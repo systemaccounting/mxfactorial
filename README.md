@@ -1,4 +1,6 @@
 # mxfactorial
+
+[![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![mxfactorial](https://cloud.githubusercontent.com/assets/12200465/12700510/1a48b412-c79b-11e5-901f-4f26965dd017.png)](http://www.systemaccounting.org/math_identity)
 
 [![Build Status](https://travis-ci.org/systemaccounting/mxfactorial.svg)](https://travis-ci.org/systemaccounting/mxfactorial) [![Coverage Status](https://coveralls.io/repos/systemaccounting/mxfactorial/badge.svg?branch=master&service=github)](https://coveralls.io/github/systemaccounting/mxfactorial?branch=master) [![Slack Status](http://slackin-systemaccounting.rhcloud.com/badge.svg)](http://slackin-systemaccounting.rhcloud.com/)
