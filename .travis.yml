@@ -20,7 +20,7 @@ before_install:
     source $HOME/.bashrc &&
     cd $TRAVIS_BUILD_DIR;
   fi
-- openssl aes-256-cbc -K $encrypted_17eb9401de9c_key -iv $encrypted_17eb9401de9c_iv -in test/encrypted/client-secret.json.enc -out test/encrypted/client-secret.json -d
+- openssl aes-256-cbc -K $encrypted_5979ecf7a4d6_key -iv $encrypted_5979ecf7a4d6_iv -in test/encrypted/client-secret.json.enc -out test/encrypted/client-secret.json -d
 - if [ -a test/encrypted/client-secret.json ]; then
     gcloud auth activate-service-account --key-file test/encrypted/client-secret.json;
   fi
