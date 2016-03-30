@@ -1,0 +1,53 @@
+{
+  "name": "nodejs-getting-started",
+  "version": "1.0.0",
+  "description": "End to end sample for running Node.JS applications on Google Cloud Platform",
+  "repository": "https://github.com/GoogleCloudPlatform/nodejs-getting-started",
+  "private": true,
+  "scripts": {
+    "start": "node app.js",
+    "monitor": "nodemon app.js",
+    "deploy": "gcloud preview app deploy app.yaml",
+    "test": "mocha test/index.js -t 30000",
+    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/index.js -t 30000"
+  },
+  "author": "Google Inc.",
+  "contributors": [
+    {
+      "name": "Jon Wayne Parrott",
+      "email": "jonwayne@google.com"
+    },
+    {
+      "name": "Jonathan Simon",
+      "email": "jbsimon@google.com"
+    },
+    {
+      "name": "Jason Dobry",
+      "email": "jdobry@google.com"
+    }
+  ],
+  "license": "Apache Version 2.0",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "gcloud": "^0.28.0",
+    "googleapis": "^2.1.7",
+    "jade": "^1.11.0",
+    "kerberos": "^0.0.18",
+    "lodash": "^4.5.1",
+    "mysql": "^2.10.2",
+    "mongodb": "^2.1.7",
+    "prompt": "^1.0.0"
+  },
+  "devDependencies": {
+    "proxyquire": "^1.7.4",
+    "mocha": "^2.4.5",
+    "istanbul": "^0.4.0",
+    "coveralls": "^2.11.4",
+    "jshint": "^2.9.1",
+    "supertest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=0.12.7"
+  }
+}
