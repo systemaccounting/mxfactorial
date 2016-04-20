@@ -15,88 +15,97 @@
 
 var extend = require('lodash').assign;
 var mysql = require('mysql');
+var config = require('../config');
 
-module.exports = function(config) {
+function getConnection () {
+  return mysql.createConnection(extend({
+    database: 'library'
+  }, {
+    host: config.get('MYSQL_HOST'),
+    user: config.get('MYSQL_USER'),
+    password: config.get('MYSQL_PASSWORD')
+  }));
+}
 
-  function getConnection() {
-    return mysql.createConnection(extend({
-      database: 'library'
-    }, config.mysql));
-  }
-
-  // [START list]
-  function list(limit, token, cb) {
-    token = token ? parseInt(token, 10) : 0;
-    var connection = getConnection();
-    connection.query(
-      'SELECT * FROM `books` LIMIT ? OFFSET ?', [limit, token],
-      function(err, results) {
-        if (err) { return cb(err); }
-        var hasMore = results.length === limit ? token + results.length : false;
-        cb(null, results, hasMore);
+// [START list]
+function list (limit, token, cb) {
+  token = token ? parseInt(token, 10) : 0;
+  var connection = getConnection();
+  connection.query(
+    'SELECT * FROM `books` LIMIT ? OFFSET ?', [limit, token],
+    function (err, results) {
+      if (err) {
+        return cb(err);
       }
-    );
-    connection.end();
-  }
-  // [END list]
+      var hasMore = results.length === limit ? token + results.length : false;
+      cb(null, results, hasMore);
+    }
+  );
+  connection.end();
+}
+// [END list]
 
-  // [START create]
-  function create(data, cb) {
-    var connection = getConnection();
-    connection.query('INSERT INTO `books` SET ?', data, function(err, res) {
-      if (err) { return cb(err); }
-      read(res.insertId, cb);
+// [START create]
+function create (data, cb) {
+  var connection = getConnection();
+  connection.query('INSERT INTO `books` SET ?', data, function (err, res) {
+    if (err) {
+      return cb(err);
+    }
+    read(res.insertId, cb);
+  });
+  connection.end();
+}
+// [END create]
+
+function read (id, cb) {
+  var connection = getConnection();
+  connection.query(
+    'SELECT * FROM `books` WHERE `id` = ?', id, function (err, results) {
+      if (err) {
+        return cb(err);
+      }
+      if (!results.length) {
+        return cb({
+          code: 404,
+          message: 'Not found'
+        });
+      }
+      cb(null, results[0]);
     });
-    connection.end();
-  }
-  // [END create]
+  connection.end();
+}
 
-  function read(id, cb) {
-    var connection = getConnection();
-    connection.query(
-      'SELECT * FROM `books` WHERE `id` = ?', id, function(err, results) {
-        if (err) { return cb(err); }
-        if (!results.length) {
-          return cb({
-            code: 404,
-            message: 'Not found'
-          });
-        }
-        cb(null, results[0]);
-      });
-    connection.end();
-  }
+// [START update]
+function update (id, data, cb) {
+  var connection = getConnection();
+  connection.query(
+    'UPDATE `books` SET ? WHERE `id` = ?', [data, id], function (err) {
+      if (err) {
+        return cb(err);
+      }
+      read(id, cb);
+    });
+  connection.end();
+}
+// [END update]
 
-  // [START update]
-  function update(id, data, cb) {
-    var connection = getConnection();
-    connection.query(
-      'UPDATE `books` SET ? WHERE `id` = ?', [data, id], function(err) {
-        if (err) { return cb(err); }
-        read(id, cb);
-      });
-    connection.end();
-  }
-  // [END update]
+function _delete (id, cb) {
+  var connection = getConnection();
+  connection.query('DELETE FROM `books` WHERE `id` = ?', id, cb);
+  connection.end();
+}
 
-  function _delete(id, cb) {
-    var connection = getConnection();
-    connection.query('DELETE FROM `books` WHERE `id` = ?', id, cb);
-    connection.end();
-  }
-
-  return {
-    createSchema: createSchema,
-    list: list,
-    create: create,
-    read: read,
-    update: update,
-    delete: _delete
-  };
+module.exports = {
+  createSchema: createSchema,
+  list: list,
+  create: create,
+  read: read,
+  update: update,
+  delete: _delete
 };
 
-
-if (!module.parent) {
+if (module === require.main) {
   var prompt = require('prompt');
   prompt.start();
 
@@ -104,13 +113,15 @@ if (!module.parent) {
     'Running this script directly will allow you to initialize your mysql ' +
     'database.\n This script will not modify any existing tables.\n');
 
-  prompt.get(['host', 'user', 'password'], function(err, result) {
-    if (err) { return; }
+  prompt.get(['host', 'user', 'password'], function (err, result) {
+    if (err) {
+      return;
+    }
     createSchema(result);
   });
 }
 
-function createSchema(config) {
+function createSchema (config) {
   var connection = mysql.createConnection(extend({
     multipleStatements: true
   }, config));
@@ -129,8 +140,10 @@ function createSchema(config) {
     '`createdBy` VARCHAR(255) NULL, ' +
     '`createdById` VARCHAR(255) NULL, ' +
     'PRIMARY KEY (`id`));',
-    function(err) {
-      if (err) { throw err; }
+    function (err) {
+      if (err) {
+        throw err;
+      }
       console.log('Successfully created schema');
       connection.end();
     }
