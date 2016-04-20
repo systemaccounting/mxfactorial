@@ -14,6 +14,7 @@
 'use strict';
 
 var config = require('./config');
+var utils = require('./utils');
 var proxyquire = require('proxyquire').noPreserveCache();
 var stubs = {};
 

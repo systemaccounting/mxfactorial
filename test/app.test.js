@@ -16,6 +16,7 @@
 var assert = require('assert');
 var config = require('./config');
 var request = require('supertest');
+var utils = require('./utils');
 var proxyquire = require('proxyquire').noPreserveCache();
 var stubs = {};
 
