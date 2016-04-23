@@ -1,26 +1,17 @@
 var path = require('path');
-var appPath = path.join(__dirname, 'app');
-var buildPath = path.join(__dirname, 'build');
 var webpack = require('webpack');
 
 module.exports = {
-    context: appPath,
-    entry:  path.join(appPath, 'client.js'),
+    entry:  './app/client.js',
     output: {
-        path:       buildPath,
+        path:       './build',
         filename:   'bundle.js',
         publicPath: 'build/'
     },
     devtool: 'inline-source-map',
     devServer: {
-    	contentBase: buildPath,
-        historyApiFallback: true,
-        hot: true,
         inline: true,
-        progress: true,
-        stats: 'errors-only',
-        host: process.env.HOST,
-        port: process.env.PORT
+        port: 3330
     },
     resolve: {
     	extensions: ['', '.js', '.jsx']
@@ -30,12 +21,12 @@ module.exports = {
     	    {
     	    	test:    /\.jsx?$/,
     	    	loader:  'babel-loader',
-    	    	include: appPath,
+    	    	exclude: '/node_modules/',
     	    },
     	    {
     	    	test:    /\.css/,
     	    	loaders: ['style', 'css'],
-    	    	include: appPath,
+    	    	exclude: '/node_modules/',
     	    },
     	    {
     	    	test:    /\.html/,
@@ -43,9 +34,5 @@ module.exports = {
     	    	exclude: '/node_modules/',
     	    }
     	],
-    },
-    plugins: [
-      new webpack.HotModuleReplacementPlugin(),
-      new webpack.NoErrorsPlugin()
-    ],
+    }
 };
