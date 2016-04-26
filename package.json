@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "build": "webpack",
-    "dev": "webpack-dev-server --watch-poll",
+    "dev": "webpack-dev-server --content-base build/ --watch-poll",
+    "dev-online": "webpack-dev-server --host 0.0.0.0 --progress --colors --hot --inline --content-base build/",
     "monitor": "nodemon app.js",
     "deploy": "gcloud preview app deploy app.yaml",
     "test": "mocha test/index.js -t 30000",
