@@ -62,6 +62,7 @@
     "istanbul": "^0.4.0",
     "jshint": "^2.9.1",
     "mocha": "^2.4.5",
+    "nodejs-repo-tools": "git+https://github.com/GoogleCloudPlatform/nodejs-repo-tools.git#21daa823090c43fb667157c8b5b0c3b7f45a8357",
     "node-sass": "^3.6.0",
     "proxyquire": "^1.7.4",
     "react-hot-loader": "^1.3.0",
