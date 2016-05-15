@@ -2,3 +2,4 @@ node_modules/
 coverage/
 npm-debug.log
 build/bundle.js
+build/static/

@@ -1,7 +1,4 @@
-// Ignore this module since it's the entry point for 
-// a 'getting started' app supplied by the Google Cloud Platform.
-// The contents of this module will be replaced with the contents of
-// main.js after Datastore integration.
+// Entry for mxfactorial on Google Cloud Platform
 
 'use strict';
 
@@ -12,18 +9,12 @@ var config = require('./config');
 var app = express();
 
 app.disable('etag');
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
 app.set('trust proxy', true);
 
-// Books
-app.use('/books', require('./books/crud'));
-app.use('/api/books', require('./books/api'));
-
-// Redirect root to /books
-app.get('/', function (req, res) {
-  res.redirect('/books');
-});
+// Targets index.html for Node.js Flexible Environment
+// See default value for index property of express.static method:
+// http://expressjs.com/en/4x/api.html#express.static
+app.use('/', express.static(__dirname + '/build'));
 
 // Basic 404 handler
 app.use(function (req, res) {
@@ -42,10 +33,8 @@ app.use(function (err, req, res, next) {
 if (module === require.main) {
   // Start the server
   var server = app.listen(config.get('PORT'), function () {
-    var host = server.address().address;
     var port = server.address().port;
-
-    console.log('App listening at http://%s:%s', host, port);
+    console.log('App listening on port %s', port);
   });
 }
 

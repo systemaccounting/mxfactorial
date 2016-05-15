@@ -1,0 +1,29 @@
+@media(max-width:767px){}
+@media(min-width:768px){}
+@media(min-width:992px){}
+@media(min-width:1200px){}
+
+.primary-nav {
+    display:-webkit-flex;
+    display:flex;
+    list-style-type:none;
+    padding:0;
+    justify-content:flex-end;
+}
+
+.left {
+    margin-right:auto;
+}
+
+.form-spacing {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: none;
+  margin-left: none;
+}
+
+.btn-style {
+  display: block;
+  width: 100%;
+  font-size: 110%;
+}

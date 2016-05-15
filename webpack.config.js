@@ -5,12 +5,12 @@ module.exports = {
     entry:  './app/client.js',
     output: {
         path:       './build',
-        filename:   'bundle.js'
+        filename:   'bundle.js',
     },
     devtool: 'inline-source-map',
     devServer: {
         inline: true,
-        port: 3330
+        port: 8080
     },
     resolve: {
         extensions: ['', '.js', '.jsx']
@@ -24,12 +24,22 @@ module.exports = {
             },
             {
                 test:    /\.css/,
-                loaders: ['style', 'css'],
+                loaders: ['style', 'css', 'sass'],
+                exclude: '/node_modules/',
+            },
+            {
+                test:    /\.scss/,
+                loaders: ['style', 'css', 'sass'],
                 exclude: '/node_modules/',
             },
             {
                 test:    /\.html/,
                 loader:  'html',
+                exclude: '/node_modules/',
+            },
+            {
+                test:   /\.(png|gif|jpe?g|svg)$/i,
+                loader: 'file-loader?name=static/images/[name].[ext]',
                 exclude: '/node_modules/',
             }
         ],
