@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router';
-
+import { Field, reduxForm } from 'redux-form'
 export default class CreateAccount04Body extends React.Component {
   render() {
     return (

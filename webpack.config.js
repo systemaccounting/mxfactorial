@@ -15,6 +15,9 @@ module.exports = {
     resolve: {
         extensions: ['', '.js', '.jsx']
     },
+    resolveLoader: {
+        root: path.join(__dirname, 'node_modules')
+    },
     module: {
         loaders: [
             {
@@ -22,6 +25,7 @@ module.exports = {
                 loader:  'babel-loader',
                 exclude: '/node_modules/',
             },
+
             {
                 test:    /\.css/,
                 loaders: ['style', 'css', 'sass'],
