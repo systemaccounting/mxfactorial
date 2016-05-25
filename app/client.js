@@ -24,8 +24,7 @@ import reducers from './reducers';
 import createLogger from 'redux-logger';
 const logger                    = createLogger();
 const createStoreWithMiddleware = applyMiddleware(
-    promise,
-    logger
+    promise
 )(createStore);
 
 class AppRoutes extends React.Component {
