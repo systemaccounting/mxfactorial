@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import MobileLayout from './MobileLayout';
 import CreateAccountNav from '../components/CreateAccountNav';
-import CreateAccount08Body from '../components/CreateAccount08Body';
-import FifthForm from '../components/signUpForms/fifthForm'
+import FifthForm from '../components/signUpForms/fifthForm';
 
 export default class CreateAccount08 extends React.Component {
   render() {

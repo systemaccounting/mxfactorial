@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router';
 import MobileLayout from './MobileLayout';
 import CreateAccountNav from '../components/CreateAccountNav';
-import CreateAccount07Body from '../components/CreateAccount07Body';
-import FourthForm from '../components/signUpForms/fourthForm'
+import FourthForm from '../components/signUpForms/fourthForm';
 
 export default class CreateAccount07 extends React.Component {
   render() {
