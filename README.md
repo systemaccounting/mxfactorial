@@ -19,7 +19,7 @@ This open-source project is intended to exploit the software engineering communi
 * If you're not familiar with Node.js, or don't know how to code, begin the [freecodecamp.com](https://www.freecodecamp.com/) curriculum.
 * Learn to deploy a Node.js web application by completing the Google App Engine ['Hello World!' tutorial](https://cloud.google.com/nodejs/getting-started/hello-world).
 * Learn to add features to your newly-deployed application by completing the Google App Engine ['Bookshelf App' tutorial](https://cloud.google.com/nodejs/getting-started/tutorial-app).
-* Now that your development & production environments are set up, you may [fork](https://help.github.com/articles/fork-a-repo/) and submit [pull requests](https://help.github.com/articles/using-pull-requests/) for this project.
+* Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://github.com/systemaccounting/mxfactorial/wiki/Code-Delivery-Workflow).
  
 Details as of 3/30/2016:
 - [mxfactorial.appspot.com](http://mxfactorial.appspot.com/)
