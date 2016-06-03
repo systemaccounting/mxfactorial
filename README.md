@@ -21,11 +21,12 @@ This open-source project is intended to exploit the software engineering communi
 * Learn to add features to your newly-deployed application by completing the Google App Engine ['Bookshelf App' tutorial](https://cloud.google.com/nodejs/getting-started/tutorial-app).
 * Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://github.com/systemaccounting/mxfactorial/wiki/Code-Delivery-Workflow).
  
-Details as of 3/30/2016:
-- [mxfactorial.appspot.com](http://mxfactorial.appspot.com/)
+Details as of 6/3/2016:
+- Production environment: [mxfactorial.org](http://mxfactorial.org/)
+- SSL-enabled production environment: [mxfactorial.appspot.com](https://mxfactorial.appspot.com/)
 - [Public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
 - Node.js
-- Google App Engine SDK
+- Google Cloud SDK
 - Datastore
 
 Roadmap:
