@@ -2,7 +2,7 @@
 // Production URL for SSL-enabled web client: https://mxfactorial.appspot.com/systemaccounting
 
 // Production URL for API: http://api.mxfactorial.org/systemaccounting
-// Production URL for SSL-enabled API: http://api.mxfactorial.appspot.com/systemaccounting
+// Production URL for SSL-enabled API: https://api.mxfactorial.appspot.com/systemaccounting
 
 // IMPORTANT NOTE 1: 
 // An 'api' subdomain has yet to be added to the SSL-enabled environment for the API,
