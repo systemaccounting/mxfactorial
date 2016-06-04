@@ -2,7 +2,9 @@
 @media(min-width:768px){}
 @media(min-width:992px){}
 @media(min-width:1200px){}
-
+body, html, #app {
+    height: 100%;
+}
 .primary-nav {
     display:-webkit-flex;
     display:flex;
@@ -10,7 +12,16 @@
     padding:0;
     justify-content:flex-end;
 }
-
+img{
+    max-width: 100%;
+}
+ul{
+    padding: 0px !important;
+    margin: 0px !important;
+}
+ul,li{
+    list-style: none;
+}
 .left {
     margin-right:auto;
 }
@@ -26,4 +37,97 @@
   display: block;
   width: 100%;
   font-size: 110%;
+}
+
+/**theme's variables**/
+.padding14{
+    padding: 14px;
+}
+.font18{
+    font-size: 18px;
+}
+.font22{
+    font-size: 22px;
+}
+.fontGray{
+    color: #666666;
+}
+.boldFont{
+    font-weight: bold;
+}
+.radius5{
+border-radius: 5px;
+  }
+/**theme's variables**/
+
+/**
+header's css
+@author kishan
+***/
+
+.header .icon img,.plusIcon{
+    width: 40px;
+}
+.header .icon {
+    display: inline-block;
+}
+.header .flag_icon.icon img{
+    width: 30px !important;
+}
+.header{
+    margin-bottom: 20px;
+}
+.header .burger-menu {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 117px;
+    z-index: 9;
+}
+.header .MyMenuButton-button span {
+    color: #999999;
+    font-size: 30px;
+    z-index: 10;
+}
+.header .MyMenuButton{
+    text-align: right;
+}
+.header .MyMenuButton-menu {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 117px;
+    background-color: #1C4587;
+    color: #ffffff;
+}
+.header .MyMenuButton-menu li {
+    border: 1px solid #d9d9d9;
+}
+.header .MyMenuButton-menu li:last-child{
+    border-bottom: 0px !important;
+}
+/**
+home page css
+@author kishan
+**/
+.fullBg{
+    height: 100%;
+    background-color: #CFE2F3;
+}
+#landingPage .input-group{
+    width: 100%;
+}
+#landingPage .indicator {
+    background-color: #efefef;
+    overflow: hidden;
+    padding: 14px;
+    margin-bottom: 20px;
+}
+#landingPage .input input {
+    background-color: #efefef;
+    border: 0 none;
+    width: 100%;
+    height: 60px;
+    margin-bottom: 20px;
+    padding: 14px;
 }

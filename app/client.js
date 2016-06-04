@@ -12,6 +12,7 @@ import CreateAccount07 from './pages/CreateAccount07';
 import CreateAccount08 from './pages/CreateAccount08';
 import CreateAccount09 from './pages/CreateAccount09';
 import CreateAccount10 from './pages/CreateAccount10';
+import HomePage from './pages/home/index'
 
 /**
  * redux libs
@@ -43,6 +44,10 @@ class AppRoutes extends React.Component {
                     <Route path="/CreateAccount08" component={CreateAccount08}></Route>
                     <Route path="/CreateAccount09" component={CreateAccount09}></Route>
                     <Route path="/CreateAccount10" component={CreateAccount10}></Route>
+
+                    {/*@author kishan*/}
+                    <Route path="/home" component={HomePage}>
+                    </Route>
                 </Router>
             </Provider>
         );
