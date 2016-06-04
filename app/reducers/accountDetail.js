@@ -1,3 +1,8 @@
+/**
+ * @author kishan
+ * @type reducer
+ * @name accountDetails
+ */
 import {SUBMIT_PROFILE_DETAILS,SUBMIT_AUTH_DETAILS} from '../constants/index.js'
 const INITIAL_STATE = {
     account:{
