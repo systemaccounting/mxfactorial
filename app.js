@@ -27,8 +27,6 @@ app.use('/books', require('./books/crud'));
 app.use('/api/users', require('./users/crud'));
 app.use('/api/books', require('./books/api'));
 
-console.log(2321342);
-
 // Redirect root to /books
 app.get('/', function (req, res) {
   res.redirect('/books');
