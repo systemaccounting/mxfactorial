@@ -7,6 +7,8 @@
     "start": "node main.js",
     "build": "webpack",
     "dev": "webpack-dev-server --content-base build/ --watch-poll",
+    "local-ds": "gcloud beta emulators datastore start --host-port 0.0.0.0:8082",
+    "create-local-ds": "(gcloud beta emulators datastore env-init)",
     "webdev": "webpack-dev-server --host 0.0.0.0 --progress --colors --hot --inline --content-base build/",
     "monitor": "nodemon app.js",
     "deploy": "gcloud preview app deploy app.yaml",
