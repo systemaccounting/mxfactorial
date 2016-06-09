@@ -1,13 +1,4 @@
-// Production URL for web client: http://mxfactorial.org/systemaccounting
-// Production URL for SSL-enabled web client: https://mxfactorial.appspot.com/systemaccounting
-
-// Production URL for API: http://api.mxfactorial.org/systemaccounting
-// Production URL for SSL-enabled API: https://api.mxfactorial.appspot.com/systemaccounting
-
-// IMPORTANT NOTE 1: 
-// An 'api' subdomain has yet to be added to the SSL-enabled environment for the API,
-// which requires inserting a 'dispatch.yaml' into the project's root: 
-// https://cloud.google.com/appengine/docs/flexible/nodejs/how-requests-are-routed
+// Current production URL for SSL-enabled web client: https://mxfactorial.appspot.com
 
 // IMPORTANT NOTE 2:
 // In the future, these variables will not be set manually. Rather,
