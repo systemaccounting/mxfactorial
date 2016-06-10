@@ -5,6 +5,7 @@
 var path = require('path');
 var express = require('express');
 var config = require('./config');
+var cors = require('cors');
 
 var app = express();
 
@@ -12,10 +13,11 @@ app.disable('etag');
 app.set('trust proxy', true);
 
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "http://mxfactorial-bryantcj.c9users.io");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+app.use(cors());
 
 app.use('/systemaccounting/users', require('./users/crud'));
 
