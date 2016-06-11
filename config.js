@@ -30,7 +30,10 @@ nconf
     DATA_BACKEND: 'datastore',
 
     // This is the id of your project in the Google Cloud Developers Console.
-    GCLOUD_PROJECT: 'mxfactorial',
+    GCLOUD_PROJECT: 'mxfactorial-1326',
+    
+    API_SECRET: 'mxfactorialapisecret',
+    TOKEN_EXPIRE_TIME: 11440,
 
     // MongoDB connection string
     // https://docs.mongodb.org/manual/reference/connection-string/

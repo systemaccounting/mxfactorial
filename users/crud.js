@@ -17,8 +17,11 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var config = require('../config');
 var gcloud = require('gcloud');
-var config = require('../config');
 var CryptoJS = require("crypto-js");
+var jwt = require('jsonwebtoken');
+var passport = require('passport');
+var JwtStrategy = require('passport-jwt').Strategy;
+var ExtractJwt = require('passport-jwt').ExtractJwt;
 
 // [START config]
 var datastore = gcloud.datastore({
@@ -47,12 +50,21 @@ var getUserByUserName = function (userName, cb) {
 };
 
 
-router.get('/', function list(req, res, next) {
-  getUserByUserName(req.query.username, function (err, data) {
+router.post('/authenticate', function list(req, res, next) {
+  getUserByUserName(req.body.username, function (err, data) {
     if (err) {
       res.status(500).json(err);
     } else {
-      res.status(200).json(data);
+      if (data && data[0] && data[0].data) {
+        var payload = data[0].data;
+        var token = jwt.sign(payload, config.get('API_SECRET'), {
+          expiresIn: config.get('TOKEN_EXPIRE_TIME')
+        });
+        delete payload.password_create;
+        res.status(200).json({user: payload, token: "JWT "+token});
+      } else {
+        res.status(500).json({ error: "user not found" });
+      }
     }
   });
 });
@@ -68,7 +80,7 @@ router.post('/', function (req, res) {
     if (data && data.length > 0) {
       res.status(400).json({ error: "username already registered" });
     } else {
-      user.password_create = CryptoJS.MD5(user.password_create);
+      user.password_create = String(CryptoJS.MD5(user.password_create));
       datastore.insert({
         key: userKey,
         data: user
@@ -82,6 +94,16 @@ router.post('/', function (req, res) {
     }
   });
 });
+
+//auth test
+
+router.get('/authtest', passport.authenticate('jwt', { session: false}), function (req, res, next) {
+  var x = 8;
+});
+
+// router.get('/authtest', function list(req, res, next) {
+//   var x = 8;
+// });
 
 router.use(function handleRpcError(err, req, res, next) {
   err.response = err.message;

@@ -5,22 +5,33 @@
 var path = require('path');
 var express = require('express');
 var config = require('./config');
+var passport = require('passport');
+var jwt = require('jsonwebtoken');
 var cors = require('cors');
+var JwtStrategy = require('passport-jwt').Strategy;
+var ExtractJwt = require('passport-jwt').ExtractJwt;
 
 var app = express();
-
 app.disable('etag');
 app.set('trust proxy', true);
 
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://mxfactorial-bryantcj.c9users.io");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 app.use(cors());
 
-app.use('/systemaccounting/users', require('./users/crud'));
+app.use(passport.initialize());
+var opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
+opts.secretOrKey = config.get('API_SECRET');
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+  done(null, jwt_payload);
+}));
 
+
+app.use('/systemaccounting/users', require('./users/crud'));
 
 // Targets index.html for Node.js Flexible Environment
 // See default value for index property of express.static method:
@@ -31,13 +42,6 @@ app.use('/', express.static(__dirname + '/build'));
 app.use(function (req, res) {
   res.status(404).send('Not Found');
 });
-
-app.get('/', function (req, res) {
-  res.status(200).json({msg: "dfd"});
-});
-
-
-
 
 // Basic error handler
 app.use(function (err, req, res, next) {
