@@ -5,11 +5,33 @@
 var path = require('path');
 var express = require('express');
 var config = require('./config');
+var passport = require('passport');
+var jwt = require('jsonwebtoken');
+var cors = require('cors');
+var JwtStrategy = require('passport-jwt').Strategy;
+var ExtractJwt = require('passport-jwt').ExtractJwt;
 
 var app = express();
-
 app.disable('etag');
 app.set('trust proxy', true);
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+app.use(cors());
+
+app.use(passport.initialize());
+var opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
+opts.secretOrKey = config.get('API_SECRET');
+passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
+  done(null, jwt_payload);
+}));
+
+
+app.use('/systemaccounting/users', require('./users/crud'));
 
 // Targets index.html for Node.js Flexible Environment
 // See default value for index property of express.static method:
@@ -29,6 +51,8 @@ app.use(function (err, req, res, next) {
   // send a generic message so as not to leak anything.
   res.status(500).send(err.response || 'Something broke!');
 });
+
+
 
 if (module === require.main) {
   // Start the server

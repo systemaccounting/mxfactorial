@@ -3,3 +3,4 @@ coverage/
 npm-debug.log
 build/bundle.js
 build/static/
+.vscode

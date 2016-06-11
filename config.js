@@ -31,6 +31,9 @@ nconf
 
     // This is the id of your project in the Google Cloud Developers Console.
     GCLOUD_PROJECT: 'mxfactorial',
+    
+    API_SECRET: 'mxfactorialapisecret',
+    TOKEN_EXPIRE_TIME: 11440,
 
     // MongoDB connection string
     // https://docs.mongodb.org/manual/reference/connection-string/
@@ -57,7 +60,7 @@ if (nconf.get('DATA_BACKEND') === 'cloudsql') {
   checkConfig('MONGO_COLLECTION');
 }
 
-function checkConfig (setting) {
+function checkConfig(setting) {
   if (!nconf.get(setting)) {
     throw new Error('You must set the ' + setting + ' environment variable or' +
       ' add it to config.json!');
