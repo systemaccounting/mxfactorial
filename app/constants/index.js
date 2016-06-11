@@ -1,13 +1,12 @@
 // Current production URL for SSL-enabled web client: https://mxfactorial.appspot.com
 
-// IMPORTANT NOTE 2:
 // In the future, these variables will not be set manually. Rather,
 // the web server will set these variables to determine whether
 // the npm script is instantiating for 'development' or 'production' 
 // (localhost vs. mxfactorial.org/systemaccounting).
 
-export const BASE_URL = 'http://api.mxfactorial.org/systemaccounting'
-//export const BASE_URL = 'http://localhost:8080/systemaccounting'
+export const BASE_URL = 'https://mxfactorial.appspot.com'
+//export const BASE_URL = 'http://localhost:8080'
 
 /**
  * cosntants for signup process
