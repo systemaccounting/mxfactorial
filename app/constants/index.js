@@ -15,9 +15,8 @@
 // the npm script is instantiating for 'development' or 'production' 
 // (localhost vs. mxfactorial.org/systemaccounting).
 
-//export const BASE_URL = 'https://api.mxfactorial.appspot.com/systemaccounting'
-export const BASE_URL = 'http://localhost:8080/systemaccounting'
-//export const BASE_URL = 'http://mxfactorial-bryantcj.c9users.io:8080/systemaccounting'
+export const BASE_URL = 'http://api.mxfactorial.org/systemaccounting'
+//export const BASE_URL = 'http://localhost:8080/systemaccounting'
 
 /**
  * cosntants for signup process

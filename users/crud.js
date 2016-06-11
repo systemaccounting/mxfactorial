@@ -49,6 +49,13 @@ var getUserByUserName = function (userName, cb) {
   datastore.runQuery(query, cb);
 };
 
+var getAllUsers = function (cb) {
+    var query = datastore.createQuery('Users');
+  //  .filter('user_create', '=', userName);
+
+  datastore.runQuery(query, cb);
+}
+
 
 router.post('/authenticate', function list(req, res, next) {
   getUserByUserName(req.body.username, function (err, data) {
@@ -98,12 +105,14 @@ router.post('/', function (req, res) {
 //auth test
 
 router.get('/authtest', passport.authenticate('jwt', { session: false}), function (req, res, next) {
-  var x = 8;
+  res.status(200).json(req.user);
 });
 
-// router.get('/authtest', function list(req, res, next) {
-//   var x = 8;
-// });
+router.get('/getusers', function (req, res) {
+  getAllUsers(function (err, data) {
+    res.status(200).json(data);
+  });
+});
 
 router.use(function handleRpcError(err, req, res, next) {
   err.response = err.message;
