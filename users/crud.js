@@ -50,7 +50,7 @@ var getUserByUserName = function (userName, cb) {
 };
 
 var getAllUsers = function (cb) {
-    var query = datastore.createQuery('Users');
+  var query = datastore.createQuery('Users');
   //  .filter('user_create', '=', userName);
 
   datastore.runQuery(query, cb);
@@ -67,8 +67,13 @@ router.post('/authenticate', function list(req, res, next) {
         var token = jwt.sign(payload, config.get('API_SECRET'), {
           expiresIn: config.get('TOKEN_EXPIRE_TIME')
         });
-        delete payload.password_create;
-        res.status(200).json({user: payload, token: "JWT "+token});
+        if (String(CryptoJS.MD5(req.body.password)) == payload.password_create) {
+          delete payload.password_create;
+          res.status(200).json({ user: payload, token: "JWT " + token });
+        }else{
+          res.status(500).json({error: "Incorrect passowrd"});
+        }
+
       } else {
         res.status(500).json({ error: "user not found" });
       }
@@ -104,7 +109,7 @@ router.post('/', function (req, res) {
 
 //auth test
 
-router.get('/authtest', passport.authenticate('jwt', { session: false}), function (req, res, next) {
+router.get('/authtest', passport.authenticate('jwt', { session: false }), function (req, res, next) {
   res.status(200).json(req.user);
 });
 
