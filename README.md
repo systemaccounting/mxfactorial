@@ -8,7 +8,7 @@ Public demonstration of the following use cases through a systemaccounting funct
 * establishing the conditions studied by [combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory) through [physics & data science](http://www.systemaccounting.org/physics_of_value) ends public dependency on such resources as [credit ratings](https://en.wikipedia.org/wiki/Bond_credit_rating), [quarterly filings](https://en.wikipedia.org/wiki/Form_10-Q), the Consumer Price Index ([CPI](https://en.wikipedia.org/wiki/Consumer_price_index)), and the Federal Reserve Economic Data ([FRED](https://en.wikipedia.org/wiki/Federal_Reserve_Economic_Data)) platform
 * financial value is a [bivector](https://en.wikipedia.org/wiki/Bivector)-valued function of buyers & sellers [swapping](https://en.wikipedia.org/wiki/Position_(vector)#Derivatives_of_position) [ownership-coordinates](https://en.wikipedia.org/wiki/Bipolar_coordinates) of goods & services they measure to have *[dimension](https://en.wikipedia.org/wiki/Physical_quantity)* throughout [recursively](https://en.wikipedia.org/wiki/Recurrence_relation)-defined, [curl-](https://en.wikipedia.org/wiki/Curl_(mathematics))standardized time-coordinates (t, curl-x, curl-y, curl-z)
 * disambiguating *delivered* value from *expected* value by enforcing a [law of conservation](https://en.wikipedia.org/wiki/Conservation_law) of value & liability (information) eliminates the possibility of [socializing](https://en.wikipedia.org/wiki/Externality#Negative) the [default risk](https://en.wikipedia.org/wiki/Liability_(financial_accounting)) of any individual, firm, or industry (difficult to avoid when an industry is [chartered](http://www.occ.gov/topics/licensing/index-licensing.html), [protected](https://en.wikipedia.org/wiki/Bailout), and [primarily depended upon](http://www.opensecrets.org/industries./) by a government requiring [election assistance](https://en.wikipedia.org/wiki/Collusion))
-* producing a scientific measure of the equilibrium price of capital removes the ability of a [central authority](https://en.wikipedia.org/wiki/Central_bank) to manipulate the [price of lending](https://en.wikipedia.org/wiki/Federal_funds_rate)
+* producing a [scientific measure](http://www.systemaccounting.org/how_does_systemaccounting_produce_a_scientific_measure_of_the_cost_of_capital) of the equilibrium price of capital removes the ability of a [central authority](https://en.wikipedia.org/wiki/Central_bank) to [manipulate](https://en.wikipedia.org/wiki/Federal_funds_rate) the price of credit
 * contract fulfillment automation
 * data visualization
 
@@ -21,9 +21,9 @@ This open-source project is intended to exploit the software engineering communi
 * Learn to add features to your newly-deployed application by completing the Google App Engine ['Bookshelf App' tutorial](https://cloud.google.com/nodejs/getting-started/tutorial-app).
 * Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://github.com/systemaccounting/mxfactorial/wiki/Code-Delivery-Workflow).
  
-Details as of 6/3/2016:
-- Production environment: [mxfactorial.org](http://mxfactorial.org/)
-- SSL-enabled production environment: [mxfactorial.appspot.com](https://mxfactorial.appspot.com/)
+Details as of 6/13/2016:
+- Production: [mxfactorial.org](http://mxfactorial.org/)
+- SSL: [mxfactorial.appspot.com](https://mxfactorial.appspot.com/)
 - [Public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
 - Node.js
 - Google Cloud SDK
@@ -31,7 +31,7 @@ Details as of 6/3/2016:
 
 Roadmap:
 * Set up managed application & persistence layer
-* Produce requirements for:
+* Produce requirements & code for:
   * data models
   * publicly-accessible endpoints
   * mobile web client for transactions (write) 
@@ -39,4 +39,4 @@ Roadmap:
 
 **Note**: Both transaction and visualization clients will be strictly served by publicly-accessible endpoints to demonstrate for the U.S. Treasury that with enough security, anyone may build an app that submits transaction data to the public ledger, thereby eliminating "banks" from the [value transmission](http://www.systemaccounting.org/what_is_money) equation.
 
-Twitter: [@Mxfactorial](https://twitter.com/mxfactorial)
+[@Mxfactorial](https://twitter.com/mxfactorial)
