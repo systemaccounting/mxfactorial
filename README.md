@@ -3,6 +3,8 @@
 
 [![Cloud IDE](https://img.shields.io/badge/Cloud%20IDE-c9.io-blue.svg)](https://ide.c9.io/mxfactorial/mxfactorial) [![Coverage Status](https://coveralls.io/repos/systemaccounting/mxfactorial/badge.svg?branch=master&service=github)](https://coveralls.io/github/systemaccounting/mxfactorial?branch=master) [![Build Status](https://travis-ci.org/systemaccounting/mxfactorial.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial) [![Production Environment](https://img.shields.io/badge/PROD-gce-brightgreen.svg)](https://mxfactorial.appspot.com/) [![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
 
+*The idea is to have the U.S. Treasury deploy a payment platform where the transaction data serves as the source for measuring the cost of capital. Instead of the cost of credit determining the cost of capital, the reference for the system's risk-free rate in systemaccounting is the cost of equity. - [@Mxfactorial](https://twitter.com/mxfactorial)*
+
 Public demonstration of the following use cases through a systemaccounting function:
 * `SELECT SUM(transaction_amount) FROM transaction_table WHERE transaction_time='YYYY-MM-DD hh:mm:ss';` maximizes & protects for individuals a scientific standard the publicly-measured quarterly or annual '[GDP](https://en.wikipedia.org/wiki/Gross_domestic_product)' violates
 * establishing the conditions studied by [combinatorial game theory](https://en.wikipedia.org/wiki/Combinatorial_game_theory) through [physics & data science](http://www.systemaccounting.org/physics_of_value) ends public dependency on such resources as [credit ratings](https://en.wikipedia.org/wiki/Bond_credit_rating), [quarterly filings](https://en.wikipedia.org/wiki/Form_10-Q), the Consumer Price Index ([CPI](https://en.wikipedia.org/wiki/Consumer_price_index)), and the Federal Reserve Economic Data ([FRED](https://en.wikipedia.org/wiki/Federal_Reserve_Economic_Data)) platform
@@ -38,5 +40,3 @@ Roadmap:
   * mobile-enabled web client for visualizing economic activity (read) through the [Data Layer](https://developers.google.com/maps/documentation/javascript/datalayer) feature of the Google Maps Javascript API
 
 **Note**: Both transaction and visualization clients will be strictly served by publicly-accessible endpoints to demonstrate for the U.S. Treasury that with enough security, anyone may build an app that submits transaction data to the public ledger, thereby eliminating "banks" from the [value transmission](http://www.systemaccounting.org/what_is_money) equation.
-
-[@Mxfactorial](https://twitter.com/mxfactorial)
