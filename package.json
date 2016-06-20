@@ -13,7 +13,8 @@
     "monitor": "nodemon app.js",
     "deploy": "gcloud preview app deploy app.yaml",
     "test": "mocha test/index.js -t 30000",
-    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/index.js -t 30000"
+    "test-travis": "./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -R spec ./test/index.js -t 30000",
+    "lint": "eslint app"
   },
   "author": "Max Funk",
   "license": "Apache Version 2.0",

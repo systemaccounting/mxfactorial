@@ -36,6 +36,8 @@ cache:
   directories:
   - node_modules
 
-script: "npm run-script test-travis"
+script:
+  - npm run test-travis
+  - npm run lint
 
 after_script: "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
