@@ -1,15 +1,15 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import React, { PropTypes, Component } from 'react';
 
-class BaseLayout extends Component {
-
+export default class BaseLayout extends Component {
   render() {
     return (
-      <div id="landingPage" className="fullBg padding14 fontGray boldFont">
+      <div id='landingPage' className='fullBg padding14 fontGray boldFont'>
         { this.props.children }
       </div>
     );
   }
 }
 
-export default connect()(BaseLayout);
+BaseLayout.propTypes = {
+  children: PropTypes.node
+};
