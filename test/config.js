@@ -16,7 +16,7 @@
 var path = require('path');
 
 module.exports = {
-  test: '2-structured-data',
+  test: 'mxfactorial',
   cwd: path.resolve(path.join(__dirname, '../')),
   cmd: 'node',
   args: ['app.js'],
