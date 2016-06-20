@@ -68,12 +68,15 @@
     "superagent": "^1.8.3"
   },
   "devDependencies": {
+    "babel-eslint": "^6.0.4",
     "bootstrap-loader": "^1.0.10",
     "bootstrap-sass": "^3.3.6",
     "chai": "^3.5.0",
     "chai-immutable": "^1.5.4",
     "coveralls": "^2.11.4",
     "css-loader": "^0.23.1",
+    "eslint": "^2.13.0",
+    "eslint-plugin-react": "^5.2.2",
     "file-loader": "^0.8.5",
     "html-loader": "^0.4.3",
     "istanbul": "^0.4.0",
