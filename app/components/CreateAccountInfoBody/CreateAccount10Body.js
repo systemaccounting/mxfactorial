@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 import '../../../static/images/mxfactorial.png';
-import { createAccount } from '../../actions/signUpActions';
 import { connect } from 'react-redux';
 
 import {
@@ -69,4 +68,4 @@ CreateAccount10Body.propTypes = {
   accountDetails: PropTypes.object
 };
 
-export default connect(mapStateToProps, { createAccount })(CreateAccount10Body);
+export default connect(mapStateToProps)(CreateAccount10Body);

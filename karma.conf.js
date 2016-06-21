@@ -1,15 +1,10 @@
-var webpack = require('karma-webpack');
-
 module.exports = function (config) {
   config.set({
-    basePath: '',
+    basePath: '.',
     browsers: ['PhantomJS'],
     files: [
       './node_modules/phantomjs-polyfill/bind-polyfill.js',
       'test/**/*.spec.js'
-    ],
-    plugins: [
-      webpack, 'karma-phantomjs-launcher', 'karma-coverage', 'karma-mocha-reporter', 'karma-mocha', 'karma-should'
     ],
     port: 8080,
     captureTimeout: 100000,
@@ -22,7 +17,7 @@ module.exports = function (config) {
     reporters: ['mocha', 'coverage'],
     preprocessors: {
       'test/**/*.spec.js': ['webpack'],
-      'app/**/*.js': ['webpack']
+      'app/**/*.js': ['webpack', 'coverage']
     },
     webpack: {
       resolve: {

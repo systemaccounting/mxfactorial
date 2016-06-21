@@ -18,7 +18,7 @@ export default class TransactionPopup extends Component {
     return (
       <div className='transaction-modal'>
         <div className='transaction-popup'>
-          <div className='indicator radius5 font22 text-center'>
+          <div className='indicator radius5 font22 text-center transaction-amount'>
               ({ transactionAmount })
           </div>
           <div>

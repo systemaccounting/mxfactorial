@@ -98,6 +98,7 @@
     "resolve-url-loader": "^1.4.3",
     "sass-loader": "^3.2.0",
     "should": "^9.0.2",
+    "should-sinon": "0.0.5",
     "sinon": "^2.0.0-pre",
     "style-loader": "^0.13.1",
     "supertest": "^1.2.0",
