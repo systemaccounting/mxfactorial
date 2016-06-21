@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { connect } from 'react-redux';
+
 import MobileLayout from '../Layout/MobileLayout';
 
 import {
@@ -10,8 +12,14 @@ import {
   CreateAccount10Body
 } from '../../components';
 
-
-export default class CreateAccounInfo extends React.Component {
+/*
+* Base component for the info pages displayed when
+* creating an account. it renders the info pages based
+* on the current id of the `/CreateAccountInfo/:id` route
+*
+* Note: This approach is not scalable, so will still be refactored.
+*/
+class CreateAccounInfo extends React.Component {
 
   componentTemplate(routerstep, component) {
     return (
@@ -35,7 +43,7 @@ export default class CreateAccounInfo extends React.Component {
           <CreateAccount03Body nextRoute="/CreateAccount/1" />);
       case '4':
         return this.componentTemplate("/CreateAccount/6",
-          <CreateAccount10Body/>);
+          <CreateAccount10Body {...this.props} />);
       default:
         return this.componentTemplate("/",
           <CreateAccount01Body nextRoute="/CreateAccountInfo/2" />);
@@ -48,3 +56,5 @@ export default class CreateAccounInfo extends React.Component {
     );
   }
 }
+
+export default connect()(CreateAccounInfo);

@@ -83,14 +83,14 @@ router.post('/authenticate', function list(req, res, next) {
 
 //create user
 router.post('/', function (req, res) {
-  var user = req.body;
+  var user = req.body
   if (!user.user_create || !user.password_create) {
     res.status(400).json({ error: "username and password cannot be empty" });
     return;
   }
   getUserByUserName(user.user_create, function (err, data) {
     if (data && data.length > 0) {
-      res.status(400).json({ error: "username already registered" });
+      res.status(400).json({ error: "username already registered", type: "username" });
     } else {
       user.password_create = String(CryptoJS.MD5(user.password_create));
       datastore.insert({

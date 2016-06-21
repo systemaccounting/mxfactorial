@@ -20,7 +20,7 @@ const store = configureStore();
 ReactDOM.render((
     <Provider store={store}>
         <Router history={ hashHistory }>
-            { getRoutes() }
+            { getRoutes(store) }
         </Router>
     </Provider>),
     document.getElementById('app')

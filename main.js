@@ -5,6 +5,7 @@
 var path = require('path');
 var express = require('express');
 var config = require('./config');
+var bodyParser = require('body-parser')
 var passport = require('passport');
 var jwt = require('jsonwebtoken');
 var cors = require('cors');
@@ -20,6 +21,12 @@ app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
+
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(bodyParser.json());
+
 app.use(cors());
 
 app.use(passport.initialize());
