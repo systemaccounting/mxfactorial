@@ -6,7 +6,9 @@ import {
   HomePage,
   CreateAccountInfo,
   CreateAccount,
-  BaseLayout
+  BaseLayout,
+  TransactionHistory,
+  TransactionDetails
 } from './containers';
 
 
@@ -19,6 +21,8 @@ export default () => {
       <Route path="/CreateAccount/:id" component={CreateAccount}/>
       {/*@author kishan*/}
       <Route path="/home" component={HomePage}/>
+      <Route path="/TransactionHistory" component={TransactionHistory}/>
+      <Route path="/TransactionDetails" component={TransactionDetails}/>
     </Route>
   );
 };
