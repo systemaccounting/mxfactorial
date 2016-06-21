@@ -10,17 +10,14 @@ const INITIAL_STATE = {
     profile: {}
   }
 };
-import _ from 'lodash';
+import assign from 'lodash/assign';
 
 export default function (state = INITIAL_STATE, action) {
-  let cloned;
   switch (action.type) {
     case SUBMIT_PROFILE_DETAILS:
-      cloned = _.clone(state);
-      return _.merge(cloned, { account: { profile: action.payload } });
+      return assign({}, state, { account: { profile: action.payload } });
     case SUBMIT_AUTH_DETAILS:
-      cloned = _.clone(state);
-      return _.merge(cloned, { account: { auth: action.payload } });
+      return assign({}, state, { account: { auth: action.payload } });
     default:
       return state;
   }
