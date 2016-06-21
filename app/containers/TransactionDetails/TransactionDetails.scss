@@ -1,0 +1,49 @@
+.transaction-details {
+
+  .indicator {
+    background-color: #efefef;
+    overflow: hidden;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .transaction-details__info {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .transaction-details__items {
+    text-align: center;
+  }
+
+  .transaction-details__key {
+    text-align: center;
+    margin: 30px 0;
+  }
+
+  .transaction-details__header {
+    text-align: center;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 20px;
+
+    .image {
+      max-width: 10%;
+    }
+  }
+
+  .transaction-details__report-btn {
+    margin-top: 20px;
+    width: 100%;
+    color: #000;
+    background-color: #999999;
+    font-size: 22px;
+    border: 1px solid #fff;
+
+    .image {
+      max-width: 11%;
+      vertical-align: top;
+      margin-left: 15px;
+    }
+  }
+}
