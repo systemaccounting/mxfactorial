@@ -7,29 +7,14 @@
 export const BASE_URL = process.env.NODE_ENV === "production" ?
     'https://mxfactorial.appspot.com/systemaccounting':
     'http://localhost:8080/systemaccounting';
-
-<<<<<<< 378b2164521818a63e76b52e3b5e2cf4e2deda16
-export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting'
-//export const BASE_URL = 'http://localhost:8080/systemaccounting'
-
-/**
- * cosntants for signup process
- * @author kishan
- */
-export const SUBMIT_PROFILE_DETAILS = 'SUBMIT_PROFILE_DETAILS'
-export const SUBMIT_AUTH_DETAILS= 'SUBMIT_AUTH_DETAILS'
-export const CREATE_ACCOUNT ='CREATE_ACCOUNT'
-
 export const GET_EMPTY_TRANSACTION = ()=>({
 	item: '',
   value: 0,
   quantity: 0,
   cr_account:''
 })
-=======
 export const SUBMIT_PROFILE_DETAILS = 'SUBMIT_PROFILE_DETAILS';
 export const SUBMIT_AUTH_DETAILS= 'SUBMIT_AUTH_DETAILS';
 export const CREATE_ACCOUNT = 'CREATE_ACCOUNT';
 export const GET_AUTH_DETAILS = 'GET_AUTH_DETAILS';
 export const LOGOUT_USER = 'LOGOUT_USER';
->>>>>>> enable the user to logout and login

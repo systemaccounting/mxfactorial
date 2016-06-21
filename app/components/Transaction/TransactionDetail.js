@@ -2,12 +2,12 @@ import React, { Component, PropTypes } from 'react';
 
 export default class TransactionDetail extends Component {
   render() {
-    const { transactionAmount } = this.props;
+    const { transactionAmount, user } = this.props;
     return (
       <div className="input-group">
        <div className="indicator radius5">
           <div className="pull-left">
-            Sandy<br />
+            {user.user_create}<br />
                balance
           </div>
           <div className="pull-right font22">
@@ -28,5 +28,6 @@ export default class TransactionDetail extends Component {
 }
 
 TransactionDetail.propTypes = {
-  transactionAmount: PropTypes.number
+  transactionAmount: PropTypes.number,
+  user: PropTypes.object
 };

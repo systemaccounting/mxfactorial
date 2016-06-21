@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router';
 
 import Header from 'components/Header/header';
@@ -12,7 +13,7 @@ export default class HomePage extends Component {
     return (
       <div className="home-page">
         <Header className="font18" {...this.props }/>
-        <TransactionContainer />
+        <TransactionContainer {...this.props}/>
       </div>
     );
   }
