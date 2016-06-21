@@ -36,12 +36,12 @@ export default class TransactionSection extends Component {
   }
 
 	render() {
-    const { transaction_item, removeTransaction, transactionAmount, addTransaction } = this.props;
+    const { transaction_item, removeTransaction, transactionAmount, addTransaction, user } = this.props;
     const that = this;
 
     return (
       <div className="container" style={{width: 300}}>
-        <TransactionDetail transactionAmount={transactionAmount}/>
+        <TransactionDetail transactionAmount={transactionAmount} user={user}/>
         <AddTransactionBtn handleClick={addTransaction}/>
         {
           transaction_item.map((item, key) => (
@@ -58,6 +58,7 @@ export default class TransactionSection extends Component {
 }
 
 TransactionSection.propTypes = {
+  user: PropTypes.object,
   transaction_item: PropTypes.array,
   transactionAmount: PropTypes.number,
   removeTransaction: PropTypes.func.isRequired,

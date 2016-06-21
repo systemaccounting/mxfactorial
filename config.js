@@ -30,8 +30,9 @@ nconf
     DATA_BACKEND: 'datastore',
 
     // This is the id of your project in the Google Cloud Developers Console.
-    GCLOUD_PROJECT: 'mxfactorial',
-    
+    // Default: mxfactorial
+    GCLOUD_PROJECT: 'maxproject-1335',
+
     API_SECRET: 'mxfactorialapisecret',
     TOKEN_EXPIRE_TIME: 11440,
 
