@@ -32,6 +32,7 @@ passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
 
 
 app.use('/systemaccounting/users', require('./users/crud'));
+app.use('/systemaccounting/transact', require('./transact/crud'));
 
 // Targets index.html for Node.js Flexible Environment
 // See default value for index property of express.static method:
