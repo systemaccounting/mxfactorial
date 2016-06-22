@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+
 import { Link } from 'react-router';
 
 import Header from 'components/Header/header';
@@ -6,6 +7,7 @@ import Header from 'components/Header/header';
 import './Home.scss';
 
 import TransactionContainer from 'containers/Transaction';
+
 
 export default class HomePage extends Component {
   render() {

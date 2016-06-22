@@ -1,4 +1,4 @@
-import React, { Component ,PropTypes} from 'react'
+import React, { Component, PropTypes} from 'react'
 import { reduxForm } from 'redux-form'
 
 import { Link ,Router} from 'react-router'
