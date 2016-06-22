@@ -3,6 +3,7 @@ import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION } from 'actions
 
 describe('transaction_item reducer', () => {
   const emptyTransaction = {
+    key: 0,
     item: '',
     value: 0,
     quantity: 0,
@@ -35,6 +36,7 @@ describe('transaction_item reducer', () => {
         value: 30
       }
     }).should.eql([{
+      key: 0,
       item: '',
       value: 30,
       quantity: 0,

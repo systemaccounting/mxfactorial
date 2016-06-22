@@ -45,7 +45,7 @@ export default class TransactionSection extends Component {
         <AddTransactionBtn handleClick={ addTransaction }/>
         {
           transaction_item.map((item, key) => (
-            <TransactionItem key={ key } item={ item }
+            <TransactionItem key={ item.key } item={ item }
               handleRemove={ removeTransaction.bind(that, key) }
               handleUpdateField={ that.handleUpdateField.bind(null, key) }/>
           ))
