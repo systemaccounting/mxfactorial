@@ -29,8 +29,8 @@ router.post('/', function (req, res) {
   }
 
   var transaction ={
-    db_author: body.debitor,
-    cr_author: body.creditor,
+    db_author: body.db_author,
+    cr_author: body.cr_author,
     rejection_time: (body.rejection_time  || null),
     expiration_time: (body.expiration_time  || null)
   }
@@ -47,7 +47,7 @@ router.post('/', function (req, res) {
 
   var items = [];
   for(var item in transaction_item){
-    items.push({db_account:body.debitor,cr_account:body.creditor,value:transaction_item[item].value,quantity:transaction_item[item].quantity,units_measured:transaction_item[item].units_measured,unit_of_measurement:transaction_item[item].unit_of_measurement,name:transaction_item[item].name});
+    items.push({db_account:transaction_item[item].db_account,cr_account:transaction_item[item].cr_account,value:transaction_item[item].value,quantity:transaction_item[item].quantity,units_measured:transaction_item[item].units_measured,unit_of_measurement:transaction_item[item].unit_of_measurement,name:transaction_item[item].name});
   }
 
   var children = [];
