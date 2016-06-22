@@ -3,27 +3,27 @@ import React, { Component, PropTypes } from 'react';
 import './TransactionItem.scss';
 
 export default class TransactionItem extends Component {
-	render() {
+  render() {
     const { item, handleRemove, handleUpdateField } = this.props;
 
     return (
-      <div className="input-group transaction-item">
-        <span className="btn__remove glyphicon glyphicon-remove text-center" onClick={ handleRemove }/>
-        <div className="input radius5 font22">
-          <input type="text" placeholder="item" className="text-center"
-            defaultValue={item.item} onBlur={handleUpdateField.bind(null, 'item')}/>
+      <div className='input-group transaction-item'>
+        <span className='btn__remove glyphicon glyphicon-remove text-center' onClick={ handleRemove }/>
+        <div className='input radius5 font22'>
+          <input type='text' placeholder='item' className='text-center'
+            defaultValue={ item.item } onBlur={ handleUpdateField.bind(null, 'item') }/>
         </div>
-        <div className="input radius5 font22">
-          <input type="number" placeholder="value" className="text-center"
-            defaultValue={item.value.toFixed(3)} onBlur={handleUpdateField.bind(null, 'value')}/>
+        <div className='input radius5 font22'>
+          <input type='number' placeholder='value' className='text-center'
+            defaultValue={ item.value.toFixed(3) } onBlur={ handleUpdateField.bind(null, 'value') }/>
         </div>
         <div>
-          <div className="pull-left field--half field__label text-center">
+          <div className='pull-left field--half field__label text-center'>
             Qty
           </div>
-          <div className="input radius5 font22 field--half pull-right">
-            <input type="number" className="text-right"
-              defaultValue={item.quantity} onBlur={handleUpdateField.bind(null, 'quantity')}/>
+          <div className='input radius5 font22 field--half pull-right'>
+            <input type='number' className='text-right'
+              defaultValue={ item.quantity } onBlur={ handleUpdateField.bind(null, 'quantity') }/>
           </div>
         </div>
       </div>

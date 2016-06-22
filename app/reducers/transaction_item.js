@@ -3,12 +3,15 @@ import { handleActions } from 'redux-actions';
 import { GET_EMPTY_TRANSACTION } from 'constants/index';
 import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION } from 'actions/transactionActions';
 
-const cloneTransactionItem = (state) => (state.slice(0))
+const cloneTransactionItem = (state) => (state.slice(0));
+
+let increment = 0;
 
 export default handleActions({
-	[ADD_TRANSACTION]: (state, action) => {
+  [ADD_TRANSACTION]: (state, action) => {
     const transaction_item = cloneTransactionItem(state);
-    transaction_item.push(GET_EMPTY_TRANSACTION());
+    transaction_item.push(GET_EMPTY_TRANSACTION(increment));
+    increment++;
     return transaction_item;
   },
   [REMOVE_TRANSACTION]: (state, action) => {
@@ -18,9 +21,9 @@ export default handleActions({
   },
   [UPDATE_TRANSACTION]: (state, action) => {
     const transaction_item = cloneTransactionItem(state);
-    let {key, field, value} = action.payload;
+    let { key, field, value } = action.payload;
     if (field==='quantity' || field === 'value') {
-      value = value && Number(value) || 0; 
+      value = value && Number(value) || 0;
     }
     transaction_item[key][field] = value;
     return transaction_item;
