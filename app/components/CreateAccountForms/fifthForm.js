@@ -1,12 +1,12 @@
-import React, { Component, PropTypes } from 'react';
-import { reduxForm } from 'redux-form';
-
+import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
-import { submitProfileDetails } from '../../actions/signUpActions';
-class fifthForm extends Component {
-  onSubmit(props) {
-    this.props.submitProfileDetails(props);
-    this.context.router.push(this.props.nextRoute);
+
+import BaseAccountForm from './BaseAccountForm';
+
+export default class fifthForm extends BaseAccountForm {
+
+  getDispatchFunction() {
+    return this.props.submitProfileDetails;
   }
 
   render() {
@@ -42,11 +42,3 @@ fifthForm.propTypes = {
   handleSubmit: PropTypes.func,
   nextRoute: PropTypes.string
 };
-
-export default reduxForm({
-  form: 'fifthForm',
-  fields: [
-    'date_of_birth', 'industry_name', 'occupation_name'
-  ],
-  destroyOnUnmount: false
-}, null, { submitProfileDetails })(fifthForm);

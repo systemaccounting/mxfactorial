@@ -1,14 +1,11 @@
 import React from 'react';
 import { IndexRoute, Route } from 'react-router';
 
-import {
-  LandingPage,
-  HomePage,
-  CreateAccountInfo,
-  CreateAccount,
-  BaseLayout
-} from './containers';
-
+import LandingPage from 'components/LandingPage/LandingPage';
+import BaseLayout from 'components/Layout/BaseLayout';
+import HomePage from 'components/Home/Home';
+import CreateAccountInfo from 'components/CreateAccountInfo/CreateAccountInfo';
+import CreateAccount from 'components/CreateAccount/CreateAccount';
 
 export default () => {
 

@@ -1,16 +1,10 @@
 import React, { PropTypes, Component } from 'react';
 
-import MobileLayout from '../Layout/MobileLayout';
-
+import MobileLayout from 'components/Layout/MobileLayout';
+import CreateAccountNav from 'components/CreateAccountNav/CreateAccountNav';
 import {
-  CreateAccountNav,
-  FirstForm,
-  SecondForm,
-  ThirdForm,
-  FourthForm,
-  FifthForm,
-  SixthForm
-} from '../../components';
+  FirstForm, SecondForm, ThirdForm, FourthForm, FifthForm, SixthForm
+} from 'containers/CreateAccountForms';
 
 export default class CreateAccount extends Component {
 

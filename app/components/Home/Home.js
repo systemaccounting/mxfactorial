@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import Header from 'components/Header/header';
+import Header from 'components/Header/Header';
 import TransactionContainer from 'containers/Transaction';
 
 import './Home.scss';

@@ -1,15 +1,11 @@
 import React, { PropTypes, Component } from 'react';
 
-import MobileLayout from '../Layout/MobileLayout';
-
+import MobileLayout from 'components/Layout/MobileLayout';
+import CreateAccountNav from 'components/CreateAccountNav/CreateAccountNav';
 import {
-  CreateAccountNav,
-  CreateAccount01Body,
-  CreateAccount02Body,
-  CreateAccount03Body,
-  CreateAccount10Body
-} from '../../components';
-
+  CreateAccount01Body, CreateAccount02Body, CreateAccount03Body
+} from 'components/CreateAccountInfoBody';
+import CreateAccount10Body from 'containers/CreateAccountInfoBody/CreateAccount10Body';
 
 export default class CreateAccounInfo extends Component {
 

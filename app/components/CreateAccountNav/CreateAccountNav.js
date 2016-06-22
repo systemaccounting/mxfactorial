@@ -1,7 +1,7 @@
-import React, { PropTypes } from 'react';
+import React, { PropTypes, Component } from 'react';
 import { Link } from 'react-router';
 
-export default class CreateAccountNav extends React.Component {
+export default class CreateAccountNav extends Component {
   render() {
     return (
       <div className='createAccountNav'>
