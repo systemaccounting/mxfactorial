@@ -5,10 +5,13 @@ import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION } from 'actions
 
 const cloneTransactionItem = (state) => (state.slice(0));
 
+let increment = 0;
+
 export default handleActions({
   [ADD_TRANSACTION]: (state, action) => {
     const transaction_item = cloneTransactionItem(state);
-    transaction_item.push(GET_EMPTY_TRANSACTION());
+    transaction_item.push(GET_EMPTY_TRANSACTION(increment));
+    increment++;
     return transaction_item;
   },
   [REMOVE_TRANSACTION]: (state, action) => {

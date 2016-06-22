@@ -1,4 +1,4 @@
-import { reduce } from 'lodash';
+import reduce from 'lodash/reduce';
 
 const getTransactionItem = (state) => (state.transaction_item);
 

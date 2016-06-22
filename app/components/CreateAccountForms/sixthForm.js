@@ -1,13 +1,12 @@
-import React, { Component, PropTypes } from 'react';
-import { reduxForm } from 'redux-form';
-
+import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
-import { submitAuthDetails } from '../../actions/signUpActions';
-class sixthForm extends Component {
 
-  onSubmit(props) {
-    this.props.submitAuthDetails(props);
-    this.context.router.push(this.props.nextRoute);
+import BaseAccountForm from './BaseAccountForm';
+
+export default class sixthForm extends BaseAccountForm {
+
+  getDispatchFunction() {
+    return this.props.submitAuthDetails;
   }
 
   render() {
@@ -43,11 +42,3 @@ sixthForm.propTypes = {
   submitAuthDetails: PropTypes.func,
   nextRoute: PropTypes.string
 };
-
-export default reduxForm({
-  form: 'sixthForm',
-  fields: [
-    'user_create', 'password_create', 'email_address_create'
-  ],
-  destroyOnUnmount: false
-}, null, { submitAuthDetails })(sixthForm);

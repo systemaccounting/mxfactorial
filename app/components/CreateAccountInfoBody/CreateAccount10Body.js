@@ -1,14 +1,10 @@
-import React, { PropTypes } from 'react';
-import '../../../static/images/mxfactorial.png';
-import { createAccount } from '../../actions/signUpActions';
-import { connect } from 'react-redux';
+import React, { Component, PropTypes } from 'react';
+import mxfactorial from 'images/mxfactorial.png';
 
-import {
-    BASE_URL
-} from '../../constants/index';
+import { BASE_URL } from 'constants/index';
 
 
-class CreateAccount10Body extends React.Component {
+export default class CreateAccount10Body extends Component {
   constructor(props) {
     super(props);
     this.createAccount = this.createAccount.bind(this);
@@ -45,7 +41,7 @@ class CreateAccount10Body extends React.Component {
           An email address may again be attempted for registration after authentication fails 3 times on the
           verification page.
         </p>
-        <img src='../../static/images/mxfactorial.png' className='center-block'
+        <img src={ mxfactorial } className='center-block'
           style={ { marginTop: 20, marginBottom: 20 } } />
         <button type='submit' onClick={ this.createAccount } className='btn btn-info form-spacing btn-style'>
           Okay
@@ -55,11 +51,6 @@ class CreateAccount10Body extends React.Component {
   }
 }
 
-function mapStateToProps(state) {
-  return {
-    accountDetails: state.accountDetails
-  };
-}
 
 CreateAccount10Body.contextTypes = {
   router: PropTypes.object
@@ -69,4 +60,3 @@ CreateAccount10Body.propTypes = {
   accountDetails: PropTypes.object
 };
 
-export default connect(mapStateToProps, { createAccount })(CreateAccount10Body);

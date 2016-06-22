@@ -1,29 +1,7 @@
-import {
-    SUBMIT_PROFILE_DETAILS,
-    SUBMIT_AUTH_DETAILS,
-    CREATE_ACCOUNT
-} from '../constants/index';
+import { createAction } from 'redux-actions';
 
-export function submitProfileDetails(props) {
-  return {
-    type: SUBMIT_PROFILE_DETAILS,
-    payload: props
-  };
-}
-export function submitAuthDetails(props) {
-  return {
-    type: SUBMIT_AUTH_DETAILS,
-    payload: props
-  };
-}
+export const SUBMIT_PROFILE_DETAILS = 'SUBMIT_PROFILE_DETAILS';
+export const SUBMIT_AUTH_DETAILS= 'SUBMIT_AUTH_DETAILS';
 
-export function createAccount(props) {
-
-    //  request.post(BASE_URL).send(props).end(function (err,res) {
-    //
-    // })
-  return {
-    type: CREATE_ACCOUNT,
-    payload: ''
-  };
-}
+export const submitProfileDetails = createAction(SUBMIT_PROFILE_DETAILS);
+export const submitAuthDetails = createAction(SUBMIT_AUTH_DETAILS);

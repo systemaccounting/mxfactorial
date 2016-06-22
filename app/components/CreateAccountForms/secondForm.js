@@ -1,13 +1,12 @@
-import React, { Component, PropTypes } from 'react';
-import { reduxForm } from 'redux-form';
-
+import React, { PropTypes } from 'react';
 import { Link } from 'react-router';
-import { submitProfileDetails } from '../../actions/signUpActions';
-class secondForm extends Component {
 
-  onSubmit(props) {
-    this.props.submitProfileDetails(props);
-    this.context.router.push(this.props.nextRoute);
+import BaseAccountForm from './BaseAccountForm';
+
+export default class secondForm extends BaseAccountForm {
+
+  getDispatchFunction() {
+    return this.props.submitProfileDetails;
   }
 
   render() {
@@ -46,10 +45,3 @@ secondForm.propTypes = {
   nextRoute: PropTypes.string
 };
 
-export default reduxForm({
-  form: 'secondForm',
-  fields: [
-    'street_number', 'street_name', 'floor_number', 'unit_number'
-  ],
-  destroyOnUnmount: false
-}, null, { submitProfileDetails })(secondForm);
