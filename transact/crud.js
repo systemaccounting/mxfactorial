@@ -35,12 +35,12 @@ router.post('/', function (req, res) {
     expiration_time: (body.expiration_time  || null)
   }
 
-  var debitor = {
+  var transactionDebitor = {
     db_time: body.db_time,
     db_latlng: body.db_latlng
   }
   
-  var creditor = {
+  var transactionCreditor = {
     cr_time: body.cr_time,
     cr_latlng: body.cr_latlng
   }
@@ -59,9 +59,12 @@ router.post('/', function (req, res) {
   datastore.insert(parentEntity, function (err, data) {
     if (!err) {
       var parentId = parentEntity.key.id;
-      children.push({key: datastore.key(['Transaction',parentId,'Debitor']),data:debitor});
-      children.push({key: datastore.key(['Transaction',parentId,'Creditor']),data:creditor});
-      children.push({key: datastore.key(['Transaction',parentId,'TransactionItem']),data:items});
+      children.push({key: datastore.key(['Transaction',parentId,'TransactionDebitor']),data:transactionDebitor});
+      children.push({key: datastore.key(['Transaction',parentId,'TransactionCreditor']),data:transactionCreditor});
+      for(var item in items){
+        children.push({key: datastore.key(['Transaction',parentId,'TransactionItem']),data:items[item]});  
+      }
+      
       datastore.save(children, function (err, data) { 
         if (!err) {
           res.status(200).json({transaction_id:parentId});
