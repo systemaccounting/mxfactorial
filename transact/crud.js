@@ -21,11 +21,6 @@ router.use(bodyParser.json({type:'application/json', limit:'500mb'}));
 router.post('/', function (req, res) {
   var body = req.body;
 
-  console.log(body);
-  if (!body.transaction_item || body.transaction_item<=0) {
-    res.status(400).json({ error: "Transaction items required" });
-    return;
-  }
   var transaction_item = body.transaction_item; 
   
   if(transaction_item==undefined || transaction_item.length<=0){
