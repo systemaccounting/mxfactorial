@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react';
+import { Link } from 'react-router';
 
 import Flag from 'images/flag.png';
 import Home from 'images/home.png';
@@ -22,7 +23,9 @@ export default class Header extends Component {
               <ul>
                 <li className='text-left'><span className='glyphicon glyphicon-cog font22 padding14'></span></li>
                 <li className='padding14'>Request</li>
-                <li className='padding14'>History</li>
+                <Link to='/TransactionHistory'>
+                  <li className='padding14'>History</li>
+                </Link>
                 <li className='padding14'>Rules</li>
                 <li className='padding14'>Query</li>
                 <li className='padding14'>Support</li>
