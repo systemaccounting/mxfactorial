@@ -12,7 +12,9 @@ export default class Header extends Component {
 
     return (
       <div className='header'>
-        <div className='home_icon icon' style={ { marginRight: '10px' } }><img src={ Home } alt=''/></div>
+        <div className='home_icon icon' style={ { marginRight: '10px' } }>
+          <Link to='/home'><img src={ Home } alt=''/></Link>
+        </div>
         <div className='flag_icon icon'><span>3</span><img src={ Flag }/></div>
         <div className='burger-menu padding14'>
           <Wrapper className='MyMenuButton' onSelection={ handleSelection }>

@@ -1,8 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import assign from 'lodash/assign';
+
 import mxfactorial from 'images/mxfactorial.png';
-
-import { BASE_URL } from 'constants/index';
-
 
 export default class CreateAccount10Body extends Component {
   constructor(props) {
@@ -10,24 +9,17 @@ export default class CreateAccount10Body extends Component {
     this.createAccount = this.createAccount.bind(this);
   }
   createAccount() {
-    const curContext = this;
-    const postObject = {};
-    const auth = this.props.accountDetails.account.auth;
-    const profile = this.props.accountDetails.account.profile;
-    let prop;
+    const { accountDetails, postCreateAccount } = this.props;
+    const { auth, profile } = accountDetails.account;
+    const postObject = assign({}, auth, profile);
 
-    for (prop in auth) {
-      postObject[prop] = auth[prop];
-    }
-    for (prop in profile) {
-      postObject[prop] = profile[prop];
-    }
-    $.post(BASE_URL + '/users',
-            postObject,
-            function (data, status) {
-              curContext.context.router.push('/');
-            }, 'json').fail(function (xhr) { alert(xhr.responseText); });
-
+    postCreateAccount(postObject)
+      .then(() => {
+        this.context.router.push('/');
+      })
+      .catch((error) => {
+        alert(error);
+      });
   }
   render() {
     return (
@@ -57,6 +49,7 @@ CreateAccount10Body.contextTypes = {
 };
 
 CreateAccount10Body.propTypes = {
-  accountDetails: PropTypes.object
+  accountDetails: PropTypes.object,
+  postCreateAccount: PropTypes.object
 };
 

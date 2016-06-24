@@ -45,10 +45,15 @@ export default class TransactionHistory extends Component {
             </div>
           </div>
         </div>
+        { this.props.children }
       </div>
     );
   }
 }
+
+TransactionHistory.propTypes = {
+  children: PropTypes.node
+};
 
 TransactionHistory.contextTypes = {
   router: PropTypes.object

@@ -11,7 +11,7 @@ export default class TransactionItem extends Component {
         <span className='btn__remove glyphicon glyphicon-remove text-center' onClick={ handleRemove }/>
         <div className='input radius5 font22'>
           <input type='text' placeholder='item' className='text-center'
-            defaultValue={ item.item } onBlur={ handleUpdateField.bind(null, 'item') }/>
+            defaultValue={ item.name } onBlur={ handleUpdateField.bind(null, 'item') }/>
         </div>
         <div className='input radius5 font22'>
           <input type='number' placeholder='value' className='text-center'
@@ -35,7 +35,7 @@ TransactionItem.propTypes = {
   handleRemove: PropTypes.func.isRequired,
   handleUpdateField: PropTypes.func.isRequired,
   item: PropTypes.shape({
-    item: PropTypes.string,
+    name: PropTypes.string,
     quantity: PropTypes.number,
     value: PropTypes.number,
     cr_account: PropTypes.string
@@ -44,7 +44,7 @@ TransactionItem.propTypes = {
 
 TransactionItem.defaultProps = {
   item: {
-    item: '',
+    name: '',
     quantity: 0,
     value: 0.000,
     cr_account: ''

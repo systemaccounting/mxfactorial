@@ -1,0 +1,14 @@
+.transaction-popup{
+  &.transaction-popup__success {
+    background-color: #d9ead3;
+    .modal__footer {
+      margin-top: 30px;
+      .btn__new {
+        width: 100px;
+        margin-right: 10px;
+        border: none;
+        color: #999;
+      }
+    }
+  }
+}

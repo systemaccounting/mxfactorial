@@ -1,12 +1,12 @@
 import { createStore, applyMiddleware } from 'redux';
 import createLogger from 'redux-logger';
-import promise from 'redux-promise';
-import reducers from '../reducers';
 
+import reducers from 'reducers/index';
+import configuredAxiosMiddleware from 'middlewares/configured-axios-middleware';
 
 export default function configurestore(initialState={}) {
   const logger = createLogger();
-  const middleWares = [promise, logger];
+  const middleWares = [logger, configuredAxiosMiddleware];
 
   const store = createStore(
     reducers, initialState, applyMiddleware(...middleWares)
