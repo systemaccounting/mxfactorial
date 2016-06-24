@@ -19,6 +19,6 @@ export const post = (url, type) => (data) => createAction(type)({
 
 export const generateAsyncTypes = (requestType) => ({
   request: requestType,
-  success: `${requestType}${successSuffix}`,
-  error: `${requestType}${errorSuffix}`
+  success: `${requestType}_${successSuffix}`,
+  error: `${requestType}_${errorSuffix}`
 });

@@ -3,8 +3,8 @@ import axiosMiddleware, { getActionTypes } from 'redux-axios-middleware';
 
 import axiosClient from 'axios-client-instance.js';
 
-export const successSuffix = '_SUCCESS';
-export const errorSuffix = '_FAILURE';
+export const successSuffix = 'SUCCESS';
+export const errorSuffix = 'FAILURE';
 
 export const getErrorMessage = (url, status) => (`Request to ${url} failed with status code ${status}.`);
 
@@ -30,6 +30,6 @@ export const onError = ({ action, next, error }, options) => {
 export default axiosMiddleware(axiosClient, {
   onSuccess,
   onError,
-  successSuffix: '_SUCCESS',
-  errorSuffix: '_FAILURE'
+  successSuffix: 'SUCCESS',
+  errorSuffix: 'FAILURE'
 });

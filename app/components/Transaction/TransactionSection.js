@@ -32,8 +32,10 @@ export default class TransactionSection extends Component {
         db_latlng: loc,
         cr_latlng: loc
       });
-      this.props.postTransaction(data).then(() => {
-        this.context.router.push('/TransactionHistory/success');
+      this.props.postTransaction(data).then((action) => {
+        if (!action.error) {
+          this.context.router.push('/TransactionHistory/success');
+        }
       });
     };
 

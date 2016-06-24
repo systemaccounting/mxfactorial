@@ -7,9 +7,10 @@ import {
 import { transactionAmountSelector, transactionSelector } from 'selectors/transaction';
 
 function mapStateToProps(state) {
-  const { transaction_item } = state;
+  const { transaction_item, transactionError } = state;
   return {
     transaction_item,
+    transactionError,
     transactionAmount: transactionAmountSelector(state),
     transaction: transactionSelector(state)
   };
