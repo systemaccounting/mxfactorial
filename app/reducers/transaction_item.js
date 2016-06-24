@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
 
 import { GET_EMPTY_TRANSACTION } from 'constants/index';
-import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION } from 'actions/transactionActions';
+import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, CLEAR_TRANSACTION } from 'actions/transactionActions';
 
 const cloneTransactionItem = (state) => (state.slice(0));
 
@@ -10,8 +10,7 @@ let increment = 0;
 export default handleActions({
   [ADD_TRANSACTION]: (state, action) => {
     const transaction_item = cloneTransactionItem(state);
-    transaction_item.push(GET_EMPTY_TRANSACTION(increment));
-    increment++;
+    transaction_item.push(GET_EMPTY_TRANSACTION(increment++, { cr_account: action.payload }));
     return transaction_item;
   },
   [REMOVE_TRANSACTION]: (state, action) => {
@@ -27,5 +26,6 @@ export default handleActions({
     }
     transaction_item[key][field] = value;
     return transaction_item;
-  }
+  },
+  [CLEAR_TRANSACTION]: (state, action) => ([])
 }, []);

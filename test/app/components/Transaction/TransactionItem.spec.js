@@ -15,7 +15,7 @@ describe('TransactionItem component', () => {
     handleRemove: spy(),
     handleUpdateField: spy(),
     item: {
-      item: 'first',
+      name: 'first',
       quantity: 1,
       value: 3
     }

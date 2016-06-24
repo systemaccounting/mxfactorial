@@ -4,14 +4,18 @@
 // the web server will set these variables to determine whether
 // the npm script is instantiating for 'development' or 'production'
 // (localhost vs. mxfactorial.org/systemaccounting).
+import merge from 'lodash/merge';
 
 export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting';
-//export const BASE_URL = 'http://localhost:8080/systemaccounting'
+// export const BASE_URL = 'http://localhost:8080/systemaccounting'
 
-export const GET_EMPTY_TRANSACTION = (key)=>({
+export const GET_EMPTY_TRANSACTION = (key, info)=>(merge({
   key,
-  item: '',
+  name: '',
   value: 0,
   quantity: 0,
-  cr_account: ''
-});
+  cr_account: '',
+  db_account: 'Sandy',
+  units_measured: '',
+  unit_of_measurement: ''
+}, info));

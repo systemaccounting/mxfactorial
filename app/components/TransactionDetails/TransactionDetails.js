@@ -21,7 +21,7 @@ export default class TransactionDetails extends Component {
         <Header className='font18'/>
         <div className='container' style={ { width: 300 } }>
           <div className='transaction-details__header'>
-            <img src={ backIcon } className='image pull-left'
+            <img src={ backIcon } className='image pull-left btn__back'
               onClick={ this.navigateBack.bind(this) }/>
             Detail
             <img src={ emailButton } className='image pull-right'/>
