@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import assign from 'lodash/assign';
 
 import mxfactorial from 'images/mxfactorial.png';
+import transformFormData from 'utils/transformFormData';
 
 export default class CreateAccount10Body extends Component {
   constructor(props) {
@@ -13,7 +14,7 @@ export default class CreateAccount10Body extends Component {
     const { auth, profile } = accountDetails.account;
     const postObject = assign({}, auth, profile);
 
-    postCreateAccount(postObject)
+    postCreateAccount(transformFormData(postObject))
       .then(() => {
         this.context.router.push('/');
       })
