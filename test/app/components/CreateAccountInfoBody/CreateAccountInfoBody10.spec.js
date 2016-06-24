@@ -7,6 +7,7 @@ import { spy, stub } from 'sinon';
 import 'should-sinon';
 
 import CreateAccount10Body from 'components/CreateAccountInfoBody/CreateAccount10Body';
+import transformFormData from 'utils/transformFormData';
 
 describe('TransactionSection component', () => {
   let instance;
@@ -48,12 +49,12 @@ describe('TransactionSection component', () => {
 
     const btnSubmit = findRenderedDOMComponentWithTag(instance, 'button');
     Simulate.click(btnSubmit);
-    postCreateAccount.should.be.calledWith({
+    postCreateAccount.should.be.calledWith(transformFormData({
       user_name: 'nil',
       password: 'secret',
       first_name: 'albert',
       last_name: 'einstein'
-    });
+    }));
     push.should.be.calledWith('/');
   });
 });
