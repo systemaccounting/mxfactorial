@@ -107,7 +107,7 @@ describe('TransactionSection component', () => {
     };
 
     props.postTransaction.returns({
-      then: (f) => (f())
+      then: (f) => (f({}))
     });
 
     const push = spy();

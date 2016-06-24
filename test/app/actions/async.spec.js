@@ -41,8 +41,8 @@ describe('asyncActions', () => {
     it('should return axios types', () => {
       generateAsyncTypes(type).should.eql({
         request: 'request',
-        success: `request${successSuffix}`,
-        error: `request${errorSuffix}`
+        success: `request_${successSuffix}`,
+        error: `request_${errorSuffix}`
       });
     });
   });
