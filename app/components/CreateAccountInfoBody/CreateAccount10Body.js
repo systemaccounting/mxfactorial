@@ -51,6 +51,6 @@ CreateAccount10Body.contextTypes = {
 
 CreateAccount10Body.propTypes = {
   accountDetails: PropTypes.object,
-  postCreateAccount: PropTypes.object
+  postCreateAccount: PropTypes.func.isRequired
 };
 

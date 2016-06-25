@@ -78,7 +78,7 @@ describe('TransactionSection component', () => {
     Simulate.blur(itemInput);
     props.updateTransaction.should.be.calledWith({
       key: 0,
-      field: 'item',
+      field: 'name',
       value: 'item2'
     });
   });

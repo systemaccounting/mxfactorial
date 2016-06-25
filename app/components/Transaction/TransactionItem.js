@@ -11,7 +11,7 @@ export default class TransactionItem extends Component {
         <span className='btn__remove glyphicon glyphicon-remove text-center' onClick={ handleRemove }/>
         <div className='input radius5 font22'>
           <input type='text' placeholder='item' className='text-center'
-            defaultValue={ item.name } onBlur={ handleUpdateField.bind(null, 'item') }/>
+            defaultValue={ item.name } onBlur={ handleUpdateField.bind(null, 'name') }/>
         </div>
         <div className='input radius5 font22'>
           <input type='number' placeholder='value' className='text-center'
