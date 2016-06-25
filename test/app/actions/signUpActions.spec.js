@@ -2,7 +2,7 @@ import {
   SUBMIT_PROFILE_DETAILS, SUBMIT_AUTH_DETAILS,
   submitProfileDetails, submitAuthDetails,
   USER_PATH, POST_CREATE_ACCOUNT,
-  postCreateAccount
+  postCreateAccount, headers
 } from 'actions/signUpActions';
 
 describe('signUpActions creator', () => {
@@ -43,7 +43,8 @@ describe('signUpActions creator', () => {
           request: {
             method: 'POST',
             url: USER_PATH,
-            data
+            data,
+            headers
           }
         }
       });

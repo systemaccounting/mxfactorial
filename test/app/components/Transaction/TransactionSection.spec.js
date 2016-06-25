@@ -128,7 +128,7 @@ describe('TransactionSection component', () => {
     const passwordInput = findRenderedDOMComponentWithTag(transactionPopup, 'input');
     Simulate.click(okBtn);
 
-    props.updateError.should.be.calledWith('Password is require');
+    props.updateError.should.be.calledWith('Password Required');
     passwordInput.value = 'secret';
     Simulate.change(passwordInput);
     Simulate.click(okBtn);

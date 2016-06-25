@@ -1,4 +1,4 @@
-import { get, post, generateAsyncTypes } from 'actions/async';
+import { get, post, generateAsyncTypes, defaultHeaders } from 'actions/async';
 import { successSuffix, errorSuffix } from 'middlewares/configured-axios-middleware';
 
 describe('asyncActions', () => {
@@ -30,7 +30,8 @@ describe('asyncActions', () => {
             request: {
               method: 'POST',
               url,
-              data
+              data,
+              headers: defaultHeaders
             }
           }
         });

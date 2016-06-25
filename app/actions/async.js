@@ -9,11 +9,14 @@ export const get = (url, type) => (params) => createAction(type)({
   }
 });
 
-export const post = (url, type) => (data) => createAction(type)({
+export const defaultHeaders = { 'Content-Type': 'application/json' };
+
+export const post = (url, type, headers=defaultHeaders) => (data) => createAction(type)({
   request: {
     method: 'POST',
     url,
-    data
+    data,
+    headers
   }
 });
 

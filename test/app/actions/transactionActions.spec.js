@@ -5,6 +5,8 @@ import {
   postTransaction
 } from 'actions/transactionActions';
 
+import { defaultHeaders } from 'actions/async';
+
 describe('transactionActions creator', () => {
 
   describe('#addTransaction', () => {
@@ -74,7 +76,8 @@ describe('transactionActions creator', () => {
           request: {
             method: 'POST',
             url: TRANSACT_PATH,
-            data
+            data,
+            headers: defaultHeaders
           }
         }
       });

@@ -10,4 +10,6 @@ export const submitAuthDetails = createAction(SUBMIT_AUTH_DETAILS);
 export const USER_PATH = '/users';
 export const POST_CREATE_ACCOUNT = 'POST_CREATE_ACCOUNT';
 
-export const postCreateAccount = post(USER_PATH, POST_CREATE_ACCOUNT);
+export const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+
+export const postCreateAccount = post(USER_PATH, POST_CREATE_ACCOUNT, headers);

@@ -28,7 +28,7 @@ export default class TransactionSection extends Component {
   handlePost(password) {
     console.log(password);
     if (!password) {
-      this.props.updateError('Password is require');
+      this.props.updateError('Password Required');
     } else {
       const mergeAndPost = (position) => {
         const loc = buildLatLng(position);
