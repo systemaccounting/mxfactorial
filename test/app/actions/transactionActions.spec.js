@@ -1,6 +1,6 @@
 import {
-  ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, UPDATE_CR_ACCOUNT, CLEAR_TRANSACTION, CLEAR_ERROR,
-  addTransaction, removeTransaction, updateTransaction, updateCRAccount, clearTransaction, clearError,
+  ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, UPDATE_CR_ACCOUNT, CLEAR_TRANSACTION, UPDATE_ERROR,
+  addTransaction, removeTransaction, updateTransaction, updateCRAccount, clearTransaction, updateError,
   TRANSACT_PATH, POST_TRANSACTION,
   postTransaction
 } from 'actions/transactionActions';
@@ -57,10 +57,10 @@ describe('transactionActions creator', () => {
     });
   });
 
-  describe('#clearError', () => {
-    it('should return CLEAR_ERROR action', () => {
-      clearError().should.eql({
-        type: CLEAR_ERROR
+  describe('#updateError', () => {
+    it('should return UPDATE_ERROR action', () => {
+      updateError().should.eql({
+        type: UPDATE_ERROR
       });
     });
   });

@@ -2,7 +2,7 @@ import React from 'react';
 import { unmountComponentAtNode, findDOMNode } from 'react-dom';
 import {
   renderIntoDocument, findRenderedComponentWithType, scryRenderedComponentsWithType,
-  findRenderedDOMComponentWithClass, Simulate, scryRenderedDOMComponentsWithTag
+  findRenderedDOMComponentWithClass, Simulate, scryRenderedDOMComponentsWithTag, findRenderedDOMComponentWithTag
 } from 'react-addons-test-utils';
 import { spy, stub } from 'sinon';
 import 'should-sinon';
@@ -21,8 +21,11 @@ describe('TransactionSection component', () => {
   const updateTransaction = spy();
   const postTransaction = stub();
   const updateCRAccount = spy();
-  const clearError = spy();
-  const props = { addTransaction, removeTransaction, updateTransaction, postTransaction, updateCRAccount, clearError };
+  const updateError = spy();
+  const props = {
+    addTransaction, removeTransaction,
+    updateTransaction, postTransaction, updateCRAccount, updateError
+  };
 
   afterEach(() => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
@@ -62,7 +65,7 @@ describe('TransactionSection component', () => {
     findRenderedDOMComponentWithClass(transactionPopup, 'transaction-amount').textContent.should.equal('(25.000)');
     const cancelBtn = findRenderedDOMComponentWithClass(transactionPopup, 'btn__cancel');
     Simulate.click(cancelBtn);
-    props.clearError.should.be.calledOnce();
+    props.updateError.should.be.calledOnce();
     scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
 
     const transactionItem = findRenderedComponentWithType(instance, TransactionItem);
@@ -109,6 +112,7 @@ describe('TransactionSection component', () => {
     props.postTransaction.returns({
       then: (f) => (f({}))
     });
+    props.updateError = spy();
 
     const push = spy();
 
@@ -121,7 +125,14 @@ describe('TransactionSection component', () => {
 
     const transactionPopup = findRenderedComponentWithType(instance, TransactionPopup);
     const okBtn = findRenderedDOMComponentWithClass(transactionPopup, 'btn__ok');
+    const passwordInput = findRenderedDOMComponentWithTag(transactionPopup, 'input');
     Simulate.click(okBtn);
+
+    props.updateError.should.be.calledWith('Password is require');
+    passwordInput.value = 'secret';
+    Simulate.change(passwordInput);
+    Simulate.click(okBtn);
+
     props.postTransaction.should.be.calledWith({
       db_author: 'Sandy',
       cr_author: '',
