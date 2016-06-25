@@ -1,6 +1,15 @@
 import React, { Component, PropTypes } from 'react';
 
 export default class TransactionDetail extends Component {
+  constructor(props) {
+    super(props);
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange(event) {
+    this.props.updateCRAccount(event.target.value);
+  }
+
   render() {
     const { transactionAmount } = this.props;
     return (
@@ -15,7 +24,7 @@ export default class TransactionDetail extends Component {
           </div>
         </div>
         <div className='input radius5 font22'>
-          <input type='text' placeholder='user' className='text-center'/>
+          <input type='text' placeholder='user' className='text-center' onChange={ this.handleChange }/>
         </div>
         <div className='indicator radius5 font22 text-right'>
           <div>
@@ -28,5 +37,6 @@ export default class TransactionDetail extends Component {
 }
 
 TransactionDetail.propTypes = {
-  transactionAmount: PropTypes.number
+  transactionAmount: PropTypes.number,
+  updateCRAccount: PropTypes.func
 };

@@ -11,7 +11,9 @@ describe('rootReducer', () => {
           auth: {}
         }
       },
-      transaction_item: []
+      transaction_item: [],
+      cr_account: '',
+      transactionError: ''
     });
   });
 

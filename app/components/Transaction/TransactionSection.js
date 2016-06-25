@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import merge from 'lodash/merge';
 
+import { getLocation, buildLatLng } from 'utils/geo';
 import TransactionDetail from './TransactionDetail';
 import AddTransactionBtn from './AddTransactionBtn';
 import TransactionItem from './TransactionItem';
@@ -13,12 +15,48 @@ export default class TransactionSection extends Component {
       showTransactionPopup: false
     };
     this.handleUpdateField = this.handleUpdateField.bind(this);
+    this.handlePost = this.handlePost.bind(this);
+    this.handleAddTransaction = this.handleAddTransaction.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+  }
+
+  handleClose() {
+    this.props.updateError();
+    this.setState({ showTransactionPopup: false });
+  }
+
+  handlePost(password) {
+    console.log(password);
+    if (!password) {
+      this.props.updateError('Password Required');
+    } else {
+      const mergeAndPost = (position) => {
+        const loc = buildLatLng(position);
+        const data = merge(this.props.transaction, {
+          db_latlng: loc,
+          cr_latlng: loc
+        });
+        this.props.postTransaction(data).then((action) => {
+          if (!action.error) {
+            this.context.router.push('/TransactionHistory/success');
+          }
+        });
+      };
+
+      getLocation(mergeAndPost);
+    }
+
   }
 
   handleUpdateField(key, field, event) {
     const { updateTransaction } = this.props;
     const { value } = event.target;
     updateTransaction({ key, field, value });
+  }
+
+  handleAddTransaction() {
+    const { cr_account, addTransaction } = this.props;
+    addTransaction(cr_account);
   }
 
   renderActionsSection() {
@@ -30,19 +68,23 @@ export default class TransactionSection extends Component {
   renderTransactionPopup() {
     return this.state.showTransactionPopup ?
       <TransactionPopup
+        transactionError={ this.props.transactionError }
+        handlePost={ this.handlePost }
         transactionAmount={ this.props.transactionAmount }
-        handleCancel={ () => {this.setState({ showTransactionPopup: false });} }/>
+        handleCancel={ this.handleClose }/>
       : null;
   }
 
   render() {
-    const { transaction_item, removeTransaction, transactionAmount, addTransaction } = this.props;
+    const { transaction_item, removeTransaction, transactionAmount, updateCRAccount } = this.props;
     const that = this;
 
     return (
       <div className='container' style={ { width: 300 } }>
-        <TransactionDetail transactionAmount={ transactionAmount }/>
-        <AddTransactionBtn handleClick={ addTransaction }/>
+        <TransactionDetail
+          updateCRAccount={ updateCRAccount }
+          transactionAmount={ transactionAmount }/>
+        <AddTransactionBtn handleClick={ this.handleAddTransaction }/>
         {
           transaction_item.map((item, key) => (
             <TransactionItem key={ item.key } item={ item }
@@ -58,14 +100,24 @@ export default class TransactionSection extends Component {
 }
 
 TransactionSection.propTypes = {
+  cr_account: PropTypes.string,
+  transaction: PropTypes.object,
   transaction_item: PropTypes.array,
   transactionAmount: PropTypes.number,
+  transactionError: PropTypes.string,
   removeTransaction: PropTypes.func.isRequired,
   updateTransaction: PropTypes.func.isRequired,
-  addTransaction: PropTypes.func.isRequired
+  addTransaction: PropTypes.func.isRequired,
+  postTransaction: PropTypes.func.isRequired,
+  updateCRAccount: PropTypes.func.isRequired,
+  updateError: PropTypes.func.isRequired
 };
 
 TransactionSection.defaultProps = {
   transaction_item: [],
   transactionAmount: 0
+};
+
+TransactionSection.contextTypes = {
+  router: PropTypes.object
 };

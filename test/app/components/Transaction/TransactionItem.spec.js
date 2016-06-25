@@ -15,7 +15,7 @@ describe('TransactionItem component', () => {
     handleRemove: spy(),
     handleUpdateField: spy(),
     item: {
-      item: 'first',
+      name: 'first',
       quantity: 1,
       value: 3
     }
@@ -47,7 +47,7 @@ describe('TransactionItem component', () => {
 
     itemInput.value = 'item';
     Simulate.blur(itemInput);
-    props.handleUpdateField.should.be.calledWith('item');
+    props.handleUpdateField.should.be.calledWith('name');
 
     valueInput.value = 30;
     Simulate.blur(valueInput);

@@ -2,9 +2,9 @@ import React from 'react';
 import { unmountComponentAtNode, findDOMNode } from 'react-dom';
 import {
   renderIntoDocument, findRenderedComponentWithType, scryRenderedComponentsWithType,
-  findRenderedDOMComponentWithClass, Simulate, scryRenderedDOMComponentsWithTag
+  findRenderedDOMComponentWithClass, Simulate, scryRenderedDOMComponentsWithTag, findRenderedDOMComponentWithTag
 } from 'react-addons-test-utils';
-import { spy } from 'sinon';
+import { spy, stub } from 'sinon';
 import 'should-sinon';
 
 import TransactionSection from 'components/Transaction/TransactionSection';
@@ -19,7 +19,13 @@ describe('TransactionSection component', () => {
   const addTransaction = spy();
   const removeTransaction = spy();
   const updateTransaction = spy();
-  const props = { addTransaction, removeTransaction, updateTransaction };
+  const postTransaction = stub();
+  const updateCRAccount = spy();
+  const updateError = spy();
+  const props = {
+    addTransaction, removeTransaction,
+    updateTransaction, postTransaction, updateCRAccount, updateError
+  };
 
   afterEach(() => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
@@ -41,7 +47,7 @@ describe('TransactionSection component', () => {
   it('should render correct with items', () => {
     props.transaction_item = [
       {
-        item: 'item1',
+        name: 'item1',
         quantity: 1,
         value: 25
       }
@@ -56,9 +62,10 @@ describe('TransactionSection component', () => {
     Simulate.click(transactBtn);
 
     const transactionPopup = findRenderedComponentWithType(instance, TransactionPopup);
-    findRenderedDOMComponentWithClass(transactionPopup, 'transaction-amount').textContent.should.equal('(25)');
+    findRenderedDOMComponentWithClass(transactionPopup, 'transaction-amount').textContent.should.equal('(25.000)');
     const cancelBtn = findRenderedDOMComponentWithClass(transactionPopup, 'btn__cancel');
     Simulate.click(cancelBtn);
+    props.updateError.should.be.calledOnce();
     scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
 
     const transactionItem = findRenderedComponentWithType(instance, TransactionItem);
@@ -74,9 +81,71 @@ describe('TransactionSection component', () => {
     Simulate.blur(itemInput);
     props.updateTransaction.should.be.calledWith({
       key: 0,
-      field: 'item',
+      field: 'name',
       value: 'item2'
     });
   });
 
+
+  it('should handle post', () => {
+    props.transaction_item = [
+      {
+        name: 'item1',
+        quantity: 1,
+        value: 25
+      }
+    ];
+    props.transaction = {
+      db_author: 'Sandy',
+      cr_author: '',
+      db_time: '',
+      db_latlng: '0,0',
+      cr_time: '',
+      cr_latlng: '0,0',
+      transaction_item: [{
+        name: 'item1',
+        quantity: 1,
+        value: 25
+      }]
+    };
+
+    props.postTransaction.returns({
+      then: (f) => (f({}))
+    });
+    props.updateError = spy();
+
+    const push = spy();
+
+    instance = renderIntoDocument(<TransactionSection { ...props }/>);
+    scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
+    instance.context.router = { push };
+    const actionsSection = findRenderedComponentWithType(instance, ActionsSection);
+    const transactBtn = findRenderedDOMComponentWithClass(actionsSection, 'btn__transact');
+    Simulate.click(transactBtn);
+
+    const transactionPopup = findRenderedComponentWithType(instance, TransactionPopup);
+    const okBtn = findRenderedDOMComponentWithClass(transactionPopup, 'btn__ok');
+    const passwordInput = findRenderedDOMComponentWithTag(transactionPopup, 'input');
+    Simulate.click(okBtn);
+
+    props.updateError.should.be.calledWith('Password Required');
+    passwordInput.value = 'secret';
+    Simulate.change(passwordInput);
+    Simulate.click(okBtn);
+
+    props.postTransaction.should.be.calledWith({
+      db_author: 'Sandy',
+      cr_author: '',
+      db_time: '',
+      db_latlng: '0,0',
+      cr_time: '',
+      cr_latlng: '0,0',
+      transaction_item: [{
+        name: 'item1',
+        quantity: 1,
+        value: 25
+      }]
+    });
+    push.should.be.calledWith('/TransactionHistory/success');
+  });
 });

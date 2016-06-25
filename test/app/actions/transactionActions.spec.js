@@ -1,7 +1,11 @@
 import {
-  ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION,
-  addTransaction, removeTransaction, updateTransaction
+  ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, UPDATE_CR_ACCOUNT, CLEAR_TRANSACTION, UPDATE_ERROR,
+  addTransaction, removeTransaction, updateTransaction, updateCRAccount, clearTransaction, updateError,
+  TRANSACT_PATH, POST_TRANSACTION,
+  postTransaction
 } from 'actions/transactionActions';
+
+import { defaultHeaders } from 'actions/async';
 
 describe('transactionActions creator', () => {
 
@@ -38,4 +42,45 @@ describe('transactionActions creator', () => {
     });
   });
 
+  describe('#updateCRAccount', () => {
+    it('should return UPDATE_CR_ACCOUNT action', () => {
+      updateCRAccount('Sandy').should.eql({
+        type: UPDATE_CR_ACCOUNT,
+        payload: 'Sandy'
+      });
+    });
+  });
+
+  describe('#clearTransaction', () => {
+    it('should return CLEAR_TRANSACTION action', () => {
+      clearTransaction().should.eql({
+        type: CLEAR_TRANSACTION
+      });
+    });
+  });
+
+  describe('#updateError', () => {
+    it('should return UPDATE_ERROR action', () => {
+      updateError().should.eql({
+        type: UPDATE_ERROR
+      });
+    });
+  });
+
+  describe('#postTransaction', () => {
+    it('should return POST_TRANSACTION action', () => {
+      const data = { cr_account: 'sandy' };
+      postTransaction(data).should.eql({
+        type: POST_TRANSACTION,
+        payload: {
+          request: {
+            method: 'POST',
+            url: TRANSACT_PATH,
+            data,
+            headers: defaultHeaders
+          }
+        }
+      });
+    });
+  });
 });

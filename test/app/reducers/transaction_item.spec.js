@@ -1,23 +1,21 @@
 import transaction_item from 'reducers/transaction_item';
-import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION } from 'actions/transactionActions';
+import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, CLEAR_TRANSACTION } from 'actions/transactionActions';
+import { GET_EMPTY_TRANSACTION } from 'constants/index';
 
 describe('transaction_item reducer', () => {
-  const emptyTransaction = {
-    key: 0,
-    item: '',
-    value: 0,
-    quantity: 0,
-    cr_account: ''
-  };
+  const emptyTransaction = GET_EMPTY_TRANSACTION(0);
 
   it('should return initial state', () => {
     transaction_item(undefined, {}).should.eql([]);
   });
 
   it('should handle ADD_TRANSACTION', () => {
+    const cr_account = 'Sandy';
+    const newTransaction = GET_EMPTY_TRANSACTION(0, { cr_account });
     transaction_item([], {
-      type: ADD_TRANSACTION
-    }).should.eql([emptyTransaction]);
+      type: ADD_TRANSACTION,
+      payload: cr_account
+    }).should.eql([newTransaction]);
   });
 
   it('should handle REMOVE_TRANSACTION', () => {
@@ -27,7 +25,14 @@ describe('transaction_item reducer', () => {
     }).should.eql([]);
   });
 
-  it('should handle ADD_TRANSACTION', () => {
+  it('should handle CLEAR_TRANSACTION', () => {
+    transaction_item([emptyTransaction], {
+      type: CLEAR_TRANSACTION,
+      payload: 0
+    }).should.eql([]);
+  });
+
+  it('should handle UPDATE_TRANSACTION', () => {
     transaction_item([emptyTransaction], {
       type: UPDATE_TRANSACTION,
       payload: {
@@ -37,10 +42,13 @@ describe('transaction_item reducer', () => {
       }
     }).should.eql([{
       key: 0,
-      item: '',
+      name: '',
       value: 30,
       quantity: 0,
-      cr_account: ''
+      cr_account: '',
+      db_account: 'Sandy',
+      units_measured: '',
+      unit_of_measurement: ''
     }]);
   });
 
