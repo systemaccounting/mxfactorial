@@ -10,6 +10,20 @@ var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
+var firebase = require("firebase");
+
+// Initializing a Firebase app with a service account, granting admin privileges
+firebase.initializeApp({
+  serviceAccount: "mxfactorial-cebe88ad95c6.json",
+  databaseURL: "https://mxfactorial.firebaseio.com"
+});
+
+// As an admin, the Firebase app has access to read and write all data, regardless of Security Rules
+var db = firebase.database();
+var ref = db.ref("restricted_access/secret_document");
+ref.once("value", function(snapshot) {
+  console.log(snapshot.val());
+});
 
 var app = express();
 app.disable('etag');
