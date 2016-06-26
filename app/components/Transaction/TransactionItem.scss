@@ -1,0 +1,28 @@
+.field--half {
+	width: 50%;
+}
+
+.field__label {
+	line-height: 60px;
+}
+
+.btn__remove {
+  &.glyphicon-remove {
+    width: 15px;
+    height: 15px;
+    position: absolute;
+    left: -24px;
+    background-color: #efefef;
+    border-radius: 5px;
+    font-size: 8px;
+    line-height: 15px;
+  }
+}
+
+.home-page {
+  .transaction-item {
+    input {
+      margin-bottom: 10px;
+    }
+  }
+}

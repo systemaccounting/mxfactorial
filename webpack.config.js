@@ -13,10 +13,8 @@ module.exports = {
         port: 8080
     },
     resolve: {
-        extensions: ['', '.js', '.jsx']
-    },
-    resolveLoader: {
-        root: path.join(__dirname, 'node_modules')
+        extensions: ['', '.js', '.jsx'],
+        modulesDirectories: ['node_modules', 'app', 'static']
     },
     module: {
         loaders: [

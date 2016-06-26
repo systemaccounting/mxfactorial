@@ -1,31 +1,15 @@
-import {
-    SUBMIT_PROFILE_DETAILS,
-    SUBMIT_AUTH_DETAILS,
-    CREATE_ACCOUNT,
-    BASE_URL
-} from '../constants/index'
-import request from 'superagent'
+import { createAction } from 'redux-actions';
+import { post } from './async';
 
-export function submitProfileDetails (props) {
-    return {
-        type: SUBMIT_PROFILE_DETAILS,
-        payload: props
-    }
-}
-export function submitAuthDetails(props) {
-    return {
-        type: SUBMIT_AUTH_DETAILS,
-        payload: props
-    }
-}
+export const SUBMIT_PROFILE_DETAILS = 'SUBMIT_PROFILE_DETAILS';
+export const SUBMIT_AUTH_DETAILS= 'SUBMIT_AUTH_DETAILS';
 
-export function createAccount(props) {
+export const submitProfileDetails = createAction(SUBMIT_PROFILE_DETAILS);
+export const submitAuthDetails = createAction(SUBMIT_AUTH_DETAILS);
 
-    //  request.post(BASE_URL).send(props).end(function (err,res) {
-    //
-    // })
-    return{
-        type:CREATE_ACCOUNT,
-        payload:''
-    }
-}
+export const USER_PATH = '/users';
+export const POST_CREATE_ACCOUNT = 'POST_CREATE_ACCOUNT';
+
+export const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+
+export const postCreateAccount = post(USER_PATH, POST_CREATE_ACCOUNT, headers);
