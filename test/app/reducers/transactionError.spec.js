@@ -1,7 +1,7 @@
 import transactionError from 'reducers/transactionError';
 
 import { generateAsyncTypes } from 'actions/async';
-import { POST_TRANSACTION, CLEAR_ERROR, CLEAR_TRANSACTION } from 'actions/transactionActions';
+import { POST_TRANSACTION, UPDATE_ERROR, CLEAR_TRANSACTION } from 'actions/transactionActions';
 
 const { error } = generateAsyncTypes(POST_TRANSACTION);
 
@@ -16,13 +16,13 @@ describe('transactionError reducer', () => {
     }).should.equal('Transaction failed');
   });
 
-  it('should handle CLEAR_ERROR', () => {
+  it('should handle UPDATE_ERROR', () => {
     transactionError('Transaction failed', {
-      type: CLEAR_ERROR
+      type: UPDATE_ERROR
     }).should.equal('');
   });
 
-  it('should handle CLEAR_ERROR', () => {
+  it('should handle UPDATE_ERROR', () => {
     transactionError('Transaction failed', {
       type: CLEAR_TRANSACTION
     }).should.equal('');

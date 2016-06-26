@@ -21,25 +21,30 @@ export default class TransactionSection extends Component {
   }
 
   handleClose() {
-    this.props.clearError();
+    this.props.updateError();
     this.setState({ showTransactionPopup: false });
   }
 
-  handlePost() {
-    const mergeAndPost = (position) => {
-      const loc = buildLatLng(position);
-      const data = merge(this.props.transaction, {
-        db_latlng: loc,
-        cr_latlng: loc
-      });
-      this.props.postTransaction(data).then((action) => {
-        if (!action.error) {
-          this.context.router.push('/TransactionHistory/success');
-        }
-      });
-    };
+  handlePost(password) {
+    if (!password) {
+      this.props.updateError('Password Required');
+    } else {
+      const mergeAndPost = (position) => {
+        const loc = buildLatLng(position);
+        const data = merge(this.props.transaction, {
+          db_latlng: loc,
+          cr_latlng: loc
+        });
+        this.props.postTransaction(data).then((action) => {
+          if (!action.error) {
+            this.context.router.push('/TransactionHistory/success');
+          }
+        });
+      };
 
-    getLocation(mergeAndPost);
+      getLocation(mergeAndPost);
+    }
+
   }
 
   handleUpdateField(key, field, event) {
@@ -104,7 +109,7 @@ TransactionSection.propTypes = {
   addTransaction: PropTypes.func.isRequired,
   postTransaction: PropTypes.func.isRequired,
   updateCRAccount: PropTypes.func.isRequired,
-  clearError: PropTypes.func.isRequired
+  updateError: PropTypes.func.isRequired
 };
 
 TransactionSection.defaultProps = {

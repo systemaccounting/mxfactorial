@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 
 import TransactionSection from 'components/Transaction/TransactionSection';
 import {
-  addTransaction, removeTransaction, updateTransaction, postTransaction, updateCRAccount, clearError
+  addTransaction, removeTransaction, updateTransaction, postTransaction, updateCRAccount, updateError
 } from 'actions/transactionActions';
 import { transactionAmountSelector, transactionSelector } from 'selectors/transaction';
 
@@ -18,7 +18,7 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = {
-  addTransaction, removeTransaction, updateTransaction, postTransaction, updateCRAccount, clearError
+  addTransaction, removeTransaction, updateTransaction, postTransaction, updateCRAccount, updateError
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TransactionSection);
