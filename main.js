@@ -14,8 +14,8 @@ var firebase = require("firebase");
 
 // Initializing a Firebase app with a service account, granting admin privileges
 firebase.initializeApp({
-  serviceAccount: "mxfactorial-cebe88ad95c6.json",
-  databaseURL: "https://mxfactorial.firebaseio.com"
+  serviceAccount: "mx-factorial-c47e38a1fbd1.json",
+  databaseURL: "https://mx-factorial.firebaseio.com"
 });
 
 // As an admin, the Firebase app has access to read and write all data, regardless of Security Rules
@@ -45,7 +45,7 @@ passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
 }));
 
 
-app.use('/systemaccounting/users', require('./users/crud'));
+app.use('/systemaccounting/account', require('./account/crud'));
 app.use('/systemaccounting/transact', require('./transact/crud'));
 
 // Targets index.html for Node.js Flexible Environment
