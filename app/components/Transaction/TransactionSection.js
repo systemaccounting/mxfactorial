@@ -26,7 +26,6 @@ export default class TransactionSection extends Component {
   }
 
   handlePost(password) {
-    console.log(password);
     if (!password) {
       this.props.updateError('Password Required');
     } else {
