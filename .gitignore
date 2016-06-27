@@ -5,4 +5,5 @@ npm-debug.log
 build/bundle.js
 build/static/
 .vscode
+apidoc/
 mxfactorial-cebe88ad95c6.json
