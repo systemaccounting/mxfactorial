@@ -11,14 +11,14 @@ export default class sixthForm extends BaseAccountForm {
 
   render() {
 
-    const { fields: { account_name, password, email_address_create }, handleSubmit } = this.props;
+    const { fields: { account, password, email_address_create }, handleSubmit } = this.props;
 
     return (
       <div className='createAccount04Body'>
         <form role='form' onSubmit={ handleSubmit(this.onSubmit.bind(this)) }>
           <div className='form-group'>
             <input type='text' className='form-control form-spacing text-center'
-              { ...account_name } placeholder='user*' />
+              { ...account } placeholder='user*' />
             <input type='password' className='form-control form-spacing text-center'
               { ...password } placeholder='password*' />
             <input type='email' className='form-control form-spacing text-center'

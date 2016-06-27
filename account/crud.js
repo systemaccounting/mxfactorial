@@ -43,10 +43,10 @@ var datastore = gcloud.datastore({
 
 
 var accountAuthKey = datastore.key([
-  'AccountAuths'
+  'AccountAuth'
 ]);
 var accountProfileKey = datastore.key([
-  'AccountProfiles'
+  'AccountProfile'
 ]);
 
 
@@ -56,14 +56,14 @@ var router = express.Router();
 router.use(bodyParser.urlencoded({ extended: false }));
 
 var getAccountByAccountName = function (accountName, cb) {
-  var query = datastore.createQuery('AccountAuths')
+  var query = datastore.createQuery('AccountAuth')
     .filter('account', '=', accountName);
 
   datastore.runQuery(query, cb);
 };
 
 var getAllAccounts = function (cb) {
-  var query = datastore.createQuery('AccountAuths');
+  var query = datastore.createQuery('AccountAuth');
   datastore.runQuery(query, cb);
 }
 
@@ -101,7 +101,7 @@ router.post('/authenticate', function list(req, res, next) {
  *
  * @apiDescription Create account.
  *
- * @apiParam {String} account_name Account Name - Required.
+ * @apiParam {String} account Account Name - Required.
  * @apiParam {String} Password Passowrd of account - Required.
  * @apiParam {String} first_name First name of account holder.
  * @apiParam {String} middle_name Moddile name of account holder.
@@ -134,11 +134,11 @@ router.post('/authenticate', function list(req, res, next) {
 
 router.post('/', function (req, res) {
   var body = req.body;
-  if (!body.account_name || !body.password) {
+  if (!body.account || !body.password) {
     res.status(400).json({ error: "account name and password cannot be empty" });
     return;
   }
-  var auth = ['account_name','password'];
+  var auth = ['account','password'];
   var profile = ['first_name',
                   'middle_name',
                   'last_name',
@@ -170,13 +170,13 @@ router.post('/', function (req, res) {
   profileParams.created_time = new Date();
   authParams.password = String(CryptoJS.MD5(authParams.password));
 
-  getAccountByAccountName(body.account_name, function (err, data) {
+  getAccountByAccountName(body.account, function (err, data) {
     if (data && data.length > 0) {
       res.status(400).json({ error: "Account name already registered" });
     } else {
       var entities = [];
-      entities.push({key: datastore.key(['AccountAuths',authParams.account_name]),data: authParams});
-      entities.push({key: datastore.key(['AccountAuths',authParams.account_name,'AccountProfiles']),data:profileParams});
+      entities.push({key: datastore.key(['AccountAuth',authParams.account]),data: authParams});
+      entities.push({key: datastore.key(['AccountAuth',authParams.account,'AccountProfile']),data:profileParams});
 
       datastore.save(entities, function (err, data) { 
         if (!err) {

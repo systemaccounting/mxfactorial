@@ -48,7 +48,7 @@ export const FifthForm = reduxForm({
 export const SixthForm = reduxForm({
   form: 'sixthForm',
   fields: [
-    'account_name', 'password', 'email_address_create'
+    'account', 'password', 'email_address_create'
   ],
   destroyOnUnmount: false
 }, null, { submitAuthDetails })(sixthForm);
