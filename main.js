@@ -14,8 +14,8 @@ var firebase = require("firebase");
 
 // Initializing a Firebase app with a service account, granting admin privileges
 firebase.initializeApp({
-  serviceAccount: "mx-factorial-c47e38a1fbd1.json",
-  databaseURL: "https://mx-factorial.firebaseio.com"
+  serviceAccount: "mxfactorial-cebe88ad95c6.json",
+  databaseURL: "https://mxfactorial.firebaseio.com"
 });
 
 // As an admin, the Firebase app has access to read and write all data, regardless of Security Rules
