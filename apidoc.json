@@ -1,0 +1,14 @@
+{
+	"name": "mxfactorial",
+	"version": "0.0.1",
+	"description": "Establishing public independence from the banking system through science and technology.",
+	"title": "mxfactorial api",
+	"url": "https://api.github.com/systemaccounting",
+	"order": [
+		"PostAccount"
+	],
+	"template": {
+		"withCompare": true,
+		"withGenerator": true
+	}
+}
