@@ -17,7 +17,9 @@ nconf
     'MYSQL_USER',
     'MYSQL_PASSWORD',
     'MYSQL_HOST',
-    'PORT'
+    'PORT',
+    'FIREBASE_URL',
+    'FIREBASE_KEY_PATH'
   ])
   // 3. Config file
   .file({ file: path.join(__dirname, 'config.json') })
@@ -31,7 +33,7 @@ nconf
 
     // This is the id of your project in the Google Cloud Developers Console.
     GCLOUD_PROJECT: 'mxfactorial',
-    
+
     API_SECRET: 'mxfactorialapisecret',
     TOKEN_EXPIRE_TIME: 11440,
 
@@ -43,6 +45,8 @@ nconf
     MYSQL_USER: '',
     MYSQL_PASSWORD: '',
     MYSQL_HOST: '',
+    FIREBASE_URL: 'https://mxfactorial.firebaseio.com',
+    FIREBASE_KEY_PATH: 'mxfactorial-cebe88ad95c6.json',
 
     // Port the HTTP server
     PORT: 8080

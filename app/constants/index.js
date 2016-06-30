@@ -6,8 +6,8 @@
 // (localhost vs. mxfactorial.org/systemaccounting).
 import merge from 'lodash/merge';
 
-export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting';
-// export const BASE_URL = 'http://localhost:8080/systemaccounting'
+// export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting';
+export const BASE_URL = 'http://localhost:8081/systemaccounting';
 
 export const GET_EMPTY_TRANSACTION = (key, info)=>(merge({
   key,
