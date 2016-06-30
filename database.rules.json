@@ -1,0 +1,25 @@
+{
+  "rules": {
+    ".write": "auth != null && auth.uid =='admin'",
+    ".read": "auth != null && auth.uid =='admin'",
+    "users": {
+      ".indexOn": [
+        "account"
+      ],
+      "$account": {
+        ".write": "auth != null && auth.uid =='admin'",
+        ".read": "auth != null && auth.uid =='admin'",
+        ".validate": "newData.hasChildren(['account', 'password'])",
+        "account_profile": {
+          ".write": "auth != null && auth.uid =='admin'",
+          ".read": "auth != null && auth.uid =='admin'",
+          "$uid": {
+            ".read": true,
+            ".write": true,
+            ".validate": "newData.hasChildren(['created_time', 'first_name', 'middle_name'])"
+          }
+        }
+      }
+    }
+  }
+}
