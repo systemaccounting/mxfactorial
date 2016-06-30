@@ -1,7 +1,7 @@
 # mxfactorial
 [![mxfactorial](https://cloud.githubusercontent.com/assets/12200465/12700510/1a48b412-c79b-11e5-901f-4f26965dd017.png)](http://www.systemaccounting.org/math_identity)
 
-[![Cloud IDE](https://img.shields.io/badge/Cloud%20IDE-c9.io-blue.svg)](https://ide.c9.io/mxfactorial/mxfactorial) [![Coverage Status](https://coveralls.io/repos/github/systemaccounting/mxfactorial/badge.svg?branch=master)](https://coveralls.io/github/systemaccounting/mxfactorial?branch=master) [![Build Status](https://travis-ci.org/systemaccounting/mxfactorial.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial) [![Production Environment](https://img.shields.io/badge/PROD-gce-brightgreen.svg)](https://mxfactorial.appspot.com/) [![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
+[![Cloud IDE](https://img.shields.io/badge/Cloud%20IDE-c9.io-blue.svg)](https://ide.c9.io/mxfactorial/mxfactorial) [![Coverage Status](https://coveralls.io/repos/github/systemaccounting/mxfactorial/badge.svg?branch=master)](https://coveralls.io/github/systemaccounting/mxfactorial?branch=master) [![Build Status](https://travis-ci.org/systemaccounting/mxfactorial.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial) [![Production Environment](https://img.shields.io/badge/PROD-Firebase-brightgreen.svg)](https://mxfactorial.firebaseapp.com/) [![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
 
 *The idea is to have the U.S. Treasury deploy a payment platform where the transaction data serves as the source for measuring the cost of capital. Instead of the cost of credit determining the cost of capital, the reference for the system's risk-free rate in systemaccounting is the cost of equity. - [@Mxfactorial](https://twitter.com/mxfactorial)*
 
@@ -23,14 +23,13 @@ This open-source project is intended to exploit the software engineering communi
 * Learn to add features to your newly-deployed application by completing the Google App Engine ['Bookshelf App' tutorial](https://cloud.google.com/nodejs/getting-started/tutorial-app).
 * Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://github.com/systemaccounting/mxfactorial/wiki/Code-Delivery-Workflow).
  
-Details as of 6/13/2016:
+Details as of 6/30/2016:
 - Production: [mxfactorial.org](http://mxfactorial.org/)
-- SSL: [mxfactorial.appspot.com](https://mxfactorial.appspot.com/)
+- SSL: [mxfactorial.firebaseapp.com](https://mxfactorial.firebaseapp.com/)
 - [Public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
 - Node.js v4.4.3
 - npm v3.5.1
-- Google Cloud SDK
-- Datastore
+- Firebase
 
 Roadmap:
 * Set up managed application & persistence layer
