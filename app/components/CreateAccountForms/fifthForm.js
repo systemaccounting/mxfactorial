@@ -11,7 +11,7 @@ export default class fifthForm extends BaseAccountForm {
 
   render() {
 
-    const { fields: { date_of_birth, industry_name, occupation_name }, handleSubmit } = this.props;
+    const { fields: { date_of_birth, industry, occupation }, handleSubmit } = this.props;
 
     return (
       <div className='createAccount04Body'>
@@ -20,9 +20,9 @@ export default class fifthForm extends BaseAccountForm {
             <input type='date' className='form-control form-spacing text-center'
               { ...date_of_birth } required={ true } placeholder='Date of Birth*' />
             <input type='text' className='form-control form-spacing text-center'
-              { ...industry_name } placeholder='Industry' />
+              { ...industry } placeholder='Industry' />
             <input type='text' className='form-control form-spacing text-center'
-              { ...occupation_name } placeholder='Occupation' />
+              { ...occupation } placeholder='Occupation' />
             <Link to='/'><button type='submit' className='btn form-spacing btn-style'>Start Over</button></Link>
             <button type='submit' className='btn btn-primary form-spacing btn-style'>Next</button>
           </div>

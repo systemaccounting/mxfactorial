@@ -11,7 +11,7 @@ export default class secondForm extends BaseAccountForm {
 
   render() {
 
-    const { fields: { street_number, street_name, floor_number, unit_number }, handleSubmit } = this.props;
+    const { fields: { street_number, street, floor_number, unit_number }, handleSubmit } = this.props;
 
     return (
       <div className='createAccount04Body'>
@@ -20,7 +20,7 @@ export default class secondForm extends BaseAccountForm {
             <input type='text' className='form-control form-spacing text-center'
               { ...street_number } placeholder='Street Number*' />
             <input type='text' className='form-control form-spacing text-center'
-              { ...street_name } placeholder='Street Name*' />
+              { ...street } placeholder='Street Name*' />
             <input type='text' className='form-control form-spacing text-center'
               { ...floor_number } placeholder='Floor Number' />
             <input type='text' className='form-control form-spacing text-center'
