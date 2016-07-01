@@ -1,5 +1,7 @@
 import transaction_item from 'reducers/transaction_item';
-import { ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, CLEAR_TRANSACTION } from 'actions/transactionActions';
+import {
+  ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, CLEAR_TRANSACTION, UPDATE_CR_ACCOUNT
+} from 'actions/transactionActions';
 import { GET_EMPTY_TRANSACTION } from 'constants/index';
 
 describe('transaction_item reducer', () => {
@@ -46,6 +48,22 @@ describe('transaction_item reducer', () => {
       value: 30,
       quantity: 0,
       cr_account: '',
+      db_account: 'Sandy',
+      units_measured: '',
+      unit_of_measurement: ''
+    }]);
+  });
+
+  it('should handle UPDATE_CR_ACCOUNT', () => {
+    transaction_item([GET_EMPTY_TRANSACTION(0)], {
+      type: UPDATE_CR_ACCOUNT,
+      payload: 'David'
+    }).should.eql([{
+      key: 0,
+      name: '',
+      value: 0,
+      quantity: 0,
+      cr_account: 'David',
       db_account: 'Sandy',
       units_measured: '',
       unit_of_measurement: ''

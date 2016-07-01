@@ -10,7 +10,7 @@
     "webdev": "webpack-dev-server --host 0.0.0.0 --progress --colors --hot --inline --content-base build/",
     "build": "webpack",
     "start": "NODE_PATH=. node main.js",
-    "deploy": "gcloud preview app deploy app.yaml",
+    "deploy": "firebase deploy",
     "test": "karma start",
     "lint": "eslint app transact account main.js config.js"
   },
@@ -93,7 +93,6 @@
     "karma-webpack": "^1.7.0",
     "mocha": "^2.4.5",
     "node-sass": "^3.6.0",
-    "nodejs-repo-tools": "git+https://github.com/GoogleCloudPlatform/nodejs-repo-tools.git#21daa823090c43fb667157c8b5b0c3b7f45a8357",
     "phantomjs-polyfill": "0.0.2",
     "phantomjs-prebuilt": "^2.1.7",
     "proxyquire": "^1.7.4",
