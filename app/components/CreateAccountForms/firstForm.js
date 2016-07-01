@@ -10,7 +10,7 @@ export default class firstForm extends BaseAccountForm {
   }
 
   render() {
-    const { fields: { first_name, last_name, middle_name, country_name }, handleSubmit } = this.props;
+    const { fields: { first_name, last_name, middle_name, country }, handleSubmit } = this.props;
 
     return (
       <div className='createAccount04Body'>
@@ -23,7 +23,7 @@ export default class firstForm extends BaseAccountForm {
             <input type='text' className='form-control form-spacing text-center'
               { ...last_name } placeholder='Last Name*' />
             <input type='text' className='form-control form-spacing text-center'
-              { ...country_name } placeholder='Country*' />
+              { ...country } placeholder='Country*' />
             <Link to='/'><button type='submit' className='btn form-spacing btn-style'>Start Over</button></Link>
             <button type='submit' className='btn btn-primary form-spacing btn-style'>Next</button>
           </div>

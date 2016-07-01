@@ -54,7 +54,6 @@
         ],
         keyword-spacing: 2,
         space-before-blocks: 2,
-        vars-on-top: 2,
         comma-spacing: 2,
         key-spacing: [
             2,
@@ -155,6 +154,7 @@
         "eslint:recommended"
     ],
     globals: {
-        "$": false
+        "$": false,
+        "Promise": false
     }
 }
