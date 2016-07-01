@@ -11,7 +11,7 @@ export default class thirdForm extends BaseAccountForm {
 
   render() {
 
-    const { fields: { city, state_name, postal_code }, handleSubmit } = this.props;
+    const { fields: { city, state, postal_code }, handleSubmit } = this.props;
 
     return (
       <div className='createAccount04Body'>
@@ -19,7 +19,7 @@ export default class thirdForm extends BaseAccountForm {
           <div className='form-group'>
             <input type='text' className='form-control form-spacing text-center' { ...city } placeholder='City*' />
             <input type='text' className='form-control form-spacing text-center'
-              { ...state_name } placeholder='State*' />
+              { ...state } placeholder='State*' />
             <input type='text' className='form-control form-spacing text-center'
               { ...postal_code } placeholder='postal code*' />
             <Link to='/'><button type='submit' className='btn form-spacing btn-style'>Start Over</button></Link>
