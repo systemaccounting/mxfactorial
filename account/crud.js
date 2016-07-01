@@ -25,71 +25,51 @@
 
 'use strict';
 
+var _ = require('lodash');
 var express = require('express');
 var bodyParser = require('body-parser');
-var config = require('../config');
-var gcloud = require('gcloud');
-var CryptoJS = require("crypto-js");
+var CryptoJS = require('crypto-js');
 var jwt = require('jsonwebtoken');
-var passport = require('passport');
-var JwtStrategy = require('passport-jwt').Strategy;
-var ExtractJwt = require('passport-jwt').ExtractJwt;
-var _ = require('lodash');
-
-// [START config]
-var datastore = gcloud.datastore({
-  projectId: config.get('GCLOUD_PROJECT')
-});
-
-
-var accountAuthKey = datastore.key([
-  'AccountAuth'
-]);
-var accountProfileKey = datastore.key([
-  'AccountProfile'
-]);
-
-
 var router = express.Router();
+
+var config = require('config.js');
+var firebaseClient = require('firebase-client/index');
+var USER_PATH = '/accounts';
 
 // Automatically parse request body as form data
 router.use(bodyParser.urlencoded({ extended: false }));
 
-var getAccountByAccountName = function (accountName, cb) {
-  var query = datastore.createQuery('AccountAuth')
-    .filter('account', '=', accountName);
-
-  datastore.runQuery(query, cb);
+var getAccountByAccountName = function (accountName) {
+  return firebaseClient().then(function (instance) {
+    return instance.get(USER_PATH + '/' + accountName);
+  });
 };
 
-var getAllAccounts = function (cb) {
-  var query = datastore.createQuery('AccountAuth');
-  datastore.runQuery(query, cb);
-}
-
-
 router.post('/authenticate', function list(req, res, next) {
-  getAccountByAccountName(req.body.username, function (err, data) {
-    if (err) {
-      res.status(500).json(err);
-    } else {
-      if (data && data[0] && data[0].data) {
-        var payload = data[0].data;
+  getAccountByAccountName(req.body.username)
+    .then(function (response) {
+      var data = response.data;
+
+      if (data) {
+        var payload = data;
         var token = jwt.sign(payload, config.get('API_SECRET'), {
           expiresIn: config.get('TOKEN_EXPIRE_TIME')
         });
-        if (String(CryptoJS.MD5(req.body.password)) == payload.password_create) {
-          delete payload.password_create;
-          res.status(200).json({ user: payload, token: "JWT " + token });
-        }else{
-          res.status(500).json({error: "Incorrect passowrd"});
+        if (String(CryptoJS.MD5(req.body.password)) == payload.password) {
+          delete payload.password;
+          res.status(200).json({
+            user: payload,
+            token: 'JWT ' + token
+          });
+        } else {
+          res.status(400).json({ error: 'Incorrect password' });
         }
-
       } else {
-        res.status(500).json({ error: "user not found" });
+        res.status(400).json({ error: 'User not found' });
       }
-    }
-  });
+    }).catch(function (err) {
+      res.status(500).json(err);
+    });
 });
 
 /**
@@ -132,13 +112,20 @@ router.post('/authenticate', function list(req, res, next) {
  * @apiUse AccountExistError
  */
 
+
+var putAccount = function (auth) {
+  return firebaseClient().then(function (instance) {
+    return instance.put(USER_PATH + '/' + auth.account, auth);
+  });
+};
+
 router.post('/', function (req, res) {
   var body = req.body;
   if (!body.account || !body.password) {
-    res.status(400).json({ error: "account name and password cannot be empty" });
+    res.status(400).json({ error: 'account name and password cannot be empty' });
     return;
   }
-  var auth = ['account','password'];
+  var auth = ['account', 'password'];
   var profile = ['first_name',
                   'middle_name',
                   'last_name',
@@ -166,39 +153,24 @@ router.post('/', function (req, res) {
                   'created_time'
                 ];
   var authParams = _.pick(body, auth);
-  var profileParams = _.pick(body,profile);
+  var profileParams = _.pick(body, profile);
   profileParams.created_time = new Date();
   authParams.password = String(CryptoJS.MD5(authParams.password));
 
-  getAccountByAccountName(body.account, function (err, data) {
-    if (data && data.length > 0) {
-      res.status(400).json({ error: "Account name already registered" });
-    } else {
-      var entities = [];
-      entities.push({key: datastore.key(['AccountAuth',authParams.account]),data: authParams});
-      entities.push({key: datastore.key(['AccountAuth',authParams.account,'AccountProfile']),data:profileParams});
-
-      datastore.save(entities, function (err, data) { 
-        if (!err) {
-          res.status(200).json(data);
-        } else {
+  getAccountByAccountName(body.account)
+    .then(function (response) {
+      if (response.data) {
+        res.status(400).json({ error: 'Account name already registered' });
+      } else {
+        putAccount(_.assign(authParams, { account_profile: profileParams })).then(function (response) {
+          res.status(200).json({ account: response.data.account });
+        }).catch(function (err) {
           res.status(500).json(err);
-        }
-      });
-    }
-  });
-});
-
-//auth test
-
-router.get('/authtest', passport.authenticate('jwt', { session: false }), function (req, res, next) {
-  res.status(200).json(req.user);
-});
-
-router.get('/', function (req, res) {
-  getAllAccounts(function (err, data) {
-    res.status(200).json(data);
-  });
+        });
+      }
+    }).catch(function (err) {
+      res.status(500).json(err);
+    });
 });
 
 router.use(function handleRpcError(err, req, res, next) {

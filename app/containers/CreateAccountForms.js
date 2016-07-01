@@ -8,7 +8,7 @@ import {
 export const FirstForm = reduxForm({
   form: 'firstForm',
   fields: [
-    'first_name', 'last_name', 'middle_name', 'country_name'
+    'first_name', 'last_name', 'middle_name', 'country'
   ],
   destroyOnUnmount: false
 }, null, { submitProfileDetails })(firstForm);
@@ -24,7 +24,7 @@ export const SecondForm = reduxForm({
 export const ThirdForm = reduxForm({
   form: 'thirdForm',
   fields: [
-    'city_name', 'state_name', 'postal_code'
+    'city', 'state', 'postal_code'
   ],
   destroyOnUnmount: false
 }, null, { submitProfileDetails })(thirdForm);
@@ -40,7 +40,7 @@ export const FourthForm = reduxForm({
 export const FifthForm = reduxForm({
   form: 'fifthForm',
   fields: [
-    'date_of_birth', 'industry_name', 'occupation_name'
+    'date_of_birth', 'industry', 'occupation'
   ],
   destroyOnUnmount: false
 }, null, { submitProfileDetails })(fifthForm);
@@ -48,7 +48,7 @@ export const FifthForm = reduxForm({
 export const SixthForm = reduxForm({
   form: 'sixthForm',
   fields: [
-    'account', 'password', 'email_address_create'
+    'account', 'password', 'email_address'
   ],
   destroyOnUnmount: false
 }, null, { submitAuthDetails })(sixthForm);

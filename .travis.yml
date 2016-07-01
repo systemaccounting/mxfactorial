@@ -6,9 +6,6 @@ node_js:
 env:
   global:
     - CXX=g++-4.8
-    - PATH=$PATH:$HOME/gcloud/google-cloud-sdk/bin
-    - GOOGLE_APPLICATION_CREDENTIALS=$TRAVIS_BUILD_DIR/test/encrypted/client-secret.json
-    - GCLOUD_PROJECT=mxfactorial
 
 addons:
   apt:
