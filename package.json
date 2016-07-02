@@ -33,7 +33,6 @@
     "googleapis": "^5.1.0",
     "history": "^1.17.0",
     "immutable": "^3.8.1",
-    "jade": "^1.11.0",
     "jsonwebtoken": "^7.0.0",
     "kerberos": "^0.0.18",
     "lodash": "^4.13.1",
