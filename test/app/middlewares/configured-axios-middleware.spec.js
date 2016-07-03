@@ -51,5 +51,20 @@ describe('configured-axios-middleware', function () {
         error: true
       });
     });
+
+    it('should fire action with error response from server', function () {
+      const message = 'server error';
+      const error = {
+        data: {
+          error: message
+        }
+      };
+
+      onError({ action, next, error }).should.eql({
+        type: getActionTypes(action)[2],
+        payload: new Error(message),
+        error: true
+      });
+    });
   });
 });

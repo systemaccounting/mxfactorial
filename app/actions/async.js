@@ -20,6 +20,14 @@ export const post = (url, type, headers=defaultHeaders) => (data) => createActio
   }
 });
 
+export const patch = (url, type) => (data) => createAction(type)({
+  request: {
+    method: 'PATCH',
+    url,
+    data
+  }
+});
+
 export const generateAsyncTypes = (requestType) => ({
   request: requestType,
   success: `${requestType}_${successSuffix}`,

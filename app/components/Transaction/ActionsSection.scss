@@ -1,19 +1,24 @@
-.home-page .actions-section {
-  color: white;
-  padding-top: 15px;
-	.indicator {
-    margin-bottom: 10px;
-  }
-  .action-section__btn {
-    border: 1px solid black;
-  }
-  .btn__transact {
-    background-color: #0b5394;
-  }
-  .btn__request {
-    background-color: #3d85c6;
-  }
-  .btn__save {
-    background-color: #6fa8dc;
+.home-page, .account-setting{
+  .actions-section {
+    color: white;
+    padding-top: 15px;
+    .indicator {
+      margin-bottom: 10px;
+    }
+    .action-section__btn {
+      border: 1px solid black;
+    }
+    .btn__transact, .btn__change-password {
+      @extend .indicator;
+      background-color: #0b5394;
+    }
+    .btn__request, .btn__edit-profile {
+      @extend .indicator;
+      background-color: #3d85c6;
+    }
+    .btn__save {
+      @extend .indicator;
+      background-color: #6fa8dc;
+    }
   }
 }

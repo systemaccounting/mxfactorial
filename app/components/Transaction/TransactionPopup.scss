@@ -9,16 +9,11 @@
     width: 100%;
   	background-color: #d9d2e9;
     border-radius: 25px;
-    transform: translate(0, 60%);
+    transform: translate(0, 20vh);
     padding: 25px;
     border: 1px solid black;
     .input {
       padding: 20px 0 20px;
-    }
-
-    .error-message {
-      text-align: center;
-      color: red;
     }
 
     .modal__footer {
@@ -41,4 +36,9 @@
       }
     }
   }
+}
+
+.error-message {
+  text-align: center;
+  color: red;
 }

@@ -1,21 +1,48 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
 
 export default class LandingPageBody extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: ''
+    };
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+
+    this.props.login({
+      username: this.refs.username.value,
+      password: this.refs.password.value
+    }).then((action) => {
+      if (action.payload.user) {
+        this.context.router.push('/home');
+      } else if (action.error) {
+        this.setState({
+          error: action.payload.message
+        });
+      }
+    });
+  }
+
   render() {
     return (
       <div>
-        <form role='form'>
+        <form role='form' onSubmit={ this.handleSubmit }>
           <div className='form-group'>
-            <input type='text' className='form-control form-spacing text-center'
-              name='user_login' required={ true } placeholder='User' />
-            <input type='password' className='form-control form-spacing text-center'
-              name='password_login' required={ true } placeholder='Password' />
-            <Link to='/home'>
-              <button type='submit' className='btn btn-info form-spacing btn-style'>Log In</button>
-            </Link>
+            <input ref='username' type='text' className='form-control form-spacing text-center'
+              name='username' required={ true } placeholder='User' />
+            <input ref='password' type='password' className='form-control form-spacing text-center'
+              name='password' required={ true } placeholder='Password' />
+            <div className='error-message'>
+              { this.state.error }
+            </div>
+            <button type='submit'
+              className='btn btn-info form-spacing btn-style'>Log In</button>
             <Link to='/CreateAccountInfo/1'>
-              <button type='submit' className='btn btn-primary form-spacing btn-style'>Create</button>
+              <button type='button' className='btn btn-primary form-spacing btn-style'>Create</button>
             </Link>
           </div>
         </form>
@@ -24,3 +51,11 @@ export default class LandingPageBody extends Component {
     );
   }
 }
+
+LandingPageBody.contextTypes = {
+  router: PropTypes.object
+};
+
+LandingPageBody.propTypes = {
+  login: PropTypes.func
+};
