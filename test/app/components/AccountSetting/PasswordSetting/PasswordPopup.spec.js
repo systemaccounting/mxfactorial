@@ -80,6 +80,15 @@ describe('PasswordPopup component', () => {
 
   it('should handle Ok', () => {
     props.updateAccountSettingError = spy();
+    const mockAction = {
+      payload: {
+        success: true
+      }
+    };
+    props.patchPassword = () => ({
+      then: (f) => { f(mockAction); }
+    });
+
     instance = renderIntoDocument(
       <PasswordPopup { ...props }/>
     );

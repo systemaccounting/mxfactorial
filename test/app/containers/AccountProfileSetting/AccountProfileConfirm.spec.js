@@ -1,33 +1,37 @@
 import React from 'react';
-import configureStore from 'redux-mock-store';
+import { Provider } from 'react-redux';
 import { unmountComponentAtNode, findDOMNode } from 'react-dom';
 import {
   renderIntoDocument,
   findRenderedDOMComponentWithClass
 } from 'react-addons-test-utils';
 
-import PasswordPopup from 'containers/AccountSetting/PasswordPopup';
+import AccountProfileConfirm from 'containers/AccountProfileSetting/AccountProfileConfirm';
+import configureStore from 'store/configureStore';
 
-describe('PasswordPopup container', () => {
+describe('AccountProfileConfirm container', () => {
   let instance;
-  const mockStore = configureStore();
 
   afterEach(() => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
   });
 
   it('should be renderable', () => {
-    const store = mockStore({
+    const store = configureStore({
       accountSetting: {
         errorMessage: 'Error'
       },
-      auth: {
-        user: {}
+      form: {
+        accountProfileForm: {
+          first_name: {}
+        }
       }
-    });
+    }, true);
 
     instance = renderIntoDocument(
-      <PasswordPopup store={ store } />
+      <Provider store={ store }>
+        <AccountProfileConfirm store={ store } />
+      </Provider>
     );
 
     findRenderedDOMComponentWithClass(instance, 'error-message').textContent.should.equal('Error');
