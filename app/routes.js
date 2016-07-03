@@ -13,6 +13,7 @@ import {
   AccountSettingSection, EmailPopup, EmailSuccess, PasswordSuccess
 } from 'components/AccountSetting';
 import PasswordPopup from 'containers/AccountSetting/PasswordPopup';
+import { AccountProfilePage, AccountProfileConfirm, AccountProfileSuccess } from 'components/AccountProfileSetting';
 
 export default () => {
 
@@ -31,6 +32,10 @@ export default () => {
         <Route path='EmailSuccess' component={ EmailSuccess }/>
         <Route path='NewPassword' component={ PasswordPopup }/>
         <Route path='PasswordSuccess' component={ PasswordSuccess }/>
+      </Route>
+      <Route path='/AccountProfile' component={ AccountProfilePage }>
+        <Route path='Success' component={ AccountProfileSuccess }/>
+        <Route path='Confirm' component={ AccountProfileConfirm }/>
       </Route>
     </Route>
   );

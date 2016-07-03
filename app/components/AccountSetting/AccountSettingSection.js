@@ -26,7 +26,7 @@ export default class AccountSettingSection extends Component {
           <NotificationSetting />
           <AccountSettingAction
             handleChangePassword={ this.navigateToPage.bind(null, '/AccountSetting/NewPassword') }
-            handleEditProfile={ () => {} }/>
+            handleEditProfile={ this.navigateToPage.bind(null, '/AccountProfile') }/>
           { children }
         </div>
       </div>

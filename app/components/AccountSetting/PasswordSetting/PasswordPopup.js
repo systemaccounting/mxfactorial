@@ -54,7 +54,7 @@ export default class PasswordPopup extends Component {
 
     return (
       <div className='transaction-modal'>
-        <div className='transaction-popup transaction-popup__success'>
+        <div className='transaction-popup'>
           <div>
             Old password:
           </div>
