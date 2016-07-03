@@ -11,6 +11,9 @@ import EmailPopup from 'components/AccountSetting/EmailSetting/EmailPopup';
 
 describe('EmailPopup component', () => {
   let instance;
+  const props = {
+    updateAccountSettingError: spy()
+  };
 
   afterEach(() => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
@@ -18,7 +21,7 @@ describe('EmailPopup component', () => {
 
   it('should handle Cancel', () => {
     instance = renderIntoDocument(
-      <EmailPopup/>
+      <EmailPopup { ...props }/>
     );
 
     const push = spy();
@@ -32,8 +35,17 @@ describe('EmailPopup component', () => {
   });
 
   it('should handle form submit', () => {
+    const mockAction = {
+      payload: {
+        success: true
+      }
+    };
+    props.patchEmail = () => ({
+      then: (f) => { f(mockAction); }
+    });
+
     instance = renderIntoDocument(
-      <EmailPopup/>
+      <EmailPopup { ...props }/>
     );
 
     const push = spy();

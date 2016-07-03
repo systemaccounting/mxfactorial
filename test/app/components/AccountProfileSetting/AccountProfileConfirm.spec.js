@@ -10,14 +10,29 @@ import AccountProfileConfirm from 'components/AccountProfileSetting/AccountProfi
 
 describe('AccountProfileConfirm component', () => {
   let instance;
+  const props = {
+    profile: {
+      first_name: 'sandy'
+    },
+    updateAccountSettingError: spy()
+  };
 
   afterEach(() => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
   });
 
   it('should handle OK', () => {
+    const mockAction = {
+      payload: {
+        success: true
+      }
+    };
+    props.patchProfile = () => ({
+      then: (f) => { f(mockAction); }
+    });
+
     instance = renderIntoDocument(
-      <AccountProfileConfirm/>
+      <AccountProfileConfirm { ...props }/>
     );
 
     const push = spy();
@@ -39,7 +54,7 @@ describe('AccountProfileConfirm component', () => {
 
   it('should handle Cancel', () => {
     instance = renderIntoDocument(
-      <AccountProfileConfirm/>
+      <AccountProfileConfirm { ...props }/>
     );
 
     const push = spy();

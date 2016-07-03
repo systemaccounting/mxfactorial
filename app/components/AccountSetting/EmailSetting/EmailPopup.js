@@ -6,12 +6,22 @@ export default class EmailPopup extends Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleSubmit() {
-    this.context.router.push('/AccountSetting/EmailSuccess');
+  componentWillUnmount() {
+    this.props.updateAccountSettingError();
+  }
+
+  handleSubmit(event) {
+    event.preventDefault();
+
+    const { patchEmail, account } = this.props;
+
+    patchEmail({ account, email: this.refs.email.value }).then((action) => {
+      action.payload.success && this.context.router.push('/AccountSetting/EmailSuccess');
+    });
   }
 
   render() {
-    var { email } = this.props;
+    const { email, errorMessage } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
@@ -22,10 +32,14 @@ export default class EmailPopup extends Component {
               Confirm new address:
             </div>
             <div className='input radius5 font22'>
-              <input type='email' className='text-center' defaultValue={ email } required={ true }/>
+              <input ref='email' type='email' className='text-center' defaultValue={ email } required={ true }/>
+            </div>
+            <div className='error-message'>
+              { errorMessage }
             </div>
             <div className='modal__footer text-center'>
               <button
+                type='button'
                 className={ `${buttonClass} btn__cancel` }
                 onClick={ () => { this.context.router.push('/AccountSetting'); } }>
                 Cancel
@@ -40,7 +54,11 @@ export default class EmailPopup extends Component {
 }
 
 EmailPopup.propTypes = {
-  email: PropTypes.string
+  email: PropTypes.string,
+  account: PropTypes.string,
+  patchEmail: PropTypes.func,
+  errorMessage: PropTypes.string,
+  updateAccountSettingError: PropTypes.func
 };
 
 EmailPopup.contextTypes = {

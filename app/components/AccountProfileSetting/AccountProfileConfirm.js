@@ -15,27 +15,37 @@ export default class AccountProfileConfirm extends Component {
 
   componentWillUnmount() {
     document.body.style.overflowY = '';
+    this.props.updateAccountSettingError();
   }
 
   handlePost() {
-    if (!this.refs.password.value) {
+    const password = this.refs.password.value;
+    if (!password) {
       this.setState({
         error: 'Password required'
       });
     } else {
-      this.context.router.push('/AccountProfile/Success');
+      const { patchProfile, profile, account } = this.props;
+
+      patchProfile({
+        account,
+        profile,
+        password
+      }).then((action) => {
+        action.payload.success && this.context.router.push('/AccountProfile/Success');
+      });
     }
   }
 
   render() {
-    const { username } = this.props;
+    const { profile, errorMessage } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
       <div className='transaction-modal'>
         <div className='transaction-popup'>
           <div className='indicator radius5 font22 text-center transaction-amount'>
-              { username } Profile
+              { profile.first_name } Profile
           </div>
           <div>
             Enter password:
@@ -44,7 +54,8 @@ export default class AccountProfileConfirm extends Component {
             <input type='password' ref={ 'password' } placeholder='********' className='text-center'/>
           </div>
           <div className='error-message'>
-            { this.state.error }
+            <div>{ this.state.error }</div>
+            <div>{ errorMessage }</div>
           </div>
           <div className='modal__footer text-center'>
             <button className={ `${buttonClass} btn__cancel` }
@@ -67,9 +78,9 @@ AccountProfileConfirm.contextTypes = {
 };
 
 AccountProfileConfirm.propTypes = {
-  username: PropTypes.string
-};
-
-AccountProfileConfirm.defaultProps = {
-  username: 'Sandy'
+  account: PropTypes.string,
+  profile: PropTypes.object,
+  patchProfile: PropTypes.func,
+  errorMessage: PropTypes.string,
+  updateAccountSettingError: PropTypes.func
 };

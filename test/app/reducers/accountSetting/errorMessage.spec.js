@@ -13,4 +13,28 @@ describe('accountSetting/errorMessage reducer', () => {
       payload: 'Password missmatch'
     }).should.equal('Password missmatch');
   });
+
+  it('should handle PATCH_EMAIL_FAILURE', () => {
+    errorMessage(undefined, {
+      type: 'PATCH_EMAIL_FAILURE',
+      payload: new Error('Invalid email'),
+      error: true
+    }).should.equal('Invalid email');
+  });
+
+  it('should handle PATCH_PASSWORD_FAILURE', () => {
+    errorMessage(undefined, {
+      type: 'PATCH_PASSWORD_FAILURE',
+      payload: new Error('Old password incorrect'),
+      error: true
+    }).should.equal('Old password incorrect');
+  });
+
+  it('should handle PATCH_PROFILE_FAILURE', () => {
+    errorMessage(undefined, {
+      type: 'PATCH_PROFILE_FAILURE',
+      payload: new Error('Password incorrect'),
+      error: true
+    }).should.equal('Password incorrect');
+  });
 });

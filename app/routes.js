@@ -10,10 +10,13 @@ import TransactionHistory from 'components/TransactionHistory/TransactionHistory
 import TransactionSuccess from 'containers/TransactionHistory/TransactionSuccess';
 import TransactionDetails from 'components/TransactionDetails/TransactionDetails';
 import {
-  AccountSettingSection, EmailPopup, EmailSuccess, PasswordSuccess
+  EmailSuccess, PasswordSuccess
 } from 'components/AccountSetting';
+import AccountSettingSection from 'containers/AccountSetting/AccountSettingSection';
 import PasswordPopup from 'containers/AccountSetting/PasswordPopup';
-import { AccountProfilePage, AccountProfileConfirm, AccountProfileSuccess } from 'components/AccountProfileSetting';
+import EmailPopup from 'containers/AccountSetting/EmailPopup';
+import { AccountProfilePage, AccountProfileSuccess } from 'components/AccountProfileSetting';
+import AccountProfileConfirm from 'containers/AccountProfileSetting/AccountProfileConfirm';
 
 export default () => {
 

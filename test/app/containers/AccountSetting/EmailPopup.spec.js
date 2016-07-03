@@ -6,9 +6,9 @@ import {
   findRenderedDOMComponentWithClass
 } from 'react-addons-test-utils';
 
-import PasswordPopup from 'containers/AccountSetting/PasswordPopup';
+import EmailPopup from 'containers/AccountSetting/EmailPopup';
 
-describe('PasswordPopup container', () => {
+describe('EmailPopup container', () => {
   let instance;
   const mockStore = configureStore();
 
@@ -27,7 +27,7 @@ describe('PasswordPopup container', () => {
     });
 
     instance = renderIntoDocument(
-      <PasswordPopup store={ store } />
+      <EmailPopup store={ store } />
     );
 
     findRenderedDOMComponentWithClass(instance, 'error-message').textContent.should.equal('Error');

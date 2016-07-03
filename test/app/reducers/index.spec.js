@@ -16,6 +16,10 @@ describe('rootReducer', () => {
       transactionError: '',
       accountSetting: {
         errorMessage: ''
+      },
+      auth: {
+        user: {},
+        token: ''
       }
     });
   });

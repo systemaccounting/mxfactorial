@@ -19,7 +19,7 @@ export default class PasswordPopup extends Component {
       return ('All fields are required');
     } else if (new_password.length < 8
       || /\s/.test(new_password)
-      || !/([A-Z]|[a-z])+[0-9]+/g.test(new_password)) {
+      || !/([A-Z]|[a-z])+[0-9]+[~@#$^*()_+=[\]{}|\\,.?:-]*/g.test(new_password)) {
       return ([
         'Password must be 8 characters,',
         'both numbers and letters,',
@@ -32,8 +32,10 @@ export default class PasswordPopup extends Component {
     return '';
   }
 
-  handleSubmit() {
-    const { updateAccountSettingError } = this.props;
+  handleSubmit(event) {
+    event.preventDefault();
+
+    const { updateAccountSettingError, patchPassword, account } = this.props;
     const { new_password, new_password_confirm, old_password } = this.refs;
     const error = this.validatePassword({
       old_password: old_password.value,
@@ -44,7 +46,13 @@ export default class PasswordPopup extends Component {
     if (error) {
       updateAccountSettingError(error);
     } else {
-      this.context.router.push('/AccountSetting/PasswordSuccess');
+      patchPassword({
+        account,
+        old_password: old_password.value,
+        new_password: new_password.value
+      }).then((action) => {
+        action.payload.success && this.context.router.push('/AccountSetting/PasswordSuccess');
+      });
     }
   }
 
@@ -93,7 +101,9 @@ export default class PasswordPopup extends Component {
 
 PasswordPopup.propTypes = {
   errorMessage: PropTypes.string,
-  updateAccountSettingError: PropTypes.func.isRequired
+  updateAccountSettingError: PropTypes.func.isRequired,
+  patchPassword: PropTypes.func,
+  account: PropTypes.string
 };
 
 PasswordPopup.contextTypes = {
