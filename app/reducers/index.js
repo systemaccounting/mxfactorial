@@ -8,13 +8,15 @@ import accountDetails from './accountDetail';
 import transaction_item from './transaction_item';
 import cr_account from './cr_account';
 import transactionError from './transactionError';
+import accountSetting from './accountSetting';
 
 const rootReducer = combineReducers({
   form: formReducer,
   accountDetails,
   transaction_item,
   cr_account,
-  transactionError
+  transactionError,
+  accountSetting
 });
 
 export default rootReducer;

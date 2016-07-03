@@ -13,7 +13,10 @@ describe('rootReducer', () => {
       },
       transaction_item: [],
       cr_account: '',
-      transactionError: ''
+      transactionError: '',
+      accountSetting: {
+        errorMessage: ''
+      }
     });
   });
 
