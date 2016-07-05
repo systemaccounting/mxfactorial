@@ -85,6 +85,14 @@ header's css
     }
   }
 
+  .icon-menu {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 166px;
+    z-index: 9;
+  }
+
   .icon {
     display: inline-block;
     img {
@@ -98,6 +106,11 @@ header's css
     top: 0;
     width: 117px;
     z-index: 9;
+  }
+
+  .header-title {
+    display: inline-block;
+    color: white;
   }
 
   .MyMenuButton {
@@ -120,6 +133,10 @@ header's css
   }
 
   .flag_icon.icon img {
+    width: 30px !important;
+  }
+
+  .back_icon.icon img {
     width: 30px !important;
   }
 

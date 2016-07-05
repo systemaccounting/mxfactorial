@@ -1,4 +1,4 @@
-import { get, post, generateAsyncTypes, defaultHeaders } from 'actions/async';
+import { get, post, patch, generateAsyncTypes, defaultHeaders } from 'actions/async';
 import { successSuffix, errorSuffix } from 'middlewares/configured-axios-middleware';
 
 describe('asyncActions', () => {
@@ -32,6 +32,23 @@ describe('asyncActions', () => {
               url,
               data,
               headers: defaultHeaders
+            }
+          }
+        });
+    });
+  });
+
+  describe('#patch', () => {
+    it('should return PATCH action follow axios standard', () => {
+      const data = { 'cr_account': 'malon' };
+      patch(url, type)(data)
+        .should.eql({
+          type,
+          payload: {
+            request: {
+              method: 'PATCH',
+              url,
+              data
             }
           }
         });

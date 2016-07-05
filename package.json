@@ -57,7 +57,8 @@
     "socket.io": "^1.4.5",
     "socket.io-client": "^1.4.5",
     "superagent": "^1.8.3",
-    "url-search-params": "^0.5.0"
+    "url-search-params": "^0.5.0",
+    "validator": "^5.4.0"
   },
   "devDependencies": {
     "babel-core": "^6.7.6",

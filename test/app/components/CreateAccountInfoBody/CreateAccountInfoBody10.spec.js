@@ -1,7 +1,7 @@
 import React from 'react';
 import { unmountComponentAtNode, findDOMNode } from 'react-dom';
 import {
-  renderIntoDocument, findRenderedDOMComponentWithTag, Simulate
+  renderIntoDocument, findRenderedDOMComponentWithTag, Simulate, findRenderedDOMComponentWithClass
 } from 'react-addons-test-utils';
 import { spy, stub } from 'sinon';
 import 'should-sinon';
@@ -30,19 +30,17 @@ describe('TransactionSection component', () => {
   });
 
   it('should handle createAccount', () => {
+    let mockAction = {};
     postCreateAccount.returns({
       then: (f) => {
-        f();
-        return {
-          catch: (f) => (f())
-        };
+        f(mockAction);
       }
     });
 
     const push = spy();
 
     instance = renderIntoDocument(
-      <CreateAccount10Body postCreateAccount={ postCreateAccount } accountDetails={ accountDetails }/>
+      <CreateAccount10Body postCreateAccount={ postCreateAccount } accountDetails={ accountDetails } reset={ spy() }/>
     );
 
     instance.context.router = { push };
@@ -56,5 +54,10 @@ describe('TransactionSection component', () => {
       last_name: 'einstein'
     }));
     push.should.be.calledWith('/');
+
+    mockAction.error = true;
+    mockAction.payload = new Error('error');
+    Simulate.click(btnSubmit);
+    findRenderedDOMComponentWithClass(instance, 'error-message').textContent.should.equal('error');
   });
 });

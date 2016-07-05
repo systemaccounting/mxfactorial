@@ -31,12 +31,40 @@ var bodyParser = require('body-parser');
 var CryptoJS = require('crypto-js');
 var jwt = require('jsonwebtoken');
 var router = express.Router();
+var validator = require('validator');
 
 var config = require('config.js');
 var firebaseClient = require('firebase-client/index');
-var USER_PATH = '/accounts';
+var USER_PATH = '/account';
+var PROFILE_FIELDS = [
+  'first_name',
+  'middle_name',
+  'last_name',
+  'date_of_birth',
+  'email_address',
+  'street_number',
+  'street_name',
+  'unit_number',
+  'floor_number',
+  'city',
+  'county',
+  'district',
+  'state',
+  'region',
+  'province',
+  'territory',
+  'postal_code',
+  'country',
+  'user_home_latlng',
+  'telephone_country_code',
+  'telephone_area_code',
+  'telephone_number',
+  'occupation',
+  'industry'
+];
 
 // Automatically parse request body as form data
+router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: false }));
 
 var getAccountByAccountName = function (accountName) {
@@ -45,7 +73,7 @@ var getAccountByAccountName = function (accountName) {
   });
 };
 
-router.post('/authenticate', function list(req, res, next) {
+router.post('/auth', function list(req, res, next) {
   getAccountByAccountName(req.body.username)
     .then(function (response) {
       var data = response.data;
@@ -126,43 +154,18 @@ router.post('/', function (req, res) {
     return;
   }
   var auth = ['account', 'password'];
-  var profile = ['first_name',
-                  'middle_name',
-                  'last_name',
-                  'date_of_birth',
-                  'email_address',
-                  'street_number',
-                  'street_name',
-                  'unit_number',
-                  'floor_number',
-                  'city',
-                  'county',
-                  'district',
-                  'state',
-                  'region',
-                  'province',
-                  'territory',
-                  'postal_code',
-                  'country',
-                  'user_home_latlng',
-                  'telephone_country_code',
-                  'telephone_area_code',
-                  'telephone_number',
-                  'occupation',
-                  'industry',
-                  'created_time'
-                ];
   var authParams = _.pick(body, auth);
-  var profileParams = _.pick(body, profile);
+  var profileParams = _.pick(body, PROFILE_FIELDS);
   profileParams.created_time = new Date();
   authParams.password = String(CryptoJS.MD5(authParams.password));
+  var account_profile = _.isEmpty(profileParams) ? null : { account_profile: [profileParams] };
 
   getAccountByAccountName(body.account)
     .then(function (response) {
       if (response.data) {
         res.status(400).json({ error: 'Account name already registered' });
       } else {
-        putAccount(_.assign(authParams, { account_profile: profileParams })).then(function (response) {
+        putAccount(_.assign(authParams, account_profile)).then(function (response) {
           res.status(200).json({ account: response.data.account });
         }).catch(function (err) {
           res.status(500).json(err);
@@ -171,6 +174,127 @@ router.post('/', function (req, res) {
     }).catch(function (err) {
       res.status(500).json(err);
     });
+});
+
+var patchEmail = function (account, email) {
+  return firebaseClient().then(function (instance) {
+    return instance.patch([USER_PATH, account, 'account_profile', 0].join('/'), { email_address: email });
+  });
+};
+
+router.patch('/email', function (req, res) {
+  var body = req.body;
+  if (!body.account) {
+    res.status(500).json({ error: 'Account is undefined' });
+    return;
+  }
+
+  if (!body.email) {
+    res.status(500).json({ error: 'Email required' });
+    return;
+  }
+
+  if (!validator.isEmail(body.email)) {
+    res.status(500).json({ error: 'Invalid email' });
+    return;
+  }
+
+
+  patchEmail(body.account, body.email).then(function (response) {
+    res.status(200).json({ success: true });
+  }).catch(function (err) {
+    res.status(500).json(err);
+  });
+});
+
+var patchPassword = function (account, password) {
+  return firebaseClient().then(function (instance) {
+    return instance.patch([USER_PATH, account].join('/'), { password: String(CryptoJS.MD5(password)) });
+  });
+};
+
+router.patch('/password', function (req, res) {
+  var body = req.body;
+  if (!body.account) {
+    res.status(500).json({ error: 'Account is undefined' });
+    return;
+  }
+
+  if (!body.new_password || !body.old_password) {
+    res.status(500).json({ error: 'Password required' });
+    return;
+  }
+
+  if (body.new_password.length < 8
+      || /\s/.test(body.new_password)
+      || !/([A-Z]|[a-z])+[0-9]+[~@#$^*()_+=[\]{}|\\,.?:-]*/g.test(body.new_password)) {
+    res.status(500).json({
+      error: [
+        'Password must be 8 characters,',
+        'both numbers and letters,',
+        'special characters permitted,',
+        'spaces not permitted'].join(' ')
+    });
+    return;
+  }
+
+  getAccountByAccountName(body.account)
+    .then(function (response) {
+      if (response.data && response.data.password === String(CryptoJS.MD5(body.old_password))) {
+        patchPassword(body.account, body.new_password).then(function (response) {
+          res.status(200).json({ success: true });
+        }).catch(function (err) {
+          res.status(500).json(err);
+        });
+      } else {
+        res.status(400).json({ error: 'Old password incorrect' });
+      }
+    }).catch(function (err) {
+      res.status(500).json(err);
+    });
+});
+
+var putProfile = function (account, profile) {
+  return firebaseClient().then(function (instance) {
+    return instance.put([USER_PATH, account, 'account_profile'].join('/'), profile);
+  });
+};
+
+router.patch('/profile', function (req, res) {
+  var account = req.body.account;
+  var password = req.body.password;
+  var profile = req.body.profile;
+
+  if (!account) {
+    res.status(500).json({ error: 'Account is undefined' });
+    return;
+  }
+
+  if (!password) {
+    res.status(500).json({ error: 'Password required' });
+    return;
+  }
+
+  profile = _.pick(profile, PROFILE_FIELDS);
+  profile.created_time = new Date();
+
+  getAccountByAccountName(account).then(function (response) {
+    if (response.data.password === String(CryptoJS.MD5(password))) {
+      if (response.data.account_profile) {
+        profile.email_address = response.data.account_profile[0].email_address;
+        profile = [profile].concat(response.data.account_profile);
+      } else {
+        profile = [profile];
+      }
+      return putProfile(account, profile);
+    } else {
+      res.status(400).json({ error: 'Password incorrect' });
+    }
+  }).then(function (response) {
+    res.status(200).json({ success: true });
+  }).catch(function (err) {
+    res.status(500).json(err);
+  });
 });
 
 router.use(function handleRpcError(err, req, res, next) {

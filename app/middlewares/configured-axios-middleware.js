@@ -18,6 +18,8 @@ export const onError = ({ action, next, error }, options) => {
   let errorObject;
   if (error instanceof Error) {
     errorObject = error;
+  } else if (error.data) {
+    errorObject = new Error(error.data.error);
   } else {
     errorObject = new Error(getErrorMessage(action.payload.request.url, error.status));
   }
