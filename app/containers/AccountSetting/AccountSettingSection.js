@@ -4,7 +4,7 @@ import AccountSettingSection from 'components/AccountSetting/AccountSettingSecti
 
 function mapStateToProps(state) {
   return {
-    email: state.auth.user.account_profile && state.auth.user.account_profile.email_address
+    email: (state.auth.user && state.auth.user.account_profile) ? state.auth.user.account_profile[0].email_address : ''
   };
 }
 

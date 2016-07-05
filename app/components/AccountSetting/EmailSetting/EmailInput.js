@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 
+import './EmailInput.scss';
+
 export default class EmailInput extends Component {
   render() {
     var { email, handleClick } = this.props;

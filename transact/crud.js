@@ -6,7 +6,7 @@ var moment = require('moment');
 var _ = require('lodash');
 
 var firebaseClient = require('firebase-client/index');
-var TRANSACTION_PATH = '/transactions';
+var TRANSACTION_PATH = '/transaction';
 
 var router = express.Router();
 

@@ -89,7 +89,7 @@ header's css
     position: absolute;
     left: 0;
     top: 0;
-    width: 117px;
+    width: 166px;
     z-index: 9;
   }
 
@@ -133,6 +133,10 @@ header's css
   }
 
   .flag_icon.icon img {
+    width: 30px !important;
+  }
+
+  .back_icon.icon img {
     width: 30px !important;
   }
 

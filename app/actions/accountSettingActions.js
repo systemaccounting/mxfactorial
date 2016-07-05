@@ -2,8 +2,10 @@ import { createAction } from 'redux-actions';
 import { patch } from './async';
 
 export const UPDATE_ACCOUNT_SETTING_ERROR = 'UPDATE_ACCOUNT_SETTING_ERROR';
+export const EMAIL_CHANGED = 'EMAIL_CHANGED';
 
 export const updateAccountSettingError = createAction(UPDATE_ACCOUNT_SETTING_ERROR);
+export const emailChanged = createAction(EMAIL_CHANGED);
 
 export const EMAIL_PATH = '/account/email';
 export const PASSWORD_PATH = '/account/password';

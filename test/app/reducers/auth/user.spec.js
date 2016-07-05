@@ -17,4 +17,17 @@ describe('auth/user reducer', () => {
       account: 'test_account'
     });
   });
+
+  it('should handle EMAIL_CHANGED', () => {
+    user({
+      account_profile: [{}]
+    }, {
+      type: 'EMAIL_CHANGED',
+      payload: 'new@ema.il'
+    }).should.eql({
+      account_profile: [{
+        email_address: 'new@ema.il'
+      }]
+    });
+  });
 });

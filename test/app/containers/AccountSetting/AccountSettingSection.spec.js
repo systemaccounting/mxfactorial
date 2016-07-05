@@ -21,9 +21,9 @@ describe('AccountSettingSection container', () => {
     const store = mockStore({
       auth: {
         user: {
-          account_profile: {
+          account_profile: [{
             email_address: 'test@test.test'
-          }
+          }]
         }
       }
     });

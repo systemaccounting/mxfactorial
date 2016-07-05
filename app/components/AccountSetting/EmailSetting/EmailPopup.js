@@ -16,7 +16,10 @@ export default class EmailPopup extends Component {
     const { patchEmail, account } = this.props;
 
     patchEmail({ account, email: this.refs.email.value }).then((action) => {
-      action.payload.success && this.context.router.push('/AccountSetting/EmailSuccess');
+      if (action.payload.success) {
+        this.props.emailChanged(this.refs.email.value);
+        this.context.router.push('/AccountSetting/EmailSuccess');
+      }
     });
   }
 
@@ -58,7 +61,8 @@ EmailPopup.propTypes = {
   account: PropTypes.string,
   patchEmail: PropTypes.func,
   errorMessage: PropTypes.string,
-  updateAccountSettingError: PropTypes.func
+  updateAccountSettingError: PropTypes.func,
+  emailChanged: PropTypes.func
 };
 
 EmailPopup.contextTypes = {

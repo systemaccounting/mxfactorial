@@ -8,7 +8,7 @@ export default class AccountProfilePage extends Component {
   render() {
     return (
       <div className='account-setting'>
-        <Header/>
+        <Header backLink='/AccountSetting'/>
         <div className='container' style={ { width: 300 } }>
           <AccountProfileForm />
           { this.props.children }

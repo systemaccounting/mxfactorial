@@ -34,6 +34,8 @@ export default class AccountProfileForm extends Component {
 
     return (
       <div className='edit-profile-form'>
+        <div className='header-title font22 text-center'>Profile of { first_name.value }</div>
+
         <form role='form' onSubmit={ handleSubmit(this.onSubmit.bind(this)) }>
           <div className='form-group'>
             <input type='text' className='form-control form-spacing text-center'

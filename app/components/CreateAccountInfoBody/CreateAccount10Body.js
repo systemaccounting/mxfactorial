@@ -4,10 +4,15 @@ import assign from 'lodash/assign';
 import mxfactorial from 'images/mxfactorial.png';
 import transformFormData from 'utils/transformFormData';
 
+const createAccountForm = ['firstForm', 'secondForm', 'thirdForm', 'fourthForm', 'fifthForm', 'sixthForm'];
+
 export default class CreateAccount10Body extends Component {
   constructor(props) {
     super(props);
     this.createAccount = this.createAccount.bind(this);
+    this.state = {
+      errorMessage: ''
+    };
   }
   createAccount() {
     const { accountDetails, postCreateAccount } = this.props;
@@ -15,11 +20,18 @@ export default class CreateAccount10Body extends Component {
     const postObject = assign({}, auth, profile);
 
     postCreateAccount(transformFormData(postObject))
-      .then(() => {
-        this.context.router.push('/');
-      })
-      .catch((error) => {
-        alert(error);
+      .then((action) => {
+        if (!action.error) {
+          createAccountForm.forEach((formName) => {
+            this.props.reset(formName);
+          });
+
+          this.context.router.push('/');
+        } else {
+          this.setState({
+            errorMessage: action.payload.message
+          });
+        }
       });
   }
   render() {
@@ -36,6 +48,7 @@ export default class CreateAccount10Body extends Component {
         </p>
         <img src={ mxfactorial } className='center-block'
           style={ { marginTop: 20, marginBottom: 20 } } />
+        <div className='error-message'>{ this.state.errorMessage }</div>
         <button type='submit' onClick={ this.createAccount } className='btn btn-info form-spacing btn-style'>
           Okay
         </button>
@@ -51,6 +64,7 @@ CreateAccount10Body.contextTypes = {
 
 CreateAccount10Body.propTypes = {
   accountDetails: PropTypes.object,
-  postCreateAccount: PropTypes.func.isRequired
+  postCreateAccount: PropTypes.func.isRequired,
+  reset: PropTypes.func
 };
 

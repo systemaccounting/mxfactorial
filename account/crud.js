@@ -35,7 +35,7 @@ var validator = require('validator');
 
 var config = require('config.js');
 var firebaseClient = require('firebase-client/index');
-var USER_PATH = '/accounts';
+var USER_PATH = '/account';
 var PROFILE_FIELDS = [
   'first_name',
   'middle_name',
@@ -60,8 +60,7 @@ var PROFILE_FIELDS = [
   'telephone_area_code',
   'telephone_number',
   'occupation',
-  'industry',
-  'created_time'
+  'industry'
 ];
 
 // Automatically parse request body as form data
@@ -74,7 +73,7 @@ var getAccountByAccountName = function (accountName) {
   });
 };
 
-router.post('/authenticate', function list(req, res, next) {
+router.post('/auth', function list(req, res, next) {
   getAccountByAccountName(req.body.username)
     .then(function (response) {
       var data = response.data;
@@ -159,13 +158,14 @@ router.post('/', function (req, res) {
   var profileParams = _.pick(body, PROFILE_FIELDS);
   profileParams.created_time = new Date();
   authParams.password = String(CryptoJS.MD5(authParams.password));
+  var account_profile = _.isEmpty(profileParams) ? null : { account_profile: [profileParams] };
 
   getAccountByAccountName(body.account)
     .then(function (response) {
       if (response.data) {
         res.status(400).json({ error: 'Account name already registered' });
       } else {
-        putAccount(_.assign(authParams, { account_profile: profileParams })).then(function (response) {
+        putAccount(_.assign(authParams, account_profile)).then(function (response) {
           res.status(200).json({ account: response.data.account });
         }).catch(function (err) {
           res.status(500).json(err);
@@ -176,9 +176,9 @@ router.post('/', function (req, res) {
     });
 });
 
-var patchProfile = function (account, profile) {
+var patchEmail = function (account, email) {
   return firebaseClient().then(function (instance) {
-    return instance.patch([USER_PATH, account, 'account_profile'].join('/'), profile);
+    return instance.patch([USER_PATH, account, 'account_profile', 0].join('/'), { email_address: email });
   });
 };
 
@@ -200,7 +200,7 @@ router.patch('/email', function (req, res) {
   }
 
 
-  patchProfile(body.account, { email_address: body.email }).then(function (response) {
+  patchEmail(body.account, body.email).then(function (response) {
     res.status(200).json({ success: true });
   }).catch(function (err) {
     res.status(500).json(err);
@@ -254,6 +254,12 @@ router.patch('/password', function (req, res) {
     });
 });
 
+var putProfile = function (account, profile) {
+  return firebaseClient().then(function (instance) {
+    return instance.put([USER_PATH, account, 'account_profile'].join('/'), profile);
+  });
+};
+
 router.patch('/profile', function (req, res) {
   var account = req.body.account;
   var password = req.body.password;
@@ -270,10 +276,17 @@ router.patch('/profile', function (req, res) {
   }
 
   profile = _.pick(profile, PROFILE_FIELDS);
+  profile.created_time = new Date();
 
   getAccountByAccountName(account).then(function (response) {
     if (response.data.password === String(CryptoJS.MD5(password))) {
-      return patchProfile(account, profile);
+      if (response.data.account_profile) {
+        profile.email_address = response.data.account_profile[0].email_address;
+        profile = [profile].concat(response.data.account_profile);
+      } else {
+        profile = [profile];
+      }
+      return putProfile(account, profile);
     } else {
       res.status(400).json({ error: 'Password incorrect' });
     }

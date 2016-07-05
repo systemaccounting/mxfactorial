@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { reset } from 'redux-form';
 
 import { CreateAccount10Body } from 'components/CreateAccountInfoBody';
 import { postCreateAccount } from 'actions/signUpActions';
@@ -10,7 +11,8 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = {
-  postCreateAccount
+  postCreateAccount,
+  reset
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(CreateAccount10Body);

@@ -12,7 +12,8 @@ import EmailPopup from 'components/AccountSetting/EmailSetting/EmailPopup';
 describe('EmailPopup component', () => {
   let instance;
   const props = {
-    updateAccountSettingError: spy()
+    updateAccountSettingError: spy(),
+    emailChanged: spy()
   };
 
   afterEach(() => {
@@ -58,6 +59,7 @@ describe('EmailPopup component', () => {
     const emailForm = findRenderedDOMComponentWithTag(instance, 'form');
     Simulate.submit(emailForm);
 
+    props.emailChanged.should.be.calledWith('email@email.email');
     push.should.be.calledWith('/AccountSetting/EmailSuccess');
   });
 });
