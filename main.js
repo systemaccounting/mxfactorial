@@ -1,11 +1,10 @@
-/* eslint no-console: 0 */
-
-// Entry for mxfactorial on Google Cloud Platform
-
 'use strict';
+
+/* eslint no-console: 0 */
 
 require('es6-promise').polyfill();
 var express = require('express');
+var bodyParser = require('body-parser');
 var config = require('./config');
 var passport = require('passport');
 var cors = require('cors');
@@ -17,7 +16,6 @@ var app = express();
 
 app.disable('etag');
 app.set('trust proxy', true);
-
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -25,13 +23,8 @@ app.use(function (req, res, next) {
 });
 app.use(cors());
 app.use(passport.initialize());
-
-var opts = {};
-opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
-opts.secretOrKey = config.get('API_SECRET');
-passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
-  done(null, jwt_payload);
-}));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/systemaccounting/account', require('./account/crud'));
 app.use('/systemaccounting/transact', require('./transact/crud'));
@@ -53,6 +46,15 @@ app.use(function (err, req, res, next) {
   // send a generic message so as not to leak anything.
   res.status(500).send(err.response || 'Something broke!');
 });
+
+// Passport configure
+var opts = {};
+opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
+opts.secretOrKey = config.get('API_SECRET');
+
+passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
+  done(null, jwt_payload);
+}));
 
 if (module === require.main) {
   // Start the server

@@ -30,4 +30,17 @@ describe('auth/user reducer', () => {
       }]
     });
   });
+
+  it('should handle GET_ACCOUNT_SUCCESS', () => {
+    user(undefined, {
+      type: 'GET_ACCOUNT_SUCCESS',
+      payload: {
+        user: {
+          account: 'test_account'
+        }
+      }
+    }).should.eql({
+      account: 'test_account'
+    });
+  });
 });

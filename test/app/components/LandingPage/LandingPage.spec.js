@@ -22,7 +22,7 @@ describe('LandingPage component', () => {
   it('should render MobileLayout, Logo, LandingPageBody', () => {
     instance = renderIntoDocument(
       <Provider store={ store }>
-        <LandingPage/>
+        <LandingPage location={ { state: {} } }/>
       </Provider>
     );
     scryRenderedComponentsWithType(instance, Logo).length.should.equal(1);

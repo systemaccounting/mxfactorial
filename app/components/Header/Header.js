@@ -56,7 +56,9 @@ export default class Header extends Component {
                 <li className='padding14'>Rules</li>
                 <li className='padding14'>Query</li>
                 <li className='padding14'>Support</li>
-                <li className='padding14'>Log out</li>
+                <Link to='/logout'>
+                  <li className='padding14'>Log out</li>
+                </Link>
               </ul>
             </Menu>
           </Wrapper>
