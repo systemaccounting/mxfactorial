@@ -35,7 +35,7 @@ nconf
     GCLOUD_PROJECT: 'mxfactorial',
 
     API_SECRET: 'mxfactorialapisecret',
-    TOKEN_EXPIRE_TIME: 10080,
+    TOKEN_EXPIRE_TIME: '7d',
 
     // MongoDB connection string
     // https://docs.mongodb.org/manual/reference/connection-string/
