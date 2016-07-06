@@ -27,11 +27,11 @@
 
 var _ = require('lodash');
 var express = require('express');
-var bodyParser = require('body-parser');
 var CryptoJS = require('crypto-js');
 var jwt = require('jsonwebtoken');
 var router = express.Router();
 var validator = require('validator');
+var passport = require('passport');
 
 var config = require('config.js');
 var firebaseClient = require('firebase-client/index');
@@ -63,28 +63,26 @@ var PROFILE_FIELDS = [
   'industry'
 ];
 
-// Automatically parse request body as form data
-router.use(bodyParser.json());
-router.use(bodyParser.urlencoded({ extended: false }));
-
 var getAccountByAccountName = function (accountName) {
   return firebaseClient().then(function (instance) {
     return instance.get(USER_PATH + '/' + accountName);
   });
 };
 
-router.post('/auth', function list(req, res, next) {
+router.post('/auth', function (req, res, next) {
   getAccountByAccountName(req.body.username)
     .then(function (response) {
       var data = response.data;
 
       if (data) {
         var payload = data;
-        var token = jwt.sign(payload, config.get('API_SECRET'), {
-          expiresIn: config.get('TOKEN_EXPIRE_TIME')
-        });
         if (String(CryptoJS.MD5(req.body.password)) == payload.password) {
           delete payload.password;
+
+          var token = jwt.sign({ username: payload.account }, config.get('API_SECRET'), {
+            expiresIn: config.get('TOKEN_EXPIRE_TIME')
+          });
+
           res.status(200).json({
             user: payload,
             token: 'JWT ' + token
@@ -98,6 +96,17 @@ router.post('/auth', function list(req, res, next) {
     }).catch(function (err) {
       res.status(500).json(err);
     });
+});
+
+router.get('/auth', passport.authenticate('jwt', { session: false }), function (req, res) {
+  getAccountByAccountName(req.user.username).then(function (response) {
+    delete response.data.password;
+    res.status(200).json({
+      user: response.data
+    });
+  }).catch(function (err) {
+    res.status(500).json(err);
+  });
 });
 
 /**
@@ -182,7 +191,7 @@ var patchEmail = function (account, email) {
   });
 };
 
-router.patch('/email', function (req, res) {
+router.patch('/email', passport.authenticate('jwt', { session: false }), function (req, res) {
   var body = req.body;
   if (!body.account) {
     res.status(500).json({ error: 'Account is undefined' });
@@ -213,7 +222,7 @@ var patchPassword = function (account, password) {
   });
 };
 
-router.patch('/password', function (req, res) {
+router.patch('/password', passport.authenticate('jwt', { session: false }), function (req, res) {
   var body = req.body;
   if (!body.account) {
     res.status(500).json({ error: 'Account is undefined' });
@@ -260,7 +269,7 @@ var putProfile = function (account, profile) {
   });
 };
 
-router.patch('/profile', function (req, res) {
+router.patch('/profile', passport.authenticate('jwt', { session: false }), function (req, res) {
   var account = req.body.account;
   var password = req.body.password;
   var profile = req.body.profile;
