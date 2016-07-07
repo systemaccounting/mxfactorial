@@ -20,7 +20,7 @@ This open-source project is intended to exploit the software engineering communi
 * Supporters preferring to contribute financial resources may do so from the [Financial Support](https://systemaccounting.nationbuilder.com/financial_endorsement) page. To contribute engineering resources, download & install [Node.js](https://nodejs.org/en/download/).
 * If you're not familiar with Node.js, or don't know how to code, begin the [freecodecamp.com](https://www.freecodecamp.com/) curriculum.
 * Learn to build & deploy a Node.js web application on Firebase by [completing a sample](https://firebase.google.com/docs/samples/).
-* Learn to deploy a Node.js web application by completing the Google App Engine ['Hello World!' tutorial](https://cloud.google.com/nodejs/getting-started/hello-world).
+* Learn to deploy a web application by completing the Google App Engine ['Hello World!' tutorial](https://cloud.google.com/nodejs/getting-started/hello-world).
 * Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://github.com/systemaccounting/mxfactorial/wiki/Code-Delivery-Workflow).
  
 Details as of 7/7/2016:
@@ -28,7 +28,7 @@ Details as of 7/7/2016:
 - [Public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
 - Node.js v4.4.3
 - npm v3.5.1
-- UI & DB on Firebase
+- web client & database on Firebase
 - API on App Engine Flex
 
 Roadmap:
