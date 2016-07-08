@@ -22,7 +22,7 @@ describe('routes', () => {
     instance = renderIntoDocument(
       <Provider store={ store }>
         <Router history={ hashHistory }>
-          { getRoutes() }
+          { getRoutes(store) }
         </Router>
       </Provider>
     );

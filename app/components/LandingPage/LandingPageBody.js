@@ -12,13 +12,15 @@ export default class LandingPageBody extends Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    const { nextPathName, login } = this.props;
 
-    this.props.login({
+    login({
       username: this.refs.username.value,
       password: this.refs.password.value
     }).then((action) => {
       if (action.payload.user) {
-        this.context.router.push('/home');
+        let path = nextPathName || '/home';
+        this.context.router.push(path);
       } else if (action.error) {
         this.setState({
           error: action.payload.message
@@ -57,5 +59,6 @@ LandingPageBody.contextTypes = {
 };
 
 LandingPageBody.propTypes = {
-  login: PropTypes.func
+  login: PropTypes.func,
+  nextPathName: PropTypes.string
 };

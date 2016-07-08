@@ -10,7 +10,8 @@
     "webdev": "webpack-dev-server --host 0.0.0.0 --progress --colors --hot --inline --content-base build/",
     "build": "webpack",
     "start": "NODE_PATH=. node main.js",
-    "deploy": "firebase deploy",
+    "deploy-firebase": "firebase deploy",
+    "deploy-appengine": "gcloud preview app deploy",
     "test": "karma start",
     "lint": "eslint app transact account main.js config.js"
   },
@@ -45,6 +46,7 @@
     "prompt": "^1.0.0",
     "react": "^15.0.1",
     "react-aria-menubutton": "^4.1.2",
+    "react-cookie": "^0.4.7",
     "react-dom": "^15.0.1",
     "react-redux": "^4.4.5",
     "react-router": "^2.4.0",

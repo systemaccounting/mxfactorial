@@ -13,4 +13,11 @@ describe('auth/token reducer', () => {
       }
     }).should.equal('JWT whatever');
   });
+
+  it('should handle RECEIVED_TOKEN', () => {
+    token(undefined, {
+      type: 'RECEIVED_TOKEN',
+      payload: 'JWT whatever'
+    }).should.equal('JWT whatever');
+  });
 });
