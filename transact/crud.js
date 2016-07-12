@@ -71,7 +71,9 @@ var getTransaction = function (id) {
 router.get('/:id', function (req, res) {
   getTransaction(req.params.id).then(function (response) {
     if (response.data) {
-      res.status(200).json(response.data);
+      var result = {};
+      result[req.params.id] = response.data;
+      res.status(200).json(result);
     } else {
       res.status(500).json({ error: 'Not found' });
     }

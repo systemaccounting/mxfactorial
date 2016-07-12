@@ -1,11 +1,13 @@
 import React from 'react';
+import { Provider } from 'react-redux';
 import { unmountComponentAtNode, findDOMNode } from 'react-dom';
 import {
-  renderIntoDocument, scryRenderedComponentsWithType,
+  renderIntoDocument, scryRenderedComponentsWithType, findRenderedComponentWithType,
   findRenderedDOMComponentWithClass, Simulate
 } from 'react-addons-test-utils';
 import { spy } from 'sinon';
 import 'should-sinon';
+import configureStore from 'redux-mock-store';
 
 import AccountSettingSection from 'components/AccountSetting/AccountSettingSection';
 import EmailInput from 'components/AccountSetting/EmailSetting/EmailInput';
@@ -14,6 +16,16 @@ import AccountSettingAction from 'components/AccountSetting/AccountSettingAction
 
 describe('AccountSettingSection component', () => {
   let instance;
+  const mockStore = configureStore();
+  const store = mockStore({
+    auth: {
+      user: {
+        account_profile: [{
+          email_address: 'test@test.test'
+        }]
+      }
+    }
+  });
 
   afterEach(() => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
@@ -21,7 +33,9 @@ describe('AccountSettingSection component', () => {
 
   it('should be renderable', () => {
     instance = renderIntoDocument(
-      <AccountSettingSection />
+      <Provider store={ store }>
+        <AccountSettingSection />
+      </Provider>
     );
 
     scryRenderedComponentsWithType(instance, EmailInput).length.should.equal(1);
@@ -31,11 +45,15 @@ describe('AccountSettingSection component', () => {
 
   it('should navigate to NewEmail', () => {
     instance = renderIntoDocument(
-      <AccountSettingSection />
+      <Provider store={ store }>
+        <AccountSettingSection />
+      </Provider>
     );
 
     const push = spy();
-    instance.context.router = { push };
+
+    const ascInstance = findRenderedComponentWithType(instance, AccountSettingSection);
+    ascInstance.context.router = { push };
 
     const emailInput = findRenderedDOMComponentWithClass(instance, 'email-input');
 
@@ -46,11 +64,15 @@ describe('AccountSettingSection component', () => {
 
   it('should navigate to NewPassword', () => {
     instance = renderIntoDocument(
-      <AccountSettingSection />
+      <Provider store={ store }>
+        <AccountSettingSection />
+      </Provider>
     );
 
     const push = spy();
-    instance.context.router = { push };
+
+    const ascInstance = findRenderedComponentWithType(instance, AccountSettingSection);
+    ascInstance.context.router = { push };
 
     const btnChangePassword = findRenderedDOMComponentWithClass(instance, 'btn__change-password');
 

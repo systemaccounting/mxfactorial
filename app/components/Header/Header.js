@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
+import { Button, Wrapper, Menu } from 'react-aria-menubutton';
 
-import Flag from 'images/flag.png';
+import NotificationMenu from 'containers/Header/NotificationMenu';
+
 import Home from 'images/home.png';
 import Back from 'images/backIcon.png';
-
-import { Button, Wrapper, Menu } from 'react-aria-menubutton';
 
 export default class Header extends Component {
   renderBackLink() {
@@ -31,9 +31,7 @@ export default class Header extends Component {
           <div className='home_icon icon' style={ { marginRight: '10px' } }>
             <Link to='/home'><img src={ Home } alt=''/></Link>
           </div>
-          <div className='flag_icon icon' style={ { marginRight: '10px' } }>
-            <span>3</span><img src={ Flag }/>
-          </div>
+          <NotificationMenu />
           { this.renderBackLink() }
         </div>
         <div className='header-title font22'>{ headerTitle }</div>
@@ -49,7 +47,9 @@ export default class Header extends Component {
                     <span className='glyphicon glyphicon-cog font22 padding14'/>
                   </li>
                 </Link>
-                <li className='padding14'>Request</li>
+                <Link to='/Requests'>
+                  <li className='padding14'>Requests</li>
+                </Link>
                 <Link to='/TransactionHistory'>
                   <li className='padding14'>History</li>
                 </Link>

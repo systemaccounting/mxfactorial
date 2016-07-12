@@ -25,6 +25,7 @@
   "dependencies": {
     "axios": "^0.12.0",
     "body-parser": "^1.15.0",
+    "classnames": "^2.2.5",
     "cors": "^2.7.1",
     "crypto-js": "^3.1.6",
     "es6-promise": "^3.2.1",
@@ -56,6 +57,7 @@
     "redux-form": "^5.2.4",
     "redux-logger": "^2.6.1",
     "redux-promise": "^0.5.3",
+    "reselect": "^2.5.3",
     "socket.io": "^1.4.5",
     "socket.io-client": "^1.4.5",
     "superagent": "^1.8.3",

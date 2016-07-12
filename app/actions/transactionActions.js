@@ -1,6 +1,6 @@
 import { createAction } from 'redux-actions';
 
-import { post } from './async';
+import { post, get } from './async';
 
 export const ADD_TRANSACTION = 'ADD_TRANSACTION';
 export const REMOVE_TRANSACTION = 'REMOVE_TRANSACTION';
@@ -20,3 +20,7 @@ export const TRANSACT_PATH = '/transact';
 
 export const POST_TRANSACTION = 'POST_TRANSACTION';
 export const postTransaction = post(TRANSACT_PATH, POST_TRANSACTION);
+export const GET_TRANSACTION_BY_ID = 'GET_TRANSACTION_BY_ID';
+export const getTransactionById = (id) => (get(`${TRANSACT_PATH}/${id}`, GET_TRANSACTION_BY_ID)());
+export const GET_TRANSACTION = 'GET_TRANSACTION';
+export const getTransaction = get(TRANSACT_PATH, GET_TRANSACTION);

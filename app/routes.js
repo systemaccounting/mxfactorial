@@ -18,6 +18,9 @@ import EmailPopup from 'containers/AccountSetting/EmailPopup';
 import { AccountProfilePage, AccountProfileSuccess } from 'components/AccountProfileSetting';
 import AccountProfileConfirm from 'containers/AccountProfileSetting/AccountProfileConfirm';
 
+import TransactionRequestDetail from 'containers/TransactionRequestDetail';
+import TransactionRequests from 'containers/Requests/TransactionRequests';
+
 import { requireAuth, handleLogout } from './auth-hooks';
 
 export default (store) => {
@@ -38,6 +41,10 @@ export default (store) => {
       </Route>
 
       <Route path='/TransactionDetails' component={ TransactionDetails } onEnter={ handleEnter }/>
+
+      <Route path='/Requests' component={ TransactionRequests } onEnter={ handleEnter }/>
+
+      <Route path='/TransactionRequestDetail/:id' component={ TransactionRequestDetail } onEnter={ handleEnter }/>
 
       <Route path='/AccountSetting' component={ AccountSettingSection } onEnter={ handleEnter }>
         <Route path='NewEmail' component={ EmailPopup }/>
