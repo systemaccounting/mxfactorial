@@ -1,7 +1,9 @@
 import merge from 'lodash/merge';
 
-export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting';
-// export const BASE_URL = 'http://localhost:8080/systemaccounting'
+// export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting';
+// export const SOCKET_URL = 'https://mxfactorial.appspot.com/';
+export const BASE_URL = 'http://192.168.66.131:8081/systemaccounting';
+export const SOCKET_URL = 'http://192.168.66.131:8081/';
 
 export const GET_EMPTY_TRANSACTION = (key, info)=>(merge({
   key,

@@ -10,9 +10,13 @@ var passport = require('passport');
 var cors = require('cors');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
-
+var socketServer = require('socket-server');
 
 var app = express();
+
+var http = require('http').Server(app);
+
+socketServer(http);
 
 app.disable('etag');
 app.set('trust proxy', true);
@@ -58,7 +62,7 @@ passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
 
 if (module === require.main) {
   // Start the server
-  var server = app.listen(config.get('PORT'), function () {
+  var server = http.listen(config.get('PORT'), function () {
     var port = server.address().port;
     console.log('App listening on port %s', port);
   });
