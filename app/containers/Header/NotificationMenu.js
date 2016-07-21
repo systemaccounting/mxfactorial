@@ -2,10 +2,11 @@ import { connect } from 'react-redux';
 
 import NotificationMenu from 'components/Header/NotificationMenu';
 import { clearAll } from 'actions/notificationActions';
+import unread from 'selectors/notification/unread';
 
 function mapStateToProps(state) {
   return {
-    notifications: state.notifications
+    notifications: unread(state)
   };
 }
 

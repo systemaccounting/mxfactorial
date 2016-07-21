@@ -27,7 +27,7 @@ export default class NotificationMenu extends Component {
       <Link to={ `/TransactionRequestDetail/${item.key}` } key={ key }>
         <li className='padding14'>
           <div>
-            { item.sent }, { item.sender } requested
+            { item.sent_time }, { item.sender_account } requested
           </div>
           <div className='text-right'>
             { item.payload }

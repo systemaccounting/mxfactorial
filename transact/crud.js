@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var moment = require('moment');
 var _ = require('lodash');
+var passport = require('passport');
 
 var firebaseClient = require('firebase-client/index');
 var TRANSACTION_PATH = '/transaction';
@@ -21,7 +22,7 @@ var postTransaction = function (data) {
 };
 
 //save transaction
-router.post('/', function (req, res) {
+router.post('/', passport.authenticate('jwt', { session: false }), function (req, res) {
   var body = req.body;
   var transaction_item = body.transaction_item;
 
@@ -68,7 +69,7 @@ var getTransaction = function (id) {
   });
 };
 
-router.get('/:id', function (req, res) {
+router.get('/:id', passport.authenticate('jwt', { session: false }), function (req, res) {
   getTransaction(req.params.id).then(function (response) {
     if (response.data) {
       var result = {};
@@ -82,14 +83,14 @@ router.get('/:id', function (req, res) {
   });
 });
 
-var getAllTransaction = function () {
+var getAllTransaction = function (account) {
   return firebaseClient().then(function (instance) {
-    return instance.get(TRANSACTION_PATH);
+    return instance.get(TRANSACTION_PATH, { orderBy: 'cr_author', equalTo: account });
   });
 };
 
-router.get('/', function (req, res) {
-  getAllTransaction().then(function (response) {
+router.get('/', passport.authenticate('jwt', { session: false }), function (req, res) {
+  getAllTransaction(req.user.username).then(function (response) {
     res.status(200).json(response.data);
   }).catch(function (err) {
     res.status(500).json(err);

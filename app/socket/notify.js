@@ -1,45 +1,88 @@
 /* eslint no-console: 0 */
-import { SOCKET_URL } from 'constants/index';
 import io from 'socket.io-client';
 
+import { SOCKET_URL } from 'constants/index';
+import extractJwt from 'extract-jwt';
+
+import {
+  receivedNotifications, addNotification, updateNotification, removeNotification
+} from 'actions/notificationActions';
+
 const link = `${SOCKET_URL}notify`;
+const notifyHub = io.connect(link);
+let cachedToken;
+let connected = false;
+let authenticated = false;
+let dispatch;
 
-const notifyHub = (function () {
-  let socket;
-
-  function init() {
-    socket = io(link);
-
-    socket.on('connect', function () {
-      console.log('connected', socket);
-    });
-
-    socket.on('child_added', function (data) {
-      console.log(data);
-    });
-
-    socket.on('connection_refused', function (err) {
-      console.log(err);
-    });
-
-    socket.on('disconnect', function () {
-    });
-
-    return socket;
+const dispatchAction = (action) => {
+  if (dispatch) {
+    dispatch(action);
   }
+};
 
-  return {
-    getInstance: function () {
+notifyHub.on('connect', () => {
+  console.log('connected', notifyHub);
+  connected = true;
+  if (cachedToken) {
+    authenticate(cachedToken);
+  }
+});
 
-      if ( !socket ) {
-        socket = init();
-      }
+notifyHub.on('authenticated', () => {
+  authenticated = true;
+  console.log('you are in');
+  notifyHub.emit('value');
+});
 
-      return socket;
+notifyHub.on('child_added', (data) => {
+  dispatchAction(addNotification(data));
+});
+
+notifyHub.on('child_changed', (data) => {
+  dispatchAction(updateNotification(data));
+});
+
+notifyHub.on('child_removed', (data) => {
+  dispatchAction(removeNotification(data));
+});
+
+notifyHub.on('value', (notifications) => {
+  console.log(notifications);
+  dispatchAction(receivedNotifications(notifications));
+});
+
+notifyHub.on('value_error', (error) => {
+  console.log(error);
+});
+
+notifyHub.on('unauthorized', (error) => {
+  console.log(error);
+});
+
+notifyHub.on('disconnect', () => {
+  connected = false;
+  authenticated = false;
+});
+
+export const injectDispatch = (dispatchFunc) => {
+  dispatch = dispatchFunc;
+};
+
+export const isConnected = () => (connected);
+
+export const authenticate = (token) => {
+  if (!authenticated) {
+    cachedToken = token;
+    if (!connected) {
+      notifyHub.connect();
     }
+    notifyHub.emit('authenticate', { token: extractJwt(token).value });
+  }
+};
 
-  };
-
-})();
+export const clearAll = () => {
+  notifyHub.emit('clear_all');
+};
 
 export default notifyHub;

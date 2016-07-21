@@ -1,17 +1,16 @@
+import assign from 'lodash/assign';
+import omitBy from 'lodash/omitBy';
+
 import { handleActions } from 'redux-actions';
 
-import { CLEAR_ALL_NOTIFICATIONS } from 'actions/notificationActions';
+import {
+  CLEAR_ALL_NOTIFICATIONS, RECEIVED_NOTIFICATIONS, ADDED_NOTIFICATION, UPDATED_NOTIFICATION, REMOVED_NOTIFICATION
+} from 'actions/notificationActions';
 
 export default handleActions({
-  [CLEAR_ALL_NOTIFICATIONS]: (state, action) => ({})
-}, {
-  '0': {
-    key: '-KLva-nufOkGRCG665P3',
-    sender: 'Kayle',
-    receiver: 'West',
-    type: 'bid200',
-    method: 'webclient',
-    payload: 500,
-    sent: '25 seconds ago'
-  }
-});
+  [CLEAR_ALL_NOTIFICATIONS]: (state, action) => ({}),
+  [RECEIVED_NOTIFICATIONS]: (state, action) => (assign({}, action.payload)),
+  [ADDED_NOTIFICATION]: (state, action) => (assign({}, state, action.payload)),
+  [UPDATED_NOTIFICATION]: (state, action) => (assign({}, state, action.payload)),
+  [REMOVED_NOTIFICATION]: (state, action) => (omitBy(state, (val, key) => (action.payload[key])))
+}, {});

@@ -20,15 +20,6 @@ describe('rootReducer', () => {
       token: ''
     },
     notifications: {
-      '0': {
-        key: '-KLva-nufOkGRCG665P3',
-        method: 'webclient',
-        payload: 500,
-        receiver: 'West',
-        sender: 'Kayle',
-        sent: '25 seconds ago',
-        type: 'bid200'
-      }
     },
     requestsFilter: 'active',
     transactions: {}
