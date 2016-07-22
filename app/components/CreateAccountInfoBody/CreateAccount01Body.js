@@ -10,7 +10,7 @@ const CreateAccount01Body = (props) => {
         public how indispensable <strong>accountability</strong> is for a prosperous economy.
       </p>
       <p style={ { textAlign: 'left' } }>
-        The greatest threat to an economy has nothing to do with those who exploit the absence of accountability to
+        The greatest threat to an economy has little to do with those who exploit the absence of accountability to
         safely pursue whatever minor offenses are especially common amongst its youth.
       </p>
       <Link to={ props.nextRoute }>

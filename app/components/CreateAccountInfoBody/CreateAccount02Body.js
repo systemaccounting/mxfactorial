@@ -10,7 +10,7 @@ const CreateAccount02Body = (props) => {
         ‘never touches the stuff’, has a family, and yet exploits the same absence of accountability to sell weapons
         to murderous criminals, raise the price of a life-saving drug 5,000%, and grants funds and fallacious academic
         degrees to anyone willing to justify theft of the public's purchasing power by printing money, polluting its
-        supply with default risk, and maninpulating interest rates to 0% so that capital may continue to be acquired
+        supply with default risk, and manipulating interest rates to 0% so that capital may continue to be acquired
         after producing nothing.
       </p>
       <Link to={ props.nextRoute }>
