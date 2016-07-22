@@ -1,0 +1,2826 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite>
+	<id>S1</id>
+	<name>Master</name>
+	<description></description>
+	<sections>
+		<section>
+		<name>API</name>
+		<description></description>
+						
+		<cases>
+									
+																																																																																<case>
+				<id>C13</id>
+				<title>Add account and profile records to database</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<api><item>
+<id>1</id><value>POST /account</value></item>
+</api>
+										<status_code><item>
+<id>1</id><value>200</value></item>
+</status_code>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Add hinted values to input fields throughout all createAccountSequence screens.
+1. Select okayButton on createAccountTenScreen.</steps>
+										<expected>The database receives values for the following properties:
+1. account
+2. password
+3. email_address
+4. first_name
+5. middle_name
+6. last_name
+7. date_of_birth
+8. street_number
+9. street_name
+10. unit_number
+11. floor_number
+12. city
+13. state
+14. postal_code
+15. country
+16. telephone_country_code
+17. telephone_area_code
+18. telephone_number
+19. occupation
+20. industry
+
+Response: ...</expected>
+										<html_id><item>
+<id>11</id><value>createAccountTenScreen</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+</html_id>
+										<property_key><item>
+<id>1</id><value>account</value></item>
+<item>
+<id>2</id><value>password</value></item>
+<item>
+<id>4</id><value>first_name</value></item>
+<item>
+<id>5</id><value>middle_name</value></item>
+<item>
+<id>6</id><value>last_name</value></item>
+<item>
+<id>7</id><value>date_of_birth</value></item>
+<item>
+<id>8</id><value>email_address</value></item>
+<item>
+<id>9</id><value>street_number</value></item>
+<item>
+<id>10</id><value>street_name</value></item>
+<item>
+<id>11</id><value>unit_number</value></item>
+<item>
+<id>12</id><value>floor_number</value></item>
+<item>
+<id>13</id><value>city</value></item>
+<item>
+<id>16</id><value>state</value></item>
+<item>
+<id>20</id><value>postal_code</value></item>
+<item>
+<id>21</id><value>country</value></item>
+<item>
+<id>22</id><value>telephone_country_code</value></item>
+<item>
+<id>23</id><value>telephone_area_code</value></item>
+<item>
+<id>24</id><value>telephone_number</value></item>
+<item>
+<id>25</id><value>occupation</value></item>
+<item>
+<id>26</id><value>industry</value></item>
+</property_key>
+										<object_name><item>
+<id>1</id><value>account</value></item>
+<item>
+<id>2</id><value>account_profile</value></item>
+</object_name>
+										<crud><item>
+<id>1</id><value>Create</value></item>
+</crud>
+									</custom>
+							</case>
+								</cases>
+							</section>
+			<section>
+		<name>webClient</name>
+		<description></description>
+						
+		<cases>
+									
+																																			<case>
+				<id>C1</id>
+				<title>landingScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1E7EE6h6jsaQY4wJh6uw5-9_dDkCkX2Fupvb6iav4-gk/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQaWdSZjljWkZEVU0</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+<item>
+<id>2</id><value>logInSequence</value></item>
+<item>
+<id>3</id><value>logOutSequence</value></item>
+</sequence>
+										<steps>1. Navigate to root URL (/) in browser (localhost:8080/ for local testing, mxfactorial.io/ for production testing).</steps>
+										<expected>The landingScreen displays:
+1. mxfactorial
+2. userInputField
+3. passwordInputField
+4. logInButton
+5. createButon
+6. forgotPasswordLink
+7. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>1</id><value>landingScreen</value></item>
+<item>
+<id>31</id><value>userInputField</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>33</id><value>logInButton</value></item>
+<item>
+<id>34</id><value>createButton</value></item>
+<item>
+<id>35</id><value>forgotPasswordLink</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C14</id>
+				<title>homeScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1E7EE6h6jsaQY4wJh6uw5-9_dDkCkX2Fupvb6iav4-gk/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/folderview?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE&amp;usp=sharing</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Add TRUE credentials to userInputField and passwordInputField on landingScreen.
+2. Select logInButton on landingScreen.</steps>
+										<expected>The homeScreen displays:
+1. homeButton
+2. notificationCounter
+3. notificationFlag
+4. mainNavMenuButton
+5. debitorAccountBalanceDisplayCell
+6. recipientAccountInputField with &quot;user&quot; placeholder hint
+7. sumTransactionItemValueDisplayCell
+8. addGoodOrServiceButton</expected>
+										<html_id><item>
+<id>7</id><value>createAccountSixScreen</value></item>
+<item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>31</id><value>userInputField</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>58</id><value>addGoodOrServiceButton</value></item>
+<item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>81</id><value>mainNavMenuButton</value></item>
+<item>
+<id>105</id><value>debitorAccountBalanceDisplayCell</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C19</id>
+				<title>mainNavDropDownMenu</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1E7EE6h6jsaQY4wJh6uw5-9_dDkCkX2Fupvb6iav4-gk/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Display homeScreen.
+2. Select mainNavMenuButton.</steps>
+										<expected>mainNavDropDownMenu displays:
+1. mainNavMenuButton
+2. mainNavAccountSettingsButton
+3. mainNavRequestButton
+4. mainNavHistoryButton
+5. mainNavRulesButton
+6. mainNavQueryButton
+7. mainNavSupportButton
+8. mainNavLogOutButton</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>81</id><value>mainNavMenuButton</value></item>
+<item>
+<id>82</id><value>mainNavAccountSettingsButton</value></item>
+<item>
+<id>83</id><value>mainNavRequestButton</value></item>
+<item>
+<id>84</id><value>mainNavHistoryButton</value></item>
+<item>
+<id>85</id><value>mainNavRulesButton</value></item>
+<item>
+<id>86</id><value>mainNavQueryButton</value></item>
+<item>
+<id>87</id><value>mainNavSupportButton</value></item>
+<item>
+<id>88</id><value>mainNavLogOutButton</value></item>
+<item>
+<id>102</id><value>mainNavDropDownMenu</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C50</id>
+				<title>notificationDropDownMenu</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references>11</references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select notificationFlag located at top left corner of screen after log in.</steps>
+										<expected>notificationDropDownMenu displays:
+1. notificationCounter
+2. notificationFlag
+3. clearAllButton
+4. a list of notificationDropDownMenuItem(s)</expected>
+										<html_id><item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+<item>
+<id>75</id><value>clearAllButton</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C63</id>
+				<title>Dimiss notificationDropDownMenu</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Select notificationFlag located at top left corner of screen after log in to display notificationDropDownMenu.
+2. Select anywhere else on screen EXCEPT notificationDropDownMenu.</steps>
+										<expected>notificationDropDownMenu dismissed.</expected>
+										<html_id><item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C51</id>
+				<title>notificationDropDownMenuItem</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/folderview?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE&amp;usp=sharing</screen_asset>
+										<update_required>false</update_required>
+										<preconds>Receive web client notifications for transactions, transaction requests, and transaction rule requests during or prior to log in.</preconds>
+										<steps>1. Select notificationFlag after log in to display notificationDropDownMenu.</steps>
+										<expected>Each notificationDropDownMenuItem displays:
+1. Human-readable relative time stamp (link to global requirement will be added later)
+2. other account involved in event
+3. notification type (transaction, request for transaction, request to add transaction rule)
+4. transaction amount (sum quantity x value)
+5. transaction direction, i.e. positive or negative</expected>
+										<html_id><item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																																					<case>
+				<id>C62</id>
+				<title>notificationDropDownMenu clearAllButton</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/folderview?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE&amp;usp=sharing</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select notificationFlag after receiving notifications for transactions, transaction requests, and rule requests to display notificationDropDownMenu.
+2. Select clearAllButton notificationDropDownMenu.</steps>
+										<expected>1. /notify service records time stamps in received_time properties for all notificationDropDownMenuItem(s) displayed.
+2. Unless a new notification is received, notificationCounter resets to 0 AFTER a new request to /notify confirms all notifications with sent_time values also have received_time values.
+3. All notificationDropDownMenuItem(s) with updated notification records are removed from notificationDropDownMenu.</expected>
+										<html_id><item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+<item>
+<id>75</id><value>clearAllButton</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+										<property_key><item>
+<id>50</id><value>sent_time</value></item>
+<item>
+<id>51</id><value>received_time</value></item>
+</property_key>
+										<object_name><item>
+<id>5</id><value>notification</value></item>
+</object_name>
+										<notification_method><item>
+<id>1</id><value>webclient</value></item>
+</notification_method>
+									</custom>
+							</case>
+								</cases>
+								<sections>
+		<section>
+		<name>Create Account</name>
+		<description></description>
+						
+		<cases>
+									
+																																			<case>
+				<id>C2</id>
+				<title>createAccountOneScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQUG9NX3FEN3dRaVE</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Select createButton on landingScreen.</steps>
+										<expected>The createAccountOneScreen displays:
+1. backButton linking to previous screen
+2. the first portion of the systemaccounting Terms of Use
+3. nextButton
+4. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>1</id><value>landingScreen</value></item>
+<item>
+<id>2</id><value>createAccountOneScreen</value></item>
+<item>
+<id>34</id><value>createButton</value></item>
+<item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C3</id>
+				<title>createAccountTwoScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQQ3pSSjlaQ0FqOGM</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Select nextButton on createAccountOneScreen.</steps>
+										<expected>The createAccountTwoScreen displays:
+1. backButton
+2. the second portion of the systemaccounting Terms of Use
+3. nextButton
+4. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>2</id><value>createAccountOneScreen</value></item>
+<item>
+<id>3</id><value>createAccountTwoScreen</value></item>
+<item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C4</id>
+				<title>createAccountThreeScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQQ2o1aDBZeDJKMWc</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Select nextButton on createAccountTwoScreen.</steps>
+										<expected>The createAccountThreeScreen displays:
+1. backButton
+2. the third portion of the systemaccounting Terms of Use
+3. iAcceptButton
+4. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>3</id><value>createAccountTwoScreen</value></item>
+<item>
+<id>4</id><value>createAccountThreeScreen</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>39</id><value>iAcceptButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C5</id>
+				<title>createAccountFourScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQYnZTaFE2WDZNRXc</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Select iAcceptButton on createAccountThreeScreen.</steps>
+										<expected>The createAccountFourScreen displays:
+1. backButton
+2. helpButton
+3. firstNameInputField
+4. middleNameInputField
+5. lastNameInputField
+6. countryInputField
+7. startOverButton
+8. nextButton
+9. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>4</id><value>createAccountThreeScreen</value></item>
+<item>
+<id>5</id><value>createAccountFourScreen</value></item>
+<item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+<item>
+<id>39</id><value>iAcceptButton</value></item>
+<item>
+<id>40</id><value>firstNameInputField</value></item>
+<item>
+<id>41</id><value>middleNameInputField</value></item>
+<item>
+<id>42</id><value>lastNameInputField</value></item>
+<item>
+<id>43</id><value>countryInputField</value></item>
+<item>
+<id>44</id><value>startOverButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C6</id>
+				<title>createAccountFiveScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQRUZ3aGlPbWFLcVk</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Add hinted values to input fields on createAccountFourScreen (type-checking NOT performed here, but by negative cases).
+2. Select nextButton on createAccountFourScreen.</steps>
+										<expected>The createAccountFiveScreen displays:
+1. backButton
+2. helpButton
+3. streetNumberInputField
+4. streetNameInputField
+5. floorNumberInputField
+6. buildingUnitInputField
+7. startOverButton
+8. nextButton
+9. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+<item>
+<id>44</id><value>startOverButton</value></item>
+<item>
+<id>45</id><value>streetNumberInputField</value></item>
+<item>
+<id>46</id><value>streetNameInputField</value></item>
+<item>
+<id>47</id><value>floorNumberInputField</value></item>
+<item>
+<id>48</id><value>buildingUnitInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C7</id>
+				<title>createAccountSixScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQZzA5d1FjRVgzNHc</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Add hinted values to input fields on createAccountFiveScreen (type-checking NOT performed here, but by negative cases).
+2. Select nextButton on createAccountFiveScreen.</steps>
+										<expected>The createAccountSixScreen displays:
+1. backButton
+2. helpButton
+3. cityInputField
+4. stateInputField
+5. postalCodeInputField
+6. startOverButton
+7. nextButton
+8. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>6</id><value>createAccountFiveScreen</value></item>
+<item>
+<id>7</id><value>createAccountSixScreen</value></item>
+<item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+<item>
+<id>44</id><value>startOverButton</value></item>
+<item>
+<id>49</id><value>cityInputField</value></item>
+<item>
+<id>50</id><value>stateInputField</value></item>
+<item>
+<id>51</id><value>postalCodeInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C8</id>
+				<title>createAccountSevenScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQQ0ZaVGJtTWVka0k</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Add hinted values to input fields on createAccountSixScreen (type-checking NOT performed here, but by negative cases).
+2. Select nextButton on createAccountSixScreen.</steps>
+										<expected>The createAccountSixScreen displays:
+1. backButton
+2. helpButton
+3. telephoneCountryCodeInputField
+4. telephoneAreaCodeInputField
+5. telephoneNumberInputField
+6. startOverButton
+7. nextButton
+8. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>7</id><value>createAccountSixScreen</value></item>
+<item>
+<id>8</id><value>createAccountSevenScreen</value></item>
+<item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+<item>
+<id>44</id><value>startOverButton</value></item>
+<item>
+<id>52</id><value>telephoneCountryCodeInputField</value></item>
+<item>
+<id>53</id><value>telephoneAreaCodeInputField</value></item>
+<item>
+<id>54</id><value>telephoneNumberInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C9</id>
+				<title>createAccountEightScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQRFRrSHVpRTVIb00</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Add hinted values to input fields on createAccountSevenScreen (type-checking NOT performed here, but by negative cases).
+2. Select nextButton on createAccountSevenScreen.</steps>
+										<expected>The createAccountEightScreen displays:
+1. backButton
+2. helpButton
+3. dateOfBirthInputField
+4. industryInputField
+5. occupationInputField
+6. startOverButton
+7. nextButton
+8. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>8</id><value>createAccountSevenScreen</value></item>
+<item>
+<id>9</id><value>createAccountEightScreen</value></item>
+<item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+<item>
+<id>44</id><value>startOverButton</value></item>
+<item>
+<id>55</id><value>occupationInputField</value></item>
+<item>
+<id>56</id><value>industryInputField</value></item>
+<item>
+<id>101</id><value>dateOfBirthInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C10</id>
+				<title>createAccountNineScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQNEFHR0k5SXAwY3c</screen_asset>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Add hinted values to input fields on createAccountEightScreen (type-checking NOT performed here, but by negative cases).
+2. Select nextButton on createAccountEightScreen.</steps>
+										<expected>The createAccountNineScreen displays:
+1. backButton
+2. helpButton
+3. userInputField
+4. passwordInputField
+5. emailAddressInputField
+6. startOverButton
+7. nextButton
+8. zero warnings &amp; errors in browser console</expected>
+										<html_id><item>
+<id>9</id><value>createAccountEightScreen</value></item>
+<item>
+<id>10</id><value>createAccountNineScreen</value></item>
+<item>
+<id>31</id><value>userInputField</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>36</id><value>nextButton</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+<item>
+<id>44</id><value>startOverButton</value></item>
+<item>
+<id>89</id><value>emailAddressInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C11</id>
+				<title>createAccountTenScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1LUDH2CLFMIeIDpeP__hD-70rAsOhOTyIph-UMpYZMII/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQY3JVNU5CVUR3SVk</screen_asset>
+										<code>https://github.com/systemaccounting/mxfactorial/blob/master/app/components/CreateAccountInfoBody/CreateAccount10Body.js</code>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Add hinted values to input fields on createAccountNineScreen (type-checking NOT performed here, but by negative cases).
+2. Select nextButton on createAccountNineScreen.</steps>
+										<expected>The createAccountTenScreen displays:
+1. backButton
+2. helpButton
+3. Verification email sent copy
+4. okayButton</expected>
+										<html_id><item>
+<id>1</id><value>landingScreen</value></item>
+<item>
+<id>10</id><value>createAccountNineScreen</value></item>
+<item>
+<id>11</id><value>createAccountTenScreen</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																																																																<case>
+				<id>C12</id>
+				<title>landingScreen after account creation</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<api><item>
+<id>1</id><value>POST /account</value></item>
+</api>
+										<status_code><item>
+<id>1</id><value>200</value></item>
+</status_code>
+										<sequence><item>
+<id>1</id><value>createAccountSequence</value></item>
+</sequence>
+										<steps>1. Select okButton on createAccountTenScreen.</steps>
+										<expected>landingScreen is displayed.
+Create account input fields are empty (200 from POST /account clears webclient state).</expected>
+										<html_id><item>
+<id>1</id><value>landingScreen</value></item>
+<item>
+<id>11</id><value>createAccountTenScreen</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>38</id><value>helpButton</value></item>
+<item>
+<id>100</id><value>okayButton</value></item>
+</html_id>
+										<property_key><item>
+<id>1</id><value>account</value></item>
+<item>
+<id>2</id><value>password</value></item>
+<item>
+<id>3</id><value>created_time</value></item>
+<item>
+<id>4</id><value>first_name</value></item>
+<item>
+<id>5</id><value>middle_name</value></item>
+<item>
+<id>6</id><value>last_name</value></item>
+<item>
+<id>7</id><value>date_of_birth</value></item>
+<item>
+<id>8</id><value>email_address</value></item>
+<item>
+<id>9</id><value>street_number</value></item>
+<item>
+<id>10</id><value>street_name</value></item>
+<item>
+<id>11</id><value>unit_number</value></item>
+<item>
+<id>12</id><value>floor_number</value></item>
+<item>
+<id>13</id><value>city</value></item>
+<item>
+<id>14</id><value>county</value></item>
+<item>
+<id>15</id><value>district</value></item>
+<item>
+<id>16</id><value>state</value></item>
+<item>
+<id>17</id><value>region</value></item>
+<item>
+<id>18</id><value>province</value></item>
+<item>
+<id>19</id><value>territory</value></item>
+<item>
+<id>20</id><value>postal_code</value></item>
+<item>
+<id>21</id><value>country</value></item>
+<item>
+<id>22</id><value>telephone_country_code</value></item>
+<item>
+<id>23</id><value>telephone_area_code</value></item>
+<item>
+<id>24</id><value>telephone_number</value></item>
+<item>
+<id>25</id><value>occupation</value></item>
+<item>
+<id>26</id><value>industry</value></item>
+<item>
+<id>27</id><value>created_time</value></item>
+</property_key>
+										<object_name><item>
+<id>1</id><value>account</value></item>
+<item>
+<id>2</id><value>account_profile</value></item>
+</object_name>
+										<crud><item>
+<id>1</id><value>Create</value></item>
+</crud>
+									</custom>
+							</case>
+								</cases>
+							</section>
+			<section>
+		<name>Edit Account</name>
+		<description></description>
+						
+		<cases>
+									
+																										<case>
+				<id>C20</id>
+				<title>accountSettingsScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1vcxir2_BI_NwjfyhOtBnENCGadBbQxpN8AeP2ptCgLw/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQOWVJQXpuem1jbEU</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Log in to display homeScreen.
+2. Select mainNavMenuButton.
+3. Select mainNavAccountSettingsButton (gear icon).</steps>
+										<expected>accountSettingsScreen displays:
+1. homeButton
+2. notificationCounter
+3. notificationFlagButton
+4. mainNavMenuButton
+5. emailAddressInputField
+6. publishActivityCheckbox
+7. passwordPerTransactionCheckbox
+8. passwordPerRequestCheckbox
+9. notifyOnPaymentReceiptCheckbox
+10. notifyOnPaymentSentCheckbox
+11. notifyOnRequestSentCheckbox
+12. notifyOnRequestReceiptCheckbox
+13. changePasswordButton
+14. editProfileButton</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>71</id><value>homeButton</value></item>
+<item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>81</id><value>mainNavMenuButton</value></item>
+<item>
+<id>89</id><value>emailAddressInputField</value></item>
+<item>
+<id>90</id><value>publishActivityCheckbox</value></item>
+<item>
+<id>91</id><value>passwordPerTransactionCheckbox</value></item>
+<item>
+<id>92</id><value>passwordPerRequestCheckbox</value></item>
+<item>
+<id>93</id><value>notifyOnPaymentReceiptCheckbox</value></item>
+<item>
+<id>94</id><value>notifyOnPaymentSentCheckbox</value></item>
+<item>
+<id>95</id><value>notifyOnRequestSentCheckbox</value></item>
+<item>
+<id>96</id><value>notifyOnRequestReceiptCheckbox</value></item>
+<item>
+<id>98</id><value>editProfileButton</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C21</id>
+				<title>editAccountProfileScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://drive.google.com/open?id=1lgoratpy1-2mCH3zPxpLtg9Xof9arU0D1_iAhuP7Q8I</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQZ0dnMUg2Y0ZrcW8</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Display accountSettingsScreen.
+2. Select editProfileButton.</steps>
+										<expected>editAccountProfileScreen displays:
+1. homeButton
+2. notificationCounter
+3. notificationFlagButton
+4. backButton
+5. mainNavMenuButton
+6. firstNameInputField
+7. middleNameInputField
+8. lastNameInputField
+9. countryInputField
+10. streetNumberInputField
+11. streetNameInputField
+12. floorNumberInputField
+13. buildingUnitInputField
+14. cityInputField
+15. stateInputField
+16. postalCodeInputField
+17. telephoneCountryCodeInputField
+18. telephoneAreaCodeInputField
+19. telephoneNumberInputField
+20. dateOfBirthInputField
+21. industryInputField
+22. occupationInputField
+23. saveButton</expected>
+										<html_id><item>
+<id>18</id><value>editAccountProfileScreen</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>40</id><value>firstNameInputField</value></item>
+<item>
+<id>41</id><value>middleNameInputField</value></item>
+<item>
+<id>42</id><value>lastNameInputField</value></item>
+<item>
+<id>43</id><value>countryInputField</value></item>
+<item>
+<id>45</id><value>streetNumberInputField</value></item>
+<item>
+<id>46</id><value>streetNameInputField</value></item>
+<item>
+<id>47</id><value>floorNumberInputField</value></item>
+<item>
+<id>48</id><value>buildingUnitInputField</value></item>
+<item>
+<id>49</id><value>cityInputField</value></item>
+<item>
+<id>50</id><value>stateInputField</value></item>
+<item>
+<id>51</id><value>postalCodeInputField</value></item>
+<item>
+<id>52</id><value>telephoneCountryCodeInputField</value></item>
+<item>
+<id>53</id><value>telephoneAreaCodeInputField</value></item>
+<item>
+<id>54</id><value>telephoneNumberInputField</value></item>
+<item>
+<id>55</id><value>occupationInputField</value></item>
+<item>
+<id>56</id><value>industryInputField</value></item>
+<item>
+<id>65</id><value>saveButton</value></item>
+<item>
+<id>71</id><value>homeButton</value></item>
+<item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>81</id><value>mainNavMenuButton</value></item>
+<item>
+<id>98</id><value>editProfileButton</value></item>
+<item>
+<id>101</id><value>dateOfBirthInputField</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C22</id>
+				<title>changePasswordPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1vcxir2_BI_NwjfyhOtBnENCGadBbQxpN8AeP2ptCgLw/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQOWVJQXpuem1jbEU</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Display accountSettingsScreen.
+2. Select changePasswordButton.</steps>
+										<expected>changePasswordPopup displays:
+1. oldPasswordInputField
+2. newPasswordInputField
+3. confirmNewPasswordInputField
+4. cancelButton
+5. okButton</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>123</id><value>oldPasswordInputField</value></item>
+<item>
+<id>124</id><value>newPasswordInputField</value></item>
+<item>
+<id>125</id><value>confirmNewPasswordInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C23</id>
+				<title>Dismiss changePasswordPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Select changePasswordButton on accountSettingsScreen to display changePasswordPopup.
+2. Add old password to oldPasswordInputField. 
+3. Add new password to newPasswordInputField.
+4. Repeat new password in confirmNewPasswordInputField.
+5. Select cancelButton.</steps>
+										<expected>1. changePasswordPopup is dismissed.
+2. accountSettingsScreen continues to display.
+3. Password unchanged.</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>24</id><value>changePasswordPopup</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>97</id><value>changePasswordButton</value></item>
+<item>
+<id>100</id><value>okayButton</value></item>
+<item>
+<id>123</id><value>oldPasswordInputField</value></item>
+<item>
+<id>124</id><value>newPasswordInputField</value></item>
+<item>
+<id>125</id><value>confirmNewPasswordInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																																																							<case>
+				<id>C24</id>
+				<title>changePasswordSuccessfulPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1vcxir2_BI_NwjfyhOtBnENCGadBbQxpN8AeP2ptCgLw/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQOWVJQXpuem1jbEU</screen_asset>
+										<update_required>false</update_required>
+										<api><item>
+<id>1</id><value>POST /account</value></item>
+</api>
+										<status_code><item>
+<id>1</id><value>200</value></item>
+</status_code>
+										<steps>1. Select changePasswordButton on accountSettingsScreen to display changePasswordPopup.
+2. Add old password into oldPasswordInputField.
+3. Add new password into newPasswordInputField.
+4. Repeat new password into confirmNewPasswordInputField.
+5. Select okButton.</steps>
+										<expected>passwordChangeSuccessfulPopup displays okButton.</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>25</id><value>changePasswordSuccessfulPopup</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>123</id><value>oldPasswordInputField</value></item>
+<item>
+<id>124</id><value>newPasswordInputField</value></item>
+<item>
+<id>125</id><value>confirmNewPasswordInputField</value></item>
+</html_id>
+										<property_key><item>
+<id>2</id><value>password</value></item>
+</property_key>
+										<object_name><item>
+<id>1</id><value>account</value></item>
+</object_name>
+										<crud><item>
+<id>3</id><value>Update</value></item>
+</crud>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C25</id>
+				<title>Dismiss changePasswordSuccessfulPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>8</id><value>changePasswordSequence</value></item>
+</sequence>
+										<steps>1. Change password to display changePasswordSuccessfulPopup.
+2. Select okButton on changePasswordSuccessfulPopup.</steps>
+										<expected>1. changePasswordSuccessfulPopup is dismissed.
+2. accountSettingsScreen continues to display.</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>25</id><value>changePasswordSuccessfulPopup</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C26</id>
+				<title>Log in with new password</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<status_code><item>
+<id>1</id><value>200</value></item>
+</status_code>
+										<steps>1. Change password.
+2. Log out.
+3. Log in with new password.</steps>
+										<expected>homeScreen displays name of account in debitorAccountDisplayCell.</expected>
+										<html_id><item>
+<id>1</id><value>landingScreen</value></item>
+<item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>105</id><value>debitorAccountBalanceDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C27</id>
+				<title>passwordApproveEditProfilePopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1lgoratpy1-2mCH3zPxpLtg9Xof9arU0D1_iAhuP7Q8I/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQZ0dnMUg2Y0ZrcW8</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select editProfileButton on accountSettingsScreen to display editAccountProfileScreen.
+2. Change values in all profile input fields.
+3. Select saveButton.</steps>
+										<expected>passwordApproveEditProfilePopup displays:
+1. editProfileDisplayCell
+2. passwordInputField
+3. cancelButton
+4. okButton</expected>
+										<html_id><item>
+<id>18</id><value>editAccountProfileScreen</value></item>
+<item>
+<id>26</id><value>passwordApproveEditProfilePopup</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>98</id><value>editProfileButton</value></item>
+<item>
+<id>120</id><value>editProfileDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C28</id>
+				<title>Dismiss passwordApproveEditProfilePopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1lgoratpy1-2mCH3zPxpLtg9Xof9arU0D1_iAhuP7Q8I/edit?usp=sharing</wireframe>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>9</id><value>changeProfileSequence</value></item>
+</sequence>
+										<steps>1. Select saveButton on editAccountProfileScreen after changing profile values.
+2. Add TRUE password to passwordInputField on passwordApproveEditProfilePopup.
+3. Select cancelButton on passwordApproveEditProfilePopup.</steps>
+										<expected>1. passwordApproveEditProfilePopup is dismissed.
+2. editAccountProfileScreen displays.
+3. Account profile remains unchanged.</expected>
+										<html_id><item>
+<id>18</id><value>editAccountProfileScreen</value></item>
+<item>
+<id>26</id><value>passwordApproveEditProfilePopup</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>120</id><value>editProfileDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C29</id>
+				<title>editProfileSuccessfulPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1lgoratpy1-2mCH3zPxpLtg9Xof9arU0D1_iAhuP7Q8I/edit?usp=sharing</wireframe>
+										<update_required>false</update_required>
+										<steps>1. Select saveButton on editAccountProfileScreen after changing profile values.
+2. Add TRUE password to passwordInputField on passwordApproveEditProfilePopup.
+3. Select saveButton on passwordApproveEditProfilePopup.</steps>
+										<expected>editProfileSuccessfulPopup displays with okButton.</expected>
+										<html_id><item>
+<id>1</id><value>landingScreen</value></item>
+<item>
+<id>26</id><value>passwordApproveEditProfilePopup</value></item>
+<item>
+<id>27</id><value>editProfileSuccessfulPopup</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>65</id><value>saveButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C30</id>
+				<title>Dismiss editProfileSuccessfulPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>9</id><value>changeProfileSequence</value></item>
+</sequence>
+										<steps>1. Select saveButton on editAccountProfileScreen after changing profile values.
+2. Add TRUE password to passwordInputField on passwordApproveeditProfilePopup.
+3. Select saveButton on passwordApproveeditProfilePopup to display editProfileSuccessfulPopup.
+4. Select okButton on editProfileSuccessfulPopup.</steps>
+										<expected>editAccountProfileScreen displays after editProfileSuccessfulPopup is dismissed.</expected>
+										<html_id><item>
+<id>18</id><value>editAccountProfileScreen</value></item>
+<item>
+<id>27</id><value>editProfileSuccessfulPopup</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C31</id>
+				<title>confirmEmailAddressChangePopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1vcxir2_BI_NwjfyhOtBnENCGadBbQxpN8AeP2ptCgLw/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQZ0dnMUg2Y0ZrcW8</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Edit email address inside emailAddressInputField on accountSettingsScreen.
+2. Remove cursor from emailAddressInputField by selecting elsewhere on screen.</steps>
+										<expected>confirmEmailAddressChangePopup displays:
+1. confirmEmailAddressChangeInputField
+2. cancelButton
+3. okButton</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>22</id><value>confirmEmailAddressChangePopup</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>82</id><value>mainNavAccountSettingsButton</value></item>
+<item>
+<id>89</id><value>emailAddressInputField</value></item>
+<item>
+<id>102</id><value>mainNavDropDownMenu</value></item>
+<item>
+<id>122</id><value>confirmEmailAddressChangeInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C32</id>
+				<title>Dismiss confirmEmailAddressChangePopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Edit email address inside emailAddressInputField on accountSettingsScreen and remove cursor to display confirmEmailAddressChangePopup.
+2. Select cancelButton on confirmEmailAddressChangePopup.</steps>
+										<expected>1. confirmEmailAddressChangePopup is dismissed.
+2. Email address unchanged.
+3. accountSettingsScreen is displayed.</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>22</id><value>confirmEmailAddressChangePopup</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>89</id><value>emailAddressInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C33</id>
+				<title>emailVerificationSentForEmailAdressChangePopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1lgoratpy1-2mCH3zPxpLtg9Xof9arU0D1_iAhuP7Q8I/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQZ0dnMUg2Y0ZrcW8</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Edit email address inside emailAddressInputField on accountSettingsScreen and remove cursor to display confirmEmailAddressChangePopup.
+2. Select okButton on confirmEmailAddressChangePopup.</steps>
+										<expected>1. emailVerificationSentForEmailAdressChangePopup displays okButton.
+2. Account profile object added to array in database with new email address.</expected>
+										<html_id><item>
+<id>22</id><value>confirmEmailAddressChangePopup</value></item>
+<item>
+<id>23</id><value>emailVerificationSentForEmailAddressChangePopup</value></item>
+</html_id>
+										<crud><item>
+<id>1</id><value>Create</value></item>
+</crud>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C34</id>
+				<title>Dismiss emailVerificationSentForEmailAdressChangePopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Edit email address inside emailAddressInputField on accountSettingsScreen and remove cursor to display confirmEmailAddressChangePopup.
+2. Select okButton on confirmEmailAddressChangePopup to display emailVerificationSentForEmailAdressChangePopup.
+3. Select okButton on emailVerificationSentForEmailAdressChangePopup.</steps>
+										<expected>emailVerificationSentForEmailAdressChangePopup is dismissed.
+accountSettingsScreen is displayed.</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>22</id><value>confirmEmailAddressChangePopup</value></item>
+<item>
+<id>23</id><value>emailVerificationSentForEmailAddressChangePopup</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>89</id><value>emailAddressInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																			<case>
+				<id>C35</id>
+				<title>confirmEmailAddressChangePopup NOT displayed after email address is unchanged</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>10</id><value>changeAccountEmailAddressSequence</value></item>
+</sequence>
+										<steps>1. Insert cursor inside emailAddressInputField on accountSettingsScreen.
+2. Remove or change characters, then restore characters WITHOUT changing the email address, e.g. change person@email.com to pers@email.com, then back to person@email.com.
+3. Remove cursor from emailAddressInputField by selecting elsewhere on accountSettingsScreen.</steps>
+										<expected>confirmEmailAddressChangePopup NOT displayed because a difference check inside the emailAddressInputField confirmed the string was NOT altered.</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>22</id><value>confirmEmailAddressChangePopup</value></item>
+<item>
+<id>89</id><value>emailAddressInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																												<case>
+				<id>C36</id>
+				<title>passwordApproveEditProfilePopup NOT displayed after profile is unchanged</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<sequence><item>
+<id>9</id><value>changeProfileSequence</value></item>
+</sequence>
+										<steps>1. Select editProfileButton on accountSettingsScreen to display editAccountProfileScreen.
+2. Remove or change, then restore characters WITHOUT changing the values inside the profile input fields, e.g. change New York to Los Angeles, then back to New York.
+3. Select saveButton.</steps>
+										<expected>1. passwordApproveEditProfilePopup NOT displayed after a difference check confirms profile values are unchanged.
+2. New account_profile object NOT added to array in database.
+3. editProfileAccountProfileScreen continues to display.</expected>
+										<html_id><item>
+<id>17</id><value>accountSettingsScreen</value></item>
+<item>
+<id>18</id><value>editAccountProfileScreen</value></item>
+<item>
+<id>26</id><value>passwordApproveEditProfilePopup</value></item>
+<item>
+<id>65</id><value>saveButton</value></item>
+<item>
+<id>98</id><value>editProfileButton</value></item>
+</html_id>
+										<object_name><item>
+<id>2</id><value>account_profile</value></item>
+</object_name>
+									</custom>
+							</case>
+								</cases>
+							</section>
+			<section>
+		<name>Transact</name>
+		<description></description>
+						
+		<cases>
+									
+																										<case>
+				<id>C15</id>
+				<title>sumTransactionItemValueDisplayCell</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://drive.google.com/open?id=1nt4Kohxm-Gogw7rK_h_dH6Bl8cLmHOUuFpTtJdB0KZk</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select addGoodOrServiceButton on homeScreen to display transactionItemNameInputField, transactionItemValueInputField, transactionItemQuantityInputField.
+2. Add name of item into transactionItemNameInputField, e.g. &quot;milk&quot;.
+3. Add value of item into transactionItemValueInputField, e.g. &quot;3.5&quot;.
+4. Add quantity of item into transactionItemQuantityInputField, e.g. &quot;2&quot;.
+5. Select addGoodOrServiceButton on homeScreen to display an additional transactionItemNameInputField, transactionItemValueInputField, transactionItemQuantityInputField.
+6. Add name of item into transactionItemNameInputField, e.g. &quot;bread&quot;.
+7. Add value of item into transactionItemValueInputField, e.g. &quot;3.0&quot;.
+8. Add quantity of item into transactionItemQuantityInputField, e.g. &quot;3&quot;.</steps>
+										<expected>sumTransactionItemValueDisplayCell = SUM (transactionItemValueInputField x transactionItemQuantityInputField) of all transaction items, e.g. 16.000 = (3.5 x 2) + (3.0 x 3)</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>58</id><value>addGoodOrServiceButton</value></item>
+<item>
+<id>60</id><value>transactionItemNameInputField</value></item>
+<item>
+<id>61</id><value>transactionItemValueInputField</value></item>
+<item>
+<id>62</id><value>transactionItemQuantityInputField</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C16</id>
+				<title>passwordApproveTransactionPopup from homeScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1nt4Kohxm-Gogw7rK_h_dH6Bl8cLmHOUuFpTtJdB0KZk/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/folderview?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE&amp;usp=sharing</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Add account into recipientAccountInputField to identify user receiving payment on homeScreen.
+2. Add multiple transaction items.
+3. Select transactButton on homeScreen.</steps>
+										<expected>passwordApproveTransactionPopup displays:
+1. sumTransactionItemValueDisplayCell = homeScreen sumTransactionItemValueDisplayCell
+2. passwordInputField
+3. cancelButton
+4. okButton</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>60</id><value>transactionItemNameInputField</value></item>
+<item>
+<id>61</id><value>transactionItemValueInputField</value></item>
+<item>
+<id>62</id><value>transactionItemQuantityInputField</value></item>
+<item>
+<id>63</id><value>transactButton</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C37</id>
+				<title>Dismiss passwordApproveTransactionPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Add account into recipientAccountInputField to identify user receiving payment on homeScreen.
+2. Add multiple transaction items.
+3. Select transactButton on homeScreen to display passwordApproveTransactionPopup.
+4. Add TRUE password into passwordInputField on passwordApproveTransactionPopup.
+5. Select cancelButton on passwordApproveTransactionPopup.</steps>
+										<expected>1. passwordApproveTransactionPopup is dismissed.
+2. homeScreen is displayed.
+3. Transaction NOT posted.</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>60</id><value>transactionItemNameInputField</value></item>
+<item>
+<id>61</id><value>transactionItemValueInputField</value></item>
+<item>
+<id>62</id><value>transactionItemQuantityInputField</value></item>
+<item>
+<id>63</id><value>transactButton</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																																														<case>
+				<id>C38</id>
+				<title>historyScreen from transactionSuccessfulPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<api><item>
+<id>11</id><value>POST /transaction</value></item>
+</api>
+										<steps>1. Add account into recipientAccountInputField to identify user receiving payment on homeScreen.
+2. Add multiple transaction items.
+3. Select transactButton on homeScreen to display passwordApproveTransactionPopup.
+4. Add TRUE password into passwordInputField on passwordApproveTransactionPopup.
+5. Select okButton on passwordApproveTransactionPopup.</steps>
+										<expected>The historyScreen displays:
+1. a new historyItemDisplayCell
+2. transactionSuccessfulPopup
+3. cancelButton on transactionSuccessfulPopup
+4. okButton on transactionSuccessfulPopup</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>13</id><value>historyScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>20</id><value>transactionSuccessfulPopup</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>60</id><value>transactionItemNameInputField</value></item>
+<item>
+<id>61</id><value>transactionItemValueInputField</value></item>
+<item>
+<id>62</id><value>transactionItemQuantityInputField</value></item>
+<item>
+<id>63</id><value>transactButton</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+</html_id>
+										<property_key><item>
+<id>29</id><value>db_author</value></item>
+<item>
+<id>30</id><value>cr_author</value></item>
+<item>
+<id>31</id><value>rejection_time</value></item>
+<item>
+<id>32</id><value>expiration_time</value></item>
+<item>
+<id>33</id><value>db_time</value></item>
+<item>
+<id>34</id><value>db_latlng</value></item>
+<item>
+<id>35</id><value>cr_time</value></item>
+<item>
+<id>36</id><value>cr_latlng</value></item>
+<item>
+<id>37</id><value>transaction_item</value></item>
+<item>
+<id>38</id><value>db_account</value></item>
+<item>
+<id>39</id><value>cr_account</value></item>
+<item>
+<id>40</id><value>quantity</value></item>
+<item>
+<id>41</id><value>units_measured</value></item>
+<item>
+<id>42</id><value>unit_of_measurement</value></item>
+<item>
+<id>43</id><value>value</value></item>
+<item>
+<id>44</id><value>name</value></item>
+</property_key>
+										<object_name><item>
+<id>3</id><value>transaction</value></item>
+<item>
+<id>4</id><value>transaction_item</value></item>
+</object_name>
+										<crud><item>
+<id>1</id><value>Create</value></item>
+</crud>
+									</custom>
+							</case>
+												
+																																												<case>
+				<id>C42</id>
+				<title>Failure of transact API on passwordApproveTransactionPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<screen_asset>https://drive.google.com/folderview?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE&amp;usp=sharing</screen_asset>
+										<update_required>false</update_required>
+										<api><item>
+<id>11</id><value>POST /transaction</value></item>
+</api>
+										<status_code><item>
+<id>2</id><value>400</value></item>
+</status_code>
+										<steps>1. Add account into recipientAccountInputField to identify user receiving payment on homeScreen.
+2. Add multiple transaction items.
+3. Select transactButton on homeScreen to display passwordApproveTransactionPopup.
+4. Add TRUE password into passwordInputField on passwordApproveTransactionPopup.
+5. Simulate a failure of the /transaction API.
+6. Select okButton on passwordApproveTransactionPopup.</steps>
+										<expected>&quot;Transaction failed&quot; displays below the passwordInputField on the passwordApproveTransactionPopup.</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>60</id><value>transactionItemNameInputField</value></item>
+<item>
+<id>61</id><value>transactionItemValueInputField</value></item>
+<item>
+<id>62</id><value>transactionItemQuantityInputField</value></item>
+<item>
+<id>63</id><value>transactButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C43</id>
+				<title>Password required on passwordApproveTransactionPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Add account into recipientAccountInputField to identify user receiving payment on homeScreen.
+2. Add multiple transaction items.
+3. Select transactButton on homeScreen to display passwordApproveTransactionPopup.
+4. Avoid adding password into passwordInputField on passwordApproveTransactionPopup.
+5. Select okButton on passwordApproveTransactionPopup.</steps>
+										<expected>&quot;Password required&quot; displays below the passwordInputField on the passwordApproveTransactionPopup.</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>60</id><value>transactionItemNameInputField</value></item>
+<item>
+<id>61</id><value>transactionItemValueInputField</value></item>
+<item>
+<id>62</id><value>transactionItemQuantityInputField</value></item>
+<item>
+<id>63</id><value>transactButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C17</id>
+				<title>Dismiss transactionSuccessfulPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Complete transaction.
+2. Select okButton on passwordApproveTransactionPopup.</steps>
+										<expected>1. passwordApproveTransactionPopup dismissed.
+2. historyScreen displays.</expected>
+										<html_id><item>
+<id>13</id><value>historyScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>20</id><value>transactionSuccessfulPopup</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C18</id>
+				<title>homeScreen from transactionSuccessfulPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Complete transaction to display passwordApproveTransactionPopup on historyScreen.
+2. Select newButton on passwordApproveTransactionPopup.</steps>
+										<expected>homeScreen displays.</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>13</id><value>historyScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>67</id><value>newButton</value></item>
+</html_id>
+									</custom>
+							</case>
+								</cases>
+								<sections>
+		<section>
+		<name>Request</name>
+		<description></description>
+						
+		<cases>
+									
+																										<case>
+				<id>C44</id>
+				<title>requestScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQY25qa1VweDhxa2M</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select mainNavMenuButton on homeScreen.
+2. Select mainNavRequestButton on mainNavDropDownMenu.</steps>
+										<expected>requestScreen displays:
+1. a button group containing a rejectedButton &amp; an activeButton (default)
+2. a list of requestItemDisplayCell(s) sorted according to most recent request received, and filtered according to rejectedButton &amp; activeButton state </expected>
+										<html_id><item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>76</id><value>rejectedButton</value></item>
+<item>
+<id>77</id><value>activeButton</value></item>
+<item>
+<id>79</id><value>requestItemDisplayCell</value></item>
+<item>
+<id>81</id><value>mainNavMenuButton</value></item>
+<item>
+<id>83</id><value>mainNavRequestButton</value></item>
+<item>
+<id>102</id><value>mainNavDropDownMenu</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C45</id>
+				<title>activeButton</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQY25qa1VweDhxa2M</screen_asset>
+										<update_required>false</update_required>
+										<preconds>Create multiple debiting &amp; crediting requests.</preconds>
+										<steps>1. Select mainNavMenuButton on homeScreen.
+2. Select mainNavRequestButton on mainNavDropDownMenu.
+3. Select activeButton on requestScreen.</steps>
+										<expected>requestScreen displays requestItemDisplayCell(s) where transaction.rejected_time does NOT exist AND current time &lt; transaction.expiration_time.</expected>
+										<html_id><item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>77</id><value>activeButton</value></item>
+<item>
+<id>79</id><value>requestItemDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C46</id>
+				<title>rejectedButton</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references>11</references> 
+																				<custom>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQY25qa1VweDhxa2M</screen_asset>
+										<update_required>false</update_required>
+										<preconds>Create multiple debiting &amp; crediting requests.
+Expire a fraction of the debiting &amp; crediting requests.</preconds>
+										<steps>1. Select mainNavMenuButton on homeScreen.
+2. Select mainNavRequestButton on mainNavDropDownMenu.
+3. Select rejectedButton on requestScreen.</steps>
+										<expected>requestScreen displays requestItemDisplayCell(s) where transaction.rejected_time EXISTS OR current time &gt;= transaction.expiration_time.</expected>
+										<html_id><item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>76</id><value>rejectedButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C47</id>
+				<title>addExpirationTimePopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQY25qa1VweDhxa2M</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Add account into recipientAccountInputField on homeScreen to identify user sending payment.
+2. Add multiple transaction items.
+3. Select requestButton on homeScreen.</steps>
+										<expected>addExpirationTimePopup displays:
+1. expirationDateInputField
+2. cancelButton
+3. okButton</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>28</id><value>addExpirationTimePopup</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>60</id><value>transactionItemNameInputField</value></item>
+<item>
+<id>61</id><value>transactionItemValueInputField</value></item>
+<item>
+<id>62</id><value>transactionItemQuantityInputField</value></item>
+<item>
+<id>64</id><value>requestButton</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>126</id><value>expirationDateInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																												<case>
+				<id>C48</id>
+				<title>requestSentPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1el8OJ_Fsh5p_bKDia0E8yLxt0A3xTIO1-dEb-c_stSQ/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE</screen_asset>
+										<update_required>false</update_required>
+										<api><item>
+<id>1</id><value>POST /account</value></item>
+</api>
+										<status_code><item>
+<id>1</id><value>200</value></item>
+</status_code>
+										<steps>1. Add account into recipientAccountInputField on homeScreen to identify user sending payment.
+2. Add multiple transaction items.
+3. Select requestButton on homeScreen to display addExpirationTimePopup.
+4. Add date to expirationDateInputField in addExpirationTimePopup.
+5. Select okButton.</steps>
+										<expected>requestSentPopup displays:
+1. historyButton
+2. okButton
+
+*Note: Client timezone must be identified to enable an equivalent server-generated time stamp (/transaction does NOT CRUD client time stamps for execution).</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>28</id><value>addExpirationTimePopup</value></item>
+<item>
+<id>29</id><value>requestSentPopup</value></item>
+<item>
+<id>57</id><value>recipientAccountInputField</value></item>
+<item>
+<id>64</id><value>requestButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>126</id><value>expirationDateInputField</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																																																							<case>
+				<id>C49</id>
+				<title>Receiving transaction request AFTER log in increases notificationCounter by 1</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE</screen_asset>
+										<update_required>false</update_required>
+										<api><item>
+<id>16</id><value>POST /notification</value></item>
+<item>
+<id>17</id><value>GET /notification</value></item>
+</api>
+										<steps>1. Log in to display homeScreen.
+2. Receive transaction request from another account to trigger an &apos;ask200&apos; webclient notification from the /notify service.</steps>
+										<expected>notificationCounter on homeScreen immediately increases by 1.</expected>
+										<html_id><item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+										<property_key><item>
+<id>45</id><value>sender_account</value></item>
+<item>
+<id>46</id><value>receiver_account</value></item>
+<item>
+<id>47</id><value>type</value></item>
+<item>
+<id>48</id><value>method</value></item>
+<item>
+<id>49</id><value>payload</value></item>
+<item>
+<id>50</id><value>sent_time</value></item>
+<item>
+<id>51</id><value>received_time</value></item>
+</property_key>
+										<object_name><item>
+<id>5</id><value>notification</value></item>
+</object_name>
+										<notification_method><item>
+<id>1</id><value>webclient</value></item>
+</notification_method>
+										<notification_type><item>
+<id>2</id><value>ask200</value></item>
+</notification_type>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C52</id>
+				<title>Receiving transaction request BEFORE log in increases notificationCounter by 1</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</screen_asset>
+										<update_required>false</update_required>
+										<preconds>Receive notifications for transactions, transaction requests, and transaction rule requests to produce an initial notificationCounter &gt; 0.</preconds>
+										<steps>1. Log in to display homeScreen.
+2. Observe notificationCounter&apos;s initial integer.
+3. Log out.
+4. Receive transaction request from another account to trigger an &apos;ask200&apos; webclient notification from the /notify service.
+5. Log in.</steps>
+										<expected>notificationCounter increased by 1.</expected>
+										<html_id><item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																												<case>
+				<id>C53</id>
+				<title>Receiving transaction request AFTER log in adds notificationMenuDropDownMenuItem</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Log in to display homeScreen.
+2. Select notificationFlag to display notificationDropDownMenu.
+3. Receive transaction request from another account to trigger an &apos;ask200&apos; webclient notification from the /notify service.</steps>
+										<expected>notificationDropDownMenuItem added to top of notificationDropDownMenu.</expected>
+										<html_id><item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+</html_id>
+										<notification_method><item>
+<id>1</id><value>webclient</value></item>
+</notification_method>
+										<notification_type><item>
+<id>2</id><value>ask200</value></item>
+</notification_type>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C54</id>
+				<title>Receiving transaction request BEFORE log in adds notificationMenuDropDownMenuItem</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQT1FvQnlzRTQ5cVE</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Log in to display homeScreen.
+2. Select notificationFlag to display notificationDropDownMenu.
+3. Observe initial list of notificationDropDownMenuItem(s).
+4. Log out.
+5. Send transaction request from another account to trigger an &apos;ask200&apos; webclient notification from /notify service.
+6. Log in.
+7. Select notificationFlag.</steps>
+										<expected>Top of notificationDropDownMenu displays new notificationDropDownMenuItem.</expected>
+										<html_id><item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C56</id>
+				<title>requestItemDisplayCell</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQY25qa1VweDhxa2M</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select mainNavMenuButton on homeScreen.
+2. Select mainNavRequestButton on mainNavDropDownMenu to display requestScreen.</steps>
+										<expected>requestItemDisplayCell displays:
+1. Human-readable relative time stamp (link to global requirement will be added later)
+2. other account involved in event
+3. request type (transaction, transaction rule)
+4. transaction amount (sum quantity x value) or rule ID
+5. transaction direction, i.e. positive or negative</expected>
+										<html_id><item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>79</id><value>requestItemDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C55</id>
+				<title>requestDetailScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQVnZxZDBBTWhEeDg</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select requestItemDisplayCell on requestScreen.</steps>
+										<expected>requestDetailScreen displays:
+1. homeButton
+2. notificationCounter
+3. notificationFlag
+4. mainNavMenu
+5. backButton
+6. creditorAccountDisplayCell
+7. sumTransactionItemValueDisplayCell
+8. transactionTimeDisplayCell
+9. expirationTimeDisplayCell
+10. transactButton
+11. rejectButton
+12. a list of transactionItemDisplayCell(s) each identifying the quanity, value, and name of a transaction_item
+13. transactionIdDisplayCell
+14. preTransactionBalanceDisplayCell</expected>
+										<html_id><item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>29</id><value>requestSentPopup</value></item>
+<item>
+<id>63</id><value>transactButton</value></item>
+<item>
+<id>78</id><value>rejectButton</value></item>
+<item>
+<id>79</id><value>requestItemDisplayCell</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+<item>
+<id>108</id><value>requestTimeDisplayCell</value></item>
+<item>
+<id>110</id><value>transactionItemDisplayCell</value></item>
+<item>
+<id>111</id><value>preTransactionBalanceDisplayCell</value></item>
+<item>
+<id>116</id><value>creditorAccountDisplayCell</value></item>
+<item>
+<id>121</id><value>transactionIdDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C57</id>
+				<title>passwordApproveTransactionPopup from requestDetailScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<update_required>false</update_required>
+										<steps>1. Select transactButton on requestDetailScreen.</steps>
+										<expected>passwordApproveTransactionPopup displays:
+1. sumTransactionItemValueDisplayCell = transactionRequestDetailScreen sumTransactionItemValueDisplayCell
+2. passwordInputField
+3. cancelButton
+4. okButton</expected>
+										<html_id><item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>63</id><value>transactButton</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+</html_id>
+										<req_supplementals>*Drive folder for passwordApproveTransactionPopup available under homeScreen folder.</req_supplementals>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C58</id>
+				<title>transactionSuccessfulPopup from requestDetailScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<update_required>false</update_required>
+										<steps>1. Select mainNavMenuButton on homeScreen.
+2. Select mainNavRequestButton on mainNavDropDownMenu to display requestScreen.
+3. Select transactionRequestItemDisplayCell on requestScreen to display requestDetailScreen.
+4. Select transactButton on requestDetailScreen to display passwordApproveTransactionPopup.
+4. Add TRUE password into passwordInputField on passwordApproveTransactionPopup.
+5. Select okButton on passwordApproveTransactionPopup.</steps>
+										<expected>The historyScreen displays:
+1. a new historyItemDisplayCell
+2. transactionSuccessfulPopup
+3. cancelButton on transactionSuccessfulPopup
+4. okButton on transactionSuccessfulPopup</expected>
+										<html_id><item>
+<id>13</id><value>historyScreen</value></item>
+<item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>19</id><value>passwordApproveTransactionPopup</value></item>
+<item>
+<id>20</id><value>transactionSuccessfulPopup</value></item>
+<item>
+<id>32</id><value>passwordInputField</value></item>
+<item>
+<id>34</id><value>createButton</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>79</id><value>requestItemDisplayCell</value></item>
+</html_id>
+										<req_supplementals>*Drive folder for transactionSuccessfulPopUp available under homeScreen folder.</req_supplementals>
+									</custom>
+							</case>
+												
+																																																														<case>
+				<id>C59</id>
+				<title>requestDetailScreen decreases notificationCounter by 1 and removes notificationDropDownMenuItem from notificationDropDownMenu</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<update_required>false</update_required>
+										<preconds>Receive a notification for a transaction request to produce an initial notificationCounter &gt; 0.</preconds>
+										<steps>1. Select requestItemDisplayCell on requestScreen.</steps>
+										<expected>1. requestDetailScreen displays.
+2. Display of requestDetailScreen triggers request to /notify to add a time stamp to received_time property.
+3. notificationCounter decreases by 1 (triggered by 200 from /notify; NOT selection of notificationDropDownMenuItem on notificationDropDownMenu).
+4. Related notificationDropDownMenuItem is removed from notificationDropDownMenu (triggered by 200 from /notify; NOT selection of notificationDropDownMenuItem on notificationDropDownMenu).</expected>
+										<html_id><item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+										<property_key><item>
+<id>51</id><value>received_time</value></item>
+</property_key>
+										<object_name><item>
+<id>5</id><value>notification</value></item>
+</object_name>
+										<notification_method><item>
+<id>1</id><value>webclient</value></item>
+</notification_method>
+										<notification_type><item>
+<id>2</id><value>ask200</value></item>
+</notification_type>
+									</custom>
+							</case>
+												
+																																												<case>
+				<id>C60</id>
+				<title>requestDetailScreen from notificationDropDownMenuItem</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1cF2Ai_lmOaXXI8Z2hso7tbWoNouYNgJ9eFCQES0rPcU/edit?usp=sharing</wireframe>
+										<update_required>false</update_required>
+										<preconds>Receive a notification for a transaction request to increase notificationCounter by 1 and add a notificationDropDownMenuItem to notificationDropDownMenu.</preconds>
+										<steps>1. Select notificationFlag after log in to display notificationDropDownMenu.
+2. Select notificationDropDownMenuItem for transaction request.</steps>
+										<expected>1. notificationDropDownMenu dismissed.
+2. requestDetailScreen displays.
+3. notificationCounter decreases by 1 (triggered by display of related requestDetailScreen; NOT selection of notificationDropDownMenuItem on notificationDropDownMenu).
+4. Related notificationDropDownMenuItem is removed from notificationDropDownMenu (triggered by display of requestDetailScreen; NOT selection of notificationDropDownMenuItem on notificationDropDownMenu).
+5. /notify records time stamp for received_time.</expected>
+										<html_id><item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+</html_id>
+										<notification_method><item>
+<id>1</id><value>webclient</value></item>
+</notification_method>
+										<notification_type><item>
+<id>2</id><value>ask200</value></item>
+</notification_type>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C61</id>
+				<title>Decreased notificationCounter and removed notificationDropDownMenuItem unchanged after log out and log in</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Decrease notificationCounter and remove notificationDropDownMenuItem by displaying related requestDetailScreen.
+2. Log out.
+3. Log in.</steps>
+										<expected>1. notificationCounter unchanged.
+2. notificationDropDownMenuItem remains absent from notificationDropDownMenu.</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>73</id><value>notificationDropDownMenu</value></item>
+<item>
+<id>74</id><value>notificationDropDownMenuItem</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C64</id>
+				<title>rejectButton displays areYouCertainPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQVnZxZDBBTWhEeDg</screen_asset>
+										<update_required>false</update_required>
+										<preconds>Receive a transaction request.</preconds>
+										<steps>1. Select rejectButton on requestDetailScreen.</steps>
+										<expected>areYouCertainPopup displays:
+1. cancelButton
+2. yesButton</expected>
+										<html_id><item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>21</id><value>areYouCertainPopup</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>99</id><value>yesButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C65</id>
+				<title>Dismiss areYourCertainPopup after selecting rejectButton</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Select rejectButton on requestDetailScreen to display areYouCertainPopup.
+2. Select cancelButton on areYouCertainPopup.</steps>
+										<expected>1. areYouCertainPopup dismissed.
+2. /transaction NOT requested to add time stamp to rejection_time property of transaction record.
+2. Transaction remains listed as active on requestScreen.</expected>
+										<html_id><item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>21</id><value>areYouCertainPopup</value></item>
+<item>
+<id>66</id><value>cancelButton</value></item>
+<item>
+<id>78</id><value>rejectButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																																																					<case>
+				<id>C66</id>
+				<title>transactionRejectedPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQVnZxZDBBTWhEeDg</screen_asset>
+										<update_required>false</update_required>
+										<status_code><item>
+<id>1</id><value>200</value></item>
+</status_code>
+										<steps>1. Select rejectButton on requestDetailScreen to display areYouCertainPopup.
+2. Select yesButton on areYouCertainPopup to request /transaction to add rejection_time property &amp; time stamp to transact record.</steps>
+										<expected>1. /transaction returns 200.
+2. requestScreen displays rejectedButton state, and sorted according to most recent rejected (newly-rejected request at top of list).
+3. transactionRejectedPopup displaying an okButton and newButton.</expected>
+										<html_id><item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>21</id><value>areYouCertainPopup</value></item>
+<item>
+<id>30</id><value>transactionRejectedPopup</value></item>
+<item>
+<id>67</id><value>newButton</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>99</id><value>yesButton</value></item>
+</html_id>
+										<property_key><item>
+<id>31</id><value>rejection_time</value></item>
+</property_key>
+										<object_name><item>
+<id>3</id><value>transaction</value></item>
+</object_name>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C67</id>
+				<title>homeScreen from transactionRejectedPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<preconds>Receive a transaction request.</preconds>
+										<steps>1. Reject transaction request.
+2. Select newButton on transactionRejectedPopup.</steps>
+										<expected>homeScreen displays.</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>16</id><value>requestDetailScreen</value></item>
+<item>
+<id>30</id><value>transactionRejectedPopup</value></item>
+<item>
+<id>67</id><value>newButton</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C68</id>
+				<title>Dismiss transactionRejectedPopup</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<steps>1. Reject transaction request.
+2. Select okButton on transactionRejectedPopup.</steps>
+										<expected>1. transactionRejectedPopup dismissed.
+2. requestScreen displays rejectedButton state, and sorted according to most recent rejected (newly-rejected request at top of list).</expected>
+										<html_id><item>
+<id>15</id><value>requestScreen</value></item>
+<item>
+<id>30</id><value>transactionRejectedPopup</value></item>
+<item>
+<id>68</id><value>okButton</value></item>
+<item>
+<id>76</id><value>rejectedButton</value></item>
+<item>
+<id>79</id><value>requestItemDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+								</cases>
+							</section>
+	</sections>
+			</section>
+			<section>
+		<name>History</name>
+		<description></description>
+						
+		<cases>
+									
+																										<case>
+				<id>C39</id>
+				<title>historyScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1W4KTDjrqXGz7Xvv56529XBKnOoDdwBZzqUyHPuYQGbE/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQTm5XQ3V3VjVlUXc</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select mainNavMenuButton on homeScreen to display mainNavDropDownMenu.
+2. Select mainNavHistoryButton.</steps>
+										<expected>historyScreen displays:
+1. homeButton
+2. notificationCounter
+3. notificationFlag
+4. mainNavMenu
+5. debitorAccountBalanceDisplayCell
+6. a historyItemDisplayCell for every transaction existing in account&apos;s history</expected>
+										<html_id><item>
+<id>12</id><value>homeScreen</value></item>
+<item>
+<id>13</id><value>historyScreen</value></item>
+<item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>80</id><value>historyItemDisplayCell</value></item>
+<item>
+<id>81</id><value>mainNavMenuButton</value></item>
+<item>
+<id>84</id><value>mainNavHistoryButton</value></item>
+<item>
+<id>102</id><value>mainNavDropDownMenu</value></item>
+<item>
+<id>105</id><value>debitorAccountBalanceDisplayCell</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C40</id>
+				<title>historyDetailScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<wireframe>https://docs.google.com/drawings/d/1W4KTDjrqXGz7Xvv56529XBKnOoDdwBZzqUyHPuYQGbE/edit?usp=sharing</wireframe>
+										<screen_asset>https://drive.google.com/open?id=0B9xlXsaN9dVQSXBWRlZTWnpCTE0</screen_asset>
+										<update_required>false</update_required>
+										<steps>1. Select historyItemDisplayCell on historyScreen.</steps>
+										<expected>historyDetailScreen displays:
+1. homeButton
+2. notificationCounter
+3. notificationFlag
+4. mainNavMenu
+5. backButton
+6. creditorAccountDisplayCell
+7. sumTransactionItemValueDisplayCell
+8. transactionTimeDisplayCell
+9. a list of transactionItemDisplayCell(s) each identifying the quanity, value, and name of a transaction_item
+10. trsInstanceIdDisplayCell
+11. preTransactionBalanceDisplayCell
+12. concurrentTransactionValueDisplay
+13. postTransactionBalanceDisplayCell
+14. disputeTransactionButton</expected>
+										<html_id><item>
+<id>13</id><value>historyScreen</value></item>
+<item>
+<id>14</id><value>historyDetailScreen</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>69</id><value>emailCopyButton</value></item>
+<item>
+<id>70</id><value>disputeTransactionButton</value></item>
+<item>
+<id>71</id><value>homeButton</value></item>
+<item>
+<id>72</id><value>notificationFlag</value></item>
+<item>
+<id>80</id><value>historyItemDisplayCell</value></item>
+<item>
+<id>81</id><value>mainNavMenuButton</value></item>
+<item>
+<id>106</id><value>sumTransactionItemValueDisplayCell</value></item>
+<item>
+<id>107</id><value>notificationCounter</value></item>
+<item>
+<id>110</id><value>transactionItemDisplayCell</value></item>
+<item>
+<id>111</id><value>preTransactionBalanceDisplayCell</value></item>
+<item>
+<id>115</id><value>transactionTimeDisplayCell</value></item>
+<item>
+<id>116</id><value>creditorAccountDisplayCell</value></item>
+<item>
+<id>117</id><value>trsInstanceIdDisplayCell</value></item>
+<item>
+<id>118</id><value>concurrentTransactionValueDisplayCell</value></item>
+<item>
+<id>119</id><value>postTransactionBalanceDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+												
+																										<case>
+				<id>C41</id>
+				<title>historyScreen from historyDetailScreen</title>
+												<template>Test Case (Text)</template>
+																<type>Other</type>
+																<priority>Medium</priority>
+																<estimate></estimate>
+																																																<references></references> 
+																				<custom>
+										<update_required>false</update_required>
+										<preconds>Create 2 transactions.</preconds>
+										<steps>1. Select first historyItemDisplayCell on historyScreen.
+2. Select the backButton.
+3. Select second historyItemDisplayCell on historyScreen.
+4. Select the backButton .</steps>
+										<expected>historyScreen displayed twice.
+Both historyItemDisplayCell(s) displayed their corresponding historyDetailScreen(s).</expected>
+										<html_id><item>
+<id>13</id><value>historyScreen</value></item>
+<item>
+<id>14</id><value>historyDetailScreen</value></item>
+<item>
+<id>37</id><value>backButton</value></item>
+<item>
+<id>80</id><value>historyItemDisplayCell</value></item>
+</html_id>
+									</custom>
+							</case>
+								</cases>
+							</section>
+	</sections>
+			</section>
+	</sections>
+</suite>

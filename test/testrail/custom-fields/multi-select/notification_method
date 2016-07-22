@@ -1,0 +1,6 @@
+1, webclient
+2, email
+3, sms
+4, apns
+5, fcm
+6, api
