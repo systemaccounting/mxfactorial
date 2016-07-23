@@ -21,7 +21,7 @@ This open-source project is intended to exploit the software engineering communi
 * If you're not familiar with Node.js, or don't know how to code, begin the [freecodecamp.com](https://www.freecodecamp.com/) curriculum.
 * Learn to build & deploy a web application on Firebase by [completing a sample](https://firebase.google.com/docs/samples/).
 * Learn to deploy a Node.js web application by completing the Google App Engine ['Hello World!' tutorial](https://cloud.google.com/nodejs/getting-started/hello-world).
-* Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://github.com/systemaccounting/mxfactorial/wiki/Code-Delivery-Workflow).
+* Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://docs.google.com/document/d/1UGklz7LwzES3t6i5IZrnt-ZwLeEFaeWhqaocFE3C9QE/edit?usp=sharing).
  
 Details as of 7/7/2016:
 - Production: [mxfactorial.io](https://mxfactorial.io/)
