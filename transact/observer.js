@@ -15,9 +15,12 @@ ref.on('child_added', function (snapshot, prevChildKey) {
         receiver_account: transaction.cr_author || null,
         type: 'bid200',
         method: 'webclient',
-        payload: _.reduce(transaction.transaction_item, function (memo, item) {
-          return memo + item.quantity * item.value;
-        }, 0),
+        payload: {
+          total: _.reduce(transaction.transaction_item, function (memo, item) {
+            return memo + item.quantity * item.value;
+          }, 0),
+          expiration_time: transaction.expiration_time || null
+        },
         sent_time: new Date().toISOString(),
         received_time: null
       });

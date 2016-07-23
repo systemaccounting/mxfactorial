@@ -23,7 +23,7 @@ export default class TransactionRequests extends Component {
         <div className='transaction-item-header'>
           <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested
         </div>
-        <div className='font22 text-right'>({ item.payload.toFixed(3) })</div>
+        <div className='font22 text-right'>({ item.payload.total.toFixed(3) })</div>
       </div>
     ));
   }

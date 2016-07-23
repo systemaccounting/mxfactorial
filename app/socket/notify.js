@@ -1,5 +1,6 @@
 /* eslint no-console: 0 */
 import io from 'socket.io-client';
+import values from 'lodash/values';
 
 import { SOCKET_URL } from 'constants/index';
 import extractJwt from 'extract-jwt';
@@ -7,6 +8,7 @@ import extractJwt from 'extract-jwt';
 import {
   receivedNotifications, addNotification, updateNotification, removeNotification
 } from 'actions/notificationActions';
+import { getTransactionById } from 'actions/transactionActions';
 
 const link = `${SOCKET_URL}notification`;
 const notifyHub = io.connect(link);
@@ -35,6 +37,7 @@ notifyHub.on('authenticated', () => {
 
 notifyHub.on('child_added', (data) => {
   dispatchAction(addNotification(data));
+  dispatchAction(getTransactionById(values(data)[0].key));
 });
 
 notifyHub.on('child_changed', (data) => {

@@ -34,7 +34,7 @@ export default class NotificationMenu extends Component {
             <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested
           </div>
           <div className='text-right'>
-            { item.payload.toFixed(3) }
+            { item.payload.total.toFixed(3) }
           </div>
         </li>
       </Link>
