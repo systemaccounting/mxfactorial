@@ -6,7 +6,7 @@ var notificationHub = require('notification/hub');
 module.exports = function (httpServer) {
   var io = require('socket.io')(httpServer);
 
-  var notify = io.of('/notify');
+  var notify = io.of('/notification');
 
   notify
     .on('connection', socketioJwt.authorize({

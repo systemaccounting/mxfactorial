@@ -1,8 +1,7 @@
 import pickBy from 'lodash/pickBy';
 import { createSelector } from 'reselect';
-
-const getNotifications = (state) => (state.notifications);
+import getNotifications from './state';
 
 export default createSelector([getNotifications], (notifications) => {
-  return pickBy(notifications, (notification) => (!notification.read));
+  return pickBy(notifications, (notification) => (!notification.received_time));
 });

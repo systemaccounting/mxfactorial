@@ -41,14 +41,17 @@ export default class TransactionRequestDetail extends Component {
   }
 
   render() {
-    const { transaction, transactionTotal, transactId } = this.props;
+    const { transaction, transactionTotal, transactId, notification } = this.props;
 
     return (
       <div className='transaction-details'>
         <Header className='font18'/>
         <div className='container' style={ { width: 300 } }>
           <TransactionHeader/>
-          <TransactionInfo transaction={ transaction } transactionTotal={ transactionTotal } />
+          <TransactionInfo
+            transaction={ transaction }
+            transactionTotal={ transactionTotal }
+            notification={ notification }/>
           <TransactionAction
             handleTransact={ () => { this.setState({ showTransactionPopup: true }); } }
             handleReject={ this.handleReject } />
@@ -76,7 +79,8 @@ TransactionRequestDetail.propTypes = {
   transactId: PropTypes.string,
   getTransactionById: PropTypes.func,
   transaction: PropTypes.object,
-  transactionTotal: PropTypes.number
+  transactionTotal: PropTypes.number,
+  notification: PropTypes.object
 };
 
 TransactionRequestDetail.defaultProps = {

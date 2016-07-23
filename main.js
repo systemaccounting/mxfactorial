@@ -11,6 +11,7 @@ var cors = require('cors');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
 var socketServer = require('socket-server');
+require('transact/observer');
 
 var app = express();
 
@@ -31,7 +32,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/systemaccounting/account', require('./account/crud'));
-app.use('/systemaccounting/transact', require('./transact/crud'));
+app.use('/systemaccounting/transaction', require('./transact/crud'));
 
 // Targets index.html for Node.js Flexible Environment
 // See default value for index property of express.static method:

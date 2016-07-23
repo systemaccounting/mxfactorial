@@ -20,6 +20,7 @@ import AccountProfileConfirm from 'containers/AccountProfileSetting/AccountProfi
 
 import TransactionRequestDetail from 'containers/TransactionRequestDetail';
 import TransactionRequests from 'containers/Requests/TransactionRequests';
+import RequestSentPopup from 'containers/Requests/RequestSentPopup';
 
 import { requireAuth, handleLogout } from './auth-hooks';
 
@@ -42,7 +43,9 @@ export default (store) => {
 
       <Route path='/TransactionDetails' component={ TransactionDetails } onEnter={ handleEnter }/>
 
-      <Route path='/Requests' component={ TransactionRequests } onEnter={ handleEnter }/>
+      <Route path='/Requests' component={ TransactionRequests } onEnter={ handleEnter }>
+        <Route path='RequestSent' component={ RequestSentPopup }/>
+      </Route>
 
       <Route path='/TransactionRequestDetail/:id' component={ TransactionRequestDetail } onEnter={ handleEnter }/>
 

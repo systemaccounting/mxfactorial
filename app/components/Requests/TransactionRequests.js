@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import map from 'lodash/map';
-import transactionTotal from 'selectors/transaction/transaction-total';
+
+import TimeAgo from 'components/TimeAgo';
 
 export default class TransactionRequests extends Component {
   constructor(props) {
@@ -14,13 +15,15 @@ export default class TransactionRequests extends Component {
 
   renderTransactionItems() {
     const that = this;
-    const { transactions } = this.props;
+    const { notifications } = this.props;
 
-    return map(transactions, (item, key) => (
+    return map(notifications, (item, key) => (
       <div className='indicator radius5 transaction-history__item' key={ key }
-        onClick={ that.navigateToDetail.bind(that, key) }>
-        <div className='transaction-item-header'>35 seconds ago, { item.cr_author }</div>
-        <div className='font22 text-right'>({ transactionTotal(item.transaction_item).toFixed(3) })</div>
+        onClick={ that.navigateToDetail.bind(that, item.key) }>
+        <div className='transaction-item-header'>
+          <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested
+        </div>
+        <div className='font22 text-right'>({ item.payload.toFixed(3) })</div>
       </div>
     ));
   }
@@ -35,7 +38,7 @@ export default class TransactionRequests extends Component {
 }
 
 TransactionRequests.propTypes = {
-  transactions: PropTypes.object
+  notifications: PropTypes.object
 };
 
 TransactionRequests.contextTypes = {

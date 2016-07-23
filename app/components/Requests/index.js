@@ -10,22 +10,24 @@ export default class Requests extends Component {
   }
 
   render() {
-    const { transactions, requestsFilter, setRequestsFilter } = this.props;
+    const { requestsFilter, setRequestsFilter, notifications, children } = this.props;
 
     return (
       <PageLayout className='transaction-requests'>
         <FilterAction filter={ requestsFilter }
           handleActive={ setRequestsFilter.bind(this, 'active') }
           handleRejected={ setRequestsFilter.bind(this, 'rejected') }/>
-        <TransactionRequests transactions={ transactions }/>
+        <TransactionRequests notifications={ notifications }/>
+        { children }
       </PageLayout>
     );
   }
 }
 
 Requests.propTypes = {
-  transactions: PropTypes.object,
+  notifications: PropTypes.object,
   setRequestsFilter: PropTypes.func,
   requestsFilter: PropTypes.string,
-  getTransaction: PropTypes.func
+  getTransaction: PropTypes.func,
+  children: PropTypes.node
 };

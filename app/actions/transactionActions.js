@@ -16,7 +16,7 @@ export const updateCRAccount = createAction(UPDATE_CR_ACCOUNT);
 export const clearTransaction = createAction(CLEAR_TRANSACTION);
 export const updateError = createAction(UPDATE_ERROR);
 
-export const TRANSACT_PATH = '/transact';
+export const TRANSACT_PATH = '/transaction';
 
 export const POST_TRANSACTION = 'POST_TRANSACTION';
 export const postTransaction = post(TRANSACT_PATH, POST_TRANSACTION);

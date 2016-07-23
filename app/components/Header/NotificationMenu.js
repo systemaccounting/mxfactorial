@@ -2,8 +2,9 @@ import map from 'lodash/map';
 import keys from 'lodash/keys';
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
-import { Button, Wrapper, Menu } from 'react-aria-menubutton';
+import { Button, Wrapper, Menu, MenuItem } from 'react-aria-menubutton';
 
+import TimeAgo from 'components/TimeAgo';
 import Flag from 'images/flag.png';
 import './NotificationMenu.scss';
 
@@ -17,7 +18,10 @@ export default class NotificationMenu extends Component {
 
   handleClear(event) {
     event.preventDefault();
-    this.props.clearAll();
+    const { notifications, clearAll } = this.props;
+
+    clearAll(keys(notifications));
+
   }
 
   renderNotifications() {
@@ -27,10 +31,10 @@ export default class NotificationMenu extends Component {
       <Link to={ `/TransactionRequestDetail/${item.key}` } key={ key }>
         <li className='padding14'>
           <div>
-            { item.sent_time }, { item.sender_account } requested
+            <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested
           </div>
           <div className='text-right'>
-            { item.payload }
+            { item.payload.toFixed(3) }
           </div>
         </li>
       </Link>
@@ -39,21 +43,24 @@ export default class NotificationMenu extends Component {
 
   render() {
     const { notifications } = this.props;
+    const numOfNotifications = keys(notifications).length;
 
     return (
       <Wrapper className='icon' onSelection={ this.handleSelection }>
-        <Button className='notification--button'>
+        <Button className='notification--button' disabled={ !numOfNotifications }>
           <div className='flag_icon icon' style={ { marginRight: '10px' } }>
-            <span>{ keys(notifications).length || null }</span><img src={ Flag }/>
+            <span>{ numOfNotifications || null }</span><img src={ Flag }/>
           </div>
         </Button>
         <Menu className='notification--menu'>
           <ul>
-            <a onClick={ this.handleClear } href='#'>
-              <li className='text-right padding14'>
-                Clear all <i className='circle-x'/>
-              </li>
-            </a>
+            <MenuItem>
+              <a onClick={ this.handleClear } href='#'>
+                <li className='text-right padding14'>
+                  Clear all <i className='circle-x'/>
+                </li>
+              </a>
+            </MenuItem>
             { this.renderNotifications() }
           </ul>
         </Menu>

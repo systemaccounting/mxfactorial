@@ -21,17 +21,14 @@ var subscribe = function (socket) {
     modelInstance
       .findAll()
       .then(function (snapshot) {
-        var notifications = _.filter(snapshot.val(), function (notification) {
-          return !notification.read;
-        });
-        socket.emit('value', notifications);
+        socket.emit('value', snapshot.val());
       }).catch(function (error) {
         socket.emit('value_error', error);
       });
   });
 
-  socket.on('read_all', function () {
-    modelInstance.updateAll({ read: true });
+  socket.on('read_all', function (keys) {
+    modelInstance.updateSelected(keys, { received_time: new Date() });
   });
 
   socket.on('disconnect', function () {

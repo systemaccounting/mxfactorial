@@ -40,6 +40,10 @@ module.exports = function (config) {
             test: /\.(png|gif|jpe?g|svg)$/i,
             loader: 'file-loader?name=static/images/[name].[ext]',
             exclude: '/node_modules/'
+          },
+          {
+            test: /\.json$/,
+            loaders: ['json-loader']
           }
         ],
         postLoaders: [{

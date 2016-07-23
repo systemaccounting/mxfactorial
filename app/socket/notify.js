@@ -8,7 +8,7 @@ import {
   receivedNotifications, addNotification, updateNotification, removeNotification
 } from 'actions/notificationActions';
 
-const link = `${SOCKET_URL}notify`;
+const link = `${SOCKET_URL}notification`;
 const notifyHub = io.connect(link);
 let cachedToken;
 let connected = false;
@@ -22,7 +22,6 @@ const dispatchAction = (action) => {
 };
 
 notifyHub.on('connect', () => {
-  console.log('connected', notifyHub);
   connected = true;
   if (cachedToken) {
     authenticate(cachedToken);
@@ -31,7 +30,6 @@ notifyHub.on('connect', () => {
 
 notifyHub.on('authenticated', () => {
   authenticated = true;
-  console.log('you are in');
   notifyHub.emit('value');
 });
 
@@ -48,12 +46,7 @@ notifyHub.on('child_removed', (data) => {
 });
 
 notifyHub.on('value', (notifications) => {
-  console.log(notifications);
   dispatchAction(receivedNotifications(notifications));
-});
-
-notifyHub.on('value_error', (error) => {
-  console.log(error);
 });
 
 notifyHub.on('unauthorized', (error) => {

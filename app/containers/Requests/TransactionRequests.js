@@ -4,12 +4,12 @@ import { connect } from 'react-redux';
 import Requests from 'components/Requests';
 import { getTransaction } from 'actions/transactionActions';
 import { setRequestsFilter } from 'actions/requestActions';
-import { requestTransactionSelector } from 'selectors/transaction/transaction-requests';
+import rejectActiveSelector from 'selectors/notification/reject-active';
 
 function mapStateToProps(state) {
   return {
-    transactions: requestTransactionSelector(state),
-    requestsFilter: state.requestsFilter
+    requestsFilter: state.requestsFilter,
+    notifications: rejectActiveSelector(state)
   };
 }
 

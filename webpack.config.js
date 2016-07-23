@@ -10,8 +10,11 @@ module.exports = {
     port: 8080
   },
   resolve: {
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['', '.json', '.js', '.jsx'],
     modulesDirectories: ['node_modules', 'app', 'static']
+  },
+  resolveLoader: {
+    packageMains: ['json-loader']
   },
   module: {
     loaders: [
@@ -37,6 +40,9 @@ module.exports = {
         test: /\.(png|gif|jpe?g|svg)$/i,
         loader: 'file-loader?name=static/images/[name].[ext]',
         exclude: '/node_modules/'
+      }, {
+        test: /\.json$/,
+        loaders: ['json-loader']
       }
     ]
   }
