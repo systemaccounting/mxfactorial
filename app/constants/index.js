@@ -19,7 +19,7 @@ export const GET_EMPTY_TRANSACTION = (key, info)=>(merge({
   value: 0,
   quantity: 0,
   cr_account: '',
-  db_account: 'Sandy',
+  db_account: '',
   units_measured: '',
   unit_of_measurement: ''
 }, info));

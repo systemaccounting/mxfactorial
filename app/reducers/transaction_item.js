@@ -12,7 +12,7 @@ let increment = 0;
 export default handleActions({
   [ADD_TRANSACTION]: (state, action) => {
     const transaction_item = cloneTransactionItem(state);
-    transaction_item.push(GET_EMPTY_TRANSACTION(increment++, { cr_account: action.payload }));
+    transaction_item.push(GET_EMPTY_TRANSACTION(increment++, action.payload));
     return transaction_item;
   },
   [REMOVE_TRANSACTION]: (state, action) => {

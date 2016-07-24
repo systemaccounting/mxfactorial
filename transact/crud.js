@@ -39,7 +39,8 @@ router.post('/', passport.authenticate('jwt', { session: false }), function (req
     db_time: moment().format('HH:mm'),
     db_latlng: body.db_latlng,
     cr_time: moment().format('HH:mm'),
-    cr_latlng: body.cr_latlng
+    cr_latlng: body.cr_latlng,
+    created_by: req.user.username
   };
 
   transaction_item = _.map(transaction_item, function (item) {

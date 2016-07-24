@@ -11,8 +11,18 @@ describe('transactionActions creator', () => {
 
   describe('#addTransaction', () => {
     it('should return ADD_TRANSACTION action', () => {
-      addTransaction().should.eql({
-        type: ADD_TRANSACTION
+      addTransaction('jim')((d) => (d), () => ({
+        auth: {
+          user: {
+            account: 'jack'
+          }
+        }
+      })).should.eql({
+        type: ADD_TRANSACTION,
+        payload: {
+          cr_account: 'jim',
+          db_account: 'jack'
+        }
       });
     });
   });

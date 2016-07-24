@@ -9,7 +9,12 @@ export const UPDATE_CR_ACCOUNT = 'UPDATE_CR_ACCOUNT';
 export const CLEAR_TRANSACTION = 'CLEAR_TRANSACTION';
 export const UPDATE_ERROR = 'UPDATE_ERROR';
 
-export const addTransaction = createAction(ADD_TRANSACTION);
+export const addTransaction = (cr_account) => ((dispatch, getState) => (
+  dispatch(createAction(ADD_TRANSACTION)({
+    cr_account,
+    db_account: getState().auth.user.account
+  }))
+));
 export const removeTransaction = createAction(REMOVE_TRANSACTION);
 export const updateTransaction = createAction(UPDATE_TRANSACTION);
 export const updateCRAccount = createAction(UPDATE_CR_ACCOUNT);

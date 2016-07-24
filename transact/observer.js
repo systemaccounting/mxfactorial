@@ -11,8 +11,9 @@ ref.on('child_added', function (snapshot, prevChildKey) {
     if (!snapshot.val()) {
       notifyRef.push({
         key: transactionKey,
-        sender_account: transaction.db_author || null,
-        receiver_account: transaction.cr_author || null,
+        sender_account: transaction.created_by || null,
+        receiver_account: (transaction.created_by != transaction.db_author ?
+          transaction.db_author : transaction.cr_author) || null,
         payload: {
           total: _.reduce(transaction.transaction_item, function (memo, item) {
             return memo + item.quantity * item.value;
