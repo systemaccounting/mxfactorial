@@ -8,7 +8,7 @@ const getTransactionItem = (state, props) => {
 export const transactionAmountSelector = createSelector([getTransactionItem], transactionTotal);
 
 export const newTransactionSelector = (state) => ({
-  db_author: 'Sandy',
+  db_author: state.auth.user.account,
   cr_author: state.cr_account,
   db_time: '',
   db_latlng: '0,0',

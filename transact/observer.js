@@ -13,13 +13,10 @@ ref.on('child_added', function (snapshot, prevChildKey) {
         key: transactionKey,
         sender_account: transaction.db_author || null,
         receiver_account: transaction.cr_author || null,
-        type: 'bid200',
-        method: 'webclient',
         payload: {
           total: _.reduce(transaction.transaction_item, function (memo, item) {
             return memo + item.quantity * item.value;
-          }, 0),
-          expiration_time: transaction.expiration_time || null
+          }, 0)
         },
         sent_time: new Date().toISOString(),
         received_time: null

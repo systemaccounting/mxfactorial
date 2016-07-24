@@ -159,8 +159,8 @@ describe('TransactionSection component', () => {
       }
     ];
     props.transaction = {
-      db_author: 'Sandy',
-      cr_author: '',
+      db_author: 'Mindy',
+      cr_author: 'Sandy',
       db_time: '',
       db_latlng: '0,0',
       cr_time: '',
@@ -168,7 +168,9 @@ describe('TransactionSection component', () => {
       transaction_item: [{
         name: 'item1',
         quantity: 1,
-        value: 25
+        value: 25,
+        db_account: 'Mindy',
+        cr_account: 'Sandy'
       }]
     };
     props.postTransaction = stub();
@@ -192,7 +194,7 @@ describe('TransactionSection component', () => {
     Simulate.click(btnOk);
     props.postTransaction.should.be.calledWith({
       db_author: 'Sandy',
-      cr_author: '',
+      cr_author: 'Mindy',
       db_time: '',
       db_latlng: '0,0',
       cr_time: '',
@@ -201,7 +203,9 @@ describe('TransactionSection component', () => {
       transaction_item: [{
         name: 'item1',
         quantity: 1,
-        value: 25
+        value: 25,
+        db_account: 'Sandy',
+        cr_account: 'Mindy'
       }]
     });
     push.should.be.calledWith('/Requests/RequestSent');

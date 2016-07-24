@@ -8,6 +8,7 @@ import TransactionItem from './TransactionItem';
 import ActionsSection from './ActionsSection';
 import TransactionPopup from './TransactionPopup';
 import RequestPopup from './RequestPopup';
+import swapTransactionDbCr from 'utils/swapTransactionDbCr';
 
 export default class TransactionSection extends Component {
   constructor(props) {
@@ -52,7 +53,7 @@ export default class TransactionSection extends Component {
   handleRequest(expirationTime) {
     const mergeAndPost = (position) => {
       const loc = buildLatLng(position);
-      const data = merge(this.props.transaction, {
+      const data = merge(swapTransactionDbCr(this.props.transaction), {
         db_latlng: loc,
         cr_latlng: loc,
         expiration_time: expirationTime

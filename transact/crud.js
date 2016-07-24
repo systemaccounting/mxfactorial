@@ -32,7 +32,7 @@ router.post('/', passport.authenticate('jwt', { session: false }), function (req
   }
 
   var transaction = {
-    db_author: req.user.username,
+    db_author: body.db_author,
     cr_author: body.cr_author,
     rejection_time: (body.rejection_time || null),
     expiration_time: moment().add(body.expiration_time||0, 'd').format(),

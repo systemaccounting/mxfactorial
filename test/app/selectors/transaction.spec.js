@@ -24,11 +24,16 @@ describe('transaction selector', () => {
         }
       ];
       const state = {
+        auth: {
+          user: {
+            account: 'Brad'
+          }
+        },
         cr_account: 'OOka',
         transaction_item
       };
       const expectedResult = {
-        db_author: 'Sandy',
+        db_author: 'Brad',
         cr_author: 'OOka',
         db_time: '',
         cr_time: '',
