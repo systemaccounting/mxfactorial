@@ -8,7 +8,7 @@ export default class TransactionAction extends Component {
     return (
       <div className='actions-section'>
         <div className={ `${buttonClass} btn__transact` } onClick={ handleTransact }>Transact</div>
-        <div className={ `${buttonClass} btn__request` } onClick={ handleReject }>Reject</div>
+        <div className={ `${buttonClass} btn__reject` } onClick={ handleReject }>Reject</div>
       </div>
 
     );

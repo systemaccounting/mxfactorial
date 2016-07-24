@@ -27,6 +27,7 @@ export default class TimeAgo extends Component {
   }
 
   updateCurrentTime() {
+    /* istanbul ignore next */
     this.setState({
       currentTime: moment()
     });
@@ -40,7 +41,7 @@ export default class TimeAgo extends Component {
 
     if (time.isBefore(currentTime)) {
       if (time.isAfter(moment(currentTime).subtract(60, 'seconds'))) {
-        return `${(currentTime - time) / 1000} seconds ago`;
+        return `${Math.round((currentTime - time) / 1000)} seconds ago`;
       } else if (time.isAfter(moment(currentTime).set({ hour: 0, minute: 0, second: 0 }))) {
         return `Today @ ${time.tz(TZ).format(DATE_FORMAT.timeOnlyWithTimezone)}`;
       } else if (time.isAfter(moment(currentTime).set({ day: -2, hour: 0, minute: 0, second: 0 }))) {

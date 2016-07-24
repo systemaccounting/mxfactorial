@@ -22,7 +22,7 @@ module.exports = function (config) {
     webpack: {
       resolve: {
         extensions: ['', '.js', '.jsx'],
-        modulesDirectories: ['node_modules', 'app', 'static']
+        modulesDirectories: ['node_modules', 'app', 'static', 'test']
       },
       module: {
         loaders: [
@@ -47,7 +47,7 @@ module.exports = function (config) {
           }
         ],
         postLoaders: [{
-          test: /\.(js|jsx)$/, exclude: /(node_modules|test)/,
+          test: /\.(js|jsx)$/, exclude: /(node_modules|test|app\/socket)/,
           loader: 'isparta'
         }]
       }

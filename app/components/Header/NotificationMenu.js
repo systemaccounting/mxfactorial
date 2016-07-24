@@ -34,7 +34,7 @@ export default class NotificationMenu extends Component {
             <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested
           </div>
           <div className='text-right'>
-            { item.payload.total.toFixed(3) }
+            { item.payload && item.payload.total.toFixed(3) || 0 }
           </div>
         </li>
       </Link>
@@ -55,7 +55,7 @@ export default class NotificationMenu extends Component {
         <Menu className='notification--menu'>
           <ul>
             <MenuItem>
-              <a onClick={ this.handleClear } href='#'>
+              <a onClick={ this.handleClear } href='#' className='clearAllButton'>
                 <li className='text-right padding14'>
                   Clear all <i className='circle-x'/>
                 </li>
