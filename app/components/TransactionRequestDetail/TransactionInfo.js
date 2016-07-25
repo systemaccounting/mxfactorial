@@ -10,7 +10,7 @@ export default class TransactionInfo extends Component {
       <div className='transaction-details__info'>
         <div className='indicator radius5 font22'>
           <div style={ { height: 40 } }>
-            { transaction.cr_author }
+            { transaction.created_by === transaction.db_author ? transaction.db_author : transaction.cr_author }
           </div>
         </div>
         <div className='indicator radius5 font22'>

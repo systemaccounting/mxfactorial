@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import map from 'lodash/map';
 
 import TimeAgo from 'components/TimeAgo';
+import chronologicalNotificationSort from 'utils/chronologicalNotificationSort';
 
 export default class TransactionRequests extends Component {
   constructor(props) {
@@ -17,8 +18,8 @@ export default class TransactionRequests extends Component {
     const that = this;
     const { notifications } = this.props;
 
-    return map(notifications, (item, key) => (
-      <div className='indicator radius5 transaction-history__item' key={ key }
+    return map(chronologicalNotificationSort(notifications), (item, key) => (
+      <div className='indicator radius5 transaction-history__item' key={ item.id }
         onClick={ that.navigateToDetail.bind(that, item.key) }>
         <div className='transaction-item-header'>
           <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested

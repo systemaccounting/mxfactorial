@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 
 import NotificationMenu from 'components/Header/NotificationMenu';
-import { clearAll } from 'actions/notificationActions';
+import { clearAll, readOne } from 'actions/notificationActions';
 import unread from 'selectors/notification/unread';
 
 function mapStateToProps(state) {
@@ -11,7 +11,8 @@ function mapStateToProps(state) {
 }
 
 const mapDispatchToProps = {
-  clearAll
+  clearAll,
+  readOne
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(NotificationMenu);

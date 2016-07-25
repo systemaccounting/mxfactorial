@@ -25,6 +25,13 @@ export default class TransactionRequestDetail extends Component {
     }
   }
 
+  componentWillReceiveProps(newProps) {
+    const { transactId, getTransactionById, transaction } = newProps;
+    if (isEmpty(transaction)) {
+      getTransactionById(transactId);
+    }
+  }
+
   handleTransact() {
     this.context.router.push('/TransactionHistory/success');
   }

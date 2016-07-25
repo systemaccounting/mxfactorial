@@ -31,6 +31,10 @@ var subscribe = function (socket) {
     modelInstance.updateSelected(keys, { received_time: new Date() });
   });
 
+  socket.on('read_one', function (key) {
+    modelInstance.update(key, { received_time: new Date() });
+  });
+
   socket.on('disconnect', function () {
     unsubscribe(socket);
   });

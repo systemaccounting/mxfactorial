@@ -9,7 +9,7 @@ import ParentFactory from 'helpers/parent-component';
 import TimeAgo from 'components/TimeAgo';
 import { DATE_FORMAT, TZ } from 'constants/index';
 
-describe('HomePage components', () => {
+describe('TimeAgo component', () => {
   let instance;
 
   afterEach(() => {
@@ -22,7 +22,7 @@ describe('HomePage components', () => {
     const Parent = ParentFactory(TimeAgo, { time: time.format() });
 
     instance = renderIntoDocument(
-      Parent()
+      <Parent/>
     );
 
     instance.refs.child.setState({

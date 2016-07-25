@@ -31,17 +31,21 @@ router.post('/', passport.authenticate('jwt', { session: false }), function (req
     return;
   }
 
+  var bid = req.user.username === body.db_author;
+
   var transaction = {
     db_author: body.db_author,
     cr_author: body.cr_author,
     rejection_time: (body.rejection_time || null),
-    expiration_time: moment().add(body.expiration_time||0, 'd').format(),
+    expiration_time: moment().add(body.expiration_time||7, 'd').format(),
     db_time: moment().format('HH:mm'),
     db_latlng: body.db_latlng,
     cr_time: moment().format('HH:mm'),
     cr_latlng: body.cr_latlng,
     created_by: req.user.username
   };
+
+  transaction = _.omit(transaction, bid ? ['cr_time', 'cr_latlng'] : ['db_time', 'db_latlng']);
 
   transaction_item = _.map(transaction_item, function (item) {
     return {

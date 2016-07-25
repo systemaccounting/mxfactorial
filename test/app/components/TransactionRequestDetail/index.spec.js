@@ -16,6 +16,7 @@ import TransactionInfo from 'components/TransactionRequestDetail/TransactionInfo
 import TransactionAction from 'components/TransactionRequestDetail/TransactionAction';
 import TransactionDetailItem from 'components/TransactionRequestDetail/TransactionDetailItem';
 import TransactionPopup from 'components/Transaction/TransactionPopup';
+import ParentFactory from 'helpers/parent-component';
 
 describe('TransactionRequestDetail components', () => {
   let instance;
@@ -74,13 +75,20 @@ describe('TransactionRequestDetail components', () => {
       transactionTotal,
       transaction: {}
     };
+
+    const Parent = ParentFactory(TransactionRequestDetail, emptyProps);
+
     instance = renderIntoDocument(
       <Provider store={ store }>
-        <TransactionRequestDetail { ...emptyProps }/>
+        <Parent/>
       </Provider>
     );
+    const parent = findRenderedComponentWithType(instance, Parent);
 
     getTransactionById.should.be.calledWith(transactId);
+
+    parent.setState({ transactId: '1' });
+    getTransactionById.should.be.calledWith('1');
   });
 
   it('should handleBack', () => {

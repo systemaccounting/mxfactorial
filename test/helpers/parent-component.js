@@ -1,13 +1,14 @@
-import React, { createFactory, createClass } from 'react';
+import React, { Component } from 'react';
 
 export default (Children, state={}) => (
-  createFactory(createClass({
-    getInitialState() {
-      return state;
-    },
+  class Parent extends Component {
+    constructor(props) {
+      super(props);
+      this.state = state;
+    }
 
     render() {
       return <Children ref='child' { ...this.state } />;
     }
-  }))
+  }
 );
