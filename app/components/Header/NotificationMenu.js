@@ -47,7 +47,7 @@ export default class NotificationMenu extends Component {
 
     return (
       <Wrapper className='icon' onSelection={ this.handleSelection }>
-        <Button className='notification--button' disabled={ !numOfNotifications }>
+        <Button className='notification--button'>
           <div className='flag_icon icon' style={ { marginRight: '10px' } }>
             <span>{ numOfNotifications || null }</span><img src={ Flag }/>
           </div>
