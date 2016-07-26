@@ -139,8 +139,6 @@ describe('TransactionSection component', () => {
       cr_author: '',
       db_time: '',
       db_latlng: '0,0',
-      cr_time: '',
-      cr_latlng: '0,0',
       transaction_item: [{
         name: 'item1',
         quantity: 1,
@@ -195,8 +193,6 @@ describe('TransactionSection component', () => {
     props.postTransaction.should.be.calledWith({
       db_author: 'Sandy',
       cr_author: 'Mindy',
-      db_time: '',
-      db_latlng: '0,0',
       cr_time: '',
       cr_latlng: '0,0',
       expiration_time: 5,

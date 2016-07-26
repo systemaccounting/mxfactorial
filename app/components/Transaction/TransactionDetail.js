@@ -1,4 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import numeral from 'numeral';
+
+import { MONEY_FORMAT } from 'constants/index';
 
 export default class TransactionDetail extends Component {
   constructor(props) {
@@ -28,7 +31,7 @@ export default class TransactionDetail extends Component {
         </div>
         <div className='indicator radius5 font22 text-right'>
           <div>
-            { transactionAmount.toFixed(3) }
+            { numeral(transactionAmount).format(MONEY_FORMAT) }
           </div>
         </div>
       </div>

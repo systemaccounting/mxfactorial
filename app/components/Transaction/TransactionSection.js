@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 
 import { getLocation, buildLatLng } from 'utils/geo';
 import TransactionDetail from './TransactionDetail';
@@ -38,7 +39,7 @@ export default class TransactionSection extends Component {
           db_latlng: loc,
           cr_latlng: loc
         });
-        this.props.postTransaction(data).then((action) => {
+        this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time'])).then((action) => {
           if (!action.error) {
             this.context.router.push('/TransactionHistory/success');
           }
@@ -58,7 +59,7 @@ export default class TransactionSection extends Component {
         cr_latlng: loc,
         expiration_time: expirationTime
       });
-      this.props.postTransaction(data).then((action) => {
+      this.props.postTransaction(omit(data, ['db_latlng', 'db_time'])).then((action) => {
         if (!action.error) {
           this.context.router.push('/Requests/RequestSent');
         }

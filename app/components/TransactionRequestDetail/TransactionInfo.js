@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import numeral from 'numeral';
 
+import { MONEY_FORMAT } from 'constants/index';
 import TimeAgo from 'components/TimeAgo';
 
 export default class TransactionInfo extends Component {
@@ -14,7 +16,8 @@ export default class TransactionInfo extends Component {
           </div>
         </div>
         <div className='indicator radius5 font22'>
-          ({ transactionTotal.toFixed(3) })
+          { numeral(transactionTotal * (notification && notification.payload
+            && notification.payload.direction || 1)).format(MONEY_FORMAT) }
         </div>
         <div className='indicator radius5'>
           <div className='text-left'>Time of request</div>

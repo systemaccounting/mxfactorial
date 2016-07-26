@@ -19,16 +19,29 @@ export default class TransactionRequestDetail extends Component {
   }
 
   componentDidMount() {
-    const { transactId, getTransactionById, transaction } = this.props;
+    const { transactId, getTransactionById, transaction, notification } = this.props;
     if (isEmpty(transaction)) {
       getTransactionById(transactId);
+    }
+    if (!isEmpty(notification)) {
+      this.emitReadNotification(notification);
     }
   }
 
   componentWillReceiveProps(newProps) {
-    const { transactId, getTransactionById, transaction } = newProps;
+    const { transactId, getTransactionById, transaction, notification } = newProps;
     if (isEmpty(transaction)) {
       getTransactionById(transactId);
+    }
+    if (isEmpty(this.props.notification) && !isEmpty(notification)) {
+      this.emitReadNotification(notification);
+    }
+  }
+
+  emitReadNotification(notification) {
+    const { readOne } = this.props;
+    if (!notification.received_time) {
+      readOne(notification.id);
     }
   }
 
@@ -43,6 +56,7 @@ export default class TransactionRequestDetail extends Component {
       <TransactionPopup
         handlePost={ this.handleTransact }
         transactionAmount={ this.props.transactionTotal }
+        direction={ this.props.notification.payload.direction }
         handleCancel={ () => (this.setState({ showTransactionPopup: false })) }/>
       : null;
   }
@@ -87,7 +101,8 @@ TransactionRequestDetail.propTypes = {
   getTransactionById: PropTypes.func,
   transaction: PropTypes.object,
   transactionTotal: PropTypes.number,
-  notification: PropTypes.object
+  notification: PropTypes.object,
+  readOne: PropTypes.func
 };
 
 TransactionRequestDetail.defaultProps = {

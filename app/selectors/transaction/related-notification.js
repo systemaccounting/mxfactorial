@@ -5,5 +5,10 @@ import getNotifications from 'selectors/notification/state';
 
 export default (state, id) => (values(pickBy(
   getNotifications(state),
-  (notification, key) => (notification.key===id))
+  (notification, key) => {
+    if (notification.key === id) {
+      notification.id = key;
+    }
+    return notification.key === id;
+  })
 )[0]);

@@ -17,7 +17,8 @@ ref.on('child_added', function (snapshot, prevChildKey) {
         payload: {
           total: _.reduce(transaction.transaction_item, function (memo, item) {
             return memo + item.quantity * item.value;
-          }, 0)
+          }, 0),
+          direction: transaction.created_by != transaction.db_author ? -1 : 1
         },
         sent_time: new Date().toISOString(),
         received_time: null

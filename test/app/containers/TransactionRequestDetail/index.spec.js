@@ -20,7 +20,8 @@ describe('TransactionRequestDetail container', () => {
     const store = configureStore({
       notifications: {
         0: {
-          key: '0'
+          key: '0',
+          payload: {}
         }
       },
       transactions: {

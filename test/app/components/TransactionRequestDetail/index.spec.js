@@ -22,8 +22,12 @@ describe('TransactionRequestDetail components', () => {
   let instance;
   let getTransactionById = spy();
   let transactId = '0';
+  let readOne = spy();
   let notification = {
-    key: transactId
+    id: '0',
+    key: transactId,
+    payload: {
+    }
   };
   let transaction = {
     transaction_item: [{
@@ -38,7 +42,8 @@ describe('TransactionRequestDetail components', () => {
     transactId,
     notification,
     transaction,
-    transactionTotal
+    transactionTotal,
+    readOne
   };
   const store = configureStore();
 
@@ -69,11 +74,14 @@ describe('TransactionRequestDetail components', () => {
   });
 
   it('should getTransactionById', () => {
+    const readOne = spy();
     const emptyProps = {
       getTransactionById,
       transactId,
       transactionTotal,
-      transaction: {}
+      transaction: {},
+      notification: {},
+      readOne
     };
 
     const Parent = ParentFactory(TransactionRequestDetail, emptyProps);
@@ -87,8 +95,15 @@ describe('TransactionRequestDetail components', () => {
 
     getTransactionById.should.be.calledWith(transactId);
 
-    parent.setState({ transactId: '1' });
+    parent.setState({
+      transactId: '1',
+      notification: {
+        id: '0',
+        payload: {}
+      }
+    });
     getTransactionById.should.be.calledWith('1');
+    readOne.should.be.calledWith('0');
   });
 
   it('should handleBack', () => {

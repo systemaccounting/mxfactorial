@@ -1,11 +1,14 @@
 import map from 'lodash/map';
 import React, { Component, PropTypes } from 'react';
+import numeral from 'numeral';
+
+import { MONEY_FORMAT } from 'constants/index';
 
 export default class TransactionDetailItem extends Component {
   renderItem(item, key) {
     return (
       <div className='indicator radius5' key={ key }>
-        { item.quantity } x { item.value.toFixed(3) } <br/> { item.name }
+        { item.quantity } x { numeral(item.value).format(MONEY_FORMAT) } <br/> { item.name }
       </div>
     );
   }

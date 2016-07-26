@@ -31,20 +31,4 @@ describe('NotificationMenu component', () => {
     Simulate.click(clearBtn);
     clearAll.should.be.calledWith(['0', '1']);
   });
-
-  it('should handle readOne', () => {
-    const readOne = spy();
-    const notifications = {
-      0: {}
-    };
-
-    instance = renderIntoDocument(
-      <NotificationMenu readOne={ readOne } notifications={ notifications }/>
-    );
-    const flagBtn = findRenderedDOMComponentWithClass(instance, 'notification--button');
-    Simulate.click(flagBtn);
-    const itemLink = findRenderedDOMComponentWithClass(instance, 'notification--item-link');
-    Simulate.click(itemLink);
-    readOne.should.be.calledWith('0');
-  });
 });

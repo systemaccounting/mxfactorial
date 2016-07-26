@@ -4,6 +4,7 @@ import TransactionRequestDetail from 'components/TransactionRequestDetail';
 import { getTransactionById } from 'actions/transactionActions';
 import { getTransactionSelector, transactionAmountSelector } from 'selectors/transaction/transaction-details';
 import relatedNotification from 'selectors/transaction/related-notification';
+import { readOne } from 'actions/notificationActions';
 
 function mapStateToProps(state, ownProps) {
   const { id } = ownProps.params;
@@ -17,7 +18,8 @@ function mapStateToProps(state, ownProps) {
 }
 
 const mapDispatchToProps = {
-  getTransactionById
+  getTransactionById,
+  readOne
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TransactionRequestDetail);

@@ -44,6 +44,7 @@
     "mongodb": "^2.1.7",
     "mysql": "^2.10.2",
     "nconf": "^0.8.4",
+    "numeral": "^1.5.3",
     "passport": "^0.3.2",
     "passport-jwt": "^2.0.0",
     "prompt": "^1.0.0",

@@ -26,8 +26,14 @@ describe('EmailPopup container', () => {
       }
     });
 
+    const location = {
+      query: {
+        email: 'abc@cba'
+      }
+    };
+
     instance = renderIntoDocument(
-      <EmailPopup store={ store } />
+      <EmailPopup store={ store } location={ location } />
     );
 
     findRenderedDOMComponentWithClass(instance, 'error-message').textContent.should.equal('Error');

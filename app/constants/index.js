@@ -13,6 +13,8 @@ export const DATE_FORMAT = Object.freeze({
   timeOnlyWithTimezone: 'h:mm A z'
 });
 
+export const MONEY_FORMAT = '(0,0.000)';
+
 export const GET_EMPTY_TRANSACTION = (key, info)=>(merge({
   key,
   name: '',

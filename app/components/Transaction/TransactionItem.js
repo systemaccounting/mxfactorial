@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import numeral from 'numeral';
 
+import { MONEY_FORMAT } from 'constants/index';
 import './TransactionItem.scss';
 
 export default class TransactionItem extends Component {
@@ -15,7 +17,8 @@ export default class TransactionItem extends Component {
         </div>
         <div className='input radius5 font22'>
           <input type='number' placeholder='value' className='text-center'
-            defaultValue={ item.value.toFixed(3) } onBlur={ handleUpdateField.bind(null, 'value') }/>
+            defaultValue={ numeral(item.value).format(MONEY_FORMAT) }
+            onBlur={ handleUpdateField.bind(null, 'value') }/>
         </div>
         <div>
           <div className='pull-left field--half field__label text-center'>

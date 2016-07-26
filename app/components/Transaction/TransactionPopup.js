@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
+import numeral from 'numeral';
 
+import { MONEY_FORMAT } from 'constants/index';
 import './TransactionPopup.scss';
 
 export default class TransactionPopup extends Component {
@@ -24,14 +26,14 @@ export default class TransactionPopup extends Component {
   }
 
   render() {
-    const { transactionAmount, handleCancel, transactionError } = this.props;
+    const { transactionAmount, handleCancel, transactionError, direction } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
       <div className='transaction-modal'>
         <div className='transaction-popup'>
           <div className='indicator radius5 font22 text-center transaction-amount'>
-              ({ transactionAmount.toFixed(3) })
+              { numeral(transactionAmount * direction).format(MONEY_FORMAT) }
           </div>
           <div>
             Enter password:
@@ -58,10 +60,12 @@ export default class TransactionPopup extends Component {
 TransactionPopup.propTypes = {
   transactionError: PropTypes.string,
   transactionAmount: PropTypes.number,
+  direction: PropTypes.number,
   handleCancel: PropTypes.func.isRequired,
   handlePost: PropTypes.func.isRequired
 };
 
 TransactionPopup.defaultProps = {
-  transactionAmount: 0
+  transactionAmount: 0,
+  direction: -1
 };

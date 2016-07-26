@@ -3,17 +3,18 @@ import keys from 'lodash/keys';
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
 import { Button, Wrapper, Menu, MenuItem } from 'react-aria-menubutton';
+import numeral from 'numeral';
 
 import TimeAgo from 'components/TimeAgo';
 import Flag from 'images/flag.png';
 import chronologicalNotificationSort from 'utils/chronologicalNotificationSort';
+import { MONEY_FORMAT } from 'constants/index';
 import './NotificationMenu.scss';
 
 export default class NotificationMenu extends Component {
   constructor(props) {
     super(props);
     this.handleClear = this.handleClear.bind(this);
-    this.handleReadOne = this.handleReadOne.bind(this);
   }
 
   handleSelection() {}
@@ -26,10 +27,6 @@ export default class NotificationMenu extends Component {
 
   }
 
-  handleReadOne(key) {
-    this.props.readOne(key);
-  }
-
   renderNotifications() {
     const { notifications } = this.props;
     if (notifications && keys(notifications).length) {
@@ -39,14 +36,15 @@ export default class NotificationMenu extends Component {
         <MenuItem key={ item.id }>
           <Link
             className='notification--item-link'
-            to={ `/TransactionRequestDetail/${item.key}` }
-            onClick={ this.handleReadOne.bind(this, item.id) }>
+            to={ `/TransactionRequestDetail/${item.key}` }>
             <li className='padding14'>
               <div>
                 <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested
               </div>
               <div className='text-right'>
-                { item.payload && item.payload.total.toFixed(3) || 0 }
+                { numeral(item.payload
+                  && item.payload.total * (item.payload.direction || 1)
+                  || 0).format(MONEY_FORMAT) }
               </div>
             </li>
           </Link>
@@ -93,6 +91,5 @@ export default class NotificationMenu extends Component {
 
 NotificationMenu.propTypes = {
   notifications: PropTypes.object,
-  clearAll: PropTypes.func,
-  readOne: PropTypes.func
+  clearAll: PropTypes.func
 };

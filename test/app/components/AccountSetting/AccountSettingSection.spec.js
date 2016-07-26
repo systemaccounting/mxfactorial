@@ -55,11 +55,17 @@ describe('AccountSettingSection component', () => {
     const ascInstance = findRenderedComponentWithType(instance, AccountSettingSection);
     ascInstance.context.router = { push };
 
-    const emailInput = findRenderedDOMComponentWithClass(instance, 'email-input');
+    const emailInput = findRenderedDOMComponentWithClass(instance, 'email--input');
+    emailInput.value='newmail@mail.com';
 
-    Simulate.click(emailInput);
+    Simulate.blur(emailInput);
 
-    push.should.be.calledWith('/AccountSetting/NewEmail');
+    push.should.be.calledWith({
+      pathname: '/AccountSetting/NewEmail',
+      query: {
+        email: 'newmail@mail.com'
+      }
+    });
   });
 
   it('should navigate to NewPassword', () => {
@@ -78,6 +84,6 @@ describe('AccountSettingSection component', () => {
 
     Simulate.click(btnChangePassword);
 
-    push.should.be.calledWith('/AccountSetting/NewPassword');
+    push.should.be.calledWith({ pathname: "/AccountSetting/NewPassword", query: null });
   });
 });

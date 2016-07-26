@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import map from 'lodash/map';
+import numeral from 'numeral';
 
+import { MONEY_FORMAT } from 'constants/index';
 import TimeAgo from 'components/TimeAgo';
 import chronologicalNotificationSort from 'utils/chronologicalNotificationSort';
 
@@ -24,7 +26,11 @@ export default class TransactionRequests extends Component {
         <div className='transaction-item-header'>
           <TimeAgo time={ item.sent_time }/>, { item.sender_account } requested
         </div>
-        <div className='font22 text-right'>({ item.payload && item.payload.total.toFixed(3) || 0 })</div>
+        <div className='font22 text-right'>
+          { numeral(item.payload
+            && item.payload.total * (item.payload.direction || 1)
+            || 0).format(MONEY_FORMAT) }
+        </div>
       </div>
     ));
   }
