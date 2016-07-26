@@ -1,5 +1,4 @@
 import React, { Component, PropTypes } from 'react';
-import isEqual from 'lodash/isEqual';
 
 export default class AccountProfileForm extends Component {
   constructor(props) {
