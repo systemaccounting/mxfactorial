@@ -1,4 +1,4 @@
-import { transactionAmountSelector, transactionSelector } from 'selectors/transaction';
+import { transactionAmountSelector, newTransactionSelector } from 'selectors/transaction/new-transaction';
 
 describe('transaction selector', () => {
 
@@ -14,7 +14,7 @@ describe('transaction selector', () => {
     });
   });
 
-  describe('#transactionSelector', () => {
+  describe('#newTransactionSelector', () => {
     it('should return correct post value', () => {
       const transaction_item = [
         {
@@ -24,11 +24,16 @@ describe('transaction selector', () => {
         }
       ];
       const state = {
+        auth: {
+          user: {
+            account: 'Brad'
+          }
+        },
         cr_account: 'OOka',
         transaction_item
       };
       const expectedResult = {
-        db_author: 'Sandy',
+        db_author: 'Brad',
         cr_author: 'OOka',
         db_time: '',
         cr_time: '',
@@ -36,7 +41,7 @@ describe('transaction selector', () => {
         cr_latlng: '0,0',
         transaction_item
       };
-      transactionSelector(state).should.eql(expectedResult);
+      newTransactionSelector(state).should.eql(expectedResult);
     });
   });
 

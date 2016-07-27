@@ -1,4 +1,5 @@
 import React from 'react';
+import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import { unmountComponentAtNode, findDOMNode } from 'react-dom';
 import {
@@ -29,7 +30,9 @@ describe('AccountSettingSection container', () => {
     });
 
     instance = renderIntoDocument(
-      <AccountSettingSection store={ store } />
+      <Provider store={ store }>
+        <AccountSettingSection/>
+      </Provider>
     );
 
     scryRenderedComponentsWithType(instance, AccountSettingSectionComponent).length.should.equal(1);

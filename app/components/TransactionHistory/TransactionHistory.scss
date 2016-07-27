@@ -11,21 +11,21 @@
     padding: 14px;
     margin-bottom: 10px;
   }
+}
 
-  .transaction-history__header {
-    text-align: center;
-    font-size: 18px;
-    color: #fff;
-    margin-bottom: 14px;
+.transaction-history__header {
+  text-align: center;
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 14px;
+}
+
+.transaction-history__item {
+  &:hover {
+    cursor: pointer;
   }
+}
 
-  .transaction-history__item {
-    &:hover {
-      cursor: pointer;
-    }
-
-    .transaction-item-header {
-      font-size: 10px;
-    }
-  }
+.transaction-item-header {
+  font-size: 10px;
 }

@@ -12,6 +12,9 @@ import cr_account from './cr_account';
 import transactionError from './transactionError';
 import accountSetting from './accountSetting';
 import auth from './auth';
+import notifications from './notifications';
+import transactions from './transactions';
+import requestsFilter from './requestsFilter';
 import { LOGOUT } from 'actions/authActions';
 
 const appReducer = combineReducers({
@@ -21,7 +24,10 @@ const appReducer = combineReducers({
   cr_account,
   transactionError,
   accountSetting,
-  auth
+  auth,
+  notifications,
+  transactions,
+  requestsFilter
 });
 
 const rootReducer = (state, action) => {

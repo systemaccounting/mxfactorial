@@ -11,8 +11,11 @@ export default class AccountSettingSection extends Component {
     this.navigateToPage = this.navigateToPage.bind(this);
   }
 
-  navigateToPage(path) {
-    this.context.router.push(path);
+  navigateToPage(pathname, query) {
+    this.context.router.push({
+      pathname,
+      query
+    });
   }
 
   render() {
@@ -22,11 +25,11 @@ export default class AccountSettingSection extends Component {
       <div className='account-setting'>
         <Header headerTitle='Account Settings'/>
         <div className='container' style={ { width: 300 } }>
-          <EmailInput email={ email } handleClick={ this.navigateToPage.bind(null, '/AccountSetting/NewEmail') }/>
+          <EmailInput email={ email } handleBlur={ this.navigateToPage.bind(null, '/AccountSetting/NewEmail') }/>
           <NotificationSetting />
           <AccountSettingAction
-            handleChangePassword={ this.navigateToPage.bind(null, '/AccountSetting/NewPassword') }
-            handleEditProfile={ this.navigateToPage.bind(null, '/AccountProfile') }/>
+            handleChangePassword={ this.navigateToPage.bind(null, '/AccountSetting/NewPassword', null) }
+            handleEditProfile={ this.navigateToPage.bind(null, '/AccountProfile', null) }/>
           { children }
         </div>
       </div>

@@ -12,7 +12,7 @@ describe('transaction_item reducer', () => {
   });
 
   it('should handle ADD_TRANSACTION', () => {
-    const cr_account = 'Sandy';
+    const cr_account = '';
     const newTransaction = GET_EMPTY_TRANSACTION(0, { cr_account });
     transaction_item([], {
       type: ADD_TRANSACTION,
@@ -48,7 +48,7 @@ describe('transaction_item reducer', () => {
       value: 30,
       quantity: 0,
       cr_account: '',
-      db_account: 'Sandy',
+      db_account: '',
       units_measured: '',
       unit_of_measurement: ''
     }]);
@@ -64,7 +64,7 @@ describe('transaction_item reducer', () => {
       value: 0,
       quantity: 0,
       cr_account: 'David',
-      db_account: 'Sandy',
+      db_account: '',
       units_measured: '',
       unit_of_measurement: ''
     }]);

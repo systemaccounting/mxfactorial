@@ -1,8 +1,8 @@
 import {
   ADD_TRANSACTION, REMOVE_TRANSACTION, UPDATE_TRANSACTION, UPDATE_CR_ACCOUNT, CLEAR_TRANSACTION, UPDATE_ERROR,
   addTransaction, removeTransaction, updateTransaction, updateCRAccount, clearTransaction, updateError,
-  TRANSACT_PATH, POST_TRANSACTION,
-  postTransaction
+  TRANSACT_PATH, POST_TRANSACTION, GET_TRANSACTION_BY_ID,
+  postTransaction, getTransactionById
 } from 'actions/transactionActions';
 
 import { defaultHeaders } from 'actions/async';
@@ -11,8 +11,18 @@ describe('transactionActions creator', () => {
 
   describe('#addTransaction', () => {
     it('should return ADD_TRANSACTION action', () => {
-      addTransaction().should.eql({
-        type: ADD_TRANSACTION
+      addTransaction('jim')((d) => (d), () => ({
+        auth: {
+          user: {
+            account: 'jack'
+          }
+        }
+      })).should.eql({
+        type: ADD_TRANSACTION,
+        payload: {
+          cr_account: 'jim',
+          db_account: 'jack'
+        }
       });
     });
   });
@@ -78,6 +88,20 @@ describe('transactionActions creator', () => {
             url: TRANSACT_PATH,
             data,
             headers: defaultHeaders
+          }
+        }
+      });
+    });
+  });
+
+  describe('#getTransactionById', () => {
+    it('should return GET_TRANSACTION_BY_ID', () => {
+      getTransactionById('xkZt').should.eql({
+        type: GET_TRANSACTION_BY_ID,
+        payload: {
+          request: {
+            url: `${TRANSACT_PATH}/xkZt`,
+            params: undefined
           }
         }
       });

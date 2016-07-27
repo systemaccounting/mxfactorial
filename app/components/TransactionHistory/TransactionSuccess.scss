@@ -2,7 +2,7 @@
   &.transaction-popup__success {
     background-color: #d9ead3;
     .modal__footer {
-      .btn__new {
+      .btn__new, .btn__history {
         width: 100px;
         margin-right: 10px;
         border: none;

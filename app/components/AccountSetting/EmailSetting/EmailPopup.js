@@ -24,7 +24,7 @@ export default class EmailPopup extends Component {
   }
 
   render() {
-    const { email, errorMessage } = this.props;
+    const { location, errorMessage } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
@@ -35,7 +35,8 @@ export default class EmailPopup extends Component {
               Confirm new address:
             </div>
             <div className='input radius5 font22'>
-              <input ref='email' type='email' className='text-center' defaultValue={ email } required={ true }/>
+              <input ref='email' type='email' className='text-center'
+                defaultValue={ location.query.email } required={ true }/>
             </div>
             <div className='error-message'>
               { errorMessage }
@@ -57,12 +58,12 @@ export default class EmailPopup extends Component {
 }
 
 EmailPopup.propTypes = {
-  email: PropTypes.string,
   account: PropTypes.string,
   patchEmail: PropTypes.func,
   errorMessage: PropTypes.string,
   updateAccountSettingError: PropTypes.func,
-  emailChanged: PropTypes.func
+  emailChanged: PropTypes.func,
+  location: PropTypes.object
 };
 
 EmailPopup.contextTypes = {

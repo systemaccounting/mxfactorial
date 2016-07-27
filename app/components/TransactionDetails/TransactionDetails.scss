@@ -1,9 +1,6 @@
 .transaction-details {
 
   .indicator {
-    background-color: #efefef;
-    overflow: hidden;
-    padding: 14px;
     margin-bottom: 10px;
   }
 
@@ -45,5 +42,10 @@
       vertical-align: top;
       margin-left: 15px;
     }
+  }
+
+  .actions-section {
+    padding-top: 0px !important;
+    padding-bottom: 20px;
   }
 }

@@ -1,4 +1,5 @@
 import { getAccount, logout } from 'actions/authActions';
+import notifyHub, { authenticate, isConnected } from 'socket/notify';
 
 /* istanbul ignore next */
 export const requireAuth = (store) => (nextState, replace, done) => {
@@ -11,6 +12,8 @@ export const requireAuth = (store) => (nextState, replace, done) => {
             pathname: '/login',
             state: { nextPathname: nextState.location.pathname }
           });
+        } else {
+          authenticate(store.getState().auth.token);
         }
 
         done();
@@ -23,6 +26,7 @@ export const requireAuth = (store) => (nextState, replace, done) => {
       done();
     }
   } else {
+    authenticate(store.getState().auth.token);
     done();
   }
 };
@@ -30,6 +34,9 @@ export const requireAuth = (store) => (nextState, replace, done) => {
 /* istanbul ignore next */
 export const handleLogout = (store) => (nextState, replace) => {
   store.dispatch(logout());
+  if (isConnected()) {
+    notifyHub.disconnect();
+  }
   replace({
     pathname: '/login'
   });

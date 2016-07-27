@@ -13,6 +13,7 @@ import AddTransactionBtn from 'components/Transaction/AddTransactionBtn';
 import TransactionItem from 'components/Transaction/TransactionItem';
 import ActionsSection from 'components/Transaction/ActionsSection';
 import TransactionPopup from 'components/Transaction/TransactionPopup';
+import RequestPopup from 'components/Transaction/RequestPopup';
 
 describe('TransactionSection component', () => {
   let instance;
@@ -138,8 +139,6 @@ describe('TransactionSection component', () => {
       cr_author: '',
       db_time: '',
       db_latlng: '0,0',
-      cr_time: '',
-      cr_latlng: '0,0',
       transaction_item: [{
         name: 'item1',
         quantity: 1,
@@ -147,5 +146,98 @@ describe('TransactionSection component', () => {
       }]
     });
     push.should.be.calledWith('/TransactionHistory/success');
+  });
+
+  it('should open request popup', () => {
+    props.transaction_item = [
+      {
+        name: 'item1',
+        quantity: 1,
+        value: 25
+      }
+    ];
+    props.transaction = {
+      db_author: 'Mindy',
+      cr_author: 'Sandy',
+      db_time: '',
+      db_latlng: '0,0',
+      cr_time: '',
+      cr_latlng: '0,0',
+      transaction_item: [{
+        name: 'item1',
+        quantity: 1,
+        value: 25,
+        db_account: 'Mindy',
+        cr_account: 'Sandy'
+      }]
+    };
+    props.postTransaction = stub();
+    props.postTransaction.returns({
+      then: (f) => (f({}))
+    });
+    const push = spy();
+
+    instance = renderIntoDocument(<TransactionSection { ...props }/>);
+    instance.context.router = { push };
+    const actionsSection = findRenderedComponentWithType(instance, ActionsSection);
+    const requestBtn = findRenderedDOMComponentWithClass(actionsSection, 'btn__request');
+    Simulate.click(requestBtn);
+
+    const requestPopup = findRenderedComponentWithType(instance, RequestPopup);
+    const expirationInput = findRenderedDOMComponentWithClass(requestPopup, 'expiration');
+    expirationInput.value = '5';
+    Simulate.change(expirationInput);
+    const btnOk = findRenderedDOMComponentWithClass(requestPopup, 'btn__ok');
+
+    Simulate.click(btnOk);
+    props.postTransaction.should.be.calledWith({
+      db_author: 'Sandy',
+      cr_author: 'Mindy',
+      cr_time: '',
+      cr_latlng: '0,0',
+      expiration_time: 5,
+      transaction_item: [{
+        name: 'item1',
+        quantity: 1,
+        value: 25,
+        db_account: 'Sandy',
+        cr_account: 'Mindy'
+      }]
+    });
+    push.should.be.calledWith('/Requests/RequestSent');
+  });
+
+  it('should close request popup', () => {
+    props.transaction_item = [
+      {
+        name: 'item1',
+        quantity: 1,
+        value: 25
+      }
+    ];
+    props.transaction = {
+      db_author: 'Sandy',
+      cr_author: '',
+      db_time: '',
+      db_latlng: '0,0',
+      cr_time: '',
+      cr_latlng: '0,0',
+      transaction_item: [{
+        name: 'item1',
+        quantity: 1,
+        value: 25
+      }]
+    };
+
+    instance = renderIntoDocument(<TransactionSection { ...props }/>);
+    const actionsSection = findRenderedComponentWithType(instance, ActionsSection);
+    const requestBtn = findRenderedDOMComponentWithClass(actionsSection, 'btn__request');
+    Simulate.click(requestBtn);
+
+    const requestPopup = findRenderedComponentWithType(instance, RequestPopup);
+    const btnCancel = findRenderedDOMComponentWithClass(requestPopup, 'btn__cancel');
+
+    Simulate.click(btnCancel);
+    scryRenderedComponentsWithType(instance, RequestPopup).length.should.equal(0);
   });
 });

@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import merge from 'lodash/merge';
+import omit from 'lodash/omit';
 
 import { getLocation, buildLatLng } from 'utils/geo';
 import TransactionDetail from './TransactionDetail';
@@ -7,6 +8,8 @@ import AddTransactionBtn from './AddTransactionBtn';
 import TransactionItem from './TransactionItem';
 import ActionsSection from './ActionsSection';
 import TransactionPopup from './TransactionPopup';
+import RequestPopup from './RequestPopup';
+import swapTransactionDbCr from 'utils/swapTransactionDbCr';
 
 export default class TransactionSection extends Component {
   constructor(props) {
@@ -18,6 +21,7 @@ export default class TransactionSection extends Component {
     this.handlePost = this.handlePost.bind(this);
     this.handleAddTransaction = this.handleAddTransaction.bind(this);
     this.handleClose = this.handleClose.bind(this);
+    this.handleRequest = this.handleRequest.bind(this);
   }
 
   handleClose() {
@@ -35,7 +39,7 @@ export default class TransactionSection extends Component {
           db_latlng: loc,
           cr_latlng: loc
         });
-        this.props.postTransaction(data).then((action) => {
+        this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time'])).then((action) => {
           if (!action.error) {
             this.context.router.push('/TransactionHistory/success');
           }
@@ -45,6 +49,24 @@ export default class TransactionSection extends Component {
       getLocation(mergeAndPost);
     }
 
+  }
+
+  handleRequest(expirationTime) {
+    const mergeAndPost = (position) => {
+      const loc = buildLatLng(position);
+      const data = merge(swapTransactionDbCr(this.props.transaction), {
+        db_latlng: loc,
+        cr_latlng: loc,
+        expiration_time: expirationTime
+      });
+      this.props.postTransaction(omit(data, ['db_latlng', 'db_time'])).then((action) => {
+        if (!action.error) {
+          this.context.router.push('/Requests/RequestSent');
+        }
+      });
+    };
+
+    getLocation(mergeAndPost);
   }
 
   handleUpdateField(key, field, event) {
@@ -60,7 +82,9 @@ export default class TransactionSection extends Component {
 
   renderActionsSection() {
     return this.props.transaction_item.length ?
-      <ActionsSection handleTransact={ () => {this.setState({ showTransactionPopup: true });} }/>
+      <ActionsSection
+        handleTransact={ () => {this.setState({ showTransactionPopup: true });} }
+        handleRequest={ () => {this.setState({ showRequestPopup: true });} }/>
       : null;
   }
 
@@ -71,6 +95,14 @@ export default class TransactionSection extends Component {
         handlePost={ this.handlePost }
         transactionAmount={ this.props.transactionAmount }
         handleCancel={ this.handleClose }/>
+      : null;
+  }
+
+  renderRequestPopup() {
+    return this.state.showRequestPopup ?
+      <RequestPopup
+        handleRequest={ this.handleRequest }
+        handleCancel={ () => { this.setState({ showRequestPopup: false }); } }/>
       : null;
   }
 
@@ -93,6 +125,7 @@ export default class TransactionSection extends Component {
         <AddTransactionBtn handleClick={ this.handleAddTransaction }/>
         { this.renderActionsSection() }
         { this.renderTransactionPopup() }
+        { this.renderRequestPopup() }
       </div>
     );
   }

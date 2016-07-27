@@ -4,6 +4,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var moment = require('moment');
 var _ = require('lodash');
+var passport = require('passport');
 
 var firebaseClient = require('firebase-client/index');
 var TRANSACTION_PATH = '/transaction';
@@ -21,7 +22,7 @@ var postTransaction = function (data) {
 };
 
 //save transaction
-router.post('/', function (req, res) {
+router.post('/', passport.authenticate('jwt', { session: false }), function (req, res) {
   var body = req.body;
   var transaction_item = body.transaction_item;
 
@@ -30,16 +31,21 @@ router.post('/', function (req, res) {
     return;
   }
 
+  var bid = req.user.username === body.db_author;
+
   var transaction = {
     db_author: body.db_author,
     cr_author: body.cr_author,
     rejection_time: (body.rejection_time || null),
-    expiration_time: (body.expiration_time || null),
+    expiration_time: moment().add(body.expiration_time||7, 'd').format(),
     db_time: moment().format('HH:mm'),
     db_latlng: body.db_latlng,
     cr_time: moment().format('HH:mm'),
-    cr_latlng: body.cr_latlng
+    cr_latlng: body.cr_latlng,
+    created_by: req.user.username
   };
+
+  transaction = _.omit(transaction, bid ? ['cr_time', 'cr_latlng'] : ['db_time', 'db_latlng']);
 
   transaction_item = _.map(transaction_item, function (item) {
     return {
@@ -68,10 +74,12 @@ var getTransaction = function (id) {
   });
 };
 
-router.get('/:id', function (req, res) {
+router.get('/:id', passport.authenticate('jwt', { session: false }), function (req, res) {
   getTransaction(req.params.id).then(function (response) {
     if (response.data) {
-      res.status(200).json(response.data);
+      var result = {};
+      result[req.params.id] = response.data;
+      res.status(200).json(result);
     } else {
       res.status(500).json({ error: 'Not found' });
     }
@@ -80,14 +88,14 @@ router.get('/:id', function (req, res) {
   });
 });
 
-var getAllTransaction = function () {
+var getAllTransaction = function (account) {
   return firebaseClient().then(function (instance) {
-    return instance.get(TRANSACTION_PATH);
+    return instance.get(TRANSACTION_PATH, { orderBy: 'cr_author', equalTo: account });
   });
 };
 
-router.get('/', function (req, res) {
-  getAllTransaction().then(function (response) {
+router.get('/', passport.authenticate('jwt', { session: false }), function (req, res) {
+  getAllTransaction(req.user.username).then(function (response) {
     res.status(200).json(response.data);
   }).catch(function (err) {
     res.status(500).json(err);

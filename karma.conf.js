@@ -22,7 +22,7 @@ module.exports = function (config) {
     webpack: {
       resolve: {
         extensions: ['', '.js', '.jsx'],
-        modulesDirectories: ['node_modules', 'app', 'static']
+        modulesDirectories: ['node_modules', 'app', 'static', 'test']
       },
       module: {
         loaders: [
@@ -40,10 +40,14 @@ module.exports = function (config) {
             test: /\.(png|gif|jpe?g|svg)$/i,
             loader: 'file-loader?name=static/images/[name].[ext]',
             exclude: '/node_modules/'
+          },
+          {
+            test: /\.json$/,
+            loaders: ['json-loader']
           }
         ],
         postLoaders: [{
-          test: /\.(js|jsx)$/, exclude: /(node_modules|test)/,
+          test: /\.(js|jsx)$/, exclude: /(node_modules|test|app\/socket)/,
           loader: 'isparta'
         }]
       }

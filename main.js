@@ -10,9 +10,14 @@ var passport = require('passport');
 var cors = require('cors');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
-
+var socketServer = require('socket-server');
+require('transact/observer');
 
 var app = express();
+
+var http = require('http').Server(app);
+
+socketServer(http);
 
 app.disable('etag');
 app.set('trust proxy', true);
@@ -27,7 +32,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use('/systemaccounting/account', require('./account/crud'));
-app.use('/systemaccounting/transact', require('./transact/crud'));
+app.use('/systemaccounting/transaction', require('./transact/crud'));
 
 // Targets index.html for Node.js Flexible Environment
 // See default value for index property of express.static method:
@@ -58,7 +63,7 @@ passport.use(new JwtStrategy(opts, function (jwt_payload, done) {
 
 if (module === require.main) {
   // Start the server
-  var server = app.listen(config.get('PORT'), function () {
+  var server = http.listen(config.get('PORT'), function () {
     var port = server.address().port;
     console.log('App listening on port %s', port);
   });

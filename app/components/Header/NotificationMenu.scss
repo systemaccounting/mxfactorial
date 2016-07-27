@@ -1,0 +1,33 @@
+span[aria-expanded=true] {
+  &.notification--button {
+    .icon {
+      color: #fff;
+      position: relative;
+      z-index: 10;
+    }
+  }
+}
+
+.notification--menu {
+  position: absolute;
+  top: 5px;
+  z-index: 9;
+  background-color: #1c4587;
+  color: #fff;
+  transform: translateX(-5px);
+  width: 200px;
+
+  li {
+    border: 1px solid #d9d9d9;
+    &:last-child {
+      border-bottom: 0 !important;
+    }
+  }
+}
+
+.circle-x {
+  font-style: normal;
+  &:before {
+    content: "Ⓧ";
+  }
+}

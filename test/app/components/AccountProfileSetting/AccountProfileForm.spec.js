@@ -35,7 +35,7 @@ describe('AccountProfileForm component', () => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
   });
 
-  it('should handle save', () => {
+  it('should not handle save when have no changed', () => {
     instance = renderIntoDocument(
       <AccountProfileForm fields={ fields } handleSubmit={ handleSubmit } />
     );
@@ -44,7 +44,18 @@ describe('AccountProfileForm component', () => {
     instance.context.router = { push };
     const profileForm = findRenderedDOMComponentWithTag(instance, 'form');
     Simulate.submit(profileForm);
+    push.should.not.be.calledOnce();
+  });
 
+  it('should handle save when data changed', () => {
+    instance = renderIntoDocument(
+      <AccountProfileForm fields={ fields } dirty={ true } handleSubmit={ handleSubmit } />
+    );
+
+    const push = spy();
+    instance.context.router = { push };
+    const profileForm = findRenderedDOMComponentWithTag(instance, 'form');
+    Simulate.submit(profileForm);
     push.should.be.calledWith('/AccountProfile/Confirm');
   });
 });

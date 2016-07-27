@@ -13,7 +13,12 @@ describe('EmailPopup component', () => {
   let instance;
   const props = {
     updateAccountSettingError: spy(),
-    emailChanged: spy()
+    emailChanged: spy(),
+    location: {
+      query: {
+        email: 'abc@abc.com'
+      }
+    }
   };
 
   afterEach(() => {

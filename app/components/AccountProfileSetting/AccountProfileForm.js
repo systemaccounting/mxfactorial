@@ -7,7 +7,9 @@ export default class AccountProfileForm extends Component {
   }
 
   onSubmit(props) {
-    this.context.router.push('/AccountProfile/Confirm');
+    if (this.props.dirty) {
+      this.context.router.push('/AccountProfile/Confirm');
+    }
   }
 
   render() {
@@ -92,5 +94,6 @@ AccountProfileForm.contextTypes = {
 
 AccountProfileForm.propTypes = {
   fields: PropTypes.object,
-  handleSubmit: PropTypes.func
+  handleSubmit: PropTypes.func,
+  dirty: PropTypes.bool
 };

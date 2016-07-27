@@ -4,7 +4,7 @@ import TransactionSection from 'components/Transaction/TransactionSection';
 import {
   addTransaction, removeTransaction, updateTransaction, postTransaction, updateCRAccount, updateError
 } from 'actions/transactionActions';
-import { transactionAmountSelector, transactionSelector } from 'selectors/transaction';
+import { transactionAmountSelector, newTransactionSelector } from 'selectors/transaction/new-transaction';
 
 function mapStateToProps(state) {
   const { transaction_item, transactionError, cr_account } = state;
@@ -13,7 +13,7 @@ function mapStateToProps(state) {
     transactionError,
     cr_account,
     transactionAmount: transactionAmountSelector(state),
-    transaction: transactionSelector(state)
+    transaction: newTransactionSelector(state)
   };
 }
 

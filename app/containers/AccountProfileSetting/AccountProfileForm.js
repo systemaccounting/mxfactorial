@@ -14,8 +14,10 @@ const form = reduxForm({
 })(AccountProfileForm);
 
 function mapStateToProps(state) {
+  const currentProfile = state.auth.user.account_profile && state.auth.user.account_profile[0];
   return {
-    initialValues: state.auth.user.account_profile && state.auth.user.account_profile[0]
+    initialValues: currentProfile,
+    currentProfile: currentProfile
   };
 }
 
