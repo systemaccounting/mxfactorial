@@ -45,8 +45,8 @@ nconf
     MYSQL_USER: '',
     MYSQL_PASSWORD: '',
     MYSQL_HOST: '',
-    FIREBASE_URL: 'https://mxfactorial.firebaseio.com',
-    FIREBASE_KEY_PATH: 'mxfactorial-cebe88ad95c6.json',
+    FIREBASE_URL: 'https://mxfactorial-test.firebaseio.com',
+    FIREBASE_KEY_PATH: 'mxfactorial-test-edb14399d2e8.json',
 
     // Port the HTTP server
     PORT: 8080

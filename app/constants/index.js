@@ -1,10 +1,10 @@
 import merge from 'lodash/merge';
 import moment from 'moment-timezone';
 
-export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting';
-export const SOCKET_URL = 'https://mxfactorial.appspot.com/';
-// export const BASE_URL = 'http://192.168.66.131:8081/systemaccounting';
-// export const SOCKET_URL = 'http://192.168.66.131:8081/';
+// export const BASE_URL = 'https://mxfactorial.appspot.com/systemaccounting';
+// export const SOCKET_URL = 'https://mxfactorial.appspot.com/';
+export const BASE_URL = 'http://localhost:8080/systemaccounting';
+export const SOCKET_URL = 'http://localhost:8080/';
 
 export const TZ = moment.tz.guess();
 

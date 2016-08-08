@@ -37,7 +37,7 @@ describe('EmailPopup component', () => {
 
     Simulate.click(btnCancel);
 
-    push.should.be.calledWith('/AccountSetting');
+    push.should.be.calledWith('/AccountSetting?clear=true');
   });
 
   it('should handle form submit', () => {

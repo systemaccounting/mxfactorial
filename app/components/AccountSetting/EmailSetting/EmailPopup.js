@@ -24,6 +24,7 @@ export default class EmailPopup extends Component {
   }
 
   render() {
+    console.log('EmailPopup', this.props);
     const { location, errorMessage } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
@@ -45,7 +46,7 @@ export default class EmailPopup extends Component {
               <button
                 type='button'
                 className={ `${buttonClass} btn__cancel` }
-                onClick={ () => { this.context.router.push('/AccountSetting'); } }>
+                onClick={ () => { this.context.router.push('/AccountSetting?clear=true'); } }>
                 Cancel
               </button>
               <button type='submit' className={ `${buttonClass} btn__ok` }>OK</button>
