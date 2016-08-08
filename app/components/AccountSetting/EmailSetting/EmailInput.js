@@ -9,16 +9,16 @@ export default class EmailInput extends Component {
   }
 
   handleBlur(event) {
-    const { email, handleBlur } = this.props;
-    if (email != event.target.value) {
+    const { initialEmail, currentEmail, handleBlur } = this.props;
+    if (initialEmail != currentEmail) {
       handleBlur({
-        email: event.target.value
+        email: currentEmail
       });
     }
   }
 
   render() {
-    var { email } = this.props;
+    var { currentEmail } = this.props;
 
     return (
       <div>
@@ -27,7 +27,7 @@ export default class EmailInput extends Component {
         </div>
         <div className='input-group text-right'>
           <div className='indicator radius5 font22 text-center email-input'>
-            <input className='email--input text-center' defaultValue={ email } onBlur={ this.handleBlur } />
+            <input className='email--input text-center' onBlur={ this.handleBlur } onChange= { this.props.onEmailChange } value={ currentEmail } />
           </div>
         </div>
       </div>
