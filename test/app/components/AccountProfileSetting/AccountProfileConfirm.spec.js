@@ -5,6 +5,7 @@ import {
 } from 'react-addons-test-utils';
 import { spy } from 'sinon';
 import 'should-sinon';
+import { reset } from 'redux-form';
 
 import AccountProfileConfirm from 'components/AccountProfileSetting/AccountProfileConfirm';
 
@@ -14,7 +15,8 @@ describe('AccountProfileConfirm component', () => {
     profile: {
       first_name: 'sandy'
     },
-    updateAccountSettingError: spy()
+    updateAccountSettingError: spy(),
+    reset
   };
 
   afterEach(() => {
