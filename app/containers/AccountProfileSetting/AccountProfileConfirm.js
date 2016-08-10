@@ -1,6 +1,5 @@
 import { connect } from 'react-redux';
-import { getValues } from 'redux-form';
-import { reset } from 'redux-form';
+import { getValues, reset } from 'redux-form';
 
 import AccountProfileConfirm from 'components/AccountProfileSetting/AccountProfileConfirm';
 import { patchProfile, updateAccountSettingError } from 'actions/accountSettingActions';
