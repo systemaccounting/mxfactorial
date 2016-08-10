@@ -11,6 +11,7 @@ export default class EmailInput extends Component {
   handleBlur(event) {
     const { initialEmail, currentEmail, handleBlur } = this.props;
     if (initialEmail != currentEmail) {
+      this.props.handleDiscardEmailChanges();
       handleBlur({
         email: currentEmail
       });
@@ -27,7 +28,8 @@ export default class EmailInput extends Component {
         </div>
         <div className='input-group text-right'>
           <div className='indicator radius5 font22 text-center email-input'>
-            <input className='email--input text-center' onBlur={ this.handleBlur } onChange= { this.props.onEmailChange } value={ currentEmail } />
+            <input className='email--input text-center' onBlur={ this.handleBlur }
+              onChange={ this.props.handleEmailChange } value={ currentEmail } />
           </div>
         </div>
       </div>
@@ -36,10 +38,14 @@ export default class EmailInput extends Component {
 }
 
 EmailInput.propTypes = {
-  email: PropTypes.string,
-  handleBlur: PropTypes.func
+  initialEmail: PropTypes.string,
+  currentEmail: PropTypes.string,
+  handleBlur: PropTypes.func,
+  handleDiscardEmailChanges: PropTypes.func,
+  handleEmailChange: PropTypes.func
 };
 
 EmailInput.defaultProps = {
-  email: ''
+  initialEmail: '',
+  currentEmail: ''
 };
