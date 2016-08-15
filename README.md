@@ -23,8 +23,10 @@ This open-source project is intended to exploit the software engineering communi
 * Learn to deploy a Node.js web application by completing the Google App Engine ['Hello World!' tutorial](https://cloud.google.com/nodejs/getting-started/hello-world).
 * Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://docs.google.com/document/d/1UGklz7LwzES3t6i5IZrnt-ZwLeEFaeWhqaocFE3C9QE/edit?usp=sharing).
  
-Details as of 7/7/2016:
+Details as of 8/15/2016:
 - Production: [mxfactorial.io](https://mxfactorial.io/)
+- [Data Model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
+- [Wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
 - [Public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
 - Node.js v4.4.3
 - npm v3.5.1
