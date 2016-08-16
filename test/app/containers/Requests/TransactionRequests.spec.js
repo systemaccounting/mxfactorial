@@ -24,7 +24,9 @@ describe('TransactionRequests container', () => {
         }
       },
       transactions: {
-        0: {}
+        0: {
+          transaction_item: [ { 0: {name: 'test'} } ]
+        }
       }
     }, true);
 

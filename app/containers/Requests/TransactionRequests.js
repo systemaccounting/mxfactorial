@@ -9,7 +9,9 @@ import rejectActiveSelector from 'selectors/notification/reject-active';
 function mapStateToProps(state) {
   return {
     requestsFilter: state.requestsFilter,
-    notifications: rejectActiveSelector(state)
+    notifications: rejectActiveSelector(state),
+    transactions: state.transactions,
+    account: state.auth.user.account
   };
 }
 
