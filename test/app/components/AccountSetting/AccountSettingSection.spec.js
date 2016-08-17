@@ -14,6 +14,8 @@ import EmailInput from 'components/AccountSetting/EmailSetting/EmailInput';
 import NotificationSetting from 'components/AccountSetting/NotificationSetting';
 import AccountSettingAction from 'components/AccountSetting/AccountSettingAction';
 
+var ReactTestUtils = require('react-addons-test-utils');
+
 describe('AccountSettingSection component', () => {
   let instance;
   const mockStore = configureStore();
@@ -57,6 +59,7 @@ describe('AccountSettingSection component', () => {
 
     const emailInput = findRenderedDOMComponentWithClass(instance, 'email--input');
     emailInput.value='newmail@mail.com';
+    ReactTestUtils.Simulate.change(emailInput);
 
     Simulate.blur(emailInput);
 
