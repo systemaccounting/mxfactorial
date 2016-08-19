@@ -26,9 +26,18 @@ describe('Requests component', () => {
   it('should handleActive/handleReject', () => {
     const setRequestsFilter = spy();
     const getTransaction = spy();
-    const notifications = {
+    const transactions = {
       0: {
-        key: 0
+        cr_author: 'user1',
+        created_by: 'user2',
+        db_author: 'user2',
+        expiration_time: '2016-08-19T22:37:51+03:00',
+        transaction_item: {
+          0: {
+            quantity:1,
+            value:100
+          }
+        }
       }
     };
 
@@ -37,7 +46,7 @@ describe('Requests component', () => {
         <Requests
           setRequestsFilter={ setRequestsFilter }
           getTransaction={ getTransaction }
-          notifications={ notifications }/>
+          transactions={ transactions }/>
       </Provider>
     );
     const requestComp = findRenderedComponentWithType(instance, Requests);

@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { getValues } from 'redux-form';
+import { getValues, reset } from 'redux-form';
 
 import AccountProfileConfirm from 'components/AccountProfileSetting/AccountProfileConfirm';
 import { patchProfile, updateAccountSettingError } from 'actions/accountSettingActions';
@@ -14,7 +14,8 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = {
   patchProfile,
-  updateAccountSettingError
+  updateAccountSettingError,
+  reset
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AccountProfileConfirm);

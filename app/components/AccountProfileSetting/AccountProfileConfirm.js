@@ -7,6 +7,7 @@ export default class AccountProfileConfirm extends Component {
       error: ''
     };
     this.handlePost = this.handlePost.bind(this);
+    this.handleCancel = this.handleCancel.bind(this);
   }
 
   componentDidMount() {
@@ -16,6 +17,11 @@ export default class AccountProfileConfirm extends Component {
   componentWillUnmount() {
     document.body.style.overflowY = '';
     this.props.updateAccountSettingError();
+  }
+
+  handleCancel() {
+    this.props.reset('accountProfileForm');
+    this.context.router.push('/AccountProfile');
   }
 
   handlePost() {
@@ -59,7 +65,7 @@ export default class AccountProfileConfirm extends Component {
           </div>
           <div className='modal__footer text-center'>
             <button className={ `${buttonClass} btn__cancel` }
-              onClick={ () => { this.context.router.push('/AccountProfile'); } }>
+              onClick={ this.handleCancel }>
               Cancel
             </button>
             <button className={ `${buttonClass} btn__ok` }
@@ -82,5 +88,6 @@ AccountProfileConfirm.propTypes = {
   profile: PropTypes.object,
   patchProfile: PropTypes.func,
   errorMessage: PropTypes.string,
-  updateAccountSettingError: PropTypes.func
+  updateAccountSettingError: PropTypes.func,
+  reset: PropTypes.func
 };

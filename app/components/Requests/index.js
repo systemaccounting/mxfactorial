@@ -10,7 +10,24 @@ export default class Requests extends Component {
   }
 
   render() {
-    const { requestsFilter, setRequestsFilter, notifications, children } = this.props;
+    const { requestsFilter, setRequestsFilter, transactions, children, account } = this.props;
+
+    var notifications = {};
+    for (var trKey in transactions) {
+      var newItem = {};
+      newItem.id = trKey;
+      newItem.key = trKey;
+      newItem.sent_time = transactions[trKey].expiration_time;
+      newItem.sender_account = transactions[trKey].cr_author;
+      var trTotal = 0;
+      var trItems = transactions[trKey].transaction_item;
+      for (var i=0; i<trItems.length; i++ ) {
+        trTotal += trItems[i].quantity * trItems[i].value;
+      }
+      var trDirection = transactions[trKey].cr_author == account ? 1 : -1;
+      newItem.payload = { total: trTotal, direction: trDirection };
+      notifications[trKey] = newItem;
+    }
 
     return (
       <PageLayout className='transaction-requests'>
@@ -29,5 +46,7 @@ Requests.propTypes = {
   setRequestsFilter: PropTypes.func,
   requestsFilter: PropTypes.string,
   getTransaction: PropTypes.func,
-  children: PropTypes.node
+  children: PropTypes.node,
+  transactions: PropTypes.object,
+  account: PropTypes.string
 };

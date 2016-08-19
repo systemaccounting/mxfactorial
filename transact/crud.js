@@ -96,7 +96,16 @@ var getAllTransaction = function (account) {
 
 router.get('/', passport.authenticate('jwt', { session: false }), function (req, res) {
   getAllTransaction(req.user.username).then(function (response) {
-    res.status(200).json(response.data);
+    var filteredTransactions = _.pickBy(response.data, function (value, key) {
+      if (value.db_time) {
+        return false;
+      }
+      if (value.cr_author == req.user.username || value.db_author == req.user.username) {
+        return true;
+      }
+      return false;
+    });
+    res.status(200).json( filteredTransactions );
   }).catch(function (err) {
     res.status(500).json(err);
   });
