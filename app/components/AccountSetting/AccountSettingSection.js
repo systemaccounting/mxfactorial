@@ -6,9 +6,13 @@ import AccountSettingAction from './AccountSettingAction';
 import Header from 'components/Header/Header';
 
 export default class AccountSettingSection extends Component {
+
   constructor(props) {
     super(props);
     this.navigateToPage = this.navigateToPage.bind(this);
+    this.handleEmailChange = this.handleEmailChange.bind(this);
+    this.handleDiscardEmailChanges = this.handleDiscardEmailChanges.bind(this);
+    this.state = { email: this.props.email };
   }
 
   navigateToPage(pathname, query) {
@@ -18,6 +22,14 @@ export default class AccountSettingSection extends Component {
     });
   }
 
+  handleEmailChange(event) {
+    this.setState({ email: event.target.value });
+  }
+
+  handleDiscardEmailChanges() {
+    this.setState({ email: this.props.email });
+  }
+
   render() {
     const { email, children } = this.props;
 
@@ -25,7 +37,10 @@ export default class AccountSettingSection extends Component {
       <div className='account-setting'>
         <Header headerTitle='Account Settings'/>
         <div className='container' style={ { width: 300 } }>
-          <EmailInput email={ email } handleBlur={ this.navigateToPage.bind(null, '/AccountSetting/NewEmail') }/>
+          <EmailInput handleEmailChange={ this.handleEmailChange } initialEmail={ email }
+            currentEmail={ this.state.email }
+            handleBlur={ this.navigateToPage.bind(null, '/AccountSetting/NewEmail') }
+            handleDiscardEmailChanges={ this.handleDiscardEmailChanges }/>
           <NotificationSetting />
           <AccountSettingAction
             handleChangePassword={ this.navigateToPage.bind(null, '/AccountSetting/NewPassword', null) }
@@ -39,7 +54,8 @@ export default class AccountSettingSection extends Component {
 
 AccountSettingSection.propTypes = {
   email: PropTypes.string,
-  children: PropTypes.node
+  children: PropTypes.node,
+  location: PropTypes.object
 };
 
 AccountSettingSection.contextTypes = {
