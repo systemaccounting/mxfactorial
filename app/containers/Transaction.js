@@ -13,7 +13,8 @@ function mapStateToProps(state) {
     transactionError,
     cr_account,
     transactionAmount: transactionAmountSelector(state),
-    transaction: newTransactionSelector(state)
+    transaction: newTransactionSelector(state),
+    account: state.auth.user.account
   };
 }
 

@@ -107,14 +107,15 @@ export default class TransactionSection extends Component {
   }
 
   render() {
-    const { transaction_item, removeTransaction, transactionAmount, updateCRAccount } = this.props;
+    const { transaction_item, removeTransaction, transactionAmount, updateCRAccount, account } = this.props;
     const that = this;
 
     return (
       <div className='container' style={ { width: 300 } }>
         <TransactionDetail
           updateCRAccount={ updateCRAccount }
-          transactionAmount={ transactionAmount }/>
+          transactionAmount={ transactionAmount }
+          account={ account }/>
         {
           transaction_item.map((item, key) => (
             <TransactionItem key={ item.key } item={ item }
@@ -142,7 +143,8 @@ TransactionSection.propTypes = {
   addTransaction: PropTypes.func.isRequired,
   postTransaction: PropTypes.func.isRequired,
   updateCRAccount: PropTypes.func.isRequired,
-  updateError: PropTypes.func.isRequired
+  updateError: PropTypes.func.isRequired,
+  account: PropTypes.string
 };
 
 TransactionSection.defaultProps = {
