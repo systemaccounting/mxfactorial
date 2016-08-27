@@ -2,6 +2,7 @@ import { createAction } from 'redux-actions';
 
 import { post, get } from './async';
 
+export const SET_TRANSACTION_DIRECTION = 'SET_TRANSACTION_DIRECTION';
 export const ADD_TRANSACTION = 'ADD_TRANSACTION';
 export const REMOVE_TRANSACTION = 'REMOVE_TRANSACTION';
 export const UPDATE_TRANSACTION = 'UPDATE_TRANSACTION';
@@ -9,6 +10,7 @@ export const UPDATE_CR_ACCOUNT = 'UPDATE_CR_ACCOUNT';
 export const CLEAR_TRANSACTION = 'CLEAR_TRANSACTION';
 export const UPDATE_ERROR = 'UPDATE_ERROR';
 
+export const setTransactionDirection = createAction(SET_TRANSACTION_DIRECTION);
 export const addTransaction = (cr_account) => ((dispatch, getState) => (
   dispatch(createAction(ADD_TRANSACTION)({
     cr_account,

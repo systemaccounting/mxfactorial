@@ -10,6 +10,7 @@ import ActionsSection from './ActionsSection';
 import TransactionPopup from './TransactionPopup';
 import RequestPopup from './RequestPopup';
 import swapTransactionDbCr from 'utils/swapTransactionDbCr';
+import TransactionDirection from './TransactionDirection';
 
 export default class TransactionSection extends Component {
   constructor(props) {
@@ -107,7 +108,8 @@ export default class TransactionSection extends Component {
   }
 
   render() {
-    const { transaction_item, removeTransaction, transactionAmount, updateCRAccount, account } = this.props;
+    const { transaction_item, removeTransaction, transactionAmount, updateCRAccount,
+      account, transactionDirection, setTransactionDirection } = this.props;
     const that = this;
 
     return (
@@ -123,6 +125,9 @@ export default class TransactionSection extends Component {
               handleUpdateField={ that.handleUpdateField.bind(null, key) }/>
           ))
         }
+        <TransactionDirection direction={ transactionDirection }
+          handleDebit={ setTransactionDirection.bind(this, 'debit') }
+          handleCredit={ setTransactionDirection.bind(this, 'credit') }/>
         <AddTransactionBtn handleClick={ this.handleAddTransaction }/>
         { this.renderActionsSection() }
         { this.renderTransactionPopup() }
@@ -144,7 +149,9 @@ TransactionSection.propTypes = {
   postTransaction: PropTypes.func.isRequired,
   updateCRAccount: PropTypes.func.isRequired,
   updateError: PropTypes.func.isRequired,
-  account: PropTypes.string
+  account: PropTypes.string,
+  transactionDirection: PropTypes.string,
+  setTransactionDirection: PropTypes.func.isRequired
 };
 
 TransactionSection.defaultProps = {

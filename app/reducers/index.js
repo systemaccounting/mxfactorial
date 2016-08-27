@@ -16,6 +16,7 @@ import notifications from './notifications';
 import transactions from './transactions';
 import requestsFilter from './requestsFilter';
 import { LOGOUT } from 'actions/authActions';
+import transactionDirection from './transactionDirection';
 
 const appReducer = combineReducers({
   form: formReducer,
@@ -27,7 +28,8 @@ const appReducer = combineReducers({
   auth,
   notifications,
   transactions,
-  requestsFilter
+  requestsFilter,
+  transactionDirection
 });
 
 const rootReducer = (state, action) => {
