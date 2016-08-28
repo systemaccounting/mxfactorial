@@ -23,9 +23,10 @@ describe('TransactionSection component', () => {
   const postTransaction = stub();
   const updateCRAccount = spy();
   const updateError = spy();
+  const setTransactionDirection = spy();
   const props = {
     addTransaction, removeTransaction,
-    updateTransaction, postTransaction, updateCRAccount, updateError
+    updateTransaction, postTransaction, updateCRAccount, updateError, setTransactionDirection
   };
 
   afterEach(() => {

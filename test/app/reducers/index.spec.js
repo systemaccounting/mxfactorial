@@ -22,6 +22,7 @@ describe('rootReducer', () => {
     notifications: {
     },
     requestsFilter: 'active',
+    transactionDirection: 'debit',
     transactions: {}
   };
 
