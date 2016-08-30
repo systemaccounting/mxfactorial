@@ -11,6 +11,8 @@ import TransactionPopup from './TransactionPopup';
 import RequestPopup from './RequestPopup';
 import swapTransactionDbCr from 'utils/swapTransactionDbCr';
 import TransactionDirection from './TransactionDirection';
+import TransactBtn from './TransactBtn';
+import RequestBtn from './RequestBtn';
 
 export default class TransactionSection extends Component {
   constructor(props) {
@@ -89,6 +91,24 @@ export default class TransactionSection extends Component {
       : null;
   }
 
+  renderTransactButton() {
+    const disabled = this.props.transaction_item.length ? false : true;
+    return this.props.transactionDirection == 'debit' ?
+      <TransactBtn
+        handleTransact={ () => {this.setState({ showTransactionPopup: true });} }
+        disabled={ disabled }/>
+      : null;
+  }
+
+  renderRequestButton() {
+    const disabled = this.props.transaction_item.length ? false : true;
+    return this.props.transactionDirection == 'credit' ?
+      <RequestBtn
+        handleRequest={ () => {this.setState({ showRequestPopup: true });} }
+        disabled={ disabled }/>
+      : null;
+  }
+
   renderTransactionPopup() {
     return this.state.showTransactionPopup ?
       <TransactionPopup
@@ -129,7 +149,8 @@ export default class TransactionSection extends Component {
           handleDebit={ setTransactionDirection.bind(this, 'debit') }
           handleCredit={ setTransactionDirection.bind(this, 'credit') }/>
         <AddTransactionBtn handleClick={ this.handleAddTransaction }/>
-        { this.renderActionsSection() }
+        { this.renderTransactButton() }
+        { this.renderRequestButton() }
         { this.renderTransactionPopup() }
         { this.renderRequestPopup() }
       </div>

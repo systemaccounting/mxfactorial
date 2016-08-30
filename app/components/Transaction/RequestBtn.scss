@@ -1,0 +1,17 @@
+.actions-section {
+  color: white;
+  padding-top: 15px;
+  .indicator {
+    margin-bottom: 10px;
+  }
+  .action-section__btn {
+    border: 1px solid black;
+  }
+  .btn__request, .btn__edit-profile, .btn__reject {
+    @extend .indicator;
+    background-color: #3d85c6;
+  }
+  .disabled {
+    background-color: grey;
+  }
+}
