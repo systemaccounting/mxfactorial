@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 
-export default class AddTransactionBtn extends Component {
+export default class AddGoodOrServiceBtn extends Component {
   render() {
     const { handleClick, title } = this.props;
 
@@ -14,7 +14,7 @@ export default class AddTransactionBtn extends Component {
   }
 }
 
-AddTransactionBtn.propTypes = {
+AddGoodOrServiceBtn.propTypes = {
   handleClick: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired
 };

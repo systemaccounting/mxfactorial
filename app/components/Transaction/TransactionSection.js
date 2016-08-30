@@ -83,6 +83,20 @@ export default class TransactionSection extends Component {
     addTransaction(cr_account);
   }
 
+  renderConsumeGoodOrServiceButton() {
+    return this.props.transactionDirection == 'debit' ?
+      <AddTransactionBtn handleClick={ this.handleAddTransaction }
+        title='(+) good or service'/>
+      : null;
+  }
+
+  renderProduceGoodOrServiceButton() {
+    return this.props.transactionDirection == 'credit' ?
+      <AddTransactionBtn handleClick={ this.handleAddTransaction }
+        title='(-) good or service'/>
+      : null;
+  }
+
   renderActionsSection() {
     return this.props.transaction_item.length ?
       <ActionsSection
@@ -148,7 +162,8 @@ export default class TransactionSection extends Component {
         <TransactionDirection direction={ transactionDirection }
           handleDebit={ setTransactionDirection.bind(this, 'debit') }
           handleCredit={ setTransactionDirection.bind(this, 'credit') }/>
-        <AddTransactionBtn handleClick={ this.handleAddTransaction }/>
+        { this.renderConsumeGoodOrServiceButton() }
+        { this.renderProduceGoodOrServiceButton() }
         { this.renderTransactButton() }
         { this.renderRequestButton() }
         { this.renderTransactionPopup() }
