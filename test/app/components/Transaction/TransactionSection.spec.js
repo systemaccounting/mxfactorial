@@ -14,6 +14,9 @@ import TransactionItem from 'components/Transaction/TransactionItem';
 import ActionsSection from 'components/Transaction/ActionsSection';
 import TransactionPopup from 'components/Transaction/TransactionPopup';
 import RequestPopup from 'components/Transaction/RequestPopup';
+import TransactionDirection from 'components/Transaction/TransactionDirection';
+import TransactBtn from 'components/Transaction/TransactBtn';
+import RequestBtn from 'components/Transaction/RequestBtn';
 
 describe('TransactionSection component', () => {
   let instance;
@@ -24,9 +27,11 @@ describe('TransactionSection component', () => {
   const updateCRAccount = spy();
   const updateError = spy();
   const setTransactionDirection = spy();
+  const transactionDirection = 'debit';
   const props = {
     addTransaction, removeTransaction,
-    updateTransaction, postTransaction, updateCRAccount, updateError, setTransactionDirection
+    updateTransaction, postTransaction, updateCRAccount, updateError, setTransactionDirection,
+    transactionDirection
   };
 
   afterEach(() => {
@@ -36,7 +41,9 @@ describe('TransactionSection component', () => {
   it('should render correct with no item', () => {
     instance = renderIntoDocument(<TransactionSection { ...props }/>);
     scryRenderedComponentsWithType(instance, TransactionItem).length.should.equal(0);
-    scryRenderedComponentsWithType(instance, ActionsSection).length.should.equal(0);
+    scryRenderedComponentsWithType(instance, TransactionDirection).length.should.equal(1);
+    scryRenderedComponentsWithType(instance, AddTransactionBtn).length.should.equal(1);
+    scryRenderedComponentsWithType(instance, TransactBtn).length.should.equal(1);
     scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
     findRenderedComponentWithType(instance, TransactionDetail).should.be.ok();
 
