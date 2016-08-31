@@ -15,6 +15,14 @@ export default class AccountSettingSection extends Component {
     this.state = { email: this.props.email };
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.email !== this.props.email) {
+      this.setState({
+        email: nextProps.email
+      });
+    }
+  }
+
   navigateToPage(pathname, query) {
     this.context.router.push({
       pathname,
