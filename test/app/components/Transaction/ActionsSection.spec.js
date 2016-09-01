@@ -4,10 +4,10 @@ import 'should-sinon';
 import { unmountComponentAtNode, findDOMNode } from 'react-dom';
 import { Simulate, renderIntoDocument, findRenderedDOMComponentWithClass } from 'react-addons-test-utils';
 
-import ActionsSection from 'components/Transaction/ActionsSection';
+import TransactBtn from 'components/Transaction/TransactBtn';
 
 
-describe('ActionsSection component', () => {
+describe('TransactBtn component', () => {
   let instance;
   const handleTransact = spy();
 
@@ -16,7 +16,7 @@ describe('ActionsSection component', () => {
   });
 
   it('click on btn__transact should handleTransact', () => {
-    instance = renderIntoDocument(<ActionsSection handleTransact={ handleTransact }/>);
+    instance = renderIntoDocument(<TransactBtn handleTransact={ handleTransact } disabled={ false }/>);
     const btnTransact = findRenderedDOMComponentWithClass (instance, 'btn__transact');
     Simulate.click(btnTransact);
     handleTransact.should.be.calledOnce();

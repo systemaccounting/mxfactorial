@@ -11,7 +11,6 @@ import TransactionSection from 'components/Transaction/TransactionSection';
 import TransactionDetail from 'components/Transaction/TransactionDetail';
 import AddTransactionBtn from 'components/Transaction/AddTransactionBtn';
 import TransactionItem from 'components/Transaction/TransactionItem';
-import ActionsSection from 'components/Transaction/ActionsSection';
 import TransactionPopup from 'components/Transaction/TransactionPopup';
 import RequestPopup from 'components/Transaction/RequestPopup';
 import TransactionDirection from 'components/Transaction/TransactionDirection';

@@ -6,7 +6,6 @@ import { getLocation, buildLatLng } from 'utils/geo';
 import TransactionDetail from './TransactionDetail';
 import AddTransactionBtn from './AddTransactionBtn';
 import TransactionItem from './TransactionItem';
-import ActionsSection from './ActionsSection';
 import TransactionPopup from './TransactionPopup';
 import RequestPopup from './RequestPopup';
 import swapTransactionDbCr from 'utils/swapTransactionDbCr';
@@ -94,14 +93,6 @@ export default class TransactionSection extends Component {
     return this.props.transactionDirection == 'credit' ?
       <AddTransactionBtn handleClick={ this.handleAddTransaction }
         title='(-) good or service'/>
-      : null;
-  }
-
-  renderActionsSection() {
-    return this.props.transaction_item.length ?
-      <ActionsSection
-        handleTransact={ () => {this.setState({ showTransactionPopup: true });} }
-        handleRequest={ () => {this.setState({ showRequestPopup: true });} }/>
       : null;
   }
 
