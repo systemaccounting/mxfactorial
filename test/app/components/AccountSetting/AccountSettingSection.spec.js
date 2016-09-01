@@ -9,10 +9,12 @@ import { spy } from 'sinon';
 import 'should-sinon';
 import configureStore from 'redux-mock-store';
 
+import { emailChanged } from 'actions/accountSettingActions';
 import AccountSettingSection from 'components/AccountSetting/AccountSettingSection';
 import EmailInput from 'components/AccountSetting/EmailSetting/EmailInput';
 import NotificationSetting from 'components/AccountSetting/NotificationSetting';
 import AccountSettingAction from 'components/AccountSetting/AccountSettingAction';
+import ParentFactory from 'helpers/parent-component';
 
 var ReactTestUtils = require('react-addons-test-utils');
 
@@ -44,6 +46,29 @@ describe('AccountSettingSection component', () => {
     scryRenderedComponentsWithType(instance, NotificationSetting).length.should.equal(1);
     scryRenderedComponentsWithType(instance, AccountSettingAction).length.should.equal(1);
   });
+
+  it('should display modified email when email props is changed', () => {
+    const initProps = {
+      email: 'initemail.stupid.com'
+    };
+
+    const Parent = ParentFactory(AccountSettingSection, initProps);
+
+    instance = renderIntoDocument(
+      <Provider store={ store }>
+        <Parent/>
+      </Provider>
+    );
+    const parent = findRenderedComponentWithType(instance, Parent);
+
+    const newEmail = 'heythere@changed.com';
+    parent.setState({
+      email: newEmail
+    });
+
+    const emailInput = findRenderedDOMComponentWithClass(instance, 'email--input');
+    emailInput.value.should.equal(newEmail);
+  })
 
   it('should navigate to NewEmail', () => {
     instance = renderIntoDocument(
