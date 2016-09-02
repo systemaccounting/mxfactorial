@@ -82,6 +82,17 @@ export default class TransactionSection extends Component {
     addTransaction(cr_account);
   }
 
+  checkTransactionItemsValid() {
+    let res = true;
+    if (!this.props.transaction_item.length) return false;
+    this.props.transaction_item.forEach(function (item) {
+      if (item.name.length == 0 ) res = false;
+      if (item.quantity == 0 ) res = false;
+      if (item.value == 0 ) res = false;
+    });
+    return res;
+  }
+
   renderConsumeGoodOrServiceButton() {
     return this.props.transactionDirection == 'debit' ?
       <AddTransactionBtn handleClick={ this.handleAddTransaction }
@@ -97,7 +108,7 @@ export default class TransactionSection extends Component {
   }
 
   renderTransactButton() {
-    const disabled = this.props.transaction_item.length ? false : true;
+    const disabled = !this.checkTransactionItemsValid();
     return this.props.transactionDirection == 'debit' ?
       <TransactBtn
         handleTransact={ () => {this.setState({ showTransactionPopup: true });} }
@@ -106,7 +117,7 @@ export default class TransactionSection extends Component {
   }
 
   renderRequestButton() {
-    const disabled = this.props.transaction_item.length ? false : true;
+    const disabled = !this.checkTransactionItemsValid();
     return this.props.transactionDirection == 'credit' ?
       <RequestBtn
         handleRequest={ () => {this.setState({ showRequestPopup: true });} }
@@ -143,6 +154,9 @@ export default class TransactionSection extends Component {
           updateCRAccount={ updateCRAccount }
           transactionAmount={ transactionAmount }
           account={ account }/>
+        <TransactionDirection direction={ transactionDirection }
+          handleDebit={ setTransactionDirection.bind(this, 'debit') }
+          handleCredit={ setTransactionDirection.bind(this, 'credit') }/>
         {
           transaction_item.map((item, key) => (
             <TransactionItem key={ item.key } item={ item }
@@ -150,9 +164,6 @@ export default class TransactionSection extends Component {
               handleUpdateField={ that.handleUpdateField.bind(null, key) }/>
           ))
         }
-        <TransactionDirection direction={ transactionDirection }
-          handleDebit={ setTransactionDirection.bind(this, 'debit') }
-          handleCredit={ setTransactionDirection.bind(this, 'credit') }/>
         { this.renderConsumeGoodOrServiceButton() }
         { this.renderProduceGoodOrServiceButton() }
         { this.renderTransactButton() }

@@ -9,6 +9,8 @@ import 'should-sinon';
 
 import TransactionItem from 'components/Transaction/TransactionItem';
 
+var ReactTestUtils = require('react-addons-test-utils');
+
 describe('TransactionItem component', () => {
   let instance;
   const props = {
@@ -54,7 +56,7 @@ describe('TransactionItem component', () => {
     props.handleUpdateField.should.be.calledWith('value');
 
     quantityInput.value = 1;
-    Simulate.blur(quantityInput);
+    ReactTestUtils.Simulate.change(quantityInput);
     props.handleUpdateField.should.be.calledWith('quantity');
   });
 

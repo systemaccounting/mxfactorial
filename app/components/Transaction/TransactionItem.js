@@ -26,7 +26,7 @@ export default class TransactionItem extends Component {
           </div>
           <div className='input radius5 font22 field--half pull-right'>
             <input type='number' className='text-right'
-              defaultValue={ item.quantity } onBlur={ handleUpdateField.bind(null, 'quantity') }/>
+              defaultValue={ item.quantity } onChange={ handleUpdateField.bind(null, 'quantity') }/>
           </div>
         </div>
       </div>
