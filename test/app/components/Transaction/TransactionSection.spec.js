@@ -27,10 +27,11 @@ describe('TransactionSection component', () => {
   const updateError = spy();
   const setTransactionDirection = spy();
   const transactionDirection = 'debit';
+  const cr_account = '';
   const props = {
     addTransaction, removeTransaction,
     updateTransaction, postTransaction, updateCRAccount, updateError, setTransactionDirection,
-    transactionDirection
+    transactionDirection, cr_account
   };
 
   afterEach(() => {
@@ -53,6 +54,7 @@ describe('TransactionSection component', () => {
   });
 
   it('should render correct with items', () => {
+    props.cr_account = 'JonSnow';
     props.transaction_item = [
       {
         name: 'item1',
@@ -97,6 +99,7 @@ describe('TransactionSection component', () => {
 
 
   it('should handle post', () => {
+    props.cr_account = 'JonSnow';
     props.transaction_item = [
       {
         name: 'item1',

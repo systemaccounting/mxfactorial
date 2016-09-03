@@ -84,11 +84,12 @@ export default class TransactionSection extends Component {
 
   checkTransactionItemsValid() {
     let res = true;
+    if (this.props.cr_account.length == 0) return false;
     if (!this.props.transaction_item.length) return false;
     this.props.transaction_item.forEach(function (item) {
-      if (item.name.length == 0 ) res = false;
-      if (item.quantity == 0 ) res = false;
-      if (item.value == 0 ) res = false;
+      if (item.name.length == 0) res = false;
+      if (item.quantity == 0) res = false;
+      if (item.value == 0) res = false;
     });
     return res;
   }
