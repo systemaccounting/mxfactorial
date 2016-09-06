@@ -26,6 +26,7 @@ export default class TransactionPopup extends Component {
   }
 
   render() {
+    console.log('TransactionPopup',this.props);
     const { transactionAmount, handleCancel, transactionError, direction } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 

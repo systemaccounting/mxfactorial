@@ -27,6 +27,7 @@ export default class RequestSentPopup extends Component {
 
 
   render() {
+    console.log('RequestSentPopup',this.props);
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
