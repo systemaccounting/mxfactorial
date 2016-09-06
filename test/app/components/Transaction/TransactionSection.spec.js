@@ -11,9 +11,11 @@ import TransactionSection from 'components/Transaction/TransactionSection';
 import TransactionDetail from 'components/Transaction/TransactionDetail';
 import AddTransactionBtn from 'components/Transaction/AddTransactionBtn';
 import TransactionItem from 'components/Transaction/TransactionItem';
-import ActionsSection from 'components/Transaction/ActionsSection';
 import TransactionPopup from 'components/Transaction/TransactionPopup';
 import RequestPopup from 'components/Transaction/RequestPopup';
+import TransactionDirection from 'components/Transaction/TransactionDirection';
+import TransactBtn from 'components/Transaction/TransactBtn';
+import RequestBtn from 'components/Transaction/RequestBtn';
 
 describe('TransactionSection component', () => {
   let instance;
@@ -23,9 +25,13 @@ describe('TransactionSection component', () => {
   const postTransaction = stub();
   const updateCRAccount = spy();
   const updateError = spy();
+  const setTransactionDirection = spy();
+  const transactionDirection = 'debit';
+  const cr_account = '';
   const props = {
     addTransaction, removeTransaction,
-    updateTransaction, postTransaction, updateCRAccount, updateError
+    updateTransaction, postTransaction, updateCRAccount, updateError, setTransactionDirection,
+    transactionDirection, cr_account
   };
 
   afterEach(() => {
@@ -35,7 +41,9 @@ describe('TransactionSection component', () => {
   it('should render correct with no item', () => {
     instance = renderIntoDocument(<TransactionSection { ...props }/>);
     scryRenderedComponentsWithType(instance, TransactionItem).length.should.equal(0);
-    scryRenderedComponentsWithType(instance, ActionsSection).length.should.equal(0);
+    scryRenderedComponentsWithType(instance, TransactionDirection).length.should.equal(1);
+    scryRenderedComponentsWithType(instance, AddTransactionBtn).length.should.equal(1);
+    scryRenderedComponentsWithType(instance, TransactBtn).length.should.equal(1);
     scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
     findRenderedComponentWithType(instance, TransactionDetail).should.be.ok();
 
@@ -46,6 +54,7 @@ describe('TransactionSection component', () => {
   });
 
   it('should render correct with items', () => {
+    props.cr_account = 'JonSnow';
     props.transaction_item = [
       {
         name: 'item1',
@@ -58,8 +67,8 @@ describe('TransactionSection component', () => {
     instance = renderIntoDocument(<TransactionSection { ...props }/>);
     scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
 
-    const actionsSection = findRenderedComponentWithType(instance, ActionsSection);
-    const transactBtn = findRenderedDOMComponentWithClass(actionsSection, 'btn__transact');
+    const transactBtnComponent = findRenderedComponentWithType(instance, TransactBtn);
+    const transactBtn = findRenderedDOMComponentWithClass(transactBtnComponent, 'btn__transact');
     Simulate.click(transactBtn);
 
     const transactionPopup = findRenderedComponentWithType(instance, TransactionPopup);
@@ -70,9 +79,6 @@ describe('TransactionSection component', () => {
     scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
 
     const transactionItem = findRenderedComponentWithType(instance, TransactionItem);
-    const btnRemove = findRenderedDOMComponentWithClass(transactionItem, 'btn__remove');
-    Simulate.click(btnRemove);
-    props.removeTransaction.should.be.calledWith(0);
 
     const [itemInput, valueInput, quantityInput] = scryRenderedDOMComponentsWithTag(transactionItem, 'input');
     itemInput.value.should.equal('item1');
@@ -85,10 +91,15 @@ describe('TransactionSection component', () => {
       field: 'name',
       value: 'item2'
     });
+
+    const btnRemove = findRenderedDOMComponentWithClass(transactionItem, 'btn__remove');
+    Simulate.click(btnRemove);
+    props.removeTransaction.should.be.calledWith(0);
   });
 
 
   it('should handle post', () => {
+    props.cr_account = 'JonSnow';
     props.transaction_item = [
       {
         name: 'item1',
@@ -120,8 +131,8 @@ describe('TransactionSection component', () => {
     instance = renderIntoDocument(<TransactionSection { ...props }/>);
     scryRenderedComponentsWithType(instance, TransactionPopup).length.should.equal(0);
     instance.context.router = { push };
-    const actionsSection = findRenderedComponentWithType(instance, ActionsSection);
-    const transactBtn = findRenderedDOMComponentWithClass(actionsSection, 'btn__transact');
+    const transactBtnComponent = findRenderedComponentWithType(instance, TransactBtn);
+    const transactBtn = findRenderedDOMComponentWithClass(transactBtnComponent, 'btn__transact');
     Simulate.click(transactBtn);
 
     const transactionPopup = findRenderedComponentWithType(instance, TransactionPopup);
@@ -149,6 +160,7 @@ describe('TransactionSection component', () => {
   });
 
   it('should open request popup', () => {
+    props.transactionDirection = 'credit';
     props.transaction_item = [
       {
         name: 'item1',
@@ -179,8 +191,8 @@ describe('TransactionSection component', () => {
 
     instance = renderIntoDocument(<TransactionSection { ...props }/>);
     instance.context.router = { push };
-    const actionsSection = findRenderedComponentWithType(instance, ActionsSection);
-    const requestBtn = findRenderedDOMComponentWithClass(actionsSection, 'btn__request');
+    const requestBtnComponent = findRenderedComponentWithType(instance, RequestBtn);
+    const requestBtn = findRenderedDOMComponentWithClass(requestBtnComponent, 'btn__request');
     Simulate.click(requestBtn);
 
     const requestPopup = findRenderedComponentWithType(instance, RequestPopup);
@@ -230,8 +242,8 @@ describe('TransactionSection component', () => {
     };
 
     instance = renderIntoDocument(<TransactionSection { ...props }/>);
-    const actionsSection = findRenderedComponentWithType(instance, ActionsSection);
-    const requestBtn = findRenderedDOMComponentWithClass(actionsSection, 'btn__request');
+    const requestBtnComponent = findRenderedComponentWithType(instance, RequestBtn);
+    const requestBtn = findRenderedDOMComponentWithClass(requestBtnComponent, 'btn__request');
     Simulate.click(requestBtn);
 
     const requestPopup = findRenderedComponentWithType(instance, RequestPopup);

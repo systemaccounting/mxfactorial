@@ -6,10 +6,12 @@ import { getLocation, buildLatLng } from 'utils/geo';
 import TransactionDetail from './TransactionDetail';
 import AddTransactionBtn from './AddTransactionBtn';
 import TransactionItem from './TransactionItem';
-import ActionsSection from './ActionsSection';
 import TransactionPopup from './TransactionPopup';
 import RequestPopup from './RequestPopup';
 import swapTransactionDbCr from 'utils/swapTransactionDbCr';
+import TransactionDirection from './TransactionDirection';
+import TransactBtn from './TransactBtn';
+import RequestBtn from './RequestBtn';
 
 export default class TransactionSection extends Component {
   constructor(props) {
@@ -80,11 +82,47 @@ export default class TransactionSection extends Component {
     addTransaction(cr_account);
   }
 
-  renderActionsSection() {
-    return this.props.transaction_item.length ?
-      <ActionsSection
+  checkTransactionItemsValid() {
+    let res = true;
+    if (this.props.cr_account.length == 0) return false;
+    if (!this.props.transaction_item.length) return false;
+    this.props.transaction_item.forEach(function (item) {
+      if (item.name.length == 0) res = false;
+      if (item.quantity == 0) res = false;
+      if (item.value == 0) res = false;
+    });
+    return res;
+  }
+
+  renderConsumeGoodOrServiceButton() {
+    return this.props.transactionDirection == 'debit' ?
+      <AddTransactionBtn handleClick={ this.handleAddTransaction }
+        title='(+) good or service'/>
+      : null;
+  }
+
+  renderProduceGoodOrServiceButton() {
+    return this.props.transactionDirection == 'credit' ?
+      <AddTransactionBtn handleClick={ this.handleAddTransaction }
+        title='(-) good or service'/>
+      : null;
+  }
+
+  renderTransactButton() {
+    const disabled = !this.checkTransactionItemsValid();
+    return this.props.transactionDirection == 'debit' ?
+      <TransactBtn
         handleTransact={ () => {this.setState({ showTransactionPopup: true });} }
-        handleRequest={ () => {this.setState({ showRequestPopup: true });} }/>
+        disabled={ disabled }/>
+      : null;
+  }
+
+  renderRequestButton() {
+    const disabled = !this.checkTransactionItemsValid();
+    return this.props.transactionDirection == 'credit' ?
+      <RequestBtn
+        handleRequest={ () => {this.setState({ showRequestPopup: true });} }
+        disabled={ disabled }/>
       : null;
   }
 
@@ -107,14 +145,19 @@ export default class TransactionSection extends Component {
   }
 
   render() {
-    const { transaction_item, removeTransaction, transactionAmount, updateCRAccount } = this.props;
+    const { transaction_item, removeTransaction, transactionAmount, updateCRAccount,
+      account, transactionDirection, setTransactionDirection } = this.props;
     const that = this;
 
     return (
       <div className='container' style={ { width: 300 } }>
         <TransactionDetail
           updateCRAccount={ updateCRAccount }
-          transactionAmount={ transactionAmount }/>
+          transactionAmount={ transactionAmount }
+          account={ account }/>
+        <TransactionDirection direction={ transactionDirection }
+          handleDebit={ setTransactionDirection.bind(this, 'debit') }
+          handleCredit={ setTransactionDirection.bind(this, 'credit') }/>
         {
           transaction_item.map((item, key) => (
             <TransactionItem key={ item.key } item={ item }
@@ -122,8 +165,10 @@ export default class TransactionSection extends Component {
               handleUpdateField={ that.handleUpdateField.bind(null, key) }/>
           ))
         }
-        <AddTransactionBtn handleClick={ this.handleAddTransaction }/>
-        { this.renderActionsSection() }
+        { this.renderConsumeGoodOrServiceButton() }
+        { this.renderProduceGoodOrServiceButton() }
+        { this.renderTransactButton() }
+        { this.renderRequestButton() }
         { this.renderTransactionPopup() }
         { this.renderRequestPopup() }
       </div>
@@ -142,7 +187,10 @@ TransactionSection.propTypes = {
   addTransaction: PropTypes.func.isRequired,
   postTransaction: PropTypes.func.isRequired,
   updateCRAccount: PropTypes.func.isRequired,
-  updateError: PropTypes.func.isRequired
+  updateError: PropTypes.func.isRequired,
+  account: PropTypes.string,
+  transactionDirection: PropTypes.string,
+  setTransactionDirection: PropTypes.func.isRequired
 };
 
 TransactionSection.defaultProps = {

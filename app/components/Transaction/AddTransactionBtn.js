@@ -1,15 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 
-import Plus from 'images/plus.png';
-
 export default class AddTransactionBtn extends Component {
   render() {
-    const { handleClick } = this.props;
+    const { handleClick, title } = this.props;
 
     return (
       <div>
-        <div className='indicator radius5 font22' onClick={ handleClick }>
-          <img src={ Plus } className='plusIcon' />  good or service
+        <div className='indicator radius5 font22' onClick={ handleClick } style={ { textAlign: 'center' } }>
+          { title }
         </div>
       </div>
     );
@@ -17,5 +15,6 @@ export default class AddTransactionBtn extends Component {
 }
 
 AddTransactionBtn.propTypes = {
-  handleClick: PropTypes.func.isRequired
+  handleClick: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired
 };

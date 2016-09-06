@@ -14,12 +14,12 @@ export default class TransactionDetail extends Component {
   }
 
   render() {
-    const { transactionAmount } = this.props;
+    const { transactionAmount, account } = this.props;
     return (
       <div className='input-group'>
         <div className='indicator radius5'>
           <div className='pull-left'>
-            Sandy<br />
+            { account }<br />
                balance
           </div>
           <div className='pull-right font22'>
@@ -41,5 +41,6 @@ export default class TransactionDetail extends Component {
 
 TransactionDetail.propTypes = {
   transactionAmount: PropTypes.number,
-  updateCRAccount: PropTypes.func
+  updateCRAccount: PropTypes.func,
+  account: PropTypes.string
 };
