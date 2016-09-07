@@ -17,6 +17,8 @@ import TransactionDirection from 'components/Transaction/TransactionDirection';
 import TransactBtn from 'components/Transaction/TransactBtn';
 import RequestBtn from 'components/Transaction/RequestBtn';
 
+var ReactTestUtils = require('react-addons-test-utils');
+
 describe('TransactionSection component', () => {
   let instance;
   const addTransaction = spy();
@@ -137,10 +139,13 @@ describe('TransactionSection component', () => {
 
     const transactionPopup = findRenderedComponentWithType(instance, TransactionPopup);
     const okBtn = findRenderedDOMComponentWithClass(transactionPopup, 'btn__ok');
-    const passwordInput = findRenderedDOMComponentWithTag(transactionPopup, 'input');
+    const passwordInput = findRenderedDOMComponentWithClass(transactionPopup, 'password');
+    const expirationInput = findRenderedDOMComponentWithClass(transactionPopup, 'expiration');
     Simulate.click(okBtn);
 
     props.updateError.should.be.calledWith('Password Required');
+    expirationInput.value='1';
+    ReactTestUtils.Simulate.change(expirationInput);
     passwordInput.value = 'secret';
     Simulate.change(passwordInput);
     Simulate.click(okBtn);
@@ -150,6 +155,7 @@ describe('TransactionSection component', () => {
       cr_author: '',
       db_time: '',
       db_latlng: '0,0',
+      expiration_time: 1,
       transaction_item: [{
         name: 'item1',
         quantity: 1,

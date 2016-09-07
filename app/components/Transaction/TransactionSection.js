@@ -31,7 +31,7 @@ export default class TransactionSection extends Component {
     this.setState({ showTransactionPopup: false });
   }
 
-  handlePost(password) {
+  handlePost(password, expirationTime) {
     if (!password) {
       this.props.updateError('Password Required');
     } else {
@@ -39,7 +39,8 @@ export default class TransactionSection extends Component {
         const loc = buildLatLng(position);
         const data = merge(this.props.transaction, {
           db_latlng: loc,
-          cr_latlng: loc
+          cr_latlng: loc,
+          expiration_time: expirationTime
         });
         this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time'])).then((action) => {
           if (!action.error) {
