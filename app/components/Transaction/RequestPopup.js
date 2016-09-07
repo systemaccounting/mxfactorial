@@ -2,6 +2,8 @@ import React, { Component, PropTypes } from 'react';
 
 import './RequestPopup.scss';
 
+import { MONEY_FORMAT } from 'constants/index';
+
 export default class RequestPopup extends Component {
   constructor(props) {
     super(props);
@@ -31,12 +33,16 @@ export default class RequestPopup extends Component {
   }
 
   render() {
-    const { handleCancel } = this.props;
+    console.log('RequestSentPopup',this.props);
+    const { handleCancel, handleRequest, transactionAmount } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
       <div className='transaction-modal'>
         <div className='transaction-popup'>
+          <div className='indicator radius5 font22 text-center transaction-amount'>
+            { numeral(transactionAmount).format(MONEY_FORMAT) }
+          </div>
           <div>
             Expiration:
           </div>
@@ -49,10 +55,7 @@ export default class RequestPopup extends Component {
           </div>
           <div className='modal__footer text-center'>
             <button className={ `${buttonClass} btn__cancel` } onClick={ handleCancel }>Cancel</button>
-            <button className={ `${buttonClass} btn__ok` }
-              onClick={ this.handleRequest }>
-              OK
-            </button>
+            <button className={ `${buttonClass} btn__ok` } onClick={ handleRequest }>OK</button>
           </div>
         </div>
       </div>
@@ -62,5 +65,6 @@ export default class RequestPopup extends Component {
 
 RequestPopup.propTypes = {
   handleCancel: PropTypes.func.isRequired,
-  handleRequest: PropTypes.func.isRequired
+  handleRequest: PropTypes.func.isRequired,
+  transactionAmount: PropTypes.number
 };

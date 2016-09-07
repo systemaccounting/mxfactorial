@@ -131,8 +131,8 @@ export default class TransactionSection extends Component {
       <TransactionPopup
         transactionError={ this.props.transactionError }
         handlePost={ this.handlePost }
-        transactionAmount={ this.props.transactionAmount }
-        handleCancel={ this.handleClose }/>
+        handleCancel={ this.handleClose }
+        transactionAmount={ this.props.transactionAmount }/>
       : null;
   }
 
@@ -140,7 +140,8 @@ export default class TransactionSection extends Component {
     return this.state.showRequestPopup ?
       <RequestPopup
         handleRequest={ this.handleRequest }
-        handleCancel={ () => { this.setState({ showRequestPopup: false }); } }/>
+        handleCancel={ () => { this.setState({ showRequestPopup: false }); } }
+        transactionAmount={ this.props.transactionAmount }/>
       : null;
   }
 
