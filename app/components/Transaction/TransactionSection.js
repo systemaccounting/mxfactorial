@@ -42,34 +42,35 @@ export default class TransactionSection extends Component {
           cr_latlng: loc,
           expiration_time: expirationTime
         });
-        this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time'])).then((action) => {
+        this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time', 'db_time'])).then((action) => {
           if (!action.error) {
             this.context.router.push('/TransactionHistory/success');
           }
         });
       };
-
       getLocation(mergeAndPost);
     }
-
   }
 
-  handleRequest(expirationTime) {
-    const mergeAndPost = (position) => {
-      const loc = buildLatLng(position);
-      const data = merge(swapTransactionDbCr(this.props.transaction), {
-        db_latlng: loc,
-        cr_latlng: loc,
-        expiration_time: expirationTime
-      });
-      this.props.postTransaction(omit(data, ['db_latlng', 'db_time'])).then((action) => {
-        if (!action.error) {
-          this.context.router.push('/Requests/RequestSent');
-        }
-      });
-    };
-
-    getLocation(mergeAndPost);
+  handleRequest(password, expirationTime) {
+    if (!password) {
+      this.props.updateError('Password Required');
+    } else {
+      const mergeAndPost = (position) => {
+        const loc = buildLatLng(position);
+        const data = merge(swapTransactionDbCr(this.props.transaction), {
+          db_latlng: loc,
+          cr_latlng: loc,
+          expiration_time: expirationTime
+        });
+        this.props.postTransaction(omit(data, ['db_latlng', 'cr_time', 'db_time'])).then((action) => {
+          if (!action.error) {
+            this.context.router.push('/Requests/RequestSent');
+          }
+        });
+      };
+      getLocation(mergeAndPost);
+    }
   }
 
   handleUpdateField(key, field, event) {
@@ -142,7 +143,8 @@ export default class TransactionSection extends Component {
       <RequestPopup
         handleRequest={ this.handleRequest }
         handleCancel={ () => { this.setState({ showRequestPopup: false }); } }
-        transactionAmount={ this.props.transactionAmount }/>
+        transactionAmount={ this.props.transactionAmount }
+        transactionError={ this.props.transactionError }/>
       : null;
   }
 

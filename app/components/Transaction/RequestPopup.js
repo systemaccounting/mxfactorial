@@ -24,7 +24,7 @@ export default class RequestPopup extends Component {
   }
 
   handleRequest() {
-    this.props.handleRequest(this.state.expirationTime);
+    this.props.handleRequest(this.refs.password.value, this.state.expirationTime);
   }
 
   handleChange(event) {
@@ -34,7 +34,7 @@ export default class RequestPopup extends Component {
   }
 
   render() {
-    const { handleCancel, transactionAmount } = this.props;
+    const { handleCancel, transactionAmount, transactionError } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
@@ -53,6 +53,15 @@ export default class RequestPopup extends Component {
               day{ this.state.expirationTime > 1 ? 's' : null }
             </span>
           </div>
+          <div>
+            Enter password:
+          </div>
+          <div className='input radius5 font22'>
+            <input type='password' ref={ 'password' } placeholder='********' className='text-center password'/>
+          </div>
+          <div className='error-message'>
+            { transactionError }
+          </div>
           <div className='modal__footer text-center'>
             <button className={ `${buttonClass} btn__cancel` } onClick={ handleCancel }>Cancel</button>
             <button className={ `${buttonClass} btn__ok` }
@@ -69,5 +78,6 @@ export default class RequestPopup extends Component {
 RequestPopup.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleRequest: PropTypes.func.isRequired,
-  transactionAmount: PropTypes.number
+  transactionAmount: PropTypes.number,
+  transactionError: PropTypes.string
 };

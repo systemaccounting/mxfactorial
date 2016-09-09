@@ -23,7 +23,8 @@ export const GET_EMPTY_TRANSACTION = (key, info)=>(merge({
   cr_account: '',
   db_account: '',
   units_measured: '',
-  unit_of_measurement: ''
+  unit_of_measurement: '',
+  rule_instance_id: ''
 }, info));
 
 export const ACCOUNT_NOFICATIONS = {

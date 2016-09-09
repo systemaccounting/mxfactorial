@@ -55,7 +55,8 @@ router.post('/', passport.authenticate('jwt', { session: false }), function (req
       quantity: item.quantity,
       units_measured: item.units_measured,
       unit_of_measurement: item.unit_of_measurement,
-      name: item.name
+      name: item.name,
+      rule_instance_id: item.rule_instance_id
     };
   });
 
