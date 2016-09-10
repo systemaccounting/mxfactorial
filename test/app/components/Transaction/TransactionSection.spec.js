@@ -112,9 +112,7 @@ describe('TransactionSection component', () => {
     props.transaction = {
       db_author: 'Sandy',
       cr_author: '',
-      db_time: '',
       db_latlng: '0,0',
-      cr_time: '',
       cr_latlng: '0,0',
       transaction_item: [{
         name: 'item1',
@@ -153,7 +151,6 @@ describe('TransactionSection component', () => {
     props.postTransaction.should.be.calledWith({
       db_author: 'Sandy',
       cr_author: '',
-      db_time: '',
       db_latlng: '0,0',
       expiration_time: 1,
       transaction_item: [{
@@ -177,9 +174,7 @@ describe('TransactionSection component', () => {
     props.transaction = {
       db_author: 'Mindy',
       cr_author: 'Sandy',
-      db_time: '',
       db_latlng: '0,0',
-      cr_time: '',
       cr_latlng: '0,0',
       transaction_item: [{
         name: 'item1',
@@ -206,12 +201,17 @@ describe('TransactionSection component', () => {
     expirationInput.value = '5';
     Simulate.change(expirationInput);
     const btnOk = findRenderedDOMComponentWithClass(requestPopup, 'btn__ok');
+    Simulate.click(btnOk);
+
+    props.updateError.should.be.calledWith('Password Required');
+    const passwordInput = findRenderedDOMComponentWithClass(requestPopup, 'password');
+    passwordInput.value = 'secret';
+    Simulate.change(passwordInput);
 
     Simulate.click(btnOk);
     props.postTransaction.should.be.calledWith({
       db_author: 'Sandy',
       cr_author: 'Mindy',
-      cr_time: '',
       cr_latlng: '0,0',
       expiration_time: 5,
       transaction_item: [{
