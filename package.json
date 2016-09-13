@@ -16,7 +16,7 @@
     "lint": "eslint app transact account main.js config.js"
   },
   "author": "Max Funk",
-  "license": "Apache Version 2.0",
+  "license": "Non-commercial; reference only",
   "private": true,
   "bugs": {
     "url": "https://github.com/systemaccounting/mxfactorial/issues"
