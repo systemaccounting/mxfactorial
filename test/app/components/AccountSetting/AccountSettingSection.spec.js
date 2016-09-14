@@ -49,7 +49,7 @@ describe('AccountSettingSection component', () => {
 
   it('should display modified email when email props is changed', () => {
     const initProps = {
-      email: 'initemail.stupid.com'
+      email: 'initemail.hello.com'
     };
 
     const Parent = ParentFactory(AccountSettingSection, initProps);
