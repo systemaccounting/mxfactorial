@@ -32,6 +32,7 @@ export default class TransactionSection extends Component {
   }
 
   handlePost(password, expirationTime) {
+    console.log('handlePost')
     if (!password) {
       this.props.updateError('Password Required');
     } else {
@@ -40,7 +41,9 @@ export default class TransactionSection extends Component {
         const data = merge(this.props.transaction, {
           db_latlng: loc,
           cr_latlng: loc,
-          expiration_time: expirationTime
+          expiration_time: expirationTime,
+          username: this.props.account,
+          password: password
         });
         this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time', 'db_time'])).then((action) => {
           if (!action.error) {
@@ -54,6 +57,7 @@ export default class TransactionSection extends Component {
   }
 
   handleRequest(password, expirationTime) {
+    console.log('handleRequest')
     if (!password) {
       this.props.updateError('Password Required');
     } else {
@@ -62,7 +66,9 @@ export default class TransactionSection extends Component {
         const data = merge(swapTransactionDbCr(this.props.transaction), {
           db_latlng: loc,
           cr_latlng: loc,
-          expiration_time: expirationTime
+          expiration_time: expirationTime,
+          username: this.props.account,
+          password: password
         });
         this.props.postTransaction(omit(data, ['db_latlng', 'cr_time', 'db_time'])).then((action) => {
           if (!action.error) {
