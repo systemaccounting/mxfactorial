@@ -23,6 +23,7 @@ var postTransaction = function (data) {
 
 //save transaction
 router.post('/', passport.authenticate('jwt', { session: false }), function (req, res) {
+  console.log('/transact/ req', req);
   var body = req.body;
   var transaction_item = body.transaction_item;
 

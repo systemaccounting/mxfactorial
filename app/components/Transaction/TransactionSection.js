@@ -44,6 +44,7 @@ export default class TransactionSection extends Component {
         });
         this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time', 'db_time'])).then((action) => {
           if (!action.error) {
+            console.log('TransactionSection !action.error action', action);
             this.context.router.push('/TransactionHistory/success');
           }
         });
