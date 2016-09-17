@@ -33,8 +33,6 @@ var postTransaction = function (data) {
 router.post('/', passport.authenticate('jwt', { session: false }), function (req, res) {
   getAccountByAccountName(req.body.username)
     .then(function (response) {
-      console.log('/transact/ req.body', req.body);
-      console.log('/transact/ response.data', response.data);
       if (String(CryptoJS.MD5(req.body.password)) == response.data.password) {
         var body = req.body;
         var transaction_item = body.transaction_item;
@@ -51,9 +49,9 @@ router.post('/', passport.authenticate('jwt', { session: false }), function (req
           cr_author: body.cr_author,
           rejection_time: (body.rejection_time || null),
           expiration_time: moment().add(body.expiration_time||7, 'd').format(),
-          db_time: moment().format('HH:mm'),
+          db_time: moment().format(),
           db_latlng: body.db_latlng,
-          cr_time: moment().format('HH:mm'),
+          cr_time: moment().format(),
           cr_latlng: body.cr_latlng,
           created_by: req.user.username
         };

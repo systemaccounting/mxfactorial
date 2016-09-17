@@ -32,7 +32,6 @@ export default class TransactionSection extends Component {
   }
 
   handlePost(password, expirationTime) {
-    console.log('handlePost')
     if (!password) {
       this.props.updateError('Password Required');
     } else {
@@ -45,9 +44,8 @@ export default class TransactionSection extends Component {
           username: this.props.account,
           password: password
         });
-        this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time', 'db_time'])).then((action) => {
+        this.props.postTransaction(omit(data, ['cr_latlng'])).then((action) => {
           if (!action.error) {
-            console.log('TransactionSection !action.error action', action);
             this.context.router.push('/TransactionHistory/success');
           }
         });
@@ -57,7 +55,6 @@ export default class TransactionSection extends Component {
   }
 
   handleRequest(password, expirationTime) {
-    console.log('handleRequest')
     if (!password) {
       this.props.updateError('Password Required');
     } else {
@@ -70,7 +67,7 @@ export default class TransactionSection extends Component {
           username: this.props.account,
           password: password
         });
-        this.props.postTransaction(omit(data, ['db_latlng', 'cr_time', 'db_time'])).then((action) => {
+        this.props.postTransaction(omit(data, ['db_latlng'])).then((action) => {
           if (!action.error) {
             this.context.router.push('/Requests/RequestSent');
           }

@@ -30,7 +30,6 @@ export default class LandingPageBody extends Component {
   }
 
   render() {
-    console.log('LandingPageBody', this.props);
     return (
       <div>
         <form role='form' onSubmit={ this.handleSubmit }>

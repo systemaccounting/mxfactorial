@@ -72,8 +72,6 @@ var getAccountByAccountName = function (accountName) {
 router.post('/auth', function (req, res, next) {
   getAccountByAccountName(req.body.username)
     .then(function (response) {
-      console.log('!!!!!/account/auth response.data', response.data);
-      console.log('!!!!!/account/auth req.body', req.body);
       var data = response.data;
 
       if (data) {
