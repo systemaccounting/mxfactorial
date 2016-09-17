@@ -35,8 +35,6 @@ describe('transaction selector', () => {
       const expectedResult = {
         db_author: 'Brad',
         cr_author: 'OOka',
-        db_time: '',
-        cr_time: '',
         db_latlng: '0,0',
         cr_latlng: '0,0',
         transaction_item
