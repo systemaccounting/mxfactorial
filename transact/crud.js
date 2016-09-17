@@ -1,6 +1,7 @@
 'use strict';
 
 var express = require('express');
+var CryptoJS = require('crypto-js');
 var bodyParser = require('body-parser');
 var moment = require('moment');
 var _ = require('lodash');
@@ -34,50 +35,54 @@ router.post('/', passport.authenticate('jwt', { session: false }), function (req
     .then(function (response) {
       console.log('/transact/ req.body', req.body);
       console.log('/transact/ response.data', response.data);
-      var body = req.body;
-      var transaction_item = body.transaction_item;
+      if (String(CryptoJS.MD5(req.body.password)) == response.data.password) {
+        var body = req.body;
+        var transaction_item = body.transaction_item;
 
-      if (_.isEmpty(transaction_item)) {
-        res.status(400).json({ error: 'Transaction items required' });
-        return;
-      }
+        if (_.isEmpty(transaction_item)) {
+          res.status(400).json({ error: 'Transaction items required' });
+          return;
+        }
 
-      var bid = req.user.username === body.db_author;
+        var bid = req.user.username === body.db_author;
 
-      var transaction = {
-        db_author: body.db_author,
-        cr_author: body.cr_author,
-        rejection_time: (body.rejection_time || null),
-        expiration_time: moment().add(body.expiration_time||7, 'd').format(),
-        db_time: moment().format('HH:mm'),
-        db_latlng: body.db_latlng,
-        cr_time: moment().format('HH:mm'),
-        cr_latlng: body.cr_latlng,
-        created_by: req.user.username
-      };
-
-      transaction = _.omit(transaction, bid ? ['cr_time', 'cr_latlng'] : ['db_time', 'db_latlng']);
-
-      transaction_item = _.map(transaction_item, function (item) {
-        return {
-          db_account: item.db_account,
-          cr_account: item.cr_account,
-          value: item.value,
-          quantity: item.quantity,
-          units_measured: item.units_measured,
-          unit_of_measurement: item.unit_of_measurement,
-          name: item.name,
-          rule_instance_id: item.rule_instance_id
+        var transaction = {
+          db_author: body.db_author,
+          cr_author: body.cr_author,
+          rejection_time: (body.rejection_time || null),
+          expiration_time: moment().add(body.expiration_time||7, 'd').format(),
+          db_time: moment().format('HH:mm'),
+          db_latlng: body.db_latlng,
+          cr_time: moment().format('HH:mm'),
+          cr_latlng: body.cr_latlng,
+          created_by: req.user.username
         };
-      });
 
-      postTransaction(_.assign({}, transaction, {
-        transaction_item: transaction_item
-      })).then(function (response) {
-        res.status(200).json({ transaction_id: response.data.name });
-      }).catch(function (err) {
-        res.status(500).json(err);
-      });
+        transaction = _.omit(transaction, bid ? ['cr_time', 'cr_latlng'] : ['db_time', 'db_latlng']);
+
+        transaction_item = _.map(transaction_item, function (item) {
+          return {
+            db_account: item.db_account,
+            cr_account: item.cr_account,
+            value: item.value,
+            quantity: item.quantity,
+            units_measured: item.units_measured,
+            unit_of_measurement: item.unit_of_measurement,
+            name: item.name,
+            rule_instance_id: item.rule_instance_id
+          };
+        });
+
+        postTransaction(_.assign({}, transaction, {
+          transaction_item: transaction_item
+        })).then(function (response) {
+          res.status(200).json({ transaction_id: response.data.name });
+        }).catch(function (err) {
+          res.status(500).json(err);
+        });
+      } else {
+        res.status(400).json({ error: 'Incorrect password' });
+      }
     });
 });
 
