@@ -50,7 +50,8 @@ describe('transaction_item reducer', () => {
       cr_account: '',
       db_account: '',
       units_measured: '',
-      unit_of_measurement: ''
+      unit_of_measurement: '',
+      rule_instance_id: ''
     }]);
   });
 
@@ -66,7 +67,8 @@ describe('transaction_item reducer', () => {
       cr_account: 'David',
       db_account: '',
       units_measured: '',
-      unit_of_measurement: ''
+      unit_of_measurement: '',
+      rule_instance_id: ''
     }]);
   });
 

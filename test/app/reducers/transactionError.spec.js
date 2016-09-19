@@ -12,8 +12,9 @@ describe('transactionError reducer', () => {
 
   it('should handle POST_TRANSACTION_FAILURE', () => {
     transactionError(undefined, {
-      type: error
-    }).should.equal('Transaction failed');
+      type: error,
+      payload: { message: 'Incorrect password' } 
+    }).should.equal('Incorrect password');
   });
 
   it('should handle UPDATE_ERROR', () => {

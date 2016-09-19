@@ -31,7 +31,7 @@ export default class TransactionSection extends Component {
     this.setState({ showTransactionPopup: false });
   }
 
-  handlePost(password) {
+  handlePost(password, expirationTime) {
     if (!password) {
       this.props.updateError('Password Required');
     } else {
@@ -39,36 +39,42 @@ export default class TransactionSection extends Component {
         const loc = buildLatLng(position);
         const data = merge(this.props.transaction, {
           db_latlng: loc,
-          cr_latlng: loc
+          cr_latlng: loc,
+          expiration_time: expirationTime,
+          username: this.props.account,
+          password: password
         });
-        this.props.postTransaction(omit(data, ['cr_latlng', 'cr_time'])).then((action) => {
+        this.props.postTransaction(omit(data, ['cr_latlng'])).then((action) => {
           if (!action.error) {
             this.context.router.push('/TransactionHistory/success');
           }
         });
       };
-
       getLocation(mergeAndPost);
     }
-
   }
 
-  handleRequest(expirationTime) {
-    const mergeAndPost = (position) => {
-      const loc = buildLatLng(position);
-      const data = merge(swapTransactionDbCr(this.props.transaction), {
-        db_latlng: loc,
-        cr_latlng: loc,
-        expiration_time: expirationTime
-      });
-      this.props.postTransaction(omit(data, ['db_latlng', 'db_time'])).then((action) => {
-        if (!action.error) {
-          this.context.router.push('/Requests/RequestSent');
-        }
-      });
-    };
-
-    getLocation(mergeAndPost);
+  handleRequest(password, expirationTime) {
+    if (!password) {
+      this.props.updateError('Password Required');
+    } else {
+      const mergeAndPost = (position) => {
+        const loc = buildLatLng(position);
+        const data = merge(swapTransactionDbCr(this.props.transaction), {
+          db_latlng: loc,
+          cr_latlng: loc,
+          expiration_time: expirationTime,
+          username: this.props.account,
+          password: password
+        });
+        this.props.postTransaction(omit(data, ['db_latlng'])).then((action) => {
+          if (!action.error) {
+            this.context.router.push('/Requests/RequestSent');
+          }
+        });
+      };
+      getLocation(mergeAndPost);
+    }
   }
 
   handleUpdateField(key, field, event) {
@@ -131,8 +137,8 @@ export default class TransactionSection extends Component {
       <TransactionPopup
         transactionError={ this.props.transactionError }
         handlePost={ this.handlePost }
-        transactionAmount={ this.props.transactionAmount }
-        handleCancel={ this.handleClose }/>
+        handleCancel={ this.handleClose }
+        transactionAmount={ this.props.transactionAmount }/>
       : null;
   }
 
@@ -140,7 +146,9 @@ export default class TransactionSection extends Component {
     return this.state.showRequestPopup ?
       <RequestPopup
         handleRequest={ this.handleRequest }
-        handleCancel={ () => { this.setState({ showRequestPopup: false }); } }/>
+        handleCancel={ () => { this.setState({ showRequestPopup: false }); } }
+        transactionAmount={ this.props.transactionAmount }
+        transactionError={ this.props.transactionError }/>
       : null;
   }
 

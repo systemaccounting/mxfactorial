@@ -1,6 +1,9 @@
 import React, { Component, PropTypes } from 'react';
+import numeral from 'numeral';
 
 import './RequestPopup.scss';
+
+import { MONEY_FORMAT } from 'constants/index';
 
 export default class RequestPopup extends Component {
   constructor(props) {
@@ -21,7 +24,7 @@ export default class RequestPopup extends Component {
   }
 
   handleRequest() {
-    this.props.handleRequest(this.state.expirationTime);
+    this.props.handleRequest(this.refs.password.value, this.state.expirationTime);
   }
 
   handleChange(event) {
@@ -31,12 +34,15 @@ export default class RequestPopup extends Component {
   }
 
   render() {
-    const { handleCancel } = this.props;
+    const { handleCancel, transactionAmount, transactionError } = this.props;
     const buttonClass = 'indicator radius5 text-center font22 modal__btn';
 
     return (
       <div className='transaction-modal'>
         <div className='transaction-popup'>
+          <div className='indicator radius5 font22 text-center transaction-amount'>
+            { numeral(transactionAmount).format(MONEY_FORMAT) }
+          </div>
           <div>
             Expiration:
           </div>
@@ -46,6 +52,15 @@ export default class RequestPopup extends Component {
             <span>
               day{ this.state.expirationTime > 1 ? 's' : null }
             </span>
+          </div>
+          <div>
+            Enter password:
+          </div>
+          <div className='input radius5 font22'>
+            <input type='password' ref={ 'password' } placeholder='********' className='text-center password'/>
+          </div>
+          <div className='error-message'>
+            { transactionError }
           </div>
           <div className='modal__footer text-center'>
             <button className={ `${buttonClass} btn__cancel` } onClick={ handleCancel }>Cancel</button>
@@ -62,5 +77,7 @@ export default class RequestPopup extends Component {
 
 RequestPopup.propTypes = {
   handleCancel: PropTypes.func.isRequired,
-  handleRequest: PropTypes.func.isRequired
+  handleRequest: PropTypes.func.isRequired,
+  transactionAmount: PropTypes.number,
+  transactionError: PropTypes.string
 };

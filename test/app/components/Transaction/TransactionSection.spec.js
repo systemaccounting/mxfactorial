@@ -17,6 +17,8 @@ import TransactionDirection from 'components/Transaction/TransactionDirection';
 import TransactBtn from 'components/Transaction/TransactBtn';
 import RequestBtn from 'components/Transaction/RequestBtn';
 
+var ReactTestUtils = require('react-addons-test-utils');
+
 describe('TransactionSection component', () => {
   let instance;
   const addTransaction = spy();
@@ -57,6 +59,7 @@ describe('TransactionSection component', () => {
     props.cr_account = 'JonSnow';
     props.transaction_item = [
       {
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25
@@ -99,9 +102,11 @@ describe('TransactionSection component', () => {
 
 
   it('should handle post', () => {
+    props.account = 'JonSnow'
     props.cr_account = 'JonSnow';
     props.transaction_item = [
       {
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25
@@ -110,11 +115,10 @@ describe('TransactionSection component', () => {
     props.transaction = {
       db_author: 'Sandy',
       cr_author: '',
-      db_time: '',
       db_latlng: '0,0',
-      cr_time: '',
       cr_latlng: '0,0',
       transaction_item: [{
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25
@@ -137,10 +141,13 @@ describe('TransactionSection component', () => {
 
     const transactionPopup = findRenderedComponentWithType(instance, TransactionPopup);
     const okBtn = findRenderedDOMComponentWithClass(transactionPopup, 'btn__ok');
-    const passwordInput = findRenderedDOMComponentWithTag(transactionPopup, 'input');
+    const passwordInput = findRenderedDOMComponentWithClass(transactionPopup, 'password');
+    const expirationInput = findRenderedDOMComponentWithClass(transactionPopup, 'expiration');
     Simulate.click(okBtn);
 
     props.updateError.should.be.calledWith('Password Required');
+    expirationInput.value='1';
+    ReactTestUtils.Simulate.change(expirationInput);
     passwordInput.value = 'secret';
     Simulate.change(passwordInput);
     Simulate.click(okBtn);
@@ -148,13 +155,16 @@ describe('TransactionSection component', () => {
     props.postTransaction.should.be.calledWith({
       db_author: 'Sandy',
       cr_author: '',
-      db_time: '',
       db_latlng: '0,0',
+      expiration_time: 1,
       transaction_item: [{
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25
-      }]
+      }],
+      username: 'JonSnow',
+      password: 'secret'
     });
     push.should.be.calledWith('/TransactionHistory/success');
   });
@@ -163,6 +173,7 @@ describe('TransactionSection component', () => {
     props.transactionDirection = 'credit';
     props.transaction_item = [
       {
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25
@@ -171,11 +182,10 @@ describe('TransactionSection component', () => {
     props.transaction = {
       db_author: 'Mindy',
       cr_author: 'Sandy',
-      db_time: '',
       db_latlng: '0,0',
-      cr_time: '',
       cr_latlng: '0,0',
       transaction_item: [{
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25,
@@ -200,21 +210,29 @@ describe('TransactionSection component', () => {
     expirationInput.value = '5';
     Simulate.change(expirationInput);
     const btnOk = findRenderedDOMComponentWithClass(requestPopup, 'btn__ok');
+    Simulate.click(btnOk);
+
+    props.updateError.should.be.calledWith('Password Required');
+    const passwordInput = findRenderedDOMComponentWithClass(requestPopup, 'password');
+    passwordInput.value = 'secret';
+    Simulate.change(passwordInput);
 
     Simulate.click(btnOk);
     props.postTransaction.should.be.calledWith({
       db_author: 'Sandy',
       cr_author: 'Mindy',
-      cr_time: '',
       cr_latlng: '0,0',
       expiration_time: 5,
       transaction_item: [{
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25,
         db_account: 'Sandy',
         cr_account: 'Mindy'
-      }]
+      }],
+      username: 'JonSnow',
+      password: 'secret'
     });
     push.should.be.calledWith('/Requests/RequestSent');
   });
@@ -222,6 +240,7 @@ describe('TransactionSection component', () => {
   it('should close request popup', () => {
     props.transaction_item = [
       {
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25
@@ -235,6 +254,7 @@ describe('TransactionSection component', () => {
       cr_time: '',
       cr_latlng: '0,0',
       transaction_item: [{
+        key: 0,
         name: 'item1',
         quantity: 1,
         value: 25

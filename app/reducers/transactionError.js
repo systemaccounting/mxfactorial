@@ -8,7 +8,7 @@ const { error } = generateAsyncTypes(POST_TRANSACTION);
 const handleClear = () => ('');
 
 export default handleActions({
-  [error]: (state, action) => ('Transaction failed'),
+  [error]: (state, action) => (action.payload.message ? action.payload.message : 'Transaction failed'),
   [UPDATE_ERROR]: (state, action) => (action.payload ? action.payload : ''),
   [CLEAR_TRANSACTION]: handleClear
 }, '');
