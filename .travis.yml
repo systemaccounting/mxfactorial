@@ -26,4 +26,6 @@ script:
   - npm run test
   - npm run lint
 
+bundler_args: --retry 5
+
 after_script: "cat ./coverage/report-lcov/lcov.info | ./node_modules/coveralls/bin/coveralls.js"
