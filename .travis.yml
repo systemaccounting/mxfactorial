@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
-- "4.4.3"
+- "4"
 
 env:
   global:
@@ -20,12 +20,9 @@ cache:
 
 before_install:
   - if [[ `npm -v` != 3* ]]; then npm i -g npm@3; fi
-  - sudo apt-get update
 
 script:
   - npm run test
   - npm run lint
-
-bundler_args: --retry 5
 
 after_script: "cat ./coverage/report-lcov/lcov.info | ./node_modules/coveralls/bin/coveralls.js"

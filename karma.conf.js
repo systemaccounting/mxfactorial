@@ -7,7 +7,7 @@ module.exports = function (config) {
       'test/**/*.spec.js'
     ],
     port: 8080,
-    captureTimeout: 200000,
+    captureTimeout: 100000,
     frameworks: ['mocha', 'should'],
     client: {
       mocha: {
@@ -33,7 +33,7 @@ module.exports = function (config) {
           },
           {
             test: /\.scss/,
-            loaders: ['style', 'css', 'sass'],
+            loaders: ['style-loader', 'css-loader', 'sass-loader'],
             exclude: '/node_modules/'
           },
           {
@@ -51,6 +51,9 @@ module.exports = function (config) {
           loader: 'isparta'
         }]
       }
+    },
+    webpackMiddleware: {
+      stats: 'errors-only'
     },
     webpackServer: {
       noInfo: true
