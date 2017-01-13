@@ -7,7 +7,7 @@ module.exports = function (config) {
       'test/**/*.spec.js'
     ],
     port: 8080,
-    captureTimeout: 100000,
+    captureTimeout: 200000,
     frameworks: ['mocha', 'should'],
     client: {
       mocha: {
