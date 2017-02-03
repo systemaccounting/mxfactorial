@@ -10,38 +10,32 @@ module.exports = {
     port: 8080
   },
   resolve: {
-    extensions: ['', '.json', '.js', '.jsx'],
-    modulesDirectories: ['node_modules', 'app', 'static']
-  },
-  resolveLoader: {
-    packageMains: ['json-loader']
+    extensions: ['.json', '.js', '.jsx'],
+    modules: ['node_modules', 'app', 'static']
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.jsx?$/,
-        loader: 'babel-loader',
+        use: 'babel-loader',
         exclude: '/node_modules/'
       },
       {
         test: /\.css/,
-        loaders: ['style-loader', 'css-loader', 'sass-loader'],
+        use: ['style-loader', 'css-loader', 'sass-loader'],
         exclude: '/node_modules/'
       }, {
         test: /\.scss/,
-        loaders: ['style-loader', 'css-loader', 'sass-loader'],
+        use: ['style-loader', 'css-loader', 'sass-loader'],
         exclude: '/node_modules/'
       }, {
         test: /\.html/,
-        loader: 'html',
+        use: 'html-loader',
         exclude: '/node_modules/'
       }, {
         test: /\.(png|gif|jpe?g|svg)$/i,
-        loader: 'file-loader?name=static/images/[name].[ext]',
+        use: 'file-loader?name=static/images/[name].[ext]',
         exclude: '/node_modules/'
-      }, {
-        test: /\.json$/,
-        loaders: ['json-loader']
       }
     ]
   }
