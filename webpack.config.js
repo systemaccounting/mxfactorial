@@ -1,3 +1,5 @@
+var webpack = require('webpack');
+
 module.exports = {
   entry: './app/client.js',
   output: {
@@ -38,5 +40,8 @@ module.exports = {
         exclude: '/node_modules/'
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.HotModuleReplacementPlugin()
+  ]
 };

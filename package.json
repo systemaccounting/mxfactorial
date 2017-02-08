@@ -7,7 +7,7 @@
     "local-ds": "gcloud beta emulators datastore start --host-port 0.0.0.0:8082",
     "set-local-ds-env": "(gcloud beta emulators datastore env-init)",
     "dev": "webpack-dev-server --content-base build/ --watch-poll",
-    "webdev": "webpack-dev-server --host 0.0.0.0 --progress --colors --hot --inline --content-base build/",
+    "webdev": "webpack-dev-server --host 0.0.0.0 --progress --colors --content-base build/",
     "build": "webpack",
     "start": "NODE_PATH=. node main.js",
     "deploy-firebase": "firebase deploy",
