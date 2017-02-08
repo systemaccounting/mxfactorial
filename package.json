@@ -31,7 +31,7 @@
     "crypto-js": "^3.1.6",
     "es6-promise": "^3.2.1",
     "express": "^4.13.4",
-    "firebase": "^3.0.5",
+    "firebase-admin": "^4.1.0",
     "gcloud": "^0.30.2",
     "googleapis": "^5.1.0",
     "history": "^1.17.0",
