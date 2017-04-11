@@ -45,7 +45,7 @@ module.exports = function (config) {
       }
     },
     webpackMiddleware: {
-      stats: 'errors-only'
+      noInfo: true
     },
     webpackServer: {
       noInfo: true

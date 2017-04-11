@@ -1,7 +1,7 @@
 # mxfactorial
 [![mxfactorial](https://cloud.githubusercontent.com/assets/12200465/12700510/1a48b412-c79b-11e5-901f-4f26965dd017.png)](http://www.systemaccounting.org/math_identity)
 
-[![Coverage Status](https://coveralls.io/repos/github/systemaccounting/mxfactorial/badge.svg?branch=master)](https://coveralls.io/github/systemaccounting/mxfactorial?branch=master) [![Build Status](https://travis-ci.org/systemaccounting/mxfactorial.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial) [![Production Environment](https://img.shields.io/badge/PROD-gcloud-brightgreen.svg)](https://mxfactorial.io/) [![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
+[![Coverage Status](https://coveralls.io/repos/github/systemaccounting/mxfactorial/badge.svg?branch=master)](https://coveralls.io/github/systemaccounting/mxfactorial?branch=master) [![Build Status](https://travis-ci.org/systemaccounting/mxfactorial.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial) [![Production Environment](https://img.shields.io/badge/PROD-firebase-brightgreen.svg)](https://mxfactorial.io/) [![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
 
 *The idea is to have the U.S. Treasury deploy a payment platform where the transaction data serves as the source for measuring the cost of capital. Instead of the cost of credit determining the cost of capital, the reference for the system's risk-free rate in systemaccounting is the cost of equity. - [@Mxfactorial](https://twitter.com/mxfactorial)*
 
@@ -23,7 +23,7 @@ This public project is intended to exploit the software engineering community's 
 * Learn to deploy a Node.js web application by completing the Google App Engine ['Hello World!' tutorial](https://cloud.google.com/nodejs/getting-started/hello-world).
 * Now that your development & production environments are set up, you may follow this project's [Code Delivery Workflow](https://docs.google.com/document/d/1UGklz7LwzES3t6i5IZrnt-ZwLeEFaeWhqaocFE3C9QE/edit?usp=sharing).
  
-Details as of 11/15/2016:
+Details as of 4/10/2017:
 - Production: [mxfactorial.io](https://mxfactorial.io/)
 - [Data Model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
 - [Wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
@@ -31,7 +31,7 @@ Details as of 11/15/2016:
 - Node.js v4.4.3
 - npm v3.5.1
 - web client & database on Firebase
-- API on App Engine Flex
+- API on Heroku
 
 Roadmap:
 * Set up managed application & persistence layer

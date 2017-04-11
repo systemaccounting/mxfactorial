@@ -53,7 +53,7 @@ notifyHub.on('value', (notifications) => {
 });
 
 notifyHub.on('unauthorized', (error) => {
-  console.log(error);
+  console.error(error);
 });
 
 notifyHub.on('disconnect', () => {
