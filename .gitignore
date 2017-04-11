@@ -6,4 +6,4 @@ build/bundle.js
 build/static/
 .vscode
 apidoc/
-mxfactorial-cebe88ad95c6.json
+mxfactorial-*.json
