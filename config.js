@@ -4,6 +4,16 @@
 // variables, and files.
 var nconf = module.exports = require('nconf');
 var path = require('path');
+const fs = require('fs');
+
+const FIREBASE_KEY_PATH = 'mxfactorial-136a67d52477.json';
+let { FIREBASE_KEY_OBJ } = process.env;
+if (FIREBASE_KEY_OBJ) {
+  // Create the config file from environment variable
+  let filename = path.join(__dirname, FIREBASE_KEY_PATH);
+  let content = FIREBASE_KEY_OBJ.replace(/\\\\n/g, '\\n');
+  fs.writeFileSync(filename, content);
+}
 
 nconf
   // 1. Command-line arguments
@@ -46,7 +56,7 @@ nconf
     MYSQL_PASSWORD: '',
     MYSQL_HOST: '',
     FIREBASE_URL: 'https://mxfactorial.firebaseio.com',
-    FIREBASE_KEY_PATH: 'mxfactorial-136a67d52477.json',
+    FIREBASE_KEY_PATH: FIREBASE_KEY_PATH,
 
     // Port the HTTP server
     PORT: 8080
