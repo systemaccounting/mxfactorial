@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import configureStore from 'store/configureStore';
 
 import getRoutes from 'routes';
-import LandingPage from 'components/LandingPage/LandingPage';
+import LandingScreen from 'components/LandingScreen/LandingScreen';
 
 describe('routes', () => {
   let instance;
@@ -27,6 +27,6 @@ describe('routes', () => {
       </Provider>
     );
     instance.should.be.ok();
-    scryRenderedComponentsWithType(instance, LandingPage).length.should.equal(1);
+    scryRenderedComponentsWithType(instance, LandingScreen).length.should.equal(1);
   });
 });

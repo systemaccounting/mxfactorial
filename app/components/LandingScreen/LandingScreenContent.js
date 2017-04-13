@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { Link } from 'react-router';
 
-export default class LandingPageBody extends Component {
+export default class LandingScreenContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,17 +34,17 @@ export default class LandingPageBody extends Component {
       <div>
         <form role='form' onSubmit={ this.handleSubmit }>
           <div className='form-group'>
-            <input ref='username' type='text' className='form-control form-spacing text-center'
+            <input id='userInputField' ref='username' type='text' className='form-control form-spacing text-center'
               name='username' required={ true } placeholder='User' />
-            <input ref='password' type='password' className='form-control form-spacing text-center'
+            <input id='passwordInputField' ref='password' type='password' className='form-control form-spacing text-center'
               name='password' required={ true } placeholder='Password' />
             <div className='error-message'>
               { this.state.error }
             </div>
-            <button type='submit'
-              className='btn btn-info form-spacing btn-style'>Log In</button>
+            <button id='signInButton' type='submit'
+              className='btn btn-info form-spacing btn-style'>Sign In</button>
             <Link to='/CreateAccountInfo/1'>
-              <button type='button' className='btn btn-primary form-spacing btn-style'>Create</button>
+              <button id='createButton' type='button' className='btn btn-primary form-spacing btn-style'>Create</button>
             </Link>
           </div>
         </form>
@@ -54,11 +54,11 @@ export default class LandingPageBody extends Component {
   }
 }
 
-LandingPageBody.contextTypes = {
+LandingScreenContent.contextTypes = {
   router: PropTypes.object
 };
 
-LandingPageBody.propTypes = {
+LandingScreenContent.propTypes = {
   login: PropTypes.func,
   nextPathName: PropTypes.string
 };

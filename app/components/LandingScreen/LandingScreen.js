@@ -2,21 +2,21 @@ import React, { Component, PropTypes } from 'react';
 
 import Logo from './Logo';
 import MobileLayout from 'components/Layout/MobileLayout';
-import LandingPageBody from 'containers/LandingPage/LandingPageBody';
+import LandingScreenContent from 'containers/LandingScreen/LandingScreenContent';
 
-export default class LandingPage extends Component {
+export default class LandingScreen extends Component {
   render() {
     const { state } = this.props.location;
 
     return (
       <MobileLayout>
         <Logo />
-        <LandingPageBody nextPathName={ state && state.nextPathName } />
+        <LandingScreenContent nextPathName={ state && state.nextPathName } />
       </MobileLayout>
     );
   }
 }
 
-LandingPage.propTypes = {
+LandingScreen.propTypes = {
   location: PropTypes.object
 };

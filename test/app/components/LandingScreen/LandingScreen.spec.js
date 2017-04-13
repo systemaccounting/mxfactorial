@@ -5,13 +5,13 @@ import {
   renderIntoDocument, scryRenderedComponentsWithType
 } from 'react-addons-test-utils';
 
-import LandingPage from 'components/LandingPage/LandingPage';
-import Logo from 'components/LandingPage/Logo';
+import LandingScreen from 'components/LandingScreen/LandingScreen';
+import Logo from 'components/LandingScreen/Logo';
 import MobileLayout from 'components/Layout/MobileLayout';
-import LandingPageBody from 'components/LandingPage/LandingPageBody';
+import LandingScreenContent from 'components/LandingScreen/LandingScreenContent';
 import configureStore from 'store/configureStore';
 
-describe('LandingPage component', () => {
+describe('LandingScreen component', () => {
   let instance;
   const store = configureStore(undefined, true);
 
@@ -19,14 +19,14 @@ describe('LandingPage component', () => {
     instance && unmountComponentAtNode(findDOMNode(instance).parentNode);
   });
 
-  it('should render MobileLayout, Logo, LandingPageBody', () => {
+  it('should render MobileLayout, Logo, LandingScreenContent', () => {
     instance = renderIntoDocument(
       <Provider store={ store }>
-        <LandingPage location={ { state: {} } }/>
+        <LandingScreen location={ { state: {} } }/>
       </Provider>
     );
     scryRenderedComponentsWithType(instance, Logo).length.should.equal(1);
     scryRenderedComponentsWithType(instance, MobileLayout).length.should.equal(1);
-    scryRenderedComponentsWithType(instance, LandingPageBody).length.should.equal(1);
+    scryRenderedComponentsWithType(instance, LandingScreenContent).length.should.equal(1);
   });
 });

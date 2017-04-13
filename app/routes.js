@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, IndexRedirect } from 'react-router';
 
-import LandingPage from 'components/LandingPage/LandingPage';
+import LandingPage from 'components/LandingScreen/LandingScreen';
 import BaseLayout from 'components/Layout/BaseLayout';
 import HomePage from 'components/Home/Home';
 import CreateAccountInfo from 'components/CreateAccountInfo/CreateAccountInfo';

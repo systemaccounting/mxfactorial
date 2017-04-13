@@ -7,9 +7,9 @@ import {
 import { spy } from 'sinon';
 import 'should-sinon';
 
-import LandingPageBody from 'components/LandingPage/LandingPageBody';
+import LandingScreenContent from 'components/LandingScreen/LandingScreenContent';
 
-describe('LandingPageBody component', () => {
+describe('LandingScreenContent component', () => {
   let instance;
 
   afterEach(() => {
@@ -31,7 +31,7 @@ describe('LandingPageBody component', () => {
     };
 
     instance = renderIntoDocument(
-      <LandingPageBody { ...props }/>
+      <LandingScreenContent { ...props }/>
     );
 
     const push = spy();
