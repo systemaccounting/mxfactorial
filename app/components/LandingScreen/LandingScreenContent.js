@@ -36,8 +36,9 @@ export default class LandingScreenContent extends Component {
           <div className='form-group'>
             <input id='userInputField' ref='username' type='text' className='form-control form-spacing text-center'
               name='username' required={ true } placeholder='User' />
-            <input id='passwordInputField' ref='password' type='password' className='form-control form-spacing text-center'
-              name='password' required={ true } placeholder='Password' />
+            <input id='passwordInputField' ref='password' type='password'
+              className='form-control form-spacing text-center' name='password'
+              required={ true } placeholder='Password' />
             <div className='error-message'>
               { this.state.error }
             </div>
