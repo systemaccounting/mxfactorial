@@ -7,7 +7,8 @@ var path = require('path');
 const fs = require('fs');
 
 const FIREBASE_KEY_PATH = 'mxfactorial-136a67d52477.json';
-let { FIREBASE_KEY_OBJ } = process.env;
+const FIREBASE_KEY_OBJ = process.env.FIREBASE_KEY_OBJ;
+
 if (FIREBASE_KEY_OBJ) {
   // Create the config file from environment variable
   let filename = path.join(__dirname, FIREBASE_KEY_PATH);
