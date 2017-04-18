@@ -1,0 +1,10 @@
+{
+  "name": "mxaccount",
+  "main": "server.js",
+  "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "body-parser": "^1.15.1",
+    "express": "^4.13.4",
+    "gcloud": "^0.34.0"
+  }
+}
