@@ -113,6 +113,7 @@
     "webpack-dev-server": "^1.16.2"
   },
   "engines": {
-    "node": ">=0.12.7"
+    "node": "6.10.3",
+    "npm": "3.5.1"
   }
 }
