@@ -6,7 +6,7 @@
   "scripts": {
     "webdev": "webpack-dev-server --host 0.0.0.0 --progress --colors --content-base build/",
     "build": "webpack",
-    "start": "NODE_PATH=. node main.js",
+    "start": "node main.js",
     "deploy-firebase": "firebase deploy",
     "heroku-postbuild": "yarn run build",
     "test": "karma start",
