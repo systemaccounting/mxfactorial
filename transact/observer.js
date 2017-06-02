@@ -1,7 +1,7 @@
 var _ = require('lodash');
 
 var ref = require('./ref');
-var notifyRef = require('notification/ref');
+var notifyRef = require('./ref');
 var blacklistRef = require('./blacklist-transaction');
 
 ref.on('child_added', function (snapshot, prevChildKey) {

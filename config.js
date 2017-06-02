@@ -6,7 +6,7 @@ var nconf = module.exports = require('nconf');
 var path = require('path');
 const fs = require('fs');
 
-const FIREBASE_KEY_PATH = 'mxfactorial-136a67d52477.json';
+const FIREBASE_KEY_PATH = path.resolve(__dirname, 'mxfactorial-136a67d52477.json');
 const FIREBASE_KEY_OBJ = process.env.FIREBASE_KEY_OBJ;
 
 if (FIREBASE_KEY_OBJ) {

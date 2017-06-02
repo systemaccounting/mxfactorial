@@ -1,7 +1,7 @@
 var socketioJwt = require('socketio-jwt');
 
-var config = require('config.js');
-var notificationHub = require('notification/hub');
+var config = require('../config.js');
+var notificationHub = require('../notification/hub');
 
 module.exports = function (httpServer) {
   var io = require('socket.io')(httpServer);

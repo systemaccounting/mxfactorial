@@ -1,6 +1,6 @@
 var google = require('googleapis');
 
-var config = require('config.js');
+var config = require('../config.js');
 var key = require(config.get('FIREBASE_KEY_PATH'));
 var instance = require('./client');
 

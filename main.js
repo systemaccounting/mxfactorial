@@ -10,8 +10,8 @@ var passport = require('passport');
 var cors = require('cors');
 var JwtStrategy = require('passport-jwt').Strategy;
 var ExtractJwt = require('passport-jwt').ExtractJwt;
-var socketServer = require('socket-server');
-require('transact/observer');
+var socketServer = require('./socket-server');
+require('./transact/observer');
 
 var app = express();
 

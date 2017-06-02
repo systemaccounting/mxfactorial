@@ -1,7 +1,7 @@
 var cookie = require('cookie');
 var jwt = require('jsonwebtoken');
 
-var config = require('config.js');
+var config = require('../config.js');
 
 module.exports = function authorize(socket) {
   return new Promise(function (resolve, reject) {

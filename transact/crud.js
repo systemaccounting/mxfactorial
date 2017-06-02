@@ -7,7 +7,7 @@ var moment = require('moment');
 var _ = require('lodash');
 var passport = require('passport');
 
-var firebaseClient = require('firebase-client/index');
+var firebaseClient = require('../firebase-client/index');
 var TRANSACTION_PATH = '/transaction';
 var USER_PATH = '/account';
 

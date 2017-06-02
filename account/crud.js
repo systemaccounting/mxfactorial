@@ -33,8 +33,8 @@ var router = express.Router();
 var validator = require('validator');
 var passport = require('passport');
 
-var config = require('config.js');
-var firebaseClient = require('firebase-client/index');
+var config = require('../config.js');
+var firebaseClient = require('../firebase-client/index');
 var USER_PATH = '/account';
 var PROFILE_FIELDS = [
   'first_name',

@@ -1,6 +1,6 @@
 var axios = require('axios');
 
-var config = require('config.js');
+var config = require('../config.js');
 
 var instance = axios.create({
   baseURL: config.get('FIREBASE_URL')
