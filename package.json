@@ -8,7 +8,7 @@
     "build": "webpack",
     "start": "NODE_PATH=. node main.js",
     "deploy-firebase": "firebase deploy",
-    "heroku-postbuild": "npm run build",
+    "heroku-postbuild": "yarn run build",
     "test": "karma start",
     "lint": "eslint app transact account main.js config.js"
   },
