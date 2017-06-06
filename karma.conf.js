@@ -8,6 +8,7 @@ module.exports = function (config) {
     ],
     port: 8080,
     captureTimeout: 100000,
+    browserNoActivityTimeout: 50000,
     frameworks: ['mocha', 'should'],
     client: {
       mocha: {
