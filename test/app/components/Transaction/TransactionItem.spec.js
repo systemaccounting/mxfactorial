@@ -6,10 +6,9 @@ import {
 } from 'react-addons-test-utils';
 import { spy } from 'sinon';
 import 'should-sinon';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import TransactionItem from 'components/Transaction/TransactionItem';
-
-var ReactTestUtils = require('react-addons-test-utils');
 
 describe('TransactionItem component', () => {
   let instance;

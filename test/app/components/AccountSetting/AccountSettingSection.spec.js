@@ -8,6 +8,7 @@ import {
 import { spy } from 'sinon';
 import 'should-sinon';
 import configureStore from 'redux-mock-store';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import { emailChanged } from 'actions/accountSettingActions';
 import AccountSettingSection from 'components/AccountSetting/AccountSettingSection';
@@ -15,8 +16,6 @@ import EmailInput from 'components/AccountSetting/EmailSetting/EmailInput';
 import NotificationSetting from 'components/AccountSetting/NotificationSetting';
 import AccountSettingAction from 'components/AccountSetting/AccountSettingAction';
 import ParentFactory from 'helpers/parent-component';
-
-var ReactTestUtils = require('react-addons-test-utils');
 
 describe('AccountSettingSection component', () => {
   let instance;
@@ -112,6 +111,6 @@ describe('AccountSettingSection component', () => {
 
     Simulate.click(btnChangePassword);
 
-    push.should.be.calledWith({ pathname: "/AccountSetting/NewPassword", query: null });
+    push.should.be.calledWith({ pathname: '/AccountSetting/NewPassword', query: null });
   });
 });

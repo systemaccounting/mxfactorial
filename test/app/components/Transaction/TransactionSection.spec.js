@@ -6,6 +6,7 @@ import {
 } from 'react-addons-test-utils';
 import { spy, stub } from 'sinon';
 import 'should-sinon';
+import ReactTestUtils from 'react-dom/test-utils';
 
 import TransactionSection from 'components/Transaction/TransactionSection';
 import TransactionDetail from 'components/Transaction/TransactionDetail';
@@ -16,8 +17,6 @@ import RequestPopup from 'components/Transaction/RequestPopup';
 import TransactionDirection from 'components/Transaction/TransactionDirection';
 import TransactBtn from 'components/Transaction/TransactBtn';
 import RequestBtn from 'components/Transaction/RequestBtn';
-
-var ReactTestUtils = require('react-addons-test-utils');
 
 describe('TransactionSection component', () => {
   let instance;
