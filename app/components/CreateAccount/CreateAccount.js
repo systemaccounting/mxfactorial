@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import MobileLayout from 'components/Layout/MobileLayout';
 import CreateAccountNav from 'components/CreateAccountNav/CreateAccountNav';

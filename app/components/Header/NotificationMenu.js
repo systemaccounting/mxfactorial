@@ -1,6 +1,7 @@
 import map from 'lodash/map';
 import keys from 'lodash/keys';
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router';
 import { Button, Wrapper, Menu, MenuItem } from 'react-aria-menubutton';
 import numeral from 'numeral';
