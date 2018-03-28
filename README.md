@@ -30,7 +30,7 @@ Public demonstration of the following use cases through a systemaccounting funct
   "item_quantity": "1",                           "item_quantity": "1",
   "unit_of_measurement": "grams",                 "unit_of_measurement": "gallon",
   "units_measured": "250"                         "units_measured": "1"
-}                                               {
+}                                               }
 
 // "Mary" account balance Δ = 0 after selling and buying in
 // autonomous market pricing 250 grams of bread = 1 gallon of milk
