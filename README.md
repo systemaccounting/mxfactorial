@@ -5,32 +5,32 @@
 
 [![Production Environment](https://img.shields.io/badge/ENV-PROD-brightgreen.svg)](https://mxfactorial.io/) [![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
 
-*The idea is to have the U.S. Treasury deploy a payment platform where the transaction data serves as the source for measuring the cost of capital. Instead of the cost of credit determining the cost of capital, the reference for the system's risk-free rate in systemaccounting is the cost of equity. - [@Mxfactorial](https://twitter.com/mxfactorial)*
+*Systemaccounting optimizes the flow of capital by letting real-time business performance set interest rates instead of votes from a central finance commitee. Furthermore, systemaccounting solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. By recording transactions as conserved quantites, user equity remains separate and protected from the liabilities produced by government-chartered lending firms. - [@Mxfactorial](https://twitter.com/mxfactorial)*
 
 Public demonstration of the following use cases through a systemaccounting function:
 * `SELECT SUM(item_value) FROM transactions WHERE debitor_approval_time IS NOT NULL AND creditor_approval_time IS NOT NULL AND transaction_completed_time='YYYY-MM-DD hh:mm:ss';` maximizes & protects for individuals a scientific standard the publicly-measured quarterly or annual '[GDP](https://en.wikipedia.org/wiki/Gross_domestic_product)' violates
 * financial value is a [bivector](https://en.wikipedia.org/wiki/Bivector)-valued function of buyers and sellers adding [ownership-coordinates](https://en.wikipedia.org/wiki/Homogeneous_coordinates) of goods & services they measure as having dimension to a [space](https://en.wikipedia.org/wiki/Conformal_geometric_algebra) shared by producers and consumers (the [dual positive and negative](https://en.wikipedia.org/wiki/Hodge_dual#Four_dimensions) string values expressed by the anticommutativity of the `"creditor" ∧ "debitor" = - ("debitor" ∧ "creditor")` exterior product defines the [continuity point](https://en.wikipedia.org/wiki/Connected_space#Path_connectedness) a [time](https://en.wikipedia.org/wiki/Time-scale_calculus)-dependent projection depends on to propagate [zero-sum](https://en.wikipedia.org/wiki/Zero-sum_game) changes to account balances)
 ```
-                                         ★
-                                         ∧
-                                       /   \
-          dual +/− spacetime diff @ t-1     dual +/− spacetime diff @ t                  
-                                    /         \
-{                                               {
-  "id": "596e693287f91076e5b7cd76",               "id": "596cba5fab84245f2b9a113b",
-  "debitor": "John",                              "debitor": "Mary", 
-  "debitor_latlng": "",                           "debitor_latlng": "",
-  "debitor_approval_time": "",                    "debitor_approval_time": "",
-  "creditor": "Mary",                             "creditor": "Isaac",
-  "creditor_latlng": "",                          "creditor_latlng": "",
-  "creditor_approval_time": "",                   "creditor_approval_time": "",
-  "transaction_completed_time": "",               "transaction_completed_time": "",
-  "item_name": "bread",                           "item_name": "milk",
-  "item_value": "3.25",                           "item_value": "3.25",
-  "item_quantity": "1",                           "item_quantity": "1",
-  "unit_of_measurement": "grams",                 "unit_of_measurement": "gallon",
-  "units_measured": "250"                         "units_measured": "1"
-}                                               }
+                                                 ★
+                                                 ∧
+                                               /   \
+                  dual +/− spacetime diff @ t-1     dual +/− spacetime diff @ t
+                                            /         \
+        {                                               {
+          "id": "",                                       "id": "",
+          "debitor": "John",                              "debitor": "Mary", 
+          "debitor_latlng": "",                           "debitor_latlng": "",
+          "debitor_approval_time": "",                    "debitor_approval_time": "",
+          "creditor": "Mary",                             "creditor": "Isaac",
+          "creditor_latlng": "",                          "creditor_latlng": "",
+          "creditor_approval_time": "",                   "creditor_approval_time": "",
+          "transaction_completed_time": "",               "transaction_completed_time": "",
+          "item_name": "bread",                           "item_name": "milk",
+          "item_value": "3.25",                           "item_value": "3.25",
+          "item_quantity": "1",                           "item_quantity": "1",
+          "unit_of_measurement": "grams",                 "unit_of_measurement": "gallon",
+          "units_measured": "250"                         "units_measured": "1"
+        }                                               }
 
 // "Mary" account balance Δ = 0 after selling and buying in
 // autonomous market pricing 250 grams of bread = 1 gallon of milk
