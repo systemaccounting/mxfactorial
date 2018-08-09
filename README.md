@@ -47,8 +47,9 @@ This public project is intended to exploit the software engineering community's 
 * Supporters preferring to contribute financial resources may do so from the [Financial Support](https://systemaccounting.nationbuilder.com/financial_endorsement) page. To contribute engineering resources, download & install [Node.js](https://nodejs.org/en/download/).
 * If you're not familiar with Node.js, or don't know how to code, begin the [freecodecamp.com](https://www.freecodecamp.com/) curriculum.
  
-Details as of 3/18/2018:
+Details as of 8/8/2018:
 - Production: [mxfactorial.io](https://mxfactorial.io/)
+- Demo client: [mxfactorial-web](https://github.com/systemaccounting/mxfactorial-web)
 - [Data Model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
 - [Wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
 - [Public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
