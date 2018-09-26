@@ -6,8 +6,5 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-
-      - run: cd react
-      - run: npm install
-
-      - run: npm test
+      - run: cd react && npm install
+      - run: cd react && npm test
