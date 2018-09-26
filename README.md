@@ -18,7 +18,7 @@ Public demonstration of the following use cases through a systemaccounting funct
                                             /         \
         {                                               {
           "id": "",                                       "id": "",
-          "debitor": "John",                              "debitor": "Mary", 
+          "debitor": "John",                              "debitor": "Mary",
           "debitor_latlng": "",                           "debitor_latlng": "",
           "debitor_approval_time": "",                    "debitor_approval_time": "",
           "creditor": "Mary",                             "creditor": "Isaac",
@@ -46,12 +46,8 @@ This public project is intended to exploit the software engineering community's 
 # How to Contribute
 * Supporters preferring to contribute financial resources may do so from the [Financial Support](https://systemaccounting.nationbuilder.com/financial_endorsement) page. To contribute engineering resources, download & install [Node.js](https://nodejs.org/en/download/).
 * If you're not familiar with Node.js, or don't know how to code, begin the [freecodecamp.com](https://www.freecodecamp.com/) curriculum.
- 
-<<<<<<< HEAD
-Details as of 8/8/2018:
-=======
+
 Details as of 9/25/2018:
->>>>>>> ci-switch
 - Production: [mxfactorial.io](https://mxfactorial.io/)
 - Demo client: [mxfactorial-web](https://github.com/systemaccounting/mxfactorial-web)
 - [Data Model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
@@ -63,7 +59,7 @@ Roadmap:
 * Produce requirements & code for:
   * data model
   * endpoints
-  * mobile web client for transactions (write) 
+  * mobile web client for transactions (write)
   * mobile-enabled web client for visualizing economic activity (read) through the [Data Layer](https://developers.google.com/maps/documentation/javascript/datalayer) feature of the Google Maps Javascript API
 
 **Note**: Both transaction and visualization clients will be strictly served by publicly-accessible endpoints to demonstrate for the U.S. Treasury that with enough security, anyone may build an app that submits transaction data to the public ledger, thereby eliminating "banks" from the [value transmission](http://www.systemaccounting.org/what_is_money) equation.
