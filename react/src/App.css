@@ -1,0 +1,39 @@
+a,
+a:visited,
+a:hover,
+a:active {
+  text-decoration: none !important;
+}
+
+#root {
+  max-width: 400px;
+}
+
+body {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  justify-content: center;
+  font-family: sans-serif;
+  background-image: radial-gradient(
+    at left 50% top 20%,
+    rgb(148, 209, 219),
+    rgb(67, 120, 219)
+  );
+  background-repeat: no-repeat;
+  background-size: 100vw 100vh;
+  background-attachment: fixed;
+  /* background-image: radial-gradient( rgb(172, 242, 255), rgb(67, 120, 219)); */
+}
+
+.landing-screen {
+  width: inherit;
+}
+
+.create-account-screen {
+  width: inherit;
+}
+
+.home-screen {
+  width: inherit;
+}

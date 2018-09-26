@@ -3,7 +3,7 @@
   <a href="http://www.systemaccounting.org/math_identity" target="_blank"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></a>
 </p>
 
-[![Production Environment](https://img.shields.io/badge/ENV-PROD-brightgreen.svg)](https://mxfactorial.io/) [![Join the chat at https://gitter.im/systemaccounting/mxfactorial](https://badges.gitter.im/systemaccounting/mxfactorial.svg)](https://gitter.im/systemaccounting/mxfactorial?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
+[![Production Environment](https://img.shields.io/badge/ENV-PROD-brightgreen.svg)](https://mxfactorial.io/) [![PayPal button](https://img.shields.io/badge/donate-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
 
 *Systemaccounting optimizes the flow of capital by expiditing the discovery of economic oppotunity through physics and data science. Dashboarding real-time business performance within an equally-accessible space spanned by a metric not only maximizes capital's throughput between investors and entrepreneurs, it also transparently benchmarks lending rates between borrowers and lenders. In addition to eliminating interest rate manipulation by central commitees, systemaccounting also solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. By recording transactions as conserved quantites, user equity remains separate and protected from the liability produced by government-chartered lending firms. - [@Mxfactorial](https://twitter.com/mxfactorial)*
 
@@ -47,16 +47,16 @@ This public project is intended to exploit the software engineering community's 
 * Supporters preferring to contribute financial resources may do so from the [Financial Support](https://systemaccounting.nationbuilder.com/financial_endorsement) page. To contribute engineering resources, download & install [Node.js](https://nodejs.org/en/download/).
 * If you're not familiar with Node.js, or don't know how to code, begin the [freecodecamp.com](https://www.freecodecamp.com/) curriculum.
  
+<<<<<<< HEAD
 Details as of 8/8/2018:
+=======
+Details as of 9/25/2018:
+>>>>>>> ci-switch
 - Production: [mxfactorial.io](https://mxfactorial.io/)
 - Demo client: [mxfactorial-web](https://github.com/systemaccounting/mxfactorial-web)
 - [Data Model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
 - [Wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
 - [Public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
-- Node.js v6.10.3
-- npm v3.5.1
-- web client & database on Firebase
-- API on Heroku
 
 Roadmap:
 * Set up managed application & persistence layer

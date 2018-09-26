@@ -1,9 +1,23 @@
-node_modules/
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+react/node_modules
+
+# testing
+react/coverage
+react/screenshot.png
+
+# production
+react/build
+
+# misc
 .DS_Store
-coverage/
-npm-debug.log
-build/bundle.js
-build/static/
+react/.env.local
+react/.env.development.local
+react/.env.test.local
+react/.env.production.local
 .vscode
-apidoc/
-mxfactorial-*.json
+
+react/npm-debug.log*
+react/yarn-debug.log*
+react/yarn-error.log*

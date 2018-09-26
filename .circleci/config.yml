@@ -1,0 +1,10 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10.11.0-stretch-browsers-legacy
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: cd react && npm install
+      - run: cd react && npm test
