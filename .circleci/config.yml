@@ -1,9 +1,6 @@
 version: 2
 jobs:
   build:
-    branches:
-      only:
-        - ci-switch
     docker:
       - image: circleci/node:10.11.0-stretch-browsers-legacy
     working_directory: ~/repo
