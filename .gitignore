@@ -1,9 +1,0 @@
-node_modules/
-.DS_Store
-coverage/
-npm-debug.log
-build/bundle.js
-build/static/
-.vscode
-apidoc/
-mxfactorial-*.json
