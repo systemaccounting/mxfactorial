@@ -1,0 +1,27 @@
+{
+  "name": "graphql-faas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "create:bucket": "aws s3api create-bucket --bucket=mxfactorial-deploy --region=us-east-1",
+    "upload:s3": "aws s3 cp lambda.zip s3://mxfactorial-deploy/v1.0.1/lambda.zip",
+    "zip": "zip -r lambda.zip index.js src node_modules package.json package-lock.json .gitignore",
+    "update:faas": "aws lambda update-function-code --function-name MxfactorialGraphQLServer --zip-file fileb://$(pwd)/lambda.zip",
+    "deploy": "npm run zip && npm run update:faas",
+    "cp:lambda": "echo \"copying over to terraform\" && cp lambda.zip ../terraform/us-east-1/prod/lambda.zip",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.325.0",
+    "aws-serverless-express": "^3.3.5",
+    "body-parser-graphql": "^1.1.0",
+    "express": "^4.16.3",
+    "express-graphql": "^0.6.12",
+    "graphql": "^14.0.2",
+    "uuid": "^3.3.2"
+  }
+}
