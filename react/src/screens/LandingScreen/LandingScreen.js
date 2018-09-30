@@ -68,13 +68,10 @@ class LandingScreen extends Component {
 
     return signIn(account, password)
       .then(token => {
-        console.log(token)
-        console.log(signInPerformed)
-        signInPerformed(() => {
-          console.log('signin performed')
-          history.replace('/account')
-        })
         if (token) {
+          signInPerformed(() => {
+            history.replace('/account')
+          })
         }
       })
       .catch(err => this.showErrors(err))
