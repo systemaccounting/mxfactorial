@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import hoistStatics from 'hoist-non-react-statics'
-import { signIn, signOut, signUp, currentUserInfo } from 'config/amplify'
+import { signIn, signOut, signUp, currentUserInfo } from 'lib/amplify'
 
 const withAuth = methods => Component => props => {
   const { wrappedComponentRef, ...remainingProps } = props
