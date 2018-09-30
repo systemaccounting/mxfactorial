@@ -63,12 +63,19 @@ class LandingScreen extends Component {
   showErrors = errors => this.setState({ errors })
 
   handleAuth = data => {
-    const { navigate, signIn, signInPerformed } = this.props
+    const { history, signIn, signInPerformed } = this.props
     const { account, password } = data
 
     return signIn(account, password)
       .then(token => {
-        token && signInPerformed(() => navigate('/'))
+        console.log(token)
+        console.log(signInPerformed)
+        signInPerformed(() => {
+          console.log('signin performed')
+          history.replace('/account')
+        })
+        if (token) {
+        }
       })
       .catch(err => this.showErrors(err))
   }
@@ -96,7 +103,7 @@ class LandingScreen extends Component {
             submitOnEnter
           />
           <ButtonLink
-            to="/account/create"
+            to="/auth/create-account"
             text="Create"
             name="create-account"
           />

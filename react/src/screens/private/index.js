@@ -1,11 +1,11 @@
 import React from 'react'
-import { navigate, Router } from '@reach/router'
+
+import { Switch, Route } from 'react-router-dom'
 
 import withUser from 'decorators/withUser'
 import HomeScreen from '../HomeScreen'
 import RequestScreen from '../RequestScreen'
-
-const Default = () => <div>Default</div>
+import NotFound from '../notFound'
 
 class PrivateRoutes extends React.Component {
   state = {
@@ -19,33 +19,32 @@ class PrivateRoutes extends React.Component {
   }
 
   componentDidUpdate() {
-    const { userLoading, user } = this.props
+    const { userLoading, user, location, history } = this.props
     if (!userLoading && user === null) {
-      return navigate('/auth')
+      return history.replace('/auth')
     } else {
-      return navigate('/account')
+      return location.pathname === '/' ? history.push('/account') : null
     }
   }
 
   renderRoutes = () => {
+    const { user } = this.props
     return (
-      <React.Fragment>
-        <HomeScreen path="/account" />
-        {/* <RequestScreen path="requests" /> */}
-      </React.Fragment>
+      <Switch>
+        <Route path={`/account`} render={() => <HomeScreen user={user} />} />
+        <Route
+          path={`/requests`}
+          component={() => <RequestScreen user={user} />}
+        />
+        <Route component={NotFound} />
+      </Switch>
     )
   }
 
   render() {
     const { user, userLoading } = this.state
-    console.log(this.props.children)
     if (user && !userLoading) {
-      return (
-        <div>
-          <p>Private</p>
-          {this.props.children({ user })}
-        </div>
-      )
+      return this.renderRoutes()
     } else if (userLoading) {
       return 'Loading...'
     }

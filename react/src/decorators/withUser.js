@@ -15,13 +15,11 @@ const withUser = methods => Component => props => {
     render() {
       return (
         <UserConsumer>
-          {({ user, userLoading, signInPerformed }) => (
+          {({ ...userProps }) => (
             <Component
               {...methods}
               {...remainingProps}
-              user={user}
-              userLoading={userLoading}
-              signInPerformed={signInPerformed}
+              {...userProps}
               ref={wrappedComponentRef}
             />
           )}

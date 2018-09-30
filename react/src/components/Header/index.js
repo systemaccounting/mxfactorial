@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { Link } from '@reach/router'
+import { Link } from 'react-router-dom'
 import { logo } from '../../assets'
 
 const HeaderStyled = styled.div`
@@ -20,7 +20,7 @@ const HeaderStyled = styled.div`
 
 const Header = () => (
   <HeaderStyled>
-    <Link to="/" className="create-account-logo-link">
+    <Link to="/auth" className="create-account-logo-link">
       <img src={logo} className="create-account-logo" alt="logo" />
     </Link>
   </HeaderStyled>
