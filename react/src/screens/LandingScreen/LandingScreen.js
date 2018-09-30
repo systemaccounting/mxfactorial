@@ -63,11 +63,13 @@ class LandingScreen extends Component {
   showErrors = errors => this.setState({ errors })
 
   handleAuth = data => {
-    const { navigate, signIn } = this.props
+    const { navigate, signIn, signInPerformed } = this.props
     const { account, password } = data
 
     return signIn(account, password)
-      .then(token => token && navigate('/account'))
+      .then(token => {
+        token && signInPerformed(() => navigate('/'))
+      })
       .catch(err => this.showErrors(err))
   }
 
