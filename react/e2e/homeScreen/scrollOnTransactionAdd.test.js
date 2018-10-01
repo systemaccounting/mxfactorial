@@ -47,7 +47,7 @@ test(
     })
     expect(
       yScrollDiffs[yScrollDiffs.length - 1] - yScrollDiffs[0]
-    ).toBeGreaterThan(110)
+    ).toBeGreaterThanOrEqual(110)
   },
   20000
 )

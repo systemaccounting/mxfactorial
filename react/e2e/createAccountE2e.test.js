@@ -3,12 +3,10 @@ const puppeteer = require(`puppeteer`)
 const BASE_URL = `http://localhost:3000`
 let browser
 let page
-const waitOpts = { waitUntil: `load` }
 
 beforeAll(async () => {
   browser = await puppeteer.launch({
     args: [`--no-sandbox`]
-    //,headless: false //for visible browser test automation
   })
   page = await browser.newPage()
 })
@@ -19,10 +17,10 @@ test(
     const firstName = `Faker`
     const lastName = `${Math.floor(Math.random() * 10000)}`
     const account = firstName + lastName
-    await page.goto(BASE_URL + '/account/create')
+    await page.goto(BASE_URL + '/auth/create-account')
 
-    await page.waitForSelector(`button[name="next-button"]`)
-    const nextButton01 = await page.$(`button[name="next-button"]`)
+    await page.waitForSelector(`button`)
+    const nextButton01 = await page.$(`button`)
     await nextButton01.click()
     await page.waitForSelector(`button[name="next-button"]`)
     const nextButton02 = await page.$(`button[name="next-button"]`)
@@ -98,7 +96,7 @@ test(
 
     await page.waitForSelector('input[name="account"]')
 
-    expect(await page.url()).toEqual(`${BASE_URL}/`)
+    expect(await page.url()).toEqual(`${BASE_URL}/auth`)
   },
-  20000
+  200000
 )

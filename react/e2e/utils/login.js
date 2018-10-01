@@ -5,8 +5,7 @@ const login = async page => {
   const passwordInput = await page.$('[name=password]')
   await passwordInput.type('password')
   await page.keyboard.press('Enter')
-  await page.goto('localhost:3000/account')
-  await page.waitForSelector('[name="account"]')
+  await page.waitForNavigation()
 }
 
 module.exports = login
