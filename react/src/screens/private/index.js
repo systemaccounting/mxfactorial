@@ -31,8 +31,13 @@ class PrivateRoutes extends React.Component {
     const { user } = this.props
     return (
       <Switch>
-        <Route path={`/account`} render={() => <HomeScreen user={user} />} />
         <Route
+          exact
+          path={`/account`}
+          render={() => <HomeScreen user={user} />}
+        />
+        <Route
+          exact
           path={`/requests`}
           component={() => <RequestScreen user={user} />}
         />
