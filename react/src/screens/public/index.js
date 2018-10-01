@@ -7,18 +7,14 @@ import NotFound from '../notFound'
 
 class PublicRoutes extends React.Component {
   render() {
-    const { location, match, history } = this.props
+    const { location, match } = this.props
     return (
       <Switch location={location}>
-        <Route
-          exact
-          path={`${match.url}/`}
-          render={() => <LandingScreen history={history} />}
-        />
+        <Route exact path={`${match.url}/`} component={LandingScreen} />
         <Route
           exact
           path={`${match.url}/create-account`}
-          render={() => <CreateAccount history={history} />}
+          component={CreateAccount}
         />
         <Route component={NotFound} />
       </Switch>

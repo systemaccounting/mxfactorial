@@ -7,7 +7,9 @@ import HomeScreen from '../HomeScreen'
 import RequestScreen from '../RequestScreen'
 import NotFound from '../notFound'
 
-class PrivateRoutes extends React.Component {
+export const Loading = () => <div>Loading...</div>
+
+export class PrivateRoutes extends React.Component {
   state = {
     userLoading: false,
     user: null
@@ -28,19 +30,10 @@ class PrivateRoutes extends React.Component {
   }
 
   renderRoutes = () => {
-    const { user } = this.props
     return (
       <Switch>
-        <Route
-          exact
-          path={`/account`}
-          render={() => <HomeScreen user={user} />}
-        />
-        <Route
-          exact
-          path={`/requests`}
-          component={() => <RequestScreen user={user} />}
-        />
+        <Route exact path={`/account`} component={HomeScreen} />
+        <Route exact path={`/requests`} component={RequestScreen} />
         <Route component={NotFound} />
       </Switch>
     )
@@ -51,7 +44,7 @@ class PrivateRoutes extends React.Component {
     if (user && !userLoading) {
       return this.renderRoutes()
     } else if (userLoading) {
-      return 'Loading...'
+      return <Loading />
     }
     return null
   }
