@@ -18,7 +18,7 @@ class PublicRoutes extends React.Component {
         <Route
           exact
           path={`${match.url}/create-account`}
-          render={() => <CreateAccount />}
+          render={() => <CreateAccount history={history} />}
         />
         <Route component={NotFound} />
       </Switch>
