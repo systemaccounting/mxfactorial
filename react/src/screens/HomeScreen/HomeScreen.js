@@ -25,13 +25,6 @@ class HomeScreen extends Component {
     }
   }
 
-  handleSignOut = () => {
-    const { navigate, signOut } = this.props
-    return signOut().then(() => {
-      navigate('/')
-    })
-  }
-
   render() {
     const { user } = this.props
     return (
