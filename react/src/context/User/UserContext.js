@@ -1,15 +1,13 @@
 import React from 'react'
-import { currentUserInfo } from 'lib/amplify'
 
 export const UserContext = React.createContext()
 
 export const UserConsumer = ({ children }) => (
   <UserContext.Consumer>
-    {({ user, userLoading, updateUser }) =>
+    {({ user, userLoading }) =>
       children({
         user,
-        userLoading,
-        updateUser
+        userLoading
       })
     }
   </UserContext.Consumer>
@@ -22,29 +20,33 @@ export class UserProvider extends React.Component {
   }
 
   componentDidMount() {
+    const { singInPerform } = this.props
     this.getLoggedUser()
+    singInPerform.subscribe(user => this.setState({ user }))
   }
 
-  getLoggedUser = async cb => {
+  componentWillUnmount() {
+    const { singInPerform } = this.props
+    singInPerform.unsubscribe()
+  }
+
+  getLoggedUser = async () => {
     const { user } = this.state
+    const { currentUserInfo } = this.props
     if (user === null) {
       const user = await currentUserInfo()
-      this.setState({ user, userLoading: false }, () => {
-        cb && cb()
-      })
+      this.setState({ user, userLoading: false })
     }
   }
 
-  updateUser = (user, userLoading) => this.setState({ user, userLoading })
-
   render() {
     const { user, userLoading } = this.state
+    console.log(user, userLoading)
     return (
       <UserContext.Provider
         value={{
           user,
-          userLoading,
-          updateUser: this.updateUser
+          userLoading
         }}
       >
         {this.props.children}
