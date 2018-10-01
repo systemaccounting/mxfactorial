@@ -11,7 +11,7 @@ jobs:
           command: |
             sudo apt-get update -y
       - run:
-          name: Update
+          name: Upgrade
           working_directory: /
           command: |
             sudo apt-get upgrade -y
@@ -47,7 +47,7 @@ jobs:
           command: |
             sudo apt-get update -y
       - run:
-          name: Update
+          name: Upgrade
           working_directory: /
           command: |
             sudo apt-get upgrade -y
@@ -84,5 +84,3 @@ workflows:
           filters:
             branches:
               only: master
-              only: develop
-              only: ci-config
