@@ -33,8 +33,8 @@ jobs:
       # - run: cd react && npm run ci:e2e
       - save_cache:
           paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+            - react/node_modules
+          key: v1-dependencies-{{ checksum "react/package.json" }}
   deploy:
     docker:
       - image: circleci/node:latest-browsers
