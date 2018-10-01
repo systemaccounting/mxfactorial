@@ -7,6 +7,6 @@ Web client for [mxfactorial platform](https://github.com/systemaccounting/mxfact
 
 [![Build Status](https://travis-ci.org/systemaccounting/mxfactorial-web.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial-web) [![Coverage Status](https://coveralls.io/repos/github/systemaccounting/mxfactorial-web/badge.svg?branch=master&service=github)](https://coveralls.io/github/systemaccounting/mxfactorial-web?branch=master)
 
-Production environment: [mxfactorial.io](https://mxfactorial.io/)
-GitHub repository: https://github.com/systemaccounting/mxfactorial
-File sharing: [Public Drive](https://drive.google.com/open?id=0B9xlXsaN9dVQWkJERUxNRVZQVWc)
+Production environment: [mxfactorial.io](https://mxfactorial.io/)  
+GitHub repository: https://github.com/systemaccounting/mxfactorial  
+File sharing: [Public Drive](https://drive.google.com/open?id=0B9xlXsaN9dVQWkJERUxNRVZQVWc)  
