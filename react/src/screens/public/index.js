@@ -16,6 +16,7 @@ class PublicRoutes extends React.Component {
           render={() => <LandingScreen history={history} />}
         />
         <Route
+          exact
           path={`${match.url}/create-account`}
           render={() => <CreateAccount />}
         />
