@@ -63,7 +63,7 @@ class LandingScreen extends Component {
   showErrors = errors => this.setState({ errors })
 
   handleAuth = data => {
-    const { history, signIn, signInPerformed } = this.props
+    const { history, signIn } = this.props
     const { account, password } = data
 
     return signIn({ account, password })
