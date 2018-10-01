@@ -1,6 +1,9 @@
 import React from 'react'
 
-export const UserContext = React.createContext()
+export const UserContext = React.createContext({
+  user: null,
+  userLoading: true
+})
 
 export const UserConsumer = ({ children }) => (
   <UserContext.Consumer>
@@ -41,7 +44,6 @@ export class UserProvider extends React.Component {
 
   render() {
     const { user, userLoading } = this.state
-    console.log(user, userLoading)
     return (
       <UserContext.Provider
         value={{
