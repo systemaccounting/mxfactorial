@@ -40,6 +40,21 @@ jobs:
       - image: circleci/node:latest-browsers
     working_directory: ~/repo
     steps:
+      - run:
+          name: Update
+          working_directory: /
+          command: |
+            sudo apt-get update -y
+      - run:
+          name: Update
+          working_directory: /
+          command: |
+            sudo apt-get upgrade -y
+      - run:
+          name: Install awscli and python
+          working_directory: /
+          command: |
+            sudo apt-get install -yq awscli python-pip --fix-missing
       - checkout
       - run: cd react && npm install
       - run: cd react && npm run build
