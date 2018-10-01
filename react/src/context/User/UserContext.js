@@ -5,13 +5,11 @@ export const UserContext = React.createContext()
 
 export const UserConsumer = ({ children }) => (
   <UserContext.Consumer>
-    {({ user, userLoading, signInPerformed, signOutPerformed, setUser }) =>
+    {({ user, userLoading, updateUser }) =>
       children({
         user,
         userLoading,
-        signInPerformed,
-        signOutPerformed,
-        setUser
+        updateUser
       })
     }
   </UserContext.Consumer>
@@ -37,13 +35,7 @@ export class UserProvider extends React.Component {
     }
   }
 
-  signOutPerformed = cb => this.setState({ user: null }, cb ? cb() : () => {})
-
-  signInPerformed = cb => {
-    return this.getLoggedUser(cb)
-  }
-
-  setUser = user => this.setState({ user })
+  updateUser = (user, userLoading) => this.setState({ user, userLoading })
 
   render() {
     const { user, userLoading } = this.state
@@ -52,9 +44,7 @@ export class UserProvider extends React.Component {
         value={{
           user,
           userLoading,
-          signInPerformed: this.signInPerformed,
-          signOutPerformed: this.signOutPerformed,
-          setUser: this.setUser
+          updateUser: this.updateUser
         }}
       >
         {this.props.children}

@@ -46,6 +46,7 @@ class Menu extends React.Component {
   }
 
   handleClose = () => this.setState({ active: false })
+
   handleEscClose = e => {
     if (e.key === 'Escape') {
       this.handleClose()
@@ -58,8 +59,8 @@ class Menu extends React.Component {
     }))
 
   handleSignOut = () => {
-    const { signOut, history, signOutPerformed } = this.props
-    signOut().then(() => signOutPerformed(() => history.replace('/auth')))
+    const { signOut, history } = this.props
+    signOut().then(() => history.replace('/auth'))
   }
 
   render() {

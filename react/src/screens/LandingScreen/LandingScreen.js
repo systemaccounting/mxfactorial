@@ -66,13 +66,9 @@ class LandingScreen extends Component {
     const { history, signIn, signInPerformed } = this.props
     const { account, password } = data
 
-    return signIn(account, password)
-      .then(token => {
-        if (token) {
-          signInPerformed(() => {
-            history.replace('/account')
-          })
-        }
+    return signIn({ account, password })
+      .then(() => {
+        history.replace('/account')
       })
       .catch(err => this.showErrors(err))
   }
