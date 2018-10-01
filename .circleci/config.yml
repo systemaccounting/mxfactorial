@@ -55,7 +55,8 @@ jobs:
           name: Install python and awscli
           working_directory: /
           command: |
-            sudo apt-get install -yq python-pip awscli --fix-missing
+            sudo apt-get install -yq python-dev python-pip --fix-missing
+            sudo pip install awscli
       - checkout
       - run: cd react && npm install
       - run: cd react && npm run build
