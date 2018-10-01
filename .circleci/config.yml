@@ -25,9 +25,10 @@ jobs:
             libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 \
             ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget --fix-missing
       - checkout
-      # - restore_cache:
-      #     keys:
-      #       - v1-dependencies-{{ checksum "package.json" }}
+      - restore_cache:
+          paths:
+            - react/node_modules
+          key: v1-dependencies-{{ checksum "react/package.json" }}
       - run: cd react && npm install
       - run: cd react && npm test
       # - run: cd react && npm run ci:e2e
@@ -51,16 +52,13 @@ jobs:
           command: |
             sudo apt-get upgrade -y
       - run:
-          name: Install awscli and python
+          name: Install python and awscli
           working_directory: /
           command: |
-            sudo apt-get install -yq awscli python-pip --fix-missing
+            sudo apt-get install -yq python-pip awscli --fix-missing
       - checkout
       - run: cd react && npm install
       - run: cd react && npm run build
-      - run:
-          name: Install awscli
-          command: sudo pip install awscli
       - run:
           name: Deploy to S3
           command: aws s3 sync react/build/ s3://mxfactorial-web --delete
