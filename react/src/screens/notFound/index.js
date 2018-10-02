@@ -1,3 +1,3 @@
 import React from 'react'
 
-export default () => <div>Not Found</div>
+export default () => <div data-id="not-found">Not Found</div>
