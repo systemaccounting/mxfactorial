@@ -15,7 +15,7 @@ const notFoundSelector = '[data-id="not-found"]'
 
 beforeEach(function() {
   originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000
 })
 
 beforeAll(async () => {
@@ -36,7 +36,7 @@ test(
     await page.waitForSelector('.create-account-logo-link')
     expect(page.url()).toEqual(AUTH_URL)
   },
-  20000
+  100000
 )
 
 test(
@@ -47,7 +47,7 @@ test(
     const notFound = await page.$$eval(notFoundSelector, list => list.length)
     expect(notFound).toEqual(1)
   },
-  20000
+  100000
 )
 
 test(
@@ -58,7 +58,7 @@ test(
     await page.waitForSelector(HOME_SELECTOR)
     expect(page.url()).toEqual(HOME_URL)
   },
-  20000
+  100000
 )
 
 test(
@@ -69,5 +69,5 @@ test(
     const notFound = await page.$$eval(notFoundSelector, list => list.length)
     expect(notFound).toEqual(1)
   },
-  2000
+  100000
 )
