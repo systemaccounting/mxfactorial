@@ -27,20 +27,28 @@ beforeAll(async () => {
   await page.goto(BASE_URL)
 })
 
-test('redirects to auth if unauthenticated user navigates to private route', async () => {
-  expect(page.url()).toEqual(AUTH_URL)
+test(
+  'redirects to auth if unauthenticated user navigates to private route',
+  async () => {
+    expect(page.url()).toEqual(AUTH_URL)
 
-  await page.goto(REQUEST_URL)
-  await page.waitForSelector('.create-account-logo-link')
-  expect(page.url()).toEqual(AUTH_URL)
-})
+    await page.goto(REQUEST_URL)
+    await page.waitForSelector('.create-account-logo-link')
+    expect(page.url()).toEqual(AUTH_URL)
+  },
+  20000
+)
 
-test('redirects to not found if route doesnt exist', async () => {
-  await page.goto(`${AUTH_URL}/not-valid-route`)
-  await page.waitForSelector(notFoundSelector)
-  const notFound = await page.$$eval(notFoundSelector, list => list.length)
-  expect(notFound).toEqual(1)
-})
+test(
+  'redirects to not found if route doesnt exist',
+  async () => {
+    await page.goto(`${AUTH_URL}/not-valid-route`)
+    await page.waitForSelector(notFoundSelector)
+    const notFound = await page.$$eval(notFoundSelector, list => list.length)
+    expect(notFound).toEqual(1)
+  },
+  20000
+)
 
 test(
   'redirects to /account after login',
@@ -53,9 +61,13 @@ test(
   20000
 )
 
-test('redirects to not found if route doesnt exist after login', async () => {
-  await page.goto(`${BASE_URL}/not-valid-route`)
-  await page.waitForSelector(notFoundSelector)
-  const notFound = await page.$$eval(notFoundSelector, list => list.length)
-  expect(notFound).toEqual(1)
-})
+test(
+  'redirects to not found if route doesnt exist after login',
+  async () => {
+    await page.goto(`${BASE_URL}/not-valid-route`)
+    await page.waitForSelector(notFoundSelector)
+    const notFound = await page.$$eval(notFoundSelector, list => list.length)
+    expect(notFound).toEqual(1)
+  },
+  2000
+)
