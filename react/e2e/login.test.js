@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer')
 
-const { AUTH_URL, HOME_URL } = require('./constants')
+const { AUTH_URL, HOME_URL, HOME_SELECTOR } = require('./constants')
 let browser
 let page
 
@@ -27,7 +27,7 @@ test(
     await passwordInput.type('password')
     await page.keyboard.press('Enter')
 
-    await page.waitForNavigation()
+    await page.waitForSelector(HOME_SELECTOR)
     expect(page.url()).toEqual(HOME_URL)
   },
   30000
