@@ -28,7 +28,7 @@ test(
     await page.keyboard.press('Enter')
 
     await page.waitForSelector(HOME_SELECTOR)
-    expect(page.url()).toEqual(HOME_URL)
+    expect(await page.url()).toEqual(HOME_URL)
   },
   100000
 )
