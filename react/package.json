@@ -40,7 +40,6 @@
     "npm": "5.8.0"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.6",
     "coveralls": "^3.0.1",
     "cross-env": "^5.2.0",
     "enzyme": "^3.3.0",
