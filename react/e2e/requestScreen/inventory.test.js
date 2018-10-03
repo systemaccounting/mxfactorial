@@ -16,9 +16,13 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   await page.goto(BASE_URL)
-  await login(page)
+  page = await login(page)
   await page.goto(REQUEST_URL)
   await page.waitForSelector(activeButtonSelector)
+})
+
+afterAll(async () => {
+  browser.close()
 })
 
 test('active button displays', async () => {

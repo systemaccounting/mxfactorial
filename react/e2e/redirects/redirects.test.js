@@ -27,6 +27,10 @@ beforeAll(async () => {
   await page.goto(BASE_URL)
 })
 
+afterAll(async () => {
+  browser.close()
+})
+
 test(
   'redirects to auth if unauthenticated user navigates to private route',
   async () => {
@@ -51,20 +55,11 @@ test(
 )
 
 test(
-  'redirects to /account after login',
-  async () => {
-    await page.goto(AUTH_URL)
-    await login(page)
-    // await page.waitForSelector(HOME_SELECTOR)
-    expect(page.url()).toEqual(HOME_URL)
-  },
-  30000
-)
-
-test(
   'redirects to not found if route doesnt exist after login',
   async () => {
-    await page.goto(`${BASE_URL}/not-valid-route`)
+    await page.goto(HOME_URL)
+    page = await login(page)
+    await page.goto(`${HOME_URL}/not-valid-route`)
     await page.waitForSelector(notFoundSelector)
     const notFound = await page.$$eval(notFoundSelector, list => list.length)
     expect(notFound).toEqual(1)

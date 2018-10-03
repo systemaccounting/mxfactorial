@@ -16,14 +16,14 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   await page.goto(BASE_URL)
-  await login(page)
-  await page.url(HOME_URL)
+  page = await login(page)
+
+  await page.goto(HOME_URL)
   await page.waitForSelector(HOME_SELECTOR)
 })
 
-beforeEach(function() {
-  originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
+afterAll(async () => {
+  browser.close()
 })
 
 test('switches between debit and credit', async () => {

@@ -1,14 +1,10 @@
 const puppeteer = require('puppeteer')
 const login = require('./utils/login')
 
-const BASE_URL = 'http://localhost:3000'
+const { HOME_URL, BASE_URL, HOME_SELECTOR } = require('./constants')
+
 let browser
 let page
-
-beforeEach(function() {
-  originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
-})
 
 beforeAll(async () => {
   browser = await puppeteer.launch({
@@ -17,7 +13,13 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   await page.goto(BASE_URL)
-  await login(page)
+  page = await login(page)
+  await page.goto(HOME_URL)
+  await page.waitForSelector(HOME_SELECTOR)
+})
+
+afterAll(async () => {
+  browser.close()
 })
 
 test('mobile nav button displays', async () => {

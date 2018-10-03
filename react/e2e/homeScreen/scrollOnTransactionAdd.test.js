@@ -9,20 +9,21 @@ let page
 
 beforeAll(async () => {
   browser = await puppeteer.launch({
-    args: ['--no-sandbox']
+    args: ['--no-sandbox'],
+    headless: false
   })
 
   page = await browser.newPage()
-  await page.setViewport({ height: 500, width: 400 })
   await page.goto(BASE_URL)
-  await login(page)
-  await page.url(HOME_URL)
+  page = await login(page)
+
+  await page.setViewport({ height: 500, width: 400 })
+  await page.goto(HOME_URL)
   await page.waitForSelector(HOME_SELECTOR)
 })
 
-beforeEach(function() {
-  originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
+afterAll(async () => {
+  browser.close()
 })
 
 test(
@@ -47,7 +48,7 @@ test(
     })
     expect(
       yScrollDiffs[yScrollDiffs.length - 1] - yScrollDiffs[0]
-    ).toBeGreaterThanOrEqual(110)
+    ).toBeGreaterThanOrEqual(100)
   },
   20000
 )

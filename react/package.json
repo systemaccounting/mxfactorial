@@ -14,7 +14,7 @@
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "^1.1.5",
+    "react-scripts": "latest",
     "react-svg": "^4.1.8",
     "rxjs": "^6.3.3",
     "styled-components": "^3.3.3",
@@ -25,12 +25,10 @@
     "start": "NODE_PATH=./src react-scripts start",
     "build": "NODE_PATH=./src react-scripts build",
     "test": "react-scripts test --env=jsdom --modulePaths=./src",
-    "loc:cov":
-      "react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
+    "loc:cov": "react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
     "ci:start": "start-server-and-test start http://localhost:3000 ci:test",
-    "ci:test":
-      "CI=true react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
-    "test:e2e": "jest --forceExit e2e",
+    "ci:test": "CI=true react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
+    "test:e2e": "jest --config=e2e/config/index.js",
     "ci:e2e": "start-server-and-test start http://localhost:3000 test:e2e",
     "eject": "react-scripts eject",
     "lint": "eslint ./src/**/*.{js,jsx}",
@@ -47,7 +45,6 @@
     "cross-env": "^5.2.0",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
-    "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-jest": "^21.15.1",
     "eslint-plugin-prettier": "^2.6.0",
@@ -67,5 +64,11 @@
       "!src/containers/**/*.js",
       "!src/lib/**/*.js"
     ]
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

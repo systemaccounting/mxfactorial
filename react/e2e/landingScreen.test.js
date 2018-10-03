@@ -13,6 +13,10 @@ beforeAll(async () => {
   page = await browser.newPage()
 })
 
+afterAll(async () => {
+  browser.close()
+})
+
 describe('Landing screen', () => {
   it(
     'displays browser title',

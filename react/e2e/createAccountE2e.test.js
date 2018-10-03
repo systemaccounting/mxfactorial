@@ -11,6 +11,10 @@ beforeAll(async () => {
   page = await browser.newPage()
 })
 
+afterAll(async () => {
+  browser.close()
+})
+
 test(
   `Create account in Cognito`,
   async () => {

@@ -1,11 +1,17 @@
+const fs = require('fs')
+const path = require('path')
+
+const restore = async page => {
+  let json = JSON.parse(fs.readFileSync(path.join(__dirname, 'storage.json')))
+  await page.evaluate(json => {
+    localStorage.clear()
+    for (let key in json) localStorage.setItem(key, json[key])
+  }, json)
+  return page
+}
+
 const login = async page => {
-  await page.waitForSelector('button[data-id="login"]')
-  const accountInput = await page.$('[name=account]')
-  await accountInput.type('JoeSmith')
-  const passwordInput = await page.$('[name=password]')
-  await passwordInput.type('password')
-  await page.keyboard.press('Enter')
-  await page.waitForNavigation()
+  return await restore(page)
 }
 
 module.exports = login
