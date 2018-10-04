@@ -9,7 +9,7 @@ jobs:
       - restore_cache:
           paths:
             - react/node_modules
-          key: v1-dependencies-{{ checksum "react/package.json" }}
+          key: v2-dependencies-{{ checksum "react/package.json" }}
       - run: cd react && npm install
       - run: cd react && npm test
       - run: cd react && npm run ci:e2e-private
@@ -17,7 +17,7 @@ jobs:
       - save_cache:
           paths:
             - react/node_modules
-          key: v1-dependencies-{{ checksum "react/package.json" }}
+          key: v2-dependencies-{{ checksum "react/package.json" }}
   deploy:
     docker:
       - image: circleci/node:latest-browsers
