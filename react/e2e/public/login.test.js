@@ -13,7 +13,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await await browser.close()
+  await browser.close()
 })
 
 test(

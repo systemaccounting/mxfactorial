@@ -27,11 +27,9 @@ afterAll(async () => {
 test(
   'redirects to auth if unauthenticated user navigates to private route',
   async () => {
-    expect(await page.url()).toEqual(AUTH_URL)
-
     await page.goto(REQUEST_URL)
     await page.waitForSelector('.create-account-logo-link')
-    expect(page.url()).toEqual(AUTH_URL)
+    expect(await page.url()).toEqual(AUTH_URL)
   },
   30000
 )
