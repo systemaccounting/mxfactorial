@@ -1,4 +1,3 @@
-const login = require('./utils/login')
 const puppeteer = require('puppeteer')
 
 const BASE_URL = 'http://localhost:3000'
@@ -11,6 +10,10 @@ beforeAll(async () => {
     args: ['--no-sandbox']
   })
   page = await browser.newPage()
+})
+
+afterAll(async () => {
+  await browser.close()
 })
 
 describe('Landing screen', () => {

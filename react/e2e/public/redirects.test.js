@@ -1,13 +1,6 @@
 const puppeteer = require('puppeteer')
-const login = require('../utils/login')
 
-const {
-  BASE_URL,
-  AUTH_URL,
-  REQUEST_URL,
-  HOME_URL,
-  HOME_SELECTOR
-} = require('../constants')
+const { BASE_URL, AUTH_URL, REQUEST_URL } = require('../constants')
 let browser
 let page
 
@@ -27,14 +20,16 @@ beforeAll(async () => {
   await page.goto(BASE_URL)
 })
 
+afterAll(async () => {
+  await browser.close()
+})
+
 test(
   'redirects to auth if unauthenticated user navigates to private route',
   async () => {
-    expect(page.url()).toEqual(AUTH_URL)
-
     await page.goto(REQUEST_URL)
     await page.waitForSelector('.create-account-logo-link')
-    expect(page.url()).toEqual(AUTH_URL)
+    expect(await page.url()).toEqual(AUTH_URL)
   },
   30000
 )
@@ -43,28 +38,6 @@ test(
   'redirects to not found if route doesnt exist',
   async () => {
     await page.goto(`${AUTH_URL}/not-valid-route`)
-    await page.waitForSelector(notFoundSelector)
-    const notFound = await page.$$eval(notFoundSelector, list => list.length)
-    expect(notFound).toEqual(1)
-  },
-  30000
-)
-
-test(
-  'redirects to /account after login',
-  async () => {
-    await page.goto(AUTH_URL)
-    await login(page)
-    // await page.waitForSelector(HOME_SELECTOR)
-    expect(page.url()).toEqual(HOME_URL)
-  },
-  30000
-)
-
-test(
-  'redirects to not found if route doesnt exist after login',
-  async () => {
-    await page.goto(`${BASE_URL}/not-valid-route`)
     await page.waitForSelector(notFoundSelector)
     const notFound = await page.$$eval(notFoundSelector, list => list.length)
     expect(notFound).toEqual(1)
