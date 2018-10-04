@@ -31,7 +31,8 @@ jobs:
           key: v1-dependencies-{{ checksum "react/package.json" }}
       - run: cd react && npm install
       - run: cd react && npm test
-      - run: cd react && npm run ci:e2e
+      - run: cd react && npm run ci:e2e-public
+      - run: cd react && npm run ci:e2e-private
       - save_cache:
           paths:
             - react/node_modules

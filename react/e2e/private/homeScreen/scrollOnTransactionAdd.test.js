@@ -1,8 +1,8 @@
 const puppeteer = require('puppeteer')
-const login = require('../utils/login')
+const login = require('../../utils/login')
 const { addTransaction } = require('./utils')
 
-const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../constants')
+const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../../constants')
 
 let browser
 let page
@@ -22,7 +22,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  browser.close()
+  await browser.close()
 })
 
 test(

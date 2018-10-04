@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
-const login = require('../utils/login')
+const login = require('../../utils/login')
 const { addTransaction, milk, bread, honey } = require('./utils')
-const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../constants')
+const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../../constants')
 
 const transactionDeleteSelector = 'button[name="delete-transaction"]'
 const transactionClearSelector = 'button[data-id="transaction-clear"]'
@@ -22,7 +22,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  browser.close()
+  await browser.close()
 })
 
 const getInputByValue = async value =>

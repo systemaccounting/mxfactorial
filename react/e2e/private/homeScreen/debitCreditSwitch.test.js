@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
-const login = require('../utils/login')
+const login = require('../../utils/login')
 
-const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../constants')
+const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../../constants')
 
 const creditSelector = 'button[name="credit"]'
 const debitSelector = 'button[name="debit"]'
@@ -23,7 +23,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  browser.close()
+  await browser.close()
 })
 
 test('switches between debit and credit', async () => {

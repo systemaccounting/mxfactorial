@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
-const login = require('../utils/login')
+const login = require('../../utils/login')
 
-const { BASE_URL, REQUEST_URL } = require('../constants')
+const { BASE_URL, REQUEST_URL } = require('../../constants')
 
 const activeButtonSelector = 'button[data-id="activeButton"]'
 const rejectedButtonSelector = 'button[data-id="rejectedButton"]'
@@ -22,7 +22,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  browser.close()
+  await browser.close()
 })
 
 test('switches types', async () => {

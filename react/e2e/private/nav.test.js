@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
-const login = require('./utils/login')
+const login = require('../utils/login')
 
-const { HOME_URL, BASE_URL, HOME_SELECTOR } = require('./constants')
+const { HOME_URL, BASE_URL, HOME_SELECTOR } = require('../constants')
 
 let browser
 let page
@@ -19,7 +19,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  browser.close()
+  await browser.close()
 })
 
 test('mobile nav button displays', async () => {

@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const puppeteer = require('puppeteer')
 
-const { BASE_URL, HOME_SELECTOR } = require('../constants')
+const { BASE_URL, HOME_SELECTOR } = require('../../constants')
 
 const save = async page => {
   const json = await page.evaluate(() => {
@@ -14,7 +14,7 @@ const save = async page => {
     return json
   })
   fs.writeFileSync(
-    path.join(__dirname, '../utils/storage.json'),
+    path.join(__dirname, '../../utils/storage.json'),
     JSON.stringify(json)
   )
 }

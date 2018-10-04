@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer')
 
-const { AUTH_URL, HOME_URL } = require('./constants')
+const { AUTH_URL, HOME_URL } = require('../constants')
 let browser
 let page
 
@@ -13,7 +13,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  browser.close()
+  await await browser.close()
 })
 
 test(

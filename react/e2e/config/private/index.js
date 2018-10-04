@@ -1,6 +1,6 @@
 module.exports = {
   verbose: true,
-  rootDir: '../',
-  globalSetup: './config/start.js'
+  rootDir: '../../private',
+  globalSetup: '../config/private/start.js'
   // globalTeardown: './config/teardown.js'
 }
