@@ -85,7 +85,8 @@ class LandingScreen extends Component {
             rel="noopener noreferrer"
           >
             <i>Mx!</i> platform
-          </a>.
+          </a>
+          .
         </IntroStyled>
         <div>
           <Form

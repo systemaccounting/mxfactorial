@@ -16,17 +16,17 @@ describe('<Landing Screen />', () => {
       account: 'x',
       password: 'x'
     }
-    const navigateMock = jest.fn()
     const signInMock = promiseToResolve(data)
+    const replaceMock = jest.fn()
     const wrapper = shallow(
-      <LandingScreen navigate={navigateMock} signIn={signInMock} />
+      <LandingScreen history={{ replace: replaceMock }} signIn={signInMock} />
     )
 
     const instance = wrapper.instance()
 
     instance
       .handleAuth([data])
-      .then(res => expect(navigateMock).toHaveBeenCalled())
+      .then(() => expect(replaceMock).toHaveBeenCalled())
   })
 
   it('errors on auth', async () => {
@@ -34,16 +34,17 @@ describe('<Landing Screen />', () => {
       account: 'x',
       password: 'x'
     }
-    const navigateMock = jest.fn()
-    const signInMock = promiseToReject(data)
+    const error = { message: 'cant auth' }
+    const replaceMock = jest.fn()
+    const signInMock = promiseToReject(error)
     const wrapper = shallow(
-      <LandingScreen navigate={navigateMock} signIn={signInMock} />
+      <LandingScreen history={{ replace: replaceMock }} signIn={signInMock} />
     )
 
     const instance = wrapper.instance()
     const spy = jest.spyOn(instance, 'showErrors')
     await instance.handleAuth([data])
-    expect(spy).toHaveBeenCalled()
+    expect(wrapper.state('errors')).toEqual(error)
   })
 
   it('renders Intro', () => {

@@ -59,9 +59,12 @@ describe('<Menu />', () => {
 
   it('handles Signout', async () => {
     const signOutMock = promiseToResolve()
-    const wrapper = shallow(<Menu signOut={signOutMock} />)
+    const replaceMock = jest.fn()
+    const wrapper = shallow(
+      <Menu history={{ replace: replaceMock }} signOut={signOutMock} />
+    )
     const instance = wrapper.instance()
     await instance.handleSignOut()
-    // expect(navigate).toHaveBeenCalled()
+    expect(replaceMock).toHaveBeenCalled()
   })
 })
