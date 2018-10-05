@@ -1,8 +1,5 @@
-const fs = require('fs')
-const path = require('path')
-
 const restore = async page => {
-  let json = JSON.parse(fs.readFileSync(path.join(__dirname, 'storage.json')))
+  let json = JSON.parse(process.env.__storage)
   await page.evaluate(json => {
     localStorage.clear()
     for (let key in json) localStorage.setItem(key, json[key])
