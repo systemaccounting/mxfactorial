@@ -56,9 +56,9 @@ describe('<CreateAccout />', () => {
       email: 'test@test.com'
     }
     const signUpMock = promiseToResolve(data)
-    const navigateMock = jest.fn()
+    const pushMock = jest.fn()
     const wrapper = shallow(
-      <CreateAccount navigate={navigateMock} signUp={signUpMock} />
+      <CreateAccount history={{ push: pushMock }} signUp={signUpMock} />
     )
     wrapper.setState({
       data,
@@ -67,7 +67,7 @@ describe('<CreateAccout />', () => {
     wrapper.update()
     const instance = wrapper.instance()
     instance.handleSignUp().then(() => {
-      expect(navigateMock).toHaveBeenCalledWith('/')
+      expect(pushMock).toHaveBeenCalledWith('/auth')
     })
   })
 
@@ -78,10 +78,7 @@ describe('<CreateAccout />', () => {
       email: 'test@test.com'
     }
     const signUpMock = promiseToReject({ errors: 'error' })
-    const navigateMock = jest.fn()
-    const wrapper = shallow(
-      <CreateAccount navigate={navigateMock} signUp={signUpMock} />
-    )
+    const wrapper = shallow(<CreateAccount signUp={signUpMock} />)
     wrapper.setState({
       data,
       step: 10
