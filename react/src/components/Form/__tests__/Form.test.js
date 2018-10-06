@@ -1,5 +1,5 @@
 import React from 'react'
-import Form, { FormContainer, FormWrapper } from '../index'
+import Form from '../index'
 import { shallow, mount } from 'enzyme'
 import Input from '../Input'
 import DateInput from '../DateInput'
@@ -143,7 +143,8 @@ describe('<Form />', () => {
     expect(form.state()).toEqual({
       values: { account: '', password: '' },
       isValid: false,
-      isClear: true
+      isClear: true,
+      focused: false
     })
   })
 
@@ -244,7 +245,8 @@ describe('<Form />', () => {
         password: 'test'
       },
       isValid: true,
-      isClear: false
+      isClear: false,
+      focused: false
     })
 
     instance.handleSubmit()

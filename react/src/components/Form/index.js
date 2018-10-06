@@ -89,13 +89,15 @@ class Form extends React.Component {
     this.state = {
       values: R.merge(currentValues)(values),
       isValid: false,
-      isClear: true
+      isClear: true,
+      focused: false
     }
   }
 
-  static getDerivedStateFromProps(nextProps) {
+  static getDerivedStateFromProps(nextProps, prevState) {
     const { values } = nextProps
-    return values ? { values } : null
+    const { focused } = prevState
+    return values && !focused ? { values } : null
   }
 
   componentDidMount() {
@@ -112,9 +114,11 @@ class Form extends React.Component {
   clearValues = () =>
     this.setState(
       {
-        values: R.pipe(R.keys, R.map(key => ({ [key]: '' })), R.mergeAll)(
-          this.props.schema.properties
-        ),
+        values: R.pipe(
+          R.keys,
+          R.map(key => ({ [key]: '' })),
+          R.mergeAll
+        )(this.props.schema.properties),
         isClear: true
       },
       () => this.validateInputs()
@@ -164,6 +168,9 @@ class Form extends React.Component {
     }
   }
 
+  handleFocus = () => this.setState({ focused: true })
+  handleBlur = () => this.setState({ focused: false })
+
   handleClear = () => {
     const { isClear } = this.state
     const {
@@ -174,9 +181,11 @@ class Form extends React.Component {
     this.setState(
       {
         isClear: true,
-        values: R.pipe(R.keys, R.map(key => ({ [key]: '' })), R.mergeAll)(
-          properties
-        )
+        values: R.pipe(
+          R.keys,
+          R.map(key => ({ [key]: '' })),
+          R.mergeAll
+        )(properties)
       },
       () => {
         onValuesUpdate(this.state.values)
@@ -196,6 +205,8 @@ class Form extends React.Component {
         placeholder: data.placeholder,
         value: this.state.values[data.name],
         onChange: this.updateValue(data.name),
+        onFocus: this.handleFocus,
+        onBlur: this.handleBlur,
         onKeyPress: this.keyDown
       }
       switch (data.type) {
