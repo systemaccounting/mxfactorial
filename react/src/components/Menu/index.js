@@ -1,7 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
 import is from 'styled-is'
-import { navigate } from '@reach/router'
 
 import Hamburger from 'components/Hamburger'
 import MobileNav from 'components/MobileNav'
@@ -47,6 +46,7 @@ class Menu extends React.Component {
   }
 
   handleClose = () => this.setState({ active: false })
+
   handleEscClose = e => {
     if (e.key === 'Escape') {
       this.handleClose()
@@ -59,16 +59,19 @@ class Menu extends React.Component {
     }))
 
   handleSignOut = () => {
-    const { signOut } = this.props
-    signOut().then(() => navigate('/'))
+    const { signOut, history } = this.props
+    signOut().then(() => history.replace('/auth'))
   }
 
   render() {
     const { active } = this.state
+    const { history } = this.props
     return (
       <Container>
         <Mask data-id="nav-mask" active={active} onClick={this.handleClose} />
-        {this.state.active && <MobileNav signOut={this.handleSignOut} />}
+        {this.state.active && (
+          <MobileNav history={history} signOut={this.handleSignOut} />
+        )}
         <MenuButton data-id="nav-button">
           <Hamburger active={active} onClick={this.handleToggle} />
         </MenuButton>

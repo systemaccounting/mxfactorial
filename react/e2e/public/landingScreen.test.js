@@ -1,4 +1,3 @@
-const login = require('./utils/login')
 const puppeteer = require('puppeteer')
 
 const BASE_URL = 'http://localhost:3000'
@@ -11,6 +10,10 @@ beforeAll(async () => {
     args: ['--no-sandbox']
   })
   page = await browser.newPage()
+})
+
+afterAll(async () => {
+  await browser.close()
 })
 
 describe('Landing screen', () => {
@@ -39,7 +42,7 @@ describe('Landing screen', () => {
       input => input.length
     )
     const createAccountButtonCount = await page.$$eval(
-      '[href="/account/create"]',
+      '[href="/auth/create-account"]',
       a => a.length
     )
     const signInButtonCount = await page.$$eval(
@@ -55,13 +58,7 @@ describe('Landing screen', () => {
     expect(landingScreenContent).toBe(5)
   })
 
-  it("clicks Sign In button on keyboard's Enter and navigates account page", async () => {
-    //begin sign in to access post-auth screens
-    await page.goto(BASE_URL)
-    await login(page)
-  })
   it('clicks create button navigates account create page', async () => {
-    await page.goto(BASE_URL)
     const createAccountButton = await page.$(`button[name="create-account"]`)
     await createAccountButton.click()
   })

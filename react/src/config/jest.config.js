@@ -30,6 +30,7 @@ module.exports = {
     '!src/assets/index.js',
     '!src/config/jest.config.js',
     '!src/config/amplify.js',
-    '!src/containers/**/*.js'
+    '!src/containers/**/*.js',
+    '!src/lib/**/*.js'
   ]
 }

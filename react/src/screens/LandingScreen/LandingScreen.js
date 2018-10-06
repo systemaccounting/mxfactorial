@@ -63,11 +63,13 @@ class LandingScreen extends Component {
   showErrors = errors => this.setState({ errors })
 
   handleAuth = data => {
-    const { navigate, signIn } = this.props
+    const { history, signIn } = this.props
     const { account, password } = data
 
-    return signIn(account, password)
-      .then(token => token && navigate('/account'))
+    return signIn({ account, password })
+      .then(() => {
+        history.replace('/account')
+      })
       .catch(err => this.showErrors(err))
   }
 
@@ -83,7 +85,8 @@ class LandingScreen extends Component {
             rel="noopener noreferrer"
           >
             <i>Mx!</i> platform
-          </a>.
+          </a>
+          .
         </IntroStyled>
         <div>
           <Form
@@ -94,7 +97,7 @@ class LandingScreen extends Component {
             submitOnEnter
           />
           <ButtonLink
-            to="/account/create"
+            to="/auth/create-account"
             text="Create"
             name="create-account"
           />

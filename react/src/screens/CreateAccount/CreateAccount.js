@@ -21,10 +21,10 @@ class CreateAccount extends React.Component {
   }
 
   handleSignUp = () => {
-    const { signUp, navigate } = this.props
+    const { signUp, history } = this.props
     const { username, password, ...attributes } = this.state.data
     return signUp({ username, password }, attributes)
-      .then(() => navigate('/'))
+      .then(() => history.push('/auth'))
       .catch(errors => this.setState({ errors }))
   }
 

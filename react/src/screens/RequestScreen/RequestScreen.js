@@ -6,7 +6,6 @@ import TypeSwitch from './components/TypeSwitch'
 import Paper from 'components/Paper'
 import { Text, Small } from 'components/Typography'
 import { fromNow } from 'utils/date'
-import { asyncPipe } from 'utils'
 
 const Wrapper = styled.div`
   display: flex;
@@ -24,13 +23,7 @@ class RequestScreen extends React.Component {
   }
 
   componentDidMount() {
-    asyncPipe(this.handleGetUserInfo, this.handleFetchRequests)
-  }
-
-  handleGetUserInfo = async () => {
-    const { currentUserInfo } = this.props
-    const user = await currentUserInfo()
-    this.setState({ user })
+    this.handleFetchRequests()
   }
 
   handleFetchRequests = async () => {
@@ -41,7 +34,8 @@ class RequestScreen extends React.Component {
   handleSwitch = status => () => this.setState({ status })
 
   render() {
-    const { status, requests, user } = this.state
+    const { status, requests } = this.state
+    const { user } = this.props
     const requestList =
       status === 'active' ? requests.active : requests.rejected
     return (

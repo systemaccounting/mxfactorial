@@ -1,7 +1,8 @@
 const puppeteer = require('puppeteer')
-const login = require('./utils/login')
+const login = require('../utils/login')
 
-const BASE_URL = 'http://localhost:3000'
+const { HOME_URL, BASE_URL, HOME_SELECTOR } = require('../constants')
+
 let browser
 let page
 
@@ -12,13 +13,13 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   await page.goto(BASE_URL)
-  await login(page)
-  await page.url(`${BASE_URL}/account`)
+  page = await login(page)
+  await page.goto(HOME_URL)
+  await page.waitForSelector(HOME_SELECTOR)
 })
 
-beforeEach(function() {
-  originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000
+afterAll(async () => {
+  await browser.close()
 })
 
 test('mobile nav button displays', async () => {
@@ -47,14 +48,18 @@ test('nav menu mask displays on nav button click', async () => {
   expect(navMask).toHaveLength(1)
 })
 
-test('signs out', async () => {
-  const navBtn = await page.$('[data-id="nav-button"]')
-  await navBtn.click()
+test(
+  'signs out',
+  async () => {
+    const navBtn = await page.$('[data-id="nav-button"]')
+    await navBtn.click()
 
-  const signOutBtn = await page.$('[data-name="sign-out"]')
-  await signOutBtn.click()
+    const signOutBtn = await page.$('[data-name="sign-out"]')
+    await signOutBtn.click()
 
-  await page.waitForSelector('[data-id="login"]')
+    await page.waitForNavigation()
 
-  expect(page.url()).toEqual(`${BASE_URL}/`)
-})
+    expect(page.url()).toEqual(`${BASE_URL}/auth`)
+  },
+  20000
+)

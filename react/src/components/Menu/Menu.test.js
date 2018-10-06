@@ -1,14 +1,9 @@
 import React from 'react'
 import { shallow } from 'enzyme'
-import { navigate } from '@reach/router'
 
 import Menu, { Mask } from './index'
 
 import { promiseToResolve } from 'utils/testing'
-
-jest.mock('@reach/router', () => ({
-  navigate: jest.fn()
-}))
 
 describe('<Menu />', () => {
   it('renders', () => {
@@ -64,9 +59,12 @@ describe('<Menu />', () => {
 
   it('handles Signout', async () => {
     const signOutMock = promiseToResolve()
-    const wrapper = shallow(<Menu signOut={signOutMock} />)
+    const replaceMock = jest.fn()
+    const wrapper = shallow(
+      <Menu history={{ replace: replaceMock }} signOut={signOutMock} />
+    )
     const instance = wrapper.instance()
     await instance.handleSignOut()
-    expect(navigate).toHaveBeenCalled()
+    expect(replaceMock).toHaveBeenCalled()
   })
 })

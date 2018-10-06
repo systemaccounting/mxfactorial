@@ -39,6 +39,7 @@ describe('<HistoryScreen />', () => {
   it('renders', () => {
     const wrapper = shallow(
       <RequestScreen
+        user={mockUser}
         fetchRequests={fetchRequestsMock}
         currentUserInfo={currentUserInfoMock}
       />
@@ -46,20 +47,10 @@ describe('<HistoryScreen />', () => {
     expect(wrapper.exists()).toBeTruthy()
   })
 
-  it('loads user', async () => {
-    const wrapper = shallow(
-      <RequestScreen
-        fetchRequests={fetchRequestsMock}
-        currentUserInfo={currentUserInfoMock}
-      />
-    )
-    const instance = wrapper.instance()
-    await instance.handleGetUserInfo()
-    expect(wrapper.state('user')).toEqual(mockUser)
-  })
   it('loads requests', async () => {
     const wrapper = shallow(
       <RequestScreen
+        user={mockUser}
         currentUserInfo={currentUserInfoMock}
         fetchRequests={fetchRequestsMock}
       />
@@ -72,6 +63,7 @@ describe('<HistoryScreen />', () => {
   it('handles switch between active/expired', () => {
     const wrapper = shallow(
       <RequestScreen
+        user={mockUser}
         fetchRequests={fetchRequestsMock}
         currentUserInfo={currentUserInfoMock}
       />

@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
-const login = require('../utils/login')
+const login = require('../../utils/login')
 
-const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../constants')
+const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../../constants')
 
 const creditSelector = 'button[name="credit"]'
 const debitSelector = 'button[name="debit"]'
@@ -22,9 +22,14 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   await page.goto(BASE_URL)
-  await login(page)
-  await page.url(HOME_URL)
+  page = await login(page)
+
+  await page.goto(HOME_URL)
   await page.waitForSelector(HOME_SELECTOR)
+})
+
+afterAll(async () => {
+  await browser.close()
 })
 
 test(

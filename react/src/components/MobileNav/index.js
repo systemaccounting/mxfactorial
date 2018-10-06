@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import { navigate } from '@reach/router'
 
 export const List = styled.ul`
   margin: 1rem 1rem 1rem 0;
@@ -28,13 +27,19 @@ export const ListItem = styled.li`
   cursor: pointer;
 `
 
-const MobileNav = ({ signOut }) => {
+const MobileNav = ({ signOut, history }) => {
   return (
     <List data-id="nav-menu">
-      <ListItem data-id="nav-menu-item" onClick={() => navigate('/requests')}>
+      <ListItem
+        data-id="nav-menu-item"
+        onClick={() => history.push('/requests')}
+      >
         Requests
       </ListItem>
-      <ListItem data-id="nav-menu-item" onClick={() => navigate('/history')}>
+      <ListItem
+        data-id="nav-menu-item"
+        onClick={() => history.push('/history')}
+      >
         History
       </ListItem>
       <ListItem data-id="nav-menu-item">Rules</ListItem>
