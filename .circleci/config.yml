@@ -1,27 +1,28 @@
 version: 2
 jobs:
-  build:
+  build-test-react:
     docker:
-      - image: circleci/node:latest-browsers
-    working_directory: ~/repo
+      - image: circleci/node:8.9.1-stretch-browsers
+    working_directory: ~/repo/react
     steps:
-      - checkout
+      - checkout:
+          path: ~/repo
       - restore_cache:
           paths:
-            - react/node_modules
-          key: v2-dependencies-{{ checksum "react/package.json" }}
-      - run: cd react && npm install
-      - run: cd react && npm test
-      - run: cd react && npm run ci:e2e-private
-      - run: cd react && npm run ci:e2e-public
+            - node_modules
+          key: v2-dependencies-{{ checksum "package.json" }}
+      - run: npm install
+      - run: npm test
+      - run: npm run ci:e2e-private
+      - run: npm run ci:e2e-public
       - save_cache:
           paths:
-            - react/node_modules
-          key: v2-dependencies-{{ checksum "react/package.json" }}
-  deploy:
+            - node_modules
+          key: v2-dependencies-{{ checksum "package.json" }}
+  deploy-react:
     docker:
-      - image: circleci/node:latest-browsers
-    working_directory: ~/repo
+      - image: circleci/node:8.9.1-stretch-browsers
+    working_directory: ~/repo/react
     steps:
       - run:
           name: Update
@@ -39,9 +40,10 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - checkout
-      - run: cd react && npm install
-      - run: cd react && npm run build
+      - checkout:
+          path: ~/repo
+      - run: npm install
+      - run: npm run build
       - run:
           name: Deploy to S3
           command: aws s3 sync react/build/ s3://mxfactorial-web --delete
@@ -57,12 +59,12 @@ jobs:
 
 workflows:
   version: 2
-  build-deploy:
+  build-test-deploy-react:
     jobs:
-      - build
-      - deploy:
+      - build-test-react
+      - deploy-react:
           requires:
-            - build
+            - build-test-react
           filters:
             branches:
               only: master
