@@ -7,6 +7,13 @@ jobs:
     steps:
       - checkout:
           path: ~/repo
+      - run:
+          name: Detect changed files
+          command: |
+            FILE_OR_FOLDER=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
+            if [[ "$FILE_OR_FOLDER" != *"react"* ]]; then
+              circleci step halt
+            fi
       - restore_cache:
           paths:
             - node_modules
@@ -61,6 +68,15 @@ jobs:
       - image: circleci/node:8.9.1-stretch-browsers
     working_directory: ~/repo/graphql-faas
     steps:
+      - checkout:
+          path: ~/repo
+      - run:
+          name: Detect changed files
+          command: |
+            FILE_OR_FOLDER=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
+            if [[ "$FILE_OR_FOLDER" != *"graphql-faas"* ]]; then
+              circleci step halt
+            fi
       - run:
           name: Update
           working_directory: /
@@ -77,8 +93,6 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - checkout:
-          path: ~/repo
       - run: npm install
       - run: npm run deploy:dev
 
