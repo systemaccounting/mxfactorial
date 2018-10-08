@@ -11,6 +11,12 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
   source_code_hash = "${base64sha256(file("lambda.zip"))}"
   runtime          = "nodejs8.10"
   role             = "${aws_iam_role.mxfactorial_graphql_lambda_role.arn}"
+
+  environment {
+    variables = {
+      REGION = "${lookup(var.region, "${terraform.workspace}")}"
+    }
+  }
 }
 
 resource "aws_iam_role" "mxfactorial_graphql_lambda_role" {

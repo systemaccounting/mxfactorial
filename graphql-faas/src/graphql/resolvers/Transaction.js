@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk')
 const uuidv1 = require('uuid/v1')
-AWS.config.update({ region: 'us-east-1' })
+AWS.config.update({ region: process.env.REGION })
 AWS.config.apiVersion = { dynamodb: '2012-08-10' }
 const documentClient = new AWS.DynamoDB.DocumentClient()
 // see aws_dynamodb_table name in envs/us-east-1/prod/dynamodb.tf

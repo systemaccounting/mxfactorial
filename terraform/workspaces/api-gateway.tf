@@ -1,23 +1,23 @@
-resource "aws_api_gateway_rest_api" "prod_mxfactorial_api" {
-  name        = "mxfactorial"
+resource "aws_api_gateway_rest_api" "mxfactorial_api" {
+  name        = "mxfactorial_${lookup(var.environment, "${terraform.workspace}")}"
   description = "GraphQL Endpoint"
 }
 
 resource "aws_api_gateway_resource" "proxy" {
-  rest_api_id = "${aws_api_gateway_rest_api.prod_mxfactorial_api.id}"
-  parent_id   = "${aws_api_gateway_rest_api.prod_mxfactorial_api.root_resource_id}"
+  rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  parent_id   = "${aws_api_gateway_rest_api.mxfactorial_api.root_resource_id}"
   path_part   = "{proxy+}"
 }
 
 resource "aws_api_gateway_method" "proxy" {
-  rest_api_id   = "${aws_api_gateway_rest_api.prod_mxfactorial_api.id}"
+  rest_api_id   = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
   resource_id   = "${aws_api_gateway_resource.proxy.id}"
   http_method   = "ANY"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "lambda" {
-  rest_api_id = "${aws_api_gateway_rest_api.prod_mxfactorial_api.id}"
+  rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
   resource_id = "${aws_api_gateway_method.proxy.resource_id}"
   http_method = "${aws_api_gateway_method.proxy.http_method}"
 
@@ -27,14 +27,14 @@ resource "aws_api_gateway_integration" "lambda" {
 }
 
 resource "aws_api_gateway_method" "proxy_root" {
-  rest_api_id   = "${aws_api_gateway_rest_api.prod_mxfactorial_api.id}"
-  resource_id   = "${aws_api_gateway_rest_api.prod_mxfactorial_api.root_resource_id}"
+  rest_api_id   = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  resource_id   = "${aws_api_gateway_rest_api.mxfactorial_api.root_resource_id}"
   http_method   = "ANY"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "lambda_root" {
-  rest_api_id = "${aws_api_gateway_rest_api.prod_mxfactorial_api.id}"
+  rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
   resource_id = "${aws_api_gateway_method.proxy_root.resource_id}"
   http_method = "${aws_api_gateway_method.proxy_root.http_method}"
 
@@ -43,13 +43,13 @@ resource "aws_api_gateway_integration" "lambda_root" {
   uri                     = "${aws_lambda_function.mxfactorial_graphql_server.invoke_arn}"
 }
 
-resource "aws_api_gateway_deployment" "prod" {
+resource "aws_api_gateway_deployment" "environment" {
   depends_on = [
     "aws_api_gateway_integration.lambda",
     "aws_api_gateway_integration.lambda_root",
   ]
 
-  rest_api_id = "${aws_api_gateway_rest_api.prod_mxfactorial_api.id}"
+  rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
   stage_name  = "${lookup(var.environment, "${terraform.workspace}")}"
 }
 
@@ -61,5 +61,5 @@ resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
-  source_arn = "${aws_api_gateway_deployment.prod.execution_arn}/*/*"
+  source_arn = "${aws_api_gateway_deployment.environment.execution_arn}/*/*"
 }
