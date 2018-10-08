@@ -14,7 +14,7 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
 }
 
 resource "aws_iam_role" "mxfactorial_graphql_lambda_role" {
-  name = "mxfactorial_graphql_lambda"
+  name = "mxfactorial_graphql_lambda_${lookup(var.region, "${terraform.workspace}")}"
 
   assume_role_policy = <<EOF
 {
