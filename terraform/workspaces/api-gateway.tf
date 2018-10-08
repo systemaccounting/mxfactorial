@@ -50,7 +50,7 @@ resource "aws_api_gateway_deployment" "prod" {
   ]
 
   rest_api_id = "${aws_api_gateway_rest_api.prod_mxfactorial_api.id}"
-  stage_name  = "${lookup(var.environments, "${terraform.workspace}")}"
+  stage_name  = "${lookup(var.environment, "${terraform.workspace}")}"
 }
 
 resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {

@@ -7,7 +7,7 @@ variable "region" {
   }
 }
 
-variable "environments" {
+variable "environment" {
   type = "map"
 
   default = {
