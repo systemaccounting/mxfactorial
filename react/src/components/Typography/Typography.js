@@ -31,11 +31,12 @@ export const Small = styled(SmallBase)`
 
 const PBase = Base.withComponent('p')
 export const P = styled(PBase)`
-  margin-bottom: 0;
+  margin: 0;
 `
 
 const TextBase = Base.withComponent('p')
 
 export const Text = styled(TextBase)`
+  margin: 0;
   ${sizeVariant};
 `
