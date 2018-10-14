@@ -8,7 +8,6 @@ import { Text } from 'components/Typography'
 
 const HeaderContainer = styled.div`
   width: 100%;
-  // border: 1px solid;
   display: flex;
   align-items: center;
   justify-content: space-between;
