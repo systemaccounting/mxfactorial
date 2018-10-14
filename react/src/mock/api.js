@@ -12,3 +12,11 @@ export const fetchTransactions = () => Promise.resolve(data)
 export const fetchBalance = () => Promise.resolve(0)
 
 export const fetchRequests = () => Promise.resolve(mapRequestsByStatus)
+
+export const fetchRequest = uuid =>
+  Promise.resolve(
+    R.pipe(
+      R.filter(item => item.timeuuid === uuid),
+      R.head
+    )(requests)
+  )
