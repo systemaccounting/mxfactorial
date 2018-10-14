@@ -1,7 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import hoistStatics from 'hoist-non-react-statics'
-import { fetchTransactions, fetchBalance, fetchRequests } from 'mock/api'
+import {
+  fetchTransactions,
+  fetchBalance,
+  fetchRequests,
+  fetchRequest
+} from 'mock/api'
 
 const withApi = methods => Component => props => {
   const { wrappedComponentRef, ...remainingProps } = props
@@ -22,4 +27,9 @@ const withApi = methods => Component => props => {
   return <H />
 }
 
-export default withApi({ fetchTransactions, fetchBalance, fetchRequests })
+export default withApi({
+  fetchTransactions,
+  fetchBalance,
+  fetchRequests,
+  fetchRequest
+})
