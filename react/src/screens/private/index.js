@@ -5,6 +5,7 @@ import { Switch, Route } from 'react-router-dom'
 import withUser from 'decorators/withUser'
 import HomeScreen from '../HomeScreen'
 import RequestScreen from '../RequestScreen'
+import RequestDetailScreen from '../RequestDetailScreen'
 import NotFound from '../notFound'
 
 export const Loading = () => <div>Loading...</div>
@@ -34,6 +35,7 @@ export class PrivateRoutes extends React.Component {
       <Switch>
         <Route exact path={`/account`} component={HomeScreen} />
         <Route exact path={`/requests`} component={RequestScreen} />
+        <Route exact path={`/requests/:uuid`} component={RequestDetailScreen} />
         <Route component={NotFound} />
       </Switch>
     )
