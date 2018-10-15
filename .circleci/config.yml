@@ -8,12 +8,16 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Detect changed files
+          name: Detect changed root files
           command: |
-            FILE_OR_FOLDER=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-            if [[ "$FILE_OR_FOLDER" != *"react"* ]]; then
-              circleci step halt
+            if [[ $(git log --name-only --oneline -1 | sed 1d) != *\/* ]]; then
+             circleci step halt
             fi
+      - run:
+          name: Detect changed subdirectory files
+          command: |
+            SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
+            [[ "$SUBDIR" != *"react"* ]] && circleci step halt
       - restore_cache:
           paths:
             - node_modules
@@ -71,12 +75,16 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Detect changed files
+          name: Detect changed root files
           command: |
-            FILE_OR_FOLDER=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-            if [[ "$FILE_OR_FOLDER" != *"graphql-faas"* ]]; then
-              circleci step halt
+            if [[ $(git log --name-only --oneline -1 | sed 1d) != *\/* ]]; then
+             circleci step halt
             fi
+      - run:
+          name: Detect changed subdirectory files
+          command: |
+            SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
+            [[ "$SUBDIR" != *"graphql-faas"* ]] && circleci step halt
       - run:
           name: Update
           working_directory: /
