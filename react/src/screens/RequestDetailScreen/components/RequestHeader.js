@@ -16,7 +16,7 @@ const HeaderContainer = styled.div`
 
 export const RequestHeader = () => (
   <HeaderContainer>
-    <div>
+    <div data-id="backButton">
       <Link to={`/requests`}>
         <BackIcon />
       </Link>
@@ -24,7 +24,7 @@ export const RequestHeader = () => (
     <div>
       <Text variant="medium">Request</Text>
     </div>
-    <div>
+    <div data-id="emailCopyButton">
       <EmailIcon />
     </div>
   </HeaderContainer>
