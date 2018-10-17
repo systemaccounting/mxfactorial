@@ -14,7 +14,7 @@ const HeaderContainer = styled.div`
   color: #efefef;
 `
 
-export const RequestHeader = () => (
+export const RequestDetailHeader = () => (
   <HeaderContainer>
     <div data-id="backButton">
       <Link to={`/requests`}>
@@ -30,4 +30,4 @@ export const RequestHeader = () => (
   </HeaderContainer>
 )
 
-export default RequestHeader
+export default RequestDetailHeader

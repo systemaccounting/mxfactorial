@@ -6,7 +6,7 @@ import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import { Text, Small, P } from 'components/Typography'
 import Button from 'components/Button'
-import RequestHeader from './components/RequestHeader'
+import RequestDetailHeader from './components/RequestDetailHeader'
 
 const TransactionInfoParts = styled.div`
   display: flex;
@@ -18,18 +18,18 @@ class RequestDetailScreen extends React.Component {
   state = { request: null, isCredit: false, errors: [] }
 
   componentDidMount() {
+    this.handleFetchRequest()
+  }
+
+  handleFetchRequest = () => {
     const { fetchRequest, user } = this.props
     const { match } = this.props
-    fetchRequest(match.params.uuid)
+    return fetchRequest(match.params.uuid)
       .then(request => {
-        if (request !== {}) {
-          this.setState({
-            request,
-            isCredit: request.creditor === user.username
-          })
-        } else {
-          this.setErrors(null, 'Request not found')
-        }
+        this.setState({
+          request,
+          isCredit: request.creditor === user.username
+        })
       })
       .catch(error => this.setErrors(error, 'Request not found'))
   }
@@ -47,7 +47,7 @@ class RequestDetailScreen extends React.Component {
     )
     return (
       <MainLayout>
-        <RequestHeader />
+        <RequestDetailHeader />
         {request && (
           <React.Fragment>
             <TransactionInfoParts>
