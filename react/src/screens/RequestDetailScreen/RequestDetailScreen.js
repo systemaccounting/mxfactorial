@@ -45,7 +45,6 @@ class RequestDetailScreen extends React.Component {
       request ? request.expiration_time : null,
       'dddd, MMMM D, YYYY \n @hh:mm:ss A ZZ UTC'
     )
-    console.log(expirationDate)
     return (
       <MainLayout>
         <RequestHeader />
