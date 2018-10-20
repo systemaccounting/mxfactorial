@@ -13,6 +13,7 @@
     "ramda": "^0.25.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
+    "react-modal": "^3.6.1",
     "react-router-dom": "^4.3.1",
     "react-scripts": "latest",
     "react-svg": "^4.1.8",
