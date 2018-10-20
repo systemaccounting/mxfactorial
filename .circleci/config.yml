@@ -57,7 +57,7 @@ jobs:
       - run: npm run build
       - run:
           name: Deploy to S3
-          command: aws s3 sync react/build/ s3://mxfactorial-react --delete
+          command: aws s3 sync react/build/ s3://mxfactorial-react-prod --delete
       - run:
           name: Change aws configuration
           command: aws configure set preview.cloudfront true
