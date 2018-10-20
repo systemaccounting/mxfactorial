@@ -5,7 +5,6 @@
   "dependencies": {
     "aws-amplify": "^1.0.2",
     "axios": "^0.18.0",
-    "bootstrap": "^4.1.1",
     "dayjs": "^1.7.5",
     "hoist-non-react-statics": "^2.5.5",
     "jsonschema": "^1.2.4",
@@ -13,7 +12,6 @@
     "ramda": "^0.25.0",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
-    "react-modal": "^3.6.1",
     "react-router-dom": "^4.3.1",
     "react-scripts": "latest",
     "react-svg": "^4.1.8",
