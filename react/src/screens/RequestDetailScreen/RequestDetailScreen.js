@@ -6,7 +6,10 @@ import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import { Text, Small, P } from 'components/Typography'
 import Button from 'components/Button'
+import Modal from 'components/Modal'
 import RequestDetailHeader from './components/RequestDetailHeader'
+import ApproveModal from './components/ApproveModal'
+import SuccessModal from './components/SuccessModal'
 
 const TransactionInfoParts = styled.div`
   display: flex;
@@ -15,7 +18,13 @@ const TransactionInfoParts = styled.div`
 `
 
 class RequestDetailScreen extends React.Component {
-  state = { request: null, isCredit: false, errors: [] }
+  state = {
+    request: null,
+    isCredit: false,
+    errors: [],
+    isApproveModalOpen: false,
+    isApprovalSuccessFul: false
+  }
 
   componentDidMount() {
     this.handleFetchRequest()
@@ -39,14 +48,48 @@ class RequestDetailScreen extends React.Component {
       errors: [...state.errors, { message, error }]
     }))
 
+  handleApprovalSuccess = () => this.setState({ isApprovalSuccessFul: true })
+
+  showApproveModal = () => this.setState({ isApproveModalOpen: true })
+
+  toggleApproveModal = isApproveModalOpen =>
+    this.setState({ isApproveModalOpen })
+
   render() {
-    const { request, isCredit } = this.state
+    const {
+      request,
+      isCredit,
+      isApproveModalOpen,
+      isApprovalSuccessFul
+    } = this.state
+
+    const { approveRequest } = this.props
+
     const expirationDate = dateString(
       request ? request.expiration_time : null,
       'dddd, MMMM D, YYYY \n @hh:mm:ss A ZZ UTC'
     )
+    const total =
+      request && `${isCredit ? '-' : ''}${request.price * request.quantity}`
     return (
       <MainLayout>
+        <Modal
+          isOpen={isApproveModalOpen}
+          onModalToggle={this.toggleApproveModal}
+        >
+          {({ hide }) =>
+            isApprovalSuccessFul ? (
+              <SuccessModal />
+            ) : (
+              <ApproveModal
+                hide={hide}
+                total={total}
+                approveRequest={approveRequest}
+                onApprovalSuccess={this.handleApprovalSuccess}
+              />
+            )
+          }
+        </Modal>
         <RequestDetailHeader />
         {request && (
           <React.Fragment>
@@ -66,7 +109,7 @@ class RequestDetailScreen extends React.Component {
                   textAlign="center"
                   data-id="sumTransactionItemIndicator"
                 >
-                  {isCredit ? '-' : ''} {request.price * request.quantity}
+                  {total}
                 </Text>
               </Paper>
               <Paper>
@@ -83,7 +126,9 @@ class RequestDetailScreen extends React.Component {
               </Paper>
             </TransactionInfoParts>
             <TransactionInfoParts data-id="request-actions">
-              <Button data-id="transactButton">Transact</Button>
+              <Button onClick={this.showApproveModal} data-id="transactButton">
+                Transact
+              </Button>
               <Button data-id="rejectButton" theme="secondary">
                 Reject
               </Button>
