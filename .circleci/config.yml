@@ -110,7 +110,7 @@ jobs:
 
 workflows:
   version: 2
-  build-test-deploy-react-prod:
+  react-build-test:
     jobs:
       - build-test-react
       - deploy-react-prod:
@@ -119,7 +119,7 @@ workflows:
           filters:
             branches:
               only: master
-  test-graphql-faas-dev:
+  graphql-test-faas-dev:
     jobs:
       - test-graphql-faas:
           filters:
