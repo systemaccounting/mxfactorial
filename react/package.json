@@ -3,6 +3,7 @@
   "version": "0.1.4",
   "private": true,
   "dependencies": {
+    "@rebass/grid": "^6.0.0-4",
     "aws-amplify": "^1.0.2",
     "axios": "^0.18.0",
     "dayjs": "^1.7.5",
