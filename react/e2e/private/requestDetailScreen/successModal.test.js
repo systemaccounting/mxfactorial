@@ -6,6 +6,7 @@ const { BASE_URL, REQUEST_URL, HOME_URL } = require('../../constants')
 const activeButtonSelector = 'button[data-id="activeButton"]'
 
 const selectors = {
+  requestItem: '[data-id="requestItemIndicator"]',
   backButton: '[data-id="backButton"]',
   approveModal: '[data-id=passwordApproveTransactionPopUp]',
   successModal: '[data-id=transactionSuccessPopup]',
@@ -29,7 +30,7 @@ beforeAll(async () => {
   page = await login(page)
   await page.goto(REQUEST_URL)
   await page.waitForSelector(activeButtonSelector)
-  const link = await page.$('[data-id="requestItemIndicator"]')
+  const link = await page.$(selectors.requestItem)
   await link.click()
 })
 
