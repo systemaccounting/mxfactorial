@@ -23,7 +23,7 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
+          key: v3-dependencies-{{ checksum "package.json" }}
       - run: npm install
       - run: npm test
       - run: npm run ci:e2e-private
