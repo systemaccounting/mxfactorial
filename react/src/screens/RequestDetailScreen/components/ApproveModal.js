@@ -65,11 +65,13 @@ export class ApproveModal extends React.Component {
           />
         </div>
         <Flex justifyContent="space-between">
-          <Button theme="secondary" onClick={hide}>
+          <Button data-id="cancelButton" theme="secondary" onClick={hide}>
             Cancel
           </Button>
           <Spacer w={10} />
-          <Button onClick={this.submit}>Ok</Button>
+          <Button data-id="okButton" onClick={this.submit}>
+            Ok
+          </Button>
         </Flex>
       </ApproveModalStyled>
     )
