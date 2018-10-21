@@ -1,6 +1,5 @@
 import React from 'react'
 import styled from 'styled-components'
-import is from 'styled-is'
 import { Flex } from '@rebass/grid'
 
 import Input from 'components/Form/Input'
