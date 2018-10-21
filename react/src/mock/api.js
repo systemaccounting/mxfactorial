@@ -13,6 +13,15 @@ export const fetchBalance = () => Promise.resolve(0)
 
 export const fetchRequests = () => Promise.resolve(mapRequestsByStatus)
 
+export const approveRequest = password =>
+  new Promise((resolve, reject) => {
+    if (password === 'TRUE') {
+      resolve(true)
+    } else {
+      reject({ error: 'PASSWORD_ERROR', message: 'Wrong password.' })
+    }
+  })
+
 export const fetchRequest = uuid =>
   Promise.resolve(
     R.pipe(
