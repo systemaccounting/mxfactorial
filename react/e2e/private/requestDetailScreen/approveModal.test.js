@@ -1,8 +1,6 @@
 const puppeteer = require('puppeteer')
 const login = require('../../utils/login')
 
-const start = require('../../config/private/start')
-
 const { BASE_URL, REQUEST_URL } = require('../../constants')
 
 const activeButtonSelector = 'button[data-id="activeButton"]'
@@ -21,8 +19,6 @@ let browser
 let page
 
 beforeAll(async () => {
-  await start()
-
   browser = await puppeteer.launch({
     args: ['--no-sandbox']
   })
