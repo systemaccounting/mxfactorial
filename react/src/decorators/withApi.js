@@ -5,7 +5,8 @@ import {
   fetchTransactions,
   fetchBalance,
   fetchRequests,
-  fetchRequest
+  fetchRequest,
+  approveRequest
 } from 'mock/api'
 
 const withApi = methods => Component => props => {
@@ -31,5 +32,6 @@ export default withApi({
   fetchTransactions,
   fetchBalance,
   fetchRequests,
-  fetchRequest
+  fetchRequest,
+  approveRequest
 })
