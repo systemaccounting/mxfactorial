@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import is from 'styled-is'
 
 const Input = styled.input`
   width: 100%;
@@ -18,6 +19,9 @@ const Input = styled.input`
   &:focus::-webkit-input-placeholder {
     color: transparent;
   }
+  ${is('hasError')`
+    color: red;
+  `};
 `
 
 export default Input
