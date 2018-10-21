@@ -17,7 +17,9 @@ jobs:
           name: Detect changed subdirectory files
           command: |
             SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-            [[ "$SUBDIR" != *"react"* ]] && circleci step halt
+            if [[ "$SUBDIR" != *"react"* ]]; then
+              circleci step halt
+            fi
       - restore_cache:
           paths:
             - node_modules
@@ -84,7 +86,9 @@ jobs:
           name: Detect changed subdirectory files
           command: |
             SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-            [[ "$SUBDIR" != *"graphql-faas"* ]] && circleci step halt
+            if [[ "$SUBDIR" != *"graphql-faas"* ]]; then
+              circleci step halt
+            fi
       - run:
           name: Update
           working_directory: /
