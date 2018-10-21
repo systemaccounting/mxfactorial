@@ -45,21 +45,30 @@ export class ApproveModal extends React.Component {
   }
 
   render() {
-    const { hide, total } = this.props
+    const { hide, total, isOpen } = this.props
     const { passwordError } = this.state
     return (
-      <ApproveModalStyled>
+      <ApproveModalStyled
+        data-id="passwordApproveTransactionPopUp"
+        data-open={isOpen}
+      >
         <div>
           <Input disabled={true} defaultValue={total} />
           <Label
             data-id="requestApporovePasswordLabel"
             hasError={passwordError}
           >
-            {passwordError ? 'Wrong Password' : 'Enter Password'}
+            {passwordError ? (
+              <span data-id="approvePasswordError">Wrong Password</span>
+            ) : (
+              'Enter Password'
+            )}
           </Label>
           <Input
             hasError={passwordError}
+            data-haserror={passwordError}
             placeholder="Password"
+            data-id="passwordInputField"
             type="password"
             onChange={this.updatePassword}
           />

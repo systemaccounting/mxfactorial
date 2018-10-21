@@ -77,12 +77,13 @@ class RequestDetailScreen extends React.Component {
           isOpen={isApproveModalOpen}
           onModalToggle={this.toggleApproveModal}
         >
-          {({ hide }) =>
+          {({ hide, isOpen }) =>
             isApprovalSuccessFul ? (
               <SuccessModal />
             ) : (
               <ApproveModal
                 hide={hide}
+                isOpen={isOpen}
                 total={total}
                 approveRequest={approveRequest}
                 onApprovalSuccess={this.handleApprovalSuccess}

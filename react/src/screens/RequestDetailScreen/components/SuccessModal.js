@@ -27,14 +27,14 @@ const LogoContainer = styled.div`
 `
 
 const SuccessModal = () => (
-  <SuccessModalStyled>
+  <SuccessModalStyled data-id="transactionSuccessPopup">
     <LogoContainer>
       <img src={logo} alt="logo" />
     </LogoContainer>
     <Flex>
-      <ButtonLink to={`/account`} text="New" />
+      <ButtonLink data-id="newButton" to={`/account`} text="New" />
       <Spacer w={10} />
-      <ButtonLink to={`/requests`} text="OK" />
+      <ButtonLink data-id="okButton" to={`/requests`} text="OK" />
     </Flex>
   </SuccessModalStyled>
 )

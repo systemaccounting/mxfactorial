@@ -114,7 +114,7 @@ class Modal extends React.Component {
       <ModalWrapper isOpen={isOpen} isHidden={isHidden} onClick={hide}>
         <ModalContainer>
           <div data-id="modal-body-frame" onClick={this.handleModalClick}>
-            {this.props.children({ toggle, show, hide })}
+            {this.props.children({ toggle, show, hide, isOpen })}
           </div>
         </ModalContainer>
       </ModalWrapper>
