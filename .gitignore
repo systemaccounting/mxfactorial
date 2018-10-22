@@ -35,7 +35,7 @@ react/yarn-error.log*
 **/node_modules
 
 # deploy faas
-**/lambda.zip
+**/*.zip
 
 ## misc
 .DS_Store
