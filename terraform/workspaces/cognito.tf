@@ -329,12 +329,6 @@ resource "aws_lambda_function" "cognito_account_auto_confirm" {
   description      = "Auto confirms new Cognito accounts"
   handler          = "index.handler"
   runtime          = "nodejs8.10"
-
-  environment {
-    variables = {
-      REGION = "${lookup(var.region, "${terraform.workspace}")}"
-    }
-  }
 }
 
 ########## Create Cognito acount auto-approve Lambda function role and policy ##########
@@ -376,7 +370,7 @@ resource "aws_iam_role_policy" "cognito_account_auto_confirm_lambda_policy" {
       "Resource": "*"
     },
     {
-      "Sid": "VisualEditor0",
+      "Sid": "VisualEditor1",
       "Effect": "Allow",
       "Action": "cognito-idp:*",
       "Resource": "${aws_cognito_user_pool.pool.arn}"
@@ -384,6 +378,13 @@ resource "aws_iam_role_policy" "cognito_account_auto_confirm_lambda_policy" {
   ]
 }
 EOF
+}
+
+resource "aws_lambda_permission" "allow_cognito" {
+  statement_id  = "AllowExecutionFromCognito"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.cognito_account_auto_confirm.function_name}"
+  principal     = "cognito-idp.amazonaws.com"
 }
 
 ########## Create a zip file with delete Faker account Lambda code for Cognito ##########
