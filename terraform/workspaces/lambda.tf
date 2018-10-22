@@ -1,6 +1,7 @@
 resource "aws_lambda_function" "mxfactorial_graphql_server" {
   filename      = "lambda.zip"
-  function_name = "MxfactorialGraphQLServer_${lookup(var.environment, "${terraform.workspace}")}"
+  function_name = "mxfactorial-graphql-server_${lookup(var.environment, "${terraform.workspace}")}"
+  description   = "GraphQL server published on API Gateway"
 
   # "main" is the filename within the zip file (main.js) and "handler"
   # is the name of the property under which the handler function was
