@@ -18,6 +18,8 @@ afterAll(async () => {
 test(
   `Create account in Cognito`,
   async () => {
+    // Faker value matched by daily db cleanup script
+    // terraform/workspaces/cognito/delete-faker-accounts/index.js:8
     const firstName = `Faker`
     const lastName = `${Math.floor(Math.random() * 10000)}`
     const account = firstName + lastName
