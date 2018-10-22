@@ -110,10 +110,10 @@ const schemas = [
     id: 'address-3',
     label: 'Next',
     properties: {
-      countryDialingCode: {
+      countryCode: {
         type: 'string',
         inputType: 'text',
-        name: 'countryDialingCode',
+        name: 'countryCode',
         placeholder: 'Country dialing code',
         value: '',
         required: true
@@ -156,10 +156,10 @@ const schemas = [
         value: '',
         required: true
       },
-      occupationName: {
+      occupation: {
         type: 'string',
         inputType: 'text',
-        name: 'occupationName',
+        name: 'occupation',
         placeholder: 'Occupation',
         value: '',
         required: true

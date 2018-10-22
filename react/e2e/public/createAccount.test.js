@@ -68,8 +68,8 @@ test(
     await nextButton05.click()
 
     await page.waitForSelector(`button[data-id="address-3"]`)
-    const countryDialingCodeInput = await page.$(`[name=countryDialingCode]`)
-    await countryDialingCodeInput.type(`66`)
+    const countryCodeInput = await page.$(`[name=countryCode]`)
+    await countryCodeInput.type(`66`)
     const areaCodeInput = await page.$(`[name=areaCode]`)
     await areaCodeInput.type(`77`)
     const phoneNumberInput = await page.$(`[name=phoneNumber]`)
@@ -82,8 +82,8 @@ test(
     await dateOfBirthInput.type(`10-05-1990`)
     const industryInput = await page.$(`[name=industryName]`)
     await industryInput.type(`Rst`)
-    const occupationNameInput = await page.$(`[name=occupationName]`)
-    await occupationNameInput.type(`Uvw`)
+    const occupationInput = await page.$(`[name=occupation]`)
+    await occupationInput.type(`Uvw`)
     const nextButton07 = await page.$(`button[data-id="personal-info"]`)
     await nextButton07.click()
 
