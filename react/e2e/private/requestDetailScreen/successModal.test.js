@@ -66,6 +66,6 @@ test('2 - go to account page on new button press', async () => {
   const newButton = await page.$(selectors.newButton)
 
   await newButton.click()
-  await page.waitFor(500)
+  await page.waitFor(1500)
   expect(page.url(HOME_URL))
 })
