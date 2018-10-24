@@ -53,30 +53,26 @@ test('1 - open/close passwordApproveTransaction Modal', async () => {
   expect(await getApproveModalStatus()).toEqual('false')
 })
 
-test(
-  '2 - password error',
-  async () => {
-    await page.goto(REQUEST_URL)
-    await page.waitForSelector(activeButtonSelector)
-    const link = await page.$('[data-id="requestItemIndicator"]')
-    await link.click()
+test('2 - password error', async () => {
+  await page.goto(REQUEST_URL)
+  await page.waitForSelector(activeButtonSelector)
+  const link = await page.$('[data-id="requestItemIndicator"]')
+  await link.click()
 
-    const transactBtn = await page.$(selectors.transactButton)
-    await transactBtn.click()
-    expect(await getApproveModalStatus()).toEqual('true')
-    const passwordInput = await page.$(selectors.passwordInput)
-    await passwordInput.type('FALSE')
-    const okButton = await page.$(selectors.okButton)
-    await okButton.click()
+  const transactBtn = await page.$(selectors.transactButton)
+  await transactBtn.click()
+  expect(await getApproveModalStatus()).toEqual('true')
+  const passwordInput = await page.$(selectors.passwordInput)
+  await passwordInput.type('FALSE')
+  const okButton = await page.$(selectors.okButton)
+  await okButton.click()
 
-    await page.waitForSelector(`${selectors.passwordInput}[data-haserror=true]`)
-    const hasError = await page.$eval(selectors.passwordInput, element =>
-      element.getAttribute('data-haserror')
-    )
-    expect(hasError).toEqual('true')
-  },
-  15000
-)
+  await page.waitForSelector(`${selectors.passwordInput}[data-haserror=true]`)
+  const hasError = await page.$eval(selectors.passwordInput, element =>
+    element.getAttribute('data-haserror')
+  )
+  expect(hasError).toEqual('true')
+})
 
 test('3 - remove error password on pasword input update', async () => {
   const passwordInput = await page.$(selectors.passwordInput)
