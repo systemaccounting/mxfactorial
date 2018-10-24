@@ -53,31 +53,35 @@ test('1 - open/close passwordApproveTransaction Modal', async () => {
   expect(await getApproveModalStatus()).toEqual('false')
 })
 
-test('2 - password error', async () => {
-  await page.goto(REQUEST_URL)
-  await page.waitForSelector(activeButtonSelector)
-  const link = await page.$('[data-id="requestItemIndicator"]')
-  await link.click()
+test(
+  '2 - password error',
+  async () => {
+    await page.goto(REQUEST_URL)
+    await page.waitForSelector(activeButtonSelector)
+    const link = await page.$('[data-id="requestItemIndicator"]')
+    await link.click()
 
-  const transactBtn = await page.$(selectors.transactButton)
-  await transactBtn.click()
-  expect(await getApproveModalStatus()).toEqual('true')
-  const passwordInput = await page.$(selectors.passwordInput)
-  await passwordInput.type('FALSE')
-  const okButton = await page.$(selectors.okButton)
-  await okButton.click()
+    const transactBtn = await page.$(selectors.transactButton)
+    await transactBtn.click()
+    expect(await getApproveModalStatus()).toEqual('true')
+    const passwordInput = await page.$(selectors.passwordInput)
+    await passwordInput.type('FALSE')
+    const okButton = await page.$(selectors.okButton)
+    await okButton.click()
 
-  const hasError = await page.$eval(selectors.passwordInput, element =>
-    element.getAttribute('data-haserror')
-  )
-  await page.waitFor(1600)
-  expect(hasError).toEqual('true')
+    await page.waitFor(1600)
+    const hasError = await page.$eval(selectors.passwordInput, element =>
+      element.getAttribute('data-haserror')
+    )
+    expect(hasError).toEqual('true')
 
-  await passwordInput.type('X')
+    await passwordInput.type('X')
 
-  const hasError2 = await page.$eval(selectors.passwordInput, element =>
-    element.getAttribute('data-haserror')
-  )
-  await page.waitFor(1500)
-  expect(hasError2).toEqual('false')
-})
+    const hasError2 = await page.$eval(selectors.passwordInput, element =>
+      element.getAttribute('data-haserror')
+    )
+    await page.waitFor(1500)
+    expect(hasError2).toEqual('false')
+  },
+  15000
+)
