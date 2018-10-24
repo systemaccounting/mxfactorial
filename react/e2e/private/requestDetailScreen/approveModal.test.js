@@ -69,19 +69,22 @@ test(
     const okButton = await page.$(selectors.okButton)
     await okButton.click()
 
-    await page.waitFor(1600)
+    await page.waitForSelector(`${selectors.passwordInput}[data-haserror=true]`)
     const hasError = await page.$eval(selectors.passwordInput, element =>
       element.getAttribute('data-haserror')
     )
     expect(hasError).toEqual('true')
-
-    await passwordInput.type('X')
-
-    const hasError2 = await page.$eval(selectors.passwordInput, element =>
-      element.getAttribute('data-haserror')
-    )
-    await page.waitFor(1500)
-    expect(hasError2).toEqual('false')
   },
   15000
 )
+
+test('3 - remove error password on pasword input update', async () => {
+  const passwordInput = await page.$(selectors.passwordInput)
+  await passwordInput.type('X')
+
+  const hasError = await page.$eval(selectors.passwordInput, element =>
+    element.getAttribute('data-haserror')
+  )
+  await page.waitFor(1500)
+  expect(hasError).toEqual('false')
+})
