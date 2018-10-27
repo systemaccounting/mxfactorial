@@ -10,6 +10,7 @@ import Modal from 'components/Modal'
 import RequestDetailHeader from './components/RequestDetailHeader'
 import ApproveModal from './components/ApproveModal'
 import SuccessModal from './components/SuccessModal'
+import { fromNow } from 'utils/date'
 
 const TransactionInfoParts = styled.div`
   display: flex;
@@ -116,7 +117,10 @@ class RequestDetailScreen extends React.Component {
               <Paper>
                 <P fontWeight="bold">Time of request</P>
                 <P data-id="requestTimeIndicator" textAlign="right">
-                  Time of request?
+                  {fromNow(
+                    request.creditor_approval_time ||
+                      request.debitor_approval_time
+                  )}
                 </P>
               </Paper>
               <Paper>
@@ -172,7 +176,7 @@ class RequestDetailScreen extends React.Component {
                   fontWeight="bold"
                   data-id="preTransactionBalanceIndicator"
                 >
-                  pre-transaction-balance?
+                  1000
                 </Text>
               </Paper>
             </TransactionInfoParts>
