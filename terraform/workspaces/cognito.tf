@@ -380,6 +380,7 @@ resource "aws_iam_role_policy" "cognito_account_auto_confirm_lambda_policy" {
 EOF
 }
 
+########## Permit Cognito invocation of auto confirm account Lambda ##########
 resource "aws_lambda_permission" "allow_cognito" {
   statement_id  = "AllowExecutionFromCognito"
   action        = "lambda:InvokeFunction"
@@ -462,8 +463,18 @@ resource "aws_cloudwatch_event_rule" "delete_faker_accounts_rule" {
   schedule_expression = "rate(1 day)"
 }
 
+########## Bind daily CloudWatch Event to delete Faker account Lambda ##########
 resource "aws_cloudwatch_event_target" "delete_faker_lambda" {
   rule      = "${aws_cloudwatch_event_rule.delete_faker_accounts_rule.name}"
   target_id = "send_to_delete_faker_lambda_${lookup(var.environment, "${terraform.workspace}")}"
   arn       = "${aws_lambda_function.delete_faker_cognito_accounts_lambda.arn}"
+}
+
+########## Permit daily CloudWatch Event invocation of delete Faker account Lambda ##########
+resource "aws_lambda_permission" "delete_faker_accounts_daily" {
+  statement_id  = "AllowExecutionFromCloudWatch"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.delete_faker_cognito_accounts_lambda.function_name}"
+  principal     = "events.amazonaws.com"
+  source_arn    = "${aws_cloudwatch_event_rule.delete_faker_accounts_rule.arn}"
 }
