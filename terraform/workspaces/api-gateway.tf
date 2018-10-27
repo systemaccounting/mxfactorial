@@ -1,5 +1,5 @@
 resource "aws_api_gateway_rest_api" "mxfactorial_api" {
-  name        = "mxfactorial_${lookup(var.environment, "${terraform.workspace}")}"
+  name        = "mxfactorial-api-${lookup(var.environment, "${terraform.workspace}")}"
   description = "GraphQL Endpoint"
 }
 
