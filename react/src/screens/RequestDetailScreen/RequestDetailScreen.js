@@ -124,7 +124,7 @@ class RequestDetailScreen extends React.Component {
                 </P>
               </Paper>
               <Paper>
-                <P fontWeight="bold">Time of expire</P>
+                <P fontWeight="bold">Time of expiration</P>
                 <P data-id="expirationTimeIndicator" textAlign="right">
                   {expirationDate}
                 </P>
@@ -152,7 +152,7 @@ class RequestDetailScreen extends React.Component {
               <Text fontWeight="bold">Transaction ID</Text>
               <Paper>
                 <Small
-                  textAlign="right"
+                  textAlign="center"
                   fontWeight="bold"
                   data-id="transactionIdIndicator"
                 >
@@ -162,7 +162,7 @@ class RequestDetailScreen extends React.Component {
               <Text fontWeight="bold">Rule Instance ID</Text>
               <Paper>
                 <Small
-                  textAlign="right"
+                  textAlign="center"
                   fontWeight="bold"
                   data-id="ruleInstanceIdsIndicator"
                 >
