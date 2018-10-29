@@ -33,7 +33,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  // await browser.close()
+  await browser.close()
 })
 
 const getApproveModalStatus = async () =>
@@ -53,34 +53,42 @@ test('1 - open/close passwordApproveTransaction Modal', async () => {
   expect(await getApproveModalStatus()).toEqual('false')
 })
 
-test('2 - password error', async () => {
-  await page.goto(REQUEST_URL)
-  await page.waitForSelector(activeButtonSelector)
-  const link = await page.$('[data-id="requestItemIndicator"]')
-  await link.click()
+test(
+  '2 - password error',
+  async () => {
+    await page.goto(REQUEST_URL)
+    await page.waitForSelector(activeButtonSelector)
+    const link = await page.$('[data-id="requestItemIndicator"]')
+    await link.click()
 
-  const transactBtn = await page.$(selectors.transactButton)
-  await transactBtn.click()
-  expect(await getApproveModalStatus()).toEqual('true')
-  const passwordInput = await page.$(selectors.passwordInput)
-  await passwordInput.type('FALSE')
-  const okButton = await page.$(selectors.okButton)
-  await okButton.click()
+    const transactBtn = await page.$(selectors.transactButton)
+    await transactBtn.click()
+    expect(await getApproveModalStatus()).toEqual('true')
+    const passwordInput = await page.$(selectors.passwordInput)
+    await passwordInput.type('FALSE')
+    const okButton = await page.$(selectors.okButton)
+    await okButton.click()
 
-  await page.waitForSelector(`${selectors.passwordInput}[data-haserror=true]`)
-  const hasError = await page.$eval(selectors.passwordInput, element =>
-    element.getAttribute('data-haserror')
-  )
-  expect(hasError).toEqual('true')
-})
+    await page.waitForSelector(`${selectors.passwordInput}[data-haserror=true]`)
+    const hasError = await page.$eval(selectors.passwordInput, element =>
+      element.getAttribute('data-haserror')
+    )
+    expect(hasError).toEqual('true')
+  },
+  10000
+)
 
-test('3 - remove error password on pasword input update', async () => {
-  const passwordInput = await page.$(selectors.passwordInput)
-  await passwordInput.type('X')
+test(
+  '3 - remove error password on pasword input update',
+  async () => {
+    const passwordInput = await page.$(selectors.passwordInput)
+    await passwordInput.type('X')
 
-  const hasError = await page.$eval(selectors.passwordInput, element =>
-    element.getAttribute('data-haserror')
-  )
-  await page.waitFor(1500)
-  expect(hasError).toEqual('false')
-})
+    const hasError = await page.$eval(selectors.passwordInput, element =>
+      element.getAttribute('data-haserror')
+    )
+    await page.waitFor(1500)
+    expect(hasError).toEqual('false')
+  },
+  10000
+)
