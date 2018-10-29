@@ -1,5 +1,7 @@
 import * as R from 'ramda'
 
+import { testPassword } from 'lib/user'
+
 import data from './data.json'
 import requests from './requests.json'
 
@@ -15,7 +17,7 @@ export const fetchRequests = () => Promise.resolve(mapRequestsByStatus)
 
 export const approveRequest = password =>
   new Promise((resolve, reject) => {
-    if (password === 'TRUE') {
+    if (testPassword(password)) {
       resolve(true)
     } else {
       reject({ error: 'PASSWORD_ERROR', message: 'Wrong password.' })
