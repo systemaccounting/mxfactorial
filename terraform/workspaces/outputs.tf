@@ -2,6 +2,10 @@ output "base_url" {
   value = "${aws_api_gateway_deployment.environment.invoke_url}"
 }
 
+output "client_cache_url" {
+  value = "${aws_cloudfront_distribution.s3_react_distribution.domain_name}"
+}
+
 output "pool_id" {
   value = "${aws_cognito_user_pool.pool.id}"
 }
