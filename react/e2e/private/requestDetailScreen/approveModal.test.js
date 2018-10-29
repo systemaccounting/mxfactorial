@@ -33,7 +33,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await browser.close()
+  // await browser.close()
 })
 
 const getApproveModalStatus = async () =>
