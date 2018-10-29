@@ -19,7 +19,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await browser.close()
+  // await browser.close()
 })
 
 test('mobile nav button displays', async () => {
