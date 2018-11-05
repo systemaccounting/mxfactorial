@@ -15,3 +15,12 @@ variable "environment" {
     dev     = "dev"
   }
 }
+
+variable "alias_prefix" {
+  type = "map"
+
+  default = {
+    default = ""
+    dev     = "dev."
+  }
+}
