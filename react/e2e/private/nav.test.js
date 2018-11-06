@@ -18,8 +18,8 @@ beforeAll(async () => {
   await page.waitForSelector(HOME_SELECTOR)
 })
 
-afterAll(async () => {
-  // await browser.close()
+afterAll(() => {
+  setTimeout(async () => await browser.close(), 2000)
 })
 
 test('mobile nav button displays', async () => {
