@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
+import 'font-awesome/css/font-awesome.min.css'
 
 import Providers from 'providers'
 import PrivateRoutes from 'screens/private'

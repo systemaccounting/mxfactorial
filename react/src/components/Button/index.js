@@ -14,7 +14,6 @@ export const ButtonBase = styled.button`
   outline: none;
   border: none;
   font-size: 1.5rem;
-  box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
   cursor: pointer;
   transition: 0.2s;
   display: flex;
@@ -37,17 +36,22 @@ export const ButtonBase = styled.button`
   `};
 `
 
-const Button = ({ theme, ...rest }) => (
-  <ButtonBase {...rest} theme={themes[theme]} />
+const Button = ({ theme, children, icon, ...rest }) => (
+  <ButtonBase {...rest} theme={themes[theme]}>
+    {icon && <i className={`fa fa-${icon}`} style={{ marginRight: 16 }} />}
+    {children}
+  </ButtonBase>
 )
 
 Button.propTypes = {
   theme: PropTypes.string,
-  inactive: PropTypes.bool
+  inactive: PropTypes.bool,
+  icon: PropTypes.string
 }
 
 Button.defaultProps = {
   theme: 'primary',
+  icon: null,
   inactive: false
 }
 

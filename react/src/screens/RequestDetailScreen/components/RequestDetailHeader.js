@@ -11,21 +11,21 @@ const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #efefef;
+  color: #444;
 `
 
 export const RequestDetailHeader = () => (
   <HeaderContainer>
     <div data-id="backButton">
       <Link to={`/requests`}>
-        <BackIcon />
+        <i className="fa fa-arrow-left fa-lg" />
       </Link>
     </div>
     <div>
       <Text variant="medium">Request</Text>
     </div>
     <div data-id="emailCopyButton">
-      <EmailIcon />
+      <i className="fa fa-envelope fa-lg" />
     </div>
   </HeaderContainer>
 )

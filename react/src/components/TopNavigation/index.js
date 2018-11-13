@@ -10,12 +10,12 @@ const Wrapper = styled.div`
 `
 
 const NavItem = styled.div`
-  color: #efefef;
+  color: #444;
   > * {
     color: #efefef;
     text-decoration: none;
     &:hover {
-      color: #e2e2e2;
+      color: #222;
     }
   }
 `
@@ -24,7 +24,7 @@ const TopNavigation = () => (
   <Wrapper>
     <NavItem>
       <Link to="/account">
-        <HomeIcon />
+        <i className="fa fa-2x fa-home" />
       </Link>
     </NavItem>
   </Wrapper>

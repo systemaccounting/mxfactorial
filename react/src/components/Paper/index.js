@@ -9,7 +9,6 @@ const Paper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
 `
 
 export default Paper
