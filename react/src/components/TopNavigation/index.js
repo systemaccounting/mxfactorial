@@ -12,8 +12,10 @@ const NavItem = styled.div`
   > * {
     color: #efefef;
     text-decoration: none;
+    opacity: 0.7;
     &:hover {
       color: #222;
+      opacity: 1;
     }
   }
 `

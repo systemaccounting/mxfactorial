@@ -11,7 +11,7 @@ const Container = styled.div`
 
 export const Label = styled.div`
   font-style: italic;
-  color: rgba(255, 255, 255, 0.6);
+  color: #333;
 `
 export const Value = styled.div`
   color: rgb(255, 246, 113);

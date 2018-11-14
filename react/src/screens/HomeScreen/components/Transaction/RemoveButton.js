@@ -6,7 +6,7 @@ const RemoveButtonStyled = styled.button`
   background-color: transparent;
   border: none;
   outline: rgba(0, 0, 0, 0);
-  color: white;
+  color: #333;
   opacity: 0.7;
   cursor: pointer;
   margin: 0 0 10px -10px;

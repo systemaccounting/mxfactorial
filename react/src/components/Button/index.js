@@ -13,7 +13,7 @@ export const ButtonBase = styled.button`
   height: 2.5rem;
   outline: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   cursor: pointer;
   transition: 0.2s;
   display: flex;
