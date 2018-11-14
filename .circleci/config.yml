@@ -31,7 +31,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v6-dependencies-{{ checksum "package.json" }}
+          key: v7g-dependencies-{{ checksum "package.json" }}
   deploy-react-prod:
     docker:
       - image: circleci/node:8.9.1-stretch-browsers
