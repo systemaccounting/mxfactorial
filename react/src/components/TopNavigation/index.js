@@ -2,8 +2,6 @@ import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import HomeIcon from 'icons/HomeIcon'
-
 const Wrapper = styled.div`
   display: flex;
   padding: 10px 0;

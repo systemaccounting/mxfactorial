@@ -170,8 +170,6 @@ class RequestDetailScreen extends React.Component {
 
   render() {
     const {
-      request,
-      isCredit,
       isApproveModalOpen,
       isApprovalSuccessFul
     } = this.state

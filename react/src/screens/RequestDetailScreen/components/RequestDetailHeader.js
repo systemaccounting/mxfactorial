@@ -2,8 +2,6 @@ import React from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import BackIcon from 'icons/BackIcon'
-import EmailIcon from 'icons/EmailIcon'
 import { Text } from 'components/Typography'
 
 const HeaderContainer = styled.div`
