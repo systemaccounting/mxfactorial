@@ -10,7 +10,7 @@ export const ButtonBase = styled.button`
   padding: 0;
   border-radius: 3px;
   margin-bottom: 8px;
-  height: 2.5rem;
+  height: 60px;
   outline: none;
   border: none;
   font-size: 1.3rem;
@@ -19,6 +19,7 @@ export const ButtonBase = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 9px 9px 9px 1px rgba(92,92,95,0.2);
   > svg {
     margin: 0 5px;
   }

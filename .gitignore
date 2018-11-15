@@ -39,11 +39,7 @@ react/yarn-error.log*
 
 # Editors and IDEs
 .idea
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode
 
 # Misc
 .DS_Store

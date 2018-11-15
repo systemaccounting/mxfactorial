@@ -121,7 +121,7 @@ class RequestDetailScreen extends React.Component {
           >
             Transact
           </Button>
-          <Button theme="error" data-id="rejectButton">
+          <Button theme="secondary" data-id="rejectButton">
             Reject
           </Button>
         </div>

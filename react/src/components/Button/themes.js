@@ -1,9 +1,10 @@
 const primary = {
-  backgroundColor: 'rgb(63, 133, 199)',
+  backgroundColor: '#005396',
   color: 'white'
 }
 const secondary = {
-  backgroundColor: 'rgb(100, 100, 128)',
+  // backgroundColor: 'rgb(100, 100, 128)',
+  backgroundColor: '#3585c8',
   color: 'white'
 }
 
