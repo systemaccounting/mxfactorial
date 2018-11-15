@@ -9,7 +9,7 @@ export const ButtonBase = styled.button`
   text-align: center;
   padding: 0;
   border-radius: 3px;
-  margin-bottom: 1rem;
+  margin-bottom: 8px;
   height: 2.5rem;
   outline: none;
   border: none;

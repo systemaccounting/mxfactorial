@@ -9,7 +9,7 @@ const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #444;
+  color: #efefef;
 `
 
 export const RequestDetailHeader = () => (
@@ -20,7 +20,9 @@ export const RequestDetailHeader = () => (
       </Link>
     </div>
     <div>
-      <Text variant="medium">Request</Text>
+      <Text variant="medium" fontWeight="bold" style={{ color: '#efefef' }}>
+        Request
+      </Text>
     </div>
     <div data-id="emailCopyButton">
       <i className="fa fa-envelope fa-lg" />

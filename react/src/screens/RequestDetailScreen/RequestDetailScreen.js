@@ -58,7 +58,8 @@ class RequestDetailScreen extends React.Component {
     }
 
     const total = request.price * request.quantity
-    return isCredit ? total * -1 : total
+    const localized = total.toLocaleString();
+    return isCredit ? `- ${localized}` : localized;
   }
 
   get transactionBalance() {
@@ -81,6 +82,7 @@ class RequestDetailScreen extends React.Component {
             <Text
               variant="large"
               textAlign="center"
+              fontWeight="bold"
               data-id="requestingAccountIndicator"
             >
               {isCredit ? request.debitor : request.creditor}
@@ -90,9 +92,10 @@ class RequestDetailScreen extends React.Component {
             <Text
               variant="large"
               textAlign="center"
+              fontWeight="bold"
               data-id="sumTransactionItemIndicator"
             >
-              {this.total.toLocaleString()}
+              {this.total}
             </Text>
           </Paper>
           <Paper>
@@ -157,6 +160,7 @@ class RequestDetailScreen extends React.Component {
           <Paper>
             <Text
               textAlign="right"
+              variant="medium"
               fontWeight="bold"
               data-id="preTransactionBalanceIndicator"
             >

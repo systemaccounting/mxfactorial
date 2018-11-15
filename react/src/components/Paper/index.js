@@ -4,11 +4,12 @@ const Paper = styled.div`
   border-radius: 4px;
   background-color: #efefef;
   padding: 10px;
-  min-height: 32px;
+  min-height: 60px;
   margin: 8px 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
 `
 
 export default Paper
