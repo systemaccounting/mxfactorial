@@ -4,8 +4,8 @@ const Paper = styled.div`
   border-radius: 4px;
   background-color: #efefef;
   padding: 10px;
-  min-height: 48px;
-  margin: 5px 0;
+  min-height: 60px;
+  margin: 8px 0;
   display: flex;
   flex-direction: column;
   justify-content: center;

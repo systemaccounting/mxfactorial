@@ -33,7 +33,7 @@ export const fontWeightVariant = ({ fontWeight }) => {
 
 export const Base = styled.div`
   margin: 0;
-  color: #333;
+  color: #666;
   ${textAlign};
   ${fontWeightVariant};
 `

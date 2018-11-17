@@ -1,5 +1,4 @@
 import React from 'react'
-import styled from 'styled-components'
 
 import { dateString } from 'utils/date'
 import MainLayout from 'components/MainLayout'
@@ -12,11 +11,7 @@ import ApproveModal from './components/ApproveModal'
 import SuccessModal from './components/SuccessModal'
 import { fromNow } from 'utils/date'
 
-const TransactionInfoParts = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 16px 0;
-`
+import s from './RequestDetailScreen.module.css'
 
 class RequestDetailScreen extends React.Component {
   state = {
@@ -56,22 +51,134 @@ class RequestDetailScreen extends React.Component {
   toggleApproveModal = isApproveModalOpen =>
     this.setState({ isApproveModalOpen })
 
+  get total() {
+    const { request, isCredit } = this.state
+    if (!request) {
+      return null
+    }
+
+    const total = request.price * request.quantity
+    const localized = total.toLocaleString();
+    return isCredit ? `- ${localized}` : localized;
+  }
+
+  get transactionBalance() {
+    return 1000
+  }
+
+  get requestInfo() {
+    const { request, isCredit } = this.state
+    if (!request) {
+      return null
+    }
+    const expirationDate = dateString(
+      request ? request.expiration_time : null,
+      'dddd, MMMM D, YYYY \n @hh:mm:ss A ZZ UTC'
+    )
+    return (
+      <div className={s.content}>
+        <div>
+          <Paper>
+            <Text
+              variant="large"
+              textAlign="center"
+              fontWeight="bold"
+              data-id="requestingAccountIndicator"
+            >
+              {isCredit ? request.debitor : request.creditor}
+            </Text>
+          </Paper>
+          <Paper>
+            <Text
+              variant="large"
+              textAlign="center"
+              fontWeight="bold"
+              data-id="sumTransactionItemIndicator"
+            >
+              {this.total}
+            </Text>
+          </Paper>
+          <Paper>
+            <P fontWeight="bold">Time of request</P>
+            <P data-id="requestTimeIndicator" textAlign="right">
+              {fromNow(
+                request.creditor_approval_time || request.debitor_approval_time
+              )}
+            </P>
+          </Paper>
+          <Paper>
+            <P fontWeight="bold">Time of expiration</P>
+            <P data-id="expirationTimeIndicator" textAlign="right">
+              {expirationDate}
+            </P>
+          </Paper>
+        </div>
+        <div className={s.actions} data-id="request-actions">
+          <Button
+            onClick={this.showApproveModal}
+            icon="exchange"
+            data-id="transactButton"
+          >
+            Transact
+          </Button>
+          <Button theme="secondary" data-id="rejectButton">
+            Reject
+          </Button>
+        </div>
+        <div className={s.cart} data-id="transaction-items">
+          <Paper data-id="transactionItemIndicator">
+            <P textAlign="center" fontWeight="bold" variant="medium">
+              {parseInt(request.quantity, 10)} x {request.price}
+            </P>
+            <P textAlign="center" fontWeight="bold" variant="medium">
+              {request.name}
+            </P>
+          </Paper>
+        </div>
+        <div data-id="transaction-ids">
+          <p className={s.label}>Transaction ID</p>
+          <Paper>
+            <Small
+              textAlign="center"
+              fontWeight="bold"
+              data-id="transactionIdIndicator"
+            >
+              {request.transaction_id}
+            </Small>
+          </Paper>
+          <p className={s.label}>Rule Instance ID</p>
+          <Paper>
+            <Small
+              textAlign="center"
+              fontWeight="bold"
+              data-id="ruleInstanceIdsIndicator"
+            >
+              {request.rule_instance_id}
+            </Small>
+          </Paper>
+          <p className={s.label}>Pre-transaction balance</p>
+          <Paper>
+            <Text
+              textAlign="right"
+              variant="medium"
+              fontWeight="bold"
+              data-id="preTransactionBalanceIndicator"
+            >
+              {this.transactionBalance.toLocaleString()}
+            </Text>
+          </Paper>
+        </div>
+      </div>
+    )
+  }
+
   render() {
     const {
-      request,
-      isCredit,
       isApproveModalOpen,
       isApprovalSuccessFul
     } = this.state
 
     const { approveRequest } = this.props
-
-    const expirationDate = dateString(
-      request ? request.expiration_time : null,
-      'dddd, MMMM D, YYYY \n @hh:mm:ss A ZZ UTC'
-    )
-    const total =
-      request && `${isCredit ? '-' : ''}${request.price * request.quantity}`
     return (
       <MainLayout>
         <Modal
@@ -85,7 +192,7 @@ class RequestDetailScreen extends React.Component {
               <ApproveModal
                 hide={hide}
                 isOpen={isOpen}
-                total={total}
+                total={this.total}
                 approveRequest={approveRequest}
                 onApprovalSuccess={this.handleApprovalSuccess}
               />
@@ -93,95 +200,7 @@ class RequestDetailScreen extends React.Component {
           }
         </Modal>
         <RequestDetailHeader />
-        {request && (
-          <React.Fragment>
-            <TransactionInfoParts>
-              <Paper>
-                <Text
-                  variant="medium"
-                  textAlign="center"
-                  data-id="requestingAccountIndicator"
-                >
-                  {isCredit ? request.debitor : request.creditor}
-                </Text>
-              </Paper>
-              <Paper>
-                <Text
-                  variant="medium"
-                  textAlign="center"
-                  data-id="sumTransactionItemIndicator"
-                >
-                  {total}
-                </Text>
-              </Paper>
-              <Paper>
-                <P fontWeight="bold">Time of request</P>
-                <P data-id="requestTimeIndicator" textAlign="right">
-                  {fromNow(
-                    request.creditor_approval_time ||
-                      request.debitor_approval_time
-                  )}
-                </P>
-              </Paper>
-              <Paper>
-                <P fontWeight="bold">Time of expiration</P>
-                <P data-id="expirationTimeIndicator" textAlign="right">
-                  {expirationDate}
-                </P>
-              </Paper>
-            </TransactionInfoParts>
-            <TransactionInfoParts data-id="request-actions">
-              <Button onClick={this.showApproveModal} data-id="transactButton">
-                Transact
-              </Button>
-              <Button data-id="rejectButton" theme="secondary">
-                Reject
-              </Button>
-            </TransactionInfoParts>
-            <TransactionInfoParts data-id="transaction-items">
-              <Paper data-id="transactionItemIndicator">
-                <P textAlign="center" fontWeight="bold" variant="medium">
-                  {parseInt(request.quantity, 10)} x {request.price}
-                </P>
-                <P textAlign="center" fontWeight="bold" variant="medium">
-                  {request.name}
-                </P>
-              </Paper>
-            </TransactionInfoParts>
-            <TransactionInfoParts data-id="transaction-ids">
-              <Text fontWeight="bold">Transaction ID</Text>
-              <Paper>
-                <Small
-                  textAlign="center"
-                  fontWeight="bold"
-                  data-id="transactionIdIndicator"
-                >
-                  {request.transaction_id}
-                </Small>
-              </Paper>
-              <Text fontWeight="bold">Rule Instance ID</Text>
-              <Paper>
-                <Small
-                  textAlign="center"
-                  fontWeight="bold"
-                  data-id="ruleInstanceIdsIndicator"
-                >
-                  {request.rule_instance_id}
-                </Small>
-              </Paper>
-              <Text fontWeight="bold">Pre-transaction balance</Text>
-              <Paper>
-                <Text
-                  textAlign="right"
-                  fontWeight="bold"
-                  data-id="preTransactionBalanceIndicator"
-                >
-                  1000
-                </Text>
-              </Paper>
-            </TransactionInfoParts>
-          </React.Fragment>
-        )}
+        {this.requestInfo}
       </MainLayout>
     )
   }

@@ -19,7 +19,7 @@ beforeAll(async () => {
 })
 
 afterAll(() => {
-  setTimeout(async () => await browser.close(), 2000)
+  setTimeout(async () => await browser.close(), 3000)
 })
 
 test('mobile nav button displays', async () => {
