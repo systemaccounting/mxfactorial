@@ -23,7 +23,7 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
+          key: v7-dependencies-{{ checksum "package.json" }}
       - run: npm install
       - run: npm test
       - run: npm run ci:e2e-private
@@ -31,7 +31,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v2-dependencies-{{ checksum "package.json" }}
+          key: v7-dependencies-{{ checksum "package.json" }}
   deploy-react-prod:
     docker:
       - image: circleci/node:8.9.1-stretch-browsers

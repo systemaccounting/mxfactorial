@@ -37,6 +37,9 @@ react/yarn-error.log*
 # deploy faas
 **/*.zip
 
-## misc
-.DS_Store
+# Editors and IDEs
+.idea
 .vscode
+
+# Misc
+.DS_Store

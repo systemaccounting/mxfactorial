@@ -3,6 +3,7 @@ a:visited,
 a:hover,
 a:active {
   text-decoration: none !important;
+  color: inherit;
 }
 
 #root {

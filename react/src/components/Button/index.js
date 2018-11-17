@@ -9,17 +9,17 @@ export const ButtonBase = styled.button`
   text-align: center;
   padding: 0;
   border-radius: 3px;
-  margin-bottom: 1rem;
-  height: 2.5rem;
+  margin-bottom: 8px;
+  height: 60px;
   outline: none;
   border: none;
-  font-size: 1.5rem;
-  box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
+  font-size: 1.3rem;
   cursor: pointer;
   transition: 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 9px 9px 9px 1px rgba(92,92,95,0.2);
   > svg {
     margin: 0 5px;
   }
@@ -37,17 +37,22 @@ export const ButtonBase = styled.button`
   `};
 `
 
-const Button = ({ theme, ...rest }) => (
-  <ButtonBase {...rest} theme={themes[theme]} />
+const Button = ({ theme, children, icon, ...rest }) => (
+  <ButtonBase {...rest} theme={themes[theme]}>
+    {icon && <i className={`fa fa-${icon}`} style={{ marginRight: 16 }} />}
+    {children}
+  </ButtonBase>
 )
 
 Button.propTypes = {
   theme: PropTypes.string,
-  inactive: PropTypes.bool
+  inactive: PropTypes.bool,
+  icon: PropTypes.string
 }
 
 Button.defaultProps = {
   theme: 'primary',
+  icon: null,
   inactive: false
 }
 

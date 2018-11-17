@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import hoistStatics from 'hoist-non-react-statics'
+
+import { testPassword } from 'lib/user'
 import { UserConsumer } from 'context/User/UserContext'
 
 const withUser = methods => Component => props => {
@@ -31,4 +33,4 @@ const withUser = methods => Component => props => {
   return <H />
 }
 
-export default withUser({})
+export default withUser({ testPassword })

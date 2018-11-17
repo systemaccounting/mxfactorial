@@ -1,0 +1,22 @@
+.content {
+  display: block;
+  margin-top: 45px;
+  margin-bottom: 48px;
+}
+
+.cart {
+  margin-top: 20px;
+  margin-bottom: 35px;
+}
+
+.actions {
+  margin-top: 20px;
+  margin-bottom: 16px;
+}
+
+.label {
+  color: #333;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}

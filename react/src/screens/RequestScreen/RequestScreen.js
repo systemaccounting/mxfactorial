@@ -1,5 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 
 import MainLayout from 'components/MainLayout'
 import TypeSwitch from './components/TypeSwitch'
@@ -46,27 +47,29 @@ class RequestScreen extends React.Component {
             const isCredit = request.creditor === user.username
             const amount = request.price * request.quantity
             return (
-              <Paper key={request.timeuuid} data-id="requestItemIndicator">
-                <Small>
-                  {fromNow(request.expiration_time)}
-                  {', '}
-                  {isCredit ? (
-                    <span>
-                      <strong>{request.debitor}</strong> recieved your request
-                      of
-                    </span>
-                  ) : (
-                    <span>
-                      <strong>{request.creditor}</strong> requested
-                    </span>
-                  )}
-                </Small>
-                <Text textAlign="right" variant="medium">
-                  <strong>
-                    {isCredit ? '-' : ''} {amount}
-                  </strong>
-                </Text>
-              </Paper>
+              <Link key={request.timeuuid} to={`requests/${request.timeuuid}`}>
+                <Paper data-id="requestItemIndicator">
+                  <Small>
+                    {fromNow(request.expiration_time)}
+                    {', '}
+                    {isCredit ? (
+                      <span>
+                        <strong>{request.debitor}</strong> recieved your request
+                        of
+                      </span>
+                    ) : (
+                      <span>
+                        <strong>{request.creditor}</strong> requested
+                      </span>
+                    )}
+                  </Small>
+                  <Text textAlign="right" variant="medium">
+                    <strong>
+                      {isCredit ? '-' : ''} {amount}
+                    </strong>
+                  </Text>
+                </Paper>
+              </Link>
             )
           })}
         </Wrapper>
