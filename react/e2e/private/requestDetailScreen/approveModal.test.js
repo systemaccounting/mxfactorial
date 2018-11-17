@@ -64,6 +64,7 @@ test(
     const transactBtn = await page.$(selectors.transactButton)
     await transactBtn.click()
     expect(await getApproveModalStatus()).toEqual('true')
+    await page.waitFor(1000)
     const passwordInput = await page.$(selectors.passwordInput)
     await passwordInput.type('FALSE')
     const okButton = await page.$(selectors.okButton)
