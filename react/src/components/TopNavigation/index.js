@@ -8,13 +8,12 @@ const Wrapper = styled.div`
 `
 
 const NavItem = styled.div`
-  color: #444;
+  color: #efefef;
   > * {
     color: #efefef;
     text-decoration: none;
     opacity: 0.7;
     &:hover {
-      color: #222;
       opacity: 1;
     }
   }
