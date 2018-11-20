@@ -31,7 +31,7 @@ describe('<PrivateRoutes />', () => {
       <PrivateRoutes user={{ username: 'test' }} userLoading={false} />
     )
     expect(wrapper.find('Switch').exists()).toBeTruthy()
-    expect(wrapper.find('Route')).toHaveLength(4)
+    expect(wrapper.find('Route')).toHaveLength(5)
   })
 
   it('redirects to auth if user doesnt exist', () => {

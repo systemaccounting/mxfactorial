@@ -35,7 +35,7 @@ const mockUser = { username: 'JoeSmith' }
 const currentUserInfoMock = promiseToResolve(mockUser)
 const fetchRequestsMock = promiseToResolve(mockRequests)
 
-describe('<HistoryScreen />', () => {
+describe('<RequestScreen />', () => {
   it('renders', () => {
     const wrapper = shallow(
       <RequestScreen
