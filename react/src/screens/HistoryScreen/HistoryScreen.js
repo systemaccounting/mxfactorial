@@ -1,12 +1,38 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
+import MainLayout from 'components/MainLayout'
+import { Text } from 'components/Typography'
+
+import s from './HistoryScreen.module.css'
 
 class HistoryScreen extends Component {
+  state = {
+    history: []
+  }
+
+  componentDidMount() {
+    this.handleFetchHistory()
+  }
+
+  handleFetchHistory = async () => {
+    const history = await this.props.fetchHistory()
+    this.setState({ history })
+  }
+
   render() {
     return (
-      <div>
-        <h1>History</h1>
-        History Screen Goes Here
-      </div>
+      <MainLayout>
+        <Text
+          variant="medium"
+          fontWeight="bold"
+          textAlign="center"
+          style={{ color: '#efefef' }}
+        >
+          History
+        </Text>
+        <div className={s.content}>
+          History Screen Goes Here
+        </div>
+      </MainLayout>
     )
   }
 }
