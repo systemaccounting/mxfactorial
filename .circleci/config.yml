@@ -31,7 +31,9 @@ jobs:
       - run: npm test
       - run: npm run ci:e2e-private
       - run: npm run ci:e2e-public
-      - run: NODE_PATH=./src REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV node node_modules/react-scripts/scripts/build.js
+      - run:
+          name: Build web client for dev environment
+          command: NODE_PATH=./src REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV node node_modules/react-scripts/scripts/build.js
       - save_cache:
           paths:
             - node_modules
@@ -71,8 +73,81 @@ jobs:
           name: Change aws configuration
           command: aws configure set preview.cloudfront true
       - run:
-          name: Terminate cache for distribution WITHOUT www prefix
+          name: Terminate cache for dev distribution
           command: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID_DEV --paths "/*"
+  react-build-test-prod:
+    executor: react-executor
+    steps:
+      - checkout:
+          path: ~/repo
+      - run:
+          name: Detect changed root files
+          command: |
+            if [[ $(git log --name-only --oneline -1 | sed 1d) != *\/* ]]; then
+             circleci step halt
+            fi
+      - run:
+          name: Detect changed subdirectory files
+          command: |
+            SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
+            if [[ "$SUBDIR" != *"react"* ]]; then
+              circleci step halt
+            fi
+      - restore_cache:
+          paths:
+            - node_modules
+          key: v007-dependencies-{{ checksum "package.json" }}
+      - run: npm install
+      - run: npm test
+      - run: npm run ci:e2e-private
+      - run: npm run ci:e2e-public
+      - run:
+          name: Build web client for prod environment
+          command: npm run build
+      - save_cache:
+          paths:
+            - node_modules
+          key: v007-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: build
+          paths:
+            - .
+  react-deploy-prod:
+    executor: react-executor
+    steps:
+      - run:
+          name: Update
+          working_directory: /
+          command: |
+            sudo apt-get update -y
+      - run:
+          name: Upgrade
+          working_directory: /
+          command: |
+            sudo apt-get upgrade -y
+      - run:
+          name: Install python and awscli
+          working_directory: /
+          command: |
+            sudo apt-get install -yq python-dev python-pip --fix-missing
+            sudo pip install awscli
+      - checkout:
+          path: ~/repo
+      - attach_workspace:
+          at: build
+      - run:
+          name: Deploy to S3
+          #from build/ attached above
+          command: aws s3 sync build/ s3://mxfactorial-react-prod --delete
+      - run:
+          name: Change aws configuration
+          command: aws configure set preview.cloudfront true
+      - run:
+          name: Terminate cache for distribution WITHOUT www prefix
+          command: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+      - run:
+          name: Terminate cache for distribution WITH www prefix
+          command: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_WWW_DISTRIBUTION_ID --paths "/*"
   test-graphql-faas:
     docker:
       - image: circleci/node:8.9.1-stretch-browsers
@@ -125,6 +200,16 @@ workflows:
               only:
                 # prior art: https://stackoverflow.com/a/49515208
                 - /^(master.+|(?!master).*)$/
+  react-build-test-deploy-prod:
+    jobs:
+      - react-build-test-prod
+      - react-deploy-prod:
+          requires:
+            - react-build-test-prod
+          filters:
+            branches:
+              only:
+                - master
   graphql-test-faas-dev:
     jobs:
       - test-graphql-faas:
