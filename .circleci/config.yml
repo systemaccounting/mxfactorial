@@ -3,7 +3,7 @@ executors:
   react-executor:
     docker:
       - image: circleci/node:8.9.1-stretch-browsers
-      working_directory: ~/repo/react
+    working_directory: ~/repo/react
 jobs:
   react-build-test-dev:
     executor: react-executor
