@@ -121,8 +121,9 @@ workflows:
             - react-build-test-dev
           filters:
             branches:
-              # prior art: https://stackoverflow.com/a/49515208
-              - /^(master.+|(?!master).*)$/
+              only:
+                # prior art: https://stackoverflow.com/a/49515208
+                - /^(master.+|(?!master).*)$/
   graphql-test-faas-dev:
     jobs:
       - test-graphql-faas:
