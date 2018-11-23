@@ -202,7 +202,11 @@ workflows:
                 - /^(master.+|(?!master).*)$/
   react-build-test-deploy-prod:
     jobs:
-      - react-build-test-prod
+      - react-build-test-prod:
+          filters:
+            branches:
+              only:
+                - master
       - react-deploy-prod:
           requires:
             - react-build-test-prod
