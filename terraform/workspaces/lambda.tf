@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "mxfactorial_graphql_server" {
   filename      = "lambda.zip"
-  function_name = "mxfactorial-graphql-server-${lookup(var.environment, "${terraform.workspace}")}"
+  function_name = "mxfactorial-graphql-server-${terraform.workspace}"
   description   = "GraphQL server published on API Gateway"
 
   # "main" is the filename within the zip file (main.js) and "handler"
@@ -21,7 +21,7 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
 }
 
 resource "aws_iam_role" "mxfactorial_graphql_lambda_role" {
-  name = "mxfactorial-graphql-lambda-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "mxfactorial-graphql-lambda-${terraform.workspace}"
 
   assume_role_policy = <<EOF
 {
@@ -42,7 +42,7 @@ EOF
 
 # Policy for Lambda to create logs and dynamodb records
 resource "aws_iam_role_policy" "mxfactorial_graphql_lambda_policy" {
-  name = "mxfactorial-lambda-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "mxfactorial-lambda-${terraform.workspace}"
   role = "${aws_iam_role.mxfactorial_graphql_lambda_role.id}"
 
   policy = <<EOF
