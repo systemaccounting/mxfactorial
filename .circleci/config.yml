@@ -26,7 +26,7 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v7-dependencies-{{ checksum "package.json" }}
+          key: v007-dependencies-{{ checksum "package.json" }}
       - run: npm install
       - run: npm test
       - run: npm run ci:e2e-private
@@ -35,7 +35,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v7-dependencies-{{ checksum "package.json" }}
+          key: v007-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: build
           paths:
