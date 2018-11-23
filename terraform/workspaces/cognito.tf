@@ -1,5 +1,5 @@
 resource "aws_cognito_user_pool" "pool" {
-  name = "mxfactorial-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "mxfactorial-${terraform.workspace}"
 
   lambda_config {
     pre_sign_up = "${aws_lambda_function.cognito_account_auto_confirm.arn}"
@@ -262,7 +262,7 @@ resource "aws_cognito_user_pool" "pool" {
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-  name = "mxfactorial-client-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "mxfactorial-client-${terraform.workspace}"
 
   user_pool_id        = "${aws_cognito_user_pool.pool.id}"
   explicit_auth_flows = ["ADMIN_NO_SRP_AUTH", "USER_PASSWORD_AUTH"]
@@ -324,7 +324,7 @@ data "archive_file" "cognito_auto_approve_lambda_zip" {
 resource "aws_lambda_function" "cognito_account_auto_confirm" {
   filename         = "cognitoAutoApproveLambda.zip"
   source_code_hash = "${data.archive_file.cognito_auto_approve_lambda_zip.output_base64sha256}"
-  function_name    = "cognito-account-auto-confirm-${lookup(var.environment, "${terraform.workspace}")}"
+  function_name    = "cognito-account-auto-confirm-${terraform.workspace}"
   role             = "${aws_iam_role.cognito_account_auto_confirm_lambda_role.arn}"
   description      = "Auto confirms new Cognito accounts"
   handler          = "index.handler"
@@ -333,7 +333,7 @@ resource "aws_lambda_function" "cognito_account_auto_confirm" {
 
 ########## Create Cognito acount auto-approve Lambda function role and policy ##########
 resource "aws_iam_role" "cognito_account_auto_confirm_lambda_role" {
-  name = "cognito-account-auto-confirm-lambda-role-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "cognito-account-auto-confirm-lambda-role-${terraform.workspace}"
 
   assume_role_policy = <<EOF
 {
@@ -353,7 +353,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "cognito_account_auto_confirm_lambda_policy" {
-  name = "cognito-account-auto-confirm-lambda-policy-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "cognito-account-auto-confirm-lambda-policy-${terraform.workspace}"
   role = "${aws_iam_role.cognito_account_auto_confirm_lambda_role.id}"
 
   policy = <<EOF
@@ -399,7 +399,7 @@ data "archive_file" "delete_faker_account_lambda_zip" {
 resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
   filename         = "deleteFakerAccounts.zip"
   source_code_hash = "${data.archive_file.delete_faker_account_lambda_zip.output_base64sha256}"
-  function_name    = "delete-faker-cognito-accounts-lambda-${lookup(var.environment, "${terraform.workspace}")}"
+  function_name    = "delete-faker-cognito-accounts-lambda-${terraform.workspace}"
   role             = "${aws_iam_role.cognito_account_auto_confirm_lambda_role.arn}"
   description      = "Deletes Faker accounts created during e2e testing"
   handler          = "index.handler"
@@ -415,7 +415,7 @@ resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
 
 ########## Create delete Faker account Lambda function role and policy ##########
 resource "aws_iam_role" "delete_faker_cognito_accounts_lambda_role" {
-  name = "delete-faker-cognito-accounts-lambda-role-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "delete-faker-cognito-accounts-lambda-role-${terraform.workspace}"
 
   assume_role_policy = <<EOF
 {
@@ -435,7 +435,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "delete_faker_cognito_accounts_lambda_policy" {
-  name = "cognito_account-auto-confirm-lambda-policy-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "cognito_account-auto-confirm-lambda-policy-${terraform.workspace}"
   role = "${aws_iam_role.delete_faker_cognito_accounts_lambda_role.id}"
 
   policy = <<EOF
@@ -458,7 +458,7 @@ EOF
 
 ########## CloudWatch Event Rule to execute delete Faker account Lambda function daily ##########
 resource "aws_cloudwatch_event_rule" "delete_faker_accounts_rule" {
-  name                = "delete-faker-accounts-daily-${lookup(var.environment, "${terraform.workspace}")}"
+  name                = "delete-faker-accounts-daily-${terraform.workspace}"
   description         = "Delete Faker accounts created in Cognito from e2e tests"
   schedule_expression = "rate(1 day)"
 }
@@ -466,7 +466,7 @@ resource "aws_cloudwatch_event_rule" "delete_faker_accounts_rule" {
 ########## Bind daily CloudWatch Event to delete Faker account Lambda ##########
 resource "aws_cloudwatch_event_target" "delete_faker_lambda" {
   rule      = "${aws_cloudwatch_event_rule.delete_faker_accounts_rule.name}"
-  target_id = "send_to_delete_faker_lambda_${lookup(var.environment, "${terraform.workspace}")}"
+  target_id = "send_to_delete_faker_lambda_${terraform.workspace}"
   arn       = "${aws_lambda_function.delete_faker_cognito_accounts_lambda.arn}"
 }
 

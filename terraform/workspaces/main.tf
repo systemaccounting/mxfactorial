@@ -1,5 +1,5 @@
 # environments created using `terraform workspace new`
-# view "environments" interpolated from variables.tf
+# environments listed in variables.tf
 
 terraform {
   required_version = ">= 0.11.8"
