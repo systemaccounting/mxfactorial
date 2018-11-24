@@ -23,27 +23,17 @@ class HistoryScreen extends Component {
   get historyList() {
     const { user } = this.props
     const { history } = this.state
-    console.log(user)
     if (!history.length) {
       return null
     }
     return history.map(historyItem => {
-      const {
-        timeuuid,
-        creditor,
-        creditor_approval_time,
-        debitor,
-        price,
-        quantity
-      } = historyItem
+      const { timeuuid, creditor } = historyItem
       const isCredit = creditor === user.username
-      const amount = (price * quantity).toLocaleString()
       return (
         <TransactionSummary
           key={timeuuid}
-          createdAt={creditor_approval_time}
-          partner={isCredit ? debitor : creditor}
-          amount={isCredit ? `- ${amount}` : amount}
+          transaction={historyItem}
+          isCredit={isCredit}
         />
       )
     })
@@ -60,9 +50,7 @@ class HistoryScreen extends Component {
         >
           History
         </Text>
-        <div className={s.content}>
-          {this.historyList}
-        </div>
+        <div className={s.content}>{this.historyList}</div>
       </MainLayout>
     )
   }

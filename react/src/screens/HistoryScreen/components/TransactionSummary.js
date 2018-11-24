@@ -4,24 +4,34 @@ import Paper from 'components/Paper'
 import { Text, Small } from 'components/Typography'
 import { fromNow } from 'utils/date'
 
-function TransactionSummary({ createdAt, partner, amount }) {
+function TransactionSummary({ transaction, isCredit }) {
+  const {
+    creditor_approval_time,
+    debitor,
+    creditor,
+    price,
+    quantity
+  } = transaction
+  const partner = isCredit ? debitor : creditor
+  const total = price * quantity
+  const amount = isCredit ? `- ${total}` : total
   return (
     <Paper>
       <Small>
-        {fromNow(createdAt)}, {partner}
+        {fromNow(creditor_approval_time)}, {partner}
       </Small>
       <Text textAlign="right" variant="medium">
-        <strong>
-          {amount}
-        </strong>
+        <strong>{amount}</strong>
       </Text>
     </Paper>
   )
 }
 
 TransactionSummary.propTypes = {
-  createdAt: T.string.isRequired,
-  partner: T.string.isRequired
+  transaction: T.shape({
+    timeuuid: T.string.isRequired
+  }).isRequired,
+  isCredit: T.bool.isRequired
 }
 
 export default TransactionSummary
