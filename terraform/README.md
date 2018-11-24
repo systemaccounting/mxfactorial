@@ -1,4 +1,4 @@
-# Build a new environment
+# build a new environment
 1. `cd terraform/global`
 1. add, for example, `stg` to `environments` list in `terraform/global/variables.tf`
 1. `terraform init` which retrieves state for a single-workspace conifguration
