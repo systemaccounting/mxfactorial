@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 import MainLayout from 'components/MainLayout'
 import { Text } from 'components/Typography'
 
@@ -16,8 +17,11 @@ class HistoryScreen extends Component {
   }
 
   handleFetchHistory = async () => {
-    const history = await this.props.fetchHistory()
-    this.setState({ history })
+    const { fetchHistory } = this.props
+    if (fetchHistory) {
+      const history = await fetchHistory()
+      this.setState({ history })
+    }
   }
 
   get historyList() {
@@ -30,11 +34,9 @@ class HistoryScreen extends Component {
       const { timeuuid, creditor } = historyItem
       const isCredit = creditor === user.username
       return (
-        <TransactionSummary
-          key={timeuuid}
-          transaction={historyItem}
-          isCredit={isCredit}
-        />
+        <Link key={timeuuid} to={`/history/${timeuuid}`}>
+          <TransactionSummary transaction={historyItem} isCredit={isCredit} />
+        </Link>
       )
     })
   }

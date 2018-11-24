@@ -28,7 +28,7 @@ describe('<HistoryScreen />', () => {
   it('loads history', async () => {
     const wrapper = shallow(<HistoryScreen fetchHistory={fetchHistoryMock} />)
     const instance = wrapper.instance()
-    await instance.handleFetchHistory()
+    await instance.componentDidMount()
     expect(wrapper.state('history')).toEqual(mockRequests)
   })
 })
