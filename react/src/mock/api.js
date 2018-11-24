@@ -34,3 +34,6 @@ export const fetchRequest = uuid =>
       R.head
     )(requests)
   )
+
+export const fetchHistoryItem = timeuuid =>
+  Promise.resolve(R.find(R.propEq({ timeuuid }))(history))

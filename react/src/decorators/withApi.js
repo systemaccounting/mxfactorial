@@ -7,6 +7,7 @@ import {
   fetchRequests,
   fetchRequest,
   fetchHistory,
+  fetchHistoryItem,
   approveRequest
 } from 'mock/api'
 
@@ -35,5 +36,6 @@ export default withApi({
   fetchRequests,
   fetchRequest,
   fetchHistory,
+  fetchHistoryItem,
   approveRequest
 })
