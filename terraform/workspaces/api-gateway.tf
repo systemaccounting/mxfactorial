@@ -1,5 +1,5 @@
 resource "aws_api_gateway_rest_api" "mxfactorial_api" {
-  name        = "mxfactorial-api-${lookup(var.environment, "${terraform.workspace}")}"
+  name        = "mxfactorial-api-${terraform.workspace}"
   description = "GraphQL Endpoint"
 }
 
@@ -50,7 +50,7 @@ resource "aws_api_gateway_deployment" "environment" {
   ]
 
   rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
-  stage_name  = "${lookup(var.environment, "${terraform.workspace}")}"
+  stage_name  = "${terraform.workspace}"
 }
 
 resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
@@ -69,7 +69,7 @@ resource "aws_api_gateway_account" "mxfactorial_api_account" {
 }
 
 resource "aws_iam_role" "cloudwatch" {
-  name = "mxfactorial-cloudwatch-role-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "mxfactorial-cloudwatch-role-${terraform.workspace}"
 
   assume_role_policy = <<EOF
 {
@@ -89,7 +89,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "cloudwatch" {
-  name = "mxfactorial-cloudwatch-policy-${lookup(var.environment, "${terraform.workspace}")}"
+  name = "mxfactorial-cloudwatch-policy-${terraform.workspace}"
   role = "${aws_iam_role.cloudwatch.id}"
 
   policy = <<EOF
@@ -112,4 +112,16 @@ resource "aws_iam_role_policy" "cloudwatch" {
     ]
 }
 EOF
+}
+
+resource "aws_api_gateway_domain_name" "mxfactorial" {
+  domain_name = "${"${terraform.workspace}" == "prod" ?  "api.mxfactorial.io" : "${terraform.workspace}-api.mxfactorial.io"}"
+
+  certificate_arn = "${lookup("${null_resource.api_cert_arns.triggers}", "${terraform.workspace}")}"
+}
+
+resource "aws_api_gateway_base_path_mapping" "mxfactorial" {
+  api_id      = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  stage_name  = "${aws_api_gateway_deployment.environment.stage_name}"
+  domain_name = "${aws_api_gateway_domain_name.mxfactorial.domain_name}"
 }

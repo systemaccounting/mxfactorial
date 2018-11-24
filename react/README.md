@@ -5,7 +5,7 @@
 
 Web client for [mxfactorial platform](https://github.com/systemaccounting/mxfactorial). Since mxfactorial is primarily a set of static and streaming endpoints, the public is welcome to develop their own clients and integrations.
 
-[![Build Status](https://travis-ci.org/systemaccounting/mxfactorial-web.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial-web) [![Coverage Status](https://coveralls.io/repos/github/systemaccounting/mxfactorial-web/badge.svg?branch=master&service=github)](https://coveralls.io/github/systemaccounting/mxfactorial-web?branch=master)
+[![Build Status](https://travis-ci.org/systemaccounting/mxfactorial.svg?branch=master)](https://travis-ci.org/systemaccounting/mxfactorial) [![Coverage Status](https://coveralls.io/repos/github/systemaccounting/mxfactorial/badge.svg?branch=master&service=github)](https://coveralls.io/github/systemaccounting/mxfactorial?branch=master)
 
 Production environment: [mxfactorial.io](https://mxfactorial.io/)  
 GitHub repository: https://github.com/systemaccounting/mxfactorial  
