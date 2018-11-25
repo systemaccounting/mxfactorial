@@ -16,7 +16,7 @@ function TransactionSummary({ transaction, isCredit }) {
   const total = price * quantity
   const amount = isCredit ? `- ${total}` : total
   return (
-    <Paper>
+    <Paper data-id="historyItemIndicator">
       <Small>
         {fromNow(creditor_approval_time)}, {partner}
       </Small>
