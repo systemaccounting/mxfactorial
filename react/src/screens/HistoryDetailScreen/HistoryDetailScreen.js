@@ -139,7 +139,7 @@ class HistoryDetailScreen extends Component {
             textAlign="right"
             variant="medium"
             fontWeight="bold"
-            data-id="preTransactionBalanceIndicator"
+            data-id="postTransactionBalanceIndicator"
           >
             976,00
           </Text>
