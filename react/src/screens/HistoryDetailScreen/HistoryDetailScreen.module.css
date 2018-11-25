@@ -3,3 +3,20 @@
     margin-top: 45px;
     margin-bottom: 48px;
 }
+
+.items {
+    margin-top: 20px;
+    margin-bottom: 35px;
+}
+
+.label {
+    color: #333;
+    font-weight: 700;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+.actions {
+    margin-top: 20px;
+    margin-bottom: 16px;
+}

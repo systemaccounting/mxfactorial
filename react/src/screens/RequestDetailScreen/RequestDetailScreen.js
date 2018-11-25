@@ -173,10 +173,7 @@ class RequestDetailScreen extends React.Component {
   }
 
   render() {
-    const {
-      isApproveModalOpen,
-      isApprovalSuccessFul
-    } = this.state
+    const { isApproveModalOpen, isApprovalSuccessFul } = this.state
 
     const { approveRequest } = this.props
     return (
