@@ -10,3 +10,12 @@ export const fromNow = date => {
 export const dateString = (date, format) => {
   return date ? dayjs(date).format(format) : null
 }
+
+export const maxDate = dates => {
+  return dates.reduce((prevValue, currentValue) => {
+    if (dayjs(currentValue).isAfter(dayjs(prevValue))) {
+      return currentValue
+    }
+    return prevValue
+  })
+}

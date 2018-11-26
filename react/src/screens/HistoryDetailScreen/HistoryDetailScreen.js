@@ -3,7 +3,7 @@ import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
-import { fromNow } from 'utils/date'
+import { fromNow, maxDate } from 'utils/date'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 
 import s from './HistoryDetailScreen.module.css'
@@ -47,9 +47,9 @@ class HistoryDetailScreen extends Component {
 
   get transactionTime() {
     const {
-      transaction: { creditor_approval_time, debitor_approval_time }
+      transaction: { cr_time, db_time }
     } = this.state
-    return fromNow(creditor_approval_time || debitor_approval_time)
+    return fromNow(maxDate([cr_time, db_time]))
   }
 
   get items() {

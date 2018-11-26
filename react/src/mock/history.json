@@ -21,8 +21,8 @@
     "debit_approver": "JoeSmith",
     "credit_approver": "Mary",
     "author": "Mary",
-    "expiration_time": "2018-06-26T21:32:52",
-    "rejection_time": ""
+    "cr_time": "2018-06-26T21:32:52",
+    "db_time": "2018-08-26T21:32:52"
   },
   {
     "timeuuid": "5678",
@@ -46,8 +46,8 @@
     "debit_approver": "JoeSmith",
     "credit_approver": "Mary",
     "author": "Mary",
-    "expiration_time": "2018-07-26T21:32:52",
-    "rejection_time": "2018-08-26T21:32:52"
+    "cr_time": "2018-07-26T21:32:52",
+    "db_time": "2018-08-26T21:32:52"
   },
   {
     "timeuuid": "9101",
@@ -71,8 +71,8 @@
     "debit_approver": "JoeSmith",
     "credit_approver": "Mary",
     "author": "Mary",
-    "expiration_time": "2018-08-26T21:32:52",
-    "rejection_time": ""
+    "cr_time": "2018-08-26T21:32:52",
+    "db_time": "2018-08-26T21:32:52"
   },
   {
     "timeuuid": "1121",
@@ -96,7 +96,7 @@
     "debit_approver": "JoeSmith",
     "credit_approver": "Mary",
     "author": "Mary",
-    "expiration_time": "2018-06-26T21:32:52",
-    "rejection_time": "2018-05-26T21:32:52"
+    "cr_time": "2018-06-26T21:32:52",
+    "db_time": "2018-05-26T21:32:52"
   }
 ]

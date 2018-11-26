@@ -1,5 +1,6 @@
 import React from 'react'
 import { shallow } from 'enzyme'
+import { fromNow, maxDate } from 'utils/date'
 import TransactionSummary from '../components/TransactionSummary'
 
 const transaction = {
@@ -10,8 +11,8 @@ const transaction = {
   price: '3000.00',
   quantity: '2.00',
   transaction_id: '12345',
-  expiration_time: '2018-10-26T21:32:52',
-  rejection_time: ''
+  cr_time: '2018-10-26T21:32:52',
+  db_time: '2018-08-26T21:32:52'
 }
 
 const selectors = {
@@ -39,7 +40,9 @@ describe('<TransactionSummary />', () => {
   it('contains transaction time', () => {
     const wrapper = shallow(<TransactionSummary {...props} />)
     const timeEl = wrapper.find(selectors.transactionTime)
+    const transactionTime = maxDate([transaction.cr_time, transaction.db_time])
     expect(timeEl.exists()).toBeTruthy()
+    expect(timeEl.text()).toEqual(fromNow(transactionTime))
   })
 
   it('contains transaction partner', () => {
