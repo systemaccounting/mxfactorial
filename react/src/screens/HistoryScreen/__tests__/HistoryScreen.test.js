@@ -17,18 +17,33 @@ const mockRequests = [
   }
 ]
 
-const fetchHistoryMock = promiseToResolve(mockRequests)
+const fetchHistory = promiseToResolve(mockRequests)
+const fetchBalance = promiseToResolve(1000)
+const user = { username: 'some user' }
+
+const props = {
+  fetchBalance,
+  fetchHistory,
+  user
+}
 
 describe('<HistoryScreen />', () => {
   it('renders', () => {
-    const wrapper = shallow(<HistoryScreen />)
+    const wrapper = shallow(<HistoryScreen {...props} />)
     expect(wrapper.exists()).toBeTruthy()
   })
 
   it('loads history', async () => {
-    const wrapper = shallow(<HistoryScreen fetchHistory={fetchHistoryMock} />)
+    const wrapper = shallow(<HistoryScreen {...props} />)
     const instance = wrapper.instance()
     await instance.componentDidMount()
     expect(wrapper.state('history')).toEqual(mockRequests)
+  })
+
+  it('loads balance', async () => {
+    const wrapper = shallow(<HistoryScreen {...props} />)
+    const instance = wrapper.instance()
+    await instance.componentDidMount()
+    expect(wrapper.state('balance')).toEqual(1000)
   })
 })

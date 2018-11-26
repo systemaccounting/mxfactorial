@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import MainLayout from 'components/MainLayout'
-import { Text } from 'components/Typography'
+import Paper from 'components/Paper'
+import { Text, P } from 'components/Typography'
 
 import TransactionSummary from './components/TransactionSummary'
 
@@ -9,11 +10,13 @@ import s from './HistoryScreen.module.css'
 
 class HistoryScreen extends Component {
   state = {
-    history: []
+    history: [],
+    balance: 0
   }
 
   componentDidMount() {
     this.handleFetchHistory()
+    this.handleFetchBalance()
   }
 
   handleFetchHistory = async () => {
@@ -22,6 +25,36 @@ class HistoryScreen extends Component {
       const history = await fetchHistory()
       this.setState({ history })
     }
+  }
+
+  handleFetchBalance = async () => {
+    const { fetchBalance } = this.props
+    if (fetchBalance) {
+      const balance = await fetchBalance()
+      this.setState({ balance })
+    }
+  }
+
+  get accountBalance() {
+    const { user } = this.props
+    return (
+      <div className={s.accountBalance}>
+        <Paper>
+          <P fontWeight="bold" textAlign="center">
+            {`${user.username} balance`}
+          </P>
+          <Text
+            variant="large"
+            textAlign="center"
+            fontWeight="bold"
+            style={{ marginTop: 4 }}
+            data-id="currentAccountBalanceIndicator"
+          >
+            {this.state.balance.toLocaleString()}
+          </Text>
+        </Paper>
+      </div>
+    )
   }
 
   get historyList() {
@@ -52,7 +85,10 @@ class HistoryScreen extends Component {
         >
           History
         </Text>
-        <div className={s.content}>{this.historyList}</div>
+        <div className={s.content}>
+          {this.accountBalance}
+          {this.historyList}
+        </div>
       </MainLayout>
     )
   }
