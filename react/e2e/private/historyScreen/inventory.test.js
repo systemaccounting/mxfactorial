@@ -31,6 +31,6 @@ describe('historyScreen inventory', () => {
       selectors.currentAccountBalanceIndicator,
       list => list.length
     )
-    expect(preTransactionBalanceIndicator).toEqual(1)
+    expect(currentAccountBalanceIndicator).toEqual(1)
   })
 })
