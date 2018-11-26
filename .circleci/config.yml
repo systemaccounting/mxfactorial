@@ -74,7 +74,9 @@ jobs:
           command: aws configure set preview.cloudfront true
       - run:
           name: Terminate cache for dev distribution
-          command: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID_DEV --paths "/*"
+          command: |
+            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID_DEV \
+            --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
   react-build-test-prod:
     executor: react-executor
     steps:
@@ -144,10 +146,14 @@ jobs:
           command: aws configure set preview.cloudfront true
       - run:
           name: Terminate cache for distribution WITHOUT www prefix
-          command: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+          command: |
+            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
+            --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
       - run:
           name: Terminate cache for distribution WITH www prefix
-          command: aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_WWW_DISTRIBUTION_ID --paths "/*"
+          command: |
+            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_WWW_DISTRIBUTION_ID \
+            --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
   test-graphql-faas:
     docker:
       - image: circleci/node:8.9.1-stretch-browsers
