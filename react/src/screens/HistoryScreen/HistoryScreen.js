@@ -38,7 +38,10 @@ class HistoryScreen extends Component {
   get accountBalance() {
     const { user } = this.props
     return (
-      <div className={s.accountBalance}>
+      <div
+        className={s.accountBalance}
+        data-id="currentAccountBalanceIndicator"
+      >
         <Paper>
           <P fontWeight="bold" textAlign="center">
             {`${user.username} balance`}
@@ -48,7 +51,6 @@ class HistoryScreen extends Component {
             textAlign="center"
             fontWeight="bold"
             style={{ marginTop: 4 }}
-            data-id="currentAccountBalanceIndicator"
           >
             {this.state.balance.toLocaleString()}
           </Text>

@@ -18,10 +18,11 @@ function TransactionSummary({ transaction, isCredit }) {
   return (
     <Paper data-id="historyItemIndicator">
       <Small>
-        {fromNow(creditor_approval_time)}, {partner}
+        <span data-id="transactionTime">{fromNow(creditor_approval_time)}</span>
+        , <span data-id="transactionPartner">{partner}</span>
       </Small>
       <Text textAlign="right" variant="medium">
-        <strong>{amount}</strong>
+        <strong data-id="transactionAmount">{amount}</strong>
       </Text>
     </Paper>
   )
@@ -31,7 +32,11 @@ TransactionSummary.propTypes = {
   transaction: T.shape({
     timeuuid: T.string.isRequired
   }).isRequired,
-  isCredit: T.bool.isRequired
+  isCredit: T.bool
+}
+
+TransactionSummary.defaultProps = {
+  isCredit: false
 }
 
 export default TransactionSummary
