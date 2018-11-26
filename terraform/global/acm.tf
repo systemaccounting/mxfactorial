@@ -44,7 +44,7 @@ resource "aws_acm_certificate" "client_cert" {
   validation_method = "DNS"
 
   tags {
-    environment = "${var.environments[count.index]}"
+    environment = "${element(var.environments, count.index)}"
   }
 
   lifecycle {
@@ -54,12 +54,12 @@ resource "aws_acm_certificate" "client_cert" {
 
 resource "aws_route53_record" "client_cert_validation" {
   count   = "${length(var.environments)}"
-  name    = "${aws_acm_certificate.client_cert.*.domain_validation_options.0.resource_record_name[count.index]}"
-  type    = "${aws_acm_certificate.client_cert.*.domain_validation_options.0.resource_record_type[count.index]}"
+  name    = "${element(aws_acm_certificate.client_cert.*.domain_validation_options.0.resource_record_name, count.index)}"
+  type    = "${element(aws_acm_certificate.client_cert.*.domain_validation_options.0.resource_record_type, count.index)}"
   zone_id = "${data.aws_route53_zone.mxfactorial_io.zone_id}"
 
   records = [
-    "${aws_acm_certificate.client_cert.*.domain_validation_options.0.resource_record_value[count.index]}",
+    "${element(aws_acm_certificate.client_cert.*.domain_validation_options.0.resource_record_value, count.index)}",
   ]
 
   ttl = 300
@@ -67,10 +67,10 @@ resource "aws_route53_record" "client_cert_validation" {
 
 resource "aws_acm_certificate_validation" "client_cert" {
   count           = "${length(var.environments)}"
-  certificate_arn = "${aws_acm_certificate.client_cert.*.arn[count.index]}"
+  certificate_arn = "${element(aws_acm_certificate.client_cert.*.arn, count.index)}"
 
   validation_record_fqdns = [
-    "${aws_route53_record.client_cert_validation.*.fqdn[count.index]}",
+    "${element(aws_route53_record.client_cert_validation.*.fqdn, count.index)}",
   ]
 }
 
@@ -78,11 +78,11 @@ resource "aws_acm_certificate_validation" "client_cert" {
 resource "aws_acm_certificate" "api_cert" {
   count = "${length(var.environments)}"
 
-  domain_name       = "${var.environments[count.index] == "prod" ?  "api.mxfactorial.io" : "${var.environments[count.index]}-api.mxfactorial.io"}"
+  domain_name       = "${element(var.environments, count.index) == "prod" ?  "api.mxfactorial.io" : "${element(var.environments, count.index)}-api.mxfactorial.io"}"
   validation_method = "DNS"
 
   tags {
-    environment = "${var.environments[count.index]}"
+    environment = "${element(var.environments, count.index)}"
   }
 
   lifecycle {
@@ -92,12 +92,12 @@ resource "aws_acm_certificate" "api_cert" {
 
 resource "aws_route53_record" "api_cert_validation" {
   count   = "${length(var.environments)}"
-  name    = "${aws_acm_certificate.api_cert.*.domain_validation_options.0.resource_record_name[count.index]}"
-  type    = "${aws_acm_certificate.api_cert.*.domain_validation_options.0.resource_record_type[count.index]}"
+  name    = "${element(aws_acm_certificate.api_cert.*.domain_validation_options.0.resource_record_name, count.index)}"
+  type    = "${element(aws_acm_certificate.api_cert.*.domain_validation_options.0.resource_record_type, count.index)}"
   zone_id = "${data.aws_route53_zone.mxfactorial_io.zone_id}"
 
   records = [
-    "${aws_acm_certificate.api_cert.*.domain_validation_options.0.resource_record_value[count.index]}",
+    "${element(aws_acm_certificate.api_cert.*.domain_validation_options.0.resource_record_value, count.index)}",
   ]
 
   ttl = 300
@@ -105,9 +105,9 @@ resource "aws_route53_record" "api_cert_validation" {
 
 resource "aws_acm_certificate_validation" "api_cert" {
   count           = "${length(var.environments)}"
-  certificate_arn = "${aws_acm_certificate.api_cert.*.arn[count.index]}"
+  certificate_arn = "${element(aws_acm_certificate.api_cert.*.arn, count.index)}"
 
   validation_record_fqdns = [
-    "${aws_route53_record.api_cert_validation.*.fqdn[count.index]}",
+    "${element(aws_route53_record.api_cert_validation.*.fqdn, count.index)}",
   ]
 }
