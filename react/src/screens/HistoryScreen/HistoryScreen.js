@@ -79,17 +79,19 @@ class HistoryScreen extends Component {
   render() {
     return (
       <MainLayout>
-        <Text
-          variant="medium"
-          fontWeight="bold"
-          textAlign="center"
-          style={{ color: '#efefef' }}
-        >
-          History
-        </Text>
-        <div className={s.content}>
-          {this.accountBalance}
-          {this.historyList}
+        <div data-id="historyScreen">
+          <Text
+            variant="medium"
+            fontWeight="bold"
+            textAlign="center"
+            style={{ color: '#efefef' }}
+          >
+            History
+          </Text>
+          <div className={s.content}>
+            {this.accountBalance}
+            {this.historyList}
+          </div>
         </div>
       </MainLayout>
     )
