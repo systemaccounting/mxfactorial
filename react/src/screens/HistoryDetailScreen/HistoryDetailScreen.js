@@ -4,6 +4,7 @@ import Paper from 'components/Paper'
 import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
 import { fromNow, maxDate } from 'utils/date'
+import { formatCurrency } from 'utils/currency'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 
 import s from './HistoryDetailScreen.module.css'
@@ -41,8 +42,8 @@ class HistoryDetailScreen extends Component {
   get total() {
     const { transaction, isCredit } = this.state
     const total = transaction.price * transaction.quantity
-    const localized = total.toLocaleString()
-    return isCredit ? `- ${localized}` : localized
+    const value = isCredit ? total * -1 : total
+    return formatCurrency(value)
   }
 
   get transactionTime() {
@@ -58,7 +59,7 @@ class HistoryDetailScreen extends Component {
       <div className={s.items}>
         <Paper data-id="transactionItemIndicator">
           <P textAlign="center" fontWeight="bold" variant="medium">
-            {parseInt(transaction.quantity, 10)} x {transaction.price}
+            {parseInt(transaction.quantity, 10)} x {formatCurrency(transaction.price)}
           </P>
           <P textAlign="center" fontWeight="bold" variant="medium">
             {transaction.name}
@@ -130,7 +131,7 @@ class HistoryDetailScreen extends Component {
             fontWeight="bold"
             data-id="preTransactionBalanceIndicator"
           >
-            1 000,00
+            {formatCurrency(1000)}
           </Text>
         </Paper>
         <p className={s.label}>Post-transaction balance</p>
@@ -141,7 +142,7 @@ class HistoryDetailScreen extends Component {
             fontWeight="bold"
             data-id="postTransactionBalanceIndicator"
           >
-            976,00
+            {formatCurrency(976)}
           </Text>
         </Paper>
         {this.actions}

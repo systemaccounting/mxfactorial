@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import { Text, P } from 'components/Typography'
+import { formatCurrency } from 'utils/currency'
 
 import TransactionSummary from './components/TransactionSummary'
 
@@ -52,7 +53,7 @@ class HistoryScreen extends Component {
             fontWeight="bold"
             style={{ marginTop: 4 }}
           >
-            {this.state.balance.toLocaleString()}
+            {formatCurrency(this.state.balance)}
           </Text>
         </Paper>
       </div>

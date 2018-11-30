@@ -22,6 +22,9 @@ const selectors = {
 let browser
 let page
 
+// prior art: https://stackoverflow.com/questions/354044/what-is-the-best-u-s-currency-regex
+const balanceRegex = /^\$?-?\s?([1-9]{1}[0-9]{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^-?\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^\(\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))\)$/
+
 beforeAll(async () => {
   browser = await puppeteer.launch({
     args: ['--no-sandbox']
@@ -126,5 +129,23 @@ describe('historyDetailScreen inventory', () => {
       list => list.length
     )
     expect(disputeTransactionButton).toEqual(1)
+  })
+
+  it('preTransactionBalanceIndicator displays commas and decimals', async () => {
+    const element = await page.$(selectors.preTransactionBalanceIndicator)
+    const preTransactionBalance = await page.evaluate(
+      element => element.textContent,
+      element
+    )
+    expect(preTransactionBalance).toMatch(balanceRegex)
+  })
+
+  it('postTransactionBalanceIndicator displays commas and decimals', async () => {
+    const element = await page.$(selectors.postTransactionBalanceIndicator)
+    const postTransactionBalance = await page.evaluate(
+      element => element.textContent,
+      element
+    )
+    expect(postTransactionBalance).toMatch(balanceRegex)
   })
 })

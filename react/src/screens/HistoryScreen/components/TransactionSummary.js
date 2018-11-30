@@ -3,13 +3,14 @@ import T from 'prop-types'
 import Paper from 'components/Paper'
 import { Text, Small } from 'components/Typography'
 import { fromNow, maxDate } from 'utils/date'
+import { formatCurrency } from 'utils/currency'
 
 function TransactionSummary({ transaction, isCredit }) {
   const { cr_time, db_time, debitor, creditor, price, quantity } = transaction
   const partner = isCredit ? debitor : creditor
   const transactionTime = maxDate([cr_time, db_time])
   const total = price * quantity
-  const amount = isCredit ? `- ${total}` : total
+  const amount = isCredit ? total * -1 : total
   return (
     <Paper data-id="historyItemIndicator">
       <Small>
@@ -17,7 +18,7 @@ function TransactionSummary({ transaction, isCredit }) {
         <span data-id="transactionPartner">{partner}</span>
       </Small>
       <Text textAlign="right" variant="medium">
-        <strong data-id="transactionAmount">{amount}</strong>
+        <strong data-id="transactionAmount">{formatCurrency(amount)}</strong>
       </Text>
     </Paper>
   )
