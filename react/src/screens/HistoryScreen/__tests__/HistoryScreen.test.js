@@ -2,6 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import HistoryScreen from '../HistoryScreen'
 import { promiseToResolve } from 'utils/testing'
+import { awaitExpression } from '@babel/types'
 
 const mockRequests = [
   {
@@ -35,14 +36,16 @@ describe('<HistoryScreen />', () => {
 
   it('loads history', async () => {
     const wrapper = shallow(<HistoryScreen {...props} />)
-    const instance = wrapper.instance()
+    await wrapper.update()
+    const instance = await wrapper.instance()
     await instance.componentDidMount()
     expect(wrapper.state('history')).toEqual(mockRequests)
   })
 
   it('loads balance', async () => {
     const wrapper = shallow(<HistoryScreen {...props} />)
-    const instance = wrapper.instance()
+    await wrapper.update()
+    const instance = await wrapper.instance()
     await instance.componentDidMount()
     expect(wrapper.state('balance')).toEqual(1000)
   })

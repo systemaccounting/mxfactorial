@@ -20,7 +20,8 @@ describe('<HistoryDetailScreen />', () => {
     const wrapper = shallow(
       <HistoryDetailScreen fetchHistoryItem={fetchRequestMock} {...props} />
     )
-    const instance = wrapper.instance()
+    await wrapper.update()
+    const instance = await wrapper.instance()
     await instance.componentDidMount()
     expect(wrapper.state('transaction')).toEqual(requestMock)
   })

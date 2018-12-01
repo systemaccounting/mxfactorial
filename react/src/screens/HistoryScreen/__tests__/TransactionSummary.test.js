@@ -2,6 +2,7 @@ import React from 'react'
 import { shallow } from 'enzyme'
 import { fromNow, maxDate } from 'utils/date'
 import TransactionSummary from '../components/TransactionSummary'
+import { formatCurrency } from 'utils/currency'
 
 const transaction = {
   timeuuid: '1234',
@@ -54,14 +55,16 @@ describe('<TransactionSummary />', () => {
   it('displays negative direction of transaction', () => {
     const wrapper = shallow(<TransactionSummary {...props} isCredit />)
     const amountEl = wrapper.find(selectors.transactionAmount)
-    const expectedValue = `- ${transaction.quantity * transaction.price}`
+    const total = transaction.quantity * transaction.price
+    const expectedValue = `- ${formatCurrency(total)}`
     expect(amountEl.text()).toEqual(expectedValue)
   })
 
   it('displays positive direction of transaction', () => {
     const wrapper = shallow(<TransactionSummary {...props} isCredit={false} />)
     const amountEl = wrapper.find(selectors.transactionAmount)
-    const expectedValue = `${transaction.quantity * transaction.price}`
+    const total = transaction.quantity * transaction.price
+    const expectedValue = `${formatCurrency(total)}`
     expect(amountEl.text()).toEqual(expectedValue)
   })
 })
