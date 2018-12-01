@@ -2,7 +2,7 @@ version: 2.1
 executors:
   react-executor:
     docker:
-      - image: circleci/node:8.9.1-stretch-browsers
+      - image: circleci/node:11.3.0-browsers
     working_directory: ~/repo/react
 jobs:
   react-build-test-dev:
@@ -156,7 +156,7 @@ jobs:
             --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
   test-graphql-faas:
     docker:
-      - image: circleci/node:8.9.1-stretch-browsers
+      - image: circleci/node:11.3.0-browsers
     working_directory: ~/repo/graphql-faas
     steps:
       - checkout:
