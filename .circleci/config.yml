@@ -27,10 +27,10 @@ jobs:
           paths:
             - node_modules
           key: v008-dependencies-{{ checksum "package.json" }}
-      - run: npm install
-      - run: npm test
-      - run: npm run ci:e2e-private
-      - run: npm run ci:e2e-public
+      - run: yarn install
+      - run: yarn test
+      - run: yarn run ci:e2e-private
+      - run: yarn run ci:e2e-public
       - run:
           name: Build web client for dev environment
           command: NODE_PATH=./src REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV node node_modules/react-scripts/scripts/build.js
@@ -99,13 +99,13 @@ jobs:
           paths:
             - node_modules
           key: v008-dependencies-{{ checksum "package.json" }}
-      - run: npm install
-      - run: npm test
-      - run: npm run ci:e2e-private
-      - run: npm run ci:e2e-public
+      - run: yarn install
+      - run: yarn test
+      - run: yarn run ci:e2e-private
+      - run: yarn run ci:e2e-public
       - run:
           name: Build web client for prod environment
-          command: npm run build
+          command: yarn run build
       - save_cache:
           paths:
             - node_modules
@@ -190,8 +190,8 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - run: npm install
-      - run: npm run deploy:dev
+      - run: yarn install
+      - run: yarn run deploy:dev
 
 workflows:
   version: 2.1
