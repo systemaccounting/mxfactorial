@@ -34,7 +34,7 @@
     "test:e2e-public": "jest --detectOpenHandles --forceExit --runInBand e2e/public",
     "ci:e2e-public": "start-server-and-test start http://localhost:3000 test:e2e-public",
     "ci:e2e-private": "start-server-and-test start http://localhost:3000 test:e2e-private",
-    "ci:e2e": "npm run ci:e2e-public && npm run ci:e2e-private",
+    "ci:e2e": "yarn run ci:e2e-public && yarn run ci:e2e-private",
     "eject": "react-scripts eject",
     "lint": "eslint ./src/**/*.{js,jsx}",
     "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
