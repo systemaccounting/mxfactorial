@@ -7,8 +7,8 @@
     "zip": "zip -r lambda.zip index.js src node_modules package.json package-lock.json .gitignore",
     "update:faas:prod": "aws lambda update-function-code --function-name mxfactorial-graphql-server-prod --zip-file fileb://$(pwd)/lambda.zip",
     "update:faas:dev": "aws lambda update-function-code --function-name mxfactorial-graphql-server-dev --zip-file fileb://$(pwd)/lambda.zip --region us-east-2",
-    "deploy:prod": "npm run zip && npm run update:faas:prod",
-    "deploy:dev": "npm run zip && npm run update:faas:dev",
+    "deploy:prod": "yarn run zip && yarn run update:faas:prod",
+    "deploy:dev": "yarn run zip && yarn run update:faas:dev",
     "cp:lambda": "echo \"copying over to terraform\" && cp lambda.zip ../terraform/workspaces/lambda.zip",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
