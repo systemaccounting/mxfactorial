@@ -22,7 +22,7 @@ const NavItem = styled.div`
 const TopNavigation = () => (
   <Wrapper>
     <NavItem>
-      <Link to="/account">
+      <Link to="/account" data-id="homeButton">
         <i className="fa fa-2x fa-home" />
       </Link>
     </NavItem>

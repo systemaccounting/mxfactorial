@@ -58,8 +58,8 @@ class RequestDetailScreen extends React.Component {
     }
 
     const total = request.price * request.quantity
-    const localized = total.toLocaleString();
-    return isCredit ? `- ${localized}` : localized;
+    const localized = total.toLocaleString()
+    return isCredit ? `- ${localized}` : localized
   }
 
   get transactionBalance() {
@@ -173,10 +173,7 @@ class RequestDetailScreen extends React.Component {
   }
 
   render() {
-    const {
-      isApproveModalOpen,
-      isApprovalSuccessFul
-    } = this.state
+    const { isApproveModalOpen, isApprovalSuccessFul } = this.state
 
     const { approveRequest } = this.props
     return (

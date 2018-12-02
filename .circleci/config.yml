@@ -2,7 +2,7 @@ version: 2.1
 executors:
   react-executor:
     docker:
-      - image: circleci/node:8.9.1-stretch-browsers
+      - image: circleci/node:11.3.0-browsers
     working_directory: ~/repo/react
 jobs:
   react-build-test-dev:
@@ -26,18 +26,18 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v008-dependencies-{{ checksum "package.json" }}
-      - run: npm install
-      - run: npm test
-      - run: npm run ci:e2e-private
-      - run: npm run ci:e2e-public
+          key: v015-dependencies-{{ checksum "package.json" }}
+      - run: yarn install
+      - run: yarn test
+      - run: yarn run ci:e2e-private
+      - run: yarn run ci:e2e-public
       - run:
           name: Build web client for dev environment
           command: NODE_PATH=./src REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV node node_modules/react-scripts/scripts/build.js
       - save_cache:
           paths:
             - node_modules
-          key: v008-dependencies-{{ checksum "package.json" }}
+          key: v015-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: build
           paths:
@@ -98,18 +98,18 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v008-dependencies-{{ checksum "package.json" }}
-      - run: npm install
-      - run: npm test
-      - run: npm run ci:e2e-private
-      - run: npm run ci:e2e-public
+          key: v015-dependencies-{{ checksum "package.json" }}
+      - run: yarn install
+      - run: yarn test
+      - run: yarn run ci:e2e-private
+      - run: yarn run ci:e2e-public
       - run:
           name: Build web client for prod environment
-          command: npm run build
+          command: yarn run build
       - save_cache:
           paths:
             - node_modules
-          key: v008-dependencies-{{ checksum "package.json" }}
+          key: v015-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: build
           paths:
@@ -156,7 +156,7 @@ jobs:
             --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
   test-graphql-faas:
     docker:
-      - image: circleci/node:8.9.1-stretch-browsers
+      - image: circleci/node:11.3.0-browsers
     working_directory: ~/repo/graphql-faas
     steps:
       - checkout:
@@ -190,8 +190,8 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - run: npm install
-      - run: npm run deploy:dev
+      - run: yarn install
+      - run: yarn run deploy:dev
 
 workflows:
   version: 2.1

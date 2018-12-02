@@ -29,8 +29,10 @@ class HomeScreen extends Component {
     const { user } = this.props
     return (
       <MainLayout>
-        <AccountHeader title={user.username} balance={this.state.balance} />
-        <Transaction fetchTransactions={this.props.fetchTransactions} />
+        <div data-id="homeScreen">
+          <AccountHeader title={user.username} balance={this.state.balance} />
+          <Transaction fetchTransactions={this.props.fetchTransactions} />
+        </div>
       </MainLayout>
     )
   }
