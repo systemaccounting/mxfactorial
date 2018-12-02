@@ -3,7 +3,7 @@ import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
-import { fromNow, maxDate } from 'utils/date'
+import { fromNow, dateString, maxDate } from 'utils/date'
 import { formatCurrency } from 'utils/currency'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 
@@ -50,7 +50,7 @@ class HistoryDetailScreen extends Component {
     const {
       transaction: { cr_time, db_time }
     } = this.state
-    return fromNow(maxDate([cr_time, db_time]))
+    return dateString(maxDate([cr_time, db_time]), 'dddd, MMMM D, YYYY @ h:mm A [GMT]Z')
   }
 
   get items() {
@@ -97,10 +97,13 @@ class HistoryDetailScreen extends Component {
           </Text>
         </Paper>
         <Paper>
-          <P fontWeight="bold">Time of transaction</P>
-          <P data-id="transactionTimeIndicator" textAlign="right">
+          <Text
+            data-id="transactionTimeIndicator"
+            fontWeight="bold"
+            textAlign="center"
+          >
             {this.transactionTime}
-          </P>
+          </Text>
         </Paper>
         {this.items}
         <p className={s.label}>Transaction ID</p>
