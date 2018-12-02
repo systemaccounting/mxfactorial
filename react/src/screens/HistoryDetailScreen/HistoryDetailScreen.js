@@ -7,6 +7,8 @@ import { dateString, maxDate } from 'utils/date'
 import { formatCurrency } from 'utils/currency'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 
+import { labels } from './constants'
+
 import s from './HistoryDetailScreen.module.css'
 
 class HistoryDetailScreen extends Component {
@@ -110,7 +112,9 @@ class HistoryDetailScreen extends Component {
           </Text>
         </Paper>
         {this.items}
-        <p className={s.label}>Transaction ID</p>
+        <p className={s.label} data-id="transactionIdLabel">
+          {labels.transactionIdLabel}
+        </p>
         <Paper>
           <Small
             textAlign="center"
@@ -120,7 +124,9 @@ class HistoryDetailScreen extends Component {
             {transaction.transaction_id}
           </Small>
         </Paper>
-        <p className={s.label}>Rule Instance IDs</p>
+        <p className={s.label} data-id="ruleInstanceIdsLabel">
+          {labels.ruleInstanceIdsLabel}
+        </p>
         <Paper>
           <Small
             textAlign="center"
@@ -130,7 +136,9 @@ class HistoryDetailScreen extends Component {
             {transaction.rule_instance_id}
           </Small>
         </Paper>
-        <p className={s.label}>Pre-transaction balance</p>
+        <p className={s.label} data-id="preTransactionBalanceLabel">
+          {labels.preTransactionBalanceLabel}
+        </p>
         <Paper>
           <Text
             textAlign="right"
@@ -141,7 +149,9 @@ class HistoryDetailScreen extends Component {
             {formatCurrency(1000)}
           </Text>
         </Paper>
-        <p className={s.label}>Post-transaction balance</p>
+        <p className={s.label} data-id="postTransactionBalanceLabel">
+          {labels.postTransactionBalanceLabel}
+        </p>
         <Paper>
           <Text
             textAlign="right"
