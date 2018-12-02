@@ -3,7 +3,7 @@ import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
-import { fromNow, dateString, maxDate } from 'utils/date'
+import { dateString, maxDate } from 'utils/date'
 import { formatCurrency } from 'utils/currency'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 
@@ -50,7 +50,10 @@ class HistoryDetailScreen extends Component {
     const {
       transaction: { cr_time, db_time }
     } = this.state
-    return dateString(maxDate([cr_time, db_time]), 'dddd, MMMM D, YYYY @ h:mm A [GMT]Z')
+    return dateString(
+      maxDate([cr_time, db_time]),
+      'dddd, MMMM D, YYYY @ h:mm A [GMT]Z'
+    )
   }
 
   get items() {
@@ -59,7 +62,8 @@ class HistoryDetailScreen extends Component {
       <div className={s.items}>
         <Paper data-id="transactionItemIndicator">
           <P textAlign="center" fontWeight="bold" variant="medium">
-            {parseInt(transaction.quantity, 10)} x {formatCurrency(transaction.price)}
+            {parseInt(transaction.quantity, 10)} x {}
+            {formatCurrency(transaction.price)}
           </P>
           <P textAlign="center" fontWeight="bold" variant="medium">
             {transaction.name}
@@ -116,7 +120,7 @@ class HistoryDetailScreen extends Component {
             {transaction.transaction_id}
           </Small>
         </Paper>
-        <p className={s.label}>Rule Instance ID</p>
+        <p className={s.label}>Rule Instance IDs</p>
         <Paper>
           <Small
             textAlign="center"
