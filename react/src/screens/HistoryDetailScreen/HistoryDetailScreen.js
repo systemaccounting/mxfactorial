@@ -70,7 +70,7 @@ class HistoryDetailScreen extends Component {
   }
 
   get content() {
-    const { transaction } = this.state
+    const { transaction, isCredit } = this.state
     if (!transaction) {
       return null
     }
@@ -83,7 +83,7 @@ class HistoryDetailScreen extends Component {
             fontWeight="bold"
             data-id="contraAccountIndicator"
           >
-            Dannys Market
+            {isCredit ? transaction.debitor : transaction.creditor}
           </Text>
         </Paper>
         <Paper>
