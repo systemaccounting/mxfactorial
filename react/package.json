@@ -32,8 +32,8 @@
     "ci:test": "CI=true react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
     "test:e2e-private": "jest --detectOpenHandles --forceExit --runInBand --config=e2e/config/private/index.js",
     "test:e2e-public": "jest --detectOpenHandles --forceExit --runInBand e2e/public",
-    "ci:e2e-public": "yarn run test:e2e-public",
-    "ci:e2e-private": "yarn run test:e2e-private",
+    "ci:e2e-public": "start-server-and-test start http://localhost:3000 test:e2e-public",
+    "ci:e2e-private": "start-server-and-test start http://localhost:3000 test:e2e-private",
     "ci:e2e": "yarn run ci:e2e-public && yarn run ci:e2e-private",
     "eject": "react-scripts eject",
     "lint": "eslint ./src/**/*.{js,jsx}",
@@ -55,7 +55,8 @@
     "eslint-plugin-prettier": "^2.6.0",
     "jest-puppeteer": "^3.5.2",
     "prettier": "^1.12.1",
-    "puppeteer": "^1.10.0"
+    "puppeteer": "^1.10.0",
+    "start-server-and-test": "^1.4.1"
   },
   "jest": {
     "collectCoverageFrom": [

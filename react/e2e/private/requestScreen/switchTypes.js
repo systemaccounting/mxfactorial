@@ -30,6 +30,7 @@ it('switches types', async () => {
   const activeButtonStatus = await page.$eval(activeButtonSelector, element =>
     element.getAttribute('data-active')
   )
+
   expect(activeButtonStatus).toBe('true')
   await rejectedButton.click()
 
