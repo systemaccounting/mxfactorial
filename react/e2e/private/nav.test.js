@@ -1,33 +1,16 @@
-const puppeteer = require('puppeteer')
-const login = require('../utils/login')
-
-const { HOME_URL, BASE_URL, HOME_SELECTOR } = require('../constants')
-
-let browser
-let page
+const { HOME_URL, HOME_SELECTOR } = require('../constants')
 
 beforeAll(async () => {
-  browser = await puppeteer.launch({
-    args: ['--no-sandbox']
-  })
-
-  page = await browser.newPage()
-  await page.goto(BASE_URL)
-  page = await login(page)
   await page.goto(HOME_URL)
   await page.waitForSelector(HOME_SELECTOR)
 })
 
-afterAll(() => {
-  setTimeout(async () => await browser.close(), 3000)
-})
-
-test('mobile nav button displays', async () => {
+it('mobile nav button displays', async () => {
   const navBtn = await page.$$('[data-id="nav-button"]')
   expect(navBtn).toHaveLength(1)
 })
 
-test('menu list displays on nav button click', async () => {
+it('menu list displays on nav button click', async () => {
   const navBtn = await page.$('[data-id="nav-button"]')
   await navBtn.click()
 
@@ -40,26 +23,26 @@ test('menu list displays on nav button click', async () => {
   // TODO: add menu items
 })
 
-test('nav menu mask displays on nav button click', async () => {
+it('nav menu mask displays on nav button click', async () => {
   const navBtn = await page.$('[data-id="nav-button"]')
   await navBtn.click()
 
   const navMask = await page.$$('[data-id="nav-mask"]')
   expect(navMask).toHaveLength(1)
 })
-
-test(
-  'signs out',
-  async () => {
-    const navBtn = await page.$('[data-id="nav-button"]')
-    await navBtn.click()
-
-    const signOutBtn = await page.$('[data-name="sign-out"]')
-    await signOutBtn.click()
-
-    await page.waitForNavigation()
-
-    expect(page.url()).toEqual(`${BASE_URL}/auth`)
-  },
-  20000
-)
+//
+// it(
+//   'signs out',
+//   async () => {
+//     const navBtn = await page.$('[data-id="nav-button"]')
+//     await navBtn.click()
+//
+//     const signOutBtn = await page.$('[data-name="sign-out"]')
+//     await signOutBtn.click()
+//
+//     await page.waitForNavigation()
+//
+//     expect(page.url()).toEqual(`${BASE_URL}/auth`)
+//   },
+//   20000
+// )
