@@ -61,10 +61,12 @@ it('1 total displays', async () => {
     totalLabelSelector,
     element => element.innerHTML
   )
+
   const total = await page.$eval(
     totalValueSelector,
     element => element.innerHTML
   )
+
   expect(totalLabel).toEqual('total')
   expect(total).toEqual('0')
 })
