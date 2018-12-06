@@ -1,55 +1,80 @@
-import React from 'react'
-import styled from 'styled-components'
+import React, { Component } from 'react'
+import T from 'prop-types'
+import cx from 'classnames'
+import { Link } from 'react-router-dom'
+import { testVars } from 'utils'
+import s from './MobileNav.module.css'
 
-export const List = styled.ul`
-  margin: 1rem 1rem 1rem 0;
-  padding: 0;
-  list-style-type: none;
-  float: right;
-  position: fixed;
-  right: 0.5rem;
-  bottom: 6rem;
-  z-index: 100;
-`
+class MobileNav extends Component {
+  static propTypes = {
+    signOut: T.func
+  }
 
-export const ListItem = styled.li`
-  padding: 0.5rem;
-  margin: 0.4rem 0.2rem;
-  font-size: 1.2rem;
-  color: rgb(115, 162, 194);
-  background-color: white;
-  border-style: solid;
-  border-width: 0.5px;
-  border-radius: 3px;
-  border-color: rgb(236, 236, 240);
-  text-align: right;
-  box-shadow: -7px 7px 9px 1px rgba(92, 92, 95, 0.3);
-  cursor: pointer;
-`
+  static defaultProps = {
+    signOut: null
+  }
 
-const MobileNav = ({ signOut, history }) => {
-  return (
-    <List data-id="nav-menu">
-      <ListItem
-        data-id="nav-menu-item"
-        onClick={() => history.push('/requests')}
+  componentDidMount() {
+    // Prevent body scrolling
+    document.body.classList.add(s.noScroll)
+  }
+
+  componentWillUnmount() {
+    document.body.classList.remove(s.noScroll)
+  }
+
+  get testVariables() {
+    if (!process.env.REACT_APP_HOST_ENV) {
+      return null
+    }
+    return testVars.map(item => (
+      <li
+        className={cx(s.listItem, s.listItem_alt)}
+        data-id="nav-menu-test-item"
+        key={item}
       >
-        Requests
-      </ListItem>
-      <ListItem
-        data-id="nav-menu-item"
-        onClick={() => history.push('/history')}
-      >
-        History
-      </ListItem>
-      <ListItem data-id="nav-menu-item">Rules</ListItem>
-      <ListItem data-id="nav-menu-item">Query</ListItem>
-      <ListItem data-id="nav-menu-item">Support</ListItem>
-      <ListItem data-name="sign-out" data-id="nav-menu-item" onClick={signOut}>
-        Sign Out
-      </ListItem>
-    </List>
-  )
+        {process.env[item]}
+      </li>
+    ))
+  }
+
+  render() {
+    const { signOut } = this.props
+    return (
+      <div className={s.root}>
+        <ul className={s.list} data-id="nav-menu">
+          <li className={s.listItem} data-id="nav-menu-item">
+            <Link to="/requests" data-id="requestsLink">
+              Requests
+            </Link>
+          </li>
+          <li className={s.listItem} data-id="nav-menu-item">
+            <Link to="/history" data-id="historyLink">
+              History
+            </Link>
+          </li>
+          <li className={s.listItem} data-id="nav-menu-item">
+            Rules
+          </li>
+          <li className={s.listItem} data-id="nav-menu-item">
+            Query
+          </li>
+          <li className={s.listItem} data-id="nav-menu-item">
+            Support
+          </li>
+          <li
+            className={s.listItem}
+            data-name="sign-out"
+            data-id="nav-menu-item"
+            onClick={signOut}
+          >
+            Sign Out
+          </li>
+          {this.testVariables}
+        </ul>
+      </div>
+    )
+  }
 }
 
 export default MobileNav
