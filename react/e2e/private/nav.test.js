@@ -1,5 +1,5 @@
 const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../constants')
-const login = require('../utils/login')
+const { login, logout } = require('../utils/auth')
 
 beforeAll(async () => {
   await page.goto(HOME_URL)
@@ -37,13 +37,6 @@ it('nav menu mask displays on nav button click', async () => {
 })
 
 it('signs out', async () => {
-  const navBtn = await page.$('[data-id="nav-button"]')
-  await navBtn.click()
-
-  const signOutBtn = await page.$('[data-name="sign-out"]')
-  await signOutBtn.click()
-
-  await page.waitForNavigation()
-
+  await logout(page)
   expect(page.url()).toEqual(`${BASE_URL}/auth`)
 })

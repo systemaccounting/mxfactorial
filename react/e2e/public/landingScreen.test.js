@@ -1,20 +1,4 @@
-const puppeteer = require('puppeteer')
-
-const BASE_URL = 'http://localhost:3000'
-let browser
-let page
-const waitOpts = { waitUntil: 'load' }
-
-beforeAll(async () => {
-  browser = await puppeteer.launch({
-    args: ['--no-sandbox']
-  })
-  page = await browser.newPage()
-})
-
-afterAll(async () => {
-  await browser.close()
-})
+const { BASE_URL } = require('../constants')
 
 describe('Landing screen', () => {
   it('displays browser title', async () => {

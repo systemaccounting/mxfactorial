@@ -1,5 +1,5 @@
 const PuppeteerEnvironment = require('jest-environment-puppeteer')
-const login = require('../../utils/login')
+const { login } = require('../../utils/auth')
 const { BASE_URL, HOME_SELECTOR } = require('../../constants')
 
 let isLoggedIn = false
