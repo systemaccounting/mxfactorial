@@ -1,14 +1,14 @@
-const restore = async page => {
-  let json = JSON.parse(process.env.__storage)
-  await page.evaluate(json => {
-    localStorage.clear()
-    for (let key in json) localStorage.setItem(key, json[key])
-  }, json)
-  return page
-}
+const { BASE_URL, HOME_SELECTOR } = require('../constants')
 
 const login = async page => {
-  return await restore(page)
+  page.goto(BASE_URL)
+  await page.waitForSelector('button[data-id="login"]')
+  const accountInput = await page.$('[name=account]')
+  await accountInput.type('JoeSmith')
+  const passwordInput = await page.$('[name=password]')
+  await passwordInput.type('password')
+  await page.keyboard.press('Enter')
+  await page.waitForSelector(HOME_SELECTOR)
 }
 
 module.exports = login
