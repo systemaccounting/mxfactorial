@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { shallow } from 'enzyme'
+import { getTestVars } from 'utils'
+
 import MobileNav from './index'
 
 const pushMock = jest.fn()
@@ -39,6 +41,6 @@ describe('<MobileNav />', () => {
     const wrapper = shallow(<MobileNav />)
     const testItemsLength = wrapper.find('[data-id="nav-menu-test-item"]')
       .length
-    expect(testItemsLength).toEqual(1)
+    expect(testItemsLength).toEqual(getTestVars().length)
   })
 })
