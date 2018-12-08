@@ -32,7 +32,7 @@ describe('<MobileNav />', () => {
     const wrapper = shallow(<MobileNav />)
     const testItemsLength = wrapper.find('[data-id="nav-menu-test-item"]')
       .length
-    expect(process.env.REACT_APP_TEST_ENV).toBeUndefined()
+    expect(process.env.REACT_APP_HOST_ENV).toBeUndefined()
     expect(testItemsLength).toEqual(0)
   })
 
