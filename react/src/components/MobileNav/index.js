@@ -56,7 +56,7 @@ class MobileNav extends Component {
   }
 
   get testVariables() {
-    if (!process.env.REACT_APP_TEST_ENV) {
+    if (!process.env.REACT_APP_HOST_ENV) {
       return null
     }
     return getTestVars().map(item => {

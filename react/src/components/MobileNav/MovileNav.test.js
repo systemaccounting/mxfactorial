@@ -28,7 +28,7 @@ describe('<MobileNav />', () => {
     expect(historyLink.prop('to')).toEqual('/history')
   })
 
-  it("doesn't render test vars if REACT_APP_TEST_ENV is undefined", () => {
+  it("doesn't render test vars if REACT_APP_HOST_ENV is undefined", () => {
     const wrapper = shallow(<MobileNav />)
     const testItemsLength = wrapper.find('[data-id="nav-menu-test-item"]')
       .length
@@ -36,8 +36,8 @@ describe('<MobileNav />', () => {
     expect(testItemsLength).toEqual(0)
   })
 
-  it('renders test vars if REACT_APP_TEST_ENV is defined', () => {
-    process.env.REACT_APP_TEST_ENV = 'dev'
+  it('renders test vars if REACT_APP_HOST_ENV is defined', () => {
+    process.env.REACT_APP_HOST_ENV = 'dev'
     const wrapper = shallow(<MobileNav />)
     const testItemsLength = wrapper.find('[data-id="nav-menu-test-item"]')
       .length
