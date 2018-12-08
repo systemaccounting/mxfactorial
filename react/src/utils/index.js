@@ -8,6 +8,7 @@ export const asyncPipe = (...promises) =>
     return await current()
   })
 
-export const testVars = Object.keys(process.env).filter(key =>
-  /REACT_APP_TEST/.test(key)
-)
+export const getTestVars = () =>
+  Object.keys(process.env).filter(key =>
+    process.env[key] ? /REACT_APP_TEST/.test(key) : false
+  )
