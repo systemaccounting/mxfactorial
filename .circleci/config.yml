@@ -31,15 +31,12 @@ jobs:
       - run: yarn test
       - run: yarn run ci:e2e-private
       - run: yarn run ci:e2e-public
-      - run:
-          name: Build web client for dev environment
-          command: NODE_PATH=./src REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV node node_modules/react-scripts/scripts/build.js
       - save_cache:
           paths:
             - node_modules
           key: v016-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
-          root: build
+          root: .
           paths:
             - .
   react-deploy-dev:
@@ -61,10 +58,22 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - checkout:
-          path: ~/repo
       - attach_workspace:
-          at: build
+          at: .
+      - run:
+          name: Build web client for acceptance testing
+          command: |
+            NODE_PATH=./src \
+            REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV \
+            REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV \
+            REACT_APP_HOST_ENV=dev \
+            REACT_APP_TEST_VERSION=$npm_package_version \
+            REACT_APP_TEST_PR_NUMBER=$CIRCLE_PR_NUMBER \
+            REACT_APP_TEST_BUILD_NUMBER=$CIRCLE_BUILD_NUM \
+            REACT_APP_PR_URL=$CIRCLE_PULL_REQUEST \
+            REACT_APP_BUILD_URL=$CIRCLE_BUILD_URL \
+            REACT_APP_TEST_DEVELOPER=$CIRCLE_USERNAME \
+            node node_modules/react-scripts/scripts/build.js
       - run:
           name: Deploy to S3
           #from build/ attached above
@@ -202,10 +211,9 @@ workflows:
           requires:
             - react-build-test-dev
           filters:
-            branches:
+            tags:
               only:
-                # prior art: https://stackoverflow.com/a/49515208
-                - /^(master.+|(?!master).*)$/
+                - /accept/
   react-build-test-deploy-prod:
     jobs:
       - react-build-test-prod:

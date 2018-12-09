@@ -1,6 +1,6 @@
 {
   "name": "mxfactorial-react",
-  "version": "0.1.4",
+  "version": "0.1.0005",
   "private": true,
   "dependencies": {
     "@rebass/grid": "^6.0.0-4",
