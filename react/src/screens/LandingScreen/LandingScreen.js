@@ -105,7 +105,7 @@ class LandingScreen extends Component {
           />
         </div>
         <div className={s.version} data-id="appVersion">
-          <IntroStyled>{process.env.REACT_APP_VERSION}</IntroStyled>
+          <IntroStyled>{process.env.REACT_APP_TEST_VERSION}</IntroStyled>
         </div>
       </LandingScreenWrapper>
     )

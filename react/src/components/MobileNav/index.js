@@ -31,9 +31,7 @@ function renderItem(itemKey) {
         </a>
       )
     default:
-      return `${itemKey.replace(/REACT_APP_TEST_/gi, '')} ${
-        process.env[itemKey]
-      }`
+      return `${process.env[itemKey]}`
   }
 }
 
