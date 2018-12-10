@@ -26,17 +26,30 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v016-dependencies-{{ checksum "package.json" }}
+          key: v017-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run: yarn run ci:e2e-private
       - run: yarn run ci:e2e-public
+      - run:
+          name: Build web client for acceptance testing
+          command: |
+            NODE_PATH=./src \
+            REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV \
+            REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV \
+            REACT_APP_HOST_ENV=dev \
+            REACT_APP_TEST_VERSION=$(node -p "require('./package.json').version") \
+            REACT_APP_TEST_BRANCH=$CIRCLE_BRANCH \
+            REACT_APP_TEST_BUILD_NUMBER=$CIRCLE_BUILD_NUM \
+            REACT_APP_BUILD_URL=$CIRCLE_BUILD_URL \
+            REACT_APP_TEST_DEVELOPER=$CIRCLE_USERNAME \
+            node node_modules/react-scripts/scripts/build.js
       - save_cache:
           paths:
             - node_modules
-          key: v016-dependencies-{{ checksum "package.json" }}
+          key: v017-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
-          root: .
+          root: build
           paths:
             - .
   react-deploy-dev:
@@ -59,21 +72,16 @@ jobs:
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
       - attach_workspace:
-          at: .
+          at: build
       - run:
-          name: Build web client for acceptance testing
+          name: Exit if build directory NOT present after early client build termination
+          #from build/ attached above
           command: |
-            NODE_PATH=./src \
-            REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV \
-            REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV \
-            REACT_APP_HOST_ENV=dev \
-            REACT_APP_TEST_VERSION=$npm_package_version \
-            REACT_APP_TEST_PR_NUMBER=$CIRCLE_PR_NUMBER \
-            REACT_APP_TEST_BUILD_NUMBER=$CIRCLE_BUILD_NUM \
-            REACT_APP_PR_URL=$CIRCLE_PULL_REQUEST \
-            REACT_APP_BUILD_URL=$CIRCLE_BUILD_URL \
-            REACT_APP_TEST_DEVELOPER=$CIRCLE_USERNAME \
-            node node_modules/react-scripts/scripts/build.js
+            if [[ -f build/index.html ]]; then
+              aws s3 sync build/ s3://mxfactorial-react-dev --delete
+            else
+               circleci step halt
+            fi
       - run:
           name: Deploy to S3
           #from build/ attached above
@@ -107,7 +115,7 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v015-dependencies-{{ checksum "package.json" }}
+          key: v017-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run: yarn run ci:e2e-private
@@ -118,7 +126,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v015-dependencies-{{ checksum "package.json" }}
+          key: v017-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: build
           paths:
@@ -206,14 +214,20 @@ workflows:
   version: 2.1
   react-build-test-deploy-dev:
     jobs:
-      - react-build-test-dev
+      - react-build-test-dev:
+          filters:
+            tags:
+              only: /.*accept.*/
       - react-deploy-dev:
           requires:
             - react-build-test-dev
           filters:
+            branches:
+              ignore: /.*/
+            # deploy accept tags only
             tags:
               only:
-                - /accept/
+                - /.*accept.*/
   react-build-test-deploy-prod:
     jobs:
       - react-build-test-prod:
