@@ -10,16 +10,6 @@ function renderItem(itemKey) {
     return null
   }
   switch (itemKey) {
-    case 'REACT_APP_TEST_PR_NUMBER':
-      return (
-        <a
-          href={process.env.REACT_APP_PR_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          PR {process.env[itemKey]}
-        </a>
-      )
     case 'REACT_APP_TEST_BUILD_NUMBER':
       return (
         <a
