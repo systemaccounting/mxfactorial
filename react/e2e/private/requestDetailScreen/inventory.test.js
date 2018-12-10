@@ -1,7 +1,4 @@
-const puppeteer = require('puppeteer')
-const login = require('../../utils/login')
-
-const { BASE_URL, REQUEST_URL } = require('../../constants')
+const { REQUEST_URL } = require('../../constants')
 
 const activeButtonSelector = 'button[data-id="activeButton"]'
 const rejectedButtonSelector = 'button[data-id="rejectedButton"]'
@@ -21,28 +18,14 @@ const selectors = {
   preTransactionBalanceIndicator: '[data-id="preTransactionBalanceIndicator"]'
 }
 
-let browser
-let page
-
 beforeAll(async () => {
-  browser = await puppeteer.launch({
-    args: ['--no-sandbox']
-  })
-
-  page = await browser.newPage()
-  await page.goto(BASE_URL)
-  page = await login(page)
   await page.goto(REQUEST_URL)
   await page.waitForSelector(activeButtonSelector)
   const link = await page.$('[data-id="requestItemIndicator"]')
   await link.click()
 })
 
-afterAll(async () => {
-  await browser.close()
-})
-
-test('inventory', async () => {
+it('inventory', async () => {
   const backButton = await page.$$eval(
     selectors.backButton,
     list => list.length

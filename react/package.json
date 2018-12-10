@@ -1,11 +1,12 @@
 {
   "name": "mxfactorial-react",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "private": true,
   "dependencies": {
     "@rebass/grid": "^6.0.0-4",
     "aws-amplify": "^1.0.2",
     "axios": "^0.18.0",
+    "classnames": "^2.2.6",
     "crypto-js": "^3.1.9-1",
     "dayjs": "^1.7.5",
     "font-awesome": "^4.7.0",
@@ -26,12 +27,12 @@
   "scripts": {
     "start": "NODE_PATH=./src react-scripts start",
     "build": "NODE_PATH=./src react-scripts build",
-    "test": "react-scripts test --env=jsdom --modulePaths=./src",
+    "test": "react-scripts test --env=jsdom --verbose --modulePaths=./src",
     "loc:cov": "react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
     "ci:start": "start-server-and-test start http://localhost:3000 ci:test",
     "ci:test": "CI=true react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
-    "test:e2e-private": "jest --detectOpenHandles --forceExit --runInBand --config=e2e/config/private/index.js",
-    "test:e2e-public": "jest --detectOpenHandles --forceExit --runInBand e2e/public",
+    "test:e2e-private": "jest --detectOpenHandles --forceExit -i --config=e2e/config/private/index.js",
+    "test:e2e-public": "jest --detectOpenHandles --forceExit -i --config=e2e/config/public/index.js",
     "ci:e2e-public": "start-server-and-test start http://localhost:3000 test:e2e-public",
     "ci:e2e-private": "start-server-and-test start http://localhost:3000 test:e2e-private",
     "ci:e2e": "yarn run ci:e2e-public && yarn run ci:e2e-private",
@@ -53,6 +54,7 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-jest": "^21.15.1",
     "eslint-plugin-prettier": "^2.6.0",
+    "jest-puppeteer": "^3.5.2",
     "prettier": "^1.12.1",
     "puppeteer": "^1.10.0",
     "start-server-and-test": "^1.4.1"

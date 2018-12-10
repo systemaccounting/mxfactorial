@@ -1,10 +1,4 @@
-const puppeteer = require('puppeteer')
-const login = require('../../utils/login')
-
-const { BASE_URL, HOME_URL, HISTORY_URL } = require('../../constants')
-
-let browser
-let page
+const { HOME_URL, HISTORY_URL } = require('../../constants')
 
 const selectors = {
   backButton: '[data-id="backButton"]',
@@ -14,18 +8,7 @@ const selectors = {
 }
 
 beforeAll(async () => {
-  browser = await puppeteer.launch({
-    args: ['--no-sandbox']
-  })
-
-  page = await browser.newPage()
-  await page.goto(BASE_URL)
-  page = await login(page)
   await page.goto(HISTORY_URL)
-})
-
-afterAll(async () => {
-  await browser.close()
 })
 
 describe('historyScreen navigation', () => {

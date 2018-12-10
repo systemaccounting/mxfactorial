@@ -1,6 +1,8 @@
 module.exports = {
   verbose: true,
+  preset: 'jest-puppeteer',
   rootDir: '../../private',
-  globalSetup: '../config/private/start.js'
+  testEnvironment: '../config/private/environment.js'
+  // globalSetup: '../config/private/start.js'
   // globalTeardown: './config/teardown.js'
 }

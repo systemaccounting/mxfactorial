@@ -1,7 +1,4 @@
-const puppeteer = require('puppeteer')
-const login = require('../../utils/login')
-
-const { BASE_URL, HISTORY_URL } = require('../../constants')
+const { HISTORY_URL } = require('../../constants')
 
 const selectors = {
   backButton: '[data-id="backButton"]',
@@ -19,27 +16,13 @@ const selectors = {
   disputeTransactionButton: '[data-id="disputeTransactionButton"]'
 }
 
-let browser
-let page
-
 // prior art: https://stackoverflow.com/questions/354044/what-is-the-best-u-s-currency-regex
 const balanceRegex = /^\$?-?\s?([1-9]{1}[0-9]{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^-?\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^\(\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))\)$/
 
 beforeAll(async () => {
-  browser = await puppeteer.launch({
-    args: ['--no-sandbox']
-  })
-
-  page = await browser.newPage()
-  await page.goto(BASE_URL)
-  page = await login(page)
   await page.goto(HISTORY_URL)
   const link = await page.waitForSelector('[data-id="historyItemIndicator"]')
   await link.click()
-})
-
-afterAll(async () => {
-  await browser.close()
 })
 
 describe('historyDetailScreen inventory', () => {

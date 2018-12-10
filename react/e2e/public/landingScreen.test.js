@@ -1,31 +1,11 @@
-const puppeteer = require('puppeteer')
-
-const BASE_URL = 'http://localhost:3000'
-let browser
-let page
-const waitOpts = { waitUntil: 'load' }
-
-beforeAll(async () => {
-  browser = await puppeteer.launch({
-    args: ['--no-sandbox']
-  })
-  page = await browser.newPage()
-})
-
-afterAll(async () => {
-  await browser.close()
-})
+const { BASE_URL } = require('../constants')
 
 describe('Landing screen', () => {
-  it(
-    'displays browser title',
-    async () => {
-      await page.goto(BASE_URL)
-      let browserTitle = await page.title()
-      expect(browserTitle).toBe('Mx! web client')
-    },
-    10000
-  )
+  it('displays browser title', async () => {
+    await page.goto(BASE_URL)
+    let browserTitle = await page.title()
+    expect(browserTitle).toBe('Mx! web client')
+  })
 
   it('displays buttons and inputs', async () => {
     await page.goto(BASE_URL)
@@ -56,6 +36,14 @@ describe('Landing screen', () => {
       createAccountButtonCount +
       signInButtonCount
     expect(landingScreenContent).toBe(5)
+  })
+
+  it('version displays on landing screen', async () => {
+    const versionElCount = await page.$$eval(
+      '[data-id="appVersion"]',
+      list => list.length
+    )
+    expect(versionElCount).toBe(1)
   })
 
   it('clicks create button navigates account create page', async () => {

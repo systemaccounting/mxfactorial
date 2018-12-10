@@ -1,7 +1,4 @@
-const puppeteer = require('puppeteer')
-const login = require('../../utils/login')
-
-const { BASE_URL, REQUEST_URL, HOME_URL } = require('../../constants')
+const { REQUEST_URL, HOME_URL } = require('../../constants')
 
 const activeButtonSelector = 'button[data-id="activeButton"]'
 
@@ -17,25 +14,11 @@ const selectors = {
   passwordInput: '[data-id="passwordInputField"]'
 }
 
-let browser
-let page
-
 beforeAll(async () => {
-  browser = await puppeteer.launch({
-    args: ['--no-sandbox']
-  })
-
-  page = await browser.newPage()
-  await page.goto(BASE_URL)
-  page = await login(page)
   await page.goto(REQUEST_URL)
   await page.waitForSelector(activeButtonSelector)
   const link = await page.$(selectors.requestItem)
   await link.click()
-})
-
-afterAll(async () => {
-  await browser.close()
 })
 
 const getApproveModalStatus = async () =>
@@ -43,7 +26,7 @@ const getApproveModalStatus = async () =>
     element.getAttribute('data-open')
   )
 
-test('1 - show success modal', async () => {
+it('1 - show success modal', async () => {
   const transactBtn = await page.$(selectors.transactButton)
   await transactBtn.click()
   expect(await getApproveModalStatus()).toEqual('true')
@@ -62,7 +45,7 @@ test('1 - show success modal', async () => {
   expect(successModal).toEqual(1)
 })
 
-test('2 - go to account page on new button press', async () => {
+it('2 - go to account page on new button press', async () => {
   const newButton = await page.$(selectors.newButton)
 
   await newButton.click()
