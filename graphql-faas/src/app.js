@@ -10,10 +10,13 @@ const schema = require('./graphql/schema')
 const appWrapper = (event, context) => {
   const app = express()
 
-  app.use('/', graphqlHTTP({
-    graphiql: true,
-    schema: schema
-  }))
+  app.use(
+    '/',
+    graphqlHTTP({
+      graphiql: true,
+      schema: schema
+    })
+  )
   app.use(body_parser.graphql())
   return app
 }
