@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 
 export default gql`
-  query fetchRules($transactions: [TransactionCreateType]) {
+  query fetchRules($transactions: [TransactionItem]) {
     rules(transactions: $transactions) {
       id
     }

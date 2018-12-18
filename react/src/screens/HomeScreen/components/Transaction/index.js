@@ -68,7 +68,10 @@ class Transaction extends React.Component {
         ...state,
         transactions: [...state.transactions, { uuid, ...data }]
       }),
-      R.pipe(this.calculateTotal, this.handleScroll)
+      R.pipe(
+        this.calculateTotal,
+        this.handleScroll
+      )
     )
   }
 
@@ -95,8 +98,15 @@ class Transaction extends React.Component {
           transaction => transaction.uuid !== uuid
         )
       }),
-      R.pipe(this.calculateTotal, this.handleFormVisibility)
+      R.pipe(
+        this.calculateTotal,
+        this.handleFormVisibility
+      )
     )
+  }
+
+  handleInputBlur = () => {
+    this.props.fetchRules(this.state.transactions)
   }
 
   handleRecipientChange = e => this.setState({ recipient: e.target.value })
@@ -153,6 +163,7 @@ class Transaction extends React.Component {
             submitLabel={[<AddIcon key="add-icon" />, ' Item']}
             onSubmit={this.handleAddTransaction}
             onValuesUpdate={this.handleDraftTransaction}
+            onInputBlur={this.handleInputBlur}
           />
         ) : (
           <Button

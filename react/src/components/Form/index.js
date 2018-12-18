@@ -43,6 +43,7 @@ class Form extends React.Component {
     clearButton: PropTypes.func,
     onSubmit: PropTypes.func,
     onValuesUpdate: PropTypes.func,
+    onInputBlur: PropTypes.func,
     onClear: PropTypes.func,
     submitOnEnter: PropTypes.bool,
     disabled: PropTypes.bool,
@@ -58,6 +59,7 @@ class Form extends React.Component {
     submitLabel: '',
     clearButton: () => <div />,
     onClear: () => {},
+    onInputBlur: () => {},
     namePrefix: null
   }
 
@@ -169,7 +171,10 @@ class Form extends React.Component {
   }
 
   handleFocus = () => this.setState({ focused: true })
-  handleBlur = () => this.setState({ focused: false })
+  handleBlur = () => {
+    this.setState({ focused: false })
+    this.props.onInputBlur()
+  }
 
   handleClear = () => {
     const { isClear } = this.state
