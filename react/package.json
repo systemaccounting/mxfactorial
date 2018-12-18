@@ -2,6 +2,7 @@
   "name": "mxfactorial-react",
   "version": "0.1.6",
   "private": true,
+  "proxy": "https://dev-api.mxfactorial.io",
   "dependencies": {
     "@rebass/grid": "^6.0.0-4",
     "apollo-boost": "^0.1.22",
