@@ -1,4 +1,9 @@
-const { GraphQLList } = require('graphql')
+const {
+  GraphQLList,
+  GraphQLID,
+  GraphQLString,
+  GraphQLInputObjectType
+} = require('graphql')
 
 const {
   TransactionType,
@@ -6,11 +11,11 @@ const {
 } = require('../types/Transaction')
 const { GetRuleTransactionsResolver } = require('../resolvers/Rule')
 
-const TransactionItemType = new GraphQLObjectType({
+const TransactionItemType = new GraphQLInputObjectType({
   name: 'TransactionItem',
   description: 'Transaction Item',
   fields: {
-    id: {
+    uuid: {
       type: GraphQLID,
       description: 'Transaction ID'
     },
@@ -25,7 +30,7 @@ const TransactionItemType = new GraphQLObjectType({
     quantity: {
       type: GraphQLString,
       description: 'Quantity of good or service'
-    },
+    }
   }
 })
 
