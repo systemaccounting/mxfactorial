@@ -106,7 +106,8 @@ class Transaction extends React.Component {
   }
 
   handleInputBlur = () => {
-    this.props.fetchRules(this.state.transactions)
+    const { draftTransaction, transactions } = this.state
+    this.props.fetchRules([...transactions, draftTransaction])
   }
 
   handleRecipientChange = e => this.setState({ recipient: e.target.value })
