@@ -125,3 +125,13 @@ resource "aws_api_gateway_base_path_mapping" "mxfactorial" {
   stage_name  = "${aws_api_gateway_deployment.environment.stage_name}"
   domain_name = "${aws_api_gateway_domain_name.mxfactorial.domain_name}"
 }
+
+module "apigateway-cors" {
+  source  = "mewa/apigateway-cors/aws"
+  version = "1.0.0"
+
+  # insert the 3 required variables here
+  api = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  resource = "${aws_api_gateway_resource.proxy.id}"
+  methods = ["POST"]
+}
