@@ -8,8 +8,8 @@ resource "aws_route53_record" "client_fqdn" {
   type    = "A"
 
   alias {
-    name                   = "${aws_cloudfront_distribution.s3_react_distribution.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.s3_react_distribution.hosted_zone_id}"
+    name                   = "${module.cloudfront.s3_react_distribution_domain_name}"
+    zone_id                = "${module.cloudfront.s3_react_distribution_hosted_zone_id}"
     evaluate_target_health = false
   }
 }
@@ -20,8 +20,8 @@ resource "aws_route53_record" "client_fqdn_ipv6" {
   type    = "AAAA"
 
   alias {
-    name                   = "${aws_cloudfront_distribution.s3_react_distribution.domain_name}"
-    zone_id                = "${aws_cloudfront_distribution.s3_react_distribution.hosted_zone_id}"
+    name                   = "${module.cloudfront.s3_react_distribution_domain_name}"
+    zone_id                = "${module.cloudfront.s3_react_distribution_hosted_zone_id}"
     evaluate_target_health = false
   }
 }

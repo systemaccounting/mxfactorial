@@ -48,7 +48,7 @@ POLICY
 
   website {
     # aws parses https prefix and bucket name when creating redirect rule
-    redirect_all_requests_to = "https://${aws_cloudfront_distribution.s3_react_distribution.domain_name}"
+    redirect_all_requests_to = "https://${module.cloudfront.s3_react_distribution_domain_name}"
   }
 
   force_destroy = true
