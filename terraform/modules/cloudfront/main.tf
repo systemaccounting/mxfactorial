@@ -7,7 +7,7 @@ resource "aws_cloudfront_distribution" "s3_react_distribution" {
   }
 
   enabled         = true
-  aliases         = "${var.aliases}"
+  aliases         = ["${var.domain_aliases}"]
   is_ipv6_enabled = true
 
   default_cache_behavior {
