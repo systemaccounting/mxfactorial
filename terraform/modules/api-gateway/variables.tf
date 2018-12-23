@@ -7,5 +7,5 @@ variable "graphql_server_function_name" {
 }
 
 variable "certificate_arn" {
-  description = 'Certificate ARN'
+  description = "Certificate ARN"
 }
