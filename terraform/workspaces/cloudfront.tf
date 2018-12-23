@@ -1,5 +1,5 @@
 module "cloudfront" {
-  source                      = "git::https://github.com/systemaccounting/mxfactorial.git//terraform/modules?ref=cf-module"
+  source                      = "git::https://github.com/systemaccounting/mxfactorial.git//terraform/modules/cloudfront?ref=cf-module"
   comment                     = "${terraform.workspace} domain cache"
   aliases                     = ["${"${terraform.workspace}" == "prod" ?  "mxfactorial.io" : "${terraform.workspace}.mxfactorial.io"}"]
   cloudfront_target_origin_id = "${aws_s3_bucket.mxfactorial_react.id}"
