@@ -1,10 +1,7 @@
 module "cloudfront" {
-  source  = "git::https://github.com/systemaccounting/mxfactorial.git//terraform/modules/cloudfront?ref=cf-module"
-  comment = "${terraform.workspace} domain cache"
-
-  domain_aliases = ["${"${terraform.workspace}" == "prod" ?  "mxfactorial.io" : "${terraform.workspace}.mxfactorial.io"}"]
-
-  # aliases                     = ["${"${terraform.workspace}" == "prod" ?  "mxfactorial.io" : "${terraform.workspace}.mxfactorial.io"}"]
+  source                      = "git::https://github.com/systemaccounting/mxfactorial.git//terraform/modules/cloudfront?ref=cf-module"
+  comment                     = "${terraform.workspace} domain cache"
+  aliases                     = ["${"${terraform.workspace}" == "prod" ?  "mxfactorial.io" : "${terraform.workspace}.mxfactorial.io"}"]
   cloudfront_target_origin_id = "${aws_s3_bucket.mxfactorial_react.id}"
   acm_certificate_arn         = "${lookup("${null_resource.client_cert_arns.triggers}", "${terraform.workspace}")}"
   domain_name                 = "${aws_s3_bucket.mxfactorial_react.bucket_regional_domain_name}"

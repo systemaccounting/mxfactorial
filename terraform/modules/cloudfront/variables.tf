@@ -2,7 +2,7 @@ variable "comment" {
   type = "string"
 }
 
-variable "domain_aliases" {
+variable "aliases" {
   type = "list"
 }
 
