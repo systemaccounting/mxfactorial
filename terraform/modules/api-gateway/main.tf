@@ -117,7 +117,7 @@ EOF
 resource "aws_api_gateway_domain_name" "mxfactorial" {
   domain_name = "${"${terraform.workspace}" == "prod" ?  "api.mxfactorial.io" : "${terraform.workspace}-api.mxfactorial.io"}"
 
-  certificate_arn = "${lookup("${null_resource.api_cert_arns.triggers}", "${terraform.workspace}")}"
+  certificate_arn = "${var.certificate_arn}"
 }
 
 resource "aws_api_gateway_base_path_mapping" "mxfactorial" {
