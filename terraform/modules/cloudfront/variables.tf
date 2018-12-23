@@ -2,9 +2,7 @@ variable "comment" {
   type = "string"
 }
 
-variable "aliases" {
-  type = "list"
-}
+variable "aliases" {}
 
 variable "cloudfront_target_origin_id" {
   type = "string"
