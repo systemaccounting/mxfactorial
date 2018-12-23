@@ -1,54 +1,11 @@
-resource "aws_cloudfront_distribution" "s3_react_distribution" {
-  comment = "${terraform.workspace} domain cache"
-
-  origin {
-    domain_name = "${aws_s3_bucket.mxfactorial_react.bucket_regional_domain_name}"
-    origin_id   = "${aws_s3_bucket.mxfactorial_react.id}"
-  }
-
-  enabled         = true
-  aliases         = ["${"${terraform.workspace}" == "prod" ?  "mxfactorial.io" : "${terraform.workspace}.mxfactorial.io"}"]
-  is_ipv6_enabled = true
-
-  default_cache_behavior {
-    allowed_methods        = ["HEAD", "GET"]
-    cached_methods         = ["HEAD", "GET"]
-    target_origin_id       = "${aws_s3_bucket.mxfactorial_react.id}"
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
-    min_ttl                = 0
-
-    default_ttl = 3600
-    max_ttl     = 86400
-
-    forwarded_values {
-      query_string = false
-
-      cookies {
-        forward = "none"
-      }
-    }
-  }
-
-  default_root_object = "index.html"
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  custom_error_response {
-    error_code         = 404
-    response_code      = 200
-    response_page_path = "/index.html"
-  }
-
-  viewer_certificate {
-    //https://github.com/terraform-providers/terraform-provider-aws/issues/2418#issuecomment-371192507
-    acm_certificate_arn = "${lookup("${null_resource.client_cert_arns.triggers}", "${terraform.workspace}")}"
-    ssl_support_method  = "sni-only"
-  }
+module "cloudfront" {
+  source                      = "git::https://github.com/systemaccounting/mxfactorial.git//terraform/modules?ref=cf-module"
+  comment                     = "${terraform.workspace} domain cache"
+  aliases                     = ["${"${terraform.workspace}" == "prod" ?  "mxfactorial.io" : "${terraform.workspace}.mxfactorial.io"}"]
+  cloudfront_target_origin_id = "${aws_s3_bucket.mxfactorial_react.id}"
+  acm_certificate_arn         = "${lookup("${null_resource.client_cert_arns.triggers}", "${terraform.workspace}")}"
+  domain_name                 = "${aws_s3_bucket.mxfactorial_react.bucket_regional_domain_name}"
+  origin_id                   = "${aws_s3_bucket.mxfactorial_react.id}"
 }
 
 resource "aws_cloudfront_distribution" "s3_react_www_distribution" {
