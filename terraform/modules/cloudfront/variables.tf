@@ -3,7 +3,7 @@ variable "comment" {
 }
 
 variable "aliases" {
-  type = "string"
+  type = "list"
 }
 
 variable "cloudfront_target_origin_id" {
