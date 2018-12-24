@@ -25,7 +25,7 @@
 1. `aws s3 sync build/ s3://mxfactorial-react-stg --delete` to deploy newly-built client from react/build
 1. navigate to newly-deployed client in new environment, e.g. stg.mxfactorial.io, and sign in with test user
 1. in subsequent deployments, terminate cache after an s3 deployment to expedite new cache, e.g. `aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}` (use query option to limit cloudfront distribution ID output)
-1. add new environment values to continuous integration tool
+1. add new environment values to ci/cd, `CLOUDFRONT_DISTRIBUTION_ID`, `CLOUDFRONT_WWW_DISTRIBUTION_ID`, `CLOUDFRONT_DISTRIBUTION_ID_DEV`, etc
 1. configure continuous integration tool in `.circle/config.yml` to automate execution of these build and deployment commands
 
 # deploy graphql server to new environment
