@@ -13,11 +13,3 @@ output "client" {
 output "api" {
   value = "${aws_route53_record.api_fqdn.name}"
 }
-
-output "s3_react_distribution_domain_name" {
-  value = "${module.cloudfront.s3_react_distribution_domain_name}"
-}
-
-output "s3_react_distribution_hosted_zone_id" {
-  value = "${module.cloudfront.s3_react_distribution}"
-}
