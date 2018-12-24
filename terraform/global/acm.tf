@@ -40,7 +40,7 @@ resource "aws_acm_certificate_validation" "client_www_cert" {
 ######### Request client certs for all envs; count > 1  ##########
 resource "aws_acm_certificate" "client_cert" {
   count             = "${length(var.environments)}"
-  domain_name       = "${var.environments[count.index] == "prod" ?  "mxfactorial.io" : "${var.environments[count.index]}.mxfactorial.io"}"
+  domain_name       = "${element(var.environments, count.index) == "prod" ?  "mxfactorial.io" : "${element(var.environments, count.index)}.mxfactorial.io"}"
   validation_method = "DNS"
 
   tags {
