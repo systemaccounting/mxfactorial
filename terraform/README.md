@@ -2,6 +2,7 @@
 1. `cd terraform/global`
 1. add, for example, `stg` to `environments` list in `terraform/global/variables.tf`
 1. `terraform init` which retrieves state for a single-workspace conifguration
+1. BUG WORKAROUND: because `aws_route53_record` fails to resolve attributes with `aws_acm_certificate` count > 1  on single `terraform apply`, `terraform apply -target aws_acm_certificate.client_cert -target aws_acm_certificate.api_cert` first
 1. `terraform apply`, and if ["diffs didn't match during apply"](https://github.com/hashicorp/terraform/issues/19331) error occurs for the `aws_route53_record` resource, `terraform apply` again per [comment 19331](https://github.com/hashicorp/terraform/issues/19331#issue-379115920) and wait approximately 5-10 minutes to complete
 1. `cd terraform/workspaces`
 1. `terraform init` because this directory stores a separate, multi-workspace configuration
