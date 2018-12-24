@@ -18,7 +18,7 @@
 
 # deploy react to new environment
 1. `cd react`
-1. add new environment values outputted from terraform into `react/.env.development.local`
+1. add new `REACT_APP_COGNITO_POOL_ID` and `REACT_APP_COGNITO_CLIENT_ID` environment values outputted from terraform into `react/.env.development.local`
 1. `yarn start`
 1. navigate to the react client on http://localhost:3000 in a browser, and create a `JoeSmith` account with password of `password` to avoid end-to-end test failure. OR, create the `JoeSmith` account using an automated test by temporarily changing the following lines in `react/e2e/public/createAccount.test.js`: `await accountNameInput.type(account)` to `await accountNameInput.type('JoeSmith')`, and `await passwordInput.type(`bluesky`)` to `await passwordInput.type('password')`. while client continues serving with `yarn start`, open a separate terminal and execute `yarn run test:e2e-public`. if a test fails, press cntrl+c to terminate because "sign in" test may have occurred before "create account" test. `git checkout e2e/public/createAccount.test.js` to restore automated test to original version. sign into `JoeSmith` account now available in local environment.
 1. build react client with new environment values outputted from terraform, e.g. `NODE_PATH=./src REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_STG REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_STG node node_modules/react-scripts/scripts/build.js`
