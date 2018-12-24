@@ -4,6 +4,7 @@ variable "region" {
   default = {
     prod = "us-east-1"
     dev  = "us-east-2"
+    stg  = "us-west-2"
   }
 }
 
@@ -16,6 +17,7 @@ resource "null_resource" "client_cert_arns" {
   triggers = {
     prod = "${data.terraform_remote_state.global.client_certs[0]}"
     dev  = "${data.terraform_remote_state.global.client_certs[1]}"
+    stg  = "${data.terraform_remote_state.global.client_certs[2]}"
   }
 }
 
@@ -23,6 +25,7 @@ resource "null_resource" "api_cert_arns" {
   triggers = {
     prod = "${data.terraform_remote_state.global.api_certs[0]}"
     dev  = "${data.terraform_remote_state.global.api_certs[1]}"
+    stg  = "${data.terraform_remote_state.global.api_certs[2]}"
   }
 }
 

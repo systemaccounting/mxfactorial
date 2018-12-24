@@ -4,5 +4,6 @@ variable "environments" {
   default = [
     "prod",
     "dev",
+    "stg",
   ]
 }
