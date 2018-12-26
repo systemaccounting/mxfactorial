@@ -65,10 +65,10 @@ resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
 }
 
 resource "aws_api_gateway_account" "mxfactorial_api_account" {
-  cloudwatch_role_arn = "${aws_iam_role.cloudwatch.arn}"
+  cloudwatch_role_arn = "${aws_iam_role.api_gateway_cloudwatch.arn}"
 }
 
-resource "aws_iam_role" "cloudwatch" {
+resource "aws_iam_role" "api_gateway_cloudwatch" {
   name = "${var.iam_role_name}"
 
   assume_role_policy = <<EOF
@@ -88,9 +88,9 @@ resource "aws_iam_role" "cloudwatch" {
 EOF
 }
 
-resource "aws_iam_role_policy" "cloudwatch" {
+resource "aws_iam_role_policy" "api_gateway_cloudwatch" {
   name = "${var.iam_role_policy_name}"
-  role = "${aws_iam_role.cloudwatch.id}"
+  role = "${aws_iam_role.api_gateway_cloudwatch.id}"
 
   policy = <<EOF
 {
