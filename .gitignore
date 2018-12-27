@@ -35,7 +35,7 @@ react/yarn-error.log*
 
 # dependencies
 **/node_modules
-/package-lock.json
+**/package-lock.json
 /npm-debug.log
 
 # deploy faas
