@@ -38,3 +38,16 @@ data "terraform_remote_state" "global" {
     region = "us-east-1"
   }
 }
+
+variable "db_master_username" {
+  type = "string"
+}
+
+variable "db_master_password" {
+  type = "string"
+}
+
+variable "db_backup_retention_period" {
+  type    = "string"
+  default = 1
+}
