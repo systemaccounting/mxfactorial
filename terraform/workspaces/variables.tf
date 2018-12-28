@@ -46,8 +46,3 @@ variable "db_master_username" {
 variable "db_master_password" {
   type = "string"
 }
-
-variable "db_backup_retention_period" {
-  type    = "string"
-  default = 1
-}
