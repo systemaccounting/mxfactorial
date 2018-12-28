@@ -28,7 +28,36 @@ data "aws_vpc" "default" {
 
 data "aws_security_groups" "default" {
   filter {
-    name   = "vpc-id"
-    values = ["${data.aws_vpc.default.id}"]
+    name   = "group-name"
+    values = ["default"]
   }
+}
+
+resource "aws_cloud9_environment_ec2" "default" {
+  instance_type               = "t2.micro"
+  name                        = "${var.cloud9_name}"
+  description                 = "connecting to rds"
+  automatic_stop_time_minutes = 15
+  subnet_id                   = "${data.aws_subnet_ids.default.ids[0]}"
+}
+
+data "aws_subnet_ids" "default" {
+  vpc_id = "${data.aws_vpc.default.id}"
+}
+
+data "aws_security_groups" "cloud9" {
+  filter {
+    name   = "group-name"
+    values = ["aws-cloud9-*"]
+  }
+}
+
+resource "aws_security_group_rule" "allow_cloud9" {
+  count                    = "${length(data.aws_security_groups.cloud9.ids)}"
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = "${element(data.aws_security_groups.cloud9.ids, count.index)}"
+  security_group_id        = "${data.aws_security_groups.default.ids[0]}"
 }

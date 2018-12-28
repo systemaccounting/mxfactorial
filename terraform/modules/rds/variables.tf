@@ -9,3 +9,7 @@ variable "db_master_username" {
 variable "db_master_password" {
   type = "string"
 }
+
+variable "cloud9_name" {
+  type = "string"
+}
