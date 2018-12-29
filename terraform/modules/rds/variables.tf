@@ -1,20 +1,15 @@
-variable "environment" {
+variable "db_cluster_identifier" {
   type = "string"
 }
 
-variable "master_username" {
+variable "db_master_username" {
   type = "string"
 }
 
-variable "master_password" {
+variable "db_master_password" {
   type = "string"
 }
 
-variable "backup_retention_period" {
-  type    = "string"
-  default = 1
-}
-
-variable "vpc_security_group_ids" {
-  type = "list"
+variable "cloud9_name" {
+  type = "string"
 }

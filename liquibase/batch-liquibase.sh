@@ -91,3 +91,6 @@ done
 FINISHED_TIME=$(date +%s)
 TIME_PASSED=$(($FINISHED_TIME - $START_TIME))
 echo 'Job completed after '"$TIME_PASSED"' seconds with status: '"$JOB_STATUS"
+
+# measure batch result from cloud9
+# mysql --user=theadmin -h some-db.cluster-12345678910.us-east-2.rds.amanonaws.com -pthepassword
