@@ -33,6 +33,17 @@ data "aws_security_groups" "default" {
   }
 }
 
+########## Allow all traffic on 3306 port within security group ##########
+resource "aws_security_group_rule" "allow_all_internal" {
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  self              = true
+  security_group_id = "${data.aws_security_groups.default.ids[0]}"
+}
+
+########## Create clou9 instance to access RDS ##########
 resource "aws_cloud9_environment_ec2" "default" {
   instance_type               = "t2.micro"
   name                        = "${var.cloud9_name}"
@@ -52,6 +63,7 @@ data "aws_security_groups" "cloud9" {
   }
 }
 
+########## Allow traffic on port 3306 between cloud9 and RDS security groups ##########
 resource "aws_security_group_rule" "allow_cloud9" {
   count                    = "${length(data.aws_security_groups.cloud9.ids)}"
   type                     = "ingress"

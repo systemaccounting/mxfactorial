@@ -13,7 +13,7 @@ AWS_JOB_DEFINITION=liquibase
 
 echo 'Please repeat if FAILED because Aurora Serverless startup time > Liquibase timeout ("Communications link failure")'
 
-echo 'AWS region for the Batch job (e.g. us-east-2)?'
+echo 'AWS region for the Batch job (e.g. us-east-1)?'
 read AWS_REGION_INPUT
 # in case vars assigned above and user wishes to quickly [enter] through
 if [[ -n $AWS_REGION_INPUT ]]; then AWS_REGION=$AWS_REGION_INPUT; fi
@@ -75,7 +75,7 @@ AWS_BATCH_JOB_ID=$(aws batch submit-job \
 JOB_STATUS=$(aws batch describe-jobs --region $AWS_REGION --jobs $AWS_BATCH_JOB_ID --query 'jobs[0].{status:status}' --output text)
 
 echo "Batch Job with $AWS_BATCH_JOB_ID ID created with status of $JOB_STATUS"
-echo 'Polling status on 5 second intervals...'
+echo 'Polling status in 5 second intervals...'
 
 START_TIME=$(date +%s)
 

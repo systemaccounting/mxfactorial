@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# add parameter for debugging
+# --logLevel=debug \
+
 git clone --single-branch --branch $BRANCH https://github.com/systemaccounting/mxfactorial.git &&
 liquibase \
 --classpath=/opt/jdbc/mysql-jdbc.jar \
