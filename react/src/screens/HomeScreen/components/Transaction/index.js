@@ -19,6 +19,7 @@ class Transaction extends React.Component {
     type: 'credit',
     transactions: [],
     draftTransaction: null,
+    salesTax: [],
     transactionHistory: [],
     recipient: '',
     total: 0,
@@ -107,7 +108,12 @@ class Transaction extends React.Component {
 
   handleInputBlur = () => {
     const { draftTransaction, transactions } = this.state
-    this.props.fetchRules([...transactions, draftTransaction])
+    this.props
+      .fetchRules([...transactions, draftTransaction])
+      .then(({ data }) => {
+        const salesTax = data.rules.filter(item => item.rule_instance_id)
+        this.setState({ salesTax })
+      })
   }
 
   handleRecipientChange = e => this.setState({ recipient: e.target.value })
@@ -126,6 +132,26 @@ class Transaction extends React.Component {
 
   handleDraftTransaction = draftTransaction =>
     this.setState({ draftTransaction }, this.calculateTotal)
+
+  get salesTax() {
+    const { salesTax } = this.state
+    if (!salesTax) {
+      return null
+    }
+    return (
+      <div style={{ marginTop: 20 }}>
+        {salesTax.map(transaction => (
+          <TransactionItem
+            key={transaction.uuid}
+            data-uuid={transaction.uuid}
+            transaction={transaction}
+            onEdit={this.handleEditTransaction}
+            editable={false}
+          />
+        ))}
+      </div>
+    )
+  }
 
   render() {
     const { total, type, recipient, hideForm, transactions } = this.state
@@ -151,9 +177,11 @@ class Transaction extends React.Component {
                 data-uuid={transaction.uuid}
                 transaction={transaction}
                 onEdit={this.handleEditTransaction}
+                onInputBlur={this.handleInputBlur}
               />
             </React.Fragment>
           ))}
+          {this.salesTax}
         </div>
         {!hideForm ? (
           <Form

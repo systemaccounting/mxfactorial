@@ -3,7 +3,11 @@ import gql from 'graphql-tag'
 export default gql`
   query fetchRules($transactions: [TransactionItem]) {
     rules(transactions: $transactions) {
-      id
+      uuid
+      name
+      price
+      quantity
+      rule_instance_id
     }
   }
 `

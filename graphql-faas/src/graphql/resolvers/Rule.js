@@ -1,3 +1,5 @@
+const uuidv1 = require('uuid/v1')
+
 const TAX_TRANSACTION_NAME = '9% state sales tax'
 
 const GetRuleTransactionsResolver = args => {
@@ -15,7 +17,8 @@ const GetRuleTransactionsResolver = args => {
 
   if (salesTaxValue > 0) {
     accountItems.push({
-      uuid: 'someUUID',
+      uuid: uuidv1(),
+      rule_instance_id: uuidv1(),
       name: TAX_TRANSACTION_NAME,
       price: salesTaxValue.toFixed(3),
       quantity: 1,
