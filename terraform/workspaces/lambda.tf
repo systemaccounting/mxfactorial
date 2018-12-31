@@ -13,9 +13,17 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
   runtime          = "nodejs8.10"
   role             = "${aws_iam_role.mxfactorial_graphql_lambda_role.arn}"
 
+  vpc_config {
+    subnet_ids         = ["${data.aws_subnet_ids.default_for_lambda.ids}"]
+    security_group_ids = ["${data.aws_security_group.default_for_lambda.id}"]
+  }
+
   environment {
     variables = {
-      REGION = "${lookup(var.region, "${terraform.workspace}")}"
+      REGION   = "${lookup(var.region, "${terraform.workspace}")}"
+      HOST     = "${module.rds.rds_endpoint}"
+      USER     = "${var.db_master_username}"
+      PASSWORD = "${var.db_master_password}"
     }
   }
 }
@@ -54,7 +62,10 @@ resource "aws_iam_role_policy" "mxfactorial_graphql_lambda_policy" {
       "Action": [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DeleteNetworkInterface"
       ],
       "Resource": "*"
     },
@@ -68,4 +79,22 @@ resource "aws_iam_role_policy" "mxfactorial_graphql_lambda_policy" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_role_policy_attachment" "rds_access_for_lambda" {
+  role       = "${aws_iam_role.mxfactorial_graphql_lambda_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
+}
+
+data "aws_vpc" "default_for_lambda" {
+  default = true
+}
+
+data "aws_security_group" "default_for_lambda" {
+  vpc_id = "${data.aws_vpc.default_for_lambda.id}"
+  name   = "default"
+}
+
+data "aws_subnet_ids" "default_for_lambda" {
+  vpc_id = "${data.aws_vpc.default_for_lambda.id}"
 }
