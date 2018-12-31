@@ -32,6 +32,7 @@ react/yarn-error.log*
 
 
 ## global
+**/yarn-error.log
 
 # dependencies
 **/node_modules
