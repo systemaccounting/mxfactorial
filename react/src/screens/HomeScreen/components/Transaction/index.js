@@ -62,6 +62,16 @@ class Transaction extends React.Component {
 
   handleSwitchType = type => () => this.setState({ type })
 
+  fetchRules = () => {
+    const { draftTransaction, transactions } = this.state
+    this.props
+      .fetchRules([...transactions, draftTransaction])
+      .then(({ data }) => {
+        const salesTax = data.rules.filter(item => item.rule_instance_id)
+        this.setState({ salesTax })
+      })
+  }
+
   handleAddTransaction = data => {
     const uuid = v4()
     this.setState(
@@ -101,27 +111,24 @@ class Transaction extends React.Component {
       }),
       R.pipe(
         this.calculateTotal,
-        this.handleFormVisibility
+        this.handleFormVisibility,
+        this.fetchRules
       )
     )
   }
 
   handleInputBlur = () => {
-    const { draftTransaction, transactions } = this.state
-    this.props
-      .fetchRules([...transactions, draftTransaction])
-      .then(({ data }) => {
-        const salesTax = data.rules.filter(item => item.rule_instance_id)
-        this.setState({ salesTax })
-      })
+    this.fetchRules()
   }
 
   handleRecipientChange = e => this.setState({ recipient: e.target.value })
 
-  handleFormClear = isClear =>
-    isClear && this.state.transactions.length
-      ? this.setState({ hideForm: true })
-      : null
+  handleFormClear = isClear => {
+    if (isClear && this.state.transactions.length) {
+      this.setState({ hideForm: true })
+    }
+    setTimeout(this.fetchRules)
+  }
 
   handleShowForm = () => this.setState({ hideForm: false })
 
@@ -130,8 +137,9 @@ class Transaction extends React.Component {
       hideForm: state.transactions.length === 0 ? false : state.hideForm
     }))
 
-  handleDraftTransaction = draftTransaction =>
+  handleDraftTransaction = draftTransaction => {
     this.setState({ draftTransaction }, this.calculateTotal)
+  }
 
   get salesTax() {
     const { salesTax } = this.state
