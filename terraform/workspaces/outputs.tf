@@ -1,11 +1,19 @@
+output "rds_endpoint" {
+  value = "${module.rds.rds_endpoint}"
+}
+
 output "pool_id" {
-  value = "${aws_cognito_user_pool.pool.id}"
+  value = "${module.cognito.pool_id}"
 }
 
 output "pool_client_id" {
-  value = "${aws_cognito_user_pool_client.client.id}"
+  value = "${module.cognito.pool_client_id}"
 }
 
-output "rds_endpoint" {
-  value = "${module.rds.rds_endpoint}"
+output "api" {
+  value = "${module.dns.api}"
+}
+
+output "client" {
+  value = "${module.dns.client}"
 }
