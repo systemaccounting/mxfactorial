@@ -1,7 +1,6 @@
 import React from 'react'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
-import { noop } from 'utils'
 
 import TransactionItem from './TransactionItem'
 import Form from 'components/Form'
