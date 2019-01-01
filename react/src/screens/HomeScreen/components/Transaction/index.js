@@ -1,6 +1,7 @@
 import React from 'react'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
+import { noop } from 'utils'
 
 import TransactionItem from './TransactionItem'
 import Form from 'components/Form'
@@ -64,6 +65,9 @@ class Transaction extends React.Component {
 
   fetchRules = () => {
     const { draftTransaction, transactions } = this.state
+    if (!this.props.fetchRules) {
+      return
+    }
     this.props
       .fetchRules([...transactions, draftTransaction])
       .then(({ data }) => {
