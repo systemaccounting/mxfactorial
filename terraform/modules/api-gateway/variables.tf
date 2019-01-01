@@ -1,4 +1,4 @@
-variable "graphql_server_arn" {
+variable "graphql_server_invoke_arn" {
   description = "Lambda GrpahQL sever invoke arn"
 }
 

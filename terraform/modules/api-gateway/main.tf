@@ -23,7 +23,7 @@ resource "aws_api_gateway_integration" "lambda" {
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "${var.graphql_server_arn}"
+  uri                     = "${var.graphql_server_invoke_arn}"
 }
 
 resource "aws_api_gateway_method" "proxy_root" {
@@ -40,7 +40,7 @@ resource "aws_api_gateway_integration" "lambda_root" {
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "${var.graphql_server_arn}"
+  uri                     = "${var.graphql_server_invoke_arn}"
 }
 
 resource "aws_api_gateway_deployment" "environment" {
@@ -115,7 +115,7 @@ EOF
 }
 
 resource "aws_api_gateway_domain_name" "mxfactorial" {
-  domain_name = "${var.domain_name}"
+  domain_name     = "${var.domain_name}"
   certificate_arn = "${var.certificate_arn}"
 }
 
