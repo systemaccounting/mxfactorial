@@ -2,8 +2,8 @@ resource "aws_cloudfront_distribution" "s3_react_distribution" {
   comment = "${terraform.workspace} domain cache"
 
   origin {
-    domain_name = "${aws_s3_bucket.mxfactorial_react.bucket_regional_domain_name}"
-    origin_id   = "${aws_s3_bucket.mxfactorial_react.id}"
+    domain_name = "${module.s3_react.react_bucket_regional_domain_name}"
+    origin_id   = "${module.s3_react.react_bucket_id}"
   }
 
   enabled         = true
@@ -13,7 +13,7 @@ resource "aws_cloudfront_distribution" "s3_react_distribution" {
   default_cache_behavior {
     allowed_methods        = ["HEAD", "GET"]
     cached_methods         = ["HEAD", "GET"]
-    target_origin_id       = "${aws_s3_bucket.mxfactorial_react.id}"
+    target_origin_id       = "${module.s3_react.react_bucket_id}"
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
     min_ttl                = 0
