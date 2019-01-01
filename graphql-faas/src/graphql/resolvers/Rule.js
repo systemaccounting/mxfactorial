@@ -11,7 +11,8 @@ const GetRuleTransactionsResolver = args => {
   // Add 9% sales tax.
   let salesTaxValue = 0
   accountItems.forEach(item => {
-    const { quantity = 1, price = 0 } = item
+    const quantity = item.quantity || 1
+    const price = item.price || 0
     salesTaxValue += price * quantity * 0.09
   })
 
