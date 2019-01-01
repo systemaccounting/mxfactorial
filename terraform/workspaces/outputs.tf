@@ -17,3 +17,7 @@ output "api" {
 output "client" {
   value = "${module.dns.client}"
 }
+
+output "cache_id" {
+  value = "${module.cloudfront.cache_id}"
+}

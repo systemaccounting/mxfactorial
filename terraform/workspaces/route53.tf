@@ -4,8 +4,8 @@ module "dns" {
   api_fqdn                           = "${"${terraform.workspace}" == "prod" ?  "api.mxfactorial.io" : "${terraform.workspace}-api.mxfactorial.io"}"
   api_alias_name                     = "${module.api_gateway.cloudfront_domain_name}"
   api_alias_zone_id                  = "${module.api_gateway.cloudfront_zone_id}"
-  cloudfront_s3_react_domain_name    = "${aws_cloudfront_distribution.s3_react_distribution.domain_name}"
-  cloudfront_s3_react_hosted_zome_id = "${aws_cloudfront_distribution.s3_react_distribution.hosted_zone_id}"
+  cloudfront_s3_react_domain_name    = "${module.cloudfront.s3_react_distribution_domain_name}"
+  cloudfront_s3_react_hosted_zome_id = "${module.cloudfront.s3_react_distribution_hosted_zone_id}"
 }
 
 resource "aws_route53_record" "www_client_fqdn" {
