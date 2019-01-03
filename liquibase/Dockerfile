@@ -37,7 +37,7 @@ RUN set -e -o pipefail;\
   mv mysql-connector-java-${jdbc_driver_version}/${jarfile} ./;\
   rm -rf ${tarfile} mysql-connector-java-${jdbc_driver_version};\
   ln -s ${jarfile} mysql-jdbc.jar;
-COPY exec-liquibase.sh /usr/local/bin/exec-liquibase.sh
-RUN chmod +x /usr/local/bin/exec-liquibase.sh
+COPY liquibase.sh /usr/local/bin/liquibase.sh
+RUN chmod +x /usr/local/bin/liquibase.sh
 WORKDIR /home
-ENTRYPOINT ["exec-liquibase.sh"]
+ENTRYPOINT ["liquibase.sh"]

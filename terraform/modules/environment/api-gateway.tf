@@ -23,7 +23,7 @@ resource "aws_api_gateway_integration" "lambda" {
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "${var.graphql_server_arn}"
+  uri                     = "${aws_lambda_function.mxfactorial_graphql_server.invoke_arn}"
 }
 
 resource "aws_api_gateway_method" "proxy_root" {
@@ -40,7 +40,7 @@ resource "aws_api_gateway_integration" "lambda_root" {
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "${var.graphql_server_arn}"
+  uri                     = "${aws_lambda_function.mxfactorial_graphql_server.invoke_arn}"
 }
 
 resource "aws_api_gateway_deployment" "environment" {
@@ -56,7 +56,7 @@ resource "aws_api_gateway_deployment" "environment" {
 resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = "${var.graphql_server_function_name}"
+  function_name = "${aws_lambda_function.mxfactorial_graphql_server.function_name}"
   principal     = "apigateway.amazonaws.com"
 
   # The /*/* portion grants access from any method on any resource
@@ -115,7 +115,7 @@ EOF
 }
 
 resource "aws_api_gateway_domain_name" "mxfactorial" {
-  domain_name = "${var.domain_name}"
+  domain_name     = "${var.domain_name}"
   certificate_arn = "${var.certificate_arn}"
 }
 

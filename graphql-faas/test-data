@@ -40,7 +40,7 @@ mutation createTransaction($input: TransactionCreateType!) {
 
 // Graphiql Query
 {
-  transactions(transaction: "84d96840-c46d-11e8-98d9-a1dd01ff2a01") {
+  transactions(transactionId: "1") {
     id
     debitor
     debitor_profile_latlng
@@ -109,7 +109,7 @@ POST
 Content-Type: application/graphql
 Body:raw
 {
-  transactions(transaction: "84d96840-c46d-11e8-98d9-a1dd01ff2a01") {
+  transactions(transactionId: "1") {
     id
     debitor
     debitor_profile_latlng

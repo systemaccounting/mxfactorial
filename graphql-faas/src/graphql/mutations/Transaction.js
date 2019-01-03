@@ -2,14 +2,13 @@ const {
   GraphQLNonNull
 } = require('graphql')
 
-const { TIMEUUID } = require('../resolvers/Transaction')
-
 const {
   TransactionType,
   TransactionCreateType
 } = require('../types/Transaction')
 const {
-  AddTransactionResolver
+  AddTransactionResolver,
+  connection
 } = require('../resolvers/Transaction')
 
 const TransactionCreateMutation = () => {
@@ -19,9 +18,7 @@ const TransactionCreateMutation = () => {
       input: { type: new GraphQLNonNull(TransactionCreateType)}
     },
     resolve(parentValue, args) {
-      var input = args.input
-      input.id = TIMEUUID
-      return AddTransactionResolver(input)
+      return AddTransactionResolver(args.input, connection)
     }
   }
 }
