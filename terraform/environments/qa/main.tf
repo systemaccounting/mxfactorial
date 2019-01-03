@@ -3,7 +3,7 @@ terraform {
 
   backend "s3" {
     encrypt = true
-    bucket  = "global-mxfactorial-tf-state"
+    bucket  = "qa-mxfactorial-tf-state"
 
     // CHANGE ENVIRONMENT HERE
     dynamodb_table = "qa-mxfactorial-tf-state"

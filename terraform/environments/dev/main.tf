@@ -3,14 +3,14 @@ terraform {
 
   backend "s3" {
     encrypt = true
-    bucket  = "prod-mxfactorial-tf-state"
+    bucket  = "global-mxfactorial-tf-state"
 
     // CHANGE ENVIRONMENT HERE
-    dynamodb_table = "prod-mxfactorial-tf-state"
+    dynamodb_table = "dev-mxfactorial-tf-state"
     region         = "us-east-1"
 
     // CHANGE ENVIRONMENT HERE
-    key = "prod-mxfactorial.tfstate"
+    key = "dev-mxfactorial.tfstate"
   }
 }
 
@@ -34,7 +34,7 @@ data "terraform_remote_state" "global" {
   }
 }
 
-module "prod" {
+module "dev" {
   source = "../../modules/environment"
 
   ############### Shared ###############
