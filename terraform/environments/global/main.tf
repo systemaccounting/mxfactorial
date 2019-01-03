@@ -30,6 +30,7 @@ variable "environments" {
   default = [
     "prod",
     "qa",
+    "dev"
   ]
 }
 
@@ -37,6 +38,7 @@ output "client_cert_map" {
   value = {
     prod = "${aws_acm_certificate_validation.client_cert.*.certificate_arn[0]}"
     qa   = "${aws_acm_certificate_validation.client_cert.*.certificate_arn[1]}"
+    dev   = "${aws_acm_certificate_validation.client_cert.*.certificate_arn[2]}"
   }
 }
 
@@ -44,6 +46,7 @@ output "api_cert_map" {
   value = {
     prod = "${aws_acm_certificate_validation.api_cert.*.certificate_arn[0]}"
     qa   = "${aws_acm_certificate_validation.api_cert.*.certificate_arn[1]}"
+    dev   = "${aws_acm_certificate_validation.api_cert.*.certificate_arn[2]}"
   }
 }
 
