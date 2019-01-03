@@ -1,11 +1,9 @@
-# prior art: https://stackoverflow.com/a/48362341
-
 provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_s3_bucket" "global-mxfactorial-s3-tf-state" {
-  bucket = "global-mxfactorial-tf-state"
+resource "aws_s3_bucket" "qa-mxfactorial-s3-tf-state" {
+  bucket = "qa-mxfactorial-tf-state"
 
   versioning {
     enabled = true
@@ -19,7 +17,7 @@ resource "aws_s3_bucket" "global-mxfactorial-s3-tf-state" {
 }
 
 resource "aws_dynamodb_table" "tf-state" {
-  name           = "global-mxfactorial-tf-state"
+  name           = "qa-mxfactorial-tf-state"
   read_capacity  = 1
   write_capacity = 1
   hash_key       = "LockID"
