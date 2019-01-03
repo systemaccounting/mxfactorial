@@ -5,6 +5,7 @@
 # AWS_JOB_NAME=
 AWS_JOB_QUEUE=liquibase
 AWS_JOB_DEFINITION=liquibase
+# AWS_ENVIRONMENT=
 # BRANCH=
 # RDS_ENDPOINT=
 # DB_USERNAME=
@@ -19,6 +20,11 @@ read AWS_REGION_INPUT
 if [[ -n $AWS_REGION_INPUT ]]; then AWS_REGION=$AWS_REGION_INPUT; fi
 # avoid sending empty values to batch
 if [[ -z $AWS_REGION ]]; then echo "value required"; exit 1; fi
+
+echo 'Environment (e.g. dev, qa, prod)?'
+read AWS_ENVIRONMENT_INPUT
+if [[ -n $AWS_ENVIRONMENT_INPUT ]]; then AWS_ENVIRONMENT=$AWS_ENVIRONMENT_INPUT; fi
+if [[ -z $AWS_ENVIRONMENT ]]; then echo "value required"; exit 1; fi
 
 echo 'Brief name for Liquibase Batch job (e.g. commit-08e6725)?'
 read AWS_JOB_NAME_INPUT
@@ -66,8 +72,8 @@ echo "Sending Batch Job..."
 AWS_BATCH_JOB_ID=$(aws batch submit-job \
 --region $AWS_REGION \
 --job-name $AWS_JOB_NAME \
---job-queue $AWS_JOB_QUEUE \
---job-definition $AWS_JOB_DEFINITION \
+--job-queue $AWS_JOB_QUEUE-$AWS_ENVIRONMENT \
+--job-definition $AWS_JOB_DEFINITION-$AWS_ENVIRONMENT \
 --container-overrides environment='[{name="BRANCH",value='"$BRANCH"'},{name="RDS_ENDPOINT",value='"$RDS_ENDPOINT"'},{name="USERNAME",value='"$DB_USERNAME"'},{name="PASSWORD",value='"$DB_PASSWORD"'},{name="LIQUIBASE_COMMAND",value='"$LIQUIBASE_COMMAND"'}]' \
 --query 'jobId' \
 --output text)
