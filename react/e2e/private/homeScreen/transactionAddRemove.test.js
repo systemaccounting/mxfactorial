@@ -1,4 +1,4 @@
-const { addTransaction, milk, bread, honey } = require('./utils')
+const { addTransaction, getTotal, milk, bread, honey } = require('./utils')
 const { HOME_URL, HOME_SELECTOR } = require('../../constants')
 
 const transactionDeleteSelector = 'button[name="delete-transaction"]'
@@ -11,11 +11,6 @@ beforeAll(async () => {
 
 const getInputByValue = async value =>
   await page.$$eval(`input[value="${value}"]`, element => element.length)
-
-const getTotal = async () =>
-  await page.$eval('[name="total-value"]', element =>
-    parseFloat(element.innerHTML)
-  )
 
 describe('transaction add remove (milk, honey, bread)', () => {
   it('adds three items', async () => {

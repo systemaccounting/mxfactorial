@@ -25,6 +25,11 @@ const addTransaction = async (
   }
 }
 
+const getTotal = async () =>
+  await page.$eval('[name="total-value"]', element =>
+    parseFloat(element.innerHTML)
+  )
+
 const milk = {
   name: 'milk',
   price: '10',
@@ -43,6 +48,7 @@ const bread = {
 
 module.exports = {
   addTransaction,
+  getTotal,
   milk,
   bread,
   honey
