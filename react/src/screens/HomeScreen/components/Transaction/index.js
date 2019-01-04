@@ -19,7 +19,7 @@ class Transaction extends React.Component {
     type: 'credit',
     transactions: [],
     draftTransaction: null,
-    salesTax: [],
+    rules: [],
     transactionHistory: [],
     recipient: '',
     total: 0,
@@ -41,13 +41,13 @@ class Transaction extends React.Component {
   }
 
   calculateTotal = () => {
-    const { transactions, draftTransaction } = this.state
+    const { transactions, draftTransaction, rules } = this.state
     const total = R.pipe(
       R.values,
       R.map(value => value && value.quantity * value.price),
       R.reject(isNaN),
       R.sum
-    )([...transactions, draftTransaction])
+    )([...transactions, draftTransaction, ...rules])
     this.setState({ total })
   }
 
@@ -95,6 +95,7 @@ class Transaction extends React.Component {
     this.setState(
       state => ({
         ...state,
+        rules: [],
         transactions: state.transactions.filter(
           transaction => transaction.uuid !== uuid
         )
@@ -136,29 +137,36 @@ class Transaction extends React.Component {
     if (!this.props.fetchRules) {
       return
     }
+    this.setState({ isFetchingRules: true })
     this.props
       .fetchRules([...transactions, draftTransaction])
       .then(({ data }) => {
-        const salesTax = data.rules.filter(item => item.rule_instance_id)
-        this.setState({ salesTax })
+        const rules = data.rules.filter(item => item.rule_instance_id)
+        this.setState({ rules, isFetchingRules: false })
+        this.calculateTotal()
       })
   }
 
-  get salesTax() {
-    const { salesTax } = this.state
-    if (!salesTax) {
+  get rules() {
+    const { rules, isFetchingRules } = this.state
+    if (isFetchingRules) {
       return null
     }
     return (
-      <div style={{ marginTop: 20 }}>
-        {salesTax.map(transaction => (
-          <TransactionItem
-            key={transaction.uuid}
-            data-uuid={transaction.uuid}
-            transaction={transaction}
-            onEdit={this.handleEditTransaction}
-            editable={false}
-          />
+      <div data-id="transaction-rules" style={{ marginTop: 20 }}>
+        {rules.map(transaction => (
+          <div
+            data-id="transaction-rule"
+            data-value={transaction.price * transaction.quantity}
+          >
+            <TransactionItem
+              key={transaction.uuid}
+              data-uuid={transaction.uuid}
+              transaction={transaction}
+              onEdit={this.handleEditTransaction}
+              editable={false}
+            />
+          </div>
         ))}
       </div>
     )
@@ -192,7 +200,7 @@ class Transaction extends React.Component {
               />
             </React.Fragment>
           ))}
-          {this.salesTax}
+          {this.rules}
         </div>
         {!hideForm ? (
           <Form

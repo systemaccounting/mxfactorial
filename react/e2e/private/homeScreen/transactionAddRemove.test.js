@@ -13,20 +13,22 @@ const getInputByValue = async value =>
   await page.$$eval(`input[value="${value}"]`, element => element.length)
 
 const getTotal = async () =>
-  await page.$eval('[name="total-value"]', element => element.innerHTML)
+  await page.$eval('[name="total-value"]', element =>
+    parseFloat(element.innerHTML)
+  )
 
 describe('transaction add remove (milk, honey, bread)', () => {
   it('adds three items', async () => {
-    expect(await getTotal()).toEqual('0')
+    expect(await getTotal()).toEqual(0)
 
     await addTransaction(page, milk)
-    expect(await getTotal()).toEqual('20')
+    expect(await getTotal()).not.toBeLessThan(20)
 
     await addTransaction(page, honey)
-    expect(await getTotal()).toEqual('60')
+    expect(await getTotal()).not.toBeLessThan(60)
 
     await addTransaction(page, bread, true) // draft
-    expect(await getTotal()).toEqual('80')
+    expect(await getTotal()).not.toBeLessThan(80)
   })
 
   it('item names should be corect', async () => {
@@ -40,7 +42,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     // delete milk
     await deleteButton.click()
-    expect(await getTotal()).toEqual('60')
+    expect(await getTotal()).not.toBeLessThan(60)
 
     expect(await getInputByValue('milk')).toEqual(0)
     expect(await getInputByValue('honey')).toEqual(1)
@@ -51,7 +53,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     const deleteButton = await page.$(transactionDeleteSelector)
     // delete honey
     await deleteButton.click()
-    expect(await getTotal()).toEqual('20')
+    expect(await getTotal()).not.toBeLessThan(20)
 
     expect(await getInputByValue('milk')).toEqual(0)
     expect(await getInputByValue('honey')).toEqual(0)
@@ -63,16 +65,18 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     // delete bread
     await deleteButton.click()
-    expect(await getTotal()).toEqual('0')
 
     expect(await getInputByValue('milk')).toEqual(0)
     expect(await getInputByValue('honey')).toEqual(0)
     expect(await getInputByValue('bread')).toEqual(0)
+
+    await page.waitFor(2000)
+    expect(await getTotal()).toEqual(0)
   })
 
   it('add milk again after deleting added items', async () => {
     await addTransaction(page, milk)
-    expect(await getTotal()).toEqual('20')
+    expect(await getTotal()).not.toBeLessThan(20)
     expect(await getInputByValue('milk')).toEqual(1)
   })
 
@@ -80,13 +84,13 @@ describe('transaction add remove (milk, honey, bread)', () => {
     const deleteButton = await page.$(transactionDeleteSelector)
     // delete milk
     await deleteButton.click()
-    expect(await getTotal()).toEqual('0')
+    expect(await getTotal()).toEqual(0)
     expect(await getInputByValue('milk')).toEqual(0)
   })
 
   it('add honey again', async () => {
     await addTransaction(page, honey, true) // draft
-    expect(await getTotal()).toEqual('40')
+    expect(await getTotal()).not.toBeLessThan(40)
     expect(await getInputByValue('honey')).toEqual(1)
   })
 
@@ -94,7 +98,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     const deleteButton2 = await page.$(transactionClearSelector)
     // delete honey
     await deleteButton2.click()
-    expect(await getTotal()).toEqual('0')
+    expect(await getTotal()).toEqual(0)
     expect(await getInputByValue('honey')).toEqual(0)
   })
 })
