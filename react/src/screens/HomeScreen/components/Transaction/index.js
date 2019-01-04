@@ -62,19 +62,6 @@ class Transaction extends React.Component {
 
   handleSwitchType = type => () => this.setState({ type })
 
-  fetchRules = () => {
-    const { draftTransaction, transactions } = this.state
-    if (!this.props.fetchRules) {
-      return
-    }
-    this.props
-      .fetchRules([...transactions, draftTransaction])
-      .then(({ data }) => {
-        const salesTax = data.rules.filter(item => item.rule_instance_id)
-        this.setState({ salesTax })
-      })
-  }
-
   handleAddTransaction = data => {
     const uuid = v4()
     this.setState(
@@ -142,6 +129,19 @@ class Transaction extends React.Component {
 
   handleDraftTransaction = draftTransaction => {
     this.setState({ draftTransaction }, this.calculateTotal)
+  }
+
+  fetchRules = () => {
+    const { draftTransaction, transactions } = this.state
+    if (!this.props.fetchRules) {
+      return
+    }
+    this.props
+      .fetchRules([...transactions, draftTransaction])
+      .then(({ data }) => {
+        const salesTax = data.rules.filter(item => item.rule_instance_id)
+        this.setState({ salesTax })
+      })
   }
 
   get salesTax() {
