@@ -95,7 +95,6 @@ class Transaction extends React.Component {
     this.setState(
       state => ({
         ...state,
-        rules: [],
         transactions: state.transactions.filter(
           transaction => transaction.uuid !== uuid
         )
@@ -148,25 +147,20 @@ class Transaction extends React.Component {
   }
 
   get rules() {
-    const { rules, isFetchingRules } = this.state
-    if (isFetchingRules) {
+    const { rules } = this.state
+    if (!rules) {
       return null
     }
     return (
       <div data-id="transaction-rules" style={{ marginTop: 20 }}>
         {rules.map(transaction => (
-          <div
-            data-id="transaction-rule"
-            data-value={transaction.price * transaction.quantity}
-          >
-            <TransactionItem
-              key={transaction.uuid}
-              data-uuid={transaction.uuid}
-              transaction={transaction}
-              onEdit={this.handleEditTransaction}
-              editable={false}
-            />
-          </div>
+          <TransactionItem
+            key={transaction.uuid}
+            data-uuid={transaction.uuid}
+            transaction={transaction}
+            onEdit={this.handleEditTransaction}
+            editable={false}
+          />
         ))}
       </div>
     )
