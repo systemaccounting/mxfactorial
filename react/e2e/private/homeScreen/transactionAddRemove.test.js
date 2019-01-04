@@ -9,6 +9,10 @@ beforeAll(async () => {
   await page.waitForSelector(HOME_SELECTOR)
 })
 
+afterAll(async () => {
+  await page.reload()
+})
+
 const getInputByValue = async value =>
   await page.$$eval(`input[value="${value}"]`, element => element.length)
 
