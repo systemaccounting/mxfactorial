@@ -95,6 +95,7 @@ class Transaction extends React.Component {
     this.setState(
       state => ({
         ...state,
+        rules: [],
         transactions: state.transactions.filter(
           transaction => transaction.uuid !== uuid
         )
