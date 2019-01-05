@@ -21,13 +21,13 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getTotal()).toEqual(0)
 
     await addTransaction(page, milk)
-    expect(await getTotal()).not.toBeLessThan(20)
+    expect(await getTotal()).toBeGreaterThanOrEqual(20)
 
     await addTransaction(page, honey)
-    expect(await getTotal()).not.toBeLessThan(60)
+    expect(await getTotal()).toBeGreaterThanOrEqual(60)
 
     await addTransaction(page, bread, true) // draft
-    expect(await getTotal()).not.toBeLessThan(80)
+    expect(await getTotal()).toBeGreaterThanOrEqual(80)
   })
 
   it('item names should be corect', async () => {
@@ -41,7 +41,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     // delete milk
     await deleteButton.click()
-    expect(await getTotal()).not.toBeLessThan(60)
+    expect(await getTotal()).toBeGreaterThanOrEqual(60)
 
     expect(await getInputByValue('milk')).toEqual(0)
     expect(await getInputByValue('honey')).toEqual(1)
@@ -52,7 +52,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     const deleteButton = await page.$(transactionDeleteSelector)
     // delete honey
     await deleteButton.click()
-    expect(await getTotal()).not.toBeLessThan(20)
+    expect(await getTotal()).toBeGreaterThanOrEqual(20)
 
     expect(await getInputByValue('milk')).toEqual(0)
     expect(await getInputByValue('honey')).toEqual(0)
@@ -69,13 +69,12 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getInputByValue('honey')).toEqual(0)
     expect(await getInputByValue('bread')).toEqual(0)
 
-    await page.waitFor(2000)
     expect(await getTotal()).toEqual(0)
   })
 
   it('add milk again after deleting added items', async () => {
     await addTransaction(page, milk)
-    expect(await getTotal()).not.toBeLessThan(20)
+    expect(await getTotal()).toBeGreaterThanOrEqual(20)
     expect(await getInputByValue('milk')).toEqual(1)
   })
 
@@ -89,7 +88,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
   it('add honey again', async () => {
     await addTransaction(page, honey, true) // draft
-    expect(await getTotal()).not.toBeLessThan(40)
+    expect(await getTotal()).toBeGreaterThanOrEqual(40)
     expect(await getInputByValue('honey')).toEqual(1)
   })
 

@@ -19,11 +19,11 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     await addTransaction(page, milk)
     total += milk.price * milk.quantity
-    expect(await getTotal()).not.toBeLessThan(total)
+    expect(await getTotal()).toBeGreaterThanOrEqual(total)
 
     await addTransaction(page, honey, true) //draft
     total += honey.price * honey.quantity
-    expect(await getTotal()).not.toBeLessThan(total)
+    expect(await getTotal()).toBeGreaterThanOrEqual(total)
   })
 
   it('draft transaction input values', async () => {
@@ -51,7 +51,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     await clearButton.click()
 
     total = milk.price * milk.quantity
-    expect(await getTotal()).not.toBeLessThan(total)
+    expect(await getTotal()).toBeGreaterThanOrEqual(total)
 
     const nameInputValue = await page.$eval(
       transactionAddNameSelector,

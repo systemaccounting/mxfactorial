@@ -114,7 +114,11 @@ class Transaction extends React.Component {
   handleRecipientChange = e => this.setState({ recipient: e.target.value })
 
   handleFormClear = isClear => {
-    if (isClear && this.state.transactions.length) {
+    const { transactions } = this.state
+    if (!transactions.length) {
+      this.setState({ rules: [] })
+    }
+    if (isClear && transactions.length) {
       this.setState({ hideForm: true })
     }
     setTimeout(this.fetchRules)

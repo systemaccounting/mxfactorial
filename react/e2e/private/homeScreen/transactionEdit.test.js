@@ -18,13 +18,13 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getTotal()).toEqual(0)
 
     await addTransaction(page, milk)
-    expect(await getTotal()).not.toBeLessThan(20)
+    expect(await getTotal()).toBeGreaterThanOrEqual(20)
 
     await addTransaction(page, honey)
-    expect(await getTotal()).not.toBeLessThan(60)
+    expect(await getTotal()).toBeGreaterThanOrEqual(60)
 
     await addTransaction(page, bread)
-    expect(await getTotal()).not.toBeLessThan(80)
+    expect(await getTotal()).toBeGreaterThanOrEqual(80)
   })
 
   it('2 - item names should be corect', async () => {
@@ -49,7 +49,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     await milkPriceInput.click({ clickCount: 3 })
     await milkPriceInput.type('5')
-    expect(await getTotal()).not.toBeLessThan(70)
+    expect(await getTotal()).toBeGreaterThanOrEqual(70)
   })
 
   it('4 - edit honey', async () => {
@@ -68,6 +68,6 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     await milkPriceInput.click({ clickCount: 3 })
     await milkPriceInput.type('60')
-    expect(await getTotal()).not.toBeLessThan(90)
+    expect(await getTotal()).toBeGreaterThanOrEqual(90)
   })
 })

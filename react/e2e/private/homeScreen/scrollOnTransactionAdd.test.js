@@ -29,6 +29,6 @@ describe('scroll home screen on add item', () => {
     })
     expect(
       yScrollDiffs[yScrollDiffs.length - 1] - yScrollDiffs[0]
-    ).toBeGreaterThanOrEqual(90)
+    ).toBeGreaterThanOrEqual(70)
   })
 })
