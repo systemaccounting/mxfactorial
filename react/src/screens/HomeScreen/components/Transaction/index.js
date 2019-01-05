@@ -116,7 +116,7 @@ class Transaction extends React.Component {
   handleFormClear = isClear => {
     const { transactions } = this.state
     if (!transactions.length) {
-      this.setState({ rules: [] })
+      this.setState({ rules: [], total: 0 })
     }
     if (isClear && transactions.length) {
       this.setState({ hideForm: true })
@@ -200,31 +200,31 @@ class Transaction extends React.Component {
           ))}
           {this.rules}
         </div>
-        {!hideForm ? (
-          <Form
-            namePrefix="transaction-add"
-            clearButton={RemoveButton}
-            onClear={this.handleFormClear}
-            schema={transactionSchema}
-            submitLabel={[<AddIcon key="add-icon" />, ' Item']}
-            onSubmit={this.handleAddTransaction}
-            onValuesUpdate={this.handleDraftTransaction}
-            onInputBlur={this.handleInputBlur}
-          />
-        ) : (
-          <Button
-            data-id="hide-show-form"
-            type="button"
-            onClick={this.handleShowForm}
-          >
-            <AddIcon key="add-icon" /> Item
-          </Button>
-        )}
-        <React.Fragment>
+        <div data-id="draft-transaction">
+          {!hideForm ? (
+            <Form
+              namePrefix="transaction-add"
+              clearButton={RemoveButton}
+              onClear={this.handleFormClear}
+              schema={transactionSchema}
+              submitLabel={[<AddIcon key="add-icon" />, ' Item']}
+              onSubmit={this.handleAddTransaction}
+              onValuesUpdate={this.handleDraftTransaction}
+              onInputBlur={this.handleInputBlur}
+            />
+          ) : (
+            <Button
+              data-id="hide-show-form"
+              type="button"
+              onClick={this.handleShowForm}
+            >
+              <AddIcon key="add-icon" /> Item
+            </Button>
+          )}
           <Button data-id={type} theme={type === 'credit' ? 'info' : 'success'}>
             {type === 'credit' ? 'Request' : 'Transact'}
           </Button>
-        </React.Fragment>
+        </div>
       </div>
     )
   }
