@@ -43,6 +43,7 @@ jobs:
             REACT_APP_TEST_BUILD_NUMBER=$CIRCLE_BUILD_NUM \
             REACT_APP_BUILD_URL=$CIRCLE_BUILD_URL \
             REACT_APP_TEST_DEVELOPER=$CIRCLE_USERNAME \
+            REACT_APP_API_URL=$REACT_APP_API_URL_DEV \
             node node_modules/react-scripts/scripts/build.js
       - save_cache:
           paths:
