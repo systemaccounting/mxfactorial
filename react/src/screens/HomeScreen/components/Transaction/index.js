@@ -122,7 +122,9 @@ class Transaction extends React.Component {
     if (isClear && transactions.length) {
       this.setState({ hideForm: true })
     }
-    setTimeout(this.fetchRules)
+    if (!isClear) {
+      this.setState({ rules: [] }, this.fetchRules)
+    }
   }
 
   handleShowForm = () => this.setState({ hideForm: false })
