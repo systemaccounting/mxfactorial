@@ -222,13 +222,13 @@ workflows:
       - react-deploy-dev:
           requires:
             - react-build-test-dev
-          filters:
-            branches:
-              ignore: /.*/
+          # filters:
+          #   branches:
+          #     ignore: /.*/
             # deploy accept tags only
-            tags:
-              only:
-                - /.*accept.*/
+            # tags:
+            #   only:
+            #     - /.*accept.*/
   react-build-test-deploy-prod:
     jobs:
       - react-build-test-prod:
