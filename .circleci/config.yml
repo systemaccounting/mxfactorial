@@ -118,8 +118,8 @@ jobs:
           key: v017-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
-      - run: yarn run ci:e2e-private
-      - run: yarn run ci:e2e-public
+      - run: yarn run test:e2e-private
+      - run: yarn run test:e2e-public
       - run:
           name: Build web client for prod environment
           command: yarn run build
