@@ -29,8 +29,16 @@ jobs:
           key: v018-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
-      - run: yarn run test:e2e-private
-      - run: yarn run test:e2e-public
+      - run:
+          name: Execute pre-auth e2e tests
+          command: yarn run test:e2e-public
+          environment:
+            CI_ENV: dev
+      - run:
+          name: Execute post-auth e2e tests
+          command: yarn run test:e2e-private
+          environment:
+            CI_ENV: dev
       - run:
           name: Build web client for acceptance testing
           command: |
@@ -118,8 +126,16 @@ jobs:
           key: v018-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
-      - run: yarn run test:e2e-private
-      - run: yarn run test:e2e-public
+      - run:
+          name: Execute pre-auth e2e tests
+          command: yarn run test:e2e-public
+          environment:
+            CI_ENV: prod
+      - run:
+          name: Execute post-auth e2e tests
+          command: yarn run test:e2e-private
+          environment:
+            CI_ENV: prod
       - run:
           name: Build web client for prod environment
           command: yarn run build

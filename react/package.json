@@ -26,6 +26,7 @@
   },
   "scripts": {
     "start": "NODE_PATH=./src react-scripts start",
+    "start:dev": "NODE_PATH=./src env-cmd .env.dev react-scripts start",
     "build": "NODE_PATH=./src react-scripts build",
     "test": "react-scripts test --env=jsdom --verbose --modulePaths=./src",
     "loc:cov": "react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
