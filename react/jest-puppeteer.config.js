@@ -1,6 +1,6 @@
 module.exports = {
   server: {
-    command: 'yarn start',
+    command: 'NODE_PATH=./src react-scripts start',
     port: 3000
   },
   launch: {
