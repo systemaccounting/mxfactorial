@@ -29,6 +29,7 @@
   },
   "scripts": {
     "start": "NODE_PATH=./src react-scripts start",
+    "start:dev": "NODE_PATH=./src env-cmd .env.dev react-scripts start",
     "build": "NODE_PATH=./src react-scripts build",
     "test": "react-scripts test --env=jsdom --verbose --modulePaths=./src",
     "loc:cov": "react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
@@ -52,6 +53,7 @@
     "babel-plugin-module-resolver": "^3.1.1",
     "coveralls": "^3.0.1",
     "cross-env": "^5.2.0",
+    "env-cmd": "^8.0.2",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "eslint-config-prettier": "^2.9.0",
@@ -59,8 +61,7 @@
     "eslint-plugin-prettier": "^2.6.0",
     "jest-puppeteer": "^3.5.2",
     "prettier": "^1.12.1",
-    "puppeteer": "^1.10.0",
-    "start-server-and-test": "^1.4.1"
+    "puppeteer": "^1.10.0"
   },
   "jest": {
     "collectCoverageFrom": [

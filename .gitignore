@@ -25,6 +25,7 @@ react/.env.local
 react/.env.development.local
 react/.env.test.local
 react/.env.production.local
+react/.env.*
 
 react/npm-debug.log*
 react/yarn-debug.log*
