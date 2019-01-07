@@ -14,7 +14,7 @@ const detectEnvironment = () => {
         return 'NODE_PATH=./src env-cmd $DEV_REACT_VARS react-scripts start'
     }
   }
-  return 'NODE_PATH=./src env-cmd .env-dev react-scripts start'
+  return 'NODE_PATH=./src env-cmd .env.dev react-scripts start'
 }
 
 module.exports = {
