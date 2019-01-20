@@ -1,9 +1,3 @@
-# `aws_route53_record` fail to resolve attributes on count > 1 `aws_acm_certificate` with single `terraform apply`
-
-# workaround:
-# 1. `terraform apply -target aws_acm_certificate.client_cert -target aws_acm_certificate.api_cert`
-# 2. `terraform apply`
-
 terraform {
   required_version = ">= 0.11.8"
 
@@ -21,36 +15,19 @@ provider "aws" {
   region = "us-east-1"
 }
 
-// variables and outputs consolidated here for convenient management of their dependency
-// ATTN: addition to environment list requires addition to client_cert_map AND api_cert_map outputs
+// ATTN: addition of cert requires addition to client_cert_map AND api_cert_map outputs
 
-variable "environments" {
-  type = "list"
-
-  default = [
-    "prod",
-    "qa",
-    "dev"
-  ]
+module "prod_certs" {
+  source      = "../../modules/us-east-1-acm"
+  environment = "prod"
 }
 
-output "client_cert_map" {
-  value = {
-    prod = "${aws_acm_certificate_validation.client_cert.*.certificate_arn[0]}"
-    qa   = "${aws_acm_certificate_validation.client_cert.*.certificate_arn[1]}"
-    dev   = "${aws_acm_certificate_validation.client_cert.*.certificate_arn[2]}"
-  }
+module "dev_certs" {
+  source      = "../../modules/us-east-1-acm"
+  environment = "dev"
 }
 
-output "api_cert_map" {
-  value = {
-    prod = "${aws_acm_certificate_validation.api_cert.*.certificate_arn[0]}"
-    qa   = "${aws_acm_certificate_validation.api_cert.*.certificate_arn[1]}"
-    dev   = "${aws_acm_certificate_validation.api_cert.*.certificate_arn[2]}"
-  }
-}
-
-// prod only
-output "client_www_cert" {
-  value = "${aws_acm_certificate_validation.client_www_cert.certificate_arn}"
+module "qa_certs" {
+  source      = "../../modules/us-east-1-acm"
+  environment = "qa"
 }
