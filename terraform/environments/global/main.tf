@@ -16,7 +16,6 @@ provider "aws" {
 }
 
 // ATTN: addition of cert requires addition to client_cert_map AND api_cert_map outputs
-
 module "prod_certs" {
   source      = "../../modules/us-east-1-acm"
   environment = "prod"
