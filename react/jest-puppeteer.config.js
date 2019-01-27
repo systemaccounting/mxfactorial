@@ -5,16 +5,25 @@
 const detectEnvironment = () => {
   if (process.env.CI) {
     switch (process.env.CI_ENV) {
-      case 'stg':
-        // code block
-        break
-      case 'prod':
-        return 'NODE_PATH=./src react-scripts start'
-      default:
+      case 'dev':
         return 'NODE_PATH=./src env-cmd $DEV_REACT_VARS react-scripts start'
+      case 'qa':
+        return 'NODE_PATH=./src env-cmd $QA_REACT_VARS react-scripts start'
+      default:
+        return 'NODE_PATH=./src react-scripts start'
     }
   }
-  return 'NODE_PATH=./src env-cmd .env-dev react-scripts start'
+  if (process.env.LOCAL_ENV) {
+    switch (process.env.LOCAL_ENV) {
+      case 'dev':
+        return 'NODE_PATH=./src env-cmd .env.dev react-scripts start'
+      case 'qa':
+        return 'NODE_PATH=./src env-cmd .env.qa react-scripts start'
+      default:
+        return 'NODE_PATH=./src react-scripts start'
+    }
+  }
+  return 'NODE_PATH=./src react-scripts start'
 }
 
 module.exports = {

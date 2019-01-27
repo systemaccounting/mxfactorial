@@ -17,12 +17,11 @@ jobs:
              circleci step halt
             fi
       - run:
-          name: Detect changed subdirectory files
+          name: Detect changed subdirectory files since last successful build
           command: |
-            SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-            if [[ "$SUBDIR" != *"react"* ]]; then
-              circleci step halt
-            fi
+            # get jq
+            sudo apt-get update && sudo apt-get install jq -y
+            . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
             - node_modules
@@ -115,12 +114,11 @@ jobs:
              circleci step halt
             fi
       - run:
-          name: Detect changed subdirectory files
+          name: Detect changed subdirectory files since last successful build
           command: |
-            SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-            if [[ "$SUBDIR" != *"react"* ]]; then
-              circleci step halt
-            fi
+            # get jq
+            sudo apt-get update && sudo apt-get install jq -y
+            . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
             - node_modules
@@ -202,12 +200,11 @@ jobs:
              circleci step halt
             fi
       - run:
-          name: Detect changed subdirectory files
+          name: Detect changed subdirectory files since last successful build
           command: |
-            SUBDIR=$(git log --name-only --oneline -1 | sed 1d | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-            if [[ "$SUBDIR" != *"graphql-faas"* ]]; then
-              circleci step halt
-            fi
+            # get jq
+            sudo apt-get update && sudo apt-get install jq -y
+            . ../.circleci/scripts/detect-project.sh graphql-faas
       - run:
           name: Update
           working_directory: /
