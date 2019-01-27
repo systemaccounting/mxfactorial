@@ -201,7 +201,6 @@ class Transaction extends React.Component {
               />
             </React.Fragment>
           ))}
-          {this.rules}
         </div>
         <div data-id="draft-transaction">
           {!hideForm ? (
@@ -228,6 +227,7 @@ class Transaction extends React.Component {
             {type === 'credit' ? 'Request' : 'Transact'}
           </Button>
         </div>
+        {this.rules}
       </div>
     )
   }
