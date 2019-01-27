@@ -13,7 +13,7 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
     CURRENT_BRANCH=$(git branch | grep -F '*' | cut -d ' ' -f2)
     SUBDIR=git log --name-only --oneline $PARENT_BRANCH..$CURRENT_BRANCH | sed -E '/^[a-f0-9]{7}/d' | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u
   else
-    # use previous commit sha if develop or master and no previous success build number
+    # use previous commit sha if develop or master and no previous success build number (in case someone git inits this script)
     SUBDIR=$(git log --name-only --oneline -1 | sed -E '/^[a-f0-9]{7}/d' | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
   fi
   # exit if react project excluded from subdirectories affected by latest commit
@@ -28,7 +28,7 @@ jq -r '.all_commit_details | first | .commit')
 echo "Last successful build commit: $LAST_SUCCESSFUL_BUILD_COMMIT"
 # get subdirectories affected by range of commits since last successful build
 SUBDIR=$(git log --name-only --oneline $LAST_SUCCESSFUL_BUILD_COMMIT..$CIRCLE_SHA1 | sed -E '/^[a-f0-9]{7}/d' | grep '/' | cut -d "/" -f1 | sed '/^\.circleci$/d' | sort -u)
-echo "Directories affected since previous successful build of $CIRCLE_JOB: $SUBDIR"
+echo "Directories affected since previous successful build of $CIRCLE_JOB job: $SUBDIR"
 # exit if react project excluded from list of subdirectories affected by range of commits since last successful build
 if [[ "$SUBDIR" != *"$1"* ]]; then
   circleci step halt
