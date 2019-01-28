@@ -119,4 +119,9 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getTotal()).toEqual(0)
     expect(await getInputByValue('honey')).toEqual(0)
   })
+
+  it('default quantity=1 for user-generated items', async () => {
+    await addTransaction(page, { name: 'test', price: 1 }, true) // draft
+    expect(await getTotal()).toBeGreaterThanOrEqual(1)
+  })
 })
