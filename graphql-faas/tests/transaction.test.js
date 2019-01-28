@@ -1,7 +1,7 @@
 const request = require('supertest')
 const gql = require('graphql-tag')
 
-const BASE_URL = `https://dev-api.mxfactorial.io`
+const BASE_URL = `https://qa-api.mxfactorial.io`
 
 const mutation = `mutation createTransaction {
   createTransaction(input: {
