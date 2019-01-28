@@ -36,6 +36,24 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getInputByValue('bread')).toEqual(1)
   })
 
+  it('user-generated item sequence contains 0 rule-generated items', async () => {
+    const qty = await page.$$eval(
+      '[data-id="user-generated-items"] [data-id="rule-item"]',
+      list => list.length
+    )
+
+    expect(qty).toEqual(0)
+  })
+
+  it('rule-generated item sequence contains 0 user-generated items', async () => {
+    const qty = await page.$$eval(
+      '[data-id="transaction-rules"] [data-id="user-item"]',
+      list => list.length
+    )
+
+    expect(qty).toEqual(0)
+  })
+
   it('delete milk and check result', async () => {
     const deleteButton = await page.$(transactionDeleteSelector)
 

@@ -161,13 +161,14 @@ class Transaction extends React.Component {
     return (
       <div data-id="transaction-rules" style={{ marginTop: 20 }}>
         {rules.map(transaction => (
-          <TransactionItem
-            key={transaction.uuid}
-            data-uuid={transaction.uuid}
-            transaction={transaction}
-            onEdit={this.handleEditTransaction}
-            editable={false}
-          />
+          <div key={transaction.uuid} data-id="rule-item">
+            <TransactionItem
+              data-uuid={transaction.uuid}
+              transaction={transaction}
+              onEdit={this.handleEditTransaction}
+              editable={false}
+            />
+          </div>
         ))}
       </div>
     )
@@ -186,46 +187,51 @@ class Transaction extends React.Component {
         />
         <LabelWithValue name="total" label="total" value={total} />
         <TypeSwitch onSwitch={this.handleSwitchType} active={this.state.type} />
-        <div>
+        <div data-id="user-generated-items">
           {transactions.map((transaction, index) => (
             <React.Fragment key={`transaction-${index}`}>
               <RemoveButton
                 name="delete-transaction"
                 onClick={this.handleDeleteTransaction(transaction.uuid)}
               />
-              <TransactionItem
-                data-uuid={transaction.uuid}
-                transaction={transaction}
-                onEdit={this.handleEditTransaction}
-                onInputBlur={this.handleInputBlur}
-              />
+              <div data-id="user-item">
+                <TransactionItem
+                  data-uuid={transaction.uuid}
+                  transaction={transaction}
+                  onEdit={this.handleEditTransaction}
+                  onInputBlur={this.handleInputBlur}
+                />
+              </div>
             </React.Fragment>
           ))}
-        </div>
-        <div data-id="draft-transaction">
-          {!hideForm ? (
-            <Form
-              namePrefix="transaction-add"
-              clearButton={RemoveButton}
-              onClear={this.handleFormClear}
-              schema={transactionSchema}
-              submitLabel={[<AddIcon key="add-icon" />, ' Item']}
-              onSubmit={this.handleAddTransaction}
-              onValuesUpdate={this.handleDraftTransaction}
-              onInputBlur={this.handleInputBlur}
-            />
-          ) : (
+          <div data-id="draft-transaction">
+            {!hideForm ? (
+              <Form
+                namePrefix="transaction-add"
+                clearButton={RemoveButton}
+                onClear={this.handleFormClear}
+                schema={transactionSchema}
+                submitLabel={[<AddIcon key="add-icon" />, ' Item']}
+                onSubmit={this.handleAddTransaction}
+                onValuesUpdate={this.handleDraftTransaction}
+                onInputBlur={this.handleInputBlur}
+              />
+            ) : (
+              <Button
+                data-id="hide-show-form"
+                type="button"
+                onClick={this.handleShowForm}
+              >
+                <AddIcon key="add-icon" /> Item
+              </Button>
+            )}
             <Button
-              data-id="hide-show-form"
-              type="button"
-              onClick={this.handleShowForm}
+              data-id={type}
+              theme={type === 'credit' ? 'info' : 'success'}
             >
-              <AddIcon key="add-icon" /> Item
+              {type === 'credit' ? 'Request' : 'Transact'}
             </Button>
-          )}
-          <Button data-id={type} theme={type === 'credit' ? 'info' : 'success'}>
-            {type === 'credit' ? 'Request' : 'Transact'}
-          </Button>
+          </div>
         </div>
         {this.rules}
       </div>
