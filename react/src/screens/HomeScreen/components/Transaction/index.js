@@ -44,7 +44,13 @@ class Transaction extends React.Component {
     const { transactions, draftTransaction, rules } = this.state
     const total = R.pipe(
       R.values,
-      R.map(({ qty = 1, price = 0 }) => qty * price),
+      R.map(value => {
+        if (!value) {
+          return 0
+        }
+        const qty = value.quantity || 1
+        return qty * value.price
+      }),
       R.reject(isNaN),
       R.sum
     )([...transactions, draftTransaction, ...rules])

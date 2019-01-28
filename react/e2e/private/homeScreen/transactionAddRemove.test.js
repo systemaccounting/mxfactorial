@@ -121,7 +121,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('default quantity=1 for user-generated items', async () => {
-    await addTransaction(page, { name: 'test', price: 1 }, true) // draft
+    await addTransaction(page, { name: 'test', price: '1' }, true) // draft
     expect(await getTotal()).toBeGreaterThanOrEqual(1)
   })
 })

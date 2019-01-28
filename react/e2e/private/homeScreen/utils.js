@@ -9,15 +9,21 @@ const addTransaction = async (
   draft = false
 ) => {
   const { name, price, quantity } = transaction
-  const itemNameInput = await page.$(transactionAddNameSelector)
-  await itemNameInput.type(name)
 
-  const itemPriceInput = await page.$(transactionAddPriceSelector)
+  if (name) {
+    const itemNameInput = await page.$(transactionAddNameSelector)
+    await itemNameInput.type(name)
+  }
 
-  await itemPriceInput.type(price)
+  if (price) {
+    const itemPriceInput = await page.$(transactionAddPriceSelector)
+    await itemPriceInput.type(price)
+  }
 
-  const itemQuantityInput = await page.$(transactionAddQuantitySelector)
-  await itemQuantityInput.type(quantity)
+  if (quantity) {
+    const itemQuantityInput = await page.$(transactionAddQuantitySelector)
+    await itemQuantityInput.type(quantity)
+  }
 
   if (!draft) {
     const addItemButton = await page.$(transactionAddButtonSelector)
