@@ -6,6 +6,8 @@ import Form from 'components/Form'
 import Header from 'components/Header'
 import ButtonLink from 'components/ButtonLink'
 
+import s from './LandingScreen.module.css'
+
 const LandingScreenWrapper = styled.div`
   text-align: center;
   display: flex;
@@ -101,6 +103,9 @@ class LandingScreen extends Component {
             text="Create"
             name="create-account"
           />
+        </div>
+        <div className={s.version} data-id="appVersion">
+          <IntroStyled>{process.env.REACT_APP_TEST_VERSION}</IntroStyled>
         </div>
       </LandingScreenWrapper>
     )

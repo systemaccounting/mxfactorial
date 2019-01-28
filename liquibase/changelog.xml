@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="mxfactorial" id="1">
+    <createTable tableName="transactions">
+      <column name="id" type="BIGINT" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="varchar(50)"/>
+      <column name="price" type="varchar(50)"/>
+      <column name="quantity" type="varchar(50)"/>
+      <column name="unit_of_measurement" type="varchar(50)"/>
+      <column name="units_measured" type="varchar(50)"/>
+      <column name="rule_instance_id" type="varchar(255)"/>
+      <column name="transaction_id" type="varchar(255)"/>
+      <column name="author" type="varchar(50)"/>
+      <column name="expiration_time" type="varchar(50)"/>
+      <column name="debitor" type="varchar(50)"/>
+      <column name="creditor" type="varchar(50)"/>
+      <column name="debitor_profile_latlng" type="varchar(50)"/>
+      <column name="creditor_profile_latlng" type="varchar(50)"/>
+      <column name="debitor_transaction_latlng" type="varchar(50)"/>
+      <column name="creditor_transaction_latlng" type="varchar(50)"/>
+      <column name="debitor_approval_time" type="varchar(50)"/>
+      <column name="creditor_approval_time" type="varchar(50)"/>
+      <column name="debitor_device" type="varchar(50)"/>
+      <column name="creditor_device" type="varchar(50)"/>
+      <column name="debit_approver" type="varchar(50)"/>
+      <column name="credit_approver" type="varchar(50)"/>
+      <column name="creditor_rejection_time" type="varchar(50)"/>
+      <column name="debitor_rejection_time" type="varchar(50)"/>
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

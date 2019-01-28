@@ -8,6 +8,8 @@
 **/*lock.info
 **/.terraform/
 
+## liquibase
+**/liquibase.properties
 
 ## react
 
@@ -23,6 +25,7 @@ react/.env.local
 react/.env.development.local
 react/.env.test.local
 react/.env.production.local
+react/.env.*
 
 react/npm-debug.log*
 react/yarn-debug.log*
@@ -30,10 +33,11 @@ react/yarn-error.log*
 
 
 ## global
+**/yarn-error.log
 
 # dependencies
 **/node_modules
-/package-lock.json
+**/package-lock.json
 /npm-debug.log
 
 # deploy faas
