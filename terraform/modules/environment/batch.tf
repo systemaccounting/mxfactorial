@@ -124,7 +124,7 @@ resource "aws_batch_compute_environment" "default" {
 
     max_vcpus     = 16
     min_vcpus     = 0
-    desired_vcpus = 0
+    desired_vcpus = 2
 
     security_group_ids = ["${data.aws_security_group.default.id}"]
 
