@@ -1,4 +1,5 @@
 import React from 'react'
+import cx from 'classnames'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
 
@@ -150,13 +151,16 @@ class Transaction extends React.Component {
       return
     }
     this.setState({ isFetchingRules: true })
-    this.props
-      .fetchRules([...transactions, draftTransaction])
-      .then(({ data }) => {
+    let promise = this.props.fetchRules([...transactions, draftTransaction])
+    this.fetchRulesRequest = promise
+    promise.then(({ data }) => {
+      // Resolve only the last request promise
+      if (promise === this.fetchRulesRequest) {
         const rules = data.rules.filter(item => item.rule_instance_id)
         this.setState({ rules, isFetchingRules: false })
         this.calculateTotal()
-      })
+      }
+    })
   }
 
   get rules() {
@@ -191,7 +195,9 @@ class Transaction extends React.Component {
           onChange={this.handleRecipientChange}
           placeholder="Recipient"
         />
-        <LabelWithValue name="total" label="total" value={total} />
+        <div className={cx({ updated: !this.state.isFetchingRules })}>
+          <LabelWithValue name="total" label="total" value={total} />
+        </div>
         <TypeSwitch onSwitch={this.handleSwitchType} active={this.state.type} />
         <div data-id="user-generated-items">
           {transactions.map((transaction, index) => (

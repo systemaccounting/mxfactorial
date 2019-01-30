@@ -18,11 +18,15 @@ const addTransaction = async (
   if (price) {
     const itemPriceInput = await page.$(transactionAddPriceSelector)
     await itemPriceInput.type(price)
+    // Blur input to fire fetchRules() request
+    await page.$eval(transactionAddPriceSelector, e => e.blur())
   }
 
   if (quantity) {
     const itemQuantityInput = await page.$(transactionAddQuantitySelector)
     await itemQuantityInput.type(quantity)
+    // Blur input to fire fetchRules() request
+    await page.$eval(transactionAddQuantitySelector, e => e.blur())
   }
 
   if (!draft) {
@@ -31,10 +35,12 @@ const addTransaction = async (
   }
 }
 
-const getTotal = async () =>
-  await page.$eval('[name="total-value"]', element =>
+const getTotal = async () => {
+  await page.waitForSelector('.updated')
+  return await page.$eval('[name="total-value"]', element =>
     parseFloat(element.innerHTML)
   )
+}
 
 const milk = {
   name: 'milk',
