@@ -50,6 +50,7 @@ jobs:
             REACT_APP_TEST_BUILD_NUMBER=$CIRCLE_BUILD_NUM \
             REACT_APP_BUILD_URL=$CIRCLE_BUILD_URL \
             REACT_APP_TEST_DEVELOPER=$CIRCLE_USERNAME \
+            REACT_APP_API_URL=$REACT_APP_API_URL_DEV \
             node node_modules/react-scripts/scripts/build.js
       - save_cache:
           paths:
@@ -234,13 +235,13 @@ workflows:
       - react-deploy-dev:
           requires:
             - react-build-test-dev
-          filters:
-            branches:
-              ignore: /.*/
+          # filters:
+          #   branches:
+          #     ignore: /.*/
             # deploy accept tags only
-            tags:
-              only:
-                - /.*accept.*/
+            # tags:
+            #   only:
+            #     - /.*accept.*/
   react-build-test-deploy-prod:
     jobs:
       - react-build-test-prod:

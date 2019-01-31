@@ -1,4 +1,4 @@
-const { addTransaction, milk, bread, honey } = require('./utils')
+const { addTransaction, getTotal, milk, bread, honey } = require('./utils')
 const { HOME_URL, HOME_SELECTOR } = require('../../constants')
 
 beforeAll(async () => {
@@ -6,24 +6,25 @@ beforeAll(async () => {
   await page.waitForSelector(HOME_SELECTOR)
 })
 
+afterAll(async () => {
+  await page.reload()
+})
+
 const getInputByValue = async value =>
   await page.$$eval(`input[value="${value}"]`, element => element.length)
 
-const getTotal = async () =>
-  await page.$eval('[name="total-value"]', element => element.innerHTML)
-
 describe('transaction add remove (milk, honey, bread)', () => {
   it('1 - adds three items', async () => {
-    expect(await getTotal()).toEqual('0')
+    expect(await getTotal()).toEqual(0)
 
     await addTransaction(page, milk)
-    expect(await getTotal()).toEqual('20')
+    expect(await getTotal()).toBeGreaterThanOrEqual(20)
 
     await addTransaction(page, honey)
-    expect(await getTotal()).toEqual('60')
+    expect(await getTotal()).toBeGreaterThanOrEqual(60)
 
     await addTransaction(page, bread)
-    expect(await getTotal()).toEqual('80')
+    expect(await getTotal()).toBeGreaterThanOrEqual(80)
   })
 
   it('2 - item names should be corect', async () => {
@@ -48,7 +49,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     await milkPriceInput.click({ clickCount: 3 })
     await milkPriceInput.type('5')
-    expect(await getTotal()).toEqual('70')
+    expect(await getTotal()).toBeGreaterThanOrEqual(70)
   })
 
   it('4 - edit honey', async () => {
@@ -67,6 +68,6 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     await milkPriceInput.click({ clickCount: 3 })
     await milkPriceInput.type('60')
-    expect(await getTotal()).toEqual('90')
+    expect(await getTotal()).toBeGreaterThanOrEqual(90)
   })
 })

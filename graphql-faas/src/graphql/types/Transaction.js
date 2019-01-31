@@ -14,6 +14,7 @@ const TransactionType = new GraphQLObjectType({
       type: GraphQLID,
       description: 'Transaction ID'
     },
+    uuid: { type: GraphQLID },
     debitor: {
       type: GraphQLString,
       description: 'Debitor account; sending payment'
