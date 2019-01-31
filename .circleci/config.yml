@@ -170,6 +170,15 @@ jobs:
       - attach_workspace:
           at: build
       - run:
+          name: Exit if build directory NOT present after early client build termination
+          #from build/ attached above
+          command: |
+            if [[ -f build/index.html ]]; then
+              aws s3 sync build/ s3://mxfactorial-react-dev --delete
+            else
+               circleci step halt
+            fi
+      - run:
           name: Deploy to S3
           #from build/ attached above
           command: aws s3 sync build/ s3://mxfactorial-react-prod --delete
