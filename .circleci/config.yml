@@ -13,14 +13,12 @@ jobs:
       - run:
           name: Detect changed root files
           command: |
-            if [[ $(git log --name-only --oneline -1 | sed 1d) != *\/* ]]; then
-             circleci step halt
-            fi
+            # get jq
+            sudo apt-get update && sudo apt-get install jq -y
+            . ../.circleci/scripts/detect-project.sh \/
       - run:
           name: Detect changed subdirectory files since last successful build
           command: |
-            # get jq
-            sudo apt-get update && sudo apt-get install jq -y
             . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
@@ -110,14 +108,12 @@ jobs:
       - run:
           name: Detect changed root files
           command: |
-            if [[ $(git log --name-only --oneline -1 | sed 1d) != *\/* ]]; then
-             circleci step halt
-            fi
+            # get jq
+            sudo apt-get update && sudo apt-get install jq -y
+            . ../.circleci/scripts/detect-project.sh \/
       - run:
           name: Detect changed subdirectory files since last successful build
           command: |
-            # get jq
-            sudo apt-get update && sudo apt-get install jq -y
             . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
@@ -174,7 +170,7 @@ jobs:
           #from build/ attached above
           command: |
             if [[ -f build/index.html ]]; then
-              aws s3 sync build/ s3://mxfactorial-react-dev --delete
+              aws s3 sync build/ s3://mxfactorial-react-prod --delete
             else
                circleci step halt
             fi
@@ -205,14 +201,12 @@ jobs:
       - run:
           name: Detect changed root files
           command: |
-            if [[ $(git log --name-only --oneline -1 | sed 1d) != *\/* ]]; then
-             circleci step halt
-            fi
+            # get jq
+            sudo apt-get update && sudo apt-get install jq -y
+            . ../.circleci/scripts/detect-project.sh \/
       - run:
           name: Detect changed subdirectory files since last successful build
           command: |
-            # get jq
-            sudo apt-get update && sudo apt-get install jq -y
             . ../.circleci/scripts/detect-project.sh graphql-faas
       - run:
           name: Update
