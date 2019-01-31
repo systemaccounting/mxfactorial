@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "zip": "zip -r lambda.zip index.js src node_modules package.json package-lock.json .gitignore",
-    "update:faas:prod": "aws lambda update-function-code --function-name mxfactorial-graphql-server-prod --zip-file fileb://$(pwd)/lambda.zip",
-    "update:faas:dev": "aws lambda update-function-code --function-name mxfactorial-graphql-server-dev --zip-file fileb://$(pwd)/lambda.zip --region us-east-2",
-    "deploy:prod": "yarn run zip && yarn run update:faas:prod",
-    "deploy:dev": "yarn run zip && yarn run update:faas:dev",
-    "cp:lambda": "echo \"copying over to terraform\" && cp lambda.zip ../terraform/workspaces/lambda.zip",
+    "update:faas:prod": "aws lambda update-function-code --function-name mxfactorial-graphql-server-prod --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
+    "update:faas:qa": "aws lambda update-function-code --function-name mxfactorial-graphql-server-qa --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
+    "update:faas:dev": "aws lambda update-function-code --function-name mxfactorial-graphql-server-dev --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
+    "deploy:prod": "yarn install && yarn run zip && yarn run update:faas:prod",
+    "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa",
+    "deploy:dev": "yarn install && yarn run zip && yarn run update:faas:dev",
+    "cp:lambda": "echo \"copying over to terraform\" && yarn install && yarn run zip && cp lambda.zip ../terraform/environments/common-bin/graphql/lambda.zip",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,9 +21,10 @@
     "aws-sdk": "^2.325.0",
     "aws-serverless-express": "^3.3.5",
     "body-parser-graphql": "^1.1.0",
+    "cors": "^2.8.5",
     "express": "^4.16.3",
     "express-graphql": "^0.6.12",
     "graphql": "^14.0.2",
-    "uuid": "^3.3.2"
+    "mysql2": "^1.6.4"
   }
 }

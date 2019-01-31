@@ -1,4 +1,5 @@
 import React from 'react'
+import cx from 'classnames'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
 
@@ -19,6 +20,7 @@ class Transaction extends React.Component {
     type: 'credit',
     transactions: [],
     draftTransaction: null,
+    rules: [],
     transactionHistory: [],
     recipient: '',
     total: 0,
@@ -40,13 +42,19 @@ class Transaction extends React.Component {
   }
 
   calculateTotal = () => {
-    const { transactions, draftTransaction } = this.state
+    const { transactions, draftTransaction, rules } = this.state
     const total = R.pipe(
       R.values,
-      R.map(value => value && value.quantity * value.price),
+      R.map(value => {
+        if (!value) {
+          return 0
+        }
+        const qty = value.quantity || 1
+        return qty * value.price
+      }),
       R.reject(isNaN),
       R.sum
-    )([...transactions, draftTransaction])
+    )([...transactions, draftTransaction, ...rules])
     this.setState({ total })
   }
 
@@ -68,7 +76,10 @@ class Transaction extends React.Component {
         ...state,
         transactions: [...state.transactions, { uuid, ...data }]
       }),
-      R.pipe(this.calculateTotal, this.handleScroll)
+      R.pipe(
+        this.calculateTotal,
+        this.handleScroll
+      )
     )
   }
 
@@ -91,20 +102,37 @@ class Transaction extends React.Component {
     this.setState(
       state => ({
         ...state,
+        rules: [],
         transactions: state.transactions.filter(
           transaction => transaction.uuid !== uuid
         )
       }),
-      R.pipe(this.calculateTotal, this.handleFormVisibility)
+      R.pipe(
+        this.calculateTotal,
+        this.handleFormVisibility,
+        this.fetchRules
+      )
     )
+  }
+
+  handleInputBlur = () => {
+    this.fetchRules()
   }
 
   handleRecipientChange = e => this.setState({ recipient: e.target.value })
 
-  handleFormClear = isClear =>
-    isClear && this.state.transactions.length
-      ? this.setState({ hideForm: true })
-      : null
+  handleFormClear = isClear => {
+    const { transactions } = this.state
+    if (!transactions.length) {
+      this.setState({ rules: [], total: 0 })
+    }
+    if (isClear && transactions.length) {
+      this.setState({ hideForm: true })
+    }
+    if (!isClear) {
+      this.setState({ rules: [] }, this.fetchRules)
+    }
+  }
 
   handleShowForm = () => this.setState({ hideForm: false })
 
@@ -113,8 +141,48 @@ class Transaction extends React.Component {
       hideForm: state.transactions.length === 0 ? false : state.hideForm
     }))
 
-  handleDraftTransaction = draftTransaction =>
+  handleDraftTransaction = draftTransaction => {
     this.setState({ draftTransaction }, this.calculateTotal)
+  }
+
+  fetchRules = () => {
+    const { draftTransaction, transactions } = this.state
+    if (!this.props.fetchRules) {
+      return
+    }
+    this.setState({ isFetchingRules: true })
+    let promise = this.props.fetchRules([...transactions, draftTransaction])
+    this.fetchRulesRequest = promise
+    promise.then(({ data }) => {
+      // Resolve only the last request promise
+      if (promise === this.fetchRulesRequest) {
+        const rules = data.rules.filter(item => item.rule_instance_id)
+        this.setState({ rules, isFetchingRules: false })
+        this.calculateTotal()
+      }
+    })
+  }
+
+  get rules() {
+    const { rules } = this.state
+    if (!rules) {
+      return null
+    }
+    return (
+      <div data-id="transaction-rules" style={{ marginTop: 20 }}>
+        {rules.map(transaction => (
+          <div key={transaction.uuid} data-id="rule-item">
+            <TransactionItem
+              data-uuid={transaction.uuid}
+              transaction={transaction}
+              onEdit={this.handleEditTransaction}
+              editable={false}
+            />
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   render() {
     const { total, type, recipient, hideForm, transactions } = this.state
@@ -127,47 +195,57 @@ class Transaction extends React.Component {
           onChange={this.handleRecipientChange}
           placeholder="Recipient"
         />
-        <LabelWithValue name="total" label="total" value={total} />
+        <div className={cx({ updated: !this.state.isFetchingRules })}>
+          <LabelWithValue name="total" label="total" value={total} />
+        </div>
         <TypeSwitch onSwitch={this.handleSwitchType} active={this.state.type} />
-        <div>
+        <div data-id="user-generated-items">
           {transactions.map((transaction, index) => (
             <React.Fragment key={`transaction-${index}`}>
               <RemoveButton
                 name="delete-transaction"
                 onClick={this.handleDeleteTransaction(transaction.uuid)}
               />
-              <TransactionItem
-                data-uuid={transaction.uuid}
-                transaction={transaction}
-                onEdit={this.handleEditTransaction}
-              />
+              <div data-id="user-item">
+                <TransactionItem
+                  data-uuid={transaction.uuid}
+                  transaction={transaction}
+                  onEdit={this.handleEditTransaction}
+                  onInputBlur={this.handleInputBlur}
+                />
+              </div>
             </React.Fragment>
           ))}
+          <div data-id="draft-transaction">
+            {!hideForm ? (
+              <Form
+                namePrefix="transaction-add"
+                clearButton={RemoveButton}
+                onClear={this.handleFormClear}
+                schema={transactionSchema}
+                submitLabel={[<AddIcon key="add-icon" />, ' Item']}
+                onSubmit={this.handleAddTransaction}
+                onValuesUpdate={this.handleDraftTransaction}
+                onInputBlur={this.handleInputBlur}
+              />
+            ) : (
+              <Button
+                data-id="hide-show-form"
+                type="button"
+                onClick={this.handleShowForm}
+              >
+                <AddIcon key="add-icon" /> Item
+              </Button>
+            )}
+            <Button
+              data-id={type}
+              theme={type === 'credit' ? 'info' : 'success'}
+            >
+              {type === 'credit' ? 'Request' : 'Transact'}
+            </Button>
+          </div>
         </div>
-        {!hideForm ? (
-          <Form
-            namePrefix="transaction-add"
-            clearButton={RemoveButton}
-            onClear={this.handleFormClear}
-            schema={transactionSchema}
-            submitLabel={[<AddIcon key="add-icon" />, ' Item']}
-            onSubmit={this.handleAddTransaction}
-            onValuesUpdate={this.handleDraftTransaction}
-          />
-        ) : (
-          <Button
-            data-id="hide-show-form"
-            type="button"
-            onClick={this.handleShowForm}
-          >
-            <AddIcon key="add-icon" /> Item
-          </Button>
-        )}
-        <React.Fragment>
-          <Button data-id={type} theme={type === 'credit' ? 'info' : 'success'}>
-            {type === 'credit' ? 'Request' : 'Transact'}
-          </Button>
-        </React.Fragment>
+        {this.rules}
       </div>
     )
   }

@@ -25,11 +25,12 @@ afterAll(async () => {
   await browser.close()
 })
 
-test('switches types', async () => {
+it('switches types', async () => {
   const rejectedButton = await page.$(rejectedButtonSelector)
   const activeButtonStatus = await page.$eval(activeButtonSelector, element =>
     element.getAttribute('data-active')
   )
+
   expect(activeButtonStatus).toBe('true')
   await rejectedButton.click()
 

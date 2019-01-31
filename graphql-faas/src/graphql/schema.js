@@ -1,13 +1,15 @@
 const { GraphQLObjectType, GraphQLSchema } = require('graphql')
 
 const { TransactionQueryType } = require('./queries/Transaction')
+const { RuleQueryType } = require('./queries/Rule')
 const { TransactionCreateMutation } = require('./mutations/Transaction')
 
 const RootQuery = new GraphQLObjectType({
   name: 'Read',
   description: 'Root query of app',
   fields: {
-    transactions: TransactionQueryType()
+    transactions: TransactionQueryType(),
+    rules: RuleQueryType()
   }
 })
 
