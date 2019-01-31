@@ -9,20 +9,37 @@ const addTransaction = async (
   draft = false
 ) => {
   const { name, price, quantity } = transaction
-  const itemNameInput = await page.$(transactionAddNameSelector)
-  await itemNameInput.type(name)
 
-  const itemPriceInput = await page.$(transactionAddPriceSelector)
+  if (name) {
+    const itemNameInput = await page.$(transactionAddNameSelector)
+    await itemNameInput.type(name)
+  }
 
-  await itemPriceInput.type(price)
+  if (price) {
+    const itemPriceInput = await page.$(transactionAddPriceSelector)
+    await itemPriceInput.type(price)
+    // Blur input to fire fetchRules() request
+    await page.$eval(transactionAddPriceSelector, e => e.blur())
+  }
 
-  const itemQuantityInput = await page.$(transactionAddQuantitySelector)
-  await itemQuantityInput.type(quantity)
+  if (quantity) {
+    const itemQuantityInput = await page.$(transactionAddQuantitySelector)
+    await itemQuantityInput.type(quantity)
+    // Blur input to fire fetchRules() request
+    await page.$eval(transactionAddQuantitySelector, e => e.blur())
+  }
 
   if (!draft) {
     const addItemButton = await page.$(transactionAddButtonSelector)
     await addItemButton.click()
   }
+}
+
+const getTotal = async () => {
+  await page.waitForSelector('.updated')
+  return await page.$eval('[name="total-value"]', element =>
+    parseFloat(element.innerHTML)
+  )
 }
 
 const milk = {
@@ -43,6 +60,7 @@ const bread = {
 
 module.exports = {
   addTransaction,
+  getTotal,
   milk,
   bread,
   honey

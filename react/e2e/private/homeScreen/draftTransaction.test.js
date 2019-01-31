@@ -1,4 +1,4 @@
-const { addTransaction, milk, bread, honey } = require('./utils')
+const { addTransaction, getTotal, milk, bread, honey } = require('./utils')
 const { HOME_URL, HOME_SELECTOR } = require('../../constants')
 
 const transactionClearSelector = 'button[data-id="transaction-clear"]'
@@ -11,22 +11,19 @@ beforeAll(async () => {
   await page.waitForSelector(HOME_SELECTOR)
 })
 
-const getTotal = async () =>
-  await page.$eval('[name="total-value"]', element => element.innerHTML)
-
 let total = 0
 
 describe('transaction add remove (milk, honey, bread)', () => {
   it('add 1 transaction and 1 draft transaction', async () => {
-    expect(await getTotal()).toEqual(total.toString())
+    expect(await getTotal()).toEqual(total)
 
     await addTransaction(page, milk)
     total += milk.price * milk.quantity
-    expect(await getTotal()).toEqual(total.toString())
+    expect(await getTotal()).toBeGreaterThanOrEqual(total)
 
     await addTransaction(page, honey, true) //draft
     total += honey.price * honey.quantity
-    expect(await getTotal()).toEqual(total.toString())
+    expect(await getTotal()).toBeGreaterThanOrEqual(total)
   })
 
   it('draft transaction input values', async () => {
@@ -54,7 +51,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     await clearButton.click()
 
     total = milk.price * milk.quantity
-    expect(await getTotal()).toEqual(total.toString())
+    expect(await getTotal()).toBeGreaterThanOrEqual(total)
 
     const nameInputValue = await page.$eval(
       transactionAddNameSelector,
