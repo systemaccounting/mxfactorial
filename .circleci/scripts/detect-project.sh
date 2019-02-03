@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# search for commits through prior 7 successful builds when latest unavailable
+# search for commits through prior 6 successful builds when latest unavailable
 last_available_commit() {
   i=1
-  while [[ $LAST_SUCCESSFUL_BUILD_COMMIT == "null" ]] || [[ $i -lt 8 ]]
+  while [[ $LAST_SUCCESSFUL_BUILD_COMMIT == "null" ]] || [[ $i -lt 7 ]]
   do
     LAST_SUCCESSFUL_BUILD_NUMBER=$(curl -s https://circleci.com/api/v1.1/project/github/systemaccounting/mxfactorial/tree/${CIRCLE_BRANCH}?circle-token=${CI_API_TOKEN} | \
     jq -r 'map(select(.workflows.job_name == '\"$CIRCLE_JOB\"' and .outcome == "success")) | nth('$i').build_num')
@@ -48,10 +48,10 @@ fi
 LAST_SUCCESSFUL_BUILD_COMMIT=$(curl -s https://circleci.com/api/v1.1/project/github/systemaccounting/mxfactorial/$LAST_SUCCESSFUL_BUILD_NUMBER?circle-token=$CI_API_TOKEN | \
 jq -r '.all_commit_details | first | .commit')
 if [[ $LAST_SUCCESSFUL_BUILD_COMMIT == "null" ]]; then
-  echo "circleci returning empty all_commit_details for last successful build. searching for commits from 7 prior successful builds."
+  echo "circleci returning empty all_commit_details for last successful build. searching for commits from 6 prior successful builds."
   last_available_commit
   if [[ $LAST_SUCCESSFUL_BUILD_COMMIT == "null" ]]; then
-    echo "0 commits found from 7 previous successful builds. halting build after detecting absent history."
+    echo "0 commits found from 6 previous successful builds. halting build after detecting absent history."
     circleci step halt
   fi
 fi
