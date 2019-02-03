@@ -43,7 +43,7 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
   if [[ -z $SUBDIR ]] || [[ $SUBDIR != *$1* ]]; then
     circleci step halt
   else
-    exit 0
+    return 0
   fi
 fi
 # get commit sha of last successful build number on branch
