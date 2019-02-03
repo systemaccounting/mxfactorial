@@ -42,6 +42,8 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
   echo "Directories affected when no previous successful build available: $SUBDIR"
   if [[ -z $SUBDIR ]] || [[ $SUBDIR != *$1* ]]; then
     circleci step halt
+  else
+    exit 0
   fi
 fi
 # get commit sha of last successful build number on branch
