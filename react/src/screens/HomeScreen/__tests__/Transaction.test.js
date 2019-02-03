@@ -54,7 +54,7 @@ describe('<Transaction />', () => {
     const scrollSpy = jest.spyOn(instance, 'handleScroll')
     instance.handleAddTransaction(transaction)
     wrapper.update()
-    expect(wrapper.state('total')).toEqual(200)
+    expect(instance.total).toEqual(200)
     expect(wrapper.state('transactions')).toHaveLength(1)
     expect(scrollSpy).toHaveBeenCalled()
   })
@@ -110,14 +110,13 @@ describe('<Transaction />', () => {
       ]
     })
     const instance = wrapper.instance()
-    instance.calculateTotal()
-    expect(wrapper.state('total')).toEqual(300)
+    expect(instance.total).toEqual(300)
     instance.handleEditTransaction('1234')({
       name: 'y',
       price: 20,
       quantity: 1
     })
-    expect(wrapper.state('total')).toEqual(220)
+    expect(instance.total).toEqual(220)
   })
 
   it('handles switch type', () => {
@@ -134,7 +133,7 @@ describe('<Transaction />', () => {
     const instance = wrapper.instance()
     expect(wrapper.state('draftTransaction')).toEqual(null)
     instance.handleDraftTransaction({ price: 10, quantity: 2 })
-    expect(wrapper.state('total')).toEqual(20)
+    expect(instance.total).toEqual(20)
   })
 
   it('handles delete transaction', () => {
