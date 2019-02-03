@@ -21,15 +21,15 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getTotal()).toEqual(0)
 
     await addTransaction(page, milk)
-    // 20 + 0.09%
+    // 20 + 9%
     expect(await getTotal()).toEqual(21.8)
 
     await addTransaction(page, honey)
-    // 60 + 0.09%
+    // 60 + 9%
     expect(await getTotal()).toEqual(65.4)
 
     await addTransaction(page, bread, true) // draft
-    // 80 + 0.09%
+    // 80 + 9%
     expect(await getTotal()).toEqual(87.2)
   })
 
@@ -124,5 +124,15 @@ describe('transaction add remove (milk, honey, bread)', () => {
   it('default quantity=1 for user-generated items', async () => {
     await addTransaction(page, { name: 'test', price: '1' }, true) // draft
     expect(await getTotal()).toEqual(1.09)
+    const deleteButton = await page.$(transactionClearSelector)
+    // delete draft transaction
+    await deleteButton.click()
+  })
+
+  it('displays .toFixed(3) total value', async () => {
+    await addTransaction(page, { name: 'milk', price: '2.00', quantity: '3' })
+    await addTransaction(page, { name: 'honey', price: '4', quantity: '4' })
+    await addTransaction(page, { name: 'pasta', price: '5', quantity: '5' })
+    expect(await getTotal()).toEqual(51.23)
   })
 })
