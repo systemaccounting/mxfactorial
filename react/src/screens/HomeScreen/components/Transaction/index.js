@@ -23,7 +23,6 @@ class Transaction extends React.Component {
     rules: [],
     transactionHistory: [],
     recipient: '',
-    total: 0,
     hideForm: false
   }
 
@@ -39,23 +38,6 @@ class Transaction extends React.Component {
       const transactionHistory = await fetchTransactions()
       this.setState({ transactionHistory })
     }
-  }
-
-  calculateTotal = () => {
-    const { transactions, draftTransaction, rules } = this.state
-    const total = R.pipe(
-      R.values,
-      R.map(value => {
-        if (!value) {
-          return 0
-        }
-        const qty = value.quantity || 1
-        return qty * value.price
-      }),
-      R.reject(isNaN),
-      R.sum
-    )([...transactions, draftTransaction, ...rules])
-    this.setState({ total })
   }
 
   handleScroll = () => {
@@ -76,26 +58,19 @@ class Transaction extends React.Component {
         ...state,
         transactions: [...state.transactions, { uuid, ...data }]
       }),
-      R.pipe(
-        this.calculateTotal,
-        this.handleScroll
-      )
+      this.handleScroll
     )
   }
 
   handleEditTransaction = uuid => data => {
-    this.setState(
-      state => ({
-        ...state,
-        transactions: state.transactions.map(transaction => {
-          if (transaction.uuid === uuid) {
-            return { ...transaction, ...data }
-          }
-          return transaction
-        })
-      }),
-      this.calculateTotal
-    )
+    this.setState(state => ({
+      transactions: state.transactions.map(transaction => {
+        if (transaction.uuid === uuid) {
+          return { ...transaction, ...data }
+        }
+        return transaction
+      })
+    }))
   }
 
   handleDeleteTransaction = uuid => () => {
@@ -108,7 +83,6 @@ class Transaction extends React.Component {
         )
       }),
       R.pipe(
-        this.calculateTotal,
         this.handleFormVisibility,
         this.fetchRules
       )
@@ -124,14 +98,10 @@ class Transaction extends React.Component {
   handleFormClear = isClear => {
     const { transactions } = this.state
     if (!transactions.length) {
-      this.setState({ rules: [], total: 0 })
+      return this.setState({ rules: [] })
     }
-    if (isClear && transactions.length) {
-      this.setState({ hideForm: true })
-    }
-    if (!isClear) {
-      this.setState({ rules: [] }, this.fetchRules)
-    }
+    this.setState({ hideForm: isClear })
+    this.fetchRules()
   }
 
   handleShowForm = () => this.setState({ hideForm: false })
@@ -142,7 +112,7 @@ class Transaction extends React.Component {
     }))
 
   handleDraftTransaction = draftTransaction => {
-    this.setState({ draftTransaction }, this.calculateTotal)
+    this.setState({ draftTransaction })
   }
 
   fetchRules = () => {
@@ -158,7 +128,6 @@ class Transaction extends React.Component {
       if (promise === this.fetchRulesRequest) {
         const rules = data.rules.filter(item => item.rule_instance_id)
         this.setState({ rules, isFetchingRules: false })
-        this.calculateTotal()
       }
     })
   }
@@ -184,8 +153,24 @@ class Transaction extends React.Component {
     )
   }
 
+  get total() {
+    const { transactions, draftTransaction, rules } = this.state
+    return R.pipe(
+      R.values,
+      R.map(value => {
+        if (!value) {
+          return 0
+        }
+        const qty = value.quantity || 1
+        return qty * value.price
+      }),
+      R.reject(isNaN),
+      R.sum
+    )([...transactions, draftTransaction, ...rules])
+  }
+
   render() {
-    const { total, type, recipient, hideForm, transactions } = this.state
+    const { type, recipient, hideForm, transactions } = this.state
     return (
       <div ref={this.transactionWrapperRef}>
         <Input
@@ -196,7 +181,11 @@ class Transaction extends React.Component {
           placeholder="Recipient"
         />
         <div className={cx({ updated: !this.state.isFetchingRules })}>
-          <LabelWithValue name="total" label="total" value={total} />
+          <LabelWithValue
+            name="total"
+            label="total"
+            value={this.total.toFixed(3)}
+          />
         </div>
         <TypeSwitch onSwitch={this.handleSwitchType} active={this.state.type} />
         <div data-id="user-generated-items">
