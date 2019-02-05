@@ -101,12 +101,13 @@ class Transaction extends React.Component {
   handleRecipientChange = e => this.setState({ recipient: e.target.value })
 
   handleFormClear = isClear => {
-    const { transactions } = this.state
-    if (!transactions.length) {
-      return this.setState({ rules: [] })
-    }
-    this.setState({ hideForm: isClear })
-    this.fetchRules()
+    this.setState(state => {
+      const allTransactions = [...state.transactions, state.draftTransaction]
+      return {
+        rules: recalculateRules(allTransactions, state.rules),
+        hideForm: isClear
+      }
+    }, this.fetchRules)
   }
 
   handleShowForm = () => this.setState({ hideForm: false })
