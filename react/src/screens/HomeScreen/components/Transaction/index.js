@@ -105,7 +105,7 @@ class Transaction extends React.Component {
       const allTransactions = [...state.transactions, state.draftTransaction]
       return {
         rules: recalculateRules(allTransactions, state.rules),
-        hideForm: isClear
+        hideForm: state.transactions.length > 0 && isClear
       }
     }, this.fetchRules)
   }
