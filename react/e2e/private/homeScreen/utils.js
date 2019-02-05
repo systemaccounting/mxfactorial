@@ -35,8 +35,15 @@ const addTransaction = async (
   }
 }
 
-const getTotal = async () => {
-  await page.waitForSelector('.updated')
+/**
+ * Get total transactions value
+ * @param waitUntilFetched Wait until fetchRules() completed
+ * @returns {Promise<void>}
+ */
+const getTotal = async (waitUntilFetched = true) => {
+  if (waitUntilFetched) {
+    await page.waitForSelector('.updated')
+  }
   return await page.$eval('[name="total-value"]', element =>
     parseFloat(element.innerHTML)
   )

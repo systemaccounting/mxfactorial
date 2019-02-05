@@ -129,6 +129,24 @@ describe('transaction add remove (milk, honey, bread)', () => {
     await deleteButton.click()
   })
 
+  it('instantly updates total value on delete transaction', async () => {
+    await addTransaction(page, milk)
+    await addTransaction(page, honey)
+    await addTransaction(page, bread)
+
+    const deleteMilkButton = await page.$(transactionDeleteSelector)
+    await deleteMilkButton.click()
+    expect(await getTotal(false)).toEqual(65.4)
+
+    const deleteHoneyButton = await page.$(transactionDeleteSelector)
+    await deleteHoneyButton.click()
+    expect(await getTotal(false)).toEqual(21.8)
+
+    const deleteBreadButton = await page.$(transactionDeleteSelector)
+    await deleteBreadButton.click()
+    expect(await getTotal(false)).toEqual(0)
+  })
+
   it('displays .toFixed(3) total value', async () => {
     await addTransaction(page, { name: 'milk', price: '2.00', quantity: '3' })
     await addTransaction(page, { name: 'honey', price: '4', quantity: '4' })
