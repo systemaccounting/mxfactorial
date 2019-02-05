@@ -15,6 +15,8 @@ import TypeSwitch from './TypeSwitch'
 import transactionSchema from './transactionSchema'
 import RemoveButton from './RemoveButton'
 
+import { recalculateRules } from './utils'
+
 class Transaction extends React.Component {
   state = {
     type: 'credit',
@@ -75,13 +77,16 @@ class Transaction extends React.Component {
 
   handleDeleteTransaction = uuid => () => {
     this.setState(
-      state => ({
-        ...state,
-        rules: [],
-        transactions: state.transactions.filter(
+      state => {
+        const newTransactions = state.transactions.filter(
           transaction => transaction.uuid !== uuid
         )
-      }),
+        const allTransactions = [...newTransactions, state.draftTransaction]
+        return {
+          rules: recalculateRules(allTransactions, state.rules),
+          transactions: newTransactions
+        }
+      },
       R.pipe(
         this.handleFormVisibility,
         this.fetchRules
