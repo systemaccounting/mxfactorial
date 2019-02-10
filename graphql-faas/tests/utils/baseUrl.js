@@ -1,4 +1,5 @@
 if (
+  process.env.JEST_ENV != `dev` &&
   process.env.JEST_ENV != `qa` &&
   process.env.JEST_ENV != `prod`
 ) {
