@@ -226,7 +226,7 @@ jobs:
             sudo pip install awscli
       - run:
           name: Install graphql-faas dependencies, then archive and deploy
-          command: yarn deploy:qa
+          command: yarn deploy:dev
       - run:
           name: Test dev endpoints
           command: yarn test:dev
