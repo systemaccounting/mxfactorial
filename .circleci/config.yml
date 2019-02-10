@@ -27,13 +27,8 @@ jobs:
       - run: yarn install
       - run: yarn test
       - run:
-          name: Execute pre-auth e2e tests
-          command: yarn run test:e2e-public
-          environment:
-            CI_ENV: dev
-      - run:
-          name: Execute post-auth e2e tests
-          command: yarn run test:e2e-private
+          name: e2e tests
+          command: yarn dev:e2e
           environment:
             CI_ENV: dev
       - run:
@@ -122,13 +117,8 @@ jobs:
       - run: yarn install
       - run: yarn test
       - run:
-          name: Execute pre-auth e2e tests
-          command: yarn run test:e2e-public
-          environment:
-            CI_ENV: prod
-      - run:
-          name: Execute post-auth e2e tests
-          command: yarn run test:e2e-private
+          name: e2e tests
+          command: yarn prod:e2e
           environment:
             CI_ENV: prod
       - run:
