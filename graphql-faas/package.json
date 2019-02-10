@@ -5,13 +5,13 @@
   "main": "index.js",
   "scripts": {
     "zip": "zip -r lambda.zip index.js src node_modules package.json package-lock.json .gitignore",
+    "cp:lambda": "echo \"copying over to terraform\" && yarn install && yarn run zip && cp lambda.zip ../terraform/environments/common-bin/graphql/lambda.zip",
     "update:faas:prod": "aws lambda update-function-code --function-name mxfactorial-graphql-server-prod --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
     "update:faas:qa": "aws lambda update-function-code --function-name mxfactorial-graphql-server-qa --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
     "update:faas:dev": "aws lambda update-function-code --function-name mxfactorial-graphql-server-dev --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
     "deploy:prod": "yarn install && yarn run zip && yarn run update:faas:prod",
     "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa",
     "deploy:dev": "yarn install && yarn run zip && yarn run update:faas:dev",
-    "cp:lambda": "echo \"copying over to terraform\" && yarn install && yarn run zip && cp lambda.zip ../terraform/environments/common-bin/graphql/lambda.zip",
     "test:prod": "JEST_ENV=prod node tests/utils/warmUp.js && JEST_ENV=prod AWS_REGION=us-east-1 jest --detectOpenHandles",
     "test:qa": "JEST_ENV=qa node tests/utils/warmUp.js && JEST_ENV=qa AWS_REGION=us-east-1 jest --detectOpenHandles",
     "test:dev": "JEST_ENV=dev node tests/utils/warmUp.js && JEST_ENV=dev AWS_REGION=us-east-1 jest --detectOpenHandles"
