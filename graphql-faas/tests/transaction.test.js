@@ -1,7 +1,10 @@
 const request = require('supertest')
-const gql = require('graphql-tag')
+const { tearDownIntegrationTestDataInRDS } = require('./utils/tearDown')
+const { REQUEST_URL } = require('./utils/baseUrl')
 
-const BASE_URL = `https://qa-api.mxfactorial.io`
+afterAll(() => {
+  tearDownIntegrationTestDataInRDS()
+})
 
 const mutation = `mutation createTransaction {
   createTransaction(input: {
@@ -37,18 +40,19 @@ const mutation = `mutation createTransaction {
 }`
 
 var transactionID
+jest.setTimeout(30000) // lambda and serverless aurora cold starts
 
 describe('Function As A Service GraphQL Server', () => {
 
   it('sends transaction mutation', (done) => {
-    request(BASE_URL)
+    return request(REQUEST_URL)
       .post('/')
       .set('Content-Type', 'application/graphql')
+      .set('Accept', 'application/json')
       .send(mutation)
       .then(res => {
         // console.log(res.body.data)
         const transaction = res.body.data.createTransaction
-        console.log(transaction)
         transactionID = transaction.id
         expect(transaction.creditor).toBe(`Mary`)
         done()
@@ -60,17 +64,17 @@ describe('Function As A Service GraphQL Server', () => {
 
   it('responds with transaction ID', (done) => {
     var query = `{
-      transactions(transaction: "${transactionID}") {
+      transactions(transactionId: "${transactionID}") {
         id
       }
     }`
-    request(BASE_URL)
+    return request(REQUEST_URL)
       .post('/')
       .set('Content-Type', 'application/graphql')
+      .set('Accept', 'application/json')
       .send(query)
       .then(res => {
-        // console.log(res.body.data)
-        console.log(res.body.data.transactions[0])
+        // console.log(res.body.data.transactions[0])
         expect(res.body.data.transactions[0].id).toBe(transactionID)
         done()
       })

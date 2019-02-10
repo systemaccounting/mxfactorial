@@ -191,7 +191,7 @@ jobs:
           command: |
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_WWW_DISTRIBUTION_ID \
             --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
-  test-graphql-faas:
+  graphql-faas-qa:
     docker:
       - image: circleci/node:11.3.0-browsers
     working_directory: ~/repo/graphql-faas
@@ -209,12 +209,12 @@ jobs:
           command: |
             . ../.circleci/scripts/detect-project.sh graphql-faas
       - run:
-          name: Update
+          name: Update Linux package library list
           working_directory: /
           command: |
             sudo apt-get update -y
       - run:
-          name: Upgrade
+          name: Upgrade installed Linux packages
           working_directory: /
           command: |
             sudo apt-get upgrade -y
@@ -224,8 +224,12 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - run: yarn install
-      - run: yarn run deploy:dev
+      - run:
+          name: Install graphql-faas dependencies, then archive and deploy
+          command: yarn deploy:qa
+      - run:
+          name: Test QA endpoints
+          command: yarn test:qa
 
 workflows:
   version: 2.1
@@ -259,9 +263,9 @@ workflows:
             branches:
               only:
                 - master
-  graphql-test-faas-dev:
+  graphql-faas:
     jobs:
-      - test-graphql-faas:
+      - graphql-faas-qa:
           filters:
             branches:
               only:

@@ -76,8 +76,9 @@ module "qa" {
   graphql_lambda_policy_name    = "mxfactorial-graphql-lambda-${var.environment}"
 
   ############### RDS ###############
-  db_cluster_identifier = "mxfactorial-${var.environment}"
-  cloud9_name           = "rds-connect-${var.environment}"
+  db_cluster_identifier                      = "mxfactorial-${var.environment}"
+  cloud9_name                                = "rds-connect-${var.environment}"
+  integration_test_data_teardown_lambda_name = "delete-faker-rds-transactions-lambda-${var.environment}"
 
   ############### Route 53 ###############
   client_fqdn = "${"${var.environment}" == "prod" ?  "mxfactorial.io" : "${var.environment}.mxfactorial.io"}"

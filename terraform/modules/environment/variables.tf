@@ -109,3 +109,7 @@ variable "iam_role_name" {
 variable "iam_role_policy_name" {
   description = "IAM role policy name"
 }
+
+variable "integration_test_data_teardown_lambda_name" {
+  description = "Integration test data teardown lambda name"
+}
