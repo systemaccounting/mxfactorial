@@ -99,6 +99,3 @@ TIME_PASSED=$(($FINISHED_TIME - $START_TIME))
 echo 'Job completed after '"$TIME_PASSED"' seconds with status: '"$JOB_STATUS\n"
 echo 'If SUCCEEDED status received, connect to RDS by visiting cloud9 in aws console, open cloud9 terminal, then:'
 echo 'mysql --user=theadmin -h some-db.cluster-12345678910.us-east-2.rds.amanonaws.com -pthepassword\n'
-
-# measure batch result from cloud9
-# mysql --user=theadmin -h some-db.cluster-12345678910.us-east-2.rds.amanonaws.com -pthepassword

@@ -1,0 +1,15 @@
+{
+  "name": "teardown",
+  "version": "1.0.0",
+  "description": "delete data from rds after integration test",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "zip": "zip -r teardown-lambda.zip index.js node_modules package.json package-lock.json",
+    "update:faas:qa": "aws lambda update-function-code --function-name delete-faker-rds-transactions-lambda-qa --zip-file fileb://$(pwd)/teardown-lambda.zip --region us-east-1",
+    "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa"
+  },
+  "dependencies": {
+    "mysql2": "^1.6.4"
+  }
+}

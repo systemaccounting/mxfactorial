@@ -12,13 +12,15 @@
     "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa",
     "deploy:dev": "yarn install && yarn run zip && yarn run update:faas:dev",
     "cp:lambda": "echo \"copying over to terraform\" && yarn install && yarn run zip && cp lambda.zip ../terraform/environments/common-bin/graphql/lambda.zip",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:prod": "JEST_ENV=prod node tests/utils/warmUp.js && JEST_ENV=prod AWS_REGION=us-east-1 jest --detectOpenHandles",
+    "test:qa": "JEST_ENV=qa node tests/utils/warmUp.js && JEST_ENV=qa AWS_REGION=us-east-1 jest --detectOpenHandles",
+    "test:dev": "JEST_ENV=dev node tests/utils/warmUp.js && JEST_ENV=dev AWS_REGION=us-east-1 jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.325.0",
+    "aws-sdk": "^2.395.0",
     "aws-serverless-express": "^3.3.5",
     "body-parser-graphql": "^1.1.0",
     "cors": "^2.8.5",
@@ -26,5 +28,9 @@
     "express-graphql": "^0.6.12",
     "graphql": "^14.0.2",
     "mysql2": "^1.6.4"
+  },
+  "devDependencies": {
+    "jest": "^24.0.0",
+    "supertest": "^3.4.2"
   }
 }
