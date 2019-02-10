@@ -7,7 +7,7 @@ const tearDownIntegrationTestDataInRDS = () => {
   // wait until lambda available Libraries updates to remove mysql2 package
   const lambda = new AWS.Lambda({ apiVersion: '2015-03-31', region: process.env.AWS_REGION })
   const params = {
-    FunctionName: `delete-faker-rds-transactions-lambda-${process.env.JEST_ENV}`,
+    FunctionName: `delete-faker-rds-transactions-lambda-${process.env.LOCAL_ENV}`,
     InvokeArgs: `null`
     }
   lambda.invokeAsync(params, (err, data) => {
