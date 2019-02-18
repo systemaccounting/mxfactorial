@@ -1,5 +1,7 @@
 resource "aws_lambda_function" "mxfactorial_graphql_server" {
-  filename      = "../common-bin/graphql/lambda.zip"
+  filename = "../../../services/graphql-faas/graphql-lambda.zip"
+
+  # filename      = "${data.archive_file.mxfactorial_graphql_server_provisioner.output_path}"
   function_name = "mxfactorial-graphql-server-${var.environment}"
   description   = "GraphQL server published on API Gateway"
 
@@ -8,10 +10,11 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
   # exported in that file.
   handler = "index.handler"
 
-  # cd ../../../graphql-faas/ && npm run zip && npm run cp:lambda
-  source_code_hash = "${data.archive_file.mxfactorial_graphql_server_provisioner.output_base64sha256}"
-  runtime          = "nodejs8.10"
-  role             = "${aws_iam_role.mxfactorial_graphql_lambda_role.arn}"
+  source_code_hash = "${base64sha256(file("../../../services/graphql-faas/graphql-lambda.zip"))}"
+
+  # source_code_hash = "${data.archive_file.mxfactorial_graphql_server_provisioner.output_base64sha256}"
+  runtime = "nodejs8.10"
+  role    = "${aws_iam_role.mxfactorial_graphql_lambda_role.arn}"
 
   environment {
     variables = {
@@ -81,17 +84,20 @@ resource "aws_iam_role_policy_attachment" "rds_access_for_lambda" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }
 
-data "archive_file" "mxfactorial_graphql_server_provisioner" {
-  type        = "zip"
-  source_dir  = "../../../graphql-faas"
-  output_path = "../../../graphql-faas/graphql-lambda.zip"
+# data "archive_file" "mxfactorial_graphql_server_provisioner" {
+#   type        = "zip"
+#   source_dir  = "../../../services/graphql-faas"
+#   output_path = "../../../services/graphql-faas/graphql-lambda.zip"
 
-  depends_on = ["null_resource.mxfactorial_graphql_server_provisioner"]
-}
 
-resource "null_resource" "mxfactorial_graphql_server_provisioner" {
-  provisioner "local-exec" {
-    working_dir = "../../../graphql-faas"
-    command     = "yarn install"
-  }
-}
+#   depends_on = ["null_resource.mxfactorial_graphql_server_provisioner"]
+# }
+
+
+# resource "null_resource" "mxfactorial_graphql_server_provisioner" {
+#   provisioner "local-exec" {
+#     working_dir = "../../../services/graphql-faas"
+#     command     = "yarn install"
+#   }
+# }
+

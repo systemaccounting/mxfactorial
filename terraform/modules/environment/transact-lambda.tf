@@ -1,5 +1,7 @@
 resource "aws_lambda_function" "transact_service_lambda" {
-  filename      = "../../../transact-faas/transact-lambda.zip"
+  filename = "../../../services/transact-faas/transact-lambda.zip"
+
+  # filename      = "${data.archive_file.transact_service_lambda_provisioner.output_path}"
   function_name = "transact-lambda-${var.environment}"
   description   = "transact service in ${var.environment}"
 
@@ -8,10 +10,11 @@ resource "aws_lambda_function" "transact_service_lambda" {
   # exported in that file.
   handler = "index.handler"
 
-  # cd ../../../graphql-faas/ && npm run zip && npm run cp:lambda
-  source_code_hash = "${data.archive_file.transact_service_lambda_provisioner.output_base64sha256}"
-  runtime          = "nodejs8.10"
-  role             = "${aws_iam_role.transact_service_lambda_role.arn}"
+  source_code_hash = "${base64sha256(file("../../../services/transact-faas/transact-lambda.zip"))}"
+
+  # source_code_hash = "${data.archive_file.transact_service_lambda_provisioner.output_base64sha256}"
+  runtime = "nodejs8.10"
+  role    = "${aws_iam_role.transact_service_lambda_role.arn}"
 
   vpc_config {
     subnet_ids = ["${data.aws_subnet_ids.default.ids}"]
@@ -90,17 +93,20 @@ resource "aws_iam_role_policy_attachment" "rds_access_for_transact_lambda" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }
 
-data "archive_file" "transact_service_lambda_provisioner" {
-  type        = "zip"
-  source_dir  = "../../../transact-faas"
-  output_path = "../../../transact-faas/transact-lambda.zip"
+# data "archive_file" "transact_service_lambda_provisioner" {
+#   type        = "zip"
+#   source_dir  = "../../../services/transact-faas"
+#   output_path = "../../../services/transact-faas/transact-lambda.zip"
 
-  depends_on = ["null_resource.transact_service_lambda_provisioner"]
-}
 
-resource "null_resource" "transact_service_lambda_provisioner" {
-  provisioner "local-exec" {
-    working_dir = "../../../transact-faas"
-    command     = "yarn install"
-  }
-}
+#   depends_on = ["null_resource.transact_service_lambda_provisioner"]
+# }
+
+
+# resource "null_resource" "transact_service_lambda_provisioner" {
+#   provisioner "local-exec" {
+#     working_dir = "../../../services/transact-faas"
+#     command     = "yarn install"
+#   }
+# }
+

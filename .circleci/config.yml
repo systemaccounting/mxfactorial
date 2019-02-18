@@ -181,10 +181,10 @@ jobs:
           command: |
             aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_WWW_DISTRIBUTION_ID \
             --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
-  graphql-faas-dev:
+  services-dev:
     docker:
       - image: circleci/node:11.3.0-browsers
-    working_directory: ~/repo/graphql-faas
+    working_directory: ~/repo/services
     steps:
       - checkout:
           path: ~/repo
@@ -197,7 +197,7 @@ jobs:
       - run:
           name: Detect changed subdirectory files since last successful build
           command: |
-            . ../.circleci/scripts/detect-project.sh graphql-faas
+            . ../.circleci/scripts/detect-project.sh services
       - run:
           name: Update Linux package library list
           working_directory: /
@@ -215,15 +215,16 @@ jobs:
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
       - run:
-          name: Install graphql-faas dependencies, then archive and deploy
-          command: yarn deploy:dev
+          name: Install dependencies, archive, then deploy
+          command: sh deploy.sh dev
       - run:
           name: Test dev endpoints
+          working_directory: ~/repo/services/graphql-faas
           command: yarn test:dev
-  graphql-faas-qa:
+  services-qa:
     docker:
       - image: circleci/node:11.3.0-browsers
-    working_directory: ~/repo/graphql-faas
+    working_directory: ~/repo/services
     steps:
       - checkout:
           path: ~/repo
@@ -236,7 +237,7 @@ jobs:
       - run:
           name: Detect changed subdirectory files since last successful build
           command: |
-            . ../.circleci/scripts/detect-project.sh graphql-faas
+            . ../.circleci/scripts/detect-project.sh services
       - run:
           name: Update Linux package library list
           working_directory: /
@@ -254,11 +255,12 @@ jobs:
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
       - run:
-          name: Install graphql-faas dependencies, then archive and deploy
-          command: yarn deploy:qa
+          name: Install dependencies, archive, then deploy
+          command: sh deploy.sh qa
       - run:
-          name: Test QA endpoints
-          command: yarn test:qa
+          name: Test qa endpoints
+          working_directory: ~/repo/services/graphql-faas
+          command: yarn test:dev
 
 workflows:
   version: 2.1
@@ -292,9 +294,9 @@ workflows:
             branches:
               only:
                 - master
-  graphql-faas:
+  services:
     jobs:
-      - graphql-faas-dev:
+      - services-dev:
           filters:
             branches:
               only:

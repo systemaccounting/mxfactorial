@@ -1,5 +1,7 @@
 resource "aws_lambda_function" "measure_service_lambda" {
-  filename      = "../../../measure-faas/measure-lambda.zip"
+  filename = "../../../services/measure-faas/measure-lambda.zip"
+
+  # filename      = "${data.archive_file.measure_service_lambda_provisioner.output_path}"
   function_name = "measure-lambda-${var.environment}"
   description   = "measure service in ${var.environment}"
 
@@ -8,10 +10,11 @@ resource "aws_lambda_function" "measure_service_lambda" {
   # exported in that file.
   handler = "index.handler"
 
-  # cd ../../../graphql-faas/ && npm run zip && npm run cp:lambda
-  source_code_hash = "${data.archive_file.measure_service_lambda_provisioner.output_base64sha256}"
-  runtime          = "nodejs8.10"
-  role             = "${aws_iam_role.measure_service_lambda_role.arn}"
+  source_code_hash = "${base64sha256(file("../../../services/measure-faas/measure-lambda.zip"))}"
+
+  # source_code_hash = "${data.archive_file.measure_service_lambda_provisioner.output_base64sha256}"
+  runtime = "nodejs8.10"
+  role    = "${aws_iam_role.measure_service_lambda_role.arn}"
 
   vpc_config {
     subnet_ids = ["${data.aws_subnet_ids.default.ids}"]
@@ -82,17 +85,20 @@ resource "aws_iam_role_policy_attachment" "rds_access_for_measure_lambda" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }
 
-data "archive_file" "measure_service_lambda_provisioner" {
-  type        = "zip"
-  source_dir  = "../../../measure-faas"
-  output_path = "../../../measure-faas/measure-lambda.zip"
+# data "archive_file" "measure_service_lambda_provisioner" {
+#   type        = "zip"
+#   source_dir  = "../../../services/measure-faas"
+#   output_path = "../../../services/measure-faas/measure-lambda.zip"
 
-  depends_on = ["null_resource.measure_service_lambda_provisioner"]
-}
 
-resource "null_resource" "measure_service_lambda_provisioner" {
-  provisioner "local-exec" {
-    working_dir = "../../../measure-faas"
-    command     = "yarn install"
-  }
-}
+#   depends_on = ["null_resource.measure_service_lambda_provisioner"]
+# }
+
+
+# resource "null_resource" "measure_service_lambda_provisioner" {
+#   provisioner "local-exec" {
+#     working_dir = "../../../services/measure-faas"
+#     command     = "yarn install"
+#   }
+# }
+

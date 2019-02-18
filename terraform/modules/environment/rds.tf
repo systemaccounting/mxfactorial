@@ -79,7 +79,7 @@ data "aws_subnet" "rds_cloud9" {
 
 ###### Integration test data teardown lambda ######
 resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
-  filename      = "../common-bin/graphql/teardown/teardown-lambda.zip"
+  filename      = "${data.archive_file.integration_test_data_teardown_lambda_provisioner.output_path}"
   function_name = "delete-faker-rds-transactions-lambda-${var.environment}"
   description   = "Integration test data teardown lambda"
 
@@ -88,15 +88,13 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
   # exported in that file.
   handler = "index.handler"
 
-  # cd ../../../graphql-faas/ && npm run zip && npm run cp:lambda
-  # source_code_hash = "${base64sha256(file("../common-bin/graphql/teardown/teardown-lambda.zip"))}"
-  source_code_hash = "${data.archive_file.integration_test_data_teardown_lambda_provisioner.output_base64sha256}"
+  source_code_hash = "${base64sha256(file("../common-bin/rds/teardown-lambda.zip"))}"
+
+  # source_code_hash = "${data.archive_file.integration_test_data_teardown_lambda_provisioner.output_base64sha256}"
 
   runtime = "nodejs8.10"
-
   # imported from lambda.tf
   role = "${aws_iam_role.mxfactorial_graphql_lambda_role.arn}"
-
   vpc_config {
     subnet_ids = ["${data.aws_subnet_ids.default.ids}"]
 
@@ -105,7 +103,6 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
       "${data.aws_security_group.default.id}",
     ]
   }
-
   environment {
     variables = {
       HOST     = "${aws_rds_cluster.default.endpoint}"
@@ -117,15 +114,15 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
 
 data "archive_file" "integration_test_data_teardown_lambda_provisioner" {
   type        = "zip"
-  source_dir  = "../common-bin/graphql/teardown"
-  output_path = "../common-bin/graphql/teardown/teardown-lambda.zip"
+  source_dir  = "../common-bin/rds"
+  output_path = "../common-bin/rds/teardown-lambda.zip"
 
   depends_on = ["null_resource.integration_test_data_teardown_lambda_provisioner"]
 }
 
 resource "null_resource" "integration_test_data_teardown_lambda_provisioner" {
   provisioner "local-exec" {
-    working_dir = "../common-bin/graphql/teardown"
+    working_dir = "../common-bin/rds"
     command     = "yarn install"
   }
 }

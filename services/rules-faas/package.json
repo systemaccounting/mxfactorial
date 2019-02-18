@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "zip": "rm -f rules-lambda.zip && zip -r rules-lambda.zip index.js node_modules package.json yarn.lock",
+    "zip": "rm -f rules-lambda.zip && yarn install && zip -r rules-lambda.zip index.js node_modules package.json yarn.lock",
     "update:faas:prod": "aws lambda update-function-code --function-name rules-lambda-prod --zip-file fileb://$(pwd)/rules-lambda.zip --region us-east-1 --query 'LastModified'",
     "update:faas:qa": "aws lambda update-function-code --function-name rules-lambda-qa --zip-file fileb://$(pwd)/rules-lambda.zip --region us-east-1 --query 'LastModified'",
     "update:faas:dev": "aws lambda update-function-code --function-name rules-lambda-dev --zip-file fileb://$(pwd)/rules-lambda.zip --region us-east-1 --query 'LastModified'",
-    "deploy:prod": "yarn install && yarn run zip && yarn run update:faas:prod",
-    "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa",
-    "deploy:dev": "yarn install && yarn run zip && yarn run update:faas:dev"
+    "deploy:prod": "yarn run zip && yarn run update:faas:prod",
+    "deploy:qa": "yarn run zip && yarn run update:faas:qa",
+    "deploy:dev": "yarn run zip && yarn run update:faas:dev"
   }
 }
