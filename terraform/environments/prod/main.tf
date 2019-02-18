@@ -34,7 +34,7 @@ data "terraform_remote_state" "global" {
   }
 }
 
-# IMPORTANT: first build lambda artifacts using `sh services/build.sh`
+# IMPORTANT: first build lambda artifacts using `cd services && sh build.sh`
 module "prod" {
   source = "../../modules/environment"
 
