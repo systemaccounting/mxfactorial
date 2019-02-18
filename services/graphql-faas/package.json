@@ -17,7 +17,6 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.395.0",
     "aws-serverless-express": "^3.3.5",
