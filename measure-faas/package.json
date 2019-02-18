@@ -1,0 +1,17 @@
+{
+  "name": "measure-faas",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "zip": "rm -f measure-lambda.zip && zip -r measure-lambda.zip index.js node_modules src package.json yarn.lock",
+    "update:faas:prod": "aws lambda update-function-code --function-name measure-lambda-prod --zip-file fileb://$(pwd)/measure-lambda.zip --region us-east-1 --query 'LastModified'",
+    "update:faas:qa": "aws lambda update-function-code --function-name measure-lambda-qa --zip-file fileb://$(pwd)/measure-lambda.zip --region us-east-1 --query 'LastModified'",
+    "update:faas:dev": "aws lambda update-function-code --function-name measure-lambda-dev --zip-file fileb://$(pwd)/measure-lambda.zip --region us-east-1 --query 'LastModified'",
+    "deploy:prod": "yarn install && yarn run zip && yarn run update:faas:prod",
+    "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa",
+    "deploy:dev": "yarn install && yarn run zip && yarn run update:faas:dev"
+  },
+  "dependencies": {
+    "mysql2": "^1.6.5"
+  }
+}

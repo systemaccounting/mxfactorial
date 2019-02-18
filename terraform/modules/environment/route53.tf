@@ -1,6 +1,6 @@
 resource "aws_route53_record" "client_fqdn" {
   zone_id = "${data.aws_route53_zone.mxfactorial_io.zone_id}"
-  name    = "${var.client_fqdn}"
+  name    = "${"${var.environment}" == "prod" ?  "mxfactorial.io" : "${var.environment}.mxfactorial.io"}"
   type    = "A"
 
   alias {
@@ -12,7 +12,7 @@ resource "aws_route53_record" "client_fqdn" {
 
 resource "aws_route53_record" "client_fqdn_ipv6" {
   zone_id = "${data.aws_route53_zone.mxfactorial_io.zone_id}"
-  name    = "${var.client_fqdn}"
+  name    = "${"${var.environment}" == "prod" ?  "mxfactorial.io" : "${var.environment}.mxfactorial.io"}"
   type    = "AAAA"
 
   alias {
@@ -25,7 +25,7 @@ resource "aws_route53_record" "client_fqdn_ipv6" {
 resource "aws_route53_record" "api_fqdn" {
   zone_id = "${data.aws_route53_zone.mxfactorial_io.zone_id}"
 
-  name = "${var.api_fqdn}"
+  name = "${"${var.environment}" == "prod" ?  "api.mxfactorial.io" : "${var.environment}-api.mxfactorial.io"}"
   type = "A"
 
   alias {
@@ -38,7 +38,7 @@ resource "aws_route53_record" "api_fqdn" {
 resource "aws_route53_record" "api_fqdn_ipv6" {
   zone_id = "${data.aws_route53_zone.mxfactorial_io.zone_id}"
 
-  name = "${var.api_fqdn}"
+  name = "${"${var.environment}" == "prod" ?  "api.mxfactorial.io" : "${var.environment}-api.mxfactorial.io"}"
   type = "AAAA"
 
   alias {

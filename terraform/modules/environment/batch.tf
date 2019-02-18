@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "liquibase_assume_role_policy" {
 
 resource "aws_iam_role" "liquibase_job_definition_role" {
   description = "permits batch job rds access"
-  name        = "${var.liquibase_job_definition_role_name}"
+  name        = "liquibase-job-definition-role-${var.environment}"
 
   assume_role_policy = "${data.aws_iam_policy_document.liquibase_assume_role_policy.json}"
 }
@@ -29,7 +29,7 @@ resource "aws_iam_role_policy_attachment" "add_rds_to_job" {
 
 ########## Job Definition for Batch ##########
 resource "aws_batch_job_definition" "liquibase" {
-  name = "${var.aws_batch_job_definition_name}"
+  name = "liquibase-${var.environment}"
   type = "container"
 
   container_properties = <<CONTAINER_PROPERTIES
@@ -50,7 +50,7 @@ CONTAINER_PROPERTIES
 ########## Compute Environment for Batch ##########
 
 resource "aws_batch_job_queue" "default" {
-  name                 = "${var.aws_batch_job_queue_name}"
+  name                 = "liquibase-${var.environment}"
   state                = "ENABLED"
   priority             = 100
   compute_environments = ["${aws_batch_compute_environment.default.arn}"]
@@ -59,7 +59,7 @@ resource "aws_batch_job_queue" "default" {
 ########## Compute Environment for Batch ##########
 resource "aws_iam_role" "batch_ecs_instance_role" {
   description = "permits compute environment to manage ecs"
-  name        = "${var.batch_ecs_instance_role_name}"
+  name        = "batch-ecs-instance-role-${var.environment}"
 
   assume_role_policy = <<EOF
 {
@@ -83,13 +83,13 @@ resource "aws_iam_role_policy_attachment" "batch_ecs_instance_role" {
 }
 
 resource "aws_iam_instance_profile" "batch_ecs_instance_role" {
-  name = "${var.batch_aws_iam_instance_profile_name}"
+  name = "batch-aws-iam-instance-profile-${var.environment}"
   role = "${aws_iam_role.batch_ecs_instance_role.name}"
 }
 
 resource "aws_iam_role" "aws_batch_service_role" {
   description = "permits ecs to manage batch"
-  name        = "${var.aws_batch_service_role_name}"
+  name        = "aws-batch-service-role-${var.environment}"
 
   assume_role_policy = <<EOF
 {
@@ -113,7 +113,7 @@ resource "aws_iam_role_policy_attachment" "aws_batch_service_role" {
 }
 
 resource "aws_batch_compute_environment" "default" {
-  compute_environment_name = "${var.aws_batch_compute_environment_name}"
+  compute_environment_name = "batch-compute-environment-${var.environment}"
 
   compute_resources {
     instance_role = "${aws_iam_instance_profile.batch_ecs_instance_role.arn}"
@@ -133,7 +133,7 @@ resource "aws_batch_compute_environment" "default" {
     type = "EC2"
 
     tags {
-      name = "${var.aws_batch_compute_environment_name}"
+      name = "batch-compute-environment-${var.environment}"
     }
   }
 

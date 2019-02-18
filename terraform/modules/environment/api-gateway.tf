@@ -1,5 +1,5 @@
 resource "aws_api_gateway_rest_api" "mxfactorial_api" {
-  name        = "${var.api_name}"
+  name        = "mxfactorial-api-${var.environment}"
   description = "GraphQL Endpoint"
 }
 
@@ -50,7 +50,7 @@ resource "aws_api_gateway_deployment" "environment" {
   ]
 
   rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
-  stage_name  = "${var.stage_name}"
+  stage_name  = "${var.environment}"
 }
 
 resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
@@ -69,7 +69,7 @@ resource "aws_api_gateway_account" "mxfactorial_api_account" {
 }
 
 resource "aws_iam_role" "api_gateway_cloudwatch" {
-  name = "${var.iam_role_name}"
+  name = "api-gateway-role-${var.environment}"
 
   assume_role_policy = <<EOF
 {
@@ -89,7 +89,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "api_gateway_cloudwatch" {
-  name = "${var.iam_role_policy_name}"
+  name = "api-gateway-cloudwatch-policy-${var.environment}"
   role = "${aws_iam_role.api_gateway_cloudwatch.id}"
 
   policy = <<EOF
@@ -115,7 +115,7 @@ EOF
 }
 
 resource "aws_api_gateway_domain_name" "mxfactorial" {
-  domain_name     = "${var.domain_name}"
+  domain_name     = "${"${var.environment}" == "prod" ?  "api.mxfactorial.io" : "${var.environment}-api.mxfactorial.io"}"
   certificate_arn = "${var.certificate_arn}"
 }
 

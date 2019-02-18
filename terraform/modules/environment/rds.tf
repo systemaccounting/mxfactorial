@@ -1,5 +1,5 @@
 resource "aws_rds_cluster" "default" {
-  cluster_identifier      = "${var.db_cluster_identifier}"
+  cluster_identifier      = "mxfactorial-${var.environment}"
   engine                  = "aurora"
   engine_mode             = "serverless"
   engine_version          = "5.6.10a"
@@ -26,7 +26,7 @@ resource "aws_rds_cluster" "default" {
 ########## Create clou9 instance to access RDS ##########
 resource "aws_cloud9_environment_ec2" "default" {
   instance_type               = "t2.micro"
-  name                        = "${var.cloud9_name}"
+  name                        = "rds-connect-${var.environment}"
   description                 = "connecting to rds"
   automatic_stop_time_minutes = 15
   subnet_id                   = "${aws_db_subnet_group.default.subnet_ids[0]}"
@@ -80,7 +80,7 @@ data "aws_subnet" "rds_cloud9" {
 ###### Integration test data teardown lambda ######
 resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
   filename      = "../common-bin/graphql/teardown/teardown-lambda.zip"
-  function_name = "${var.integration_test_data_teardown_lambda_name}"
+  function_name = "delete-faker-rds-transactions-lambda-${var.environment}"
   description   = "Integration test data teardown lambda"
 
   # "main" is the filename within the zip file (main.js) and "handler"
@@ -108,7 +108,6 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
 
   environment {
     variables = {
-      REGION   = "${var.graphql_lambda_region_env_var}"
       HOST     = "${aws_rds_cluster.default.endpoint}"
       USER     = "${var.db_master_username}"
       PASSWORD = "${var.db_master_password}"

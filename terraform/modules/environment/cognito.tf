@@ -407,7 +407,6 @@ resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
 
   environment {
     variables = {
-      REGION          = "${var.faker_lambda_region_env_var}"
       COGNITO_POOL_ID = "${aws_cognito_user_pool.pool.id}"
     }
   }

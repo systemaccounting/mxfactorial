@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "mxfactorial_react" {
-  bucket = "${var.react_bucket_name}"
+  bucket = "mxfactorial-react-${var.environment}"
 
   policy = <<POLICY
 {

@@ -7,8 +7,7 @@ const {
   TransactionCreateType
 } = require('../types/Transaction')
 const {
-  AddTransactionResolver,
-  connection
+  AddTransactionResolver
 } = require('../resolvers/Transaction')
 
 const TransactionCreateMutation = () => {
@@ -18,7 +17,7 @@ const TransactionCreateMutation = () => {
       input: { type: new GraphQLNonNull(TransactionCreateType)}
     },
     resolve(parentValue, args) {
-      return AddTransactionResolver(args.input, connection)
+      return AddTransactionResolver(args.input)
     }
   }
 }

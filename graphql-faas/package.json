@@ -4,17 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "zip": "zip -r lambda.zip index.js src node_modules package.json package-lock.json .gitignore",
-    "update:faas:prod": "aws lambda update-function-code --function-name mxfactorial-graphql-server-prod --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
-    "update:faas:qa": "aws lambda update-function-code --function-name mxfactorial-graphql-server-qa --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
-    "update:faas:dev": "aws lambda update-function-code --function-name mxfactorial-graphql-server-dev --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",
+    "zip": "rm -f graphql-lambda.zip && zip -r graphql-lambda.zip index.js src node_modules package.json yarn.lock",
+    "update:faas:prod": "aws lambda update-function-code --function-name mxfactorial-graphql-server-prod --zip-file fileb://$(pwd)/graphql-lambda.zip --region us-east-1 --query 'LastModified'",
+    "update:faas:qa": "aws lambda update-function-code --function-name mxfactorial-graphql-server-qa --zip-file fileb://$(pwd)/graphql-lambda.zip --region us-east-1 --query 'LastModified'",
+    "update:faas:dev": "aws lambda update-function-code --function-name mxfactorial-graphql-server-dev --zip-file fileb://$(pwd)/graphql-lambda.zip --region us-east-1 --query 'LastModified'",
     "deploy:prod": "yarn install && yarn run zip && yarn run update:faas:prod",
     "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa",
     "deploy:dev": "yarn install && yarn run zip && yarn run update:faas:dev",
     "test:prod": "LOCAL_ENV=prod node tests/utils/warmUp.js && LOCAL_ENV=prod AWS_REGION=us-east-1 jest --detectOpenHandles",
     "test:qa": "LOCAL_ENV=qa node tests/utils/warmUp.js && LOCAL_ENV=qa AWS_REGION=us-east-1 jest --detectOpenHandles",
     "test:dev": "LOCAL_ENV=dev node tests/utils/warmUp.js && LOCAL_ENV=dev AWS_REGION=us-east-1 jest --detectOpenHandles",
-    "cp:lambda": "echo \"copying over to terraform\" && yarn install && yarn run zip && cp lambda.zip ../terraform/environments/common-bin/graphql/lambda.zip"
+    "cp:lambda": "echo \"copying over to terraform\" && yarn install && yarn run zip && cp graphql-lambda.zip ../terraform/environments/common-bin/graphql/graphql-lambda.zip"
   },
   "keywords": [],
   "author": "",
@@ -26,8 +26,7 @@
     "cors": "^2.8.5",
     "express": "^4.16.3",
     "express-graphql": "^0.6.12",
-    "graphql": "^14.0.2",
-    "mysql2": "^1.6.4"
+    "graphql": "^14.0.2"
   },
   "devDependencies": {
     "jest": "^24.0.0",

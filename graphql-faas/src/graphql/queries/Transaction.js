@@ -2,8 +2,7 @@ const { GraphQLList, GraphQLString } = require('graphql')
 
 const { TransactionType } = require('../types/Transaction')
 const {
-  GetTransactionResolver,
-  connection
+  GetTransactionResolver
 } = require('../resolvers/Transaction')
 
 const TransactionQueryType = () => {
@@ -17,7 +16,7 @@ const TransactionQueryType = () => {
       }
     },
     resolve(parentValue, args) {
-      return GetTransactionResolver(args.transactionId, connection)
+      return GetTransactionResolver(args.transactionId)
     }
   }
 }

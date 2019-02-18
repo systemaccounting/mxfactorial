@@ -1,0 +1,17 @@
+{
+  "name": "transact-faas",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "zip": "rm -f transact-lambda.zip && zip -r transact-lambda.zip index.js node_modules src package.json yarn.lock",
+    "update:faas:prod": "aws lambda update-function-code --function-name transact-lambda-prod --zip-file fileb://$(pwd)/transact-lambda.zip --region us-east-1 --query 'LastModified'",
+    "update:faas:qa": "aws lambda update-function-code --function-name transact-lambda-qa --zip-file fileb://$(pwd)/transact-lambda.zip --region us-east-1 --query 'LastModified'",
+    "update:faas:dev": "aws lambda update-function-code --function-name transact-lambda-dev --zip-file fileb://$(pwd)/transact-lambda.zip --region us-east-1 --query 'LastModified'",
+    "deploy:prod": "yarn install && yarn run zip && yarn run update:faas:prod",
+    "deploy:qa": "yarn install && yarn run zip && yarn run update:faas:qa",
+    "deploy:dev": "yarn install && yarn run zip && yarn run update:faas:dev"
+  },
+  "dependencies": {
+    "mysql2": "^1.6.5"
+  }
+}

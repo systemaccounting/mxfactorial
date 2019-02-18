@@ -47,43 +47,6 @@ module "prod" {
   ############### API Gateway ###############
   certificate_arn = "${lookup(data.terraform_remote_state.global.api_cert_map, var.environment)}"
 
-  api_name             = "mxfactorial-api-${var.environment}"
-  stage_name           = "${var.environment}"
-  domain_name          = "${"${var.environment}" == "prod" ?  "api.mxfactorial.io" : "${var.environment}-api.mxfactorial.io"}"
-  iam_role_name        = "mxfactorial-cloudwatch-role-${var.environment}"
-  iam_role_policy_name = "mxfactorial-cloudwatch-policy-${var.environment}"
-
-  ############### Batch ###############
-  aws_batch_job_queue_name            = "liquibase-${var.environment}"
-  aws_batch_job_definition_name       = "liquibase-${var.environment}"
-  batch_ecs_instance_role_name        = "batch-ecs-instance-role-${var.environment}"
-  batch_aws_iam_instance_profile_name = "batch-aws-iam-instance-profile-${var.environment}"
-  aws_batch_service_role_name         = "aws-batch-service-role-${var.environment}"
-  aws_batch_compute_environment_name  = "batch-compute-environment-${var.environment}"
-  liquibase_job_definition_role_name  = "liquibase-job-definition-role-${var.environment}"
-
   ############### Cloudfront ###############
-  domain_aliases = ["${"${var.environment}" == "prod" ?  "mxfactorial.io" : "${var.environment}.mxfactorial.io"}"]
-  ssl_arn        = "${lookup(data.terraform_remote_state.global.client_cert_map, var.environment)}"
-
-  ############### Cognito ###############
-  faker_lambda_region_env_var = "${var.region}"
-
-  ############### Lambda ###############
-  graphql_lambda_function_name  = "mxfactorial-graphql-server-${var.environment}"
-  graphql_lambda_region_env_var = "${var.region}"
-  graphql_lambda_role_name      = "mxfactorial-graphql-lambda-${var.environment}"
-  graphql_lambda_policy_name    = "mxfactorial-graphql-lambda-${var.environment}"
-
-  ############### RDS ###############
-  db_cluster_identifier                      = "mxfactorial-${var.environment}"
-  cloud9_name                                = "rds-connect-${var.environment}"
-  integration_test_data_teardown_lambda_name = "delete-faker-rds-transactions-lambda-${var.environment}"
-
-  ############### Route 53 ###############
-  client_fqdn = "${"${var.environment}" == "prod" ?  "mxfactorial.io" : "${var.environment}.mxfactorial.io"}"
-  api_fqdn    = "${"${var.environment}" == "prod" ?  "api.mxfactorial.io" : "${var.environment}-api.mxfactorial.io"}"
-
-  ############### S3 ###############
-  react_bucket_name = "mxfactorial-react-${var.environment}"
+  ssl_arn = "${lookup(data.terraform_remote_state.global.client_cert_map, var.environment)}"
 }
