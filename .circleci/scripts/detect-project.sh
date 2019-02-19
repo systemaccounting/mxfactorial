@@ -29,11 +29,8 @@ echo "Last successful build: $LAST_SUCCESSFUL_BUILD_NUMBER"
 if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
   # get initial commit after branching from develop or master if no previous successful build number
   if [[ $CIRCLE_BRANCH != "develop" && $CIRCLE_BRANCH != "master" ]]; then
-    PARENT_BRANCH=$(git show-branch | grep -F '*' | grep -v "$(git rev-parse --abbrev-ref HEAD)" | head -n1 | sed 's/.*\[\(.*\)\].*/\1/' | sed 's/[\^~].*//')
-    echo "Parent branch: $PARENT_BRANCH"
-    CURRENT_BRANCH=$(git branch | grep -F '*' | cut -d ' ' -f2)
-    echo "Current branch: $CURRENT_BRANCH"
-    SUBDIR=$(git log --name-only --oneline $PARENT_BRANCH..$CURRENT_BRANCH | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
+    echo "Current branch: $CIRCLE_BRANCH"
+    SUBDIR=$(git log --name-only --oneline develop..$CURRENT_BRANCH | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
   else
     # use previous commit sha if develop or master and no previous success build number (in case someone git inits this script)
     SUBDIR=$(git log --name-only --oneline -1 | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
