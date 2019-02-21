@@ -6,12 +6,10 @@ const AddTransactionResolver = (arg) => {
     console.log(`Empty object received by resolver`)
     return `Please specify at least 1 transaction`
   }
+  let transaction = arg
   let params = {}
   params.FunctionName = process.env.TRANSACT_LAMBDA_ARN
-  let responseObject = {}
-  responseObject.transaction = arg
-  responseObject.internal = 1
-  params.Payload = JSON.stringify(responseObject)
+  params.Payload = JSON.stringify(transaction)
   // console.log(params)
   return lambda.invoke(params)
   .promise()
@@ -25,9 +23,9 @@ const AddTransactionResolver = (arg) => {
 const GetTransactionResolver = (arg) => {
   let params = {}
   params.FunctionName = process.env.MEASURE_LAMBDA_ARN
-  let responseObject = {}
-  responseObject.id = arg
-  params.Payload = JSON.stringify(responseObject)
+  let payload = {}
+  payload.id = arg
+  params.Payload = JSON.stringify(payload)
   return lambda.invoke(params)
   .promise()
   .then(data => {

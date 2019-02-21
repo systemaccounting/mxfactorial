@@ -12,6 +12,6 @@ const connection = mysql.createConnection({
 
 exports.handler = async (event) => {
   // console.log(event)
-  let insert = await addTransaction(event.transaction, connection)
+  let insert = await addTransaction(event, connection)
   return insert
 }

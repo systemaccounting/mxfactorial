@@ -30,7 +30,7 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
   # get initial commit after branching from develop or master if no previous successful build number
   if [[ $CIRCLE_BRANCH != "develop" && $CIRCLE_BRANCH != "master" ]]; then
     echo "Current branch: $CIRCLE_BRANCH"
-    SUBDIR=$(git log --name-only --oneline develop..$CURRENT_BRANCH | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
+    SUBDIR=$(git log --name-only --oneline origin/develop..$CIRCLE_BRANCH | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
   else
     # use previous commit sha if develop or master and no previous success build number (in case someone git inits this script)
     SUBDIR=$(git log --name-only --oneline -1 | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
@@ -40,7 +40,7 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
   if [[ -z $SUBDIR ]] || [[ $SUBDIR != *$1* ]]; then
     circleci step halt
   else
-    return 0
+    exit 0
   fi
 fi
 # get commit sha of last successful build number on branch
