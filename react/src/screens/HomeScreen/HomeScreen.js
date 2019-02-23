@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { graphql } from 'react-apollo'
 import { fetchRules } from 'queries/rules'
-import { insertTransactions } from 'queries/transactions'
+import { createTransaction } from 'queries/transactions'
 
 import MainLayout from 'components/MainLayout'
 import AccountHeader from './components/AccountHeader'
@@ -32,14 +32,15 @@ class HomeScreen extends Component {
     const { client } = this.props
     return client.query({
       query: fetchRules,
+      addTypename: false,
       variables: {
         transactions
       }
     })
   }
 
-  onRequestTransactions = (type, transactions) => {
-    console.log(type, transactions)
+  onRequestTransactions = (type, items) => {
+    return this.props.createTransaction(items)
   }
 
   render() {
@@ -61,11 +62,11 @@ class HomeScreen extends Component {
 
 export { HomeScreen }
 
-export default graphql(insertTransactions, {
+export default graphql(createTransaction, {
   props: ({ ownProps, mutate }) => ({
-    insertTransactions: transactions =>
+    createTransaction: transactions =>
       mutate({
-        variables: { transactions }
+        variables: { items: transactions }
       })
   })
 })(HomeScreen)

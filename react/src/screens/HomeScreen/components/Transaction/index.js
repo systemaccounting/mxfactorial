@@ -140,11 +140,12 @@ class Transaction extends React.Component {
 
   requestTransactions = () => {
     const { type, rules, transactions, draftTransaction } = this.state
-    return this.props.onRequestTransactions(type, [
+    const transactionItems = R.map(R.omit(['__typename']))([
       ...transactions,
       draftTransaction,
       ...rules
     ])
+    return this.props.onRequestTransactions(type, transactionItems)
   }
 
   get rules() {

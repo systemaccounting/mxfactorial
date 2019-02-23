@@ -1,15 +1,13 @@
 import gql from 'graphql-tag'
 
-const insertTransactions = gql`
-  mutation insertTransactions($transactions: [TransactionItem]) {
-    rules(transactions: $transactions) {
-      uuid
+const createTransaction = gql`
+  mutation CreateTransaction($items: [TransactionCreateType]) {
+    createTransaction(items: $items) {
       name
-      price
       quantity
-      rule_instance_id
+      price
     }
   }
 `
 
-export { insertTransactions }
+export { createTransaction }
