@@ -8,7 +8,7 @@ const { AddTransactionResolver } = require('../resolvers/Transaction')
 
 const TransactionCreateMutation = () => {
   return {
-    type: TransactionType,
+    type: new GraphQLList(TransactionType),
     args: {
       items: {
         name: 'Transaction items',

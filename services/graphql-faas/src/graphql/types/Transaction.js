@@ -114,7 +114,7 @@ const TransactionCreateType = new GraphQLInputObjectType({
   name: 'TransactionCreateType',
   type: TransactionType,
   fields: {
-    // id: { type: GraphQLID },
+    uuid: { type: GraphQLID },
     // debitor: { type: new GraphQLNonNull(GraphQLString) },
     // debitor_profile_latlng: { type: GraphQLString },
     // debitor_transaction_latlng: { type: GraphQLString },
@@ -127,10 +127,10 @@ const TransactionCreateType = new GraphQLInputObjectType({
     // creditor_device: { type: GraphQLString },
     name: { type: new GraphQLNonNull(GraphQLString) },
     price: { type: new GraphQLNonNull(GraphQLString) },
-    quantity: { type: new GraphQLNonNull(GraphQLString) }
+    quantity: { type: new GraphQLNonNull(GraphQLString) },
     // unit_of_measurement: { type: GraphQLString },
     // units_measured: { type: GraphQLString },
-    // rule_instance_id: { type: GraphQLString },
+    rule_instance_id: { type: GraphQLString }
     // transaction_id: { type: new GraphQLNonNull(GraphQLString) },
     // debit_approver: { type: new GraphQLNonNull(GraphQLString) },
     // credit_approver: { type: new GraphQLNonNull(GraphQLString) },
