@@ -1,7 +1,7 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
 import { promiseToResolve, promiseToReject } from 'utils/testing'
-import HomeScreen from '../HomeScreen'
+import { HomeScreen } from '../HomeScreen'
 
 const user = {
   username: 'john doe'

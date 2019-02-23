@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 
-const fetchRules = gql`
-  query fetchRules($transactions: [TransactionItem]) {
+const insertTransactions = gql`
+  mutation insertTransactions($transactions: [TransactionItem]) {
     rules(transactions: $transactions) {
       uuid
       name
@@ -12,4 +12,4 @@ const fetchRules = gql`
   }
 `
 
-export { fetchRules }
+export { insertTransactions }
