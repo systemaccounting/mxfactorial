@@ -12,6 +12,7 @@
     "deploy:dev": "yarn run zip && yarn run update:faas:dev"
   },
   "dependencies": {
+    "aws-sdk": "^2.395.0",
     "mysql2": "^1.6.5"
   }
 }

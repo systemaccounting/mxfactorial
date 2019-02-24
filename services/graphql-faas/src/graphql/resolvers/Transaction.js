@@ -6,19 +6,19 @@ const AddTransactionResolver = args => {
     console.log(`Empty object received by resolver`)
     return `Please specify at least 1 transaction`
   }
-  return args.items
-  // let transaction = arg
-  // let params = {}
-  // params.FunctionName = process.env.TRANSACT_LAMBDA_ARN
-  // params.Payload = JSON.stringify(transaction)
-  // // console.log(params)
-  // return lambda.invoke(params)
-  // .promise()
-  // .then(data => {
-  //     let responseFromTransact = JSON.parse(data.Payload)
-  //     return responseFromTransact
-  //   })
-  // .catch(err => { console.error(err, err.stack) })
+  const params = {
+    FunctionName: process.env.TRANSACT_LAMBDA_ARN,
+    Payload: JSON.stringify({ items: args.items })
+  }
+  return lambda
+    .invoke(params)
+    .promise()
+    .then(data => {
+      return JSON.parse(data.Payload)
+    })
+    .catch(err => {
+      console.error(err, err.stack)
+    })
 }
 
 const GetTransactionResolver = arg => {
