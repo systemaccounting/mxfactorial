@@ -23,14 +23,17 @@ resource "aws_lambda_function" "transact_service_lambda" {
       "${aws_security_group.rds.id}",
       "${data.aws_security_group.default.id}",
     ]
+
+    # "${aws_security_group.vpce_sqs.id}",
   }
 
   environment {
     variables = {
-      HOST             = "${aws_rds_cluster.default.endpoint}"
-      USER             = "${var.db_master_username}"
-      PASSWORD         = "${var.db_master_password}"
-      RULES_LAMBDA_ARN = "${aws_lambda_function.rules_service_lambda.arn}"
+      HOST                    = "${aws_rds_cluster.default.endpoint}"
+      USER                    = "${var.db_master_username}"
+      PASSWORD                = "${var.db_master_password}"
+      TRANSACT_TO_RULES_QUEUE = "${aws_sqs_queue.transact_to_rules.id}"
+      RULES_TO_TRANSACT_QUEUE = "${aws_sqs_queue.rules_to_transact.id}"
     }
   }
 }
@@ -55,7 +58,7 @@ resource "aws_iam_role" "transact_service_lambda_role" {
 EOF
 }
 
-# Policy for Lambda to create logs and dynamodb records
+# policy for lambda to create logs and access rds
 resource "aws_iam_role_policy" "transact_service_lambda_policy" {
   name = "transact-service-lambda-policy-${var.environment}"
   role = "${aws_iam_role.transact_service_lambda_role.id}"
@@ -75,13 +78,30 @@ resource "aws_iam_role_policy" "transact_service_lambda_policy" {
           "ec2:DeleteNetworkInterface"
       ],
       "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+# policy for lambda to sns policy
+resource "aws_iam_role_policy" "transact_service_lambda_messaging_policy" {
+  name = "transact-service-lambda-messaging-policy-${var.environment}"
+  role = "${aws_iam_role.transact_service_lambda_role.id}"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "sns:*",
+      "Resource": "*"
     },
     {
       "Effect": "Allow",
-      "Action": "lambda:InvokeFunction",
-      "Resource": [
-        "${aws_lambda_function.rules_service_lambda.arn}"
-      ]
+      "Action": "sqs:*",
+      "Resource": "*"
     }
   ]
 }
