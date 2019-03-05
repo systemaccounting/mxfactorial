@@ -39,7 +39,7 @@ resource "aws_security_group" "rds" {
   vpc_id      = "${data.aws_vpc.default.id}"
 }
 
-########## Allow traffic on port 3306 between cloud9 and RDS security groups ##########
+########## Allow traffic on port 3306 between cloud9 and RDS ##########
 resource "aws_security_group_rule" "allow_cloud9" {
   type              = "ingress"
   from_port         = 3306
@@ -49,12 +49,22 @@ resource "aws_security_group_rule" "allow_cloud9" {
   security_group_id = "${aws_security_group.rds.id}"
 }
 
-###### Allow all traffic on 3306 port within subnet shared by RDS and cloud9 ######
-resource "aws_security_group_rule" "allow_all_internal" {
+###### Allow all traffic within RDS and lambda group ######
+resource "aws_security_group_rule" "allow_all_internal_inbound_rds" {
   type              = "ingress"
-  from_port         = 3306
-  to_port           = 3306
-  protocol          = "tcp"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  self              = true
+  security_group_id = "${aws_security_group.rds.id}"
+}
+
+###### Allow all outbound within RDS and lambda group for messaging topics and queues ######
+resource "aws_security_group_rule" "allow_all_outbound_rds" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
   self              = true
   security_group_id = "${aws_security_group.rds.id}"
 }
