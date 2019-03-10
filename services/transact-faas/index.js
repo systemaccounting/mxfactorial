@@ -13,7 +13,7 @@ exports.handler = async (event) => {
 
   // add temporary property expected by rules index.js:21
   let rulesIntegrationDemo = event
-  rulesIntegrationDemo.some = `transaction`
+  rulesIntegrationDemo.some = `transactions`
   // console.log(rulesIntegrationDemo)
 
   let messageId = await sendMessageToQueue(

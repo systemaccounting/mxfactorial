@@ -17,9 +17,9 @@ exports.handler = async (event) => {
     let messageFromTransactSQS = event.Records[0]
     let messageIdFromTransact = messageFromTransactSQS.messageId
     // console.log("id: " + messageIdFromTransact)
+    console.log(`message received from transact: ${messageFromTransactSQS.body}`)
     let messageBody = JSON.parse(messageFromTransactSQS.body)
     let ruleInstance = queriedRule(messageBody.some)
-    // console.log(ruleInstance)
 
     return await sendMessageToQueue(ruleInstance, messageIdFromTransact, RULES_TO_TRANSACT_QUEUE)
   }
