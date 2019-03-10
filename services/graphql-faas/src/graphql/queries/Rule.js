@@ -43,8 +43,8 @@ const RuleQueryType = () => ({
       description: 'Please, specify transactions'
     }
   },
-  resolve(parent, args) {
-    return GetRuleTransactionsResolver(args)
+  resolve: async (parent, args) => {
+    return await GetRuleTransactionsResolver(args)
   }
 })
 

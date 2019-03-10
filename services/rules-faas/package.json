@@ -10,5 +10,8 @@
     "deploy:prod": "yarn run zip && yarn run update:faas:prod",
     "deploy:qa": "yarn run zip && yarn run update:faas:qa",
     "deploy:dev": "yarn run zip && yarn run update:faas:dev"
+  },
+  "dependencies": {
+    "uuid": "^3.3.2"
   }
 }
