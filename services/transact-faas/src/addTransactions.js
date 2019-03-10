@@ -1,7 +1,14 @@
 const aws = require('aws-sdk')
 const lambda = new aws.Lambda()
+const {
+  sendMessageToQueue,
+  receiveMessageFromQueue,
+  deleteMessageFromQueue
+} = require('./sqs')
 
-const addTransaction = (obj, conn) => {
+const { TRANSACT_TO_RULES_QUEUE, RULES_TO_TRANSACT_QUEUE } = process.env
+
+const addTransaction = async (obj, conn) => {
   if (!obj.items) {
     console.log(`Empty object received by resolver`)
     return `Please specify at least 1 transaction`
@@ -9,22 +16,34 @@ const addTransaction = (obj, conn) => {
 
   // service assigns recieved items as itemsUnderTestArray, then logs
   const itemsUnderTestArray = obj.items
-  console.log(itemsUnderTestArray)
+  console.log('Item under test array: ', itemsUnderTestArray)
 
   // service POST /rules itemsUnderTestArray
-  const params = {
-    FunctionName: process.env.RULES_LAMBDA_ARN,
-    Payload: JSON.stringify({ items: 'items' })
-  }
-  return lambda
-    .invoke(params)
-    .promise()
-    .then(data => {
-      return data
-    })
-    .catch(err => {
-      console.log('ERROR', err)
-    })
+  const messageId = await sendMessageToQueue(
+    itemsUnderTestArray,
+    TRANSACT_TO_RULES_QUEUE
+  )
+  console.log('Initial id: ', messageId) //match with message returned from
+
+  const responseFromRules = await receiveMessageFromQueue(
+    RULES_TO_TRANSACT_QUEUE
+  )
+  console.log('Items standard array: ', responseFromRules)
+
+  return itemsUnderTestArray
+  // const params = {
+  //   FunctionName: process.env.RULES_LAMBDA_ARN,
+  //   Payload: JSON.stringify({ items: 'items' })
+  // }
+  // return lambda
+  //   .invoke(params)
+  //   .promise()
+  //   .then(data => {
+  //     return data
+  //   })
+  //   .catch(err => {
+  //     console.log('ERROR', err)
+  //   })
 
   // const transactionRecord = obj
   // var returnedRecord = transactionRecord
