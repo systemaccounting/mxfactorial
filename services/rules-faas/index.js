@@ -4,9 +4,6 @@ const applyRules = require('./src/applyRules')
 const RULES_TO_TRANSACT_QUEUE = process.env.RULES_TO_TRANSACT_QUEUE
 
 exports.handler = async event => {
-  const queriedRule = transactions =>
-    `const payTax = (${transactions}) => rules-applied ${transactions}`
-
   // if coming from transact through sqs which adds Records property to event object:
   if (event.Records) {
     // no need to delete message from queue per standard instructions in
@@ -15,14 +12,11 @@ exports.handler = async event => {
     let messageFromTransactSQS = event.Records[0]
     let messageIdFromTransact = messageFromTransactSQS.messageId
     // console.log("id: " + messageIdFromTransact)
-    console.log(
-      `message received from transact: ${messageFromTransactSQS.body}`
-    )
-    let messageBody = JSON.parse(messageFromTransactSQS.body)
-    let ruleInstance = queriedRule(messageBody.some)
+    console.log('Message received from transact: ', messageFromTransactSQS.body)
+    const transactions = JSON.parse(messageFromTransactSQS.body)
 
     return await sendMessageToQueue(
-      ruleInstance,
+      applyRules(transactions),
       messageIdFromTransact,
       RULES_TO_TRANSACT_QUEUE
     )

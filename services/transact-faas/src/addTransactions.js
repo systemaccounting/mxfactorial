@@ -1,10 +1,10 @@
 const aws = require('aws-sdk')
-const lambda = new aws.Lambda()
 const {
   sendMessageToQueue,
   receiveMessageFromQueue,
   deleteMessageFromQueue
 } = require('./sqs')
+const _ = require('lodash')
 
 const { TRANSACT_TO_RULES_QUEUE, RULES_TO_TRANSACT_QUEUE } = process.env
 
@@ -15,8 +15,8 @@ const addTransaction = async (obj, conn) => {
   }
 
   // service assigns recieved items as itemsUnderTestArray, then logs
-  const itemsUnderTestArray = obj.items
-  console.log('Item under test array: ', itemsUnderTestArray)
+  const itemsUnderTestArray = _.sortBy(obj.items, 'name')
+  console.log('Item under test array: ', JSON.stringify(itemsUnderTestArray))
 
   // service POST /rules itemsUnderTestArray
   const messageId = await sendMessageToQueue(
@@ -28,9 +28,44 @@ const addTransaction = async (obj, conn) => {
   const responseFromRules = await receiveMessageFromQueue(
     RULES_TO_TRANSACT_QUEUE
   )
-  console.log('Items standard array: ', responseFromRules)
 
-  return itemsUnderTestArray
+  // sqs omits Message property if queue empty or messages not visible (in flight)
+  if (responseFromRules.Messages) {
+    const message = responseFromRules.Messages[0]
+
+    console.log(
+      'Returned id: ',
+      message.MessageAttributes.InitialMessageId.StringValue
+    )
+
+    await deleteMessageFromQueue(RULES_TO_TRANSACT_QUEUE, message.ReceiptHandle)
+    const itemsStandardArray = _.sortBy(JSON.parse(message.Body), 'name')
+
+    // JSON.Stringify to prettify aws console output
+    console.log('Items standard array: ', JSON.stringify(itemsStandardArray))
+
+    // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
+    const isEqual = _.isEqual(itemsUnderTestArray, itemsStandardArray)
+
+    if (!isEqual) {
+      // Arrays are not equal, log error message with unidentical item arrays
+      console.log(
+        'UNEQUAL',
+        JSON.stringify(itemsUnderTestArray),
+        JSON.stringify(itemsStandardArray)
+      )
+      return false
+    }
+
+    // Arrays are equal, log success message with identical item arrays
+    console.log(
+      'EQUALITY',
+      JSON.stringify(itemsUnderTestArray),
+      JSON.stringify(itemsStandardArray)
+    )
+  }
+
+  return false
   // const params = {
   //   FunctionName: process.env.RULES_LAMBDA_ARN,
   //   Payload: JSON.stringify({ items: 'items' })
