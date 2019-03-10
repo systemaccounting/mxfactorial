@@ -39,18 +39,3 @@ resource "aws_lambda_permission" "transact_to_rules_service_lambda" {
 #   depends_on = ["null_resource.rules_service_lambda_provisioner"]
 # }
 
-####### create vpc endpoint for sqs service access by lambda in vpc #######
-resource "aws_vpc_endpoint" "sqs" {
-  vpc_id = "${data.aws_vpc.default.id}"
-
-  # aws ec2 describe-vpc-endpoint-services
-  service_name      = "com.amazonaws.${data.aws_region.current.name}.sqs"
-  vpc_endpoint_type = "Interface"
-
-  security_group_ids = [
-    "${aws_security_group.rds.id}",
-  ]
-
-  subnet_ids          = ["${data.aws_subnet_ids.default.ids}"]
-  private_dns_enabled = true
-}

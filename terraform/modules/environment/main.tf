@@ -24,7 +24,10 @@ data "aws_route_table" "default" {
   }
 }
 
-data "aws_region" "current" {}
+data "aws_security_group" "vpce_sqs" {
+  vpc_id = "${data.aws_vpc.default.id}"
+  name   = "vpce-sqs"
+}
 
 # data "aws_subnet" "default_subnets" {
 #   count = "${length(data.aws_subnet_ids.default.ids)}"

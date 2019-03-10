@@ -10,7 +10,8 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
   # exported in that file.
   handler = "index.handler"
 
-  source_code_hash = "${base64sha256(file("../../../services/graphql-faas/graphql-lambda.zip"))}"
+  # source_code_hash = "${base64sha256(file("../../../services/graphql-faas/graphql-lambda.zip"))}"
+  source_code_hash = "NotAllowedToWaste40MinOfUsersTimeApplying00="
 
   # source_code_hash = "${data.archive_file.mxfactorial_graphql_server_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"

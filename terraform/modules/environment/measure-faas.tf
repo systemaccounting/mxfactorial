@@ -22,6 +22,7 @@ resource "aws_lambda_function" "measure_service_lambda" {
     security_group_ids = [
       "${aws_security_group.rds.id}",
       "${data.aws_security_group.default.id}",
+      "${data.aws_security_group.vpce_sqs.id}",
     ]
   }
 
