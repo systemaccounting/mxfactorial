@@ -27,18 +27,12 @@ react/.env.test.local
 react/.env.production.local
 react/.env.*
 
-react/npm-debug.log*
-react/yarn-debug.log*
-react/yarn-error.log*
-
-
 ## global
-**/yarn-error.log
+**/*.log
 
 # dependencies
 **/node_modules
 **/package-lock.json
-/npm-debug.log
 
 # deploy faas
 **/*.zip
