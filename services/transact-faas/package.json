@@ -12,6 +12,7 @@
     "deploy:dev": "yarn run zip && yarn run update:faas:dev"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "mysql2": "^1.6.5"
   }
 }

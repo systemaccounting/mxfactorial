@@ -21,3 +21,11 @@ output "pool_id" {
 output "cache_id" {
   value = "${module.qa.cache_id}"
 }
+
+output "transact_url" {
+  value = "${module.qa.transact_url}"
+}
+
+output "rules_url" {
+  value = "${module.qa.rules_url}"
+}

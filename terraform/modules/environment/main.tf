@@ -24,9 +24,16 @@ data "aws_route_table" "default" {
   }
 }
 
-data "aws_security_group" "vpce_sqs" {
+data "aws_security_group" "vpce_api" {
   vpc_id = "${data.aws_vpc.default.id}"
-  name   = "vpce-sqs"
+  name   = "vpce-api"
+}
+
+data "aws_region" "current" {}
+
+data "aws_vpc_endpoint" "private-api" {
+  vpc_id       = "${data.aws_vpc.default.id}"
+  service_name = "com.amazonaws.${data.aws_region.current.name}.execute-api"
 }
 
 # data "aws_subnet" "default_subnets" {
