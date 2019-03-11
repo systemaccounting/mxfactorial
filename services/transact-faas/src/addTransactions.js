@@ -1,10 +1,11 @@
 const aws = require('aws-sdk')
+const _ = require('lodash')
 const {
   sendMessageToQueue,
   receiveMessageFromQueue,
   deleteMessageFromQueue
 } = require('./sqs')
-const _ = require('lodash')
+const stroreTransactions = require('./storeTransactions')
 
 const { TRANSACT_TO_RULES_QUEUE, RULES_TO_TRANSACT_QUEUE } = process.env
 
@@ -45,7 +46,16 @@ const addTransaction = async (obj, conn) => {
     console.log('Items standard array: ', JSON.stringify(itemsStandardArray))
 
     // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
-    const isEqual = _.isEqual(itemsUnderTestArray, itemsStandardArray)
+    const isEqual = _.isEqualWith(
+      itemsUnderTestArray,
+      itemsStandardArray,
+      (obj1, obj2) => {
+        // Avoid comparing rules-generated uuid, rule_instance_id
+        const { name: n1, price: p1, quantity: q1 } = obj1
+        const { name: n2, price: p2, quantity: q2 } = obj1
+        return n1 === n2 && p1 == p2 && q1 == q2
+      }
+    )
 
     if (!isEqual) {
       // Arrays are not equal, log error message with unidentical item arrays
@@ -63,6 +73,8 @@ const addTransaction = async (obj, conn) => {
       JSON.stringify(itemsUnderTestArray),
       JSON.stringify(itemsStandardArray)
     )
+    stroreTransactions(itemsUnderTestArray)
+    return true
   }
 
   return false

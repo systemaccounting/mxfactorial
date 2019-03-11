@@ -26,6 +26,7 @@ const applyRules = transactionItems => {
       creditor: 'StateOfCalifornia'
     })
   }
+  console.log('Applied rules: ', JSON.stringify(accountItems))
 
   return accountItems
 }
