@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize')
-const mysql = require('mysql2')
+const TransactionModel = require('./models/Transaction')
 
 const DB_NAME = 'mxfactorial'
 const DB_USERNAME = process.env.USER
@@ -17,6 +17,10 @@ const storeTransactions = async transactions => {
       idle: 10000
     }
   })
+
+  // Define transaction model
+  const Transaction = TransactionModel(sequelize, Sequelize)
+  console.log('Transaction model: ', Transaction)
 
   // Close connection
   sequelize.close()
