@@ -12,8 +12,8 @@
     "deploy:dev": "yarn run zip && yarn run update:faas:dev"
   },
   "dependencies": {
-    "aws-sdk": "^2.395.0",
     "lodash": "^4.17.11",
-    "mysql2": "^1.6.5"
+    "mysql2": "^1.6.5",
+    "sequelize": "^4.43.0"
   }
 }
