@@ -16,30 +16,13 @@ const addTransaction = async (obj, conn) => {
   const itemsUnderTestArray = _.sortBy(obj.items, 'name')
   console.log('Item under test array: ', JSON.stringify(itemsUnderTestArray))
 
-  // service POST /rules itemsUnderTestArray
-  // const messageId = await sendMessageToQueue(
-  //   itemsUnderTestArray,
-  //   TRANSACT_TO_RULES_QUEUE
-  // )
-  // console.log('Initial id: ', messageId) //match with message returned from
-  //
-  // const responseFromRules = await receiveMessageFromQueue(
-  //   RULES_TO_TRANSACT_QUEUE
-  // )
-  const responseFromRules = await axios.post(RULES_URL, itemsUnderTestArray)
-  console.log('RESPONSE FROM RULES', responseFromRules)
+  const responseFromRules = await axios
+    .post(RULES_URL, itemsUnderTestArray)
+    .then(response => response.data)
 
   // sqs omits Message property if queue empty or messages not visible (in flight)
-  if (responseFromRules.Messages) {
-    const message = responseFromRules.Messages[0]
-
-    console.log(
-      'Returned id: ',
-      message.MessageAttributes.InitialMessageId.StringValue
-    )
-
-    // await deleteMessageFromQueue(RULES_TO_TRANSACT_QUEUE, message.ReceiptHandle)
-    const itemsStandardArray = _.sortBy(JSON.parse(message.Body), 'name')
+  if (responseFromRules) {
+    const itemsStandardArray = _.sortBy(responseFromRules, 'name')
 
     // JSON.Stringify to prettify aws console output
     console.log('Items standard array: ', JSON.stringify(itemsStandardArray))
