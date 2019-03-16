@@ -1,14 +1,18 @@
 # stripped down kilna/liquibase-docker
 
 # docker build -t mxfactorial/liquibase-rds:1.0.0 .
+
 # docker push mxfactorial/liquibase-rds:1.0.0
+
 # docker run \
 # --env BRANCH= \
 # --env RDS_ENDPOINT= \
 # --env USERNAME= \
 # --env PASSWORD= \
-# --env LIQUIBASE_COMMAND= \
+# --env LIQUIBASE_COMMAND=updateTestingRollback \
 # mxfactorial/liquibase-rds:1.0.0
+
+# other liquibase commands available from https://www.liquibase.org/documentation/command_line.html
 
 FROM anapsix/alpine-java:8
 ARG liquibase_version=3.5.3

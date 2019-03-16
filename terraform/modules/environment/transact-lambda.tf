@@ -22,19 +22,18 @@ resource "aws_lambda_function" "transact_service_lambda" {
     security_group_ids = [
       "${aws_security_group.rds.id}",
       "${data.aws_security_group.default.id}",
-      "${data.aws_security_group.vpce_sqs.id}",
+      "${data.aws_security_group.vpce_api.id}",
     ]
-
-    # "${aws_security_group.vpce_sqs.id}",
   }
 
   environment {
     variables = {
-      HOST                    = "${aws_rds_cluster.default.endpoint}"
-      USER                    = "${var.db_master_username}"
-      PASSWORD                = "${var.db_master_password}"
-      TRANSACT_TO_RULES_QUEUE = "${aws_sqs_queue.transact_to_rules.id}"
-      RULES_TO_TRANSACT_QUEUE = "${aws_sqs_queue.rules_to_transact.id}"
+      HOST     = "${aws_rds_cluster.default.endpoint}"
+      USER     = "${var.db_master_username}"
+      PASSWORD = "${var.db_master_password}"
+
+      # workaround for aws_api_gateway_deployment.rules.invoke_url cycle error:
+      RULES_URL = "https://${aws_api_gateway_rest_api.rules.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
     }
   }
 }
@@ -78,30 +77,6 @@ resource "aws_iam_role_policy" "transact_service_lambda_policy" {
           "ec2:DescribeNetworkInterfaces",
           "ec2:DeleteNetworkInterface"
       ],
-      "Resource": "*"
-    }
-  ]
-}
-EOF
-}
-
-# policy for lambda to sns policy
-resource "aws_iam_role_policy" "transact_service_lambda_messaging_policy" {
-  name = "transact-service-lambda-messaging-policy-${var.environment}"
-  role = "${aws_iam_role.transact_service_lambda_role.id}"
-
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "sns:*",
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "sqs:*",
       "Resource": "*"
     }
   ]

@@ -14,5 +14,7 @@
   "dependencies": {
     "lodash": "^4.17.11",
     "sequelize": "^4.43.0"
+    "axios": "^0.18.0",
+    "mysql2": "^1.6.5"
   }
 }

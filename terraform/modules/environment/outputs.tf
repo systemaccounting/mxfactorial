@@ -53,3 +53,11 @@ output "cloudfront_domain_name" {
 output "cloudfront_zone_id" {
   value = "${aws_api_gateway_domain_name.mxfactorial.cloudfront_zone_id}"
 }
+
+output "transact_url" {
+  value = "${aws_api_gateway_deployment.transact.invoke_url}"
+}
+
+output "rules_url" {
+  value = "${aws_api_gateway_deployment.rules.invoke_url}"
+}
