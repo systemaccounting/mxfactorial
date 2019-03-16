@@ -1,13 +1,10 @@
 const aws = require('aws-sdk')
+const axios = require('axios')
 const _ = require('lodash')
-const {
-  sendMessageToQueue,
-  receiveMessageFromQueue,
-  deleteMessageFromQueue
-} = require('./sqs')
+
 const stroreTransactions = require('./storeTransactions')
 
-const { TRANSACT_TO_RULES_QUEUE, RULES_TO_TRANSACT_QUEUE } = process.env
+const { RULES_URL } = process.env
 
 const addTransaction = async (obj, conn) => {
   if (!obj.items) {
@@ -20,15 +17,17 @@ const addTransaction = async (obj, conn) => {
   console.log('Item under test array: ', JSON.stringify(itemsUnderTestArray))
 
   // service POST /rules itemsUnderTestArray
-  const messageId = await sendMessageToQueue(
-    itemsUnderTestArray,
-    TRANSACT_TO_RULES_QUEUE
-  )
-  console.log('Initial id: ', messageId) //match with message returned from
-
-  const responseFromRules = await receiveMessageFromQueue(
-    RULES_TO_TRANSACT_QUEUE
-  )
+  // const messageId = await sendMessageToQueue(
+  //   itemsUnderTestArray,
+  //   TRANSACT_TO_RULES_QUEUE
+  // )
+  // console.log('Initial id: ', messageId) //match with message returned from
+  //
+  // const responseFromRules = await receiveMessageFromQueue(
+  //   RULES_TO_TRANSACT_QUEUE
+  // )
+  const responseFromRules = await axios.post(RULES_URL, itemsUnderTestArray)
+  console.log('RESPONSE FROM RULES', responseFromRules)
 
   // sqs omits Message property if queue empty or messages not visible (in flight)
   if (responseFromRules.Messages) {
@@ -39,7 +38,7 @@ const addTransaction = async (obj, conn) => {
       message.MessageAttributes.InitialMessageId.StringValue
     )
 
-    await deleteMessageFromQueue(RULES_TO_TRANSACT_QUEUE, message.ReceiptHandle)
+    // await deleteMessageFromQueue(RULES_TO_TRANSACT_QUEUE, message.ReceiptHandle)
     const itemsStandardArray = _.sortBy(JSON.parse(message.Body), 'name')
 
     // JSON.Stringify to prettify aws console output
