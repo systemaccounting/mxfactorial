@@ -1,12 +1,18 @@
-module.exports = (sequelize, type) => {
-  return sequelize.define('transaction', {
-    id: {
-      type: type.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
+module.exports = (sequelize, type) =>
+  sequelize.define(
+    'transaction',
+    {
+      id: {
+        type: type.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      name: type.STRING,
+      price: type.STRING,
+      quantity: type.STRING
     },
-    name: type.STRING,
-    price: type.FLOAT,
-    quantity: type.FLOAT
-  })
-}
+    {
+      // There are no `createdAt` and `updatedAt` transaction columns yet
+      timestamps: false
+    }
+  )
