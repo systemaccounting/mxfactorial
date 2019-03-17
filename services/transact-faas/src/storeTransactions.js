@@ -10,7 +10,7 @@ const storeTransactions = async transactions => {
   const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
     host: DB_HOST,
     operatorsAliases: false,
-    logging: str => console.log('SEQUELIZE', str),
+    logging: console.log,
     port: 3306,
     dialect: 'mysql',
     pool: {
@@ -22,25 +22,9 @@ const storeTransactions = async transactions => {
     }
   })
 
-  sequelize
-    .authenticate()
-    .then(() => {
-      console.log('Connection has been established successfully.')
-    })
-    .catch(err => {
-      throw new Error(`Unable to connect to the database: ${e}`)
-    })
-
   // Define transaction model
   const Transaction = TransactionModel(sequelize, Sequelize)
-  let result
-
-  try {
-    result = await Transaction.bulkCreate(transactions)
-  } catch (e) {
-    throw new Error(e)
-    // console.log('ERROR while creating transactions: ', e)
-  }
+  const result = await Transaction.bulkCreate(transactions)
 
   // Close connection
   sequelize.close().then(() => console.log('MySQL connection closed'))
