@@ -1,6 +1,4 @@
 module.exports = {
   verbose: true,
-  roots: [
-    "tests"
-  ]
+  roots: ['tests']
 }

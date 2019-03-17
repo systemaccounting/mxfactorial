@@ -9,7 +9,8 @@ module.exports = (sequelize, type) =>
       },
       name: type.STRING,
       price: type.STRING,
-      quantity: type.STRING
+      quantity: type.STRING,
+      creditor: type.STRING
     },
     {
       // There are no `createdAt` and `updatedAt` transaction columns yet

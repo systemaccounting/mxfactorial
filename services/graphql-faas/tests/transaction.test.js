@@ -43,8 +43,7 @@ var transactionID
 jest.setTimeout(30000) // lambda and serverless aurora cold starts
 
 describe('Function As A Service GraphQL Server', () => {
-
-  it('sends transaction mutation', (done) => {
+  it('sends transaction mutation', done => {
     return request(REQUEST_URL)
       .post('/')
       .set('Content-Type', 'application/graphql')
@@ -62,7 +61,7 @@ describe('Function As A Service GraphQL Server', () => {
       })
   })
 
-  it('responds with transaction ID', (done) => {
+  it('responds with transaction ID', done => {
     var query = `{
       transactions(transactionId: "${transactionID}") {
         id
