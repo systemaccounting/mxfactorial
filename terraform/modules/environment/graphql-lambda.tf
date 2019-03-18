@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "mxfactorial_graphql_server" {
-  filename = "../../../services/graphql-faas/graphql-lambda.zip"
+  filename = "../../../services/graphql-faas/graphql-src.zip"
 
   # filename      = "${data.archive_file.mxfactorial_graphql_server_provisioner.output_path}"
   function_name = "mxfactorial-graphql-server-${var.environment}"
@@ -10,7 +10,8 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
   # exported in that file.
   handler = "index.handler"
 
-  source_code_hash = "${base64sha256(file("../../../services/graphql-faas/graphql-lambda.zip"))}"
+  source_code_hash = "${base64sha256(file("../../../services/graphql-faas/graphql-src.zip"))}"
+  layers           = ["${aws_lambda_layer_version.graphql_layer.arn}"]
 
   # source_code_hash = "${data.archive_file.mxfactorial_graphql_server_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
@@ -26,6 +27,14 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
       MEASURE_LAMBDA_ARN  = "${aws_lambda_function.measure_service_lambda.arn}"
     }
   }
+}
+
+resource "aws_lambda_layer_version" "graphql_layer" {
+  filename   = "../../../services/graphql-faas/graphql-layer.zip"
+  layer_name = "graphql-node-deps-${var.environment}"
+
+  compatible_runtimes = ["nodejs8.10", "nodejs6.10"]
+  source_code_hash    = "${base64sha256(file("../../../services/graphql-faas/graphql-layer.zip"))}"
 }
 
 resource "aws_iam_role" "mxfactorial_graphql_lambda_role" {
