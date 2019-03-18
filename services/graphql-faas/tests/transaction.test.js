@@ -34,4 +34,9 @@ describe('Function As A Service GraphQL Server', () => {
     expect(transaction.creditor).toBe('Mary')
     done()
   })
+
+  it('does something', () => {
+    expect(1).toEqual(1)
+    done()
+  })
 })
