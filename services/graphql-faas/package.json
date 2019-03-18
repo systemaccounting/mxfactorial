@@ -4,13 +4,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "zip": "rm -f graphql-lambda.zip && yarn install && zip -r graphql-lambda.zip index.js src node_modules package.json yarn.lock",
-    "update:faas:prod": "aws lambda update-function-code --function-name mxfactorial-graphql-server-prod --zip-file fileb://$(pwd)/graphql-lambda.zip --region us-east-1 --query 'LastModified'",
-    "update:faas:qa": "aws lambda update-function-code --function-name mxfactorial-graphql-server-qa --zip-file fileb://$(pwd)/graphql-lambda.zip --region us-east-1 --query 'LastModified'",
-    "update:faas:dev": "aws lambda update-function-code --function-name mxfactorial-graphql-server-dev --zip-file fileb://$(pwd)/graphql-lambda.zip --region us-east-1 --query 'LastModified'",
-    "deploy:prod": "yarn run zip && yarn run update:faas:prod",
-    "deploy:qa": "yarn run zip && yarn run update:faas:qa",
-    "deploy:dev": "yarn run zip && yarn run update:faas:dev",
     "test:prod": "LOCAL_ENV=prod node tests/utils/warmUp.js && LOCAL_ENV=prod AWS_REGION=us-east-1 jest --detectOpenHandles",
     "test:qa": "LOCAL_ENV=qa node tests/utils/warmUp.js && LOCAL_ENV=qa AWS_REGION=us-east-1 jest --detectOpenHandles",
     "test:dev": "LOCAL_ENV=dev node tests/utils/warmUp.js && LOCAL_ENV=dev AWS_REGION=us-east-1 jest --detectOpenHandles"

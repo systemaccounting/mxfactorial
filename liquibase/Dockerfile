@@ -14,6 +14,8 @@
 
 # other liquibase commands available from https://www.liquibase.org/documentation/command_line.html
 
+# mysql --user=theadmin -h mxfactorial-dev.cluster-012345678910.us-east-1.rds.amazonaws.com -pthepassword
+
 FROM anapsix/alpine-java:8
 ARG liquibase_version=3.5.3
 ARG liquibase_download_url=https://github.com/liquibase/liquibase/releases/download/liquibase-parent-${liquibase_version}
