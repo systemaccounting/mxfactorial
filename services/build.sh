@@ -1,3 +1,4 @@
+#!/bin/bash
 CURRENT_DIR=$(pwd)
 for dir in */; do
   cd $CURRENT_DIR/$dir && . build.sh

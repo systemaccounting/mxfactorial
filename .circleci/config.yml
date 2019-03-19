@@ -216,7 +216,7 @@ jobs:
             sudo pip install awscli
       - run:
           name: Install dependencies, archive, then deploy
-          command: sh deploy.sh dev
+          command: bash deploy.sh dev
       - run:
           name: Test dev endpoints
           working_directory: ~/repo/services/graphql-faas
@@ -256,7 +256,7 @@ jobs:
             sudo pip install awscli
       - run:
           name: Install dependencies, archive, then deploy
-          command: sh deploy.sh qa
+          command: bash deploy.sh qa
       - run:
           name: Test qa endpoints
           working_directory: ~/repo/services/graphql-faas
