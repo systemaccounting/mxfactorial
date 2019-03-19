@@ -1,3 +1,4 @@
+#!/bin/bash
 build_src() {
   rm -f transact-lambda.zip
   yarn install

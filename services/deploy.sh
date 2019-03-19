@@ -1,3 +1,4 @@
+#!/bin/bash
 ENV=$1
 CURRENT_DIR=$(pwd)
 for dir in */; do
