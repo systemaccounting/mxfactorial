@@ -5,7 +5,7 @@ const { createTransaction } = require('./queries/transactions')
 
 const graphQLClient = new GraphQLClient(REQUEST_URL, {
   headers: {
-    'Content-Type': 'application/graphql',
+    'Content-Type': 'application/json',
     Accept: 'application/json'
   }
 })
