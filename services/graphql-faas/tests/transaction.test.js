@@ -1,7 +1,14 @@
-const { request } = require('graphql-request')
+const { GraphQLClient } = require('graphql-request')
 const { tearDownIntegrationTestDataInRDS } = require('./utils/tearDown')
 const { REQUEST_URL } = require('./utils/baseUrl')
 const { createTransaction } = require('./queries/transactions')
+
+const graphQLClient = new GraphQLClient(REQUEST_URL, {
+  headers: {
+    'Content-Type': 'application/graphql',
+    Accept: 'application/json'
+  }
+})
 
 afterAll(() => {
   tearDownIntegrationTestDataInRDS()
@@ -27,7 +34,7 @@ jest.setTimeout(30000) // lambda and serverless aurora cold starts
 
 describe('Function As A Service GraphQL Server', () => {
   it('sends transaction mutation', async done => {
-    const response = await request(REQUEST_URL, createTransaction, {
+    const response = await graphQLClient.request(createTransaction, {
       items: testItems
     })
     const transaction = response.createTransaction[0]
