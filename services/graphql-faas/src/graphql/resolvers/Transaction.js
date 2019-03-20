@@ -6,6 +6,7 @@ const AddTransactionResolver = args => {
     console.log(`Empty object received by resolver`)
     return `Please specify at least 1 transaction`
   }
+  console.log(args)
   const params = {
     FunctionName: process.env.TRANSACT_LAMBDA_ARN,
     Payload: JSON.stringify({ items: args.items })
@@ -14,6 +15,7 @@ const AddTransactionResolver = args => {
     .invoke(params)
     .promise()
     .then(data => {
+      console.log(data)
       return JSON.parse(data.Payload)
     })
     .catch(err => {
