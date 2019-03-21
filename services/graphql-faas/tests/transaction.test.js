@@ -29,7 +29,6 @@ const testItems = [
   }
 ]
 
-var transactionID
 jest.setTimeout(30000) // lambda and serverless aurora cold starts
 
 describe('Function As A Service GraphQL Server', () => {
@@ -37,7 +36,7 @@ describe('Function As A Service GraphQL Server', () => {
     const response = await graphQLClient.request(createTransaction, {
       items: testItems
     })
-    const transaction = response.createTransaction[0]
+    const transaction = response.createTransaction[1]
     expect(transaction.creditor).toBe('Mary')
     done()
   })

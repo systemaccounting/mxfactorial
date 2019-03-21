@@ -12,6 +12,10 @@ const addTransaction = async (obj, conn) => {
     return `Please specify at least 1 transaction`
   }
 
+  if (!obj.items.length) {
+    return obj.items
+  }
+
   // service assigns recieved items as itemsUnderTestArray, then logs
   const itemsUnderTestArray = _.sortBy(obj.items, 'name')
   console.log('Item under test array: ', JSON.stringify(itemsUnderTestArray))

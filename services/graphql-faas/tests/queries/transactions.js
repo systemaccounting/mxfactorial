@@ -9,6 +9,15 @@ const createTransaction = `
   }
 `
 
+const getTransaction = `
+  query getTransaction($id: String!) {
+    transactions(transactionId: $id) {
+      id
+    }
+  }
+`
+
 module.exports = {
+  getTransaction,
   createTransaction
 }
