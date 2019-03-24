@@ -31,7 +31,7 @@ const testItems = [
 
 jest.setTimeout(30000) // lambda and serverless aurora cold starts
 
-describe('Function As A Service GraphQL Server', () => {
+describe('Function As A Service GraphQL Server /transact endpoint', () => {
   it('sends transaction mutation', async done => {
     const response = await graphQLClient.request(createTransaction, {
       items: testItems
