@@ -1,7 +1,7 @@
-const aws = require('aws-sdk')
 const axios = require('axios')
 const _ = require('lodash')
 
+const compareTransactions = require('./compareTransactions')
 const stroreTransactions = require('./storeTransactions')
 
 const { RULES_URL } = process.env
@@ -24,45 +24,35 @@ const addTransaction = async (obj, conn) => {
     .post(RULES_URL, itemsUnderTestArray)
     .then(response => response.data)
 
-  // sqs omits Message property if queue empty or messages not visible (in flight)
-  if (responseFromRules) {
-    const itemsStandardArray = _.sortBy(responseFromRules, 'name')
+  if (!responseFromRules) {
+    return []
+  }
 
-    // JSON.Stringify to prettify aws console output
-    console.log('Items standard array: ', JSON.stringify(itemsStandardArray))
+  const itemsStandardArray = _.sortBy(responseFromRules, 'name')
 
-    // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
-    const isEqual = _.isEqualWith(
-      itemsUnderTestArray,
-      itemsStandardArray,
-      (obj1, obj2) => {
-        // Avoid comparing rules-generated uuid, rule_instance_id
-        const { name: n1, price: p1, quantity: q1 } = obj1
-        const { name: n2, price: p2, quantity: q2 } = obj1
-        return n1 === n2 && p1 == p2 && q1 == q2
-      }
-    )
+  // JSON.Stringify to prettify aws console output
+  console.log('Items standard array: ', JSON.stringify(itemsStandardArray))
 
-    if (!isEqual) {
-      // Arrays are not equal, log error message with unidentical item arrays
-      console.log(
-        'UNEQUAL',
-        JSON.stringify(itemsUnderTestArray),
-        JSON.stringify(itemsStandardArray)
-      )
-      return false
-    }
+  // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
+  const isEqual = compareTransactions(itemsUnderTestArray, itemsStandardArray)
 
-    // Arrays are equal, log success message with identical item arrays
+  if (!isEqual) {
+    // Arrays are not equal, log error message with unidentical item arrays
     console.log(
-      'EQUALITY',
+      'UNEQUAL',
       JSON.stringify(itemsUnderTestArray),
       JSON.stringify(itemsStandardArray)
     )
-    return await stroreTransactions(itemsUnderTestArray)
+    return []
   }
 
-  return false
+  // Arrays are equal, log success message with identical item arrays
+  console.log(
+    'EQUALITY',
+    JSON.stringify(itemsUnderTestArray),
+    JSON.stringify(itemsStandardArray)
+  )
+  return await stroreTransactions(itemsUnderTestArray)
 }
 
 module.exports = {

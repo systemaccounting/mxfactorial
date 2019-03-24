@@ -16,11 +16,11 @@ const tearDownIntegrationTestDataInRDS = () => {
     InvokeArgs: `null`
   }
   lambda.invokeAsync(params, (err, data) => {
-    if (err) console.log(err, err.stack)
-    else if (data.Status === 202) {
-      console.log(`rds test data deleted by lambda`)
+    if (err) {
+      console.log(err, err.stack)
+    } else if (data.Status === 202) {
+      // console.log(`rds test data deleted by lambda`)
     }
-    //  else console.log(data)
   })
 }
 

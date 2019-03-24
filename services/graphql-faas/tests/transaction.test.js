@@ -23,7 +23,7 @@ const testItems = [
   },
   {
     name: '9% state sales tax',
-    price: '24.750',
+    price: '0.540',
     quantity: '1',
     creditor: 'Mary'
   }
@@ -38,6 +38,14 @@ describe('Function As A Service GraphQL Server', () => {
     })
     const transaction = response.createTransaction[1]
     expect(transaction.creditor).toBe('Mary')
+    done()
+  })
+
+  it('returns empty array if there are no rules-required items', async done => {
+    const response = await graphQLClient.request(createTransaction, {
+      items: [testItems[0]]
+    })
+    expect(response.createTransaction).toHaveLength(0)
     done()
   })
 })

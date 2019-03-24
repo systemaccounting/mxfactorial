@@ -11,7 +11,6 @@ const graphQLClient = new GraphQLClient(REQUEST_URL, {
 
 const warmUpRequest = (attempts = 20) =>
   graphQLClient.request(createTransaction, { items: [] }).catch(res => {
-    console.log(res)
     if (attempts === 0) {
       console.log(`\nLambda and aurora serverless not responding.`)
       return
