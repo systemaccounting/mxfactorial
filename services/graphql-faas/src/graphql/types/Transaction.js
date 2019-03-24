@@ -120,7 +120,7 @@ const TransactionCreateType = new GraphQLInputObjectType({
     // debitor_transaction_latlng: { type: GraphQLString },
     // debitor_approval_time: { type: GraphQLString },
     // debitor_device: { type: GraphQLString },
-    creditor: { type: new GraphQLNonNull(GraphQLString) },
+    // creditor: { type: new GraphQLNonNull(GraphQLString) },
     // creditor_profile_latlng: { type: GraphQLString },
     // creditor_transaction_latlng: { type: GraphQLString },
     // creditor_approval_time: { type: GraphQLString },

@@ -4,7 +4,6 @@ const createTransaction = `
       name
       quantity
       price
-      creditor
     }
   }
 `

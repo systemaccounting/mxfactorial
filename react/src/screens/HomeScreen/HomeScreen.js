@@ -39,8 +39,11 @@ class HomeScreen extends Component {
     })
   }
 
-  onRequestTransactions = (type, items) => {
-    return this.props.createTransaction(items)
+  onRequestTransactions = async (type, items) => {
+    const { history } = this.props
+    await this.props.createTransaction(items)
+    // Go to requests screen
+    return history.push('/requests')
   }
 
   render() {

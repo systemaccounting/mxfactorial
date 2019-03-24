@@ -18,14 +18,12 @@ const testItems = [
   {
     name: 'Milk',
     price: '3',
-    quantity: '2',
-    creditor: 'Mary'
+    quantity: '2'
   },
   {
     name: '9% state sales tax',
     price: '0.540',
-    quantity: '1',
-    creditor: 'Mary'
+    quantity: '1'
   }
 ]
 
@@ -37,7 +35,7 @@ describe('Function As A Service GraphQL Server /transact endpoint', () => {
       items: testItems
     })
     const transaction = response.createTransaction[1]
-    expect(transaction.creditor).toBe('Mary')
+    expect(transaction.name).toBe('Milk')
     done()
   })
 
