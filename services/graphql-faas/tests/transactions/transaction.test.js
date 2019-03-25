@@ -1,7 +1,7 @@
 const { GraphQLClient } = require('graphql-request')
-const { tearDownIntegrationTestDataInRDS } = require('./utils/tearDown')
-const { REQUEST_URL } = require('./utils/baseUrl')
-const { createTransaction } = require('./queries/transactions')
+const { tearDownIntegrationTestDataInRDS } = require('../utils/tearDown')
+const { REQUEST_URL } = require('../utils/baseUrl')
+const { createTransaction } = require('../queries/transactions')
 
 const graphQLClient = new GraphQLClient(REQUEST_URL, {
   headers: {
