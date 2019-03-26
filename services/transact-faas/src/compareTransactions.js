@@ -1,9 +1,17 @@
 const _ = require('lodash')
 
-module.exports = function compareTransactions(transactions1, transactions2) {
+function compareTransactions(transactions1, transactions2) {
   if (!transactions1 || !transactions2) {
     return false
   }
+
+  // Sort transactions alphabetically
+  const itemsUnderTestArray = _.sortBy(transactions1, 'name')
+  const itemsStandardArray = _.sortBy(transactions2, 'name')
+
+  // JSON.Stringify to prettify aws console output
+  console.log('Item under test array: ', JSON.stringify(itemsUnderTestArray))
+  console.log('Items standard array: ', JSON.stringify(itemsStandardArray))
 
   const mapFn = ({ name, price, quantity }) => {
     // Omit rules-generated uuid, rule_instance_id, etc
@@ -15,18 +23,17 @@ module.exports = function compareTransactions(transactions1, transactions2) {
     }
   }
 
-  // Sort items alphabetically
-  const sortFn = (a, b) => {
-    if (a.name > b.name) {
-      return 1
-    }
-    if (a.name < b.name) {
-      return -1
-    }
-    return 0
-  }
+  const arr1 = JSON.stringify(itemsUnderTestArray.map(mapFn))
+  const arr2 = JSON.stringify(itemsStandardArray.map(mapFn))
+  const isEqual = arr1 === arr2
 
-  const arr1 = JSON.stringify(transactions1.sort(sortFn).map(mapFn))
-  const arr2 = JSON.stringify(transactions2.sort(sortFn).map(mapFn))
-  return arr1 === arr2
+  console.log(
+    isEqual ? 'EQUALITY: ' : 'UNEQUAL: ',
+    JSON.stringify(itemsUnderTestArray),
+    JSON.stringify(itemsStandardArray)
+  )
+
+  return isEqual
 }
+
+module.exports = compareTransactions
