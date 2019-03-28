@@ -34,16 +34,7 @@ describe('Function As A Service GraphQL Server /transact endpoint', () => {
     const response = await graphQLClient.request(createTransaction, {
       items: testItems
     })
-    const transaction = response.createTransaction[1]
-    expect(transaction.name).toBe('Milk')
-    done()
-  })
-
-  it('returns empty array if there are no rules-required items', async done => {
-    const response = await graphQLClient.request(createTransaction, {
-      items: [testItems[0]]
-    })
-    expect(response.createTransaction).toHaveLength(0)
+    expect(response.createTransaction).toHaveLength(testItems.length)
     done()
   })
 })
