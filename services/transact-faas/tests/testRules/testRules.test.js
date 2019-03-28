@@ -1,5 +1,4 @@
 const { handler } = require('../../index')
-
 const requestRules = require('../../src/requestRules')
 const compareTransactions = require('../../src/compareTransactions')
 
