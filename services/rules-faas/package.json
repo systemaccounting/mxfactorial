@@ -9,7 +9,13 @@
     "update:faas:dev": "aws lambda update-function-code --function-name rules-lambda-dev --zip-file fileb://$(pwd)/rules-lambda.zip --region us-east-1 --query 'LastModified'",
     "deploy:prod": "yarn run zip && yarn run update:faas:prod",
     "deploy:qa": "yarn run zip && yarn run update:faas:qa",
-    "deploy:dev": "yarn run zip && yarn run update:faas:dev"
+    "deploy:dev": "yarn run zip && yarn run update:faas:dev",
+    "test": "jest --detectOpenHandles"
   },
-  "dependencies": {}
+  "dependencies": {
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "jest": "^24.5.0"
+  }
 }

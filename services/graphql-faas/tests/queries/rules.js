@@ -1,6 +1,4 @@
-import gql from 'graphql-tag'
-
-const fetchRules = gql`
+const fetchRules = `
   query fetchRules($transactions: [TransactionItem]) {
     rules(transactions: $transactions) {
       uuid
@@ -12,4 +10,4 @@ const fetchRules = gql`
   }
 `
 
-export { fetchRules }
+module.exports = { fetchRules }

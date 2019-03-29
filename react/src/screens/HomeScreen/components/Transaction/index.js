@@ -138,6 +138,16 @@ class Transaction extends React.Component {
     })
   }
 
+  requestTransactions = () => {
+    const { type, rules, transactions, draftTransaction } = this.state
+    const transactionItems = R.map(R.omit(['__typename']))([
+      ...transactions,
+      draftTransaction,
+      ...rules
+    ])
+    return this.props.onRequestTransactions(type, transactionItems)
+  }
+
   get rules() {
     const { rules } = this.state
     if (!rules) {
@@ -235,6 +245,7 @@ class Transaction extends React.Component {
             <Button
               data-id={type}
               theme={type === 'credit' ? 'info' : 'success'}
+              onClick={this.requestTransactions}
             >
               {type === 'credit' ? 'Request' : 'Transact'}
             </Button>

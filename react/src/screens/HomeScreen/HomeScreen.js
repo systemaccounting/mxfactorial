@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
-import rulesQuery from 'queries/rules'
+import { graphql } from 'react-apollo'
+import { fetchRules } from 'queries/rules'
+import { createTransaction } from 'queries/transactions'
 
 import MainLayout from 'components/MainLayout'
 import AccountHeader from './components/AccountHeader'
@@ -29,11 +31,19 @@ class HomeScreen extends Component {
   fetchRules = transactions => {
     const { client } = this.props
     return client.query({
-      query: rulesQuery,
+      query: fetchRules,
+      addTypename: false,
       variables: {
         transactions
       }
     })
+  }
+
+  onRequestTransactions = async (type, items) => {
+    const { history } = this.props
+    await this.props.createTransaction(items)
+    // Go to requests screen
+    return history.push('/requests')
   }
 
   render() {
@@ -44,6 +54,7 @@ class HomeScreen extends Component {
           <AccountHeader title={user.username} balance={this.state.balance} />
           <Transaction
             fetchTransactions={this.props.fetchTransactions}
+            onRequestTransactions={this.onRequestTransactions}
             fetchRules={this.fetchRules}
           />
         </div>
@@ -52,4 +63,13 @@ class HomeScreen extends Component {
   }
 }
 
-export default HomeScreen
+export { HomeScreen }
+
+export default graphql(createTransaction, {
+  props: ({ ownProps, mutate }) => ({
+    createTransaction: transactions =>
+      mutate({
+        variables: { items: transactions }
+      })
+  })
+})(HomeScreen)

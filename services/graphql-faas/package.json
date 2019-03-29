@@ -20,7 +20,7 @@
     "graphql": "^14.0.2"
   },
   "devDependencies": {
-    "jest": "^24.0.0",
-    "supertest": "^3.4.2"
+    "graphql-request": "^1.8.2",
+    "jest": "^24.5.0"
   }
 }
