@@ -11,6 +11,7 @@ const DB_NAME = 'mxfactorial'
 const DB_USERNAME = process.env.USER
 const DB_PASSWORD = process.env.PASSWORD
 const DB_HOST = process.env.HOST
+const WRITABLE_LAMBDA_PATH = '/tmp/mxfactorial/schema/diffs'
 
 
 exports.handler = async (event) => {
@@ -21,8 +22,8 @@ exports.handler = async (event) => {
   // configure 10s timeout on lambda
   await exec(`rm -rf /tmp/*`)
   await exec(`cd /tmp && git clone --depth 1 --single-branch --branch ${BRANCH} ${REPO}`)
-  const { stdout, stderr } = await exec(`ls /tmp/mxfactorial/services`)
-  console.log(stdout.split('\n'))
+  const { stdout, stderr } = await exec(`ls ${WRITABLE_LAMBDA_PATH}`)
+  console.log(stdout.replace('\n', ' '))
 
   await mysql.createConnection(
     {
@@ -68,7 +69,7 @@ exports.handler = async (event) => {
       params: [migration, dataTypes, errCb],
       // write permitted in /tmp on lambda
       // path after clone in /tmp
-      path: '/tmp/mxfactorial/schema/diffs',
+      path: WRITABLE_LAMBDA_PATH,
       pattern: /\.js$/
     }
   }
