@@ -13,7 +13,6 @@ const DB_PASSWORD = process.env.PASSWORD
 const DB_HOST = process.env.HOST
 const WRITABLE_LAMBDA_PATH = '/tmp/mxfactorial/schema/diffs'
 
-
 exports.handler = async (event) => {
   const cmd = event.command
   const BRANCH = event.branch ? event.branch : 'develop'
@@ -23,7 +22,7 @@ exports.handler = async (event) => {
   await exec(`rm -rf /tmp/*`)
   await exec(`cd /tmp && git clone --depth 1 --single-branch --branch ${BRANCH} ${REPO}`)
   const { stdout, stderr } = await exec(`ls ${WRITABLE_LAMBDA_PATH}`)
-  console.log(stdout.replace('\n', ' '))
+  console.log('diffs found: ' + stdout.replace('\n', ' '))
 
   await mysql.createConnection(
     {
