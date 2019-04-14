@@ -18,7 +18,8 @@ const testItems = [
   {
     name: 'Milk',
     price: '3',
-    quantity: '2'
+    quantity: '2',
+    author: 'Joe Smith'
   }
 ]
 

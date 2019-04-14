@@ -18,12 +18,14 @@ const testItems = [
   {
     name: 'Milk',
     price: '3',
-    quantity: '2'
+    quantity: '2',
+    author: 'Joe Smith'
   },
   {
     name: '9% state sales tax',
     price: '0.540',
-    quantity: '1'
+    quantity: '1',
+    author: 'Joe Smith'
   }
 ]
 
