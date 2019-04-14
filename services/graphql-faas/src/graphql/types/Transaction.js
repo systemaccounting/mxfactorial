@@ -130,11 +130,11 @@ const TransactionCreateType = new GraphQLInputObjectType({
     quantity: { type: new GraphQLNonNull(GraphQLString) },
     // unit_of_measurement: { type: GraphQLString },
     // units_measured: { type: GraphQLString },
-    rule_instance_id: { type: GraphQLString }
+    rule_instance_id: { type: GraphQLString },
     // transaction_id: { type: new GraphQLNonNull(GraphQLString) },
     // debit_approver: { type: new GraphQLNonNull(GraphQLString) },
     // credit_approver: { type: new GraphQLNonNull(GraphQLString) },
-    // author: { type: new GraphQLNonNull(GraphQLString) },
+    author: { type: new GraphQLNonNull(GraphQLString) }
     // expiration_time: { type: GraphQLString },
     // creditor_rejection_time: { type: GraphQLString },
     // debitor_rejection_time: { type: GraphQLString }

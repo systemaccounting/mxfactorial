@@ -118,7 +118,13 @@ class Transaction extends React.Component {
     }))
 
   handleDraftTransaction = draftTransaction => {
-    this.setState({ draftTransaction })
+    const { username } = this.props
+    this.setState({
+      draftTransaction: {
+        ...draftTransaction,
+        author: username
+      }
+    })
   }
 
   fetchRules = () => {
@@ -140,11 +146,13 @@ class Transaction extends React.Component {
 
   requestTransactions = () => {
     const { type, rules, transactions, draftTransaction } = this.state
-    const transactionItems = R.map(R.omit(['__typename']))([
-      ...transactions,
-      draftTransaction,
-      ...rules
-    ])
+    const transactionItems = [...transactions, draftTransaction, ...rules].map(
+      item => {
+        // omit __typename to avoid GraphQL errors
+        const { __typename, ...itemProps } = item
+        return { ...itemProps }
+      }
+    )
     return this.props.onRequestTransactions(type, transactionItems)
   }
 

@@ -19,6 +19,7 @@ const applyRules = transactionItems => {
   if (salesTaxValue > 0) {
     accountItems.push({
       uuid: uuidv1(),
+      author: accountItems[0].author,
       rule_instance_id: uuidv1(),
       name: TAX_TRANSACTION_NAME,
       price: salesTaxValue.toFixed(3),

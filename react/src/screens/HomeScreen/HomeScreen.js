@@ -53,6 +53,7 @@ class HomeScreen extends Component {
         <div data-id="homeScreen">
           <AccountHeader title={user.username} balance={this.state.balance} />
           <Transaction
+            username={user.username}
             fetchTransactions={this.props.fetchTransactions}
             onRequestTransactions={this.onRequestTransactions}
             fetchRules={this.fetchRules}
