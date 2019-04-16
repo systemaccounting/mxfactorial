@@ -54,11 +54,15 @@ class Transaction extends React.Component {
   handleSwitchType = type => () => this.setState({ type })
 
   handleAddTransaction = data => {
+    const { username } = this.props
     const uuid = v4()
     this.setState(
       state => ({
         ...state,
-        transactions: [...state.transactions, { uuid, ...data }]
+        transactions: [
+          ...state.transactions,
+          { uuid, ...data, author: username }
+        ]
       }),
       this.handleScroll
     )
