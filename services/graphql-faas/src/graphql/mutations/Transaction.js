@@ -2,7 +2,7 @@ const { GraphQLList } = require('graphql')
 
 const {
   TransactionType,
-  TransactionCreateType
+  TransactionInputType
 } = require('../types/Transaction')
 const { AddTransactionResolver } = require('../resolvers/Transaction')
 
@@ -12,9 +12,8 @@ const TransactionCreateMutation = () => {
     args: {
       items: {
         name: 'Transaction items',
-        type: new GraphQLList(TransactionCreateType)
+        type: new GraphQLList(TransactionInputType)
       }
-      // input: { type: new GraphQLNonNull(TransactionCreateType)}
     },
     resolve(parentValue, args) {
       return AddTransactionResolver(args)

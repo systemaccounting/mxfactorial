@@ -7,7 +7,7 @@ const {
 
 const {
   TransactionType,
-  TransactionCreateType
+  TransactionInputType
 } = require('../types/Transaction')
 const { GetRuleTransactionsResolver } = require('../resolvers/Rule')
 
@@ -39,7 +39,7 @@ const RuleQueryType = () => ({
   description: 'Returns a list of modified transactions',
   args: {
     transactions: {
-      type: new GraphQLList(TransactionCreateType),
+      type: new GraphQLList(TransactionInputType),
       description: 'Please, specify transactions'
     }
   },

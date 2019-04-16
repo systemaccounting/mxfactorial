@@ -110,8 +110,8 @@ const TransactionType = new GraphQLObjectType({
   }
 })
 
-const TransactionCreateType = new GraphQLInputObjectType({
-  name: 'TransactionCreateType',
+const TransactionInputType = new GraphQLInputObjectType({
+  name: 'TransactionInputType',
   type: TransactionType,
   fields: {
     uuid: { type: GraphQLID },
@@ -143,5 +143,5 @@ const TransactionCreateType = new GraphQLInputObjectType({
 
 module.exports = {
   TransactionType,
-  TransactionCreateType
+  TransactionInputType
 }

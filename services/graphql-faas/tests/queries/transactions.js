@@ -1,5 +1,5 @@
 const createTransaction = `
-  mutation CreateTransaction($items: [TransactionCreateType]) {
+  mutation CreateTransaction($items: [TransactionInputType]) {
     createTransaction(items: $items) {
       name
       quantity
