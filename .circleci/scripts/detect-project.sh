@@ -30,12 +30,15 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
   # get initial commit after branching from develop or master if no previous successful build number
   if [[ $CIRCLE_BRANCH != "develop" && $CIRCLE_BRANCH != "master" ]]; then
     echo "Current branch: $CIRCLE_BRANCH"
-    SUBDIR=$(git log --name-only --oneline origin/develop..$CIRCLE_BRANCH | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
+    SUBDIR=$(git log --name-only --oneline origin/develop..$CIRCLE_BRANCH | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci/d' | sort -u)
   else
     # use previous commit sha if develop or master and no previous success build number (in case someone git inits this script)
-    SUBDIR=$(git log --name-only --oneline -1 | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
+    SUBDIR=$(git log --name-only --oneline -1 | sed -E '/^[a-f0-9]{7}/d' | cut -d/ -f1 | sort -u)
+    if [[ $SUBDIR == '.circleci' ]]; then
+      exit 0
+    fi
   fi
-  # exit if react project excluded from subdirectories affected by latest commit
+  # exit if subdirectory name ($1) excluded from subdirectories affected by latest commit
   echo "Directories affected when no previous successful build available: $SUBDIR"
   if [[ -z $SUBDIR ]] || [[ $SUBDIR != *$1* ]]; then
     circleci step halt
@@ -56,7 +59,10 @@ if [[ $LAST_SUCCESSFUL_BUILD_COMMIT == "null" ]]; then
 fi
 echo "Last successful build commit: $LAST_SUCCESSFUL_BUILD_COMMIT"
 # get subdirectories affected by range of commits since last successful build
-SUBDIR=$(git log --name-only --oneline $LAST_SUCCESSFUL_BUILD_COMMIT..$CIRCLE_SHA1 | sed -E '/^[a-f0-9]{7}/d' | sed '/^\.circleci$/d' | sort -u)
+SUBDIR=$(git log --name-only --oneline $LAST_SUCCESSFUL_BUILD_COMMIT..$CIRCLE_SHA1 | sed -E '/^[a-f0-9]{7}/d' | sort -u)
+if [[ $SUBDIR == '.circleci' ]]; then
+  exit 0
+fi
 echo "Directories affected since previous successful build of $CIRCLE_JOB job: $SUBDIR"
 # exit if project passed as argument excluded from list of subdirectories affected by range of commits since last successful build
 if [[ $SUBDIR != *$1* ]]; then
