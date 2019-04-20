@@ -4,7 +4,10 @@ const input = [
   {
     name: 'Milk',
     price: '3',
-    quantity: '2'
+    quantity: '2',
+    author: 'Joe Smith',
+    debitor: 'Joe Smith',
+    creditor: 'Mary'
   }
 ]
 

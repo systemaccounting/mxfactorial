@@ -19,13 +19,17 @@ const testItems = [
     name: 'Milk',
     price: '3',
     quantity: '2',
-    author: 'Joe Smith'
+    author: 'Joe Smith',
+    debitor: 'Joe Smith',
+    creditor: 'Mary'
   },
   {
     name: '9% state sales tax',
     price: '0.540',
     quantity: '1',
-    author: 'Joe Smith'
+    author: 'Joe Smith',
+    debitor: 'Joe Smith',
+    creditor: 'StateOfCalifornia'
   }
 ]
 
