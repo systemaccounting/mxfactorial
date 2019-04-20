@@ -43,4 +43,15 @@ describe('Function As A Service GraphQL Server /transact endpoint', () => {
     expect(response.createTransaction).toHaveLength(testItems.length)
     done()
   })
+
+  it('sets debitor_approval_time and creditor_approval_time on create transaction', async done => {
+    const response = await graphQLClient.request(createTransaction, {
+      items: testItems
+    })
+    response.createTransaction.forEach(item => {
+      expect(item.creditor_approval_time).not.toBeUndefined()
+      expect(item.debitor_approval_time).not.toBeUndefined()
+    })
+    done()
+  })
 })
