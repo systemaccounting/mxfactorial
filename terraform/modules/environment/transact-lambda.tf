@@ -11,6 +11,7 @@ resource "aws_lambda_function" "transact_service_lambda" {
   handler = "index.handler"
 
   source_code_hash = "${base64sha256(file("../../../services/transact-faas/transact-lambda.zip"))}"
+  layers           = ["${aws_lambda_layer_version.transact_layer.arn}"]
 
   # source_code_hash = "${data.archive_file.transact_service_lambda_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
@@ -36,6 +37,14 @@ resource "aws_lambda_function" "transact_service_lambda" {
       RULES_URL = "https://${aws_api_gateway_rest_api.rules.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
     }
   }
+}
+
+resource "aws_lambda_layer_version" "transact_layer" {
+  filename   = "../../../services/transact-faas/transact-layer.zip"
+  layer_name = "transact-node-deps-${var.environment}"
+
+  compatible_runtimes = ["nodejs8.10", "nodejs6.10"]
+  source_code_hash    = "${base64sha256(file("../../../services/transact-faas/transact-layer.zip"))}"
 }
 
 resource "aws_iam_role" "transact_service_lambda_role" {

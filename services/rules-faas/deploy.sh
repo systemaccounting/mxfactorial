@@ -2,11 +2,12 @@
 ENV=$1
 
 update_lambda() {
-  aws lambda update-function-code \
+  DEPLOY_TIME=$(aws lambda update-function-code \
   --function-name rules-lambda-$1 \
-  --zip-file fileb://$(pwd)/rules-lambda.zip \
+  --zip-file fileb://$(pwd)/rules-src.zip \
   --region us-east-1 \
-  --query 'LastModified'
+  --query 'LastModified')
+  echo "Deployment completed at $DEPLOY_TIME"
 }
 
 # build src before deploying

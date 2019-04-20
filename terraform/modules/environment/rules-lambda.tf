@@ -11,6 +11,7 @@ resource "aws_lambda_function" "rules_service_lambda" {
   handler = "index.handler"
 
   source_code_hash = "${base64sha256(file("../../../services/rules-faas/rules-lambda.zip"))}"
+  layers           = ["${aws_lambda_layer_version.rules_layer.arn}"]
 
   # source_code_hash = "${data.archive_file.rules_service_lambda_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
@@ -38,6 +39,14 @@ resource "aws_lambda_function" "rules_service_lambda" {
       TRANSACT_URL = "https://${aws_api_gateway_rest_api.transact.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
     }
   }
+}
+
+resource "aws_lambda_layer_version" "rules_layer" {
+  filename   = "../../../services/rules-faas/rules-layer.zip"
+  layer_name = "rules-node-deps-${var.environment}"
+
+  compatible_runtimes = ["nodejs8.10", "nodejs6.10"]
+  source_code_hash    = "${base64sha256(file("../../../services/rules-faas/rules-layer.zip"))}"
 }
 
 resource "aws_iam_role" "rules_service_lambda_role" {
