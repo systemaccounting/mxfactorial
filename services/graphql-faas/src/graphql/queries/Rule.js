@@ -7,39 +7,39 @@ const {
 
 const {
   TransactionType,
-  TransactionCreateType
+  TransactionInputType
 } = require('../types/Transaction')
 const { GetRuleTransactionsResolver } = require('../resolvers/Rule')
 
-const TransactionItemType = new GraphQLInputObjectType({
-  name: 'TransactionItem',
-  description: 'Transaction Item',
-  fields: {
-    uuid: {
-      type: GraphQLID,
-      description: 'Transaction ID'
-    },
-    name: {
-      type: GraphQLString,
-      description: 'Name of good or service'
-    },
-    price: {
-      type: GraphQLString,
-      description: 'Value of good or service'
-    },
-    quantity: {
-      type: GraphQLString,
-      description: 'Quantity of good or service'
-    }
-  }
-})
+// const TransactionItemType = new GraphQLInputObjectType({
+//   name: 'TransactionItem',
+//   description: 'Transaction Item',
+//   fields: {
+//     uuid: {
+//       type: GraphQLID,
+//       description: 'Transaction ID'
+//     },
+//     name: {
+//       type: GraphQLString,
+//       description: 'Name of good or service'
+//     },
+//     price: {
+//       type: GraphQLString,
+//       description: 'Value of good or service'
+//     },
+//     quantity: {
+//       type: GraphQLString,
+//       description: 'Quantity of good or service'
+//     }
+//   }
+// })
 
 const RuleQueryType = () => ({
   type: new GraphQLList(TransactionType),
   description: 'Returns a list of modified transactions',
   args: {
     transactions: {
-      type: new GraphQLList(TransactionItemType),
+      type: new GraphQLList(TransactionInputType),
       description: 'Please, specify transactions'
     }
   },

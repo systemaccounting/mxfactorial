@@ -51,14 +51,31 @@ class Transaction extends React.Component {
     }
   }
 
-  handleSwitchType = type => () => this.setState({ type })
+  handleSwitchType = type => () => {
+    const { recipient } = this.state
+    const { username } = this.props
+    this.setState({ type }, () =>
+      this.updateTransactions(type, username, recipient)
+    )
+  }
 
   handleAddTransaction = data => {
+    const { recipient, type } = this.state
+    const { username } = this.props
     const uuid = v4()
     this.setState(
       state => ({
         ...state,
-        transactions: [...state.transactions, { uuid, ...data }]
+        transactions: [
+          ...state.transactions,
+          {
+            uuid,
+            ...data,
+            author: username,
+            creditor: type === 'credit' ? recipient : username,
+            debitor: type === 'debit' ? recipient : username
+          }
+        ]
       }),
       this.handleScroll
     )
@@ -98,7 +115,12 @@ class Transaction extends React.Component {
     this.fetchRules()
   }
 
-  handleRecipientChange = e => this.setState({ recipient: e.target.value })
+  handleRecipientChange = e => {
+    const { type } = this.state
+    const { username } = this.state
+    this.setState({ recipient: e.target.value })
+    this.updateTransactions(type, username, e.target.value)
+  }
 
   handleFormClear = isClear => {
     this.setState(state => {
@@ -118,7 +140,16 @@ class Transaction extends React.Component {
     }))
 
   handleDraftTransaction = draftTransaction => {
-    this.setState({ draftTransaction })
+    const { recipient, type } = this.state
+    const { username } = this.props
+    this.setState({
+      draftTransaction: {
+        ...draftTransaction,
+        author: username,
+        creditor: type === 'credit' ? recipient : username,
+        debitor: type === 'debit' ? recipient : username
+      }
+    })
   }
 
   fetchRules = () => {
@@ -140,12 +171,41 @@ class Transaction extends React.Component {
 
   requestTransactions = () => {
     const { type, rules, transactions, draftTransaction } = this.state
-    const transactionItems = R.map(R.omit(['__typename']))([
-      ...transactions,
-      draftTransaction,
-      ...rules
-    ])
+    const transactionItems = [...transactions, draftTransaction, ...rules].map(
+      item => {
+        // omit __typename to avoid GraphQL errors
+        const { __typename, ...itemProps } = item
+        return { ...itemProps }
+      }
+    )
     return this.props.onRequestTransactions(type, transactionItems)
+  }
+
+  updateTransactions = (type, username, recipient) => {
+    const creditor = type === 'credit' ? recipient : username
+    const debitor = type === 'debit' ? recipient : username
+    this.setState(prevState => ({
+      draftTransaction: {
+        ...prevState.draftTransaction,
+        author: username,
+        creditor,
+        debitor
+      },
+      transactions: prevState.transactions.map(item => {
+        // Do not update creditor in rule-generated items
+        if (item.rule_instance_id) {
+          return {
+            ...item,
+            debitor
+          }
+        }
+        return {
+          ...item,
+          debitor,
+          creditor
+        }
+      })
+    }))
   }
 
   get rules() {

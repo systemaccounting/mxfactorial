@@ -110,38 +110,38 @@ const TransactionType = new GraphQLObjectType({
   }
 })
 
-const TransactionCreateType = new GraphQLInputObjectType({
-  name: 'TransactionCreateType',
+const TransactionInputType = new GraphQLInputObjectType({
+  name: 'TransactionInputType',
   type: TransactionType,
   fields: {
     uuid: { type: GraphQLID },
-    // debitor: { type: new GraphQLNonNull(GraphQLString) },
-    // debitor_profile_latlng: { type: GraphQLString },
-    // debitor_transaction_latlng: { type: GraphQLString },
-    // debitor_approval_time: { type: GraphQLString },
-    // debitor_device: { type: GraphQLString },
-    // creditor: { type: new GraphQLNonNull(GraphQLString) },
-    // creditor_profile_latlng: { type: GraphQLString },
-    // creditor_transaction_latlng: { type: GraphQLString },
-    // creditor_approval_time: { type: GraphQLString },
-    // creditor_device: { type: GraphQLString },
+    debitor: { type: new GraphQLNonNull(GraphQLString) },
+    debitor_profile_latlng: { type: GraphQLString },
+    debitor_transaction_latlng: { type: GraphQLString },
+    debitor_approval_time: { type: GraphQLString },
+    debitor_device: { type: GraphQLString },
+    creditor: { type: new GraphQLNonNull(GraphQLString) },
+    creditor_profile_latlng: { type: GraphQLString },
+    creditor_transaction_latlng: { type: GraphQLString },
+    creditor_approval_time: { type: GraphQLString },
+    creditor_device: { type: GraphQLString },
     name: { type: new GraphQLNonNull(GraphQLString) },
     price: { type: new GraphQLNonNull(GraphQLString) },
     quantity: { type: new GraphQLNonNull(GraphQLString) },
-    // unit_of_measurement: { type: GraphQLString },
-    // units_measured: { type: GraphQLString },
-    rule_instance_id: { type: GraphQLString }
+    unit_of_measurement: { type: GraphQLString },
+    units_measured: { type: GraphQLString },
+    rule_instance_id: { type: GraphQLString },
     // transaction_id: { type: new GraphQLNonNull(GraphQLString) },
     // debit_approver: { type: new GraphQLNonNull(GraphQLString) },
     // credit_approver: { type: new GraphQLNonNull(GraphQLString) },
-    // author: { type: new GraphQLNonNull(GraphQLString) },
-    // expiration_time: { type: GraphQLString },
-    // creditor_rejection_time: { type: GraphQLString },
-    // debitor_rejection_time: { type: GraphQLString }
+    author: { type: new GraphQLNonNull(GraphQLString) },
+    expiration_time: { type: GraphQLString },
+    creditor_rejection_time: { type: GraphQLString },
+    debitor_rejection_time: { type: GraphQLString }
   }
 })
 
 module.exports = {
   TransactionType,
-  TransactionCreateType
+  TransactionInputType
 }
