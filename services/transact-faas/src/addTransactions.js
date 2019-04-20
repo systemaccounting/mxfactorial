@@ -35,7 +35,17 @@ const addTransaction = async obj => {
     }
   }
 
-  const storedTransactions = await storeTransactions(obj.items)
+  // Always ignore approval time fields sent from client
+  const preparedItems = obj.items.map(item => {
+    const {
+      debitor_approval_time,
+      creditor_approval_time,
+      ...otherItemProps
+    } = item
+    return otherItemProps
+  })
+
+  const storedTransactions = await storeTransactions(preparedItems)
   return {
     status: STATUS_SUCCESS,
     data: storedTransactions

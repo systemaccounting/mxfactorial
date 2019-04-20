@@ -7,6 +7,9 @@ const fetchRules = gql`
       name
       price
       quantity
+      author
+      debitor
+      creditor
       rule_instance_id
     }
   }

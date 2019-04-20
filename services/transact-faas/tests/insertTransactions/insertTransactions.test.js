@@ -51,4 +51,14 @@ describe('Store into transactions table', () => {
     expect(response.message).toBe('Required items missing')
     expect(storeTransactions).not.toHaveBeenCalled()
   })
+
+  it('ignores debitor_approval_time and creditor_approval_time sent from client', async () => {
+    const items = itemsUnderTestArray.map(item => ({
+      ...item,
+      debitor_approval_time: '2019-12-12',
+      creditor_approval_time: '2019-12-12'
+    }))
+    await handler({ items })
+    expect(storeTransactions).toHaveBeenCalledWith(itemsUnderTestArray)
+  })
 })
