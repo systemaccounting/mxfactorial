@@ -60,7 +60,7 @@ if [[ $LAST_SUCCESSFUL_BUILD_COMMIT == "null" ]]; then
 fi
 echo "Last successful build commit: $LAST_SUCCESSFUL_BUILD_COMMIT"
 # get subdirectories affected by range of commits since last successful build
-SUBDIR=$(git log --name-only --oneline $LAST_SUCCESSFUL_BUILD_COMMIT..$CIRCLE_SHA1 | sed -E '/^[a-f0-9]{7}/d' | sort -u)
+SUBDIR=$(git log --name-only --oneline $LAST_SUCCESSFUL_BUILD_COMMIT..$CIRCLE_SHA1 | sed -E '/^[a-f0-9]{7}/d' | cut -d/ -f1 | sort -u)
 if [[ $SUBDIR == '.circleci' ]]; then
   exit 0
 fi
