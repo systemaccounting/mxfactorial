@@ -24,7 +24,8 @@ const applyRules = transactionItems => {
       name: TAX_TRANSACTION_NAME,
       price: salesTaxValue.toFixed(3),
       quantity: 1,
-      creditor: 'StateOfCalifornia'
+      creditor: 'StateOfCalifornia',
+      debitor: accountItems[0].debitor
     })
   }
   console.log('Applied rules: ', JSON.stringify(accountItems))

@@ -7,6 +7,9 @@ import Transaction from '../components/Transaction'
 
 import { fetchTransactions } from 'mock/api'
 
+const USERNAME = 'JoeSmith'
+const RECIPIENT = 'Mary'
+
 describe('<Transaction />', () => {
   it('renders', () => {
     const wrapper = shallow(<Transaction />)
@@ -262,5 +265,56 @@ describe('<Transaction />', () => {
       ])
     )
     expect(Object.keys(wrapper.state('transactionHistory')[0])).toHaveLength(23)
+  })
+
+  it('updates transactions correctly', async () => {
+    const wrapper = shallow(<Transaction username={USERNAME} />)
+    const transactions = [
+      {
+        uuid: '1234',
+        name: 'x',
+        price: 100,
+        quantity: 2,
+        author: USERNAME,
+        debitor: USERNAME,
+        creditor: RECIPIENT
+      },
+      {
+        uuid: '1235',
+        name: 'y',
+        price: 25,
+        quantity: 2,
+        author: USERNAME,
+        debitor: USERNAME,
+        creditor: RECIPIENT
+      }
+    ]
+    wrapper.setState({ transactions, recipient: RECIPIENT })
+    wrapper.update()
+    const instance = wrapper.instance()
+
+    instance.handleDraftTransaction({ name: 'Bread', price: 5, quantity: 5 })
+    const draftTransaction = wrapper.state('draftTransaction')
+    expect(draftTransaction.creditor).toEqual(RECIPIENT)
+    expect(draftTransaction.debitor).toEqual(USERNAME)
+    expect(draftTransaction.author).toEqual(USERNAME)
+
+    instance.handleAddTransaction({ name: 'Bread', price: 5, quantity: 5 })
+    wrapper.state('transactions').forEach(transaction => {
+      expect(transaction.debitor).toEqual(USERNAME)
+      expect(transaction.creditor).toEqual(RECIPIENT)
+    })
+
+    instance.updateTransactions('debit', USERNAME, RECIPIENT)
+    wrapper.state('transactions').forEach(transaction => {
+      expect(transaction.creditor).toEqual(USERNAME)
+      expect(transaction.debitor).toEqual(RECIPIENT)
+    })
+
+    instance.updateTransactions('credit', USERNAME, RECIPIENT)
+    wrapper.state('transactions').forEach(transaction => {
+      expect(transaction.debitor).toEqual(USERNAME)
+      expect(transaction.creditor).toEqual(RECIPIENT)
+    })
   })
 })
