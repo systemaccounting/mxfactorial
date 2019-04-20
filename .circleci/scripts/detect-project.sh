@@ -46,6 +46,7 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
     exit 0
   fi
 fi
+
 # get commit sha of last successful build number on branch
 LAST_SUCCESSFUL_BUILD_COMMIT=$(curl -s https://circleci.com/api/v1.1/project/github/systemaccounting/mxfactorial/$LAST_SUCCESSFUL_BUILD_NUMBER?circle-token=$CI_API_TOKEN | \
 jq -r '.all_commit_details | first | .commit')
