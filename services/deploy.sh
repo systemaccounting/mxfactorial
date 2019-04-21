@@ -2,6 +2,7 @@
 ENV=$1
 CURRENT_DIR=$(pwd)
 for dir in */; do
+  echo "Deploying from $CURRENT_DIR/$dir"
   cd $CURRENT_DIR/$dir && . deploy.sh $ENV
 done
 
