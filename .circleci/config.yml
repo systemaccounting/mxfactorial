@@ -11,14 +11,10 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Detect changed root files
+          name: Detect changed subdirectory files since last successful build
           command: |
             # get jq
             sudo apt-get update && sudo apt-get install jq -y
-            . ../.circleci/scripts/detect-project.sh \/
-      - run:
-          name: Detect changed subdirectory files since last successful build
-          command: |
             . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
@@ -101,14 +97,10 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Detect changed root files
+          name: Detect changed subdirectory files since last successful build
           command: |
             # get jq
             sudo apt-get update && sudo apt-get install jq -y
-            . ../.circleci/scripts/detect-project.sh \/
-      - run:
-          name: Detect changed subdirectory files since last successful build
-          command: |
             . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
@@ -189,14 +181,10 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Detect changed root files
+          name: Detect changed subdirectory files since last successful build
           command: |
             # get jq
             sudo apt-get update && sudo apt-get install jq -y
-            . ../.circleci/scripts/detect-project.sh \/
-      - run:
-          name: Detect changed subdirectory files since last successful build
-          command: |
             . ../.circleci/scripts/detect-project.sh services
       - run:
           name: Update Linux package library list
@@ -229,14 +217,10 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Detect changed root files
+          name: Detect changed subdirectory files since last successful build
           command: |
             # get jq
             sudo apt-get update && sudo apt-get install jq -y
-            . ../.circleci/scripts/detect-project.sh \/
-      - run:
-          name: Detect changed subdirectory files since last successful build
-          command: |
             . ../.circleci/scripts/detect-project.sh services
       - run:
           name: Update Linux package library list
@@ -269,14 +253,10 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Detect changed root files
+          name: Detect changed subdirectory files since last successful build
           command: |
             # get jq
             sudo apt-get update && sudo apt-get install jq -y
-            . ../.circleci/scripts/detect-project.sh \/
-      - run:
-          name: Detect changed subdirectory files since last successful build
-          command: |
             . ../.circleci/scripts/detect-project.sh services
       - run:
           name: Update Linux package library list
