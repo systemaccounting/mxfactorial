@@ -14,7 +14,7 @@ afterAll(() => {
   tearDownIntegrationTestDataInRDS()
 })
 
-const testItems = [
+const debitRequest = [
   {
     name: 'Milk',
     price: '3',
@@ -33,24 +33,46 @@ const testItems = [
   }
 ]
 
+const creditRequest = [
+  {
+    name: 'Milk',
+    price: '3',
+    quantity: '2',
+    author: 'Joe Smith',
+    creditor: 'Joe Smith',
+    debitor: 'Mary'
+  }
+]
+
 jest.setTimeout(30000) // lambda and serverless aurora cold starts
 
 describe('Function As A Service GraphQL Server /transact endpoint', () => {
   it('sends transaction mutation', async done => {
     const response = await graphQLClient.request(createTransaction, {
-      items: testItems
+      items: debitRequest
     })
-    expect(response.createTransaction).toHaveLength(testItems.length)
+    expect(response.createTransaction).toHaveLength(debitRequest.length)
     done()
   })
 
-  it('sets debitor_approval_time and creditor_approval_time on create transaction', async done => {
+  it('sets debitor_approval_time if author === debitor', async done => {
     const response = await graphQLClient.request(createTransaction, {
-      items: testItems
+      items: debitRequest
     })
     response.createTransaction.forEach(item => {
-      expect(item.creditor_approval_time).not.toBeUndefined()
-      expect(item.debitor_approval_time).not.toBeUndefined()
+      expect(item.creditor_approval_time).toBeNull()
+      expect(item.debitor_approval_time).not.toBeNull()
+    })
+    done()
+  })
+
+  it('sets creditor_approval_time if author === creditor', async done => {
+    const response = await graphQLClient.request(createTransaction, {
+      items: creditRequest
+    })
+    response.createTransaction.forEach(item => {
+      expect(item.creditor_approval_time).not.toBeNull()
+      expect(item.debitor_approval_time).toBeNull()
     })
     done()
   })
