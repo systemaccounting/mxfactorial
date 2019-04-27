@@ -276,8 +276,8 @@ describe('<Transaction />', () => {
         price: 100,
         quantity: 2,
         author: USERNAME,
-        debitor: USERNAME,
-        creditor: RECIPIENT
+        creditor: USERNAME,
+        debitor: RECIPIENT
       },
       {
         uuid: '1235',
@@ -285,8 +285,8 @@ describe('<Transaction />', () => {
         price: 25,
         quantity: 2,
         author: USERNAME,
-        debitor: USERNAME,
-        creditor: RECIPIENT
+        creditor: USERNAME,
+        debitor: RECIPIENT
       }
     ]
     wrapper.setState({ transactions, recipient: RECIPIENT })
@@ -295,32 +295,32 @@ describe('<Transaction />', () => {
 
     instance.handleDraftTransaction({ name: 'Bread', price: 5, quantity: 5 })
     const draftTransaction = wrapper.state('draftTransaction')
-    expect(draftTransaction.creditor).toEqual(RECIPIENT)
-    expect(draftTransaction.debitor).toEqual(USERNAME)
+    expect(draftTransaction.creditor).toEqual(USERNAME)
+    expect(draftTransaction.debitor).toEqual(RECIPIENT)
     expect(draftTransaction.author).toEqual(USERNAME)
     expect(draftTransaction.creditor_approval_time).toBeUndefined()
     expect(draftTransaction.debitor_approval_time).toBeUndefined()
 
     instance.handleAddTransaction({ name: 'Bread', price: 5, quantity: 5 })
     wrapper.state('transactions').forEach(transaction => {
-      expect(transaction.debitor).toEqual(USERNAME)
-      expect(transaction.creditor).toEqual(RECIPIENT)
+      expect(transaction.debitor).toEqual(RECIPIENT)
+      expect(transaction.creditor).toEqual(USERNAME)
       expect(transaction.debitor_approval_time).toBeUndefined()
       expect(transaction.creditor_approval_time).toBeUndefined()
     })
 
     instance.updateTransactions('debit', USERNAME, RECIPIENT)
     wrapper.state('transactions').forEach(transaction => {
-      expect(transaction.creditor).toEqual(USERNAME)
-      expect(transaction.debitor).toEqual(RECIPIENT)
+      expect(transaction.creditor).toEqual(RECIPIENT)
+      expect(transaction.debitor).toEqual(USERNAME)
       expect(transaction.debitor_approval_time).toBeUndefined()
       expect(transaction.creditor_approval_time).toBeUndefined()
     })
 
     instance.updateTransactions('credit', USERNAME, RECIPIENT)
     wrapper.state('transactions').forEach(transaction => {
-      expect(transaction.debitor).toEqual(USERNAME)
-      expect(transaction.creditor).toEqual(RECIPIENT)
+      expect(transaction.debitor).toEqual(RECIPIENT)
+      expect(transaction.creditor).toEqual(USERNAME)
       expect(transaction.debitor_approval_time).toBeUndefined()
       expect(transaction.creditor_approval_time).toBeUndefined()
     })
