@@ -24,7 +24,9 @@ const storeTransactions = async transactions => {
 
   // Define transaction model
   const Transaction = TransactionModel(sequelize, Sequelize)
-  const result = await Transaction.bulkCreate(transactions)
+  const result = await Transaction.bulkCreate(transactions, {
+    individualHooks: true
+  })
 
   // Close connection
   sequelize.close().then(() => console.log('MySQL connection closed'))
