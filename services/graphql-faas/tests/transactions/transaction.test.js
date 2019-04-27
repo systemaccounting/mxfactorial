@@ -41,6 +41,14 @@ const creditRequest = [
     author: 'Joe Smith',
     creditor: 'Joe Smith',
     debitor: 'Mary'
+  },
+  {
+    name: '9% state sales tax',
+    price: '0.540',
+    quantity: '1',
+    author: 'Joe Smith',
+    debitor: 'Mary',
+    creditor: 'StateOfCalifornia'
   }
 ]
 
@@ -60,8 +68,10 @@ describe('Function As A Service GraphQL Server /transact endpoint', () => {
       items: debitRequest
     })
     response.createTransaction.forEach(item => {
-      expect(item.creditor_approval_time).toBeNull()
-      expect(item.debitor_approval_time).not.toBeNull()
+      if (item.author === item.debitor) {
+        expect(item.creditor_approval_time).toBeNull()
+        expect(item.debitor_approval_time).not.toBeNull()
+      }
     })
     done()
   })
@@ -71,8 +81,10 @@ describe('Function As A Service GraphQL Server /transact endpoint', () => {
       items: creditRequest
     })
     response.createTransaction.forEach(item => {
-      expect(item.creditor_approval_time).not.toBeNull()
-      expect(item.debitor_approval_time).toBeNull()
+      if (item.author === item.creditor) {
+        expect(item.creditor_approval_time).not.toBeNull()
+        expect(item.debitor_approval_time).toBeNull()
+      }
     })
     done()
   })
