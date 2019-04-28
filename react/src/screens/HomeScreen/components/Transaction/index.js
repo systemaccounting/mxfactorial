@@ -72,8 +72,8 @@ class Transaction extends React.Component {
             uuid,
             ...data,
             author: username,
-            creditor: type === 'credit' ? recipient : username,
-            debitor: type === 'debit' ? recipient : username
+            debitor: type === 'credit' ? recipient : username,
+            creditor: type === 'debit' ? recipient : username
           }
         ]
       }),
@@ -146,8 +146,8 @@ class Transaction extends React.Component {
       draftTransaction: {
         ...draftTransaction,
         author: username,
-        creditor: type === 'credit' ? recipient : username,
-        debitor: type === 'debit' ? recipient : username
+        debitor: type === 'credit' ? recipient : username,
+        creditor: type === 'debit' ? recipient : username
       }
     })
   }
@@ -182,8 +182,8 @@ class Transaction extends React.Component {
   }
 
   updateTransactions = (type, username, recipient) => {
-    const creditor = type === 'credit' ? recipient : username
-    const debitor = type === 'debit' ? recipient : username
+    const debitor = type === 'credit' ? recipient : username
+    const creditor = type === 'debit' ? recipient : username
     this.setState(prevState => ({
       draftTransaction: {
         ...prevState.draftTransaction,

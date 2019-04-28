@@ -13,17 +13,21 @@ module.exports = (sequelize, type) =>
       author: type.STRING,
       creditor: type.STRING,
       debitor: type.STRING,
-      debitor_approval_time: {
-        type: type.DATE,
-        defaultValue: type.NOW
-      },
-      creditor_approval_time: {
-        type: type.DATE,
-        defaultValue: type.NOW
-      }
+      debitor_approval_time: type.DATE,
+      creditor_approval_time: type.DATE
     },
     {
       // There are no `createdAt` and `updatedAt` transaction columns yet
-      timestamps: false
+      timestamps: false,
+      hooks: {
+        beforeCreate: (instance, options) => {
+          if (instance.author === instance.creditor) {
+            instance.set('creditor_approval_time', new Date())
+          }
+          if (instance.author === instance.debitor) {
+            instance.set('debitor_approval_time', new Date())
+          }
+        }
+      }
     }
   )

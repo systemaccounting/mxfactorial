@@ -6,6 +6,11 @@ const createTransaction = gql`
       name
       quantity
       price
+      author
+      debitor
+      creditor
+      creditor_approval_time
+      debitor_approval_time
     }
   }
 `
