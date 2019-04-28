@@ -37,7 +37,7 @@ describe('transaction request', async () => {
     )
     requestTransactionButton.click()
 
-    await page.waitForNavigation({ waitUntil: 'networkidle2' })
+    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })
 
     // redirect to historyScreen
     await expect(page.url()).toMatch('/requests')
