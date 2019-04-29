@@ -17,6 +17,7 @@ resource "aws_lambda_function" "clone_tool_lambda" {
 
   # source_code_hash = "${data.archive_file.clone_tool_lambda_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
+  timeout = 30
   role    = "${aws_iam_role.clone_tool_lambda.arn}"
 
   environment {
@@ -26,8 +27,6 @@ resource "aws_lambda_function" "clone_tool_lambda" {
       SCHEMA_UPDATE_LAMBDA_ARN = "${aws_lambda_function.schema_update_tool_lambda.arn}"
     }
   }
-
-  timeout = 30
 }
 
 resource "aws_iam_role" "clone_tool_lambda" {

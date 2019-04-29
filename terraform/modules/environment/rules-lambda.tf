@@ -15,6 +15,7 @@ resource "aws_lambda_function" "rules_service_lambda" {
 
   # source_code_hash = "${data.archive_file.rules_service_lambda_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
+  timeout = 30
   role    = "${aws_iam_role.rules_service_lambda_role.arn}"
 
   vpc_config {

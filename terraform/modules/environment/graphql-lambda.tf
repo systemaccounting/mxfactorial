@@ -15,6 +15,7 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
 
   # source_code_hash = "${data.archive_file.mxfactorial_graphql_server_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
+  timeout = 30
   role    = "${aws_iam_role.mxfactorial_graphql_lambda_role.arn}"
 
   environment {

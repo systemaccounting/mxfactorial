@@ -82,3 +82,14 @@ resource "aws_lambda_permission" "transact" {
   # within the API Gateway "REST API".
   source_arn = "${aws_api_gateway_deployment.transact.execution_arn}/*/*"
 }
+
+resource "aws_api_gateway_method_settings" "transact_settings" {
+  rest_api_id = "${aws_api_gateway_rest_api.transact.id}"
+  stage_name  = "${aws_api_gateway_deployment.transact.stage_name}"
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled = true
+    logging_level   = "INFO"
+  }
+}

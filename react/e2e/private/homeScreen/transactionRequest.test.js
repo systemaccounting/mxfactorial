@@ -41,5 +41,5 @@ describe('transaction request', async () => {
 
     // redirect to historyScreen
     await expect(page.url()).toMatch('/requests')
-  })
+  }, 20000)
 })

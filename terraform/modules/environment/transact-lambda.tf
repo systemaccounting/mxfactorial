@@ -15,6 +15,7 @@ resource "aws_lambda_function" "transact_service_lambda" {
 
   # source_code_hash = "${data.archive_file.transact_service_lambda_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
+  timeout = 30
   role    = "${aws_iam_role.transact_service_lambda_role.arn}"
 
   vpc_config {

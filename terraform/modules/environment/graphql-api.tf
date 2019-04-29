@@ -176,3 +176,14 @@ resource "aws_api_gateway_method_response" "resource_options_200" {
     "method.response.header.Access-Control-Allow-Origin"  = true
   }
 }
+
+resource "aws_api_gateway_method_settings" "graphql_settings" {
+  rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  stage_name  = "${aws_api_gateway_deployment.environment.stage_name}"
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled = true
+    logging_level   = "INFO"
+  }
+}
