@@ -36,6 +36,7 @@ react/.env.*
 
 # deploy faas
 **/*.zip
+**/index.handler
 
 # Editors and IDEs
 .idea
