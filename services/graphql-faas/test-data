@@ -1,4 +1,32 @@
 
+// 2019-04-15
+
+mutation createTransaction($items: [TransactionCreateType]!) {
+  createTransaction(items: $items) {
+    uuid
+    name
+    price
+    quantity
+    rule_instance_id
+  }
+}
+
+// iterable input
+{
+  "items": [
+    {
+      "name": "Milk",
+      "price": "3",
+      "quantity": "2"
+    },
+    {
+      "name": "9% state sales tax",
+      "price": "0.540",
+      "quantity": "1"
+    }
+	]
+}
+
 // Graphiql Mutation
 mutation createTransaction($input: TransactionCreateType!) {
   createTransaction(input: $input) {
