@@ -33,12 +33,8 @@ const GetTransactionResolver = arg => {
     .invoke(params)
     .promise()
     .then(data => {
-      console.log('from measure')
-      // console.log(data)
-      console.log(typeof data.Payload)
       let parseStringToJson = JSON.parse(data.Payload)
       let parseJsonToJsObject = JSON.parse(parseStringToJson)
-      console.log(parseJsonToJsObject)
       return parseJsonToJsObject
     })
     .catch(err => {
