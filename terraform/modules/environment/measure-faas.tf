@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "measure_service_lambda" {
-  filename = "../../../services/go-measure/measure-src.zip"
+  filename = "../../../services/measure-faas/measure-src.zip"
 
   # filename      = "${data.archive_file.measure_service_lambda_provisioner.output_path}"
   function_name = "measure-lambda-${var.environment}"
@@ -8,7 +8,7 @@ resource "aws_lambda_function" "measure_service_lambda" {
   # name of go executable instead of js file and exported function
   handler = "index.handler"
 
-  source_code_hash = "${base64sha256(file("../../../services/go-measure/measure-src.zip"))}"
+  source_code_hash = "${base64sha256(file("../../../services/measure-faas/measure-src.zip"))}"
 
   # source_code_hash = "${data.archive_file.measure_service_lambda_provisioner.output_base64sha256}"
   timeout = 30
