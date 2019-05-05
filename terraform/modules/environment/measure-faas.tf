@@ -1,20 +1,18 @@
 resource "aws_lambda_function" "measure_service_lambda" {
-  filename = "../../../services/measure-faas/measure-lambda.zip"
+  filename = "../../../services/go-measure/measure-src.zip"
 
   # filename      = "${data.archive_file.measure_service_lambda_provisioner.output_path}"
   function_name = "measure-lambda-${var.environment}"
   description   = "measure service in ${var.environment}"
 
-  # "main" is the filename within the zip file (main.js) and "handler"
-  # is the name of the property under which the handler function was
-  # exported in that file.
+  # name of go executable instead of js file and exported function
   handler = "index.handler"
 
-  source_code_hash = "${base64sha256(file("../../../services/measure-faas/measure-lambda.zip"))}"
+  source_code_hash = "${base64sha256(file("../../../services/go-measure/measure-src.zip"))}"
 
   # source_code_hash = "${data.archive_file.measure_service_lambda_provisioner.output_base64sha256}"
-  runtime = "nodejs8.10"
   timeout = 30
+  runtime = "go1.x"
   role    = "${aws_iam_role.measure_service_lambda_role.arn}"
 
   vpc_config {
