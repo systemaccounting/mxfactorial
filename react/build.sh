@@ -6,8 +6,9 @@ fi
 ENV=$1
 if [[ $CI ]]; then
   echo "Building for ${ENV} on CI..."
-  UPPERCASE_ENV=$(echo "${ENV}" | awk '{print toupper($0)}')
-  ENV_FILE=$(echo "${UPPERCASE_ENV}"_REACT_VARS | base64 --decode --ignore-garbage | tr -d '\0')
+  UPPERCASE_ENV=$(echo $ENV | awk '{print toupper($0)}')
+  CI_VAR_FILE_NAME="${UPPERCASE_ENV}"_REACT_VARS
+  ENV_FILE=$(echo "${!CI_VAR_FILE_NAME//[[:space:]]/}" | base64 --decode --ignore-garbage | tr -d '\0')
   if [[ $ENV == 'dev' ]]; then
     ENV_FILE="${ENV_FILE} REACT_APP_HOST_ENV=dev"
     ENV_FILE="${ENV_FILE} REACT_APP_TEST_VERSION=$(jq -r '.version' package.json)"
