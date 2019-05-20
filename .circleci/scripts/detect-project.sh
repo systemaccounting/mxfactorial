@@ -45,7 +45,7 @@ if [[ $LAST_SUCCESSFUL_BUILD_NUMBER == "null" ]]; then
       circleci step halt
   elif [[ $CHANGED_SUBDIR == '.circleci' ]]; then
     exit 0
-  elif [[ $CHANGED_SUBDIR == *'.'* && $CHANGED_SUBDIR != *'.circleci'* ]]; then
+  elif [[ $CHANGED_SUBDIR != *'/'* ]]; then
     echo "halting after detecting changes to root files only"
     circleci step halt
   elif [[ $CHANGED_SUBDIR != *$BUILD_SUBDIR* ]]; then
