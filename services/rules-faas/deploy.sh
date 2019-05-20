@@ -7,7 +7,7 @@ update_lambda() {
   --zip-file fileb://$(pwd)/rules-src.zip \
   --region us-east-1 \
   --query 'LastModified')
-  echo "Deployment completed at $DEPLOY_TIME"
+  echo "***Deployment completed at $DEPLOY_TIME"
 }
 
 # build src before deploying
