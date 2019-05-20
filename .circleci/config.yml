@@ -19,39 +19,29 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v018-dependencies-{{ checksum "package.json" }}
+          key: v019-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run:
           name: e2e tests
-          command: yarn dev:e2e
-          environment:
-            CI_ENV: dev
+          command: bash test-e2e.sh dev
       - run:
           name: Build web client for acceptance testing
-          command: |
-            NODE_PATH=./src \
-            REACT_APP_COGNITO_POOL_ID=$REACT_APP_COGNITO_POOL_ID_DEV \
-            REACT_APP_COGNITO_CLIENT_ID=$REACT_APP_COGNITO_CLIENT_ID_DEV \
-            REACT_APP_HOST_ENV=dev \
-            REACT_APP_TEST_VERSION=$(node -p "require('./package.json').version") \
-            REACT_APP_TEST_BRANCH=$CIRCLE_BRANCH \
-            REACT_APP_TEST_BUILD_NUMBER=$CIRCLE_BUILD_NUM \
-            REACT_APP_BUILD_URL=$CIRCLE_BUILD_URL \
-            REACT_APP_TEST_DEVELOPER=$CIRCLE_USERNAME \
-            REACT_APP_API_URL=$REACT_APP_API_URL_DEV \
-            node node_modules/react-scripts/scripts/build.js
+          command: bash build.sh dev
       - save_cache:
           paths:
             - node_modules
-          key: v018-dependencies-{{ checksum "package.json" }}
+          key: v019-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
-          root: build
+          root: .
           paths:
-            - .
+            - build
+            - deploy.sh
   react-deploy-dev:
     executor: react-executor
     steps:
+      - attach_workspace:
+          at: .
       - run:
           name: Update
           working_directory: /
@@ -68,29 +58,17 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - attach_workspace:
-          at: build
       - run:
           name: Exit if build directory NOT present after early client build termination
           #from build/ attached above
           command: |
-            if [[ -f build/index.html ]]; then
-              aws s3 sync build/ s3://mxfactorial-react-dev --delete
-            else
-               circleci step halt
+            if [[ ! -f build/index.html ]]; then
+              circleci step halt
             fi
       - run:
-          name: Deploy to S3
+          name: Deploy to S3 and terminate cache
           #from build/ attached above
-          command: aws s3 sync build/ s3://mxfactorial-react-dev --delete
-      - run:
-          name: Change aws configuration
-          command: aws configure set preview.cloudfront true
-      - run:
-          name: Terminate cache for dev distribution
-          command: |
-            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID_DEV \
-            --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
+          command: bash deploy.sh dev
   react-build-test-prod:
     executor: react-executor
     steps:
@@ -105,28 +83,31 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v018-dependencies-{{ checksum "package.json" }}
+          key: v019-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run:
           name: e2e tests
-          command: yarn prod:e2e
-          environment:
-            CI_ENV: prod
+          command: bash test-e2e.sh prod
       - run:
           name: Build web client for prod environment
-          command: yarn run build
+          command: bash build.sh prod
       - save_cache:
           paths:
             - node_modules
-          key: v018-dependencies-{{ checksum "package.json" }}
+          key: v019-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
-          root: build
+          root: .
           paths:
-            - .
+            - build
+            - deploy.sh
   react-deploy-prod:
     executor: react-executor
     steps:
+      - checkout:
+          path: ~/repo
+      - attach_workspace:
+          at: .
       - run:
           name: Update
           working_directory: /
@@ -143,36 +124,17 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
-      - checkout:
-          path: ~/repo
-      - attach_workspace:
-          at: build
       - run:
           name: Exit if build directory NOT present after early client build termination
           #from build/ attached above
           command: |
-            if [[ -f build/index.html ]]; then
-              aws s3 sync build/ s3://mxfactorial-react-prod --delete
-            else
-               circleci step halt
+            if [[ ! -f build/index.html ]]; then
+              circleci step halt
             fi
       - run:
-          name: Deploy to S3
+          name: Deploy to S3 and terminate cache
           #from build/ attached above
-          command: aws s3 sync build/ s3://mxfactorial-react-prod --delete
-      - run:
-          name: Change aws configuration
-          command: aws configure set preview.cloudfront true
-      - run:
-          name: Terminate cache for distribution WITHOUT www prefix
-          command: |
-            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
-            --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
-      - run:
-          name: Terminate cache for distribution WITH www prefix
-          command: |
-            aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_WWW_DISTRIBUTION_ID \
-            --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
+          command: bash deploy.sh prod
   services-dev:
     docker:
       - image: circleci/node:11.3.0-browsers
@@ -202,6 +164,12 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
+      - run:
+          name: Install and configure go
+          working_directory: /
+          command: |
+            . ~/repo/.circleci/scripts/get-go.sh
+            source /home/circleci/.bashrc
       - run:
           name: Install dependencies, archive, then deploy
           command: bash deploy.sh dev
@@ -239,6 +207,12 @@ jobs:
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
       - run:
+          name: Install and configure go
+          working_directory: /
+          command: |
+            . ~/repo/.circleci/scripts/get-go.sh
+            source /home/circleci/.bashrc
+      - run:
           name: Install dependencies, archive, then deploy
           command: bash deploy.sh qa
       - run:
@@ -274,6 +248,12 @@ jobs:
           command: |
             sudo apt-get install -yq python-dev python-pip --fix-missing
             sudo pip install awscli
+      - run:
+          name: Install and configure go
+          working_directory: /
+          command: |
+            . ~/repo/.circleci/scripts/get-go.sh
+            source /home/circleci/.bashrc
       - run:
           name: Install dependencies, archive, then deploy
           command: bash deploy.sh prod
