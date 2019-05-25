@@ -1,4 +1,9 @@
 #!/bin/bash
+if [[ ! $1 ]]; then
+  echo 'must pass environment as argument to this script, e.g. dev, qa, prod'
+  exit 1
+fi
+
 ENV=$1
 
 update_lambda() {
@@ -7,7 +12,7 @@ update_lambda() {
   --zip-file fileb://$(pwd)/graphql-src.zip \
   --region us-east-1 \
   --query 'LastModified')
-  echo "Deployment completed at $DEPLOY_TIME"
+  echo "***Deployment completed at $DEPLOY_TIME"
 }
 
 # build src before deploying

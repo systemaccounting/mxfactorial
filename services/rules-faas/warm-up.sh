@@ -6,12 +6,16 @@ fi
 
 ENV=$1
 
+OBJ='{"transactions":[{"name":"bread","price":"5",'\
+'"quantity":"2","author":"Joe Smith",'\
+'"debitor":"Joe Smith","creditor":"Mary"}]}'
+
 warm_up() {
   aws lambda invoke \
   --region us-east-1 \
   --invocation-type RequestResponse \
-  --function-name measure-lambda-$1 \
-  --payload '{}' \
+  --function-name rules-lambda-$1 \
+  --payload "${OBJ}" \
   invoke.log
 }
 

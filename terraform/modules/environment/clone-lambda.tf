@@ -17,7 +17,7 @@ resource "aws_lambda_function" "clone_tool_lambda" {
 
   # source_code_hash = "${data.archive_file.clone_tool_lambda_provisioner.output_base64sha256}"
   runtime = "nodejs8.10"
-  timeout = 30
+  timeout = 60
   role    = "${aws_iam_role.clone_tool_lambda.arn}"
 
   environment {
@@ -25,6 +25,8 @@ resource "aws_lambda_function" "clone_tool_lambda" {
       # workaround for aws_api_gateway_deployment.transact.invoke_url cycle error:
       # SCHEMA_UPDATE_URL        = "https://${aws_api_gateway_rest_api.schema_update_tool_lambda.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
       SCHEMA_UPDATE_LAMBDA_ARN = "${aws_lambda_function.schema_update_tool_lambda.arn}"
+
+      WARM_UP_LAMBDA_ARN = "${aws_lambda_function.integration_test_data_teardown_lambda.arn}"
     }
   }
 }
@@ -62,7 +64,8 @@ resource "aws_iam_role_policy" "clone_tool_lambda_policy" {
       "Effect": "Allow",
       "Action": "lambda:InvokeFunction",
       "Resource": [
-        "${aws_lambda_function.schema_update_tool_lambda.arn}"
+        "${aws_lambda_function.schema_update_tool_lambda.arn}",
+        "${aws_lambda_function.integration_test_data_teardown_lambda.arn}"
       ]
     },
     {
@@ -78,11 +81,3 @@ resource "aws_iam_role_policy" "clone_tool_lambda_policy" {
 }
 EOF
 }
-
-# resource "null_resource" "clone_tool_lambda_provisioner" {
-#   provisioner "local-exec" {
-#     working_dir = "../../../services/rules-faas"
-#     command     = "yarn install"
-#   }
-# }
-
