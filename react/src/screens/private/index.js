@@ -4,7 +4,6 @@ import { compose } from 'react-apollo'
 import { Switch, Route } from 'react-router-dom'
 
 import withUser from 'decorators/withUser'
-import withTransactions from 'decorators/withTransactions'
 import HomeScreen from '../HomeScreen'
 import RequestScreen from '../RequestScreen'
 import RequestDetailScreen from '../RequestDetailScreen'
@@ -58,7 +57,4 @@ export class PrivateRoutes extends React.Component {
   }
 }
 
-export default compose(
-  withTransactions,
-  withUser
-)(PrivateRoutes)
+export default compose(withUser)(PrivateRoutes)
