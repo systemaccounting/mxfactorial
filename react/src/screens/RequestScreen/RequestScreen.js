@@ -1,4 +1,5 @@
 import React from 'react'
+import T from 'prop-types'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
@@ -6,14 +7,16 @@ import MainLayout from 'components/MainLayout'
 import TypeSwitch from './components/TypeSwitch'
 import Paper from 'components/Paper'
 import { Text, Small } from 'components/Typography'
+
 import { fromNow } from 'utils/date'
+import { TransactionType } from 'types';
 
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
 `
 
-class RequestScreen extends React.Component {
+export default class RequestScreen extends React.Component {
   state = {
     user: null,
     requests: {
@@ -36,18 +39,18 @@ class RequestScreen extends React.Component {
 
   render() {
     const { status, requests } = this.state
-    const { user } = this.props
+    const { user, transactions } = this.props
     const requestList =
       status === 'active' ? requests.active : requests.rejected
     return (
       <MainLayout>
         <Wrapper data-id="request-screen-wrapper">
           <TypeSwitch active={status} onSwitch={this.handleSwitch} />
-          {requestList.map(request => {
+          {transactions.map(request => {
             const isCredit = request.creditor === user.username
             const amount = request.price * request.quantity
             return (
-              <Link key={request.timeuuid} to={`requests/${request.timeuuid}`}>
+              <Link key={request.id} to={`requests/${request.id}`}>
                 <Paper data-id="requestItemIndicator">
                   <Small>
                     {fromNow(request.expiration_time)}
@@ -78,4 +81,10 @@ class RequestScreen extends React.Component {
   }
 }
 
-export default RequestScreen
+RequestScreen.propTypes = {
+  transactions: T.arrayOf(TransactionType)
+}
+
+RequestScreen.defaultProps = {
+  transactions: []
+}

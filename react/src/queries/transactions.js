@@ -18,6 +18,7 @@ export const createTransaction = gql`
 export const fetchTransactions = gql`
   query {
     transactions {
+      id
       name
       quantity
       price
@@ -26,6 +27,7 @@ export const fetchTransactions = gql`
       creditor
       creditor_approval_time
       debitor_approval_time
+      expiration_time
     }
   }
 `
