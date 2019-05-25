@@ -89,7 +89,7 @@ data "aws_subnet" "rds_cloud9" {
 
 ###### Integration test data teardown lambda ######
 resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
-  filename      = "${data.archive_file.integration_test_data_teardown_lambda_provisioner.output_path}"
+  filename      = "../common-bin/rds/teardown-src.zip"
   function_name = "delete-faker-rds-transactions-lambda-${var.environment}"
   description   = "Integration test data teardown lambda"
 
@@ -98,13 +98,14 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
   # exported in that file.
   handler = "index.handler"
 
-  source_code_hash = "${base64sha256(file("../common-bin/rds/teardown-lambda.zip"))}"
+  source_code_hash = "${filebase64sha256("../common-bin/rds/teardown-src.zip")}"
 
   # source_code_hash = "${data.archive_file.integration_test_data_teardown_lambda_provisioner.output_base64sha256}"
 
   runtime = "nodejs8.10"
+  timeout = 30
   # imported from lambda.tf
-  role = "${aws_iam_role.mxfactorial_graphql_lambda_role.arn}"
+  role = "${aws_iam_role.test_data_teardown_lambda_role.arn}"
   vpc_config {
     subnet_ids = ["${data.aws_subnet_ids.default.ids}"]
 
@@ -122,17 +123,53 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
   }
 }
 
-data "archive_file" "integration_test_data_teardown_lambda_provisioner" {
-  type        = "zip"
-  source_dir  = "../common-bin/rds"
-  output_path = "../common-bin/rds/teardown-lambda.zip"
+resource "aws_iam_role" "test_data_teardown_lambda_role" {
+  name = "test-data-teardown-lambda-role-${var.environment}"
 
-  depends_on = ["null_resource.integration_test_data_teardown_lambda_provisioner"]
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": "sts:AssumeRole",
+      "Principal": {
+        "Service": "lambda.amazonaws.com"
+      },
+      "Effect": "Allow",
+      "Sid": ""
+    }
+  ]
+}
+EOF
 }
 
-resource "null_resource" "integration_test_data_teardown_lambda_provisioner" {
-  provisioner "local-exec" {
-    working_dir = "../common-bin/rds"
-    command     = "yarn install"
-  }
+# policy for lambda to create logs and access rds
+resource "aws_iam_role_policy" "test_data_teardown_lambda_policy" {
+  name = "test-data-teardown-lambda-policy-${var.environment}"
+  role = "${aws_iam_role.test_data_teardown_lambda_role.id}"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DeleteNetworkInterface"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "rds_access_for_test_data_teardown_lambda" {
+  role       = "${aws_iam_role.test_data_teardown_lambda_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }

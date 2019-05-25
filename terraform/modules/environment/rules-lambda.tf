@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "rules_service_lambda" {
-  filename = "../../../services/rules-faas/rules-lambda.zip"
+  filename = "../../../services/rules-faas/rules-src.zip"
 
   # filename      = "${data.archive_file.rules_service_lambda_provisioner.output_path}"
   function_name = "rules-lambda-${var.environment}"
@@ -10,7 +10,7 @@ resource "aws_lambda_function" "rules_service_lambda" {
   # exported in that file.
   handler = "index.handler"
 
-  source_code_hash = "${base64sha256(file("../../../services/rules-faas/rules-lambda.zip"))}"
+  source_code_hash = "${base64sha256(file("../../../services/rules-faas/rules-src.zip"))}"
   layers           = ["${aws_lambda_layer_version.rules_layer.arn}"]
 
   # source_code_hash = "${data.archive_file.rules_service_lambda_provisioner.output_base64sha256}"

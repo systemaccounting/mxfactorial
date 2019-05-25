@@ -312,18 +312,10 @@ resource "aws_cognito_user_pool_client" "client" {
   ]
 }
 
-# prior art: https://github.com/hashicorp/terraform/issues/8344#issuecomment-265548941
-########## Create a zip file with auto-approve Lambda code for Cognito ##########
-data "archive_file" "cognito_auto_approve_lambda_zip" {
-  type        = "zip"
-  source_dir  = "../common-bin/cognito/auto-confirm"
-  output_path = "../common-bin/cognito/cognitoAutoApproveLambda.zip"
-}
-
 ########## Create an auto-approve Lambda function for Cognito ##########
 resource "aws_lambda_function" "cognito_account_auto_confirm" {
-  filename         = "../common-bin/cognito/cognitoAutoApproveLambda.zip"
-  source_code_hash = "${data.archive_file.cognito_auto_approve_lambda_zip.output_base64sha256}"
+  filename         = "../common-bin/cognito/auto-confirm/auto-confirm-src.zip"
+  source_code_hash = "${filebase64sha256("../common-bin/cognito/auto-confirm/auto-confirm-src.zip")}"
   function_name    = "cognito-account-auto-confirm-${var.environment}"
   role             = "${aws_iam_role.cognito_account_auto_confirm_lambda_role.arn}"
   description      = "Auto confirms new Cognito accounts"
@@ -397,8 +389,8 @@ data "archive_file" "delete_faker_account_lambda_zip" {
 
 ########## Create a function to delete e2e Faker accounts in Cognito ##########
 resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
-  filename         = "../common-bin/cognito/deleteFakerAccounts.zip"
-  source_code_hash = "${data.archive_file.delete_faker_account_lambda_zip.output_base64sha256}"
+  filename         = "../common-bin/cognito/delete-faker-accounts/delete-faker-src.zip"
+  source_code_hash = "${filebase64sha256("../common-bin/cognito/delete-faker-accounts/delete-faker-src.zip")}"
   function_name    = "delete-faker-cognito-accounts-lambda-${var.environment}"
   role             = "${aws_iam_role.cognito_account_auto_confirm_lambda_role.arn}"
   description      = "Deletes Faker accounts created during e2e testing"
