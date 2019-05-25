@@ -176,7 +176,7 @@ jobs:
       - run:
           name: Test dev endpoints
           working_directory: ~/repo/services/graphql-faas
-          command: yarn test
+          command: bash test-all.sh dev
   services-qa:
     docker:
       - image: circleci/node:11.3.0-browsers
@@ -218,7 +218,7 @@ jobs:
       - run:
           name: Test qa endpoints
           working_directory: ~/repo/services/graphql-faas
-          command: yarn test:dev
+          command: bash test-all.sh qa
   services-prod:
     docker:
       - image: circleci/node:11.3.0-browsers
