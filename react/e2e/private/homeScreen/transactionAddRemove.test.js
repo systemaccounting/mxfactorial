@@ -18,6 +18,7 @@ const getInputByValue = async value =>
 
 describe('transaction add remove (milk, honey, bread)', () => {
   it('adds three items', async () => {
+    await page.waitFor(500)
     expect(await getTotal()).toEqual(0)
 
     await addTransaction(page, milk)
@@ -31,7 +32,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     await addTransaction(page, bread, true) // draft
     // 80 + 9%
     expect(await getTotal()).toEqual(87.2)
-  })
+  }, 10000)
 
   it('item names should be corect', async () => {
     expect(await getInputByValue('milk')).toEqual(1)
@@ -63,9 +64,11 @@ describe('transaction add remove (milk, honey, bread)', () => {
     // delete milk
     await deleteButton.click()
     expect(await getTotal()).toEqual(65.4)
-
+    await page.waitFor(500)
     expect(await getInputByValue('milk')).toEqual(0)
+    await page.waitFor(500)
     expect(await getInputByValue('honey')).toEqual(1)
+    await page.waitFor(500)
     expect(await getInputByValue('bread')).toEqual(1)
   })
 
