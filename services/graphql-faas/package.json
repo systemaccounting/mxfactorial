@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "LOCAL_ENV=dev AWS_REGION=us-east-1 jest --detectOpenHandles"
+    "test": "AWS_REGION=us-east-1 jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
