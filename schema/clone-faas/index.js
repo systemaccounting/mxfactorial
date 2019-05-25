@@ -10,6 +10,19 @@ const WRITABLE_LAMBDA_PATH = '/tmp/mxfactorial/schema/diffs'
 const ZIP_FILENAME = 'diffs.zip'
 
 exports.handler = async (event) => {
+
+  // this condition repurposes this lambda to invoke another
+  // lambda in a vpc, which warms up serverless aurora
+  if (event.warmUp) {
+    let warmUpParams = {
+      FunctionName: process.env.WARM_UP_LAMBDA_ARN,
+      Payload: JSON.stringify({})
+    }
+    const warmUpLambdaResponse = await lambda.invoke(warmUpParams).promise()
+    return JSON.parse(warmUpLambdaResponse.Payload)
+  }
+  // serverless aurora warm up ends here
+
   const BRANCH = event.branch ? event.branch : 'develop'
   const SCHEMA_CHANGE_COMMAND = event.command
 
