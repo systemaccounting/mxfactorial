@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test:prod": "LOCAL_ENV=prod node tests/utils/warmUp.js && LOCAL_ENV=prod AWS_REGION=us-east-1 jest --detectOpenHandles",
-    "test:qa": "LOCAL_ENV=qa node tests/utils/warmUp.js && LOCAL_ENV=qa AWS_REGION=us-east-1 jest --detectOpenHandles",
-    "test:dev": "LOCAL_ENV=dev node tests/utils/warmUp.js && LOCAL_ENV=dev AWS_REGION=us-east-1 jest --detectOpenHandles"
+    "test": "LOCAL_ENV=dev AWS_REGION=us-east-1 jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
