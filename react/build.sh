@@ -9,16 +9,16 @@ if [[ $CI ]]; then
   UPPERCASE_ENV=$(echo $ENV | awk '{print toupper($0)}')
   CI_VAR_FILE_NAME="${UPPERCASE_ENV}"_REACT_VARS
   ENV_FILE=$(echo "${!CI_VAR_FILE_NAME//[[:space:]]/}" | base64 --decode --ignore-garbage | tr -d '\0')
-  if [[ $ENV == 'dev' ]]; then
-    ENV_FILE="${ENV_FILE} REACT_APP_HOST_ENV=dev"
-    ENV_FILE="${ENV_FILE} REACT_APP_TEST_VERSION=$(jq -r '.version' package.json)"
-    ENV_FILE="${ENV_FILE} REACT_APP_TEST_BRANCH=${CIRCLE_BRANCH}"
-    ENV_FILE="${ENV_FILE} REACT_APP_TEST_BUILD_NUMBER=${CIRCLE_BUILD_NUM}"
-    ENV_FILE="${ENV_FILE} REACT_APP_BUILD_URL=${CIRCLE_BUILD_URL}"
-    ENV_FILE="${ENV_FILE} REACT_APP_TEST_DEVELOPER=${CIRCLE_USERNAME}"
-  fi
   echo "${ENV_FILE}" > .env.current
   chmod u+r .env.current
+  if [[ $ENV == 'dev' ]]; then
+    echo 'REACT_APP_HOST_ENV=dev' >> .env.current
+    echo "REACT_APP_TEST_VERSION=$(jq -r '.version' package.json)" >> .env.current
+    echo "REACT_APP_TEST_BRANCH=${CIRCLE_BRANCH}" >> .env.current
+    echo "REACT_APP_TEST_BUILD_NUMBER=${CIRCLE_BUILD_NUM}" >> .env.current
+    echo "REACT_APP_BUILD_URL=${CIRCLE_BUILD_URL}" >> .env.current
+    echo "REACT_APP_TEST_DEVELOPER=${CIRCLE_USERNAME}" >> .env.current
+  fi
   yarn run build:env
   rm .env.current
 else
