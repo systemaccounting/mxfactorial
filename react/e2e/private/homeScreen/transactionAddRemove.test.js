@@ -151,6 +151,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     await addTransaction(page, { name: 'milk', price: '2.00', quantity: '3' })
     await addTransaction(page, { name: 'honey', price: '4', quantity: '4' })
     await addTransaction(page, { name: 'pasta', price: '5', quantity: '5' })
+    await page.waitFor(500)
     expect(await getTotal()).toEqual(51.23)
   })
 })
