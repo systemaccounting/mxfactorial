@@ -16,8 +16,8 @@ export const createTransaction = gql`
 `
 
 export const fetchTransactions = gql`
-  query {
-    transactions {
+  query FetchTransactions($user: String) {
+    transactions(user: $user) {
       id
       name
       quantity
