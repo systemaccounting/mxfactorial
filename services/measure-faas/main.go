@@ -72,7 +72,7 @@ func handleLambdaEvent(event lambdaEvent) (string, error) {
 	// if request empty, or if id property empty
 	if (lambdaEvent{} == event) || len(event.ID) == 0 {
 		queryString := "(SELECT * FROM transactions ORDER BY id DESC LIMIT ?) ORDER BY id;"
-		return getLast2Transactions(db, queryString, 2)
+		return getLast2Transactions(db, queryString, 20)
 	}
 
 	// cast event.ID to int
