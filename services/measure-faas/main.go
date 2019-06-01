@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"context"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
@@ -14,6 +15,7 @@ import (
 
 type lambdaEvent struct {
 	ID string `json:"id"`
+	User string `json:"user"`
 }
 
 type transaction struct {
@@ -56,7 +58,7 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ns.String)
 }
 
-func handleLambdaEvent(event lambdaEvent) (string, error) {
+func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 	db, err := sql.Open(
 		"mysql",
 		fmt.Sprintf(
@@ -71,7 +73,8 @@ func handleLambdaEvent(event lambdaEvent) (string, error) {
 
 	// if request empty, or if id property empty
 	if (lambdaEvent{} == event) || len(event.ID) == 0 {
-		queryString := "(SELECT * FROM transactions WHERE creditor='Person1' OR debitor='Person1' AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL) ORDER BY id DESC LIMIT ?) ORDER BY id desc;"
+		queryString := fmt.Sprintf("(SELECT * FROM transactions WHERE creditor='%s' OR debitor='%s' AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL) ORDER BY id DESC LIMIT ?) ORDER BY id desc;", event.User, event.User)
+		fmt.Println(queryString)
 		return getLast2Transactions(db, queryString, 20)
 	}
 
