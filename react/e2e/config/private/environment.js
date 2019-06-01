@@ -10,7 +10,7 @@ class CustomEnvironment extends PuppeteerEnvironment {
     // Your setup
     if (!isLoggedIn) {
       const { page } = this.global
-      await login(page)
+      await login()
       isLoggedIn = true
     }
   }
