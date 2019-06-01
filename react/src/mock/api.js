@@ -27,13 +27,7 @@ export const approveRequest = password =>
     }
   })
 
-export const fetchRequest = uuid =>
-  Promise.resolve(
-    R.pipe(
-      R.filter(item => item.timeuuid === uuid),
-      R.head
-    )(requests)
-  )
+export const fetchRequest = uuid => Promise.resolve(R.pipe(R.head)(requests))
 
 export const fetchHistoryItem = timeuuid =>
   Promise.resolve(R.find(R.propEq({ timeuuid }))(history))

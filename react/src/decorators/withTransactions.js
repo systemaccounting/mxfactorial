@@ -2,7 +2,8 @@ import { graphql } from 'react-apollo'
 import { fetchTransactions } from 'queries/transactions'
 
 export default graphql(fetchTransactions, {
-  props: ({ data: { transactions } }) => ({
-    transactions
+  props: ({ data: { transactions, loading } }) => ({
+    transactions,
+    isTransactionsLoading: loading
   })
 })

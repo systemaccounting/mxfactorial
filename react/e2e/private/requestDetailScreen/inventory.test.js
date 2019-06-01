@@ -19,8 +19,9 @@ const selectors = {
 }
 
 beforeAll(async () => {
-  await page.goto(REQUEST_URL)
+  await page.goto(REQUEST_URL, { waitUntil: 'networkidle0' })
   await page.waitForSelector(activeButtonSelector)
+  // const el = await page.waitForSelector('.transactions-loaded')
   const link = await page.$('[data-id="requestItemIndicator"]')
   await link.click()
 })
