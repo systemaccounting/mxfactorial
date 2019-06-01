@@ -71,7 +71,7 @@ func handleLambdaEvent(event lambdaEvent) (string, error) {
 
 	// if request empty, or if id property empty
 	if (lambdaEvent{} == event) || len(event.ID) == 0 {
-		queryString := "(SELECT * FROM transactions ORDER BY id DESC LIMIT ?) ORDER BY id;"
+		queryString := "(SELECT * FROM transactions WHERE creditor='Person1' OR debitor='Person1' AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL) ORDER BY id DESC LIMIT ?) ORDER BY id desc;"
 		return getLast2Transactions(db, queryString, 20)
 	}
 
