@@ -1,7 +1,7 @@
 const { AUTH_URL } = require('../constants')
 
 const auth = async (login = 'JoeSmith', password = 'password') => {
-  page.goto(AUTH_URL)
+  await page.goto(AUTH_URL)
   await page.waitForSelector('button[data-id="login"]')
   const accountInput = await page.$('[name=account]')
   await accountInput.type(login)

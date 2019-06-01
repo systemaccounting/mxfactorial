@@ -44,9 +44,6 @@ export class UserProvider extends React.Component {
 
   render() {
     const { user, userLoading } = this.state
-    if (userLoading) {
-      return null
-    }
     return (
       <UserContext.Provider
         value={{
