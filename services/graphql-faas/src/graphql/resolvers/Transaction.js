@@ -23,12 +23,16 @@ const AddTransactionResolver = args => {
     })
 }
 
-const GetTransactionResolver = arg => {
-  let params = {}
-  params.FunctionName = process.env.MEASURE_LAMBDA_ARN
-  let payload = {}
-  payload.id = arg
-  params.Payload = JSON.stringify(payload)
+const GetTransactionResolver = args => {
+  if (!args.user) {
+    console.log(`Please specify user`)
+    return `Please specify user`
+  }
+
+  let params = {
+    FunctionName: process.env.MEASURE_LAMBDA_ARN,
+    Payload: JSON.stringify(args)
+  }
   return lambda
     .invoke(params)
     .promise()
