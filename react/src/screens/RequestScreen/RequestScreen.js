@@ -51,7 +51,7 @@ export default class RequestScreen extends React.Component {
             const amount = request.price * request.quantity
             return (
               <Link key={request.id} to={`requests/${request.id}`}>
-                <Paper data-id="requestItemIndicator">
+                <Paper data-id="requestItemIndicator" data-request-id={request.id}>
                   <Small>
                     {fromNow(request.expiration_time)}
                     {', '}
