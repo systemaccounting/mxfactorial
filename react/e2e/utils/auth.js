@@ -1,12 +1,9 @@
 const { AUTH_URL } = require('../constants')
 
 const auth = async (login = 'JoeSmith', password = 'password') => {
-  await page.goto(AUTH_URL)
-  await page.waitForSelector('button[data-id="login"]')
-  const accountInput = await page.$('[name=account]')
-  await accountInput.type(login)
-  const passwordInput = await page.$('[name=password]')
-  await passwordInput.type(password)
+  await page.goto(AUTH_URL, { waitUntil: 'networkidle2' })
+  await page.type('[name=account]', login)
+  await page.type('[name=password]', password)
   await page.keyboard.press('Enter')
   await page.waitForNavigation({ waitUntil: 'networkidle2' })
 }
