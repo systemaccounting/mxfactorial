@@ -7,7 +7,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await login()
+  await login(page)
 })
 
 describe('Mobile Menu Navigation', () => {
@@ -43,7 +43,7 @@ describe('Mobile Menu Navigation', () => {
   })
 
   it('signs out', async () => {
-    await logout()
+    await logout(page)
     expect(page.url()).toEqual(`${BASE_URL}/auth`)
   })
 })

@@ -16,7 +16,7 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   await page.goto(BASE_URL)
-  page = await login()
+  page = await login(page)
   await page.goto(REQUEST_URL)
   await page.waitForSelector(activeButtonSelector)
 })

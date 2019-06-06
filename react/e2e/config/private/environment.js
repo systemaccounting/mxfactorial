@@ -10,16 +10,7 @@ class CustomEnvironment extends PuppeteerEnvironment {
     // Your setup
     if (!isLoggedIn) {
       const { page } = this.global
-
-      await page.goto(AUTH_URL)
-      await page.waitForSelector('button[data-id="login"]')
-      const accountInput = await page.$('[name=account]')
-      await accountInput.type('JoeSmith')
-      const passwordInput = await page.$('[name=password]')
-      await passwordInput.type('password')
-      await page.keyboard.press('Enter')
-      await page.waitForNavigation({ waitUntil: 'networkidle2' })
-
+      await login(page)
       isLoggedIn = true
     }
   }
