@@ -76,7 +76,10 @@ describe('transaction request', async () => {
     await page2.waitForSelector(requestItemSelector);
     const lastItemId2 = await page2.$eval(requestItemSelector, e => e.getAttribute('data-request-id'));
 
+    await page2.close()
+    await login(page)
+
     // Assert last transaction ID has changed
     expect(lastItemId1).not.toEqual(lastItemId2)
-  }, 1120000)
+  }, 30000)
 })

@@ -18,14 +18,12 @@ const addTransaction = async (
     await page.type(transactionAddPriceSelector, price)
     // Blur input to fire fetchRules() request
     await page.$eval(transactionAddPriceSelector, e => e.blur())
-    page.waitForNavigation({ waitUntil: 'networkidle0' })
   }
 
   if (quantity) {
     await page.type(transactionAddQuantitySelector, quantity)
     // Blur input to fire fetchRules() request
     await page.$eval(transactionAddQuantitySelector, e => e.blur())
-    page.waitForNavigation({ waitUntil: 'networkidle0' })
   }
 
   if (!draft) {

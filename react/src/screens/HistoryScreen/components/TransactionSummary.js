@@ -11,6 +11,7 @@ function TransactionSummary({ transaction, isCredit }) {
   const transactionTime = maxDate([cr_time, db_time])
   const total = price * quantity
   const amount = isCredit ? total * -1 : total
+
   return (
     <Paper data-id="historyItemIndicator">
       <Small>
