@@ -9,7 +9,7 @@ import Paper from 'components/Paper'
 import { Text, Small } from 'components/Typography'
 
 import { fromNow } from 'utils/date'
-import { TransactionType } from 'types';
+import { TransactionType } from 'types'
 
 const Wrapper = styled.div`
   display: flex;
@@ -51,7 +51,10 @@ export default class RequestScreen extends React.Component {
             const amount = request.price * request.quantity
             return (
               <Link key={request.id} to={`requests/${request.id}`}>
-                <Paper data-id="requestItemIndicator" data-request-id={request.id}>
+                <Paper
+                  data-id="requestItemIndicator"
+                  data-request-id={request.id}
+                >
                   <Small>
                     {fromNow(request.expiration_time)}
                     {', '}
