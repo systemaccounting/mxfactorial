@@ -5,7 +5,7 @@ const TAX_TRANSACTION_NAME = '9% state sales tax'
 const transaction_items = [
     {
       name: 'Milk',
-      price: '4.43',
+      price: '4.4',
       quantity: '2',
       author: 'Joe Smith',
       debitor: 'Joe Smith',
@@ -51,37 +51,11 @@ const transaction_items = [
     debitor: 'Joe Smith',
     creditor: 'Mary',
     },
-  
-    // {
-    //   name: '9% Sales Tax',
-    //   price: '7.02',
-    //   quantity: '10',
-    //   author: 'Joe Smith',
-    //   debitor: 'Joe Smith',
-    //   creditor: 'StateOfCalifornia'
-    // },
-    // {
-    //   name: '9% Sales Tax',
-    //   price: '7.02',
-    //   quantity: '10',
-    //   author: 'Joe Smith',
-    //   debitor: 'Joe Smith',
-    //   creditor: 'StateOfCalifornia'
-    // },
-    // {
-    //   name: '9% Sales Tax',
-    //   price: '7.02',
-    //   quantity: '10',
-    //   author: 'Joe Smith',
-    //   debitor: 'Joe Smith',
-    //   creditor: 'StateOfCalifornia'
-    // }
 ]
 
-const with_sales_tax = applyRules( uuidv1(), transaction_items )
+const with_sales_tax = applyRules(uuidv1(), transaction_items)
 
 describe('Apply Rules should verify', () => {
-
     it('all non-rule objects have fixed number of properties', () => {
         let length = Object.keys(with_sales_tax[0]).length
         
@@ -93,8 +67,6 @@ describe('Apply Rules should verify', () => {
     })
 
     it('decimal precision is fixed to thousandths', () => {
-        let isOK = false
-        console.log(with_sales_tax)
         with_sales_tax.forEach( item => {
             if( item.name == TAX_TRANSACTION_NAME ){
                 expect( item.price ).toEqual( parseFloat(item.price).toFixed(3) )
@@ -106,9 +78,9 @@ describe('Apply Rules should verify', () => {
         let items = with_sales_tax.filter( item => {
             return item.name !== TAX_TRANSACTION_NAME
         });
-        
+
         for(i = 0; i < items.length; i++){
-            expect(items[i].author ).toEqual(transaction_items[i].author);
+            expect(items[i].author ).toEqual(transaction_items[i].author)
         }
     });
 
