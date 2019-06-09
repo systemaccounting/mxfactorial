@@ -107,4 +107,19 @@ describe('Apply Rules should verify', () => {
         })
         expect( isOK ).toBeTruthy()
     })
+    it('removes initial tax objects', () => {
+        const noTaxObject = removeSalesObjects();
+        let initialLength = transactionItems.length
+        let finalLength = initialLength - (initialLength - noTaxObject.length)
+        expect( noTaxObject.length ).toBe( finalLength )
+      });
+    
+      it('checks debitor name match', () => {
+        let debitor = transactionItems.filter( name => {
+            return name.name !== '9% Sales Tax'
+        });
+        debitor.forEach( name => {
+          expect( name.author ).toBeTruthy(transactionItems.author);
+        });
+      });
 })
