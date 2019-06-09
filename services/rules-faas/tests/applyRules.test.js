@@ -1,9 +1,11 @@
-import { applyRules }  from '../src/applyRules'
+const applyRules  =  require('../src/applyRules') 
+const uuidv1 = require('uuid/v1')
+const TAX_TRANSACTION_NAME = '9% state sales tax'
 
 const transaction_items = [
     {
       name: 'Milk',
-      price: '5',
+      price: '4.43',
       quantity: '2',
       author: 'Joe Smith',
       debitor: 'Joe Smith',
@@ -11,7 +13,7 @@ const transaction_items = [
     },
     {
       name: 'Bread',
-      price: '4',
+      price: '6.25',
       quantity: '5',
       author: 'Joe Smith',
       debitor: 'Joe Smith',
@@ -19,7 +21,7 @@ const transaction_items = [
     },
     {
       name: 'Vitamins',
-      price: '24',
+      price: '24.23',
       quantity: '1',
       author: 'Joe Smith',
       debitor: 'Joe Smith',
@@ -27,7 +29,7 @@ const transaction_items = [
     },
     {
       name: 'NY Steak',
-      price: '12',
+      price: '12.54',
       quantity: '2',
       author: 'Joe Smith',
       debitor: 'Joe Smith',
@@ -35,11 +37,19 @@ const transaction_items = [
     },
     {
       name: 'Grapes',
-      price: '5',
+      price: '5.223',
       quantity: '1',
       author: 'Joe Namath',
       debitor: 'Joe Smith',
       creditor: 'Mary'
+    },
+    {
+    name: 'Paper Towels',
+    price: '12.3348',
+    quantity: '1',
+    author: 'Joe Namath',
+    debitor: 'Joe Smith',
+    creditor: 'Mary',
     },
   
     // {
@@ -68,58 +78,45 @@ const transaction_items = [
     // }
 ]
 
-const with_sales_tax = applyRules( transaction_items )
+const with_sales_tax = applyRules( uuidv1(), transaction_items )
 
 describe('Apply Rules should verify', () => {
-    it('key values are only type String', () => {
-        let isOK = true;
-        let length = with_sales_tax.length
+
+    it('all non-rule objects have fixed number of properties', () => {
+        let length = Object.keys(with_sales_tax[0]).length
         
-        for( i = 0; i < length; i++){
-            if( typeof Object.keys(with_sales_tax) !== 'string'){
-                isOK = false
-                break
-            }
-        }
-        expect(isOK).toBeTruthy()
-    })
-
-    it('all objects have fixed number of properties', () => {
-    let length = with_sales_tax.length
-    let isOK = true
-
-    for( i = 0; i < with_sales_tax.length; i++){
-        if( Object.keys(with_sales_tax[i]).length !== length ){
-            isOK = false
-            break
-            }
-    }
-
-    expect( isOK ).toBeTruthy()
+        with_sales_tax.forEach( item => { 
+            if(item.name !== TAX_TRANSACTION_NAME){
+                expect(Object.keys(item).length).toEqual(length)
+            } 
+        })
     })
 
     it('decimal precision is fixed to thousandths', () => {
-        let isOK = true
+        let isOK = false
+        console.log(with_sales_tax)
         with_sales_tax.forEach( item => {
-            if( item.price <= item.price.toFixed(3) ){
-                isOK = false
+            if( item.name == TAX_TRANSACTION_NAME ){
+                expect( item.price ).toEqual( parseFloat(item.price).toFixed(3) )
             }
         })
-        expect( isOK ).toBeTruthy()
     })
-    it('removes initial tax objects', () => {
-        const noTaxObject = removeSalesObjects();
-        let initialLength = transactionItems.length
-        let finalLength = initialLength - (initialLength - noTaxObject.length)
-        expect( noTaxObject.length ).toBe( finalLength )
-      });
     
-      it('checks debitor name match', () => {
-        let debitor = transactionItems.filter( name => {
-            return name.name !== '9% Sales Tax'
+    it('checks debitor name match', () => {
+        let items = with_sales_tax.filter( item => {
+            return item.name !== TAX_TRANSACTION_NAME
         });
-        debitor.forEach( name => {
-          expect( name.author ).toBeTruthy(transactionItems.author);
-        });
-      });
+        
+        for(i = 0; i < items.length; i++){
+            expect(items[i].author ).toEqual(transaction_items[i].author);
+        }
+    });
+
+    it('checks rule generated object has rule ID', () => {
+        with_sales_tax.forEach( item => {
+            if(item.name === TAX_TRANSACTION_NAME){
+                expect(Object.keys(item)).toContain('rule_instance_id')
+            }
+        })
+    })
 })
