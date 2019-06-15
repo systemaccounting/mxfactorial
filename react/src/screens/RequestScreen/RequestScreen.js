@@ -38,10 +38,8 @@ export default class RequestScreen extends React.Component {
   handleSwitch = status => () => this.setState({ status })
 
   render() {
-    const { status, requests } = this.state
+    const { status } = this.state
     const { user, transactions } = this.props
-    const requestList =
-      status === 'active' ? requests.active : requests.rejected
     return (
       <MainLayout>
         <Wrapper data-id="request-screen-wrapper">
