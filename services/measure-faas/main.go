@@ -1,20 +1,20 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
-	"context"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type lambdaEvent struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
 	User string `json:"user"`
 }
 
@@ -72,8 +72,13 @@ func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 	}
 
 	if event.User != "" {
-		queryString := fmt.Sprintf("(SELECT * FROM transactions WHERE creditor='%s' OR debitor='%s' AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL) ORDER BY id DESC LIMIT ?) ORDER BY id desc;", event.User, event.User)
-		fmt.Println(queryString)
+		initQuery := `
+		(SELECT * FROM transactions
+		WHERE creditor='%s' OR debitor='%s'
+		AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL)
+		ORDER BY id DESC LIMIT ?)
+		ORDER BY id desc;`
+		queryString := fmt.Sprintf(initQuery, event.User, event.User)
 		return getLastNTransactions(db, queryString, 20)
 	}
 
