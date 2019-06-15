@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func getLast2Transactions(db *sql.DB, queryString string, limit int) (string, error) {
+func getLastNTransactions(db *sql.DB, queryString string, limit int) (string, error) {
 
 	rows, err := db.Query(queryString, limit)
 

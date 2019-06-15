@@ -71,11 +71,16 @@ func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 		log.Panic(err)
 	}
 
-	// if request empty, or if id property empty
-	if (lambdaEvent{} == event) || len(event.ID) == 0 {
+	if event.User != "" {
 		queryString := fmt.Sprintf("(SELECT * FROM transactions WHERE creditor='%s' OR debitor='%s' AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL) ORDER BY id DESC LIMIT ?) ORDER BY id desc;", event.User, event.User)
 		fmt.Println(queryString)
-		return getLast2Transactions(db, queryString, 20)
+		return getLastNTransactions(db, queryString, 20)
+	}
+
+	// if request empty, or if id property empty
+	if (lambdaEvent{} == event) || len(event.ID) == 0 {
+		queryString := "(SELECT * FROM transactions ORDER BY id DESC LIMIT ?) ORDER BY id;"
+		return getLastNTransactions(db, queryString, 2)
 	}
 
 	// cast event.ID to int
