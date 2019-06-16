@@ -1,6 +1,7 @@
 const applyRules = require('../src/applyRules')
 const uuidv1 = require('uuid/v1')
 const TAX_TRANSACTION_NAME = '9% state sales tax'
+jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn())
 
 const transaction_items = [
   {
