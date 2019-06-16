@@ -83,11 +83,8 @@ describe('Apply Rules returns', () => {
 
   it('checks debitor name match', () => {
     let withSalesTax = applyRules(uuidv1(), transaction_items)
-    let userGeneratedItems = withSalesTax.filter(item => {
-      return item.name !== TAX_TRANSACTION_NAME
-    })
-    for (i = 0; i < userGeneratedItems.length; i++) {
-      expect(userGeneratedItems[i].debitor).toEqual('JoeSmith')
+    for (i = 0; i < withSalesTax.length; i++) {
+      expect(withSalesTax[i].debitor).toEqual('JoeSmith')
     }
   })
 
