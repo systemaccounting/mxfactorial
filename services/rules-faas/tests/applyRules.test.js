@@ -69,7 +69,6 @@ describe('Apply Rules returns', () => {
     let ruleGeneratedObject = withSalesTax.filter(item => {
       return item.name === TAX_TRANSACTION_NAME
     })[0]
-    console.log('ruleGenItem.price:' + ruleGeneratedObject.price)
     expect(ruleGeneratedObject.price).toEqual('9.623')
   })
 
@@ -108,7 +107,6 @@ describe('Apply Rules returns', () => {
     let userGeneratedItemsWithRuleID = userGeneratedItems.filter(item => {
       return Object.keys(item) == 'rule_instance_id'
     })
-    console.log('length', typeof userGeneratedItemsWithRuleID.length)
     expect(userGeneratedItemsWithRuleID).toHaveLength(0)
   })
 })
