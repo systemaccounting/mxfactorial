@@ -78,7 +78,7 @@ describe('Apply Rules returns', () => {
     let userGeneratedObjectCount = withSalesTax.filter(item => {
       return item.name !== TAX_TRANSACTION_NAME
     }).length
-    expect(withSalesTax).toHaveLength(userGeneratedObjectCount + 3)
+    expect(withSalesTax).toHaveLength(userGeneratedObjectCount + 1)
   })
 
   it('checks debitor name match', () => {
