@@ -47,25 +47,28 @@ describe('transaction request', async () => {
 
   it('displays stored transaction', async () => {
     // Login as Person2
-    const page2 = await browser.newPage();
-    await login(page2,'Person2', 'password')
+    const page2 = await browser.newPage()
+    await login(page2, 'Person2', 'password')
     await page2.goto(REQUEST_URL)
-    await page2.waitForSelector(requestItemSelector);
+    await page2.waitForSelector(requestItemSelector)
 
-    // Get last transaction ID
-    const lastItemId1 = await page2.$eval(requestItemSelector, e => e.getAttribute('data-request-id'));
-
-    await login(page,'Person1', 'password')
+    await login(page, 'Person1', 'password')
 
     await page.type(recipientSelector, 'Person2')
 
     // Select credit type transaction
     await page.click(debitSelector)
 
+    const expectedPrice = (Math.random() * Math.floor(100))
+      .toFixed(3)
+      .toString()
+
     // Create transaction
-    await addTransaction(page, milk)
-    await addTransaction(page, honey)
-    await addTransaction(page, bread)
+    await addTransaction(page, {
+      name: 'Milk',
+      price: expectedPrice,
+      quantity: '1'
+    })
     await getTotal()
 
     // Request transacton
@@ -73,13 +76,12 @@ describe('transaction request', async () => {
     await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })
 
     await page2.reload()
-    await page2.waitForSelector(requestItemSelector);
-    const lastItemId2 = await page2.$eval(requestItemSelector, e => e.getAttribute('data-request-id'));
+    await page2.waitForSelector(requestItemSelector)
+
+    // Assert transaction from Person1 received
+    expect(await page2.content()).toMatch(expectedPrice)
 
     await page2.close()
     await login(page)
-
-    // Assert last transaction ID has changed
-    expect(lastItemId1).not.toEqual(lastItemId2)
   }, 30000)
 })
