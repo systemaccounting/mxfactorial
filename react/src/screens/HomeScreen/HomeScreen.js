@@ -40,8 +40,9 @@ class HomeScreen extends Component {
   }
 
   onRequestTransactions = async (type, items) => {
-    const { history } = this.props
+    const { history, refetchTransactions } = this.props
     await this.props.createTransaction(items)
+    await refetchTransactions()
     // Go to requests screen
     return history.push('/requests')
   }

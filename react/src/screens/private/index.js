@@ -1,5 +1,6 @@
 import React from 'react'
 
+import { compose } from 'react-apollo'
 import { Switch, Route } from 'react-router-dom'
 
 import withUser from 'decorators/withUser'
@@ -56,4 +57,4 @@ export class PrivateRoutes extends React.Component {
   }
 }
 
-export default withUser(PrivateRoutes)
+export default compose(withUser)(PrivateRoutes)

@@ -13,15 +13,24 @@ const createTransaction = `
   }
 `
 
-const getTransaction = `
-  query getTransaction($id: String!) {
-    transactions(transactionId: $id) {
+const fetchTransactions = `
+  query FetchTransactions($user: String) {
+    transactions(user: $user) {
       id
+      name
+      quantity
+      price
+      author
+      debitor
+      creditor
+      creditor_approval_time
+      debitor_approval_time
+      expiration_time
     }
   }
 `
 
 module.exports = {
-  getTransaction,
+  fetchTransactions,
   createTransaction
 }

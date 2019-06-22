@@ -11,20 +11,17 @@ const addTransaction = async (
   const { name, price, quantity } = transaction
 
   if (name) {
-    const itemNameInput = await page.$(transactionAddNameSelector)
-    await itemNameInput.type(name)
+    await page.type(transactionAddNameSelector, name)
   }
 
   if (price) {
-    const itemPriceInput = await page.$(transactionAddPriceSelector)
-    await itemPriceInput.type(price)
+    await page.type(transactionAddPriceSelector, price)
     // Blur input to fire fetchRules() request
     await page.$eval(transactionAddPriceSelector, e => e.blur())
   }
 
   if (quantity) {
-    const itemQuantityInput = await page.$(transactionAddQuantitySelector)
-    await itemQuantityInput.type(quantity)
+    await page.type(transactionAddQuantitySelector, quantity)
     // Blur input to fire fetchRules() request
     await page.$eval(transactionAddQuantitySelector, e => e.blur())
   }

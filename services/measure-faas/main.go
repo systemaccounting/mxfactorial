@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -13,7 +14,8 @@ import (
 )
 
 type lambdaEvent struct {
-	ID string `json:"id"`
+	ID   string `json:"id"`
+	User string `json:"user"`
 }
 
 type transaction struct {
@@ -56,7 +58,7 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ns.String)
 }
 
-func handleLambdaEvent(event lambdaEvent) (string, error) {
+func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 	db, err := sql.Open(
 		"mysql",
 		fmt.Sprintf(
@@ -69,10 +71,21 @@ func handleLambdaEvent(event lambdaEvent) (string, error) {
 		log.Panic(err)
 	}
 
+	if event.User != "" {
+		initQuery := `
+		(SELECT * FROM transactions
+		WHERE creditor='%s' OR debitor='%s'
+		AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL)
+		ORDER BY id DESC LIMIT ?)
+		ORDER BY id desc;`
+		queryString := fmt.Sprintf(initQuery, event.User, event.User)
+		return getLastNTransactions(db, queryString, 20)
+	}
+
 	// if request empty, or if id property empty
 	if (lambdaEvent{} == event) || len(event.ID) == 0 {
 		queryString := "(SELECT * FROM transactions ORDER BY id DESC LIMIT ?) ORDER BY id;"
-		return getLast2Transactions(db, queryString, 2)
+		return getLastNTransactions(db, queryString, 2)
 	}
 
 	// cast event.ID to int

@@ -1,7 +1,7 @@
 const { GraphQLClient } = require('graphql-request')
 const { tearDownIntegrationTestDataInRDS } = require('../utils/tearDown')
 const { REQUEST_URL } = require('../utils/baseUrl')
-const { createTransaction } = require('../queries/transactions')
+const { createTransaction, fetchTransactions } = require('../queries/transactions')
 
 const graphQLClient = new GraphQLClient(REQUEST_URL, {
   headers: {
@@ -85,6 +85,16 @@ describe('Function As A Service GraphQL Server /transact endpoint', () => {
         expect(item.creditor_approval_time).not.toBeNull()
         expect(item.debitor_approval_time).toBeNull()
       }
+    })
+    done()
+  })
+
+  it('returns 20 most recent debit and credit requests matching authenticated account', async done => {
+    const response = await graphQLClient.request(fetchTransactions, {
+      user: 'JoeSmith'
+    })
+    response.transactions.forEach(item => {
+      expect(item.debitor || item.creditor).toBe('JoeSmith')
     })
     done()
   })

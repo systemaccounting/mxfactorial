@@ -15,7 +15,7 @@ const selectors = {
 }
 
 beforeAll(async () => {
-  await page.goto(REQUEST_URL)
+  await page.goto(REQUEST_URL, { waitUntil: 'networkidle0' })
   await page.waitForSelector(activeButtonSelector)
   const link = await page.$(selectors.requestItem)
   await link.click()

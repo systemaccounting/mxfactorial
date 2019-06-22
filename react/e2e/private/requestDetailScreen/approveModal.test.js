@@ -13,7 +13,7 @@ const selectors = {
 }
 
 beforeAll(async () => {
-  await page.goto(REQUEST_URL)
+  await page.goto(REQUEST_URL, { waitUntil: 'networkidle0' })
   await page.waitForSelector(activeButtonSelector)
   const link = await page.$('[data-id="requestItemIndicator"]')
   await link.click()
@@ -37,7 +37,7 @@ it('1 - open/close passwordApproveTransaction Modal', async () => {
 })
 
 it('2 - password error', async () => {
-  await page.goto(REQUEST_URL)
+  await page.goto(REQUEST_URL, { waitUntil: 'networkidle0' })
   await page.waitForSelector(activeButtonSelector)
   const link = await page.$('[data-id="requestItemIndicator"]')
   await link.click()
