@@ -44,3 +44,6 @@ react/.env.*
 
 # Misc
 .DS_Store
+
+# unintended
+yarn.lock
