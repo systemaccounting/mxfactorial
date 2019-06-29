@@ -38,52 +38,30 @@
 1. `touch .env.stg`  
 1. add `REACT_APP_COGNITO_POOL_ID`, `REACT_APP_COGNITO_CLIENT_ID`, `REACT_APP_API_URL` variables in `.env.stg` file per [usage instructions](https://www.npmjs.com/package/env-cmd#basic-usage)  
 1. assign variables in `.env.stg` to recently outputted values from creating `stg` environment in terraform (prefix `https://` to `api` terraform output value for `REACT_APP_API_URL` variable value)
-1. add `"stg:e2e": "LOCAL_ENV=stg yarn run test:e2e-public && LOCAL_ENV=stg yarn run test:e2e-private",` to `scripts` object in `react/package.json` for development  
-1. in `react/jest-puppeteer.config.js`, add `'stg'` case with `return 'NODE_PATH=./src env-cmd .env.stg react-scripts start'` to `LOCAL_ENV` condition block of `detectEnvironment()`. jest will load the `.env.stg` when executing e2e tests  
 1. avoid automated test failure by adding a `JoeSmith` account with password of `password`. test user may be added quickly through temporarily modifying, then exectuting automated test, OR manually:
    > automated: change the following lines in `react/e2e/public/createAccount.test.js`: `await accountNameInput.type(account)` to `await accountNameInput.type('JoeSmith')`, and `await passwordInput.type(`bluesky`)` to `await passwordInput.type('password')`. while client continues serving with `yarn start:stg`, open a separate terminal and execute `yarn run test:e2e-public`. if a test fails, press cntrl+c to terminate because "sign in" test may have occurred before "create account" test. after success, `git checkout e2e/public/createAccount.test.js` to restore automated test to original version  
 
-    > manually: `yarn start:stg` to serve react client on `http://localhost:3000`, then create account  
+    > manually: `bash start.sh stg` to serve react client on `http://localhost:3000`, then create account 
 1. sign into `JoeSmith` account now available from local environment  
-1. add `"build:stg": "NODE_PATH=./src env-cmd .env.stg react-scripts build",` to `scripts` object in `react/package.json`  
-1. `yarn build:stg`
-1. `aws s3 sync build/ s3://mxfactorial-react-stg --delete` to deploy newly-built `stg` client from react/build directory (`--delete` option replaces bucket contents; unnecessary for initial deployment, but presented here for subsequent deployments)  
+1. `bash build.sh stg`
+1. `bash deploy.sh stg`
 1. navigate to newly-deployed client in new environment, e.g. stg.mxfactorial.io, and sign in with test user
-1. in subsequent deployments, terminate cache after an s3 deployment to expedite new cache, e.g. `aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'` (replace `$CLOUDFRONT_DISTRIBUTION_ID ` with terraform output value; use query option to limit cloudfront distribution ID output)
-
-    > if authentication fails in react client after subsequent deployments, open browser developer tools:
-
-    > i. navigate to Network and checkmark to Disable cache
-    
-    > ii. navigate to Application > Service Worker settings, and unregister react client's previously registered service worker
-
 1. to add CI to new environment, [base64 encode](https://support.circleci.com/hc/en-us/articles/360003540393-How-to-insert-files-as-environment-variables-with-Base64) the recently-created `.env.stg` with `base64 -i .env.stg -o out.txt`  
 1. add a `STG_REACT_VARS` environment variable in [ci settings](https://circleci.com/gh/systemaccounting/mxfactorial/edit#env-vars), and assign to base64 contents of `out.txt` file created in previous step (exclude new lines when copying)  
 1. `rm out.txt` to avoid inclusion in git  
-1. in `react/jest-puppeteer.config.js`, add `'stg'` case with `return 'NODE_PATH=./src env-cmd $STG_REACT_VARS react-scripts start'` to `CI_ENV` condition block of `detectEnvironment()`. jest will load `$STG_REACT_VARS` when executing e2e tests 
 1. configure continuous integration tool in `.circle/config.yml` to automate execution of build and deployment commands referencing `$STG_REACT_VARS`  
 
-
 # add git-stored schema to serverless rds
-1. `cd liquibase`  
-1. `sh batch.sh`  
+1. `cd schema`  
+1. `bash schema.sh`  
 1. input region when prompted, e.g. `us-east-1`  
 1. input environment when prompted, e.g. `stg`  
 1. input name for batch job when prompted, e.g. `commit-08e6725` (latest abbreviated commit on remote branch available, for example, from `git log -1 origin/develop --pretty=format:%h`)
 1. input branch when prompted, e.g. `develop`
-1. input rds endpoint outputted by terraform when creating `stg` environment, e.g. `some-db.cluster-12345678910.us-east-2.rds.amanonaws.com`  
-1. input db username when prompted, e.g. `someadmin`  
-1. input db password when prompted, e.g. `somepassword`  
-1. input liquibase command when prompted, e.g. `updateTestingRollback`  
-1. wait for `batch.sh` script exits
 1. sign into `stg` environment's dedicated cloud9 instance for direct connetions to `stg` rds instance using `mysql --user=theadmin -h some-db.cluster-12345678910.us-east-2.rds.amanonaws.com -pthepassword`  
 
-# deploy graphql server to new environment
-
-1. a graphql server function initially deploys in terraform since environment creations requires `terraform/environments/common-bin/graphql/lambda.zip`. for subsequent deployments, `cd graphql-faas`
-1. add `"update:faas:stg": "aws lambda update-function-code --function-name mxfactorial-graphql-server-stg --zip-file fileb://$(pwd)/lambda.zip --region us-east-1",` to scripts object in `graphql-faas/package.json` (note: new script and function as a service named with `stg` while targeting `us-east-1` region set in Terraform)
-1. add `"deploy:stg": "yarn install && yarn run zip && yarn run update:faas:stg",` to scripts object in `graphql-faas/package.json`
-1. execute `yarn run deploy:stg` to zip and deploy graphql server function to new environment
+# manually deploy and test services
+1. `cd services && bash deploy.sh stg`
 1. navigate to newly-deployed api in new environment, e.g. stg-api.mxfactorial.io to view api browsing tool
 1. test graphql requests documented in `graphql-faas/test-data`  
 1. configure continuous integration tool in `.circle/config.yml` to automate execution of these zip and deployment commands
