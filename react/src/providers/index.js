@@ -4,13 +4,10 @@ import { ApolloProvider } from 'react-apollo'
 
 import { currentUserInfo, singInPerform } from 'lib/amplify'
 import { UserProvider } from 'context/User/UserContext'
-
-const client = new ApolloClient({
-  uri: `${process.env.REACT_APP_API_URL}`
-})
+import apiClient from './apollo'
 
 export default ({ children }) => (
-  <ApolloProvider client={client}>
+  <ApolloProvider client={apiClient}>
     <UserProvider
       currentUserInfo={currentUserInfo}
       singInPerform={singInPerform}
