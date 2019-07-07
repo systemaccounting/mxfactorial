@@ -1,5 +1,4 @@
 import React from 'react'
-import ApolloClient from 'apollo-boost'
 import { ApolloProvider } from 'react-apollo'
 
 import { currentUserInfo, singInPerform } from 'lib/amplify'

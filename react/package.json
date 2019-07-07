@@ -5,7 +5,7 @@
   "dependencies": {
     "@rebass/grid": "^6.0.0-4",
     "apollo-boost": "^0.1.22",
-    "aws-amplify": "^1.0.2",
+    "aws-amplify": "^1.1.29",
     "axios": "^0.18.0",
     "classnames": "^2.2.6",
     "crypto-js": "^3.1.9-1",
