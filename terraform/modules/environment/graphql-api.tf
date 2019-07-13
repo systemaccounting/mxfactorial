@@ -64,8 +64,13 @@ resource "aws_api_gateway_deployment" "environment" {
     "aws_api_gateway_integration.lambda_root",
   ]
 
+  stage_description = "deploy-000001"
   rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
   stage_name  = "${var.environment}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
