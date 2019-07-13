@@ -7,10 +7,11 @@ const client = new ApolloClient({
     credentials: 'include'
   },
   request: async operation => {
-    const { accessToken } = await Auth.currentSession()
+    const session = await Auth.currentSession()
+    const token = session.getAccessToken().getJwtToken()
     operation.setContext({
       headers: {
-        authorization: accessToken.jwtToken
+        // Authorization: `Bearer ${token}`
       }
     })
   }

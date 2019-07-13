@@ -9,11 +9,24 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
+data "aws_cognito_user_pools" "this" {
+  name = "mxfactorial-${var.environment}"
+}
+
+resource "aws_api_gateway_authorizer" "api_authorizer" {
+  name                   = "api_authorizer"
+  type                   = "COGNITO_USER_POOLS"
+  rest_api_id            = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  provider_arns          = ["${data.aws_cognito_user_pools.this.arns}"]
+}
+
 resource "aws_api_gateway_method" "proxy" {
-  rest_api_id   = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
-  resource_id   = "${aws_api_gateway_resource.proxy.id}"
-  http_method   = "ANY"
-  authorization = "NONE"
+  rest_api_id      = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  resource_id      = "${aws_api_gateway_resource.proxy.id}"
+  http_method      = "ANY"
+  api_key_required = true
+  authorization    = "COGNITO_USER_POOLS"
+  authorizer_id    = "${aws_api_gateway_authorizer.api_authorizer.id}"
 }
 
 resource "aws_api_gateway_integration" "lambda" {
@@ -27,10 +40,12 @@ resource "aws_api_gateway_integration" "lambda" {
 }
 
 resource "aws_api_gateway_method" "proxy_root" {
-  rest_api_id   = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
-  resource_id   = "${aws_api_gateway_rest_api.mxfactorial_api.root_resource_id}"
-  http_method   = "ANY"
-  authorization = "NONE"
+  rest_api_id      = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  resource_id      = "${aws_api_gateway_rest_api.mxfactorial_api.root_resource_id}"
+  http_method      = "ANY"
+  api_key_required = true
+  authorization    = "COGNITO_USER_POOLS"
+  authorizer_id    = "${aws_api_gateway_authorizer.api_authorizer.id}"
 }
 
 resource "aws_api_gateway_integration" "lambda_root" {
