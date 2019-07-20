@@ -8,10 +8,10 @@ const client = new ApolloClient({
   },
   request: async operation => {
     const session = await Auth.currentSession()
-    const token = session.getAccessToken().getJwtToken()
+    const token = session.getIdToken().getJwtToken()
     operation.setContext({
       headers: {
-        // Authorization: `Bearer ${token}`
+        Authorization: token
       }
     })
   }
