@@ -21,11 +21,12 @@ react/screenshot.png
 react/build
 
 # env vars and logs
-react/.env.local
-react/.env.development.local
-react/.env.test.local
-react/.env.production.local
-react/.env.*
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/.env.*
 
 ## global
 **/*.log
