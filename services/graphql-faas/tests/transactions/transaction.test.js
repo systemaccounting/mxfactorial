@@ -1,13 +1,25 @@
 const { GraphQLClient } = require('graphql-request')
 const { tearDownIntegrationTestDataInRDS } = require('../utils/tearDown')
+const authenticate = require('../utils/authenticate')
 const { REQUEST_URL } = require('../utils/baseUrl')
-const { createTransaction, fetchTransactions } = require('../queries/transactions')
+const {
+  createTransaction,
+  fetchTransactions
+} = require('../queries/transactions')
 
-const graphQLClient = new GraphQLClient(REQUEST_URL, {
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json'
-  }
+let graphQLClient
+
+beforeAll(async () => {
+  const session = await authenticate('JoeSmith', 'password')
+  const idToken = session.getIdToken().getJwtToken()
+
+  graphQLClient = new GraphQLClient(REQUEST_URL, {
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: idToken
+    }
+  })
 })
 
 afterAll(() => {

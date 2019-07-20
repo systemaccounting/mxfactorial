@@ -18,6 +18,7 @@
     "graphql": "^14.0.2"
   },
   "devDependencies": {
+    "aws-amplify": "^1.1.32",
     "graphql-request": "^1.8.2",
     "jest": "^24.5.0"
   }
