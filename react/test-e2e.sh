@@ -4,6 +4,6 @@ if [[ ! $1 ]]; then
   exit 1
 fi
 export LOCAL_ENV=$1
-(cd ../services; . warm-up.sh $ENV)
+(cd ../services; . warm-up.sh $LOCAL_ENV)
 yarn run test:e2e-public
 yarn run test:e2e-private

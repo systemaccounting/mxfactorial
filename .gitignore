@@ -45,3 +45,6 @@ react/build
 
 # Misc
 .DS_Store
+
+# unintended
+yarn.lock

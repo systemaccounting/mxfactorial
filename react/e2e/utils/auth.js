@@ -8,7 +8,7 @@ const auth = async (page, login = 'JoeSmith', password = 'password') => {
   await page.waitForNavigation({ waitUntil: 'networkidle2' })
 }
 
-const logout = async (page) => {
+const logout = async page => {
   const navBtn = await page.$('[data-id="nav-button"]')
   await navBtn.click()
 

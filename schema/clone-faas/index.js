@@ -50,6 +50,8 @@ exports.handler = async (event) => {
   const lsOutput = await exec(`ls ${WRITABLE_LAMBDA_PATH}`)
   const formattedFromls = lsOutput.stdout.replace('\n', ' ').slice(0, -1)
   console.log('diffs found: ' + formattedFromls)
+  const commitSHA = await exec(`cd ${WRITABLE_LAMBDA_PATH} && git rev-parse --short HEAD`)
+  console.log(`commit SHA: ${commitSHA.stdout}`)
   await exec(`cd ${WRITABLE_LAMBDA_PATH} && zip -r ${ZIP_FILENAME} .`)
   const base64Content = await readFile(`${WRITABLE_LAMBDA_PATH}/${ZIP_FILENAME}`, { encoding: 'base64' })
   return await invokeSchemaUpdate({ zip: base64Content, command: SCHEMA_CHANGE_COMMAND })
