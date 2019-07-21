@@ -13,4 +13,4 @@ RUN sudo apt-get update -y \
   && sudo chown -R root:root ./go \
   && sudo mv ./go /usr/local \
   && mkdir -p $HOME/go/bin
-# inherit entrypint
+# inherit entrypoint
