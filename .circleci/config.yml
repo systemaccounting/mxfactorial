@@ -144,8 +144,9 @@ jobs:
           command: |
             sudo apt-get update -y
             sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip jq --fix-missing
-            sudo pip install awscli
+            sudo apt-get install -yq python3 jq --fix-missing
+            sudo pip3 install awscli --upgrade --user
+            sudo cp -rf $HOME/.local/bin/* /usr/local/bin
       - run:
           name: Detect changed subdirectory files since last successful build
           command: |
@@ -238,10 +239,10 @@ workflows:
           # filters:
           #   branches:
           #     ignore: /.*/
-            # deploy accept tags only
-            # tags:
-            #   only:
-            #     - /.*accept.*/
+          # deploy accept tags only
+          # tags:
+          #   only:
+          #     - /.*accept.*/
   react-build-test-deploy-prod:
     jobs:
       - react-build-test-prod:
