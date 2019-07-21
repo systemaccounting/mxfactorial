@@ -25,7 +25,7 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run:
@@ -37,7 +37,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: .
           paths:
@@ -87,7 +87,7 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run:
@@ -99,7 +99,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: .
           paths:
