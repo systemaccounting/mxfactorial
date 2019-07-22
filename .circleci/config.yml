@@ -2,7 +2,7 @@ version: 2.1
 executors:
   react-executor:
     docker:
-      - image: circleci/node:11.3.0-browsers
+      - image: mxfactorial/circleci:v1
     working_directory: ~/repo/react
 jobs:
   react-build-test-dev:
@@ -11,21 +11,13 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Update Linux packages and install aws cli
-          working_directory: /
-          command: |
-            sudo apt-get update -y
-            sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip jq --fix-missing
-            sudo pip install awscli
-      - run:
           name: Detect changed subdirectory files since last successful build
           command: |
             . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run:
@@ -37,7 +29,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: .
           paths:
@@ -56,14 +48,6 @@ jobs:
               circleci step halt
             fi
       - run:
-          name: Update Linux packages and install aws cli
-          working_directory: /
-          command: |
-            sudo apt-get update -y
-            sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip --fix-missing
-            sudo pip install awscli
-      - run:
           name: Deploy to S3 and terminate cache
           #from build/ attached above
           command: bash deploy.sh dev
@@ -73,21 +57,13 @@ jobs:
       - checkout:
           path: ~/repo
       - run:
-          name: Update Linux packages and install aws cli
-          working_directory: /
-          command: |
-            sudo apt-get update -y
-            sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip jq --fix-missing
-            sudo pip install awscli
-      - run:
           name: Detect changed subdirectory files since last successful build
           command: |
             . ../.circleci/scripts/detect-project.sh react
       - restore_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - run: yarn install
       - run: yarn test
       - run:
@@ -99,7 +75,7 @@ jobs:
       - save_cache:
           paths:
             - node_modules
-          key: v019-dependencies-{{ checksum "package.json" }}
+          key: v020-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: .
           paths:
@@ -120,41 +96,26 @@ jobs:
               circleci step halt
             fi
       - run:
-          name: Update Linux packages and install aws cli
-          working_directory: /
-          command: |
-            sudo apt-get update -y
-            sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip --fix-missing
-            sudo pip install awscli
-      - run:
           name: Deploy to S3 and terminate cache
           #from build/ attached above
           command: bash deploy.sh prod
   services-dev:
     docker:
-      - image: circleci/node:11.3.0-browsers
+      - image: mxfactorial/circleci:v1
     working_directory: ~/repo/services
     steps:
       - checkout:
           path: ~/repo
       - run:
-          name: Update Linux packages and install aws cli
-          working_directory: /
-          command: |
-            sudo apt-get update -y
-            sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip jq --fix-missing
-            sudo pip install awscli
-      - run:
           name: Detect changed subdirectory files since last successful build
           command: |
             . ../.circleci/scripts/detect-project.sh services
       - run:
-          name: Install and configure go
-          working_directory: /
+          name: Set Go Environment Variables
           command: |
-            . ~/repo/.circleci/scripts/get-go.sh
+            echo 'export GOPATH=$HOME/go' >> $BASH_ENV
+            echo 'export GOBIN=$GOPATH/bin' >> $BASH_ENV
+            echo 'export PATH=/usr/local/go/bin:$PATH' >> $BASH_ENV
             source /home/circleci/.bashrc
       - run:
           name: Install dependencies, archive, then deploy
@@ -165,28 +126,21 @@ jobs:
           command: bash test-all.sh dev
   services-qa:
     docker:
-      - image: circleci/node:11.3.0-browsers
+      - image: mxfactorial/circleci:v1
     working_directory: ~/repo/services
     steps:
       - checkout:
           path: ~/repo
       - run:
-          name: Update Linux packages and install aws cli
-          working_directory: /
-          command: |
-            sudo apt-get update -y
-            sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip jq --fix-missing
-            sudo pip install awscli
-      - run:
           name: Detect changed subdirectory files since last successful build
           command: |
             . ../.circleci/scripts/detect-project.sh services
       - run:
-          name: Install and configure go
-          working_directory: /
+          name: Set Go Environment Variables
           command: |
-            . ~/repo/.circleci/scripts/get-go.sh
+            echo 'export GOPATH=$HOME/go' >> $BASH_ENV
+            echo 'export GOBIN=$GOPATH/bin' >> $BASH_ENV
+            echo 'export PATH=/usr/local/go/bin:$PATH' >> $BASH_ENV
             source /home/circleci/.bashrc
       - run:
           name: Install dependencies, archive, then deploy
@@ -197,28 +151,21 @@ jobs:
           command: bash test-all.sh qa
   services-prod:
     docker:
-      - image: circleci/node:11.3.0-browsers
+      - image: mxfactorial/circleci:v1
     working_directory: ~/repo/services
     steps:
       - checkout:
           path: ~/repo
       - run:
-          name: Update Linux packages and install aws cli
-          working_directory: /
-          command: |
-            sudo apt-get update -y
-            sudo apt-get upgrade -y
-            sudo apt-get install -yq python-dev python-pip jq --fix-missing
-            sudo pip install awscli
-      - run:
           name: Detect changed subdirectory files since last successful build
           command: |
             . ../.circleci/scripts/detect-project.sh services
       - run:
-          name: Install and configure go
-          working_directory: /
+          name: Set Go Environment Variables
           command: |
-            . ~/repo/.circleci/scripts/get-go.sh
+            echo 'export GOPATH=$HOME/go' >> $BASH_ENV
+            echo 'export GOBIN=$GOPATH/bin' >> $BASH_ENV
+            echo 'export PATH=/usr/local/go/bin:$PATH' >> $BASH_ENV
             source /home/circleci/.bashrc
       - run:
           name: Install dependencies, archive, then deploy
@@ -238,10 +185,10 @@ workflows:
           # filters:
           #   branches:
           #     ignore: /.*/
-            # deploy accept tags only
-            # tags:
-            #   only:
-            #     - /.*accept.*/
+          # deploy accept tags only
+          # tags:
+          #   only:
+          #     - /.*accept.*/
   react-build-test-deploy-prod:
     jobs:
       - react-build-test-prod:

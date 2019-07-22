@@ -9,11 +9,20 @@ resource "aws_api_gateway_resource" "proxy" {
   path_part   = "{proxy+}"
 }
 
+resource "aws_api_gateway_authorizer" "api_authorizer" {
+  name            = "cognito-pool-api-authorizer-${var.environment}"
+  type            = "COGNITO_USER_POOLS"
+  rest_api_id     = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  provider_arns   = ["${aws_cognito_user_pool.pool.arn}"]
+  identity_source = "method.request.header.Authorization"
+}
+
 resource "aws_api_gateway_method" "proxy" {
   rest_api_id   = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
   resource_id   = "${aws_api_gateway_resource.proxy.id}"
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = "${aws_api_gateway_authorizer.api_authorizer.id}"
 }
 
 resource "aws_api_gateway_integration" "lambda" {
@@ -30,7 +39,8 @@ resource "aws_api_gateway_method" "proxy_root" {
   rest_api_id   = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
   resource_id   = "${aws_api_gateway_rest_api.mxfactorial_api.root_resource_id}"
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = "${aws_api_gateway_authorizer.api_authorizer.id}"
 }
 
 resource "aws_api_gateway_integration" "lambda_root" {
@@ -49,8 +59,13 @@ resource "aws_api_gateway_deployment" "environment" {
     "aws_api_gateway_integration.lambda_root",
   ]
 
-  rest_api_id = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
-  stage_name  = "${var.environment}"
+  stage_description = "deploy-001"
+  rest_api_id       = "${aws_api_gateway_rest_api.mxfactorial_api.id}"
+  stage_name        = "${var.environment}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {

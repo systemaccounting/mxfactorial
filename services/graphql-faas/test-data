@@ -1,4 +1,21 @@
 
+// 2019-07-13 branch: api-authentication
+Postman query
+POST
+Content-Type: application/graphql
+Body:raw
+{
+  transactions(transactionId: "50", user: "Mary") {
+    id
+    debitor
+    creditor
+    name
+    price
+    quantity
+  }
+}
+
+
 // 2019-04-15
 
 mutation createTransaction($items: [TransactionCreateType]!) {
