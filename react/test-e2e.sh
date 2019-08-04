@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 if [[ ! $1 ]]; then
   echo 'must pass environment as argument to this script, e.g. dev, qa, prod'
   exit 1
