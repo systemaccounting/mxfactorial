@@ -1,6 +1,3 @@
-variable "environment" {
-  type = string
-}
 
 variable "db_master_username" {
   type = string

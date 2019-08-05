@@ -13,7 +13,7 @@ resource "google_cloudfunctions_function" "graphql" {
     event_type = "providers/cloud.storage/eventTypes/object.change"
     resource   = google_storage_bucket.artifact_bucket.name
     failure_policy {
-      retry = true
+      retry = false
     }
   }
 }
