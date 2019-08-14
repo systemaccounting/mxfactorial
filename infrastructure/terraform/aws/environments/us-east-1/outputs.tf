@@ -1,14 +1,14 @@
 output "client_cert_map" {
   value = {
-    prod = module.prod_certs.client_cert
-    dev  = module.dev_certs.client_cert
+    prod = module.prod_certs_and_artifact_storage.client_cert
+    dev  = module.dev_certs_and_artifact_storage.client_cert
   }
 }
 
 output "api_cert_map" {
   value = {
-    prod = module.prod_certs.api_cert
-    dev  = module.dev_certs.api_cert
+    prod = module.prod_certs_and_artifact_storage.api_cert
+    dev  = module.dev_certs_and_artifact_storage.api_cert
   }
 }
 

@@ -1,9 +1,9 @@
-module "prod_certs" {
-  source      = "../../modules/us-east-1-acm"
+module "prod_certs_and_artifact_storage" {
+  source      = "../../modules/us-east-1"
   environment = "prod"
 }
 
-module "dev_certs" {
-  source      = "../../modules/us-east-1-acm"
+module "dev_certs_and_artifact_storage" {
+  source      = "../../modules/us-east-1"
   environment = "dev"
 }
