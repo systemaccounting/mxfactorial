@@ -1,20 +1,53 @@
 #!/bin/bash
+ENV=$1
+ARTIFACT_TYPE=$2
+APP=rules
+
 if [[ ! $1 ]]; then
-  echo 'must pass environment as argument to this script, e.g. dev, qa, prod'
+  echo 'must pass environment as first argument to this script, e.g. dev, qa, prod'
   exit 1
 fi
 
-ENV=$1
+if [[ ! $2 ]]; then
+  echo 'must pass artifact type as second argument to this script, e.g. dev src, dev deps, dev all'
+  exit 1
+fi
 
-update_lambda() {
-  DEPLOY_TIME=$(aws lambda update-function-code \
-  --function-name rules-lambda-$1 \
-  --zip-file fileb://$(pwd)/rules-src.zip \
-  --region us-east-1 \
-  --query 'LastModified')
-  echo "***Deployment completed at $DEPLOY_TIME"
+update_layer() {
+  ETAG=$(aws s3api put-object \
+  --bucket=mxfactorial-artifacts-$1 \
+  --key=$APP-layer.zip \
+  --body=$(pwd)/$APP-layer.zip \
+  --region=us-east-1 \
+  --output=text | sed 's/"//g')
+  echo "***Deployed from s3 ETag: $ETAG"
+}
+
+update_src() {
+  ETAG=$(aws s3api put-object \
+  --bucket=mxfactorial-artifacts-$1 \
+  --key=$APP-src.zip \
+  --body=$(pwd)/$APP-src.zip \
+  --region=us-east-1 \
+  --output=text | sed 's/"//g')
+  echo "***Deployed from s3 ETag: $ETAG"
+}
+
+deploy() {
+  case $2 in
+    "all")
+      update_layer $1
+      update_src $1
+      ;;
+    "deps")
+      update_layer $1
+      ;;
+    *)
+      update_src $1
+      ;;
+  esac
 }
 
 # build src before deploying
 . build.sh
-update_lambda $ENV
+deploy $ENV $ARTIFACT_TYPE

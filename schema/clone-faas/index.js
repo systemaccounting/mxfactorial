@@ -45,7 +45,7 @@ exports.handler = async (event) => {
   // add arn:aws:lambda:<region>:744348701589:layer:bash:5 layer published
   // from https://github.com/gkrizek/bash-lambda-layer before invoking.
   // configure 10s timeout on lambda
-  await exec(`rm -rf /tmp/*`)
+  await exec(`rm -rf /tmp/*`) // wipe directory contents if lambda reused
   await exec(`cd /tmp && git clone --depth 1 --single-branch --branch ${BRANCH} ${REPO}`)
   const lsOutput = await exec(`ls ${WRITABLE_LAMBDA_PATH}`)
   const formattedFromls = lsOutput.stdout.replace('\n', ' ').slice(0, -1)

@@ -1,7 +1,7 @@
 #!/bin/bash
 ENV=$1
 ARTIFACT_TYPE=$2
-APP=measure
+APP=auto-confirm
 
 if [[ ! $1 ]]; then
   echo 'must pass environment as first argument to this script, e.g. dev, qa, prod'
@@ -21,7 +21,7 @@ update_layer() {
   # --region=us-east-1 \
   # --output=text | sed 's/"//g')
   # echo "***Deployed from s3 ETag: $ETAG"
-  echo 'measure faas compiles with deps. not building layer'
+  echo 'auto-confirm-faas has 0 deps. not building layer'
 }
 
 update_src() {

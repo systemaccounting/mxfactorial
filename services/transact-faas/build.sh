@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 BUILD_TARGET=$1
 
 build_deps() {
@@ -14,7 +14,7 @@ build_deps() {
 build_src() {
   rm -f transact-src.zip
   yarn install
-  yarn test && zip -r transact-lambda.zip index.js src package.json yarn.lock jest.config.js
+  yarn test && zip -r transact-src.zip index.js src package.json yarn.lock jest.config.js
 }
 
 archive() {
