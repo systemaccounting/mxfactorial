@@ -35,7 +35,7 @@ data "terraform_remote_state" "aws-us-east-1" {
   }
 }
 
-# IMPORTANT: first build lambda artifacts using `cd services && sh build.sh`
+# IMPORTANT: first build lambda artifacts using `cd infrastructure/terraform && sh build.sh $ENV`
 module "prod" {
   source = "../../modules/environment"
 
