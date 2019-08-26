@@ -423,43 +423,42 @@ resource "aws_cloudwatch_log_group" "delete_faker_cognito_accounts_lambda" {
 resource "aws_iam_role" "delete_faker_cognito_accounts_lambda_role" {
   name = "delete-faker-cognito-accounts-lambda-role-${var.environment}"
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
+  assume_role_policy = data.aws_iam_policy_document.delete_faker_cognito_accounts_lambda_role.json
 }
-EOF
+
+data "aws_iam_policy_document" "delete_faker_cognito_accounts_lambda_role" {
+  version = "2012-10-17"
+  statement {
+    sid = "DeleteFakerCognitoAccountsLambdaRole${var.environment}"
+    actions = [
+      "sts:AssumeRole"
+    ]
+    principals {
+      type        = "Service"
+      identifiers = ["lambda.amazonaws.com"]
+    }
+    effect = "Allow"
+  }
 }
 
 resource "aws_iam_role_policy" "delete_faker_cognito_accounts_lambda_policy" {
   name = "cognito_account-auto-confirm-lambda-policy-${var.environment}"
   role = aws_iam_role.delete_faker_cognito_accounts_lambda_role.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    }
-  ]
+  policy = data.aws_iam_policy_document.delete_faker_cognito_accounts_lambda_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "delete_faker_cognito_accounts_lambda_policy" {
+  version = "2012-10-17"
+  statement {
+    sid = "CognitoAccountAutoConfirmLambdaPolicy${var.environment}"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["*"]
+  }
 }
 
 ########## CloudWatch Event Rule to execute delete Faker account Lambda function daily ##########

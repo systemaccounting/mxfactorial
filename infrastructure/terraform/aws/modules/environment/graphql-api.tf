@@ -86,47 +86,45 @@ resource "aws_api_gateway_account" "mxfactorial_api_account" {
 resource "aws_iam_role" "api_gateway_cloudwatch" {
   name = "api-gateway-role-${var.environment}"
 
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "apigateway.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
+  assume_role_policy = data.aws_iam_policy_document.api_gateway_cloudwatch_role.json
 }
-EOF
+
+data "aws_iam_policy_document" "api_gateway_cloudwatch_role" {
+  version = "2012-10-17"
+  statement {
+    sid    = "ApiGatewayRole${var.environment}"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["apigateway.amazonaws.com"]
+    }
+    actions = ["sts:AssumeRole"]
+  }
 }
 
 resource "aws_iam_role_policy" "api_gateway_cloudwatch" {
   name = "api-gateway-cloudwatch-policy-${var.environment}"
   role = aws_iam_role.api_gateway_cloudwatch.id
 
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:DescribeLogGroups",
-                "logs:DescribeLogStreams",
-                "logs:PutLogEvents",
-                "logs:GetLogEvents",
-                "logs:FilterLogEvents"
-            ],
-            "Resource": "*"
-        }
-    ]
+  policy = data.aws_iam_policy_document.api_gateway_cloudwatch_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "api_gateway_cloudwatch_policy" {
+  version = "2012-10-17"
+  statement {
+    sid    = "ApiGatewayCloudwatchPolicy${var.environment}"
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
+      "logs:GetLogEvents",
+      "logs:FilterLogEvents"
+    ]
+    resources = ["*"]
+  }
 }
 
 resource "aws_api_gateway_domain_name" "mxfactorial" {
