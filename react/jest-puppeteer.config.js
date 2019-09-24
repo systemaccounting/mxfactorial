@@ -1,6 +1,6 @@
 module.exports = {
   server: {
-    command: `bash start.sh ${process.env.LOCAL_ENV}`,
+    command: 'yarn start:env',
     port: 3000,
     launchTimeout: 30000
   },
