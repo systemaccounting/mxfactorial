@@ -17,24 +17,21 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v020-dependencies-{{ checksum "package.json" }}
-      - run: yarn install
-      - run: yarn test
-      - run:
-          name: e2e tests
-          command: bash test-e2e.sh dev
+          key: v021-dependencies-{{ checksum "package.json" }}
+      - run: make test ENV=dev
+      - run: make e2e ENV=dev
       - run:
           name: Build web client for acceptance testing
-          command: bash build.sh dev
+          command: make build ENV=dev
       - save_cache:
           paths:
             - node_modules
-          key: v020-dependencies-{{ checksum "package.json" }}
+          key: v021-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: .
           paths:
             - build
-            - deploy.sh
+            - makefile
   react-deploy-dev:
     executor: react-executor
     steps:
@@ -50,7 +47,7 @@ jobs:
       - run:
           name: Deploy to S3 and terminate cache
           #from build/ attached above
-          command: bash deploy.sh dev
+          command: make deploy ENV=dev
   react-build-test-prod:
     executor: react-executor
     steps:
@@ -63,24 +60,21 @@ jobs:
       - restore_cache:
           paths:
             - node_modules
-          key: v020-dependencies-{{ checksum "package.json" }}
-      - run: yarn install
-      - run: yarn test
-      - run:
-          name: e2e tests
-          command: bash test-e2e.sh prod
+          key: v021-dependencies-{{ checksum "package.json" }}
+      - run: make test ENV=prod
+      - run: make e2e ENV=prod
       - run:
           name: Build web client for prod environment
-          command: bash build.sh prod
+          command: make build ENV=prod
       - save_cache:
           paths:
             - node_modules
-          key: v020-dependencies-{{ checksum "package.json" }}
+          key: v021-dependencies-{{ checksum "package.json" }}
       - persist_to_workspace:
           root: .
           paths:
             - build
-            - deploy.sh
+            - makefile
   react-deploy-prod:
     executor: react-executor
     steps:
@@ -98,7 +92,7 @@ jobs:
       - run:
           name: Deploy to S3 and terminate cache
           #from build/ attached above
-          command: bash deploy.sh prod
+          command: make deploy ENV=prod
   services-dev:
     docker:
       - image: mxfactorial/circleci:v1
@@ -119,36 +113,11 @@ jobs:
             source /home/circleci/.bashrc
       - run:
           name: Install dependencies, archive, then deploy
-          command: bash deploy.sh dev
+          command: make deploy ENV=dev
       - run:
           name: Test dev endpoints
           working_directory: ~/repo/services/graphql-faas
-          command: bash test-all.sh dev
-  services-qa:
-    docker:
-      - image: mxfactorial/circleci:v1
-    working_directory: ~/repo/services
-    steps:
-      - checkout:
-          path: ~/repo
-      - run:
-          name: Detect changed subdirectory files since last successful build
-          command: |
-            . ../.circleci/scripts/detect-project.sh services
-      - run:
-          name: Set Go Environment Variables
-          command: |
-            echo 'export GOPATH=$HOME/go' >> $BASH_ENV
-            echo 'export GOBIN=$GOPATH/bin' >> $BASH_ENV
-            echo 'export PATH=/usr/local/go/bin:$PATH' >> $BASH_ENV
-            source /home/circleci/.bashrc
-      - run:
-          name: Install dependencies, archive, then deploy
-          command: bash deploy.sh qa
-      - run:
-          name: Test qa endpoints
-          working_directory: ~/repo/services/graphql-faas
-          command: bash test-all.sh qa
+          command: make test ENV=dev
   services-prod:
     docker:
       - image: mxfactorial/circleci:v1
@@ -169,8 +138,7 @@ jobs:
             source /home/circleci/.bashrc
       - run:
           name: Install dependencies, archive, then deploy
-          command: bash deploy.sh prod
-
+          command: make deploy ENV=prod
 workflows:
   version: 2.1
   react-build-test-deploy-dev:
