@@ -73,7 +73,7 @@ exports.handler = async (event) => {
         }
       }
     }
-    await console.log(`Lambda layers updated: ${lambdaLayersUpdated}`)
+    console.log(`Lambda layers updated: ${lambdaLayersUpdated}`)
 
   // if lambda code, update function
   } else if (srcRegex.test(S3Key)) {
