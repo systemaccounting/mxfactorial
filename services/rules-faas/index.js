@@ -2,6 +2,10 @@ const applyRules = require('./src/applyRules')
 const uuidv1 = require('uuid/v1')
 
 exports.handler = async event => {
+  if (Object.entries(event).length === 0) {
+    console.log('warming up')
+    return
+  }
   if (event.body) {
     const transactions = JSON.parse(event.body)
     console.log('Received transactions: ', event.body)
