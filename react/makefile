@@ -118,7 +118,7 @@ ifeq ($(ENV), prod)
 		@WWW_CACHE_ID=$$(aws cloudfront list-distributions --output text \
 		--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-mxfactorial-react-prod`][].Id'); \
 		echo 'Terminating www cache'; \
-		aws cloudfront create-invalidation --distribution-id $WWW_CACHE_ID \
+		aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID \
 		--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
 endif
 
