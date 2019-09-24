@@ -32,6 +32,7 @@ jobs:
           paths:
             - build
             - makefile
+            - package.json
   react-deploy-dev:
     executor: react-executor
     steps:
@@ -75,6 +76,7 @@ jobs:
           paths:
             - build
             - makefile
+            - package.json
   react-deploy-prod:
     executor: react-executor
     steps:
