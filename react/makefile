@@ -105,8 +105,8 @@ dev: build
 
 ###################### deploy ######################
 
-.PHONY: deploy build
-deploy: build
+.PHONY: deploy
+deploy:
 		@CACHE_ID=$$(aws cloudfront list-distributions --output text \
 			--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`mxfactorial-react-'$(ENV)'`][].Id'); \
 		aws s3 sync build/ s3://mxfactorial-react-$(ENV) --delete; \
