@@ -42,7 +42,7 @@ get-secrets: test-env-arg
 			--output text \
 			| base64 --decode \
 			> $(DIR)/.env
-		@if [[ ! -s $(DIR)/.env ]]; then \
+		@if [ ! -s $(DIR)/.env ]; then \
 			rm $(DIR)/.env; \
 		fi
 
@@ -64,7 +64,7 @@ test-secret: test-env-arg
 		@aws secretsmanager describe-secret \
 			--secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
 			> /dev/null 2>&1; \
-			if [[ "$$?" != 0 ]]; then \
+			if [ "$$?" != 0 ]; then \
 				echo "$(APP_NAME)-$(APP_TYPE) requires a remote-stored .env file to build."; \
 				printf "create an .env file and store with "; \
 				echo "'make create-secrets' before building."; \
