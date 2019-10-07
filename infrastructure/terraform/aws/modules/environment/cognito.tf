@@ -286,7 +286,6 @@ resource "aws_cognito_user_pool_client" "client" {
     "custom:industryName",
     "custom:occupation",
     "custom:emailAddress",
-    "custom:account",
   ]
 
   write_attributes = [
@@ -308,7 +307,6 @@ resource "aws_cognito_user_pool_client" "client" {
     "custom:industryName",
     "custom:occupation",
     "custom:emailAddress",
-    "custom:account",
   ]
 }
 
