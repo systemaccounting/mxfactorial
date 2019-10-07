@@ -21,10 +21,8 @@ resource "aws_lambda_function" "rules_service_lambda" {
     security_group_ids = [
       aws_security_group.rds.id,
       data.aws_security_group.default.id,
-      data.aws_security_group.vpce_api.id,
+      data.aws_security_group.us-east-1_vpce.id
     ]
-
-    # aws_security_group.vpce_sqs.id,
   }
 
   environment {
@@ -111,11 +109,3 @@ resource "aws_iam_role_policy_attachment" "rds_access_for_rules_lambda" {
   role       = aws_iam_role.rules_service_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }
-
-# resource "null_resource" "rules_service_lambda_provisioner" {
-#   provisioner "local-exec" {
-#     working_dir = "../../../services/rules-faas"
-#     command     = "yarn install"
-#   }
-# }
-
