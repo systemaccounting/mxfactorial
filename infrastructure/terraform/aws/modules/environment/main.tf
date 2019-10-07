@@ -24,9 +24,9 @@ data "aws_route_table" "default" {
   }
 }
 
-data "aws_security_group" "vpce_api" {
+data "aws_security_group" "us-east-1_vpce" {
   vpc_id = data.aws_vpc.default.id
-  name   = "vpce-api"
+  name   = "vpce"
 }
 
 data "aws_region" "current" {}
@@ -34,4 +34,9 @@ data "aws_region" "current" {}
 data "aws_vpc_endpoint" "private-api" {
   vpc_id       = data.aws_vpc.default.id
   service_name = "com.amazonaws.${data.aws_region.current.name}.execute-api"
+}
+
+data "aws_vpc_endpoint" "sns" {
+  vpc_id       = data.aws_vpc.default.id
+  service_name = "com.amazonaws.${data.aws_region.current.name}.sns"
 }

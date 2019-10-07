@@ -7,7 +7,23 @@ resource "aws_vpc_endpoint" "api" {
   vpc_endpoint_type = "Interface"
 
   security_group_ids = [
-    aws_security_group.vpce_api.id,
+    aws_security_group.vpce.id,
+  ]
+
+  subnet_ids          = tolist(data.aws_subnet_ids.default.ids)
+  private_dns_enabled = true
+}
+
+####### vpc endpoint for sns service access by lambda in vpc #######
+resource "aws_vpc_endpoint" "sns" {
+  vpc_id = data.aws_vpc.default.id
+
+  # aws ec2 describe-vpc-endpoint-services
+  service_name      = "com.amazonaws.us-east-1.sns"
+  vpc_endpoint_type = "Interface"
+
+  security_group_ids = [
+    aws_security_group.vpce.id,
   ]
 
   subnet_ids          = tolist(data.aws_subnet_ids.default.ids)
@@ -15,9 +31,9 @@ resource "aws_vpc_endpoint" "api" {
 }
 
 ####### security group for vpce and dependent resources #######
-resource "aws_security_group" "vpce_api" {
-  name        = "vpce-api"
-  description = "allow all traffic between api dependent resources"
+resource "aws_security_group" "vpce" {
+  name        = "vpce"
+  description = "allow all traffic between vpce dependent resources"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
@@ -41,6 +57,7 @@ resource "aws_security_group" "vpce_api" {
     self      = true
   }
   tags = {
-    name = "vpce-api"
+    name = "vpce"
   }
 }
+

@@ -21,7 +21,7 @@ resource "aws_lambda_function" "transact_service_lambda" {
     security_group_ids = [
       aws_security_group.rds.id,
       data.aws_security_group.default.id,
-      data.aws_security_group.vpce_api.id,
+      data.aws_security_group.us-east-1_vpce.id
     ]
   }
 
