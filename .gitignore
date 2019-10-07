@@ -18,7 +18,8 @@ react/coverage
 react/screenshot.png
 
 # production
-react/build
+**/build
+**/dist
 
 # env vars and logs
 **/.env
@@ -48,3 +49,9 @@ react/build
 
 # unintended
 yarn.lock
+
+# aws-cdk
+.cdk.staging
+cdk.out
+infrastructure/aws-cdk/**/*.js
+infrastructure/aws-cdk/**/*.d.ts
