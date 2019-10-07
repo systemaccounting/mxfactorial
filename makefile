@@ -14,6 +14,8 @@ endif
 deploy: test-env-arg
 	@$(MAKE) -C services/graphql-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/measure-faas ENV=$(ENV) $(CMD)
+	@$(MAKE) -C services/notification/notify-faas ENV=$(ENV) $(CMD)
+	@$(MAKE) -C services/notification/websocket-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/rules-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/transact-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C schema/clone-faas ENV=$(ENV) $(CMD)
@@ -22,3 +24,4 @@ deploy: test-env-arg
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/cognito/delete-faker-accounts ENV=$(ENV) $(CMD)
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/deploy-lambda ENV=$(ENV) $(CMD)
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/rds ENV=$(ENV) $(CMD)
+	@$(MAKE) -C infrastructure/cloudformation/s3-event-faas ENV=$(ENV) $(CMD)
