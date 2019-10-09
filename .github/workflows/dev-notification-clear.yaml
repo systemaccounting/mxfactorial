@@ -29,12 +29,15 @@ jobs:
       - name: install dependencies
         run: make install
         working-directory: services/notification/notification-clear-faas
-      - name: retrive secrets for dev
-        run: make get-secrets ENV=dev
-        working-directory: services/notification/notification-clear-faas
-      - name: unit tests
+      - name: retrieve environment secrets and execute unit tests
         run: make test-unit ENV=dev
         working-directory: services/notification/notification-clear-faas
+        env:
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          CI: true
       - name: deploy and execute integration tests
         run: make test-integration ENV=dev
         working-directory: services/notification/notification-clear-faas
