@@ -9,7 +9,7 @@ on:
 
 jobs:
   test:
-    name: notification-get-faas unit and integration tests
+    name: deploy notification-get-faas to prod
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -21,7 +21,7 @@ jobs:
         uses: sergioramos/yarn-actions/install@master
       - name: install aws cli
         uses: chrislennon/action-aws-cli@v1.1
-      - name: install dependencies, then execute unit and integration tests in prod
+      - name: deploy
         working-directory: services/notification/notification-get-faas
         run: make deploy ENV=prod
         env:
