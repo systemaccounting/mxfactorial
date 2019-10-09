@@ -11,7 +11,7 @@ const randomFourDigitInt = () => {
   return Math.floor(Math.random() * (9999 - 1000)) + 1000
 }
 
-const ACCOUNT = `FakerAccount${randomFourDigitInt()}`
+const ACCOUNT = `Faker${randomFourDigitInt()}`
 const SECRET = process.env.SECRET
 const CLIENT_ID = process.env.CLIENT_ID
 const POOL_ID = process.env.POOL_ID

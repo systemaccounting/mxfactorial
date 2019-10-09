@@ -19,7 +19,7 @@ const {
 const authorize = require('./lib/iam')
 
 const AWS_REGION = process.env.AWS_REGION
-const POOL_ID_NAME = process.env.POOL_ID_NAME
+const POOL_NAME = process.env.POOL_NAME
 
 
 exports.handler = async event => {
@@ -46,7 +46,7 @@ exports.handler = async event => {
   let cognito = new AWS.CognitoIdentityServiceProvider(config)
 
   let pools = await getPools(cognito)
-  let filteredCognitoPoolId = await filterCurrentCognitoPoolId(pools, POOL_ID_NAME)
+  let filteredCognitoPoolId = await filterCurrentCognitoPoolId(pools, POOL_NAME)
   let cognitoJsonWebKeys = await getCognitoJsonWebKeys(
     axios,
     AWS_REGION,
