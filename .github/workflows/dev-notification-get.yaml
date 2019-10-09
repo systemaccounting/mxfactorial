@@ -4,11 +4,13 @@ on:
   push:
     paths:
     - 'services/notification/notification-get-faas/**'
-    pull_request:
-      paths:
+    branches-ignore:
+    - 'master'
+  pull_request:
+    paths:
     - 'services/notification/notification-get-faas/**'
-    branches:
-    - '!master'
+    branches-ignore:
+    - 'master'
 
 jobs:
   test:
