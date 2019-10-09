@@ -92,7 +92,7 @@ test-integration: deploy
 		yarn test:integration
 
 .PHONY: dev test
-dev: test # test target alias to create development environment
+dev: test # aliases test target to create development environment
 
 .PHONY: src test-env-arg clean test install-prod zip
 src: test-env-arg clean test install-prod zip
