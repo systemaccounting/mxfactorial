@@ -48,7 +48,7 @@ afterAll(async () => {
 let storedNotifications = []
 beforeEach(async () => {
   await sendNotifications(sns, TOPIC_ARN, pendingNotifications)
-  await timeout(1e3) // wait 1 second for sns -> lambda -> ddb
+  await timeout(2e3) // wait 2 second for sns -> lambda -> ddb
   for (account of dedupedTestAccounts) {
     let queryResult = await queryIndex(
       ddb,
