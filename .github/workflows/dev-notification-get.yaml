@@ -26,7 +26,7 @@ jobs:
         uses: sergioramos/yarn-actions/install@master
       - name: install aws cli
         uses: chrislennon/action-aws-cli@v1.1
-      - name: install and test
+      - name: install dependencies, then execute unit and integration tests in dev
         working-directory: services/notification/notification-get-faas
         run: make test ENV=dev
         env:
