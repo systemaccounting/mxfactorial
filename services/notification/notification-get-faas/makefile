@@ -4,6 +4,8 @@ APP_TYPE = faas
 LAMBDA_NAME = notification-get
 ARTIFACT_BUCKET= mxfactorial-websocket-artifacts
 REGION = us-east-1
+ENV_VARS := AWS_REGION NOTIFICATIONS_TABLE_NAME SECRET \
+CLIENT_ID POOL_ID WSS_CLIENT_URL
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -40,42 +42,29 @@ install-prod: clean-deps
 
 ###################### secrets ######################
 
-.PHONY: get-secrets test-env-arg clean-env
-get-secrets: test-env-arg clean-env
-		@aws secretsmanager get-secret-value --secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--query 'SecretBinary' \
-			--output text \
-			| base64 --decode \
-			> $(DIR)/.env
-		@if [ ! -s $(DIR)/.env ]; then \
-			rm $(DIR)/.env; \
-		fi
+.PHONY: get-secrets retrieve-each-secret
+get-secrets: retrieve-each-secret
+	@if [ ! -s $(DIR)/.env ]; then \
+		rm $(DIR)/.env; \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
 
-.PHONY: create-secrets test-env-arg
-create-secrets: test-env-arg
-		aws secretsmanager create-secret \
-			--name $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--description 'env-cmd file fetched before testing' \
-			--secret-binary file://$(DIR)/.env
-
-.PHONY: put-secrets test-env-arg
-put-secrets: test-env-arg
-		aws secretsmanager put-secret-value \
-			--secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--secret-binary file://$(DIR)/.env
-
-.PHONY: test-secret test-env-arg
-test-secret: test-env-arg
-		@aws secretsmanager describe-secret \
-			--secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			> /dev/null 2>&1; \
-			if [ "$$?" != 0 ]; then \
-				echo "$(APP_NAME)-$(APP_TYPE) requires a remote-stored .env file to build."; \
-				printf "create an .env file and store with "; \
-				echo "'make create-secrets' before building."; \
-				echo "exiting."; \
-				exit 1; \
-			fi
+.PHONY: retrieve-each-secret test-env-arg clean-env $(ENV_VARS)
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	@if [ $@ = AWS_REGION ]; then \
+		echo AWS_REGION=$(REGION) >> $(DIR)/.env; \
+	else \
+		ENV_VAR=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+			echo $@=$$ENV_VAR \
+			>> $(DIR)/.env; \
+	fi
 
 ###################### build and test ######################
 
