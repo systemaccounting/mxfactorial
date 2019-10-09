@@ -86,8 +86,8 @@ test: test-env-arg install get-secrets test-unit test-integration
 test-unit: test-env-arg get-secrets
 		yarn test
 
-.PHONY: test-integration deploy
-test-integration: deploy
+.PHONY: test-integration deploy get-secrets
+test-integration: deploy get-secrets
 		@yarn install; \
 		yarn test:integration
 
