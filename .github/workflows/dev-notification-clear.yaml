@@ -1,4 +1,4 @@
-name: notification-clear-faas
+name: dev-notification-clear-faas
 
 on:
   push:
