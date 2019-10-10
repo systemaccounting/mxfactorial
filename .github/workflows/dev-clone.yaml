@@ -13,8 +13,8 @@ on:
     - 'master'
 
 jobs:
-  deploy:
-    name: clone-faas unit
+  build:
+    name: clone-faas
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
