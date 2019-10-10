@@ -8,7 +8,7 @@ on:
     - 'master'
 
 jobs:
-  build:
+  deploy:
     name: measure-faas
     runs-on: ubuntu-latest
     env:
@@ -37,5 +37,5 @@ jobs:
         run: make zip
         working-directory: services/measure-faas
       - name: deloy
-        run: make deploy-only ENV=dev
+        run: make deploy-only ENV=prod
         working-directory: services/measure-faas
