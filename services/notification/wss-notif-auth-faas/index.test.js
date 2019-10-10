@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 const jwkToPem = require('jwk-to-pem')
 
 const AWS_REGION = process.env.AWS_REGION
-const POOL_ID_NAME = process.env.POOL_ID_NAME
+const POOL_NAME = process.env.POOL_NAME
 
 const {
   getPools,
@@ -147,7 +147,7 @@ describe('lambda function', () => {
   test('calls filterCurrentCognitoPoolId with pools and id name', async () => {
     await handler(event)
     await expect(filterCurrentCognitoPoolId)
-      .toHaveBeenCalledWith(TEST_POOL_LIST, POOL_ID_NAME)
+      .toHaveBeenCalledWith(TEST_POOL_LIST, POOL_NAME)
   })
 
   test('calls getCognitoJsonWebKeys with service, region and key id', async () => {

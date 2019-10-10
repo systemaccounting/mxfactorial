@@ -2,19 +2,19 @@ const randomFourDigitInt = () => {
   return Math.floor(Math.random() * (9999 - 1000)) + 1000
 }
 
-const TEST_ACCOUNT = `FakerAccount${randomFourDigitInt()}`
+const TEST_ACCOUNT = `Faker${randomFourDigitInt()}`
 
 let pendingNotifications = [
   {
-    account: 'FakerAccount1',
+    account: 'Faker1',
     message: 'message 1'
   },
   {
-    account: 'FakerAccount2',
+    account: 'Faker2',
     message: 'message 2'
   },
   {
-    account: 'FakerAccount3',
+    account: 'Faker3',
     message: 'message 3'
   },
   {
@@ -35,19 +35,19 @@ let pendingReceivedNotifications = [
   {
     uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8c',
     timestamp: 1570139563495635,
-    account: 'FakerAccount1',
+    account: 'Faker1',
     message: 'message 1'
   },
   {
     uuid: '8f93fd21-e60b-11e9-a7a9-2b4645cb9b8c',
     timestamp: 1570139563495685,
-    account: 'FakerAccount2',
+    account: 'Faker2',
     message: 'message 2'
   },
   {
     uuid: '8f93fd22-e60b-11e9-a7a9-2b4645cb9b8c',
     timestamp: 1570139563495694,
-    account: 'FakerAccount3',
+    account: 'Faker3',
     message: 'message 3'
   },
   {
@@ -76,7 +76,7 @@ const batchWriteNotifications = [
       Item: {
         uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8c',
         timestamp: 1570139563495635,
-        account: 'FakerAccount1',
+        account: 'Faker1',
         message: 'message 1'
       }
     }
@@ -86,7 +86,7 @@ const batchWriteNotifications = [
       Item: {
         uuid: '8f93fd21-e60b-11e9-a7a9-2b4645cb9b8c',
         timestamp: 1570139563495685,
-        account: 'FakerAccount2',
+        account: 'Faker2',
         message: 'message 2'
       }
     }
@@ -96,7 +96,7 @@ const batchWriteNotifications = [
       Item: {
         uuid: '8f93fd22-e60b-11e9-a7a9-2b4645cb9b8c',
         timestamp: 1570139563495694,
-        account: 'FakerAccount3',
+        account: 'Faker3',
         message: 'message 3'
       }
     }
@@ -134,9 +134,9 @@ const batchWriteNotifications = [
 ]
 
 const dedupedTestAccounts = [
-  'FakerAccount1',
-  'FakerAccount2',
-  'FakerAccount3',
+  'Faker1',
+  'Faker2',
+  'Faker3',
   TEST_ACCOUNT
 ]
 

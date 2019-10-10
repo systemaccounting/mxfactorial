@@ -14,7 +14,7 @@ const {
   TEST_KEYS
 } = require('../tests/utils/testConstants')
 
-const POOL_ID_NAME = process.env.POOL_ID_NAME
+const POOL_NAME = process.env.POOL_NAME
 
 // comment .clearAllMocks() intended for .mockResolvedValueOnce:
 // afterEach(() => {
@@ -68,17 +68,17 @@ describe('cognito', () => {
 
   test('current cognito pool id from filterCurrentCognitoPoolId', () => {
     let expected = TEST_POOL_LIST[0].Id
-    let result = filterCurrentCognitoPoolId(TEST_POOL_LIST, POOL_ID_NAME)
+    let result = filterCurrentCognitoPoolId(TEST_POOL_LIST, POOL_NAME)
     expect(result).toBe(expected)
   })
 
   test('filterCurrentCognitoPoolId throws 0 user pools matched error', () => {
-    expect(() => filterCurrentCognitoPoolId(TEST_UNMATCHABLE_POOL_LIST, POOL_ID_NAME))
+    expect(() => filterCurrentCognitoPoolId(TEST_UNMATCHABLE_POOL_LIST, POOL_NAME))
       .toThrow('0 user pools matched')
   })
 
   test('filterCurrentCognitoPoolId throws duplicate pools matched error', () => {
-    expect(() => filterCurrentCognitoPoolId(TEST_DUPLICATE_POOL_LIST, POOL_ID_NAME))
+    expect(() => filterCurrentCognitoPoolId(TEST_DUPLICATE_POOL_LIST, POOL_NAME))
       .toThrow('duplicate pools matched')
   })
 

@@ -2,7 +2,7 @@ import ApolloClient from 'apollo-boost'
 import Auth from '@aws-amplify/auth'
 
 const client = new ApolloClient({
-  uri: `${process.env.REACT_APP_API_URL}`,
+  uri: `${process.env.REACT_APP_GRAPHQL_API}`,
   fetchOptions: {
     credentials: 'include'
   },

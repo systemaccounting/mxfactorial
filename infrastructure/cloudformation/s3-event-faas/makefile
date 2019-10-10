@@ -27,37 +27,39 @@ clean: clean-deps clean-artifact
 
 .PHONY: install-env clean-deps
 install-env: clean-deps
-		@if [ ! -d ./bin ]; then \
-			python3.7 -m venv .; \
-		fi; \
-		source ./bin/activate; \
+		@python3.7 -m venv .; \
+		. ./bin/activate; \
 		pip install pipenv
 
-.PHONY: install install-env
-install: install-env
-		pipenv install --dev
+.PHONY: install-deps
+install-deps:
+		. ./bin/activate; pipenv install --dev
+
+.PHONY: install install-env install-deps
+install: install-env install-deps
 
 ###################### build and test ######################
 
-.PHONY: test install
-test: install
-		source ./bin/activate; \
+.PHONY: test install test-unit
+test: install test-unit
+
+.PHONY: test-unit
+test-unit:
+		. ./bin/activate; \
 		AWS_REGION=neverland ENVIRONMENT=dev ARTIFACTS_BUCKET=some-artifact-dev \
 		pytest -vv src
 
-.PHONY: test-only
-test-only:
-		source ./bin/activate; \
-		AWS_REGION=neverland ENVIRONMENT=dev ARTIFACTS_BUCKET=some-artifact-dev \
-		pytest -vv src
+# todo: add integration tests
+# .PHONY: test-integration
+# test-integration:
 
  # aliases test target to create development environment
 .PHONY: dev test
 dev: test
 
 # deps added by lambda layer
-.PHONY: zip
-zip:
+.PHONY: zip clean-artifact
+zip: clean-artifact
 		zip -r -j $(APP_NAME)-src.zip src/main.py
 
 # aliases test target which creates tested artifact
@@ -66,8 +68,11 @@ src: zip
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg zip
-deploy: zip test-env-arg
+.PHONY: deploy zip deploy-only
+deploy: zip deploy-only
+
+.PHONY: deploy-only test-env-arg
+deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \

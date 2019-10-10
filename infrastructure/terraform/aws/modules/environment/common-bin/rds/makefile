@@ -31,9 +31,9 @@ install: clean-deps
 
 ###################### build ######################
 
-.PHONY: zip install
-zip: install
-		zip -r $(APP_NAME)-src.zip index.js package.json
+.PHONY: zip
+zip:
+		zip -r $(APP_NAME)-src.zip index.js package.json node_modules
 
 .PHONY: src zip
 src: zip
@@ -47,6 +47,19 @@ layer:
 
 ###################### deploy ######################
 
+.PHONY: deploy install zip deploy-only
+deploy: install zip deploy-only
+
+.PHONY: deploy-only test-env-arg
+deploy-only: test-env-arg
+		@ETAG=$$(aws s3api put-object \
+			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
+			--key=$(APP_NAME)-src.zip \
+			--body=$(DIR)/$(APP_NAME)-src.zip \
+			--region=$(REGION) \
+			--output=text | sed 's/"//g'); \
+		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
+
 .PHONY: deploy-layer layer
 deploy-layer: layer
 #		@ETAG=$$(aws s3api put-object \
@@ -56,16 +69,6 @@ deploy-layer: layer
 			--region=$(REGION) \
 			--output=text | sed 's/"//g'); \
 #		echo "***Deployed from s3 ETag: $$ETAG"
-
-.PHONY: deploy test-env-arg zip
-deploy: test-env-arg zip
-		@ETAG=$$(aws s3api put-object \
-			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
-			--key=$(APP_NAME)-src.zip \
-			--body=$(DIR)/$(APP_NAME)-src.zip \
-			--region=$(REGION) \
-			--output=text | sed 's/"//g'); \
-		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
 .PHONY: deploy-all test-env-arg deploy-layer deploy
 deploy-all: test-env-arg deploy-layer deploy # layer and source

@@ -1,0 +1,45 @@
+name: dev-graphql-faas
+
+on:
+  push:
+    paths:
+    - 'services/graphql-faas/**'
+    branches-ignore:
+    - 'master'
+  pull_request:
+    paths:
+    - 'services/graphql-faas/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  test:
+    name: graphql-faas unit and integration tests
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: use node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: install yarn
+        uses: sergioramos/yarn-actions/install@master
+      - name: install aws cli
+        uses: chrislennon/action-aws-cli@v1.1
+      - name: install dependencies
+        run: make install
+        working-directory: services/graphql-faas
+      - name: create archive for deployment
+        run: make zip
+        working-directory: services/graphql-faas
+      - name: deploy to dev for integration testing
+        run: make deploy ENV=dev
+        working-directory: services/graphql-faas
+      - name: execute integration tests
+        run: make test ENV=dev
+        working-directory: services/graphql-faas

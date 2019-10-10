@@ -18,7 +18,7 @@ module.exports = {
   TEST_POOL_LIST: [
     {
       "Id": "us-east-1_test",
-      "Name": process.env.POOL_ID_NAME,
+      "Name": process.env.POOL_NAME,
       "LambdaConfig": {
         "PreSignUp": "arn"
       },
@@ -49,7 +49,7 @@ module.exports = {
   TEST_DUPLICATE_POOL_LIST: [
     {
       "Id": "us-east-1_id",
-      "Name": process.env.POOL_ID_NAME,
+      "Name": process.env.POOL_NAME,
       "LambdaConfig": {
         "PreSignUp": "arn"
       },
@@ -58,7 +58,7 @@ module.exports = {
     },
     {
       "Id": "us-east-1_id",
-      "Name": process.env.POOL_ID_NAME,
+      "Name": process.env.POOL_NAME,
       "LambdaConfig": {
         "PreSignUp": "arn"
       },

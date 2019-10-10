@@ -27,8 +27,11 @@ src: zip
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg zip
-deploy: test-env-arg zip
+.PHONY: deploy zip deloy-only
+deploy: zip deloy-only
+
+.PHONY: deploy-only test-env-arg
+deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
