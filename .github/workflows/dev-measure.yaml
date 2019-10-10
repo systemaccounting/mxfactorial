@@ -29,6 +29,8 @@ jobs:
         uses: chrislennon/action-aws-cli@v1.1
       - name: install dependencies
         run: |
+          export GOPATH=$(go env GOPATH)
+          export GOBIN=$(go env GOPATH)/bin
           export PATH=$PATH:$(go env GOPATH)/bin
           make install
         working-directory: services/measure-faas
