@@ -21,13 +21,11 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       CI: true
-      GOPATH: $HOME/go
+      GOPATH: $GITHUB_WORKSPACE/go
     steps:
       - uses: actions/checkout@v1
-      - name: use go 1.9.3
+      - name: use default go
         uses: actions/setup-go@v1
-        with:
-          node-version: '1.9.3'
       - name: install aws cli
         uses: chrislennon/action-aws-cli@v1.1
       - name: install dependencies
