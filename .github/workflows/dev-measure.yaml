@@ -21,6 +21,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       CI: true
+      GOPATH: $HOME/go
     steps:
       - uses: actions/checkout@v1
       - name: use go 1.9.3
