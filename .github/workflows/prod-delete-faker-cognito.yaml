@@ -1,4 +1,4 @@
-name: prod-delete-faker-accounts-faas
+name: prod-delete-faker-cognito
 
 on:
   push:
