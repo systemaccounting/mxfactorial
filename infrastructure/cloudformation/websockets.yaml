@@ -88,7 +88,7 @@ Resources:
         S3Key: !Ref WebsocketAuthFunctionArtifact
       Environment:
         Variables:
-          POOL_ID_NAME: !Sub "mxfactorial-${Environment}"
+          POOL_NAME: !Sub "mxfactorial-${Environment}"
       Role: !GetAtt WebsocketAuthLambdaRole.Arn
   WebsocketAuthLambdaLogGroup:
     Type: AWS::Logs::LogGroup
@@ -994,6 +994,52 @@ Resources:
       AccountId: !Ref AWS::AccountId
       ObjectName: !Ref NotificationsClearFunctionArtifact
       ResourceName: !Ref NotificationClearLambda
+  NotificationWebsocketEndpoint:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notification websocket endoint in ${Environment}"
+      Name: !Sub "${Environment}/WSS_CLIENT_URL"
+      SecretString:
+        Fn::Join:
+        - ''
+        - - wss://
+          - !Ref NotificationWebsocket
+          - .execute-api.
+          - !Ref AWS::Region
+          - .amazonaws.com/
+          - !Ref Stage
+  NotificationWebsocketConnectionUrl:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notification websocket connection url in ${Environment}"
+      Name: !Sub "${Environment}/WSS_CONNECTION_URL"
+      SecretString:
+        Fn::Join:
+        - ''
+        - - https://
+          - !Ref NotificationWebsocket
+          - .execute-api.
+          - !Ref AWS::Region
+          - .amazonaws.com/
+          - !Ref Stage
+  NotificationsTableName:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notifications table name in ${Environment}"
+      Name: !Sub "${Environment}/NOTIFICATIONS_TABLE_NAME"
+      SecretString: !Ref NotificationsTable
+  WebsocketsTableName:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "websockets table name in ${Environment}"
+      Name: !Sub "${Environment}/WEBSOCKETS_TABLE_NAME"
+      SecretString: !Ref WebsocketConnectionsTable
+  NotificationTopicArn:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notification topic arn in ${Environment}"
+      Name: !Sub "${Environment}/TOPIC_ARN"
+      SecretString: !Ref NotificationTopic
 Outputs:
   NotificationWebsocketEndpoint:
     Description: wss notification endpoint
