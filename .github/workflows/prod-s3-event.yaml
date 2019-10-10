@@ -18,13 +18,11 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v1
-      - name: use node.js 12
+      - name: use python
         uses: actions/setup-python@v1
         with:
           python-version: '3.x'
           architecture: 'x64'
-      - name: install yarn
-        uses: sergioramos/yarn-actions/install@master
       - name: install aws cli
         uses: chrislennon/action-aws-cli@v1.1
       - name: install environment
