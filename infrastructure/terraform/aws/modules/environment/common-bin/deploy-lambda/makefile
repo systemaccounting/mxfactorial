@@ -15,8 +15,33 @@ endif
 clean:
 		rm -f $(APP_NAME)-src.zip
 
+###################### secrets ######################
 
-###################### build ######################
+.PHONY: get-secrets retrieve-each-secret
+get-secrets: retrieve-each-secret
+	@if [ ! -s $(DIR)/.env ]; then \
+		rm $(DIR)/.env; \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
+
+.PHONY: retrieve-each-secret test-env-arg clean-env $(ENV_VARS)
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	@if [ $@ = AWS_REGION ]; then \
+		echo AWS_REGION=$(REGION) >> $(DIR)/.env; \
+	else \
+		ENV_VAR=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+			echo $@=$$ENV_VAR \
+			>> $(DIR)/.env; \
+	fi
+
+###################### build & test ######################
 
 .PHONY: zip clean
 zip: clean
@@ -26,10 +51,26 @@ zip: clean
 .PHONY: src zip
 src: zip
 
+# todo: add unit and integration tests
+# .PHONY: test test-unit test-integration
+# test: test-unit test-integration
+
+# .PHONY: test-unit test-env-arg get-secrets install
+# test-unit: test-env-arg get-secrets install
+# 		yarn test
+
+# .PHONY: test-integration deploy
+# test-integration: deploy
+# 		@yarn install; \
+# 		yarn test:integration
+
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg zip
-deploy: test-env-arg zip
+.PHONY: deploy zip deploy-only
+deploy: zip deploy-only
+
+.PHONY: deploy-only test-env-arg
+deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
