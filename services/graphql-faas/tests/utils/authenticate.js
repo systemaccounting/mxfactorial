@@ -3,8 +3,8 @@ const Auth = require('@aws-amplify/auth')
 
 Amplify.default.configure({
   Auth: {
-    userPoolId: process.env.REACT_APP_COGNITO_POOL_ID || 'us-east-1_unit-test',
-    userPoolWebClientId: process.env.REACT_APP_COGNITO_CLIENT_ID || 'unit-test'
+    userPoolId: process.env.POOL_ID || 'us-east-1_unit-test',
+    userPoolWebClientId: process.env.CLIENT_ID || 'unit-test'
   }
 })
 
