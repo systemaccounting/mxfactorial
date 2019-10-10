@@ -15,19 +15,23 @@ endif
 clean:
 		rm -f $(APP_NAME)-src.zip
 
+###################### build ######################
+
 .PHONY: zip clean
 zip: clean
 		zip -r $(APP_NAME)-src.zip index.js
 
-###################### build ######################
 # aliases zip target
 .PHONY: src zip
 src: zip
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg zip
-deploy: test-env-arg zip
+.PHONY: deploy zip deploy-only
+deploy: zip deploy-only
+
+.PHONY: deploy-only test-env-arg
+deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
