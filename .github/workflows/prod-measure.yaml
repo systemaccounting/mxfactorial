@@ -16,7 +16,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       CI: true
-      GOPATH: $GITHUB_WORKSPACE/go
     steps:
       - uses: actions/checkout@v1
       - name: use default go
