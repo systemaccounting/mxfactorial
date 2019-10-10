@@ -3,6 +3,7 @@ APP_NAME = react
 APP_TYPE = client
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
+ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -29,48 +30,35 @@ clean: clean-deps clean-env clean-artifact
 
 ###################### dependencies ######################
 
-.PHONY: install clean get-secrets
-install: clean get-secrets
+.PHONY: install clean-deps
+install: clean-deps
 		yarn install
 
 ###################### secrets ######################
 
-.PHONY: get-secrets test-env-arg
-get-secrets: test-env-arg
-		@aws secretsmanager get-secret-value --secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--query 'SecretBinary' \
-			--output text \
-			| base64 --decode \
-			> $(DIR)/.env
-		@if [ ! -s $(DIR)/.env ]; then \
-			rm $(DIR)/.env; \
-		fi
+.PHONY: get-secrets retrieve-each-secret
+get-secrets: retrieve-each-secret
+	@if [ ! -s $(DIR)/.env ]; then \
+		rm $(DIR)/.env; \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
 
-.PHONY: create-secrets test-env-arg
-create-secrets: test-env-arg
-		aws secretsmanager create-secret \
-			--name $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--description 'env-cmd file fetched before testing' \
-			--secret-binary file://$(DIR)/.env
-
-.PHONY: put-secrets test-env-arg
-put-secrets: test-env-arg
-		aws secretsmanager put-secret-value \
-			--secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--secret-binary file://$(DIR)/.env
-
-.PHONY: test-secret test-env-arg
-test-secret: test-env-arg
-		@aws secretsmanager describe-secret \
-			--secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			> /dev/null 2>&1; \
-			if [ "$$?" != 0 ]; then \
-				echo "$(APP_NAME)-$(APP_TYPE) requires a remote-stored .env file to build."; \
-				printf "create an .env file and store with "; \
-				echo "'make create-secrets' before building."; \
-				echo "exiting."; \
-				exit 1; \
-			fi
+.PHONY: retrieve-each-secret test-env-arg clean-env $(ENV_VARS)
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	@if [ $@ = AWS_REGION ]; then \
+		echo REACT_APP_AWS_REGION=$(REGION) >> $(DIR)/.env; \
+	else \
+		ENV_VAR=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+			echo REACT_APP_$@=$$ENV_VAR \
+			>> $(DIR)/.env; \
+	fi
 
 ###################### start ######################
 
@@ -80,20 +68,22 @@ start: install
 
 ###################### build and test ######################
 
-.PHONY: test install
-test: install
-		yarn test --coverage
+.PHONY: test-env-arg test test-unit test-e2e
+test: test-env-arg install test-unit test-e2e
 
-.PHONY: e2e install warm-up
-e2e: install warm-up
+.PHONY: test-unit
+test-unit:
+		yarn test
+
+.PHONY: test-e2e test-env-arg get-secrets warm-up
+test-e2e: test-env-arg get-secrets warm-up
 		LOCAL_ENV=$(ENV) yarn test:e2e-public; \
 		LOCAL_ENV=$(ENV) yarn test:e2e-private
 
-.PHONY: e2e
+.PHONY: e2e-now
 e2e-now:
 		LOCAL_ENV=$(ENV) yarn test:e2e-public; \
 		LOCAL_ENV=$(ENV) yarn test:e2e-private
-
 
 .PHONY: build clean-env test-env-arg get-secrets
 build: clean-env test-env-arg get-secrets
@@ -105,8 +95,8 @@ dev: build
 
 ###################### deploy ######################
 
-.PHONY: deploy
-deploy:
+.PHONY: deploy test-env-arg
+deploy: test-env-arg
 		@CACHE_ID=$$(aws cloudfront list-distributions --output text \
 			--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`mxfactorial-react-'$(ENV)'`][].Id'); \
 		aws s3 sync build/ s3://mxfactorial-react-$(ENV) --delete; \
