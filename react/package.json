@@ -31,7 +31,7 @@
     "start": "NODE_PATH=./src react-scripts start",
     "start:env": "NODE_PATH=./src env-cmd react-scripts start",
     "build:env": "NODE_PATH=./src env-cmd react-scripts build",
-    "test": "react-scripts test --env=jsdom --verbose --modulePaths=./src",
+    "test": "react-scripts test --env=jsdom --verbose --modulePaths=./src --coverage",
     "loc:cov": "react-scripts test --forceExit --env=jsdom --modulePaths=./src --coverage",
     "test:e2e-private": "jest --detectOpenHandles --forceExit -i --config=e2e/config/private/index.js",
     "test:e2e-public": "jest --detectOpenHandles --forceExit -i --config=e2e/config/public/index.js",
