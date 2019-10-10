@@ -1,0 +1,44 @@
+name: prod-s3-event
+
+on:
+  push:
+    paths:
+    - 'infrastructure/cloudformation/s3-event-faas/**'
+    branches:
+    - 'master'
+
+jobs:
+  deploy:
+    name: deploy s3-event-faas
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: use node.js 12
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+      - name: install yarn
+        uses: sergioramos/yarn-actions/install@master
+      - name: install aws cli
+        uses: chrislennon/action-aws-cli@v1.1
+      - name: install environment
+        run: make install-env
+        working-directory: infrastructure/cloudformation/s3-event-faas
+      - name: install dependencies
+        run: make install-deps
+        working-directory: infrastructure/cloudformation/s3-event-faas
+      - name: unit testing
+        run: make test-unit
+        working-directory: infrastructure/cloudformation/s3-event-faas
+      - name: create archive for deployment
+        run: make zip
+        working-directory: infrastructure/cloudformation/s3-event-faas
+      - name: deploy
+        run: make deploy-only ENV=prod
+        working-directory: infrastructure/cloudformation/s3-event-faas
