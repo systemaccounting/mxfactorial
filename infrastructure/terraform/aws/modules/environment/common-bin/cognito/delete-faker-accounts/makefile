@@ -27,8 +27,8 @@ src: zip
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg zip deloy-only
-deploy: test-env-arg zip deloy-only
+.PHONY: deploy zip deloy-only
+deploy: zip deloy-only
 
 .PHONY: deploy-only test-env-arg
 deploy-only: test-env-arg
