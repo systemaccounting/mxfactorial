@@ -1,0 +1,39 @@
+name: dev-rules-faas
+
+on:
+  push:
+    paths:
+    - 'services/rules-faas/**'
+    branches-ignore:
+    - 'master'
+  pull_request:
+    paths:
+    - 'services/rules-faas/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  test:
+    name: rules-faas unit and integration tests
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: use node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: install yarn
+        uses: sergioramos/yarn-actions/install@master
+      - name: install aws cli
+        uses: chrislennon/action-aws-cli@v1.1
+      - name: install dependencies and execute unit tests
+        run: make test-unit ENV=dev
+        working-directory: services/rules-faas
+      - name: deploy
+        run: make deploy ENV=dev
+        working-directory: services/rules-faas
