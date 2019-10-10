@@ -54,8 +54,11 @@ src: build
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg build
-deploy: test-env-arg build
+.PHONY: deploy test-env-arg build deploy-only
+deploy: test-env-arg build deploy-only
+
+.PHONY: deploy-only test-env-arg
+deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
