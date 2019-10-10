@@ -28,12 +28,12 @@ clean: clean-deps clean-artifact
 .PHONY: install-env clean-deps
 install-env: clean-deps
 		@python3.7 -m venv .; \
-		source ./bin/activate; \
+		. ./bin/activate; \
 		pip install pipenv
 
 .PHONY: install-deps
 install-deps:
-		source ./bin/activate; pipenv install --dev
+		. ./bin/activate; pipenv install --dev
 
 .PHONY: install install-env install-deps
 install: install-env install-deps
@@ -45,7 +45,7 @@ test: install test-unit
 
 .PHONY: test-unit
 test-unit:
-		source ./bin/activate; \
+		. ./bin/activate; \
 		AWS_REGION=neverland ENVIRONMENT=dev ARTIFACTS_BUCKET=some-artifact-dev \
 		pytest -vv src
 
