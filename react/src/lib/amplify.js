@@ -1,4 +1,4 @@
-import { Auth } from 'aws-amplify'
+import Auth from '@aws-amplify/auth' // https://github.com/aws-amplify/amplify-js/issues/3484
 import { BehaviorSubject } from 'rxjs'
 import { cryptString } from './crypt'
 

@@ -45,11 +45,13 @@ exports.handler = async (event) => {
   // add arn:aws:lambda:<region>:744348701589:layer:bash:5 layer published
   // from https://github.com/gkrizek/bash-lambda-layer before invoking.
   // configure 10s timeout on lambda
-  await exec(`rm -rf /tmp/*`)
+  await exec(`rm -rf /tmp/*`) // wipe directory contents if lambda reused
   await exec(`cd /tmp && git clone --depth 1 --single-branch --branch ${BRANCH} ${REPO}`)
   const lsOutput = await exec(`ls ${WRITABLE_LAMBDA_PATH}`)
   const formattedFromls = lsOutput.stdout.replace('\n', ' ').slice(0, -1)
   console.log('diffs found: ' + formattedFromls)
+  const commitSHA = await exec(`cd ${WRITABLE_LAMBDA_PATH} && git rev-parse --short HEAD`)
+  console.log(`commit SHA: ${commitSHA.stdout}`)
   await exec(`cd ${WRITABLE_LAMBDA_PATH} && zip -r ${ZIP_FILENAME} .`)
   const base64Content = await readFile(`${WRITABLE_LAMBDA_PATH}/${ZIP_FILENAME}`, { encoding: 'base64' })
   return await invokeSchemaUpdate({ zip: base64Content, command: SCHEMA_CHANGE_COMMAND })

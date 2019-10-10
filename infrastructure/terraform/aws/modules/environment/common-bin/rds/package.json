@@ -1,0 +1,9 @@
+{
+  "name": "teardown",
+  "version": "1.0.0",
+  "description": "delete data from rds after integration test",
+  "main": "index.js",
+  "dependencies": {
+    "mysql2": "^1.6.4"
+  }
+}

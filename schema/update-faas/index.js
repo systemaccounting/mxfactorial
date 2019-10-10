@@ -44,7 +44,7 @@ exports.handler = async (event) => {
     connection.query(`CREATE DATABASE IF NOT EXISTS ${DB_NAME};`)
   })
 
-  const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
+  const sequelizeConfig = {
     host: DB_HOST,
     logging: console.log,
     port: 3306,
@@ -56,7 +56,9 @@ exports.handler = async (event) => {
       idle: 10000,
       handleDisconnects: true
     }
-  })
+  }
+
+  const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, sequelizeConfig)
 
   // arguments to sequelize configuration params
   const migration = sequelize.getQueryInterface()
@@ -68,7 +70,7 @@ exports.handler = async (event) => {
   const storageOptions = { sequelize }
 
   // https://github.com/abelnation/sequelize-migration-hello/blob/01-initial/migrate.js
-  const configuration = {
+  const umzugConfiguration = {
     storage: 'sequelize',
     storageOptions,
     logging: false,
@@ -83,7 +85,7 @@ exports.handler = async (event) => {
     }
   }
 
-  const umzug = new Umzug(configuration)
+  const umzug = new Umzug(umzugConfiguration)
 
   const logUmzugEvent = eventName => {
     return (name, migration) => {

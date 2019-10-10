@@ -18,14 +18,16 @@ react/coverage
 react/screenshot.png
 
 # production
-react/build
+**/build
+**/dist
 
 # env vars and logs
-react/.env.local
-react/.env.development.local
-react/.env.test.local
-react/.env.production.local
-react/.env.*
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/.env.*
 
 ## global
 **/*.log
@@ -47,3 +49,9 @@ react/.env.*
 
 # unintended
 yarn.lock
+
+# aws-cdk
+.cdk.staging
+cdk.out
+infrastructure/aws-cdk/**/*.js
+infrastructure/aws-cdk/**/*.d.ts

@@ -1,0 +1,1056 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: websocket api
+Parameters:
+  Environment:
+    Type: String
+  S3EventNotificationCustomResourceArtifact:
+    Type: String
+    Default: s3-event-src.zip
+  WebsocketAuthFunctionArtifact:
+    Type: String
+    Default: wss-notif-auth-src.zip
+  WebsocketConnectFunctionArtifact:
+    Type: String
+    Default: wss-notif-connect-src.zip
+  NotificationGetFunctionArtifact:
+    Type: String
+    Default: notification-get-src.zip
+  NotificationSendFunctionArtifact:
+    Type: String
+    Default: notification-send-src.zip
+  NotificationsClearFunctionArtifact:
+    Type: String
+    Default: notification-clear-src.zip
+Resources:
+  NotificationWebsocket:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "notification-websocket-${Environment}"
+      Description: !Sub "realtime notifications in ${Environment}"
+      DisableSchemaValidation: true
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: $request.body.action
+      Tags:
+        environment: !Sub "${Environment}"
+  NotificationWebsocketAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      Name: !Sub "wss-notif-auth-${Environment}"
+      ApiId: !Ref NotificationWebsocket
+      AuthorizerType: REQUEST
+      AuthorizerUri:
+        Fn::Join:
+          - ''
+          - - 'arn:aws:apigateway:'
+            - !Ref AWS::Region
+            - ':lambda:path/2015-03-31/functions/arn:aws:lambda:'
+            - !Ref AWS::Region
+            - ':'
+            - !Ref AWS::AccountId
+            - ':function:'
+            - !Ref WebsocketAuthLambda
+            - '/invocations'
+      IdentitySource:
+        - route.request.header.Authorization
+      AuthorizerCredentialsArn: !GetAtt NotificationWebsocketAuthorizerRole.Arn
+  NotificationWebsocketAuthorizerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - apigateway.amazonaws.com
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub "allow-apigateway-invoke-websocket-auth-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'lambda:InvokeFunction'
+            Resource: !GetAtt WebsocketAuthLambda.Arn
+  WebsocketAuthLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "websocket-auth-${Environment}"
+      Description: !Sub "authorizes websocket clients in ${Environment}"
+      Handler: index.handler
+      MemorySize: 256
+      Runtime: nodejs8.10
+      Code:
+        S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
+        S3Key: !Ref WebsocketAuthFunctionArtifact
+      Environment:
+        Variables:
+          POOL_NAME: !Sub "mxfactorial-${Environment}"
+      Role: !GetAtt WebsocketAuthLambdaRole.Arn
+  WebsocketAuthLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn:
+      - WebsocketAuthLambda
+    Properties:
+      RetentionInDays: 90
+      LogGroupName: !Sub /aws/lambda/${WebsocketAuthLambda}
+  WebsocketAuthLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "notification-websocket-auth-lambda-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - "lambda.amazonaws.com"
+          Action:
+          - "sts:AssumeRole"
+      Policies:
+      - PolicyName: !Sub "allow-logs-notification-websocket-auth-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            Resource: arn:aws:logs:*:*:*
+      - PolicyName: !Sub "allow-cognito-pool-list-websocket-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'cognito-idp:ListUserPools'
+            Resource: '*'
+  Deployment00001:
+    Type: AWS::ApiGatewayV2::Deployment
+    DependsOn:
+      - ConnectRoute
+      - DisconnectRoute
+      - GetNotificationsRoute
+      - ClearNotificationsRoute
+      - DefaultRoute
+    Properties:
+      Description: !Sub "notififcation websocket in ${Environment} v1"
+      ApiId: !Ref NotificationWebsocket
+      StageName: "" # https://forums.aws.amazon.com/thread.jspa?threadID=236830
+  Stage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: !Sub "${Environment}"
+      Description: !Sub "${Environment} stage"
+      DeploymentId: !Ref Deployment00001
+      ApiId: !Ref NotificationWebsocket
+      DefaultRouteSettings:
+        DataTraceEnabled: true
+        LoggingLevel: ERROR
+  WebsocketNotificationConnectLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "websocket-notification-connect-faas-${Environment}"
+      Description: records connected websocket clients in dynamodb
+      Handler: index.handler
+      MemorySize: 256
+      Runtime: nodejs8.10
+      Code:
+        S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
+        S3Key: !Ref WebsocketConnectFunctionArtifact
+      Environment:
+        Variables:
+          WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
+      Role: !GetAtt WebsocketNotificationConnectLambdaRole.Arn
+  WebsocketNotificationConnectLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "websocket-notification-connect-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - "lambda.amazonaws.com"
+          Action:
+          - "sts:AssumeRole"
+      Policies:
+      - PolicyName: !Sub "allow-logs-websocket-notification-connect-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            Resource: arn:aws:logs:*:*:*
+      - PolicyName: !Sub "allow-dynamodb-access-websocket-notification-connect-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:BatchWriteItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:DeleteItem'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:PutItem'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            - 'dynamodb:UpdateItem'
+            Resource: !GetAtt WebsocketConnectionsTable.Arn
+      - PolicyName: !Sub "allow-dynamodb-index-access-websocket-notification-connect-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
+  WebsocketNotificationConnectLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn:
+      - WebsocketNotificationConnectLambda
+    Properties:
+      RetentionInDays: 90
+      LogGroupName: !Sub /aws/lambda/${WebsocketNotificationConnectLambda}
+  ApiGatewayWebsocketConnectLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - NotificationWebsocket
+      - WebsocketNotificationConnectLambda
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref WebsocketNotificationConnectLambda
+      Principal: apigateway.amazonaws.com
+  ApiGatewayNotificationGetLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - NotificationGetLambda
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref NotificationGetLambda
+      Principal: apigateway.amazonaws.com
+  ApiGatewayNotificationClearLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - NotificationClearLambda
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref NotificationClearLambda
+      Principal: apigateway.amazonaws.com
+  NotificationGetLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "notification-get-faas-${Environment}"
+      Description: !Sub "gets notifications after receiving websocket request in ${Environment}"
+      Handler: index.handler
+      MemorySize: 256
+      Runtime: nodejs8.10
+      Role: !GetAtt NotificationGetLambdaExecutionRole.Arn
+      Environment:
+          Variables:
+            NOTIFICATIONS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt NotificationsTable.Arn]]
+            WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
+            WSS_CONNECTION_URL: !Sub "https://${NotificationWebsocket}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+      Code:
+        S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
+        S3Key: !Ref NotificationGetFunctionArtifact
+  NotificationGetLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "notification-get-lambda-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub "allow-logs-notification-get-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            Resource: arn:aws:logs:*:*:*
+      - PolicyName: !Sub "allow-notification-table-access-notification-get-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !GetAtt NotificationsTable.Arn
+      - PolicyName: !Sub "allow-notifications-table-index-access-notification-get-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !Join [ '/', [!GetAtt NotificationsTable.Arn, 'index', '*'] ]
+      - PolicyName: !Sub "allow-websocket-table-access-notification-get-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !GetAtt WebsocketConnectionsTable.Arn
+      - PolicyName: !Sub "allow-websocket-table-index-access-notification-get-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
+      - PolicyName: !Sub "api-manage-connections-get-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - execute-api:ManageConnections
+            - 'execute-api:Invoke'
+            Resource:
+            - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NotificationWebsocket}/${Environment}/*'
+  NotificationGetLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn:
+      - NotificationGetLambda
+    Properties:
+      RetentionInDays: 90
+      LogGroupName: !Sub /aws/lambda/${NotificationGetLambda}
+  NotificationClearLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "notification-clear-faas-${Environment}"
+      Description: !Sub "clears notifications from websocket message in ${Environment}"
+      Handler: index.handler
+      MemorySize: 256
+      Runtime: nodejs8.10
+      Role: !GetAtt NotificationClearLambdaExecutionRole.Arn
+      Environment:
+          Variables:
+            NOTIFICATIONS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt NotificationsTable.Arn]]
+            WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
+            WSS_CONNECTION_URL: !Sub "https://${NotificationWebsocket}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+      Code:
+        S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
+        S3Key: !Ref NotificationsClearFunctionArtifact
+  NotificationClearLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "notification-clear-lambda-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyName: !Sub "allow-logs-notification-clear-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            Resource: arn:aws:logs:*:*:*
+      - PolicyName: !Sub "allow-notification-table-access-notification-clear-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:BatchWriteItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:DeleteItem'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:PutItem'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            - 'dynamodb:UpdateItem'
+            Resource: !GetAtt NotificationsTable.Arn
+      - PolicyName: !Sub "allow-websocket-table-access-notification-clear-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !GetAtt WebsocketConnectionsTable.Arn
+      - PolicyName: !Sub "allow-websocket-index-access-notification-clear-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
+      - PolicyName: !Sub "allow-api-invoke-clear-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'execute-api:ManageConnections'
+            - 'execute-api:Invoke'
+            Resource:
+            - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NotificationWebsocket}/${Environment}/*'
+  NotificationClearLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn:
+      - NotificationClearLambda
+    Properties:
+      RetentionInDays: 90
+      LogGroupName: !Sub /aws/lambda/${NotificationClearLambda}
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "notifications-${Environment}"
+      Subscription:
+        - Protocol: lambda
+          Endpoint: !GetAtt NotificationSendLambda.Arn
+  NotificationSendLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "notification-send-faas-${Environment}"
+      Description: !Sub "stores and sends notifications in ${Environment}"
+      Handler: index.handler
+      MemorySize: 256
+      Runtime: nodejs8.10
+      Code:
+        S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
+        S3Key: !Ref NotificationSendFunctionArtifact
+      Environment:
+        Variables:
+          WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
+          NOTIFICATIONS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt NotificationsTable.Arn]]
+          ENVIRONMENT: !Sub ${Environment
+          WSS_CONNECTION_URL: !Sub "https://${NotificationWebsocket}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+      Role: !GetAtt NotificationSendLambdaRole.Arn
+  NotificationSendLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "notification-send-lambda-role-${Environment}"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - "lambda.amazonaws.com"
+          Action:
+          - "sts:AssumeRole"
+      Policies:
+      - PolicyName: !Sub "allow-logs-notification-send-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'logs:CreateLogGroup'
+            - 'logs:CreateLogStream'
+            - 'logs:PutLogEvents'
+            Resource: arn:aws:logs:*:*:*
+      - PolicyName: !Sub "allow-dynamodb-access-notification-send-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:BatchWriteItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:DeleteItem'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:PutItem'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            - 'dynamodb:UpdateItem'
+            Resource: !GetAtt NotificationsTable.Arn
+      - PolicyName: !Sub "allow-notfication-ddb-index-access-notification-send-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !Join [ '/', [!GetAtt NotificationsTable.Arn, 'index', '*'] ]
+      - PolicyName: !Sub "allow-notification-table-access-notification-send-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !GetAtt NotificationsTable.Arn
+      - PolicyName: !Sub "allow-websocket-table-access-notification-send-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:BatchGetItem'
+            - 'dynamodb:ConditionCheck'
+            - 'dynamodb:GetItem'
+            - 'dynamodb:GetRecords'
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !GetAtt WebsocketConnectionsTable.Arn
+      - PolicyName: !Sub "allow-websocket-ddb-index-access-notification-send-lambda-${Environment}"
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'dynamodb:Query'
+            - 'dynamodb:Scan'
+            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
+      - PolicyName: !Sub "api-manage-connections-send-lambda-${Environment}"
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'execute-api:Invoke'
+            Resource:
+            - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NotificationWebsocket}/${Environment}/*'
+  NotificationSendLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn:
+      - NotificationSendLambda
+    Properties:
+      RetentionInDays: 90
+      LogGroupName: !Sub /aws/lambda/${NotificationSendLambda}
+  NotificationSendLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    DependsOn:
+      - NotificationTopic
+      - NotificationSendLambda
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref NotificationSendLambda
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref NotificationTopic
+  WebsocketConnectionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "notification-websocket-${Environment}"
+      AttributeDefinitions:
+      - AttributeName: "connection_id"
+        AttributeType: "S"
+      - AttributeName: "timestamp"
+        AttributeType: "N"
+      - AttributeName: "account"
+        AttributeType: "S"
+      KeySchema:
+      - AttributeName: "connection_id"
+        KeyType: "HASH"
+      - AttributeName: "timestamp"
+        KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: account-index
+          KeySchema:
+            - AttributeName: account
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+  WebsocketConnectionsTableWriteCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: 15
+      MinCapacity: 5
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref WebsocketConnectionsTable
+      RoleARN: !GetAtt WebsocketConnectionsTable.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  WebsocketConnectionsWriteScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref WebsocketConnectionsTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  NotificationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "notifications-${Environment}"
+      AttributeDefinitions:
+      - AttributeName: "uuid"
+        AttributeType: "S"
+      - AttributeName: "timestamp"
+        AttributeType: "N"
+      - AttributeName: "account"
+        AttributeType: "S"
+      KeySchema:
+      - AttributeName: "uuid"
+        KeyType: "HASH"
+      - AttributeName: "timestamp"
+        KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: "account-index"
+          KeySchema:
+            - AttributeName: "account"
+              KeyType: HASH
+            - AttributeName: "timestamp"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+  NotificationsTableWriteCapacityScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: 15
+      MinCapacity: 5
+      ResourceId: !Join
+        - /
+        - - table
+          - !Ref NotificationsTable
+      RoleARN: !GetAtt NotificationsTable.Arn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+  NotificationsTableWriteScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: WriteAutoScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref NotificationsTableWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+  DynamoDBScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Principal:
+              Service:
+                - application-autoscaling.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        -
+          PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "dynamodb:DescribeTable"
+                  - "dynamodb:UpdateTable"
+                  - "cloudwatch:PutMetricAlarm"
+                  - "cloudwatch:DescribeAlarms"
+                  - "cloudwatch:GetMetricStatistics"
+                  - "cloudwatch:SetAlarmState"
+                  - "cloudwatch:DeleteAlarms"
+                Resource: "*"
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      RouteKey: $connect
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref NotificationWebsocketAuthorizer
+      OperationName: ConnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ConnectInteg
+  ConnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      Description: "integration called from websocket connect event in ${Environment}"
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+          arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WebsocketNotificationConnectLambda.Arn}/invocations
+  # todo: customize 'error: Unexpected server response: 502' api gateway response when token auth fails
+  DisconnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      RouteKey: $disconnect
+      AuthorizationType: NONE
+      OperationName: DisconnectRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref DisconnectInteg
+  DisconnectInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      Description: Disconnect Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${WebsocketNotificationConnectLambda.Arn}/invocations
+  GetNotificationsRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      RouteKey: getnotifications
+      AuthorizationType: NONE
+      OperationName: Get Notifications
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref GetNotificationsInteg
+  GetNotificationsInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      Description: GetNotifications Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotificationGetLambda.Arn}/invocations
+  ClearNotificationsRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      RouteKey: clearnotifications
+      AuthorizationType: NONE
+      OperationName: ClearNotifications
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref ClearNotificationsInteg
+  ClearNotificationsInteg:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      Description: Clear Notifications Integration
+      IntegrationType: AWS_PROXY
+      IntegrationUri:
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${NotificationClearLambda.Arn}/invocations
+  DefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      RouteKey: '$default'
+      RouteResponseSelectionExpression: '$default'
+      AuthorizationType: NONE
+      OperationName: default
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref DefaultIntegration
+  DefaultIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      Description: returns error describing available actions
+      IntegrationType: MOCK
+      PassthroughBehavior: WHEN_NO_MATCH
+      RequestTemplates:
+        "200": "{\"statusCode\": 200}"
+      TemplateSelectionExpression: "200"
+  DefaultIntegrationResponse:
+    Type: AWS::ApiGatewayV2::IntegrationResponse
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      IntegrationId: !Ref DefaultIntegration
+      IntegrationResponseKey: "$default"
+      ResponseTemplates:
+        "404": "\"only getnotifications and clearnotifications actions available\""
+      TemplateSelectionExpression: "404"
+  DefaultRouteResponse:
+    Type: AWS::ApiGatewayV2::RouteResponse
+    Properties:
+      ApiId: !Ref NotificationWebsocket
+      RouteId: !Ref DefaultRoute
+      RouteResponseKey: '$default'
+  S3EventNotificationLifecycleManager:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "s3-event-faas-${Environment}"
+      Description: !Sub "manages s3 events for cloudformation in ${Environment}"
+      Handler: main.lambda_handler
+      Role: !GetAtt S3EventNotificationLifecycleManagerRole.Arn
+      Runtime: python3.6
+      Timeout: 50
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:113088814899:layer:Klayers-python37-requests:8"
+      Code:
+        S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
+        S3Key: !Ref S3EventNotificationCustomResourceArtifact
+      Environment:
+          Variables:
+            ENVIRONMENT: !Sub ${Environment}
+            ARTIFACTS_BUCKET: !Sub "mxfactorial-websocket-artifacts-${Environment}"
+  S3EventNotificationLifecycleManagerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+            Action:
+            - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: !Sub AllowS3EventCustomLambdaInvoke${Environment}
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketNotification
+                  - s3:PutBucketNotification
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+  S3EventNotificationLifecycleManagerLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn:
+      - S3EventNotificationLifecycleManager
+    Properties:
+      RetentionInDays: 90
+      LogGroupName: !Sub /aws/lambda/${S3EventNotificationLifecycleManager}
+  CustomResourceLambdaDeployS3EventConfiguration:
+  # depend on: 1) lambda to deploy, 2) preceding s3 event configurations,
+  # 3) S3EventNotificationLifecycleManagerLogGroup (avoids lingering log
+  # group after destroy). depending on preceding s3 event configurations avoids
+  # 'PutBucketNotificationConfiguration operation: A conflicting conditional
+  # operation is currently in progress against this resource. Please try again.'
+    DependsOn:
+    # lambda to deploy
+      - S3EventNotificationLifecycleManager
+    # preceding s3 event configurations (S3EventNotificationLifecycleManager first)
+      # - none
+    # S3EventNotificationLifecycleManagerLogGroup
+      - S3EventNotificationLifecycleManagerLogGroup
+    Type: Custom::CustomResourceLambdaDeployS3EventConfiguration
+    Properties:
+      ServiceToken: !GetAtt S3EventNotificationLifecycleManager.Arn
+      AccountId: !Ref AWS::AccountId
+      ObjectName: !Ref S3EventNotificationCustomResourceArtifact
+      ResourceName: !Ref S3EventNotificationLifecycleManager
+  CustomResourceLambdaDeployWebsocketAuthConfiguration:
+    DependsOn:
+    # lambda to deploy
+      - WebsocketAuthLambda
+    # preceding s3 event configurations
+      - CustomResourceLambdaDeployS3EventConfiguration
+    # S3EventNotificationLifecycleManagerLogGroup
+      - S3EventNotificationLifecycleManagerLogGroup
+    Type: Custom::CustomResourceLambdaDeployWebsocketAuthConfiguration
+    Properties:
+      ServiceToken: !GetAtt S3EventNotificationLifecycleManager.Arn
+      AccountId: !Ref AWS::AccountId
+      ObjectName: !Ref WebsocketAuthFunctionArtifact
+      ResourceName: !Ref WebsocketAuthLambda
+  WebsocketNotificationConnectLambdaConfiguration:
+    DependsOn:
+    # lambda to deploy
+      - WebsocketNotificationConnectLambda
+    # preceding s3 event configurations
+      - CustomResourceLambdaDeployWebsocketAuthConfiguration
+      - CustomResourceLambdaDeployS3EventConfiguration
+    # S3EventNotificationLifecycleManagerLogGroup
+      - S3EventNotificationLifecycleManagerLogGroup
+    Type: Custom::WebsocketNotificationConnectLambdaConfiguration
+    Properties:
+      ServiceToken: !GetAtt S3EventNotificationLifecycleManager.Arn
+      AccountId: !Ref AWS::AccountId
+      ObjectName: !Ref WebsocketConnectFunctionArtifact
+      ResourceName: !Ref WebsocketNotificationConnectLambda
+  CustomResourceNotificationGetLambdaConfiguration:
+    DependsOn:
+    # lambda to deploy
+      - WebsocketNotificationConnectLambda
+    # preceding s3 event configurations
+      - CustomResourceLambdaDeployWebsocketAuthConfiguration
+      - CustomResourceLambdaDeployS3EventConfiguration
+      - WebsocketNotificationConnectLambdaConfiguration
+    # S3EventNotificationLifecycleManagerLogGroup
+      - S3EventNotificationLifecycleManagerLogGroup
+    Type: Custom::CustomResourceNotificationGetLambdaConfiguration
+    Properties:
+      ServiceToken: !GetAtt S3EventNotificationLifecycleManager.Arn
+      AccountId: !Ref AWS::AccountId
+      ObjectName: !Ref NotificationGetFunctionArtifact
+      ResourceName: !Ref NotificationGetLambda
+  CustomResourceNotificationSendLambdaConfiguration:
+    DependsOn:
+    # lambda to deploy
+      - WebsocketNotificationConnectLambda
+    # preceding s3 event configurations
+      - CustomResourceLambdaDeployWebsocketAuthConfiguration
+      - CustomResourceLambdaDeployS3EventConfiguration
+      - WebsocketNotificationConnectLambdaConfiguration
+      - CustomResourceNotificationGetLambdaConfiguration
+    # S3EventNotificationLifecycleManagerLogGroup
+      - S3EventNotificationLifecycleManagerLogGroup
+    Type: Custom::CustomResourceNotificationSendLambdaConfiguration
+    Properties:
+      ServiceToken: !GetAtt S3EventNotificationLifecycleManager.Arn
+      AccountId: !Ref AWS::AccountId
+      ObjectName: !Ref NotificationSendFunctionArtifact
+      ResourceName: !Ref NotificationSendLambda
+  CustomResourceNotificationClearLambdaConfiguration:
+    DependsOn:
+    # lambda to deploy
+      - WebsocketNotificationConnectLambda
+    # preceding s3 event configurations
+      - CustomResourceLambdaDeployWebsocketAuthConfiguration
+      - CustomResourceLambdaDeployS3EventConfiguration
+      - WebsocketNotificationConnectLambdaConfiguration
+      - CustomResourceNotificationGetLambdaConfiguration
+      - CustomResourceNotificationSendLambdaConfiguration
+    # S3EventNotificationLifecycleManagerLogGroup
+      - S3EventNotificationLifecycleManagerLogGroup
+    Type: Custom::CustomResourceNotificationClearLambdaConfiguration
+    Properties:
+      ServiceToken: !GetAtt S3EventNotificationLifecycleManager.Arn
+      AccountId: !Ref AWS::AccountId
+      ObjectName: !Ref NotificationsClearFunctionArtifact
+      ResourceName: !Ref NotificationClearLambda
+  NotificationWebsocketEndpoint:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notification websocket endoint in ${Environment}"
+      Name: !Sub "${Environment}/WSS_CLIENT_URL"
+      SecretString:
+        Fn::Join:
+        - ''
+        - - wss://
+          - !Ref NotificationWebsocket
+          - .execute-api.
+          - !Ref AWS::Region
+          - .amazonaws.com/
+          - !Ref Stage
+  NotificationWebsocketConnectionUrl:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notification websocket connection url in ${Environment}"
+      Name: !Sub "${Environment}/WSS_CONNECTION_URL"
+      SecretString:
+        Fn::Join:
+        - ''
+        - - https://
+          - !Ref NotificationWebsocket
+          - .execute-api.
+          - !Ref AWS::Region
+          - .amazonaws.com/
+          - !Ref Stage
+  NotificationsTableName:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notifications table name in ${Environment}"
+      Name: !Sub "${Environment}/NOTIFICATIONS_TABLE_NAME"
+      SecretString: !Ref NotificationsTable
+  WebsocketsTableName:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "websockets table name in ${Environment}"
+      Name: !Sub "${Environment}/WEBSOCKETS_TABLE_NAME"
+      SecretString: !Ref WebsocketConnectionsTable
+  NotificationTopicArn:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notification topic arn in ${Environment}"
+      Name: !Sub "${Environment}/TOPIC_ARN"
+      SecretString: !Ref NotificationTopic
+Outputs:
+  NotificationWebsocketEndpoint:
+    Description: wss notification endpoint
+    Value:
+      Fn::Join:
+        - ''
+        - - wss://
+          - !Ref NotificationWebsocket
+          - .execute-api.
+          - !Ref AWS::Region
+          - .amazonaws.com/
+          - !Ref Stage
+    Export:
+      Name: !Sub "notification-websocket-endpoint-${Environment}"
