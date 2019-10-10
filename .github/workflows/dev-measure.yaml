@@ -21,7 +21,6 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       CI: true
-      GOPATH: $GITHUB_WORKSPACE/go
     steps:
       - uses: actions/checkout@v1
       - name: use default go
@@ -29,7 +28,9 @@ jobs:
       - name: install aws cli
         uses: chrislennon/action-aws-cli@v1.1
       - name: install dependencies
-        run: make install
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          make install
         working-directory: services/measure-faas
       - name: compile
         run: make compile
