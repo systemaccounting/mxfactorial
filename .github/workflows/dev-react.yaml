@@ -1,0 +1,48 @@
+name: dev-react
+
+on:
+  push:
+    paths:
+    - 'react/**'
+    branches-ignore:
+    - 'master'
+  pull_request:
+    paths:
+    - 'react/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  test:
+    name: react unit and e2e tests in dev
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: use node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: install yarn
+        uses: sergioramos/yarn-actions/install@master
+      - name: install aws cli
+        uses: chrislennon/action-aws-cli@v1.1
+      - name: install dependencies
+        run: make install
+        working-directory: react
+      - name: execute unit tests
+        run: make test-unit
+        working-directory: react
+      - name: execute integration tests
+        run: make test-e2e ENV=dev
+        working-directory: react
+      - name: build for dev
+        run: make build ENV=dev
+        working-directory: react
+      - name: deploy to dev
+        run: make deploy ENV=dev
+        working-directory: react
