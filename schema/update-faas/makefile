@@ -4,6 +4,7 @@ APP_TYPE = faas
 LAMBDA_NAME = schema-update-tool-lambda
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
+# ENV_VARS :=
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -30,52 +31,39 @@ clean: clean-deps clean-env clean-artifact
 
 ###################### dependencies ######################
 
-.PHONY: install
-install:
+.PHONY: install clean-deps
+install: clean-deps
 		yarn install
 
-.PHONY: install-prod
-install-prod:
+.PHONY: install-prod clean-deps
+install-prod: clean-deps
 		yarn install --prod
 
 ###################### secrets ######################
 
-.PHONY: get-secrets test-env-arg
-get-secrets: test-env-arg
-		@aws secretsmanager get-secret-value --secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--query 'SecretBinary' \
-			--output text \
-			| base64 --decode \
-			> $(DIR)/.env
-		@if [ ! -s $(DIR)/.env ]; then \
-			rm $(DIR)/.env; \
-		fi
+.PHONY: get-secrets retrieve-each-secret
+get-secrets: retrieve-each-secret
+	@if [ ! -s $(DIR)/.env ]; then \
+		rm $(DIR)/.env; \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
 
-.PHONY: create-secrets test-env-arg
-create-secrets: test-env-arg
-		aws secretsmanager create-secret \
-			--name $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--description 'env-cmd file fetched before testing' \
-			--secret-binary file://$(DIR)/.env
-
-.PHONY: put-secrets test-env-arg
-put-secrets: test-env-arg
-		aws secretsmanager put-secret-value \
-			--secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			--secret-binary file://$(DIR)/.env
-
-.PHONY: test-secret test-env-arg
-test-secret: test-env-arg
-		@aws secretsmanager describe-secret \
-			--secret-id $(ENV)/$(APP_NAME)-$(APP_TYPE) \
-			> /dev/null 2>&1; \
-			if [ "$$?" != 0 ]; then \
-				echo "$(APP_NAME)-$(APP_TYPE) requires a remote-stored .env file to build."; \
-				printf "create an .env file and store with "; \
-				echo "'make create-secrets' before building."; \
-				echo "exiting."; \
-				exit 1; \
-			fi
+.PHONY: retrieve-each-secret test-env-arg clean-env $(ENV_VARS)
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	@if [ $@ = AWS_REGION ]; then \
+		echo AWS_REGION=$(REGION) >> $(DIR)/.env; \
+	else \
+		ENV_VAR=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+			echo $@=$$ENV_VAR \
+			>> $(DIR)/.env; \
+	fi
 
 ###################### build and test ######################
 
@@ -104,10 +92,27 @@ src: zip
 # .PHONY: dev test
 # dev: test
 
+
+# todo: add unit and integration tests
+# .PHONY: test test-unit test-integration
+# test: test-unit test-integration
+
+# .PHONY: test-unit test-env-arg get-secrets install
+# test-unit: test-env-arg get-secrets install
+# 		yarn test
+
+# .PHONY: test-integration deploy
+# test-integration: deploy
+# 		@yarn install; \
+# 		yarn test:integration
+
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg zip
-deploy: test-env-arg zip # lambda layer NOT deployed. use deploy-all
+.PHONY: deploy test-env-arg install-prod zip deploy-only
+deploy: test-env-arg install-prod zip deploy-only # lambda layer NOT deployed. use deploy-all
+
+.PHONY: deploy-only test-env-arg
+deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
