@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --verbose --silent"
+    "test": "env-cmd jest --detectOpenHandles --verbose --silent"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "lodash": "^4.17.11",
     "mysql2": "^1.6.5",
-    "sequelize": "^4.43.0"
+    "sequelize": "^4.43.0",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "aws-sdk": "^2.548.0",
+    "env-cmd": "^10.0.1",
     "jest": "^24.5.0"
   }
 }
