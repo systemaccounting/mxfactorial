@@ -1,39 +1,22 @@
 const { handler } = require('../..')
 const storeTransactions = require('../../src/storeTransactions')
 const requestRules = require('../../src/requestRules')
+const {
+  itemsUnderTestArray,
+  itemsStandardArray
+} = require('../utils/testData')
 
 jest.mock('../../src/storeTransactions')
-jest.mock('../../src/requestRules.js')
-
-const itemsUnderTestArray = [
-  {
-    name: 'Milk',
-    price: '3',
-    quantity: '2',
-    author: 'Joe Smith',
-    debitor: 'Joe Smith',
-    creditor: 'Mary'
-  }
-]
-
-const itemsStandardArray = [
-  {
-    name: 'Milk',
-    price: '3',
-    quantity: '2',
-    author: 'Joe Smith',
-    debitor: 'Joe Smith',
-    creditor: 'Mary'
-  },
-  {
-    name: '9% state sales tax',
-    quantity: '1',
-    price: '0.540',
-    author: 'Joe Smith',
-    debitor: 'Joe Smith',
-    creditor: 'StateOfCalifornia'
-  }
-]
+jest.mock('../../src/compareTransactions', () => {
+  return jest.fn()
+    .mockReturnValueOnce(true)
+    .mockReturnValueOnce(false)
+    .mockReturnValue(true)
+})
+jest.mock('../../src/requestRules.js', () => jest.fn().mockImplementation(() => {
+  return jest.requireActual('../utils/testData').itemsStandardArray
+}))
+jest.mock('uuid/v1', () => jest.fn().mockReturnValue('662bc1a0-ed24-11e9-90ac-fd8810fc35b7'))
 
 describe('Store into transactions table', () => {
   afterEach(() => {

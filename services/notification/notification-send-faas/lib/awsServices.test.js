@@ -1,5 +1,4 @@
 const {
-  idAndTimestampNotifications,
   formatPendingNotifications,
   batchWriteTable,
   queryIndex,
@@ -7,14 +6,9 @@ const {
 } = require('./awsServices')
 
 const {
-  pendingNotifications,
   pendingReceivedNotifications,
   batchWriteNotifications
 } = require('../tests/utils/testData')
-
-afterEach(() => {
-  jest.clearAllMocks()
-})
 
 const mockAws = method => {
   return {
@@ -34,36 +28,11 @@ const mockAws = method => {
   }
 }
 
-const mockId = jest.fn()
-  .mockImplementationOnce(() => '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd21-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd22-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd23-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd24-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd25-e60b-11e9-a7a9-2b4645cb9b8c')
-
-const mockTime = {
-  now: jest.fn()
-  .mockImplementationOnce(() => 1570139563495635)
-  .mockImplementationOnce(() => 1570139563495685)
-  .mockImplementationOnce(() => 1570139563495694)
-  .mockImplementationOnce(() => 1570139563495700)
-  .mockImplementationOnce(() => 1570139563495706)
-  .mockImplementationOnce(() => 1570139563495713)
-}
-
 describe('awsServices', () => {
 
-  test('ids and timestamps added to received notifications', () => {
-    let expected = pendingReceivedNotifications
-    let result = idAndTimestampNotifications(mockId, mockTime, pendingNotifications)
-    expect(result).toEqual(expected)
-  })
-
-  test('batchwrite items formatted', () => {
-    let expected = batchWriteNotifications
+  test('items formatted for batchWrite', () => {
     let result = formatPendingNotifications(pendingReceivedNotifications)
-    expect(result).toEqual(expected)
+    expect(result).toEqual(batchWriteNotifications)
   })
 
   test('batchwrite notifications param', () => {
@@ -103,8 +72,12 @@ describe('awsServices', () => {
     let apig = mockAws('postToConnection')
     let connectionId = '1234567'
     let data = {
-      cleared: [
-        {"account":"testaccount","time_uuid":"1234","message":"test message"}
+      pending: [
+        {
+          "account":"testaccount",
+          "time_uuid":"1234",
+          "message":"test message"
+        }
       ]
     }
     let expected = {

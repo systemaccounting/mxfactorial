@@ -5,7 +5,7 @@ LAMBDA_NAME = notification-send
 ARTIFACT_BUCKET= mxfactorial-websocket-artifacts
 REGION = us-east-1
 ENV_VARS := AWS_REGION WSS_CONNECTION_URL WSS_CLIENT_URL NOTIFICATIONS_TABLE_NAME \
-WEBSOCKETS_TABLE_NAME SECRET CLIENT_ID POOL_ID TOPIC_ARN
+WEBSOCKETS_TABLE_NAME SECRET CLIENT_ID POOL_ID NOTIFY_TOPIC_ARN
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -85,7 +85,9 @@ src: test-env-arg clean test zip
 
 .PHONY: zip install-prod
 zip: install-prod
-		zip -r $(APP_NAME)-src.zip index.js package.json node_modules lib/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip \
+			index.js package.json node_modules lib supportedServices \
+			--exclude "*.test.*"
 
 .PHONY: layer
 layer:

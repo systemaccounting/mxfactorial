@@ -9,9 +9,11 @@
     "axios": "^0.18.0",
     "lodash": "^4.17.11",
     "mysql2": "^1.6.5",
-    "sequelize": "^4.43.0"
+    "sequelize": "^4.43.0",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
+    "aws-sdk": "^2.548.0",
     "jest": "^24.5.0"
   }
 }

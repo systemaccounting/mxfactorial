@@ -4,6 +4,7 @@ APP_TYPE = faas
 LAMBDA_NAME = transact-lambda
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
+ENV_VARS := AWS_REGION NOTIFY_TOPIC_ARN RULES_URL
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -73,6 +74,7 @@ test: test-env-arg test-unit
 test-unit: test-env-arg install
 		yarn test
 
+# todo: add integration tests
 # .PHONY: test-integration deploy get-secrets
 # test-integration: deploy get-secrets
 # 		@yarn install; \
@@ -88,10 +90,11 @@ dev: test
 
 .PHONY: zip
 zip:
-		zip -r $(APP_NAME)-src.zip index.js package.json src/* --exclude "*.test.*" "*src/__mocks__*"
+		zip -r $(APP_NAME)-src.zip index.js package.json src/* \
+			--exclude "*.test.*" "*src/__mocks__*"
 
-.PHONY: layer
-layer:
+.PHONY: clean-deps layer
+layer: clean-deps
 		rm -f $(APP_NAME)-layer.zip
 		yarn install --prod
 		mkdir nodejs

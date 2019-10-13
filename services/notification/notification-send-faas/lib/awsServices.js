@@ -1,24 +1,22 @@
-const idAndTimestampNotifications = (idService, timeService, notificationArray) => {
-  let receivedItems = []
-  for (let i = 0; i < notificationArray.length; i++) {
-    let { account, message } = notificationArray[i]
-    receivedItems.push({
-      uuid: idService(),
-      timestamp: timeService.now(),
-      account,
-      message
-    })
-  }
-  return receivedItems
-}
-
 const formatPendingNotifications = notificationArray => {
   let ddbPutFormattedItems = []
-  for (let i = 0; i < notificationArray.length; i++) {
-    let { uuid, timestamp, account, message } = notificationArray[i]
+  for (notification of notificationArray) {
+    let {
+      uuid,
+      timestamp,
+      human_timestamp,
+      account,
+      message
+    } = notification
     ddbPutFormattedItems.push({
       PutRequest: {
-        Item: { uuid, timestamp, account, message }
+        Item: {
+          uuid,
+          timestamp,
+          human_timestamp,
+          account,
+          message
+        }
       }
     })
   }
@@ -76,9 +74,7 @@ const sendMessageToClient = (service, connectionId, data) => {
   return service.postToConnection(params)
     .promise()
     .then(data => {
-      if (data) {
-        console.log(`sent: ${params.Data}`)
-      }
+      console.log('sent: ' + params.Data)
       return
     })
     .catch(err => {
@@ -88,7 +84,6 @@ const sendMessageToClient = (service, connectionId, data) => {
 }
 
 module.exports = {
-  idAndTimestampNotifications,
   formatPendingNotifications,
   batchWriteTable,
   queryIndex,
