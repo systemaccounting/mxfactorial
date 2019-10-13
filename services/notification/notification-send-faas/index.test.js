@@ -1,7 +1,9 @@
+const AWS = require('aws-sdk')
+const uuid = require('uuid/v1')
+const microtime = require('microtime')
 const { handler } = require('./index')
 
 const {
-  idAndTimestampNotifications,
   formatPendingNotifications,
   batchWriteTable,
   queryIndex,
@@ -9,32 +11,63 @@ const {
 } = require('./lib/awsServices')
 
 const {
-  dedupeAccounts
-} = require('./lib/utils')
+  accountsReceivingTransactionNotifications,
+  transactionNotificationsToSend,
+  dedupeTransactionNotificationRecipients,
+  idAndTimestampNotifications
+} = require('./supportedServices/transact')
 
 const {
-  pendingNotifications
+  dedupedRecipientList,
+  pendingNotifications,
+  pendingReceivedNotifications,
+  snsEvent,
+  notificationsToSend
 } = require('./tests/utils/testData')
+
+jest.mock('uuid/v1')
+jest.mock('microtime')
+jest.mock('aws-sdk', () => {
+  return {
+    DynamoDB: {
+      DocumentClient: jest.fn().mockImplementation(() => {})
+    },
+    ApiGatewayManagementApi: jest.fn()
+  }
+})
 
 jest.mock('./lib/awsServices', () => {
   return {
-    idAndTimestampNotifications: jest.fn().mockImplementation(
-      () => jest.requireActual('./lib/utils').idAndTimestampNotifications
+    formatPendingNotifications: jest.fn().mockImplementation(
+      () => {
+        return jest.requireActual('./tests/utils/testData')
+          .pendingReceivedNotifications
+      }
     ),
-    formatPendingNotifications: jest.fn(),
     batchWriteTable: jest.fn(),
     queryIndex: jest.fn().mockImplementation(
-      () => jest.requireActual('./tests/utils/testData').websocketConnectionIds
+      () => {
+        return jest.requireActual('./tests/utils/testData')
+          .websocketConnectionIds
+      }
     ),
     sendMessageToClient: jest.fn()
   }
 })
 
-jest.mock('./lib/utils', () => {
+jest.mock('./supportedServices/transact', () => {
   return {
-    dedupeAccounts: jest.fn().mockImplementation(
-      jest.requireActual('./lib/utils').dedupeAccounts
-    )
+    accountsReceivingTransactionNotifications: jest.fn().mockImplementation(
+      () => {
+        return jest.requireActual('./tests/utils/testData')
+          .dedupedRecipientList
+      }
+    ),
+    transactionNotificationsToSend: jest.fn().mockImplementation(() => {
+      return jest.requireActual('./tests/utils/testData')
+        .notificationsToSend
+    }),
+    idAndTimestampNotifications: jest.fn()
   }
 })
 
@@ -43,54 +76,77 @@ afterEach(() => {
 })
 
 afterAll(() => {
-  jest.unmock('./lib/awsServices')
-  jest.unmock('./lib/utils')
+  jest.unmock('uuid/v1')
+  jest.unmock('microtime')
+  jest.unmock('aws-sdk')
+  jest.unmock('./supportedServices/transact')
 })
 
-const event = {
-  Records: [
-    {
-      Sns: {
-        Message: JSON.stringify(pendingNotifications)
-      }
-    }
-  ]
-}
-
 describe('lambda function', () => {
-  test('calls dedupeAccounts', async () => {
-    await handler(event)
-    await expect(dedupeAccounts).toHaveBeenCalled()
+  test('calls accountsReceivingTransactionNotifications with args', async () => {
+    await handler(snsEvent)
+    expect(accountsReceivingTransactionNotifications)
+      .toHaveBeenCalledWith(
+        pendingNotifications,
+        dedupeTransactionNotificationRecipients,
+        'creditor',
+        'debitor'
+      )
   })
 
-  test('calls idAndTimestampNotifications', async () => {
-    await handler(event)
-    await expect(idAndTimestampNotifications).toHaveBeenCalledTimes(4)
+  test('calls transactionNotificationsToSend with args', async () => {
+    await handler(snsEvent)
+    expect(transactionNotificationsToSend)
+    .toHaveBeenCalledWith(
+      uuid,
+      microtime,
+      dedupedRecipientList,
+      pendingNotifications,
+      idAndTimestampNotifications
+    )
   })
 
-  test('calls formatPendingNotifications', async () => {
-    await handler(event)
-    await expect(formatPendingNotifications).toHaveBeenCalledTimes(4)
+  test('calls formatPendingNotifications with args', async () => {
+    await handler(snsEvent)
+    expect(formatPendingNotifications)
+      .toHaveBeenCalledWith(notificationsToSend)
   })
 
-  test('calls batchWriteTable', async () => {
-    await handler(event)
-    await expect(batchWriteTable).toHaveBeenCalledTimes(4)
+  test('calls formatPendingNotifications 3 times', async () => {
+    await handler(snsEvent)
+    expect(formatPendingNotifications)
+      .toHaveBeenCalledTimes(3)
   })
 
-  test('calls queryIndex', async () => {
-    await handler(event)
-    await expect(queryIndex).toHaveBeenCalledTimes(4)
+  test('calls batchWriteTable with args', async () => {
+    process.env.NOTIFICATIONS_TABLE_NAME = 'notifications-table'
+    await handler(snsEvent)
+    expect(batchWriteTable.mock.calls[0][0])
+      .toEqual({})
+    expect(batchWriteTable.mock.calls[0][1])
+      .toBe('notifications-table')
+    expect(batchWriteTable.mock.calls[0][2])
+      .toBe(pendingReceivedNotifications)
   })
 
-  test('calls sendMessageToClient', async () => {
-    await handler(event)
-    await expect(sendMessageToClient).toHaveBeenCalledTimes(4)
+  test('calls queryIndex with args', async () => {
+    process.env.WEBSOCKETS_TABLE_NAME = 'websocket-table'
+    await handler(snsEvent)
+    expect(queryIndex.mock.calls[0][0])
+      .toEqual({})
+    expect(queryIndex.mock.calls[0][1])
+      .toBe('websocket-table')
+    expect(queryIndex.mock.calls[0][2])
+      .toBe('account-index')
+    expect(queryIndex.mock.calls[0][3])
+      .toBe('account')
+    expect(queryIndex.mock.calls[0][4])
+      .toBe(dedupedRecipientList[0])
   })
 
   test('calls sendMessageToClient 0 times', async () => {
     queryIndex.mockImplementation(() => [])
-    await handler(event)
+    await handler(snsEvent)
     await expect(sendMessageToClient).toHaveBeenCalledTimes(0)
   })
 
@@ -101,7 +157,7 @@ describe('lambda function', () => {
         ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
       ]
     })
-    await handler(event)
-    await expect(sendMessageToClient).toHaveBeenCalledTimes(8)
+    await handler(snsEvent)
+    await expect(sendMessageToClient).toHaveBeenCalledTimes(6)
   })
 })
