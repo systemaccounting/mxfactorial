@@ -1,5 +1,7 @@
 const _ = require('lodash')
 
+// todo: unit tests
+
 function compareTransactions(transactions1, transactions2) {
   if (!transactions1 || !transactions2) {
     return false

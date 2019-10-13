@@ -339,7 +339,7 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
-            - execute-api:ManageConnections
+            - 'execute-api:ManageConnections'
             - 'execute-api:Invoke'
             Resource:
             - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NotificationWebsocket}/${Environment}/*'
@@ -447,13 +447,12 @@ Resources:
     Properties:
       RetentionInDays: 90
       LogGroupName: !Sub /aws/lambda/${NotificationClearLambda}
-  NotificationTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: !Sub "notifications-${Environment}"
-      Subscription:
-        - Protocol: lambda
-          Endpoint: !GetAtt NotificationSendLambda.Arn
+  NotificationTopicSubscription: # sns topic provisioned in infrastructure/terraform/aws/modules/environment/sns.tf
+      Type: AWS::SNS::Subscription
+      Properties:
+        Endpoint: !GetAtt NotificationSendLambda.Arn
+        Protocol: lambda
+        TopicArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:notifications-${Environment}"
   NotificationSendLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -563,6 +562,7 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
+            - 'execute-api:ManageConnections'
             - 'execute-api:Invoke'
             Resource:
             - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${NotificationWebsocket}/${Environment}/*'
@@ -576,13 +576,13 @@ Resources:
   NotificationSendLambdaInvokePermission:
     Type: AWS::Lambda::Permission
     DependsOn:
-      - NotificationTopic
       - NotificationSendLambda
+      - NotificationTopicSubscription
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref NotificationSendLambda
       Principal: sns.amazonaws.com
-      SourceArn: !Ref NotificationTopic
+      SourceArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:notifications-${Environment}"
   WebsocketConnectionsTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -1034,12 +1034,6 @@ Resources:
       Description: !Sub "websockets table name in ${Environment}"
       Name: !Sub "${Environment}/WEBSOCKETS_TABLE_NAME"
       SecretString: !Ref WebsocketConnectionsTable
-  NotificationTopicArn:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: !Sub "notification topic arn in ${Environment}"
-      Name: !Sub "${Environment}/TOPIC_ARN"
-      SecretString: !Ref NotificationTopic
 Outputs:
   NotificationWebsocketEndpoint:
     Description: wss notification endpoint
