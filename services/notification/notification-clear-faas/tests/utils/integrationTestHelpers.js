@@ -1,11 +1,21 @@
 const createNotifications = (service, table, notifications) => {
   let ddbPutItems = []
   for (let i = 0; i < notifications.length; i++) {
-    let { uuid, timestamp, account, message } = notifications[i]
+    let {
+      uuid,
+      timestamp,
+      human_timestamp,
+      account,
+      message
+    } = notifications[i]
     ddbPutItems.push({
       PutRequest: {
         Item: {
-          uuid, timestamp, account, message
+          uuid,
+          timestamp,
+          human_timestamp,
+          account,
+          message
         }
       }
     })

@@ -12,7 +12,7 @@ const {
 
 const {
   TEST_ACCOUNT,
-  pendingNotifications
+  pendingReceivedNotifications
 } = require('./utils/testData')
 
 const AWS_REGION = process.env.AWS_REGION
@@ -39,7 +39,7 @@ beforeEach(async () => {
   await createNotifications(
     ddb,
     NOTIFICATIONS_TABLE_NAME,
-    pendingNotifications
+    pendingReceivedNotifications
   )
 })
 
@@ -47,12 +47,12 @@ afterEach(async () => {
   await deleteNotifications(
     ddb,
     NOTIFICATIONS_TABLE_NAME,
-    pendingNotifications
+    pendingReceivedNotifications
   )
 })
 
 describe('notification pending lambda', () => {
-  test('clears 3 pending messages', async done => {
+  test('clears 1 pending message', async done => {
     let token = await getToken(cognitoIdsp, CLIENT_ID, TEST_ACCOUNT, SECRET)
     let options = {
       headers: { Authorization: token }
@@ -86,7 +86,7 @@ describe('notification pending lambda', () => {
                   done()
                 }
                 ws.close()
-                expect(cleared.length).toBe(3)
+                expect(cleared.length).toBe(1)
                 done()
               }
             })
@@ -95,4 +95,6 @@ describe('notification pending lambda', () => {
       })
     })
   }, 10000)
+
+  // todo: assert notification table length - 1 after clear action
 })
