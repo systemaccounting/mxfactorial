@@ -1,4 +1,6 @@
 const AWS = require('aws-sdk')
+const ddb = new AWS.DynamoDB.DocumentClient({ region: AWS_REGION })
+const ws = new AWS.ApiGatewayManagementApi({ endpoint: WSS_CONNECTION_URL })
 
 const {
   queryIndex,
@@ -19,10 +21,6 @@ const PENDING_NOTIFICATIONS_PROPERTY = 'pending'
 // {"action":"getnotifications"}
 exports.handler = async event => {
   console.log(JSON.stringify(event))
-
-  // declared within handler for local testing
-  let ddb = new AWS.DynamoDB.DocumentClient({ region: AWS_REGION })
-  let ws = new AWS.ApiGatewayManagementApi({ endpoint: WSS_CONNECTION_URL })
 
   // retrieve account owned by connection id
   let websocketItems = await queryTable(
