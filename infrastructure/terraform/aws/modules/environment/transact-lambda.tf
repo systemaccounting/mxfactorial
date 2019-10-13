@@ -27,21 +27,24 @@ resource "aws_lambda_function" "transact_service_lambda" {
 
   environment {
     variables = {
-      HOST     = aws_rds_cluster.default.endpoint
-      USER     = var.db_master_username
-      PASSWORD = var.db_master_password
-
-      # workaround for aws_api_gateway_deployment.rules.invoke_url cycle error:
-      RULES_URL = "https://${aws_api_gateway_rest_api.rules.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
+      HOST             = aws_rds_cluster.default.endpoint
+      USER             = var.db_master_username
+      PASSWORD         = var.db_master_password
+      NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn
+      RULES_URL        = local.RULES_URL
     }
   }
+}
+
+locals {
+  # workaround for aws_api_gateway_deployment.rules.invoke_url cycle error:
+  RULES_URL = "https://${aws_api_gateway_rest_api.rules.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
 }
 
 resource "aws_cloudwatch_log_group" "transact_service_lambda" {
   name              = "/aws/lambda/${aws_lambda_function.transact_service_lambda.function_name}"
   retention_in_days = 30
 }
-
 
 data "aws_lambda_layer_version" "transact_service_lambda" {
   layer_name = "transact-node-deps-${var.environment}"
@@ -80,30 +83,51 @@ resource "aws_iam_role" "transact_service_lambda_role" {
 EOF
 }
 
-# policy for lambda to create logs and access rds
+# policy for lambda to create logs, access rds and sns
 resource "aws_iam_role_policy" "transact_service_lambda_policy" {
   name = "transact-service-lambda-policy-${var.environment}"
   role = aws_iam_role.transact_service_lambda_role.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface"
-      ],
-      "Resource": "*"
-    }
-  ]
+  policy = data.aws_iam_policy_document.transact_service_lambda_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "transact_service_lambda_policy" {
+  version = "2012-10-17"
+
+  statement {
+    sid = "TransactLambdaLoggingPolicy${var.environment}"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid = "TransactLambdaEc2AccessPolicy${var.environment}"
+    actions = [
+      "ec2:CreateNetworkInterface",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:DeleteNetworkInterface"
+    ]
+    resources = [
+      "*", # todo: restrict
+    ]
+  }
+
+  statement {
+    sid = "TransactLambdaSNSPublishPolicy${var.environment}"
+    actions = [
+      "SNS:Publish",
+    ]
+    resources = [
+      aws_sns_topic.notifications.arn,
+    ]
+  }
+
 }
 
 resource "aws_iam_role_policy_attachment" "rds_access_for_transact_lambda" {
