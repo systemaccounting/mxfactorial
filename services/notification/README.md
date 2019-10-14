@@ -2,7 +2,7 @@
   <a href="http://www.systemaccounting.org/math_identity" target="_blank"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></a>
 </p>
 
-**client websocket integration**
+**client websocket integration**  
 1. send transaction request to test account in ui
 1. `cd services/notification/client-instructions`
 1. assign test account and password to `ACCOUNT` and `SECRET` env vars in .env file
@@ -10,7 +10,7 @@
 1. `yarn get` to print pending notifications for `ACCOUNT`
 1. `yarn clear` to print cleared notifications for `ACCOUNT`
 
-**authentication and connection**
+**authentication and connection**  
 websocket authentication and connection depends on passing cognito `idToken` as `Authorization` header to `Websocket` instance:
 
 ```js
@@ -30,7 +30,7 @@ const options = {
 const ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
 ```
 
-**get notifications**
+**get notifications**  
 `pending` transaction notifications retrieved with `JSON.stringify({"action":"getnotifications"})` websocket message:
 
 ```js
@@ -84,7 +84,7 @@ transaction item array stored as notification `message` value. items grouped by 
 ]
 ```
 
-**clear notifications**
+**clear notifications**  
 transaction notifications cleared by sending `clearnotifications` websocket message:
 ```js
 const shapeClearnNotificationsRequest = notifications => {
