@@ -3,7 +3,7 @@ APP_NAME = react
 APP_TYPE = client
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
-ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API
+ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API ENV
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -50,14 +50,15 @@ retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
 		echo REACT_APP_AWS_REGION=$(REGION) >> $(DIR)/.env; \
+	elif [ $@ = ENV ]; then \
+		echo ENV=$(ENV) >> $(DIR)/.env; \
 	else \
 		ENV_VAR=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-			echo REACT_APP_$@=$$ENV_VAR \
-			>> $(DIR)/.env; \
+		echo REACT_APP_$@=$$ENV_VAR >> $(DIR)/.env; \
 	fi
 
 ###################### start ######################
@@ -77,13 +78,13 @@ test-unit:
 
 .PHONY: test-e2e test-env-arg get-secrets warm-up
 test-e2e: test-env-arg get-secrets warm-up
-		LOCAL_ENV=$(ENV) yarn test:e2e-public; \
-		LOCAL_ENV=$(ENV) yarn test:e2e-private
+		yarn test:e2e-public; \
+		yarn test:e2e-private
 
 .PHONY: e2e-now
 e2e-now:
-		LOCAL_ENV=$(ENV) yarn test:e2e-public; \
-		LOCAL_ENV=$(ENV) yarn test:e2e-private
+		yarn test:e2e-public; \
+		yarn test:e2e-private
 
 .PHONY: build clean-env test-env-arg get-secrets
 build: clean-env test-env-arg get-secrets
