@@ -404,6 +404,7 @@ resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
   role              = aws_iam_role.cognito_account_auto_confirm_lambda_role.arn
   handler           = "index.handler"
   runtime           = "nodejs8.10"
+  timeout           = 10
 
   environment {
     variables = {
