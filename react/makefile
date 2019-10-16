@@ -3,7 +3,7 @@ APP_NAME = react
 APP_TYPE = client
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
-ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API ENV
+ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API ENV SECRET
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -51,7 +51,9 @@ $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
 		echo REACT_APP_AWS_REGION=$(REGION) >> $(DIR)/.env; \
 	elif [ $@ = ENV ]; then \
-		echo ENV=$(ENV) >> $(DIR)/.env; \
+		echo JEST_ENV=$(ENV) >> $(DIR)/.env; \
+	elif [ $@ = SECRET ]; then \
+		echo JEST_SECRET=password >> $(DIR)/.env; \
 	else \
 		ENV_VAR=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \

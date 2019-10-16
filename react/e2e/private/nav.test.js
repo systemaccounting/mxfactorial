@@ -1,4 +1,9 @@
-const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../constants')
+const {
+  BASE_URL,
+  HOME_URL,
+  HOME_SELECTOR,
+  TEST_ACCOUNT
+} = require('../constants')
 const { login, logout } = require('../utils/auth')
 
 beforeAll(async () => {
@@ -7,7 +12,7 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await login(page)
+  await login(page, TEST_ACCOUNT, process.env.JEST_SECRET)
 })
 
 describe('Mobile Menu Navigation', () => {

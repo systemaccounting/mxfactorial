@@ -1,6 +1,11 @@
 const { login } = require('../../utils/auth')
 const { addTransaction, getTotal, milk, bread, honey } = require('./utils')
-const { HOME_URL, HOME_SELECTOR, REQUEST_URL } = require('../../constants')
+const {
+  HOME_URL,
+  HOME_SELECTOR,
+  REQUEST_URL,
+  TEST_ACCOUNT
+} = require('../../constants')
 
 const creditSelector = 'button[name="credit"]'
 const debitSelector = 'button[name="debit"]'
@@ -82,6 +87,6 @@ describe('transaction request', async () => {
     expect(await page2.content()).toMatch(expectedPrice)
 
     await page2.close()
-    await login(page)
+    await login(page, TEST_ACCOUNT, process.env.JEST_SECRET)
   }, 30000)
 })

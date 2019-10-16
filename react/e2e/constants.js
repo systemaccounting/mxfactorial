@@ -3,6 +3,7 @@ const HOME_URL = `${BASE_URL}/account`
 const REQUEST_URL = `${BASE_URL}/requests`
 const AUTH_URL = `${BASE_URL}/auth`
 const HISTORY_URL = `${BASE_URL}/history`
+const TEST_ACCOUNT = 'JoeSmith'
 
 const HOME_SELECTOR = `[name="account-label"]`
 
@@ -12,5 +13,6 @@ module.exports = {
   REQUEST_URL,
   AUTH_URL,
   HISTORY_URL,
-  HOME_SELECTOR
+  HOME_SELECTOR,
+  TEST_ACCOUNT
 }

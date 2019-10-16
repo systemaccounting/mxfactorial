@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
 const login = require('../../utils/login')
 
-const { BASE_URL, REQUEST_URL } = require('../../constants')
+const { BASE_URL, REQUEST_URL, TEST_ACCOUNT } = require('../../constants')
 
 const activeButtonSelector = 'button[data-id="activeButton"]'
 const rejectedButtonSelector = 'button[data-id="rejectedButton"]'
@@ -16,7 +16,7 @@ beforeAll(async () => {
 
   page = await browser.newPage()
   await page.goto(BASE_URL)
-  page = await login(page)
+  page = await login(page, TEST_ACCOUNT, process.env.JEST_SECRET)
   await page.goto(REQUEST_URL)
   await page.waitForSelector(activeButtonSelector)
 })

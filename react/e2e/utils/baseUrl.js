@@ -1,7 +1,7 @@
 const URL =
-  process.env.ENV == `prod`
+  process.env.JEST_ENV == `prod`
     ? `api.mxfactorial.io`
-    : `${process.env.ENV}-api.mxfactorial.io`
+    : `${process.env.JEST_ENV}-api.mxfactorial.io`
 
 module.exports = {
   BASE_URL: URL,
