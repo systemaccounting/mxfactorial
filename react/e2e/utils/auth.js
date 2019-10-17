@@ -10,10 +10,11 @@ const auth = async (page, login, password) => {
 }
 
 const logout = async page => {
-  const navBtn = await page.$('[data-id="nav-button"]')
+  const navBtn = await page.$(SELECTORS.navButton)
   await navBtn.click()
 
-  const signOutBtn = await page.$('[data-name="sign-out"]')
+  await waitForSelector(SELECTORS.signOutButton)
+  const signOutBtn = await page.$(SELECTORS.signOutButton)
   await signOutBtn.click()
 
   await page.waitForSelector(SELECTORS.landingScreenLogo)
