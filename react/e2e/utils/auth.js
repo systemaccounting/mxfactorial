@@ -1,4 +1,4 @@
-const { AUTH_URL } = require('../constants')
+const { SELECTORS, AUTH_URL } = require('../constants')
 
 // todo: create user before test
 const auth = async (page, login, password) => {
@@ -16,7 +16,7 @@ const logout = async page => {
   const signOutBtn = await page.$('[data-name="sign-out"]')
   await signOutBtn.click()
 
-  await page.waitForNavigation()
+  await page.waitForSelector(SELECTORS.landingScreenLogo)
 }
 
 module.exports = {
