@@ -3,7 +3,9 @@ const HOME_URL = `${BASE_URL}/account`
 const REQUEST_URL = `${BASE_URL}/requests`
 const AUTH_URL = `${BASE_URL}/auth`
 const HISTORY_URL = `${BASE_URL}/history`
-const TEST_ACCOUNT = 'JoeSmith'
+const TEST_ACCOUNTS = Object.keys(process.env)
+  .filter(prop => prop.includes('TEST_ACCOUNT_'))
+  .sort() // get vars from .env file created by make
 
 const SELECTORS = {
   HOME: '[name="account-label"]',
@@ -77,5 +79,5 @@ module.exports = {
   REQUEST_URL,
   AUTH_URL,
   HISTORY_URL,
-  TEST_ACCOUNT
+  TEST_ACCOUNTS
 }
