@@ -25,8 +25,7 @@ describe('transaction request', async () => {
         expect(response.status()).toBe(200)
       }
     })
-    // send transaction request to account in next test to avoid test failure
-    // in environment with empty db table https://github.com/systemaccounting/mxfactorial/issues/109
+
     await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
     await addTransaction(page, milk)
