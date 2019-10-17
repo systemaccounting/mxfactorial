@@ -1,5 +1,5 @@
 const { getTotal } = require('./utils')
-const { SELECTORS, HOME_URL } = require('../../constants')
+const { TEST_ACCOUNTS, SELECTORS, HOME_URL } = require('../../constants')
 
 beforeAll(async () => {
   jest.setTimeout(30000)
@@ -37,7 +37,7 @@ describe('homeScreen inventory', () => {
       element => element.innerHTML
     )
     expect(accountLabel).toEqual('account')
-    expect(accountHandle).toEqual('JoeSmith')
+    expect(accountHandle).toEqual(TEST_ACCOUNTS[0])
   })
 
   it('1 balance displays', async () => {})

@@ -4,7 +4,7 @@ const {
   SELECTORS,
   HOME_URL,
   REQUEST_URL,
-  TEST_ACCOUNT
+  TEST_ACCOUNTS
 } = require('../../constants')
 
 beforeAll(async () => {
@@ -25,6 +25,9 @@ describe('transaction request', async () => {
         expect(response.status()).toBe(200)
       }
     })
+    // send transaction request to account in next test to avoid test failure
+    // in environment with empty db table https://github.com/systemaccounting/mxfactorial/issues/109
+    await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
     await addTransaction(page, milk)
     await addTransaction(page, honey)
@@ -38,22 +41,23 @@ describe('transaction request', async () => {
     // Request transacton
     await page.click(SELECTORS.requestCreditTransactionBtn)
 
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })
+    // await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
+    await page.waitForSelector(SELECTORS.requestItem)
 
     // redirect to historyScreen
     await expect(page.url()).toMatch(REQUEST_URL)
-  }, 20000)
+  })
 
   it('displays stored transaction', async () => {
-    // Login as Person2
+    // Login as TEST_ACCOUNT_02 (TEST_ACCOUNTS[1])
     const page2 = await browser.newPage()
-    await login(page2, 'Person2', 'password')
+    await login(page2, TEST_ACCOUNTS[1], process.env.JEST_SECRET)
     await page2.goto(REQUEST_URL)
     await page2.waitForSelector(SELECTORS.requestItem)
 
-    await login(page, 'Person1', 'password')
+    await login(page, TEST_ACCOUNTS[2], process.env.JEST_SECRET)
 
-    await page.type(SELECTORS.recipient, 'Person2')
+    await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
     // Select credit type transaction
     await page.click(SELECTORS.debitButton)
@@ -81,6 +85,6 @@ describe('transaction request', async () => {
     expect(await page2.content()).toMatch(expectedPrice)
 
     await page2.close()
-    await login(page, TEST_ACCOUNT, process.env.JEST_SECRET)
-  }, 30000)
+    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
+  })
 })

@@ -1,6 +1,6 @@
 const PuppeteerEnvironment = require('jest-environment-puppeteer')
 const { login } = require('../../utils/auth')
-const { TEST_ACCOUNT } = require('../../constants')
+const { TEST_ACCOUNTS } = require('../../constants')
 
 let isLoggedIn = false
 
@@ -10,7 +10,7 @@ class CustomEnvironment extends PuppeteerEnvironment {
     // Your setup
     if (!isLoggedIn) {
       const { page } = this.global
-      await login(page, TEST_ACCOUNT, process.env.JEST_SECRET)
+      await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
       isLoggedIn = true
     }
   }

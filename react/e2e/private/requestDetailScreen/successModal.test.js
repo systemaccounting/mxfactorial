@@ -18,7 +18,7 @@ it('1 - show success modal', async () => {
   await transactBtn.click()
   expect(await getApproveModalStatus()).toEqual('true')
   const passwordInput = await page.$(SELECTORS.passwordInput)
-  await passwordInput.type('password')
+  await passwordInput.type(process.env.JEST_SECRET)
   const okButton = await page.$(SELECTORS.okButton)
   await okButton.click()
 
