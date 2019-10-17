@@ -1,5 +1,6 @@
 import CryptoJS from 'crypto-js'
 
+// todo: add secrets manager value
 const SECRET = process.env.REACT_APP_SECRET || 'secret'
 
 export function cryptString(data) {

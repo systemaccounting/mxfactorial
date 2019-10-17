@@ -1,17 +1,16 @@
 const { login } = require('../../utils/auth')
 const { addTransaction, getTotal, milk, bread, honey } = require('./utils')
-const { HOME_URL, HOME_SELECTOR, REQUEST_URL } = require('../../constants')
-
-const creditSelector = 'button[name="credit"]'
-const debitSelector = 'button[name="debit"]'
-const requestCreditTransactionBtn = "button[data-id='credit']"
-const requestDebitTransactionBtn = "button[data-id='debit']"
-const recipientSelector = '[name="recipient"]'
-const requestItemSelector = '[data-id="requestItemIndicator"]'
+const {
+  SELECTORS,
+  HOME_URL,
+  REQUEST_URL,
+  TEST_ACCOUNTS
+} = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(HOME_URL)
-  await page.waitForSelector(HOME_SELECTOR)
+  await page.waitForSelector(SELECTORS.HOME)
 })
 
 afterAll(async () => {
@@ -27,37 +26,40 @@ describe('transaction request', async () => {
       }
     })
 
+    await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
+
     await addTransaction(page, milk)
     await addTransaction(page, honey)
     await addTransaction(page, bread)
     await getTotal()
 
     // Select credit type transaction
-    const creditButton = await page.$(creditSelector)
+    const creditButton = await page.$(SELECTORS.creditButton)
     await creditButton.click()
 
     // Request transacton
-    await page.click(requestCreditTransactionBtn)
+    await page.click(SELECTORS.requestCreditTransactionBtn)
 
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })
+    // await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
+    await page.waitForSelector(SELECTORS.requestItem)
 
     // redirect to historyScreen
     await expect(page.url()).toMatch(REQUEST_URL)
-  }, 20000)
+  })
 
   it('displays stored transaction', async () => {
-    // Login as Person2
+    // Login as TEST_ACCOUNT_02 (TEST_ACCOUNTS[1])
     const page2 = await browser.newPage()
-    await login(page2, 'Person2', 'password')
+    await login(page2, TEST_ACCOUNTS[1], process.env.JEST_SECRET)
     await page2.goto(REQUEST_URL)
-    await page2.waitForSelector(requestItemSelector)
+    await page2.waitForSelector(SELECTORS.requestItem)
 
-    await login(page, 'Person1', 'password')
+    await login(page, TEST_ACCOUNTS[2], process.env.JEST_SECRET)
 
-    await page.type(recipientSelector, 'Person2')
+    await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
     // Select credit type transaction
-    await page.click(debitSelector)
+    await page.click(SELECTORS.debitButton)
 
     const expectedPrice = (Math.random() * Math.floor(100))
       .toFixed(3)
@@ -72,16 +74,17 @@ describe('transaction request', async () => {
     await getTotal()
 
     // Request transacton
-    await page.click(requestDebitTransactionBtn)
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 5000 })
+    await page.click(SELECTORS.requestDebitTransactionBtn)
+    await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
+    // await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
 
     await page2.reload()
-    await page2.waitForSelector(requestItemSelector)
+    await page2.waitForSelector(SELECTORS.requestItem)
 
     // Assert transaction from Person1 received
     expect(await page2.content()).toMatch(expectedPrice)
 
     await page2.close()
-    await login(page)
-  }, 30000)
+    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
+  })
 })

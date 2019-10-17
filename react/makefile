@@ -3,7 +3,8 @@ APP_NAME = react
 APP_TYPE = client
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
-ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API
+ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API ENV SECRET ACCOUNT
+TEST_ACCOUNTS = TEST_ACCOUNT_01 TEST_ACCOUNT_02 TEST_ACCOUNT_03
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -50,14 +51,26 @@ retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
 		echo REACT_APP_AWS_REGION=$(REGION) >> $(DIR)/.env; \
+	elif [ $@ = ENV ]; then \
+		echo JEST_ENV=$(ENV) >> $(DIR)/.env; \
+	elif [ $@ = ACCOUNT ]; then \
+		for account in $(TEST_ACCOUNTS); do \
+			echo $$account=1 >> $(DIR)/.env; \
+		done; \
+	elif [ $@ = SECRET ]; then \
+		SECRET=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+		echo JEST_$@=$$SECRET >> $(DIR)/.env; \
 	else \
 		ENV_VAR=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-			echo REACT_APP_$@=$$ENV_VAR \
-			>> $(DIR)/.env; \
+		echo REACT_APP_$@=$$ENV_VAR >> $(DIR)/.env; \
 	fi
 
 ###################### start ######################
@@ -77,13 +90,13 @@ test-unit:
 
 .PHONY: test-e2e test-env-arg get-secrets warm-up
 test-e2e: test-env-arg get-secrets warm-up
-		LOCAL_ENV=$(ENV) yarn test:e2e-public; \
-		LOCAL_ENV=$(ENV) yarn test:e2e-private
+		yarn test:e2e-public; \
+		yarn test:e2e-private
 
 .PHONY: e2e-now
 e2e-now:
-		LOCAL_ENV=$(ENV) yarn test:e2e-public; \
-		LOCAL_ENV=$(ENV) yarn test:e2e-private
+		yarn test:e2e-public; \
+		yarn test:e2e-private
 
 .PHONY: build clean-env test-env-arg get-secrets
 build: clean-env test-env-arg get-secrets
@@ -127,6 +140,29 @@ endif
 
 .PHONY: deploy-all deploy-layer deploy
 deploy-all: deploy-layer deploy
+
+###################### create e2e test accounts ######################
+
+.PHONY: create-accounts test-env-arg get-secrets
+create-accounts: test-env-arg get-secrets
+		@[ -f .env ] && . .env; \
+		for account in $(TEST_ACCOUNTS); do \
+			aws cognito-idp sign-up \
+				--region $(REGION) \
+				--client-id $$REACT_APP_CLIENT_ID \
+				--username $$account \
+				--password $$JEST_SECRET; \
+		done
+
+.PHONY: delete-accounts test-env-arg get-secrets
+delete-accounts: test-env-arg get-secrets
+		@[ -f .env ] && . .env; \
+		for account in $(TEST_ACCOUNTS); do \
+			aws cognito-idp admin-delete-user \
+				--region $(REGION) \
+				--user-pool-id $$REACT_APP_POOL_ID \
+				--username $$account; \
+		done
 
 ###################### warm up services ######################
 

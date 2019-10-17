@@ -1,100 +1,83 @@
-const { REQUEST_URL } = require('../../constants')
-
-const activeButtonSelector = 'button[data-id="activeButton"]'
-const rejectedButtonSelector = 'button[data-id="rejectedButton"]'
-
-const selectors = {
-  backButton: '[data-id="backButton"]',
-  emailCopyButton: '[data-id="emailCopyButton"]',
-  requestingAccountIndicator: '[data-id="requestingAccountIndicator"]',
-  sumTransactionItemIndicator: '[data-id="sumTransactionItemIndicator"]',
-  requestTimeIndicator: '[data-id="requestTimeIndicator"]',
-  expirationTimeIndicator: '[data-id="expirationTimeIndicator"]',
-  transactButton: '[data-id="transactButton"]',
-  rejectButton: '[data-id="rejectButton"]',
-  transactionItemIndicator: '[data-id="transactionItemIndicator"]',
-  transactionIdIndicator: '[data-id="transactionIdIndicator"]',
-  ruleInstanceIdsIndicator: '[data-id="ruleInstanceIdsIndicator"]',
-  preTransactionBalanceIndicator: '[data-id="preTransactionBalanceIndicator"]'
-}
+const { SELECTORS, REQUEST_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(REQUEST_URL, { waitUntil: 'networkidle0' })
-  await page.waitForSelector(activeButtonSelector)
+  await page.waitForSelector(SELECTORS.activeButton)
   // const el = await page.waitForSelector('.transactions-loaded')
-  const link = await page.$('[data-id="requestItemIndicator"]')
+  const link = await page.$(SELECTORS.requestItem)
   await link.click()
 })
 
 it('inventory', async () => {
   const backButton = await page.$$eval(
-    selectors.backButton,
+    SELECTORS.backButton,
     list => list.length
   )
   expect(backButton).toEqual(1)
 
   const emailCopyButton = await page.$$eval(
-    selectors.emailCopyButton,
+    SELECTORS.emailCopyButton,
     list => list.length
   )
   expect(emailCopyButton).toEqual(1)
 
   const requestingAccountIndicator = await page.$$eval(
-    selectors.requestingAccountIndicator,
+    SELECTORS.requestingAccountIndicator,
     list => list.length
   )
   expect(requestingAccountIndicator).toEqual(1)
 
   const sumTransactionItemIndicator = await page.$$eval(
-    selectors.sumTransactionItemIndicator,
+    SELECTORS.sumTransactionItemIndicator,
     list => list.length
   )
   expect(sumTransactionItemIndicator).toEqual(1)
 
   const requestTimeIndicator = await page.$$eval(
-    selectors.requestTimeIndicator,
+    SELECTORS.requestTimeIndicator,
     list => list.length
   )
   expect(requestTimeIndicator).toEqual(1)
 
   const expirationTimeIndicator = await page.$$eval(
-    selectors.expirationTimeIndicator,
+    SELECTORS.expirationTimeIndicator,
     list => list.length
   )
   expect(expirationTimeIndicator).toEqual(1)
 
   const transactButton = await page.$$eval(
-    selectors.transactButton,
+    SELECTORS.transactButton,
     list => list.length
   )
   expect(transactButton).toEqual(1)
 
   const rejectButton = await page.$$eval(
-    selectors.rejectButton,
+    SELECTORS.rejectButton,
     list => list.length
   )
   expect(rejectButton).toEqual(1)
 
   const transactionItemIndicator = await page.$$eval(
-    selectors.transactionItemIndicator,
+    SELECTORS.transactionItemIndicator,
     list => list.length
   )
   expect(transactionItemIndicator).toEqual(1)
 
   const transactionIdIndicator = await page.$$eval(
-    selectors.transactionIdIndicator,
+    SELECTORS.transactionIdIndicator,
     list => list.length
   )
   expect(transactionIdIndicator).toEqual(1)
 
   const ruleInstanceIdsIndicator = await page.$$eval(
-    selectors.ruleInstanceIdsIndicator,
+    SELECTORS.ruleInstanceIdsIndicator,
     list => list.length
   )
   expect(ruleInstanceIdsIndicator).toEqual(1)
 
   const preTransactionBalanceIndicator = await page.$$eval(
-    selectors.preTransactionBalanceIndicator,
+    SELECTORS.preTransactionBalanceIndicator,
     list => list.length
   )
   expect(preTransactionBalanceIndicator).toEqual(1)

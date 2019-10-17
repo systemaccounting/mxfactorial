@@ -1,34 +1,27 @@
-const { HOME_URL, HISTORY_URL } = require('../../constants')
-
-const selectors = {
-  backButton: '[data-id="backButton"]',
-  homeButton: '[data-id="homeButton"]',
-  homeScreen: '[data-id="homeScreen"]',
-  historyScreen: '[data-id="historyScreen"]',
-  historyItemIndicator: '[data-id="historyItemIndicator"]'
-}
+const { SELECTORS, HOME_URL, HISTORY_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(HISTORY_URL)
 })
 
 beforeEach(async () => {
-  const link = await page.waitForSelector(selectors.historyItemIndicator)
+  const link = await page.waitForSelector(SELECTORS.historyItemIndicator)
   await link.click()
 })
 
 describe('historyDetailScreen navigation', () => {
   it('navigates to historyScreen on back button click', async () => {
-    const backButton = await page.$(selectors.backButton)
+    const backButton = await page.$(SELECTORS.backButton)
     backButton.click()
-    await page.waitForSelector(selectors.historyScreen)
+    await page.waitForSelector(SELECTORS.historyScreen)
     expect(page.url()).toEqual(HISTORY_URL)
   })
 
   it('navigates to homeScreen on home button click', async () => {
-    const homeButton = await page.$(selectors.homeButton)
+    const homeButton = await page.$(SELECTORS.homeButton)
     homeButton.click()
-    await page.waitForSelector(selectors.homeScreen)
+    await page.waitForSelector(SELECTORS.homeScreen)
     expect(page.url()).toEqual(HOME_URL)
   })
 })

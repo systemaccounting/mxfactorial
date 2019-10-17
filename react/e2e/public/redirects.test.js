@@ -1,6 +1,4 @@
-const { BASE_URL, AUTH_URL, REQUEST_URL } = require('../constants')
-
-const notFoundSelector = '[data-id="not-found"]'
+const { SELECTORS, BASE_URL, AUTH_URL, REQUEST_URL } = require('../constants')
 
 // beforeEach(function() {
 //   originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
@@ -19,7 +17,7 @@ it('redirects to auth if unauthenticated user navigates to private route', async
 
 it('redirects to not found if route doesnt exist', async () => {
   await page.goto(`${AUTH_URL}/not-valid-route`)
-  await page.waitForSelector(notFoundSelector)
-  const notFound = await page.$$eval(notFoundSelector, list => list.length)
+  await page.waitForSelector(SELECTORS.notFound)
+  const notFound = await page.$$eval(SELECTORS.notFound, list => list.length)
   expect(notFound).toEqual(1)
 }, 30000)

@@ -1,19 +1,15 @@
-const { HISTORY_URL } = require('../../constants')
-
-const selectors = {
-  historyItemIndicator: '[data-id="historyItemIndicator"]',
-  currentAccountBalanceIndicator: '[data-id="currentAccountBalanceIndicator"]'
-}
+const { SELECTORS, HISTORY_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(HISTORY_URL)
-  await page.waitForSelector(selectors.historyItemIndicator)
+  await page.waitForSelector(SELECTORS.historyItemIndicator)
 })
 
 describe('historyScreen inventory', () => {
   it('contains currentAccountBalanceIndicator', async () => {
     const currentAccountBalanceIndicator = await page.$$eval(
-      selectors.currentAccountBalanceIndicator,
+      SELECTORS.currentAccountBalanceIndicator,
       list => list.length
     )
     expect(currentAccountBalanceIndicator).toEqual(1)

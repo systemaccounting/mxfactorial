@@ -1,6 +1,7 @@
-const { AUTH_URL } = require('../constants')
+const { SELECTORS, AUTH_URL } = require('../constants')
 
-const auth = async (page, login = 'JoeSmith', password = 'password') => {
+// todo: create user before test
+const auth = async (page, login, password) => {
   await page.goto(AUTH_URL, { waitUntil: 'networkidle2' })
   await page.type('[name=account]', login)
   await page.type('[name=password]', password)
@@ -9,13 +10,14 @@ const auth = async (page, login = 'JoeSmith', password = 'password') => {
 }
 
 const logout = async page => {
-  const navBtn = await page.$('[data-id="nav-button"]')
+  const navBtn = await page.$(SELECTORS.navButton)
   await navBtn.click()
 
-  const signOutBtn = await page.$('[data-name="sign-out"]')
+  await page.waitForSelector(SELECTORS.signOutButton)
+  const signOutBtn = await page.$(SELECTORS.signOutButton)
   await signOutBtn.click()
 
-  await page.waitForNavigation()
+  await page.waitForSelector(SELECTORS.landingScreenLogo)
 }
 
 module.exports = {
