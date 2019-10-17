@@ -1,12 +1,10 @@
 const { addTransaction, getTotal, milk, bread, honey } = require('./utils')
-const { HOME_URL, HOME_SELECTOR } = require('../../constants')
-
-const transactionDeleteSelector = 'button[name="delete-transaction"]'
-const transactionClearSelector = 'button[data-id="transaction-clear"]'
+const { SELECTORS, HOME_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(HOME_URL)
-  await page.waitForSelector(HOME_SELECTOR)
+  await page.waitForSelector(SELECTORS.HOME)
 })
 
 afterAll(async () => {
@@ -32,7 +30,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     await addTransaction(page, bread, true) // draft
     // 80 + 9%
     expect(await getTotal()).toEqual(87.2)
-  }, 10000)
+  })
 
   it('item names should be corect', async () => {
     expect(await getInputByValue('milk')).toEqual(1)
@@ -59,7 +57,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('delete milk and check result', async () => {
-    const deleteButton = await page.$(transactionDeleteSelector)
+    const deleteButton = await page.$(SELECTORS.transactionDelete)
 
     // delete milk
     await deleteButton.click()
@@ -73,7 +71,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('delete honey and check result', async () => {
-    const deleteButton = await page.$(transactionDeleteSelector)
+    const deleteButton = await page.$(SELECTORS.transactionDelete)
     // delete honey
     await deleteButton.click()
     expect(await getTotal()).toEqual(21.8)
@@ -84,7 +82,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('clear draft transaction and check result', async () => {
-    const deleteButton = await page.$(transactionClearSelector)
+    const deleteButton = await page.$(SELECTORS.transactionClear)
 
     // delete bread
     await deleteButton.click()
@@ -103,7 +101,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('delete milk again', async () => {
-    const deleteButton = await page.$(transactionDeleteSelector)
+    const deleteButton = await page.$(SELECTORS.transactionDelete)
     // delete milk
     await deleteButton.click()
     expect(await getTotal()).toEqual(0)
@@ -117,7 +115,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('delele honey again', async () => {
-    const deleteButton2 = await page.$(transactionClearSelector)
+    const deleteButton2 = await page.$(SELECTORS.transactionClear)
     // delete honey
     await deleteButton2.click()
     expect(await getTotal()).toEqual(0)
@@ -127,7 +125,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   it('default quantity=1 for user-generated items', async () => {
     await addTransaction(page, { name: 'test', price: '1' }, true) // draft
     expect(await getTotal()).toEqual(1.09)
-    const deleteButton = await page.$(transactionClearSelector)
+    const deleteButton = await page.$(SELECTORS.transactionClear)
     // delete draft transaction
     await deleteButton.click()
   })
@@ -137,15 +135,15 @@ describe('transaction add remove (milk, honey, bread)', () => {
     await addTransaction(page, honey)
     await addTransaction(page, bread)
 
-    const deleteMilkButton = await page.$(transactionDeleteSelector)
+    const deleteMilkButton = await page.$(SELECTORS.transactionDelete)
     await deleteMilkButton.click()
     expect(await getTotal(false)).toEqual(65.4)
 
-    const deleteHoneyButton = await page.$(transactionDeleteSelector)
+    const deleteHoneyButton = await page.$(SELECTORS.transactionDelete)
     await deleteHoneyButton.click()
     expect(await getTotal(false)).toEqual(21.8)
 
-    const deleteBreadButton = await page.$(transactionDeleteSelector)
+    const deleteBreadButton = await page.$(SELECTORS.transactionDelete)
     await deleteBreadButton.click()
     expect(await getTotal(false)).toEqual(0)
   })

@@ -1,35 +1,27 @@
 const { getTotal } = require('./utils')
-const { HOME_URL, HOME_SELECTOR } = require('../../constants')
-
-const creditSelector = 'button[name="credit"]'
-const debitSelector = 'button[name="debit"]'
-const totalValueSelector = '[name="total-value"]'
-const totalLabelSelector = '[name="total-label"]'
-const accountLabelSelector = '[name="account-label"]'
-const accountValueSelector = '[name="account-value"]'
-const recipientInputSelector = 'input[name="recipient"]'
-const balanceSelector = '[placeholder="balance"]'
+const { SELECTORS, HOME_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(HOME_URL)
-  await page.waitForSelector(HOME_SELECTOR)
+  await page.waitForSelector(SELECTORS.HOME)
 })
 
 describe('homeScreen inventory', () => {
   it('request button displays', async () => {
     const requestButtonLength = await page.$$eval(
-      creditSelector,
+      SELECTORS.creditButton,
       list => list.length
     )
     expect(requestButtonLength).toEqual(1)
   })
 
   it('debit button displays', async () => {
-    const debitButton = await page.$(debitSelector)
+    const debitButton = await page.$(SELECTORS.debitButton)
     await debitButton.click()
 
     const debitButtonLength = await page.$$eval(
-      debitSelector,
+      SELECTORS.debitButton,
       list => list.length
     )
     expect(debitButtonLength).toEqual(1)
@@ -37,30 +29,27 @@ describe('homeScreen inventory', () => {
 
   it('1 account label displays', async () => {
     const accountLabel = await page.$eval(
-      accountLabelSelector,
+      SELECTORS.accountLabel,
       element => element.innerHTML
     )
     const accountHandle = await page.$eval(
-      accountValueSelector,
+      SELECTORS.accountValue,
       element => element.innerHTML
     )
     expect(accountLabel).toEqual('account')
     expect(accountHandle).toEqual('JoeSmith')
   })
 
-  it('1 balance displays', async () => {
-    const balanceLabel = await page.$$(balanceSelector)
-    expect(balanceLabel).toHaveLength(1)
-  })
+  it('1 balance displays', async () => {})
 
   it('1 recipient-account-input displays', async () => {
-    const recipientAccountInput = await page.$$(recipientInputSelector)
+    const recipientAccountInput = await page.$$(SELECTORS.recipientInput)
     expect(recipientAccountInput).toHaveLength(1)
   })
 
   it('1 total displays', async () => {
     const totalLabel = await page.$eval(
-      totalLabelSelector,
+      SELECTORS.totalLabel,
       element => element.innerHTML
     )
 
@@ -69,8 +58,8 @@ describe('homeScreen inventory', () => {
   })
 
   it('debit and credit buttons display', async () => {
-    const debitButton = await page.$$(debitSelector)
-    const creditButton = await page.$$(creditSelector)
+    const debitButton = await page.$$(SELECTORS.debitButton)
+    const creditButton = await page.$$(SELECTORS.creditButton)
     expect(debitButton).toHaveLength(1)
     expect(creditButton).toHaveLength(1)
   })

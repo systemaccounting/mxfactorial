@@ -1,27 +1,22 @@
-const { HISTORY_URL } = require('../../constants')
-
-const selectors = {
-  historyItemIndicator: '[data-id="historyItemIndicator"]',
-  transactionPartner: '[data-id="transactionPartner"]',
-  contraAccountIndicator: '[data-id="contraAccountIndicator"]'
-}
+const { SELECTORS, HISTORY_URL } = require('../../constants')
 
 beforeAll(async () => {
   await page.goto(HISTORY_URL)
-  await page.waitForSelector(selectors.historyItemIndicator)
+  jest.setTimeout(30000)
+  await page.waitForSelector(SELECTORS.historyItemIndicator)
 })
 
 describe('historyDetailScreen contraAccount value', () => {
   it('same contraAccountIndicator value on historyScreen and historyDetailScreen', async () => {
-    const link = await page.$(selectors.historyItemIndicator)
+    const link = await page.$(SELECTORS.historyItemIndicator)
     const partner1 = await page.$eval(
-      `${selectors.historyItemIndicator} ${selectors.transactionPartner}`,
+      `${SELECTORS.historyItemIndicator} ${SELECTORS.transactionPartner}`,
       elem => elem.textContent
     )
     link.click()
-    await page.waitForSelector(selectors.contraAccountIndicator)
+    await page.waitForSelector(SELECTORS.contraAccountIndicator)
     const partner2 = await page.$eval(
-      selectors.contraAccountIndicator,
+      SELECTORS.contraAccountIndicator,
       elem => elem.textContent
     )
     expect(partner1).toEqual(partner2)

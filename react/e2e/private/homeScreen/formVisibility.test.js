@@ -1,13 +1,10 @@
 const { addTransaction, milk, honey } = require('./utils')
-const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../../constants')
-
-const transactionDeleteSelector = 'button[name="delete-transaction"]'
-const transactionClearSelector = 'button[data-id="transaction-clear"]'
-const transactionFormToggleSelector = 'button[data-id="hide-show-form"]'
+const { SELECTORS, BASE_URL, HOME_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(HOME_URL)
-  await page.waitForSelector(HOME_SELECTOR)
+  await page.waitForSelector(SELECTORS.HOME)
 })
 
 const getInputByValue = async value =>
@@ -20,27 +17,27 @@ describe('form visibility after transaction deletion', () => {
   })
 
   it('clear form (honey)', async () => {
-    const clearBtn = await page.$(transactionClearSelector)
+    const clearBtn = await page.$(SELECTORS.transactionClear)
     await clearBtn.click()
     expect(await getInputByValue('honey')).toEqual(0) // honey is cleared
 
-    const toggleButton = await page.$$(transactionFormToggleSelector)
+    const toggleButton = await page.$$(SELECTORS.transactionFormToggle)
     expect(toggleButton).toHaveLength(0)
   })
 
   it('hide form', async () => {
-    const clearBtn = await page.$(transactionClearSelector)
+    const clearBtn = await page.$(SELECTORS.transactionClear)
     await clearBtn.click()
 
     // Toggle button only appears if transaction form is hidden.
-    const toggleButton = await page.$$(transactionFormToggleSelector)
+    const toggleButton = await page.$$(SELECTORS.transactionFormToggle)
     expect(toggleButton).toHaveLength(1)
   })
 
   it('remove milk', async () => {
-    const deleteButton = await page.$(transactionDeleteSelector)
+    const deleteButton = await page.$(SELECTORS.transactionDelete)
     await deleteButton.click()
-    const toggleButton = await page.$$(transactionFormToggleSelector)
+    const toggleButton = await page.$$(SELECTORS.transactionFormToggle)
     expect(toggleButton).toHaveLength(0)
   })
 })

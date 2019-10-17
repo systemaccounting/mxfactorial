@@ -1,9 +1,10 @@
 const { addTransaction, getTotal, milk, bread, honey } = require('./utils')
-const { HOME_URL, HOME_SELECTOR } = require('../../constants')
+const { SELECTORS, HOME_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(HOME_URL)
-  await page.waitForSelector(HOME_SELECTOR)
+  await page.waitForSelector(SELECTORS.HOME)
 })
 
 afterAll(async () => {

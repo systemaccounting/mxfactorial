@@ -1,11 +1,12 @@
 const { addTransaction } = require('./utils')
 
-const { BASE_URL, HOME_URL, HOME_SELECTOR } = require('../../constants')
+const { SELECTORS, HOME_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.setViewport({ height: 500, width: 400 })
   await page.goto(HOME_URL)
-  await page.waitForSelector(HOME_SELECTOR)
+  await page.waitForSelector(SELECTORS.HOME)
 })
 
 describe('scroll home screen on add item', () => {

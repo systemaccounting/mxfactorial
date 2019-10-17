@@ -1,16 +1,14 @@
-const { REQUEST_URL } = require('../../constants')
-
-const activeButtonSelector = 'button[data-id="activeButton"]'
-const rejectedButtonSelector = 'button[data-id="rejectedButton"]'
+const { SELECTORS, REQUEST_URL } = require('../../constants')
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await page.goto(REQUEST_URL)
-  await page.waitForSelector(activeButtonSelector)
+  await page.waitForSelector(SELECTORS.activeButton)
 })
 
 it('active button displays', async () => {
   const activeButton = await page.$$eval(
-    activeButtonSelector,
+    SELECTORS.activeButton,
     list => list.length
   )
   expect(activeButton).toEqual(1)
@@ -18,7 +16,7 @@ it('active button displays', async () => {
 
 it('rejected button displays', async () => {
   const rejectedButton = await page.$$eval(
-    rejectedButtonSelector,
+    SELECTORS.rejectedButton,
     list => list.length
   )
   expect(rejectedButton).toEqual(1)
