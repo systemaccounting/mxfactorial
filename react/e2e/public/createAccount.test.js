@@ -1,11 +1,17 @@
 const { BASE_URL } = require('../constants')
+const { deleteUser } = require('../utils/teardown')
+
+const firstName = `Faker`
+const lastName = `${Math.floor(Math.random() * 10000)}`
+const PUBLIC_TEST_ACCOUNT = firstName + lastName
+
+afterAll(async () => {
+  await deleteUser(process.env.REACT_APP_POOL_ID, PUBLIC_TEST_ACCOUNT)
+})
 
 it(`Create account in Cognito`, async () => {
   // Faker value matched by daily db cleanup script
   // terraform/workspaces/cognito/delete-faker-accounts/index.js:8
-  const firstName = `Faker`
-  const lastName = `${Math.floor(Math.random() * 10000)}`
-  const account = firstName + lastName
   await page.goto(BASE_URL + '/auth/create-account')
 
   await page.waitForSelector(`button`)
@@ -74,7 +80,7 @@ it(`Create account in Cognito`, async () => {
 
   await page.waitForSelector(`button[data-id="account"]`)
   const accountNameInput = await page.$(`[name=username]`)
-  await accountNameInput.type(account)
+  await accountNameInput.type(PUBLIC_TEST_ACCOUNT)
   const passwordInput = await page.$(`[name=password]`)
   await passwordInput.type(`bluesky`)
   const emailAddressInput = await page.$(`[name=emailAddress]`)
