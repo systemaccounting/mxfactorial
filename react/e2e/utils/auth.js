@@ -13,7 +13,7 @@ const logout = async page => {
   const navBtn = await page.$(SELECTORS.navButton)
   await navBtn.click()
 
-  await waitForSelector(SELECTORS.signOutButton)
+  await page.waitForSelector(SELECTORS.signOutButton)
   const signOutBtn = await page.$(SELECTORS.signOutButton)
   await signOutBtn.click()
 
