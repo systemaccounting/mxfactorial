@@ -3,9 +3,12 @@ const HOME_URL = `${BASE_URL}/account`
 const REQUEST_URL = `${BASE_URL}/requests`
 const AUTH_URL = `${BASE_URL}/auth`
 const HISTORY_URL = `${BASE_URL}/history`
-const TEST_ACCOUNTS = Object.keys(process.env)
-  .filter(prop => prop.includes('TEST_ACCOUNT_'))
-  .sort() // get vars from .env file created by make
+
+const ACCOUNTS_FROM_MAKE = Object.keys(process.env).filter(prop =>
+  prop.includes('TEST_ACCOUNT_')
+)
+
+const TEST_ACCOUNTS = ACCOUNTS_FROM_MAKE.sort() // get vars from .env file created by make
 
 const SELECTORS = {
   HOME: '[name="account-label"]',
@@ -69,7 +72,8 @@ const SELECTORS = {
   navMask: '[data-id="nav-mask"]',
   notFound: '[data-id="not-found"]',
   draftTransaction: '[data-id="draft-transaction"]',
-  signOutButton: '[data-name="sign-out"]'
+  signOutButton: '[data-name="sign-out"]',
+  landingScreenLogo: '.create-account-logo'
 }
 
 module.exports = {
