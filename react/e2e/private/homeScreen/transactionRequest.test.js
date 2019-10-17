@@ -76,7 +76,8 @@ describe('transaction request', async () => {
 
     // Request transacton
     await page.click(SELECTORS.requestDebitTransactionBtn)
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
+    await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
+    // await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
 
     await page2.reload()
     await page2.waitForSelector(SELECTORS.requestItem)
