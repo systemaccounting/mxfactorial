@@ -25,31 +25,34 @@ exports.handler = async (event) => {
       LayerName: resourceName
     }
     let { LayerArn, LayerVersionArn } = await lambda.publishLayerVersion(layerParams)
-    .promise()
-    .then(data => console.log(data))
-    .catch(err => console.error(err, err.stack))
+      .promise()
+      .then(data => {
+        console.log(data)
+        return data
+      })
+      .catch(err => console.error(err, err.stack))
 
     // update functions dependent on new layer
     let layerArnRegex = new RegExp(LayerArn)
     let lambdaList = await lambda.listFunctions()
-    .promise()
-    .then(async data => {
-      let nextPage = data.NextMarker
-      lambdaList.push(...data.Functions)
-      while(nextPage) {
-        let nextListParams = {
-          Marker: nextPage
+      .promise()
+      .then(async data => {
+        let nextPage = data.NextMarker
+        lambdaList.push(...data.Functions)
+        while(nextPage) {
+          let nextListParams = {
+            Marker: nextPage
+          }
+          await lambda.listFunctions(nextListParams)
+          .promise()
+          .then(nextData => {
+            nextPage = nextData.NextMarker
+            lambdaList.push(...nextData.Functions)
+          })
+          .catch(err => console.log(err, err.stack))
         }
-        await lambda.listFunctions(nextListParams)
-        .promise()
-        .then(nextData => {
-          nextPage = nextData.NextMarker
-          lambdaList.push(...nextData.Functions)
-        })
-        .catch(err => console.log(err, err.stack))
-      }
-    })
-    .catch(err => console.log(err, err.stack))
+      })
+      .catch(err => console.log(err, err.stack))
     let lambdasWithLayers = lambdaList.filter(idx => idx.Layers)
     let lambdaLayersUpdated = 0
     for (lambdaFn of lambdasWithLayers) {
