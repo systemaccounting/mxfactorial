@@ -34,26 +34,29 @@ exports.handler = async (event) => {
 
     // update functions dependent on new layer
     let layerArnRegex = new RegExp(LayerArn)
-    let lambdaList = await lambda.listFunctions()
+    let lambdaList = []
+    let initialRequest = await lambda.listFunctions()
       .promise()
-      .then(async data => {
-        let nextPage = data.NextMarker
-        lambdaList.push(...data.Functions)
-        while(nextPage) {
-          let nextListParams = {
-            Marker: nextPage
-          }
-          await lambda.listFunctions(nextListParams)
-          .promise()
-          .then(nextData => {
-            nextPage = nextData.NextMarker
-            lambdaList.push(...nextData.Functions)
-          })
-          .catch(err => console.log(err, err.stack))
-        }
-      })
+      .then(data => data)
       .catch(err => console.log(err, err.stack))
+    lambdaList.push(...initialRequest.Functions)
+    let nextPage
+    if (initialRequest.NextMarker) {
+      nextPage = initialRequest.NextMarker
+      while(nextPage) {
+        let nextListParams = {
+          Marker: nextPage
+        }
+        let nextLambdas = await lambda.listFunctions(nextListParams)
+          .promise()
+          .then(data => data)
+          .catch(err => console.log(err, err.stack))
+          nextPage = nextLambdas.NextMarker
+          lambdaList.push(...nextLambdas.Functions)
+      }
+    }
     let lambdasWithLayers = lambdaList.filter(idx => idx.Layers)
+    console.log(lambdasWithLayers)
     let lambdaLayersUpdated = 0
     for (lambdaFn of lambdasWithLayers) {
       for (layer of lambdaFn.Layers) {
@@ -62,13 +65,13 @@ exports.handler = async (event) => {
             let lambdaFnConfigUpdateParam = {
               FunctionName: lambdaFn.FunctionName,
               Layers: [
-                layerArn
+                layer.Arn
               ]
              }
              await lambda.updateFunctionConfiguration(lambdaFnConfigUpdateParam)
              .promise()
              .then(data => {
-               console.log(`${lambdaFn.FunctionName} lambda received ${layerArn} on ${data.LastModified}`)
+               console.log(`${lambdaFn.FunctionName} lambda received ${layer.Arn} on ${data.LastModified}`)
                lambdaLayersUpdated++
               })
              .catch(err => console.log(err, err.stack))
