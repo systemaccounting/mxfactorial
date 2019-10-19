@@ -21,6 +21,7 @@ exports.handler = async event => {
     console.log(`No schema change command received`)
     return `Please supply schema change command, e.g. up, down`
   }
+
   const zipFile = new Buffer(event.zip, 'base64')
   // const base64DecodedZipWithClonedDiffs = Buffer.from(event.zip, 'base64')
   // add arn:aws:lambda:<region>:744348701589:layer:bash:5 layer published
