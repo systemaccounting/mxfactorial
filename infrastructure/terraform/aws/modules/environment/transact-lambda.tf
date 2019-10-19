@@ -11,7 +11,7 @@ resource "aws_lambda_function" "transact_service_lambda" {
   s3_object_version = data.aws_s3_bucket_object.transact_service_lambda.version_id
   handler           = "index.handler"
   layers            = [data.aws_lambda_layer_version.transact_service_lambda.arn]
-  runtime           = "nodejs8.10"
+  runtime           = "nodejs10.x"
   timeout           = 30
   role              = aws_iam_role.transact_service_lambda_role.arn
 
@@ -26,13 +26,13 @@ resource "aws_lambda_function" "transact_service_lambda" {
   }
 
   environment {
-    variables = {
-      HOST             = aws_rds_cluster.default.endpoint
-      USER             = var.db_master_username
-      PASSWORD         = var.db_master_password
-      NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn
-      RULES_URL        = local.RULES_URL
-    }
+    variables = merge(
+      {
+        RULES_URL        = local.RULES_URL,
+        NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn
+      },
+      local.POSTGRES_VARS
+    )
   }
 }
 
@@ -53,14 +53,6 @@ data "aws_lambda_layer_version" "transact_service_lambda" {
 data "aws_s3_bucket_object" "transact_layer" {
   bucket = "mxfactorial-artifacts-${var.environment}"
   key    = "transact-layer.zip"
-}
-
-resource "aws_lambda_layer_version" "transact_layer" {
-  layer_name          = "transact-node-deps-${var.environment}"
-  s3_bucket           = data.aws_s3_bucket_object.transact_layer.bucket
-  s3_key              = data.aws_s3_bucket_object.transact_layer.key
-  s3_object_version   = data.aws_s3_bucket_object.transact_layer.version_id
-  compatible_runtimes = ["nodejs10.x", "nodejs8.10", "nodejs6.10"]
 }
 
 resource "aws_iam_role" "transact_service_lambda_role" {

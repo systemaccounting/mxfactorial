@@ -11,18 +11,14 @@ resource "aws_lambda_function" "clone_tool_lambda" {
   s3_object_version = data.aws_s3_bucket_object.clone_tool_lambda.version_id
   handler           = "index.handler"
   # https://github.com/gkrizek/bash-lambda-layer
-  layers  = ["arn:aws:lambda:${data.aws_region.current.name}:744348701589:layer:bash:5"]
+  layers  = ["arn:aws:lambda:${data.aws_region.current.name}:744348701589:layer:bash:8"]
   runtime = "nodejs8.10"
   timeout = 60
   role    = aws_iam_role.clone_tool_lambda.arn
 
   environment {
     variables = {
-      # workaround for aws_api_gateway_deployment.transact.invoke_url cycle error:
-      # SCHEMA_UPDATE_URL        = "https://${aws_api_gateway_rest_api.schema_update_tool_lambda.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
-      SCHEMA_UPDATE_LAMBDA_ARN = aws_lambda_function.schema_update_tool_lambda.arn
-
-      WARM_UP_LAMBDA_ARN = aws_lambda_function.integration_test_data_teardown_lambda.arn
+      MIGRATE_LAMBDA_ARN = aws_lambda_function.migrate_lambda.arn
     }
   }
 }
@@ -57,28 +53,32 @@ resource "aws_iam_role_policy" "clone_tool_lambda_policy" {
   name = "clone-tool-lambda-policy-${var.environment}"
   role = aws_iam_role.clone_tool_lambda.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "lambda:InvokeFunction",
-      "Resource": [
-        "${aws_lambda_function.schema_update_tool_lambda.arn}",
-        "${aws_lambda_function.integration_test_data_teardown_lambda.arn}"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    }
-  ]
+  policy = data.aws_iam_policy_document.clone_tool_lambda_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "clone_tool_lambda_policy" {
+  version = "2012-10-17"
+
+  statement {
+    sid = "CloneToolLambdaLoggingPolicy${var.environment}"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid = "CloneToolLambdaInvokePolicy${var.environment}"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      "${aws_lambda_function.migrate_lambda.arn}",
+      "${aws_lambda_function.integration_test_data_teardown_lambda.arn}"
+    ]
+  }
 }

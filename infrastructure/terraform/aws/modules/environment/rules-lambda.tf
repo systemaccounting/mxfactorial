@@ -27,7 +27,6 @@ resource "aws_lambda_function" "rules_service_lambda" {
 
   environment {
     variables = {
-      HOST     = aws_rds_cluster.default.endpoint
       USER     = var.db_master_username
       PASSWORD = var.db_master_password
 
@@ -49,14 +48,6 @@ data "aws_lambda_layer_version" "rules_service_lambda" {
 data "aws_s3_bucket_object" "rules_layer" {
   bucket = "mxfactorial-artifacts-${var.environment}"
   key    = "rules-layer.zip"
-}
-
-resource "aws_lambda_layer_version" "rules_layer" {
-  layer_name          = "rules-node-deps-${var.environment}"
-  s3_bucket           = data.aws_s3_bucket_object.rules_layer.bucket
-  s3_key              = data.aws_s3_bucket_object.rules_layer.key
-  s3_object_version   = data.aws_s3_bucket_object.rules_layer.version_id
-  compatible_runtimes = ["nodejs10.x", "nodejs8.10", "nodejs6.10"]
 }
 
 resource "aws_iam_role" "rules_service_lambda_role" {
