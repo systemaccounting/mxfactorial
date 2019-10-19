@@ -22,7 +22,7 @@ deploy: test-env-arg
 	@$(MAKE) -C services/rules-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/transact-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C schema/clone-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C schema/update-faas ENV=$(ENV) $(CMD)
+	@$(MAKE) -C schema/migrate-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/cognito/auto-confirm ENV=$(ENV) $(CMD)
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/cognito/delete-faker-accounts ENV=$(ENV) $(CMD)
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/deploy-lambda ENV=$(ENV) $(CMD)
