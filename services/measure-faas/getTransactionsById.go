@@ -28,8 +28,7 @@ func getTransactionsByID(db *sql.DB, queryString string, recordID int) (string, 
 			&item.Creditor, &item.DebitorProfileLatLng, &item.CreditorProfileLatlng, &item.DebitorTransactionLatLng,
 			&item.CreditorTransactionLatLng, &item.DebitorApprovalTime, &item.CreditorApprovalTime, &item.DebitorDevice,
 			&item.CreditorDevice, &item.DebitApprover, &item.CreditApprover, &item.CreditorRejectionTime,
-			&item.DebitorRejectionTime,
-		)
+			&item.DebitorRejectionTime, &item.CreatedAt)
 		transactions = append(transactions, item)
 		if err != nil {
 			log.Fatal(err)
