@@ -2,6 +2,7 @@ DIR := ${CURDIR}
 APP_NAME = transact
 APP_TYPE = faas
 LAMBDA_NAME = transact-lambda
+RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 ENV_VARS := AWS_REGION NOTIFY_TOPIC_ARN RULES_URL
@@ -140,8 +141,8 @@ deploy-layer: test-env-arg layer
 .PHONY: deploy-all deploy-layer deploy
 deploy-all: deploy-layer deploy # layer and source
 
-.PHONY: initial-deploy test-env-arg clean deploy-layer zip
-initial-deploy: test-env-arg clean deploy-layer zip
+.PHONY: initial-deploy test-env-arg clean publish-layer zip
+initial-deploy: test-env-arg clean publish-layer zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -149,6 +150,19 @@ initial-deploy: test-env-arg clean deploy-layer zip
 			--region=$(REGION) \
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
+
+###################### create resource ######################
+
+.PHONY: publish-layer deploy-layer
+publish-layer: deploy-layer
+		@LAYER_VERSION=$$(aws lambda publish-layer-version \
+			--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
+			--description="$(APP_NAME) dependencies in $(ENV)" \
+			--content=S3Bucket=$(ARTIFACT_BUCKET)-$(ENV),S3Key=$(APP_NAME)-layer.zip \
+			--region=$(REGION) \
+			--query 'Version' \
+			--output=text | sed 's/"//g'); \
+		echo "***Published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
 ###################### warm up ######################
 

@@ -17,9 +17,6 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
 
   environment {
     variables = {
-      HOST                = aws_rds_cluster.default.endpoint
-      USER                = var.db_master_username
-      PASSWORD            = var.db_master_password
       RULES_LAMBDA_ARN    = aws_lambda_function.rules_service_lambda.arn
       TRANSACT_LAMBDA_ARN = aws_lambda_function.transact_service_lambda.arn
       MEASURE_LAMBDA_ARN  = aws_lambda_function.measure_service_lambda.arn
@@ -39,14 +36,6 @@ data "aws_lambda_layer_version" "mxfactorial_graphql_server" {
 data "aws_s3_bucket_object" "graphql_layer" {
   bucket = "mxfactorial-artifacts-${var.environment}"
   key    = "graphql-layer.zip"
-}
-
-resource "aws_lambda_layer_version" "graphql_layer" {
-  layer_name          = "graphql-node-deps-${var.environment}"
-  s3_bucket           = data.aws_s3_bucket_object.graphql_layer.bucket
-  s3_key              = data.aws_s3_bucket_object.graphql_layer.key
-  s3_object_version   = data.aws_s3_bucket_object.graphql_layer.version_id
-  compatible_runtimes = ["nodejs10.x", "nodejs8.10", "nodejs6.10"]
 }
 
 resource "aws_iam_role" "mxfactorial_graphql_lambda_role" {
