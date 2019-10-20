@@ -14,10 +14,6 @@ output "client" {
   value = aws_route53_record.client_fqdn.name
 }
 
-output "rds_endpoint" {
-  value = aws_rds_cluster.default.endpoint
-}
-
 output "graphql_lambda_function_name" {
   value = aws_lambda_function.mxfactorial_graphql_server.function_name
 }
@@ -60,4 +56,8 @@ output "transact_url" {
 
 output "rules_url" {
   value = aws_api_gateway_deployment.rules.invoke_url
+}
+
+output "postgres_address" {
+  value = aws_db_instance.postgres.address
 }

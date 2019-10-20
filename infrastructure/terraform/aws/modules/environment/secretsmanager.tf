@@ -82,3 +82,58 @@ resource "aws_secretsmanager_secret_version" "rules_url" {
   secret_id     = aws_secretsmanager_secret.rules_url.id
   secret_string = local.RULES_URL
 }
+
+resource "aws_secretsmanager_secret" "postgres_db_name" {
+  name                    = "${var.environment}/PGDATABASE"
+  recovery_window_in_days = 0
+  description             = "postgres db name in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "postgres_db_name" {
+  secret_id     = aws_secretsmanager_secret.postgres_db_name.id
+  secret_string = local.POSTGRES_VARS.PGDATABASE
+}
+
+resource "aws_secretsmanager_secret" "postgres_host" {
+  name                    = "${var.environment}/PGHOST"
+  recovery_window_in_days = 0
+  description             = "postgres host in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "postgres_host" {
+  secret_id     = aws_secretsmanager_secret.postgres_host.id
+  secret_string = local.POSTGRES_VARS.PGHOST
+}
+
+resource "aws_secretsmanager_secret" "postgres_password" {
+  name                    = "${var.environment}/PGPASSWORD"
+  recovery_window_in_days = 0
+  description             = "postgres password in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "postgres_password" {
+  secret_id     = aws_secretsmanager_secret.postgres_password.id
+  secret_string = local.POSTGRES_VARS.PGPASSWORD
+}
+
+resource "aws_secretsmanager_secret" "postgres_port" {
+  name                    = "${var.environment}/PGPORT"
+  recovery_window_in_days = 0
+  description             = "postgres port in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "postgres_port" {
+  secret_id     = aws_secretsmanager_secret.postgres_port.id
+  secret_string = local.POSTGRES_VARS.PGPORT
+}
+
+resource "aws_secretsmanager_secret" "postgres_user" {
+  name                    = "${var.environment}/PGUSER"
+  recovery_window_in_days = 0
+  description             = "postgres user in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "postgres_user" {
+  secret_id     = aws_secretsmanager_secret.postgres_user.id
+  secret_string = local.POSTGRES_VARS.PGUSER
+}

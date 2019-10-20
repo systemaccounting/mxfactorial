@@ -2,6 +2,7 @@ DIR := ${CURDIR}
 APP_NAME = rules
 APP_TYPE = faas
 LAMBDA_NAME = rules-lambda
+RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 
@@ -88,7 +89,8 @@ dev: test
 
 .PHONY: zip
 zip:
-		zip -r $(APP_NAME)-src.zip index.js package.json src/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip index.js package.json src/* node_modules \
+			 --exclude "*.test.*"
 
 .PHONY: layer
 layer:
@@ -101,8 +103,8 @@ layer:
 
 ###################### deploy ######################
 
-.PHONY: deploy zip
-deploy: zip # lambda layer NOT deployed. use deploy-all
+.PHONY: deploy test-env-arg install-prod zip
+deploy: test-env-arg install-prod zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -111,8 +113,8 @@ deploy: zip # lambda layer NOT deployed. use deploy-all
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-untested test-env-arg clean install zip
-deploy-untested: test-env-arg clean install zip # lambda layer NOT deployed. use deploy-all
+.PHONY: deploy-untested test-env-arg install-prod zip
+deploy-untested: test-env-arg install-prod zip
 ifeq ($(ENV), prod)
 		$(error no untested deployments to prod)
 endif
@@ -134,11 +136,11 @@ deploy-layer: test-env-arg layer
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-all deploy-layer deploy
-deploy-all: deploy-layer deploy # layer and source
+.PHONY: deploy-all deploy
+deploy-all: deploy # no layer currently
 
-.PHONY: initial-deploy test-env-arg clean deploy-layer zip
-initial-deploy: test-env-arg clean deploy-layer zip
+.PHONY: initial-deploy deploy
+initial-deploy: deploy
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -146,6 +148,20 @@ initial-deploy: test-env-arg clean deploy-layer zip
 			--region=$(REGION) \
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
+
+
+###################### create resource ######################
+
+.PHONY: publish-layer deploy-layer
+publish-layer: deploy-layer
+		@LAYER_VERSION=$$(aws lambda publish-layer-version \
+			--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
+			--description="$(APP_NAME) dependencies in $(ENV)" \
+			--content=S3Bucket=$(ARTIFACT_BUCKET)-$(ENV),S3Key=$(APP_NAME)-layer.zip \
+			--region=$(REGION) \
+			--query 'Version' \
+			--output=text | sed 's/"//g'); \
+		echo "***Published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
 ###################### warm up ######################
 

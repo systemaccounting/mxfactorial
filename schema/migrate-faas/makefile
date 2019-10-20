@@ -1,10 +1,11 @@
 DIR := ${CURDIR}
-APP_NAME = schema-update
+APP_NAME = migrate
 APP_TYPE = faas
-LAMBDA_NAME = schema-update-tool-lambda
+LAMBDA_NAME = migrate-lambda
+RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
-# ENV_VARS :=
+ENV_VARS := PGUSER PGHOST PGPASSWORD PGDATABASE PGPORT
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -22,9 +23,16 @@ clean-deps:
 clean-env:
 		rm -f .env
 
-.PHONY: clean-artifact
-clean-artifact:
-		rm -f $(APP_NAME)-src.zip $(APP_NAME)-layer.zip
+.PHONY: clean-layer
+clean-layer:
+		rm -f $(APP_NAME)-layer.zip
+
+.PHONY: clean-src
+clean-src:
+		rm -f $(APP_NAME)-src.zip
+
+.PHONY: clean-artifact clean-layer clean-src
+clean-artifact: clean-layer clean-src
 
 .PHONY: clean clean-deps clean-env clean-artifact
 clean: clean-deps clean-env clean-artifact
@@ -61,14 +69,13 @@ $(ENV_VARS):
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-			echo $@=$$ENV_VAR \
-			>> $(DIR)/.env; \
+		echo $@=$$ENV_VAR >> $(DIR)/.env; \
 	fi
 
 ###################### build and test ######################
 
-.PHONY: zip
-zip:
+.PHONY: zip clean-src
+zip: clean-src
 		zip -r $(APP_NAME)-src.zip index.js package.json
 
 .PHONY: layer
@@ -108,8 +115,8 @@ src: zip
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg install-prod zip deploy-only
-deploy: test-env-arg install-prod zip deploy-only # lambda layer NOT deployed. use deploy-all
+.PHONY: deploy test-env-arg zip deploy-only
+deploy: test-env-arg zip deploy-only # lambda layer NOT deployed. use deploy-all
 
 .PHONY: deploy-only test-env-arg
 deploy-only: test-env-arg
@@ -134,8 +141,8 @@ deploy-layer: test-env-arg clean-deps layer
 .PHONY: deploy-all deploy-layer deploy
 deploy-all: deploy-layer deploy # layer and source
 
-.PHONY: initial-deploy test-env-arg clean deploy-layer zip
-initial-deploy: test-env-arg clean deploy-layer zip
+.PHONY: initial-deploy test-env-arg clean publish-layer zip
+initial-deploy: test-env-arg clean publish-layer zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -143,6 +150,19 @@ initial-deploy: test-env-arg clean deploy-layer zip
 			--region=$(REGION) \
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"
+
+###################### create resource ######################
+
+.PHONY: publish-layer deploy-layer
+publish-layer: deploy-layer
+		@LAYER_VERSION=$$(aws lambda publish-layer-version \
+			--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
+			--description="$(APP_NAME) dependencies in $(ENV)" \
+			--content=S3Bucket=$(ARTIFACT_BUCKET)-$(ENV),S3Key=$(APP_NAME)-layer.zip \
+			--region=$(REGION) \
+			--query 'Version' \
+			--output=text | sed 's/"//g'); \
+		echo "***Published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
 ###################### warm up ######################
 

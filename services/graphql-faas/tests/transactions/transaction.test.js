@@ -101,12 +101,12 @@ describe('Function As A Service GraphQL Server /transact endpoint', () => {
     done()
   })
 
-  it('returns 20 most recent debit and credit requests matching authenticated account', async done => {
+  it('returns debit and credit requests matching authenticated account', async done => {
     const response = await graphQLClient.request(fetchTransactions, {
       user: 'JoeSmith'
     })
     response.transactions.forEach(item => {
-      expect(item.debitor || item.creditor).toBe('JoeSmith')
+      expect([item.debitor, item.creditor]).toContain('JoeSmith')
     })
     done()
   })

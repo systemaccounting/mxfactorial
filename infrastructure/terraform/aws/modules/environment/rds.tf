@@ -1,27 +1,52 @@
-resource "aws_rds_cluster" "default" {
-  cluster_identifier      = "mxfactorial-${var.environment}"
-  engine                  = "aurora"
-  engine_mode             = "serverless"
-  engine_version          = "5.6.10a"
-  database_name           = "mxfactorial"
-  master_username         = var.db_master_username
-  master_password         = var.db_master_password
-  port                    = "3306"
-  backup_retention_period = 1
-  preferred_backup_window = "08:00-10:00"
-  skip_final_snapshot     = true
-  apply_immediately       = true
-  db_subnet_group_name    = aws_db_subnet_group.default.name
+resource "aws_db_instance" "postgres" {
+  identifier                          = "mxfactorial-postgres-${var.environment}"
+  allocated_storage                   = 20
+  storage_type                        = "gp2"
+  engine                              = "postgres"
+  engine_version                      = "11.5"
+  instance_class                      = "db.t2.micro"
+  name                                = "mxfactorial"
+  username                            = var.db_master_username
+  password                            = var.db_master_password
+  port                                = 5432
+  parameter_group_name                = "default.postgres11"
+  backup_retention_period             = 0
+  backup_window                       = "07:09-07:39"
+  db_subnet_group_name                = aws_db_subnet_group.default.name
+  deletion_protection                 = false
+  enabled_cloudwatch_logs_exports     = ["postgresql", "upgrade"]
+  iam_database_authentication_enabled = true
+  skip_final_snapshot                 = true
+  vpc_security_group_ids              = [aws_security_group.rds.id]
+}
 
-  vpc_security_group_ids = [aws_security_group.rds.id]
-
-  scaling_configuration {
-    auto_pause               = true
-    max_capacity             = 256
-    min_capacity             = 2
-    seconds_until_auto_pause = 1200
+locals {
+  POSTGRES_VARS = {
+    PGDATABASE = aws_db_instance.postgres.name,
+    PGHOST     = aws_db_instance.postgres.address,
+    PGPASSWORD = var.db_master_password
+    PGPORT     = aws_db_instance.postgres.port,
+    PGUSER     = var.db_master_username
   }
 }
+
+########## Create security group for RDS ##########
+resource "aws_security_group" "rds" {
+  name        = "db-security-group-${var.environment}"
+  description = "Allow internal MySQL 3306 port access"
+  vpc_id      = data.aws_vpc.default.id
+}
+
+########## allow traffic on 5432 between cloud9 and postgres ##########
+resource "aws_security_group_rule" "allow_cloud9_postgres" {
+  type              = "ingress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  cidr_blocks       = data.aws_subnet.rds_cloud9.*.cidr_block
+  security_group_id = aws_security_group.rds.id
+}
+
 
 ########## Create clou9 instance to access RDS ##########
 resource "aws_cloud9_environment_ec2" "default" {
@@ -33,22 +58,6 @@ resource "aws_cloud9_environment_ec2" "default" {
   subnet_id = tolist(data.aws_subnet_ids.default.ids)[0]
 }
 
-########## Create security group for RDS ##########
-resource "aws_security_group" "rds" {
-  name        = "db-security-group-${var.environment}"
-  description = "Allow internal MySQL 3306 port access"
-  vpc_id      = data.aws_vpc.default.id
-}
-
-########## Allow traffic on port 3306 between cloud9 and RDS ##########
-resource "aws_security_group_rule" "allow_cloud9" {
-  type              = "ingress"
-  from_port         = 3306
-  to_port           = 3306
-  protocol          = "tcp"
-  cidr_blocks       = data.aws_subnet.rds_cloud9.*.cidr_block
-  security_group_id = aws_security_group.rds.id
-}
 
 ###### Allow all traffic within RDS and lambda group ######
 resource "aws_security_group_rule" "allow_all_internal_inbound_rds" {
@@ -72,12 +81,12 @@ resource "aws_security_group_rule" "allow_all_outbound_rds" {
 
 ###### Cherry-pick subnets for RDS in future ######
 resource "aws_db_subnet_group" "default" {
-  description = "serverless db subnet group"
+  description = "postgres db subnet group"
   name        = "db-subnet-group-${var.environment}"
   subnet_ids  = data.aws_subnet_ids.default.ids
 
   tags = {
-    Name = "serverless-db-subnet-group"
+    Name = "postgres-db-subnet-group"
   }
 }
 
@@ -115,11 +124,7 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
     ]
   }
   environment {
-    variables = {
-      HOST     = aws_rds_cluster.default.endpoint
-      USER     = var.db_master_username
-      PASSWORD = var.db_master_password
-    }
+    variables = local.POSTGRES_VARS
   }
 }
 
@@ -153,25 +158,33 @@ resource "aws_iam_role_policy" "test_data_teardown_lambda_policy" {
   name = "test-data-teardown-lambda-policy-${var.environment}"
   role = aws_iam_role.test_data_teardown_lambda_role.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface"
-      ],
-      "Resource": "*"
-    }
-  ]
+  policy = data.aws_iam_policy_document.test_data_teardown_lambda.json
 }
-EOF
+
+data "aws_iam_policy_document" "test_data_teardown_lambda" {
+  statement {
+    sid = "TestDataTeardownLambdaLoggingPolicy${var.environment}"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid = "TestDataTeardownLambdaVpcAccessPolicy${var.environment}"
+    actions = [
+      "ec2:CreateNetworkInterface",
+      "ec2:DeleteNetworkInterface",
+      "ec2:DescribeNetworkInterfaces"
+    ]
+    resources = [
+      "*", # todo: restrict
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "rds_access_for_test_data_teardown_lambda" {

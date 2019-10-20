@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
 )
 
 type lambdaEvent struct {
@@ -43,6 +43,7 @@ type transaction struct {
 	CreditApprover            NullString `json:"credit_approver"`
 	CreditorRejectionTime     NullString `json:"creditor_rejection_time"`
 	DebitorRejectionTime      NullString `json:"debitor_rejection_time"`
+	CreatedAt                 string     `json:"createdAt"`
 }
 
 // NullString is an alias for sql.NullString data type https://gist.github.com/rsudip90/022c4ef5d98130a224c9239e0a1ab397
@@ -60,12 +61,14 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 
 func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 	db, err := sql.Open(
-		"mysql",
+		"postgres",
 		fmt.Sprintf(
-			"%s:%s@tcp(%s:3306)/mxfactorial",
-			os.Getenv("USER"),
-			os.Getenv("PASSWORD"),
-			os.Getenv("HOST"))) // "user:password@tcp(host:port)/database"
+			"host=%s port=%s user=%s password=%s dbname=%s",
+			os.Getenv("PGHOST"),
+			os.Getenv("PGPORT"),
+			os.Getenv("PGUSER"),
+			os.Getenv("PGPASSWORD"),
+			os.Getenv("PGDATABASE")))
 
 	if err != nil {
 		log.Panic(err)
@@ -73,18 +76,17 @@ func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 
 	if event.User != "" {
 		initQuery := `
-		(SELECT * FROM transactions
+		SELECT * FROM transactions
 		WHERE creditor='%s' OR debitor='%s'
 		AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL)
-		ORDER BY id DESC LIMIT ?)
-		ORDER BY id desc;`
+		ORDER BY id DESC LIMIT $1;`
 		queryString := fmt.Sprintf(initQuery, event.User, event.User)
 		return getLastNTransactions(db, queryString, 20)
 	}
 
 	// if request empty, or if id property empty
 	if (lambdaEvent{} == event) || len(event.ID) == 0 {
-		queryString := "(SELECT * FROM transactions ORDER BY id DESC LIMIT ?) ORDER BY id;"
+		queryString := "SELECT * FROM transactions ORDER BY id DESC LIMIT $1;"
 		return getLastNTransactions(db, queryString, 2)
 	}
 
@@ -93,7 +95,7 @@ func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	queryString := "SELECT * FROM transactions WHERE id=?"
+	queryString := "SELECT * FROM transactions WHERE id=$1;"
 	return getTransactionsByID(db, queryString, integerID)
 }
 

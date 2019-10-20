@@ -6,10 +6,6 @@ output "client" {
   value = module.prod.client
 }
 
-output "rds_endpoint" {
-  value = module.prod.rds_endpoint
-}
-
 output "pool_client_id" {
   value = module.prod.pool_client_id
 }

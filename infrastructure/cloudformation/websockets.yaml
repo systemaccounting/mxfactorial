@@ -82,7 +82,7 @@ Resources:
       Description: !Sub "authorizes websocket clients in ${Environment}"
       Handler: index.handler
       MemorySize: 256
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref WebsocketAuthFunctionArtifact
@@ -158,7 +158,7 @@ Resources:
       Description: records connected websocket clients in dynamodb
       Handler: index.handler
       MemorySize: 256
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref WebsocketConnectFunctionArtifact
@@ -255,7 +255,7 @@ Resources:
       Description: !Sub "gets notifications after receiving websocket request in ${Environment}"
       Handler: index.handler
       MemorySize: 256
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Role: !GetAtt NotificationGetLambdaExecutionRole.Arn
       Environment:
           Variables:
@@ -357,7 +357,7 @@ Resources:
       Description: !Sub "clears notifications from websocket message in ${Environment}"
       Handler: index.handler
       MemorySize: 256
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Role: !GetAtt NotificationClearLambdaExecutionRole.Arn
       Environment:
           Variables:
@@ -460,7 +460,7 @@ Resources:
       Description: !Sub "stores and sends notifications in ${Environment}"
       Handler: index.handler
       MemorySize: 256
-      Runtime: nodejs8.10
+      Runtime: nodejs10.x
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref NotificationSendFunctionArtifact

@@ -1,21 +1,21 @@
 const Sequelize = require('sequelize')
 const TransactionModel = require('./models/Transaction')
 
-const DB_NAME = 'mxfactorial'
-
 // todo: unit and integration tests
 
 const storeTransactions = async transactions => {
+  // options.dialectModule default = pg per:
+  // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor
   const sequelize = new Sequelize(
-    DB_NAME,
-    process.env.USER,
-    process.env.PASSWORD,
+    process.env.PGDATABASE,
+    process.env.PGUSER,
+    process.env.PGPASSWORD,
     {
-      host: process.env.HOST,
+      host: process.env.PGHOST,
       operatorsAliases: false,
       logging: console.log,
-      port: 3306,
-      dialect: 'mysql',
+      port: process.env.PGPORT,
+      dialect: 'postgres',
       pool: {
         min: 0,
         max: 5,
@@ -32,7 +32,7 @@ const storeTransactions = async transactions => {
     individualHooks: true
   })
   // Close connection
-  sequelize.close().then(() => console.log('MySQL connection closed'))
+  sequelize.close().then(() => console.log('postgres connection closed'))
   return result
 }
 

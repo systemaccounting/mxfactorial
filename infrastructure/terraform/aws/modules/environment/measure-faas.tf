@@ -25,11 +25,7 @@ resource "aws_lambda_function" "measure_service_lambda" {
   }
 
   environment {
-    variables = {
-      HOST     = aws_rds_cluster.default.endpoint
-      USER     = var.db_master_username
-      PASSWORD = var.db_master_password
-    }
+    variables = local.POSTGRES_VARS
   }
 }
 
@@ -63,25 +59,33 @@ resource "aws_iam_role_policy" "measure_service_lambda_policy" {
   name = "measure-service-lambda-policy-${var.environment}"
   role = aws_iam_role.measure_service_lambda_role.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "ec2:CreateNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-          "ec2:DeleteNetworkInterface"
-      ],
-      "Resource": "*"
-    }
-  ]
+  policy = data.aws_iam_policy_document.measure_service_lambda_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "measure_service_lambda_policy" {
+  statement {
+    sid = "MeasureLambdaLoggingPolicy${var.environment}"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    sid = "MeasureLambdaVpcAccessPolicy${var.environment}"
+    actions = [
+      "ec2:CreateNetworkInterface",
+      "ec2:DeleteNetworkInterface",
+      "ec2:DescribeNetworkInterfaces"
+    ]
+    resources = [
+      "*", # todo: restrict
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "rds_access_for_measure_lambda" {

@@ -65,13 +65,13 @@ exports.handler = async (event) => {
             let lambdaFnConfigUpdateParam = {
               FunctionName: lambdaFn.FunctionName,
               Layers: [
-                layer.Arn
+                LayerVersionArn
               ]
              }
              await lambda.updateFunctionConfiguration(lambdaFnConfigUpdateParam)
              .promise()
              .then(data => {
-               console.log(`${lambdaFn.FunctionName} lambda received ${layer.Arn} on ${data.LastModified}`)
+               console.log(`${lambdaFn.FunctionName} lambda received ${LayerVersionArn} on ${data.LastModified}`)
                lambdaLayersUpdated++
               })
              .catch(err => console.log(err, err.stack))
