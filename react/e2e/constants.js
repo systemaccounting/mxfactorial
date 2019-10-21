@@ -17,7 +17,6 @@ const SELECTORS = {
   backButton: '[data-id="backButton"]',
   historyItemIndicator: '[data-id="historyItemIndicator"]',
   transactionPartner: '[data-id="transactionPartner"]',
-  contraAccountIndicator: '[data-id="contraAccountIndicator"]',
   emailCopyButton: '[data-id="emailCopyButton"]',
   contraAccountIndicator: '[data-id="contraAccountIndicator"]',
   sumTransactionItemValueIndicator:
@@ -73,7 +72,8 @@ const SELECTORS = {
   notFound: '[data-id="not-found"]',
   draftTransaction: '[data-id="draft-transaction"]',
   signOutButton: '[data-name="sign-out"]',
-  landingScreenLogo: '.create-account-logo'
+  landingScreenLogo: '.create-account-logo',
+  ruleItem: '[data-id="rule-item"]'
 }
 
 module.exports = {
