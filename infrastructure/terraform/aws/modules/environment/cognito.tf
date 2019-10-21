@@ -357,33 +357,36 @@ resource "aws_iam_role_policy" "cognito_account_auto_confirm_lambda_policy" {
   name = "cognito-account-auto-confirm-lambda-policy-${var.environment}"
   role = aws_iam_role.cognito_account_auto_confirm_lambda_role.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Sid": "VisualEditor1",
-      "Effect": "Allow",
-      "Action": "cognito-idp:*",
-      "Resource": "${aws_cognito_user_pool.pool.arn}"
-    }
-  ]
+  policy = data.aws_iam_policy_document.cognito_account_auto_confirm_lambda_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "cognito_account_auto_confirm_lambda_policy" {
+  version = "2012-10-17"
+
+  statement {
+    sid = "CognitoAccountAutoConfirmLambdaLoggingPolicy${var.environment}"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "CognitoAccountAutoConfirmLambdaCognitoAccessPolicy${var.environment}"
+    actions = [
+      "cognito-idp:*"
+    ]
+    resources = [
+      aws_cognito_user_pool.pool.arn
+    ]
+  }
 }
 
 ########## Permit Cognito invocation of auto confirm account Lambda ##########
 resource "aws_lambda_permission" "allow_cognito" {
-  statement_id  = "AllowExecutionFromCognito"
+  statement_id  = "AllowExecutionFromCognito${title(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.cognito_account_auto_confirm.function_name
   principal     = "cognito-idp.amazonaws.com"
@@ -428,7 +431,7 @@ resource "aws_iam_role" "delete_faker_cognito_accounts_lambda_role" {
 data "aws_iam_policy_document" "delete_faker_cognito_accounts_lambda_role" {
   version = "2012-10-17"
   statement {
-    sid = "DeleteFakerCognitoAccountsLambdaRole${var.environment}"
+    sid = "DeleteFakerCognitoAccountsLambdaRole${title(var.environment)}"
     actions = [
       "sts:AssumeRole"
     ]
@@ -450,7 +453,7 @@ resource "aws_iam_role_policy" "delete_faker_cognito_accounts_lambda_policy" {
 data "aws_iam_policy_document" "delete_faker_cognito_accounts_lambda_policy" {
   version = "2012-10-17"
   statement {
-    sid = "CognitoAccountAutoConfirmLambdaPolicy${var.environment}"
+    sid = "DeleteFakerCognitoAccountLambdaLoggingPolicy${title(var.environment)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -476,7 +479,7 @@ resource "aws_cloudwatch_event_target" "delete_faker_lambda" {
 
 ########## Permit daily CloudWatch Event invocation of delete Faker account Lambda ##########
 resource "aws_lambda_permission" "delete_faker_accounts_daily" {
-  statement_id  = "AllowExecutionFromCloudWatch"
+  statement_id  = "AllowExecutionFromCloudWatch${title(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.delete_faker_cognito_accounts_lambda.function_name
   principal     = "events.amazonaws.com"

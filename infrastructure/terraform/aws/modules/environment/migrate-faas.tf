@@ -81,7 +81,7 @@ data "aws_iam_policy_document" "migrate_lambda_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "MigrateLambdaLoggingPolicy${var.environment}"
+    sid = "MigrateLambdaLoggingPolicy${title(var.environment)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -93,7 +93,7 @@ data "aws_iam_policy_document" "migrate_lambda_policy" {
   }
 
   statement {
-    sid = "MigrateLambdaEc2AccessPolicy${var.environment}"
+    sid = "MigrateLambdaEc2AccessPolicy${title(var.environment)}"
     actions = [
       "ec2:CreateNetworkInterface",
       "ec2:DescribeNetworkInterfaces",

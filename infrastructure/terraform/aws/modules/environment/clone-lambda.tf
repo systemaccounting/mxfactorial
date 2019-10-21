@@ -60,7 +60,7 @@ data "aws_iam_policy_document" "clone_tool_lambda_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "CloneToolLambdaLoggingPolicy${var.environment}"
+    sid = "CloneToolLambdaLoggingPolicy${title(var.environment)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -72,13 +72,13 @@ data "aws_iam_policy_document" "clone_tool_lambda_policy" {
   }
 
   statement {
-    sid = "CloneToolLambdaInvokePolicy${var.environment}"
+    sid = "CloneToolLambdaInvokePolicy${title(var.environment)}"
     actions = [
       "lambda:InvokeFunction"
     ]
     resources = [
-      "${aws_lambda_function.migrate_lambda.arn}",
-      "${aws_lambda_function.integration_test_data_teardown_lambda.arn}"
+      aws_lambda_function.migrate_lambda.arn,
+      aws_lambda_function.integration_test_data_teardown_lambda.arn
     ]
   }
 }

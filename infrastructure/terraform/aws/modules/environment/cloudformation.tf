@@ -6,7 +6,7 @@ data "aws_s3_bucket" "websocket_artifacts" {
 }
 
 resource "aws_lambda_permission" "allow_deploy_lambda_invoke_from_websocket_s3" {
-  statement_id  = "AllowDeployLambdaInvokeFromWebsocketS3${var.environment}"
+  statement_id  = "AllowDeployLambdaInvokeFromWebsocketS3${title(var.environment)}"
   action        = local.lambda_allowed_action
   function_name = aws_lambda_function.deploy_lambda.arn
   principal     = "s3.amazonaws.com"
@@ -15,7 +15,7 @@ resource "aws_lambda_permission" "allow_deploy_lambda_invoke_from_websocket_s3" 
 
 data "aws_iam_policy_document" "deploy_lambda_for_cloudformation_artifacts" {
   statement {
-    sid = "CloudformationLambdaGetS3Object${var.environment}"
+    sid = "CloudformationLambdaGetS3Object${title(var.environment)}"
 
     effect = "Allow"
 

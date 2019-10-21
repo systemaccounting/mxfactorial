@@ -73,7 +73,7 @@ resource "aws_api_gateway_deployment" "transact" {
 }
 
 resource "aws_lambda_permission" "transact" {
-  statement_id  = "AllowAPIGatewayInvokeTransact"
+  statement_id  = "AllowAPIGatewayInvokeTransact${title(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.transact_service_lambda.arn
   principal     = "apigateway.amazonaws.com"

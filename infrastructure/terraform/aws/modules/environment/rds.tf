@@ -163,7 +163,7 @@ resource "aws_iam_role_policy" "test_data_teardown_lambda_policy" {
 
 data "aws_iam_policy_document" "test_data_teardown_lambda" {
   statement {
-    sid = "TestDataTeardownLambdaLoggingPolicy${var.environment}"
+    sid = "TestDataTeardownLambdaLoggingPolicy${title(var.environment)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -175,7 +175,7 @@ data "aws_iam_policy_document" "test_data_teardown_lambda" {
   }
 
   statement {
-    sid = "TestDataTeardownLambdaVpcAccessPolicy${var.environment}"
+    sid = "TestDataTeardownLambdaVpcAccessPolicy${title(var.environment)}"
     actions = [
       "ec2:CreateNetworkInterface",
       "ec2:DeleteNetworkInterface",

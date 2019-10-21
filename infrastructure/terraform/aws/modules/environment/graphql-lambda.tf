@@ -62,31 +62,35 @@ resource "aws_iam_role_policy" "mxfactorial_graphql_lambda_policy" {
   name = "mxfactorial-graphql-lambda-${var.environment}"
   role = aws_iam_role.mxfactorial_graphql_lambda_role.id
 
-  policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "lambda:InvokeFunction",
-      "Resource": [
-        "${aws_lambda_function.rules_service_lambda.arn}",
-        "${aws_lambda_function.transact_service_lambda.arn}",
-        "${aws_lambda_function.measure_service_lambda.arn}"
-      ]
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-      ],
-      "Resource": "*"
-    }
-  ]
+  policy = data.aws_iam_policy_document.mxfactorial_graphql_lambda_policy.json
 }
-EOF
+
+data "aws_iam_policy_document" "mxfactorial_graphql_lambda_policy" {
+  version = "2012-10-17"
+
+  statement {
+    sid = "GraphQLInvokeLambdaPolicy${title(var.environment)}"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+    resources = [
+      aws_lambda_function.rules_service_lambda.arn,
+      aws_lambda_function.transact_service_lambda.arn,
+      aws_lambda_function.measure_service_lambda.arn
+    ]
+  }
+
+  statement {
+    sid = "GraphQLLoggingPolicy${title(var.environment)}"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = [
+      "*",
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "rds_access_for_lambda" {

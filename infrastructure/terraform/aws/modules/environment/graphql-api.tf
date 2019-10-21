@@ -69,7 +69,7 @@ resource "aws_api_gateway_deployment" "environment" {
 }
 
 resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
-  statement_id  = "AllowAPIGatewayInvoke"
+  statement_id  = "AllowAPIGatewayInvoke${title(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.mxfactorial_graphql_server.function_name
   principal     = "apigateway.amazonaws.com"
@@ -112,7 +112,7 @@ resource "aws_iam_role_policy" "api_gateway_cloudwatch" {
 data "aws_iam_policy_document" "api_gateway_cloudwatch_policy" {
   version = "2012-10-17"
   statement {
-    sid    = "ApiGatewayCloudwatchPolicy${var.environment}"
+    sid    = "ApiGatewayCloudwatchPolicy${title(var.environment)}"
     effect = "Allow"
     actions = [
       "logs:CreateLogGroup",

@@ -55,7 +55,7 @@ resource "aws_iam_role_policy" "deploy_lambda" {
 
 data "aws_iam_policy_document" "deploy_lambda" {
   statement {
-    sid = "DeployLambdaLogging${var.environment}"
+    sid = "DeployLambdaLogging${title(var.environment)}"
 
     effect = "Allow"
 
@@ -71,7 +71,7 @@ data "aws_iam_policy_document" "deploy_lambda" {
   }
 
   statement {
-    sid = "DeployLambdaUpdateCode${var.environment}"
+    sid = "DeployLambdaUpdateCode${title(var.environment)}"
 
     effect = "Allow"
 
@@ -89,7 +89,7 @@ data "aws_iam_policy_document" "deploy_lambda" {
   }
 
   statement {
-    sid = "AllLambdaGetS3Object${var.environment}"
+    sid = "AllLambdaGetS3Object${title(var.environment)}"
 
     effect = "Allow"
 

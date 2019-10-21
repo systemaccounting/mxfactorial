@@ -38,7 +38,17 @@ resource "aws_lambda_function" "transact_service_lambda" {
 
 locals {
   # workaround for aws_api_gateway_deployment.rules.invoke_url cycle error:
-  RULES_URL = "https://${aws_api_gateway_rest_api.rules.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
+  RULES_URL = join(
+    "",
+    [
+      "https://",
+      aws_api_gateway_rest_api.rules.id,
+      ".execute-api.",
+      data.aws_region.current.name,
+      ".amazonaws.com/",
+      var.environment
+    ]
+  )
 }
 
 resource "aws_cloudwatch_log_group" "transact_service_lambda" {
@@ -87,7 +97,7 @@ data "aws_iam_policy_document" "transact_service_lambda_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "TransactLambdaLoggingPolicy${var.environment}"
+    sid = "TransactLambdaLoggingPolicy${title(var.environment)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -99,7 +109,7 @@ data "aws_iam_policy_document" "transact_service_lambda_policy" {
   }
 
   statement {
-    sid = "TransactLambdaEc2AccessPolicy${var.environment}"
+    sid = "TransactLambdaEc2AccessPolicy${title(var.environment)}"
     actions = [
       "ec2:CreateNetworkInterface",
       "ec2:DescribeNetworkInterfaces",
@@ -111,7 +121,7 @@ data "aws_iam_policy_document" "transact_service_lambda_policy" {
   }
 
   statement {
-    sid = "TransactLambdaSNSPublishPolicy${var.environment}"
+    sid = "TransactLambdaSNSPublishPolicy${title(var.environment)}"
     actions = [
       "SNS:Publish",
     ]

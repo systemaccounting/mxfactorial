@@ -73,7 +73,7 @@ resource "aws_api_gateway_deployment" "rules" {
 }
 
 resource "aws_lambda_permission" "rules" {
-  statement_id  = "AllowAPIGatewayInvokeRules"
+  statement_id  = "AllowAPIGatewayInvokeRules${title(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.rules_service_lambda.arn
   principal     = "apigateway.amazonaws.com"

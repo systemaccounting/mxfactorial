@@ -64,7 +64,7 @@ resource "aws_iam_role_policy" "measure_service_lambda_policy" {
 
 data "aws_iam_policy_document" "measure_service_lambda_policy" {
   statement {
-    sid = "MeasureLambdaLoggingPolicy${var.environment}"
+    sid = "MeasureLambdaLoggingPolicy${title(var.environment)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -76,7 +76,7 @@ data "aws_iam_policy_document" "measure_service_lambda_policy" {
   }
 
   statement {
-    sid = "MeasureLambdaVpcAccessPolicy${var.environment}"
+    sid = "MeasureLambdaVpcAccessPolicy${title(var.environment)}"
     actions = [
       "ec2:CreateNetworkInterface",
       "ec2:DeleteNetworkInterface",
