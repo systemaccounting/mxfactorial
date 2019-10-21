@@ -94,12 +94,7 @@ zip:
 
 .PHONY: layer
 layer:
-		rm -f $(APP_NAME)-layer.zip
-		yarn install --prod
-		mkdir nodejs
-		cp -r node_modules nodejs/node_modules
-		zip -r $(APP_NAME)-layer.zip nodejs
-		rm -rf nodejs
+		@echo "$(APP_NAME)-$(APP_TYPE) has few deps. not building layer"
 
 ###################### deploy ######################
 
@@ -128,13 +123,13 @@ endif
 
 .PHONY: deploy-layer test-env-arg layer
 deploy-layer: test-env-arg layer
-		@ETAG=$$(aws s3api put-object \
+#		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-layer.zip \
-			--body=$(DIR)/$(APP_NAME)-layer.zip \
+			--body=$(DIR)/$(APP_NAME)-src.zip \
 			--region=$(REGION) \
 			--output=text | sed 's/"//g'); \
-		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
+#		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
 .PHONY: deploy-all deploy
 deploy-all: deploy # no layer currently
@@ -154,14 +149,14 @@ initial-deploy: deploy
 
 .PHONY: publish-layer deploy-layer
 publish-layer: deploy-layer
-		@LAYER_VERSION=$$(aws lambda publish-layer-version \
+#		@LAYER_VERSION=$$(aws lambda publish-layer-version \
 			--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
 			--description="$(APP_NAME) dependencies in $(ENV)" \
 			--content=S3Bucket=$(ARTIFACT_BUCKET)-$(ENV),S3Key=$(APP_NAME)-layer.zip \
 			--region=$(REGION) \
 			--query 'Version' \
 			--output=text | sed 's/"//g'); \
-		echo "***Published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
+#		echo "***Published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
 ###################### warm up ######################
 
