@@ -77,8 +77,7 @@ data "aws_iam_policy_document" "clone_tool_lambda_policy" {
       "lambda:InvokeFunction"
     ]
     resources = [
-      aws_lambda_function.migrate_lambda.arn,
-      aws_lambda_function.integration_test_data_teardown_lambda.arn
+      aws_lambda_function.migrate_lambda.arn
     ]
   }
 }
