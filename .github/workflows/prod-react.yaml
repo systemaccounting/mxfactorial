@@ -1,9 +1,9 @@
-name: prod-graphql-faas
+name: prod-react
 
 on:
   push:
     paths:
-    - 'services/graphql-faas/**'
+    - 'react/**'
     branches:
     - 'master'
 
