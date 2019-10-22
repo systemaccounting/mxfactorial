@@ -11,7 +11,7 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
   s3_object_version = data.aws_s3_bucket_object.mxfactorial_graphql_server.version_id
   handler           = "index.handler"
   layers            = [data.aws_lambda_layer_version.mxfactorial_graphql_server.arn]
-  runtime           = "nodejs8.10"
+  runtime           = "nodejs10.x"
   timeout           = 30
   role              = aws_iam_role.mxfactorial_graphql_lambda_role.arn
 

@@ -324,7 +324,7 @@ resource "aws_lambda_function" "cognito_account_auto_confirm" {
   s3_object_version = data.aws_s3_bucket_object.cognito_account_auto_confirm.version_id
   role              = aws_iam_role.cognito_account_auto_confirm_lambda_role.arn
   handler           = "index.handler"
-  runtime           = "nodejs8.10"
+  runtime           = "nodejs10.x"
 }
 
 resource "aws_cloudwatch_log_group" "cognito_account_auto_confirm" {
@@ -406,7 +406,7 @@ resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
   s3_object_version = data.aws_s3_bucket_object.delete_faker_cognito_accounts_lambda.version_id
   role              = aws_iam_role.cognito_account_auto_confirm_lambda_role.arn
   handler           = "index.handler"
-  runtime           = "nodejs8.10"
+  runtime           = "nodejs10.x"
   timeout           = 10
 
   environment {

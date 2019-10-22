@@ -111,7 +111,7 @@ resource "aws_lambda_function" "integration_test_data_teardown_lambda" {
   s3_key            = data.aws_s3_bucket_object.integration_test_data_teardown_lambda.key
   s3_object_version = data.aws_s3_bucket_object.integration_test_data_teardown_lambda.version_id
   handler           = "index.handler"
-  runtime           = "nodejs8.10"
+  runtime           = "nodejs10.x"
   timeout           = 30
   # imported from lambda.tf
   role = aws_iam_role.test_data_teardown_lambda_role.arn

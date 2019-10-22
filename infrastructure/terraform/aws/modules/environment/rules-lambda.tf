@@ -11,7 +11,7 @@ resource "aws_lambda_function" "rules_service_lambda" {
   s3_object_version = data.aws_s3_bucket_object.rules_service_lambda.version_id
   handler           = "index.handler"
   layers            = [data.aws_lambda_layer_version.rules_service_lambda.arn]
-  runtime           = "nodejs8.10"
+  runtime           = "nodejs10.x"
   timeout           = 30
   role              = aws_iam_role.rules_service_lambda_role.arn
 
