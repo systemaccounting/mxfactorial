@@ -1,10 +1,12 @@
 DIR := ${CURDIR}
 APP_NAME = rules
 APP_TYPE = faas
-LAMBDA_NAME = rules-lambda
+LAMBDA_NAME = rules-faas
 RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
+ENV_VARS := AWS_REGION RULE_INSTANCE_TABLE_NAME SECRET \
+CLIENT_ID POOL_ID GRAPHQL_API
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -24,7 +26,7 @@ clean-env:
 
 .PHONY: clean-artifact
 clean-artifact:
-		rm -f $(APP_NAME)-src.zip $(APP_NAME)-layer.zip
+		rm -f $(APP_NAME)-src.zip
 
 .PHONY: clean clean-deps clean-env clean-artifact
 clean: clean-deps clean-env clean-artifact
@@ -61,8 +63,7 @@ $(ENV_VARS):
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-			echo $@=$$ENV_VAR \
-			>> $(DIR)/.env; \
+		echo $@=$$ENV_VAR >> $(DIR)/.env; \
 	fi
 
 ###################### build and test ######################
@@ -74,10 +75,10 @@ test: test-env-arg test-unit
 test-unit: test-env-arg install
 		yarn test
 
-# .PHONY: test-integration deploy get-secrets
-# test-integration: deploy get-secrets
-# 		@yarn install; \
-# 		yarn test:integration
+.PHONY: test-integration get-secrets
+test-integration: get-secrets
+		@yarn install; \
+		yarn test:integration
 
 # aliases test target which creates tested artifact
 .PHONY: src test
@@ -87,8 +88,8 @@ src: test
 .PHONY: dev test
 dev: test
 
-.PHONY: zip
-zip:
+.PHONY: zip clean-artifact
+zip: clean-artifact
 		zip -r $(APP_NAME)-src.zip index.js package.json src/* node_modules \
 			 --exclude "*.test.*"
 
@@ -98,8 +99,8 @@ layer:
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg install-prod zip
-deploy: test-env-arg install-prod zip
+.PHONY: deploy test-env-arg init-rules install-prod zip
+deploy: test-env-arg init-rules install-prod zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -108,8 +109,8 @@ deploy: test-env-arg install-prod zip
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-untested test-env-arg install-prod zip
-deploy-untested: test-env-arg install-prod zip
+.PHONY: deploy-untested test-env-arg init-rules install-prod zip
+deploy-untested: test-env-arg init-rules install-prod zip
 ifeq ($(ENV), prod)
 		$(error no untested deployments to prod)
 endif
@@ -134,8 +135,8 @@ deploy-layer: test-env-arg layer
 .PHONY: deploy-all deploy
 deploy-all: deploy # no layer currently
 
-.PHONY: initial-deploy deploy
-initial-deploy: deploy
+.PHONY: initial-deploy deploy init-rules
+initial-deploy: deploy init-rules
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -157,6 +158,10 @@ publish-layer: deploy-layer
 			--query 'Version' \
 			--output=text | sed 's/"//g'); \
 #		echo "***Published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
+
+.PHONY: init-rules get-secrets
+init-rules: get-secrets
+		@yarn install && yarn init:rules
 
 ###################### warm up ######################
 
