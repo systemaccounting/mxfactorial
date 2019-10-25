@@ -5,7 +5,8 @@ LAMBDA_NAME = mxfactorial-graphql-server
 ARTIFACT_BUCKET = mxfactorial-artifacts
 RUNTIME = node
 REGION = us-east-1
-ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API
+ENV_VARS := AWS_REGION POOL_ID CLIENT_ID GRAPHQL_API \
+SECRET RDS_TRANSACTION_TEARDOWN_LAMBDA
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -79,7 +80,8 @@ test: install zip deploy test-integration
 .PHONY: test-integration get-secrets
 test-integration: get-secrets
 		@$(MAKE) -C .. ENV=$(ENV) warm-up
-		LOCAL_ENV=$(ENV) yarn test
+		yarn install
+		yarn test
 
 .PHONY: zip clean-artifact
 zip: clean-artifact
@@ -113,7 +115,7 @@ deploy: test-env-arg # lambda layer NOT deployed. use deploy-all
 			--body=$(DIR)/$(APP_NAME)-src.zip \
 			--region=$(REGION) \
 			--output=text | sed 's/"//g'); \
-		echo "***Deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"
+		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
 .PHONY: deploy-layer test-env-arg layer
 deploy-layer: test-env-arg layer
