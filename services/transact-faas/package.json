@@ -6,7 +6,6 @@
     "test": "jest --detectOpenHandles --verbose --silent"
   },
   "dependencies": {
-    "axios": "^0.18.0",
     "lodash": "^4.17.11",
     "pg": "^7.12.1",
     "pg-hstore": "^2.3.3",
@@ -14,7 +13,7 @@
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "aws-sdk": "^2.548.0",
+    "aws-sdk": "^2.555.0",
     "jest": "^24.5.0"
   }
 }
