@@ -145,17 +145,10 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 
   lambda_function {
-    id                  = aws_lambda_function.rules_service_lambda.function_name
+    id                  = aws_lambda_function.rules_faas.function_name
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.rules_service_lambda.key
-  }
-
-  lambda_function {
-    id                  = data.aws_lambda_layer_version.rules_service_lambda.layer_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.rules_layer.key
+    filter_prefix       = data.aws_s3_bucket_object.rules_faas.key
   }
 
   lambda_function {

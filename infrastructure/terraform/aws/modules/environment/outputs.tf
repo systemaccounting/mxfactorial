@@ -53,11 +53,6 @@ output "cloudfront_zone_id" {
 output "transact_url" {
   value = aws_api_gateway_deployment.transact.invoke_url
 }
-
-output "rules_url" {
-  value = aws_api_gateway_deployment.rules.invoke_url
-}
-
 output "postgres_address" {
   value = aws_db_instance.postgres.address
 }

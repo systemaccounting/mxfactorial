@@ -72,17 +72,6 @@ resource "aws_secretsmanager_secret_version" "notifications_topic_arn" {
   secret_string = aws_sns_topic.notifications.arn
 }
 
-resource "aws_secretsmanager_secret" "rules_url" {
-  name                    = "${var.environment}/RULES_URL"
-  recovery_window_in_days = 0
-  description             = "rules url in ${var.environment}"
-}
-
-resource "aws_secretsmanager_secret_version" "rules_url" {
-  secret_id     = aws_secretsmanager_secret.rules_url.id
-  secret_string = local.RULES_URL
-}
-
 resource "aws_secretsmanager_secret" "postgres_db_name" {
   name                    = "${var.environment}/PGDATABASE"
   recovery_window_in_days = 0
@@ -136,4 +125,26 @@ resource "aws_secretsmanager_secret" "postgres_user" {
 resource "aws_secretsmanager_secret_version" "postgres_user" {
   secret_id     = aws_secretsmanager_secret.postgres_user.id
   secret_string = local.POSTGRES_VARS.PGUSER
+}
+
+resource "aws_secretsmanager_secret" "rule_instance_table_name" {
+  name                    = "${var.environment}/RULE_INSTANCE_TABLE_NAME"
+  recovery_window_in_days = 0
+  description             = "rule instance table name in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "rule_instance_table_name" {
+  secret_id     = aws_secretsmanager_secret.rule_instance_table_name.id
+  secret_string = aws_dynamodb_table.rule_instances.name
+}
+
+resource "aws_secretsmanager_secret" "rds_transaction_teardown_lambda" {
+  name                    = "${var.environment}/RDS_TRANSACTION_TEARDOWN_LAMBDA"
+  recovery_window_in_days = 0
+  description             = "rds transaction teardown lambda name in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "rds_transaction_teardown_lambda" {
+  secret_id     = aws_secretsmanager_secret.rds_transaction_teardown_lambda.id
+  secret_string = aws_lambda_function.integration_test_data_teardown_lambda.function_name
 }
