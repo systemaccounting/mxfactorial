@@ -11,7 +11,7 @@ endif
 warm-up: $(SUBDIRS) test-env-arg
 		@for dir in $(SUBDIRS); do \
 			if [ -f $$dir/makefile ]; then \
-				echo $${dir/%??/}:; \
+				echo $$dir; \
 				$(MAKE) -C $$dir ENV=$(ENV) warm-up; \
 			fi \
 		done

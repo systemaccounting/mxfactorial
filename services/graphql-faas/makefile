@@ -69,7 +69,6 @@ $(ENV_VARS):
 
 ###################### build and test ######################
 
-
 .PHONY: test install zip deploy test-integration
 test: install zip deploy test-integration
 
