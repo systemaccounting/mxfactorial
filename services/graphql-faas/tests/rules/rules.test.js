@@ -1,49 +1,64 @@
+const AWS = require('aws-sdk')
 const { GraphQLClient } = require('graphql-request')
-const { tearDownIntegrationTestDataInRDS } = require('../utils/tearDown')
-const authenticate = require('../utils/authenticate')
-const { REQUEST_URL } = require('../utils/baseUrl')
 const { fetchRules } = require('../queries/rules')
+
+const {
+  itemsUnderTestArray,
+  TEST_ACCOUNT
+} = require('../utils/testData')
+
+const {
+  createAccount,
+  deleteAccount,
+  getToken
+} = require('../utils/integrationTestHelpers')
+
+const cognitoIdsp = new AWS.CognitoIdentityServiceProvider({
+  region: process.env.AWS_REGION
+})
 
 let graphQLClient
 
 beforeAll(async () => {
-  const session = await authenticate('JoeSmith', 'password')
-  const idToken = session.getIdToken().getJwtToken()
-
-  graphQLClient = new GraphQLClient(REQUEST_URL, {
+  jest.setTimeout(10000)
+  await createAccount(
+    cognitoIdsp,
+    process.env.CLIENT_ID,
+    TEST_ACCOUNT,
+    process.env.SECRET
+  )
+  let token = await getToken(
+    cognitoIdsp,
+    process.env.CLIENT_ID,
+    TEST_ACCOUNT,
+    process.env.SECRET
+  )
+  graphQLClient = new GraphQLClient(process.env.GRAPHQL_API, {
     headers: {
       'Content-Type': 'application/json',
       Accept: 'application/json',
-      Authorization: idToken
+      Authorization: token
     }
   })
 })
 
-afterAll(() => {
-  tearDownIntegrationTestDataInRDS()
+afterAll(async () => {
+  await deleteAccount(
+    cognitoIdsp,
+    process.env.POOL_ID,
+    TEST_ACCOUNT
+  )
 })
 
-const testItems = [
-  {
-    name: 'Milk',
-    price: '3',
-    quantity: '2',
-    author: 'Joe Smith',
-    debitor: 'Joe Smith',
-    creditor: 'Mary'
-  }
-]
-
-jest.setTimeout(30000) // lambda and serverless aurora cold starts
-
-describe('Function As A Service GraphQL Server /rules endpoint', () => {
-  it('returns rules items', async done => {
+describe('graphql rules query', () => {
+  it('returns rules-modified transaction items', async () => {
     const { rules } = await graphQLClient.request(fetchRules, {
-      transactions: testItems
+      transactions: itemsUnderTestArray
     })
-    const taxItem = rules.find(item => item.name === '9% state sales tax')
+    const taxItem = rules.find(
+      item => item.name === '9% state sales tax'
+    )
     expect(rules).toHaveLength(2)
     expect(taxItem.price).toBe('0.540')
-    done()
   })
 })
