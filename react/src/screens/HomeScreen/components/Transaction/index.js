@@ -173,8 +173,8 @@ class Transaction extends React.Component {
     const { type, rules, transactions, draftTransaction } = this.state
     const transactionItems = [...transactions, draftTransaction, ...rules].map(
       item => {
-        // omit __typename to avoid GraphQL errors
-        const { __typename, ...itemProps } = item
+        // omit __typename to avoid GraphQL errors & client-side uuid
+        const { __typename, uuid, ...itemProps } = item
         return { ...itemProps }
       }
     )
