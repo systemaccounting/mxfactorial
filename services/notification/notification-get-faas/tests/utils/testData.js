@@ -2,7 +2,7 @@ const randomFourDigitInt = () => {
   return Math.floor(Math.random() * (9999 - 1000)) + 1000
 }
 
-const TEST_ACCOUNT = `FakerAccount${randomFourDigitInt()}`
+const TEST_ACCOUNT = `Faker${randomFourDigitInt()}`
 
 let pendingReceivedNotifications = [
   {
