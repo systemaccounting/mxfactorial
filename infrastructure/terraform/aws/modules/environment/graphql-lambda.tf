@@ -17,7 +17,7 @@ resource "aws_lambda_function" "mxfactorial_graphql_server" {
 
   environment {
     variables = {
-      RULES_LAMBDA_ARN    = aws_lambda_function.rules_service_lambda.arn
+      RULES_FAAS_ARN      = aws_lambda_function.rules_faas.arn
       TRANSACT_LAMBDA_ARN = aws_lambda_function.transact_service_lambda.arn
       MEASURE_LAMBDA_ARN  = aws_lambda_function.measure_service_lambda.arn
     }
@@ -74,7 +74,7 @@ data "aws_iam_policy_document" "mxfactorial_graphql_lambda_policy" {
       "lambda:InvokeFunction"
     ]
     resources = [
-      aws_lambda_function.rules_service_lambda.arn,
+      aws_lambda_function.rules_faas.arn,
       aws_lambda_function.transact_service_lambda.arn,
       aws_lambda_function.measure_service_lambda.arn
     ]

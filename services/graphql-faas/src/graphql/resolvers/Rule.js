@@ -8,7 +8,7 @@ const GetRuleTransactionsResolver = async args => {
   }
 
   const params = {
-    FunctionName: process.env.RULES_LAMBDA_ARN,
+    FunctionName: process.env.RULES_FAAS_ARN,
     Payload: JSON.stringify({ transactions: args.transactions })
   }
 

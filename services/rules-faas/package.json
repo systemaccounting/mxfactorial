@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles --verbose --silent"
+    "test": "jest --detectOpenHandles --verbose --silent",
+    "test:integration": "env-cmd jest --detectOpenHandles --runInBand --silent --verbose --testRegex='.*\\.integ\\.[tj]sx?'",
+    "init:rules": "env-cmd node ./utils/initRules.js"
   },
-  "dependencies": {
-    "uuid": "^3.3.2"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "aws-sdk": "^2.555.0",
+    "env-cmd": "^10.0.1",
+    "graphql-request": "^1.8.2",
     "jest": "^24.5.0"
   }
 }

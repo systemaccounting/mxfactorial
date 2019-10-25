@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "AWS_REGION=us-east-1 jest --detectOpenHandles --silent"
+    "test": "env-cmd jest --detectOpenHandles --silent",
+    "warmup": "env-cmd node ./tests/utils/warmUp.js"
   },
   "keywords": [],
   "author": "",
   "dependencies": {
-    "aws-sdk": "^2.395.0",
     "aws-serverless-express": "^3.3.5",
     "body-parser-graphql": "^1.1.0",
     "cors": "^2.8.5",
@@ -18,8 +18,8 @@
     "graphql": "^14.0.2"
   },
   "devDependencies": {
-    "aws-amplify": "^1.1.32",
-    "dotenv": "^8.0.0",
+    "aws-sdk": "^2.556.0",
+    "env-cmd": "^10.0.1",
     "graphql-request": "^1.8.2",
     "jest": "^24.5.0"
   }

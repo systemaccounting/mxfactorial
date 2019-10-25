@@ -1,12 +1,12 @@
 const applyRules = (
   transactionItems,
-  rules,
+  ruleInstances,
   ruleIdParamName,
   transactionItemsParamName
   ) => {
   let transactionsWithRulesApplied
   let modifiedByRule = transactionItems // init recursion to cumulatively apply matched rules
-  for (instance of rules) {
+  for (instance of ruleInstances) {
     let ruleInstance = new Function(
       ruleIdParamName,
       transactionItemsParamName,

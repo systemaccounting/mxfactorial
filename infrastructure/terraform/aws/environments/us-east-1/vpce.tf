@@ -30,6 +30,17 @@ resource "aws_vpc_endpoint" "sns" {
   private_dns_enabled = true
 }
 
+####### vpc endpoint for dynamodb access by lambda in vpc #######
+resource "aws_vpc_endpoint" "dynamodb" {
+  vpc_id       = data.aws_vpc.default.id
+  service_name = "com.amazonaws.us-east-1.dynamodb"
+}
+
+resource "aws_vpc_endpoint_route_table_association" "dynamodb" {
+  vpc_endpoint_id = aws_vpc_endpoint.dynamodb.id
+  route_table_id  = data.aws_vpc.default.main_route_table_id
+}
+
 ####### security group for vpce and dependent resources #######
 resource "aws_security_group" "vpce" {
   name        = "vpce"

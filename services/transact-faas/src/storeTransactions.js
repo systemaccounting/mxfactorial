@@ -1,8 +1,6 @@
 const Sequelize = require('sequelize')
 const TransactionModel = require('./models/Transaction')
 
-// todo: unit and integration tests
-
 const storeTransactions = async transactions => {
   // options.dialectModule default = pg per:
   // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor

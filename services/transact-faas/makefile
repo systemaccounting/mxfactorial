@@ -5,7 +5,8 @@ LAMBDA_NAME = transact-lambda
 RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
-ENV_VARS := AWS_REGION NOTIFY_TOPIC_ARN RULES_URL
+ENV_VARS := AWS_REGION NOTIFY_TOPIC_ARN RULES_VPC_URL \
+RULE_INSTANCE_TABLE_NAME
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -89,10 +90,10 @@ src: test
 .PHONY: dev test
 dev: test
 
-.PHONY: zip
-zip:
+.PHONY: zip clean-artifact
+zip: clean-artifact
 		zip -r $(APP_NAME)-src.zip index.js package.json src/* \
-			--exclude "*.test.*" "*src/__mocks__*"
+			--exclude "*.test.*"
 
 .PHONY: clean-deps layer
 layer: clean-deps

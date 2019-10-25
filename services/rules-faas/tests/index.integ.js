@@ -1,17 +1,24 @@
 const AWS = require('aws-sdk')
 const { GraphQLClient } = require('graphql-request')
-const { fetchRules } = require('../queries/rules')
-
-const {
-  itemsUnderTestArray,
-  TEST_ACCOUNT
-} = require('../utils/testData')
+const { fetchRules } = require('./utils/queries/rules')
 
 const {
   createAccount,
   deleteAccount,
-  getToken
-} = require('../utils/integrationTestHelpers')
+  getToken,
+} = require('./utils/integrationTestHelpers')
+
+const {
+  itemsUnderTestArray,
+  TEST_ACCOUNT
+} = require('./utils/testData')
+
+// env var inventory (avoid const assignment):
+// process.env.AWS_REGION
+// process.env.SECRET
+// process.env.CLIENT_ID
+// process.env.POOL_ID
+// process.env.GRAPHQL_API
 
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION
@@ -42,7 +49,7 @@ beforeAll(async () => {
   })
 })
 
-afterAll(async () => {
+afterAll(async() => {
   await deleteAccount(
     cognitoIdsp,
     process.env.POOL_ID,
@@ -50,15 +57,20 @@ afterAll(async () => {
   )
 })
 
-describe('graphql rules query', () => {
-  it('returns rules-modified transaction items', async () => {
-    const { rules } = await graphQLClient.request(fetchRules, {
+// todo: increase coverage
+describe('tax rule returned by service', () => {
+  test('adds 1 rule-generated object', async () => {
+    let { rules } = await graphQLClient.request(fetchRules, {
       transactions: itemsUnderTestArray
     })
-    const taxItem = rules.find(
-      item => item.name === '9% state sales tax'
-    )
     expect(rules).toHaveLength(2)
+  })
+
+  test('0.540 tax price', async () => {
+    let { rules } = await graphQLClient.request(fetchRules, {
+      transactions: itemsUnderTestArray
+    })
+    let taxItem = rules.find(item => item.name === '9% state sales tax')
     expect(taxItem.price).toBe('0.540')
   })
 })

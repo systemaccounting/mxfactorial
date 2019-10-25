@@ -1,4 +1,6 @@
 const AWS = require('aws-sdk')
+// todo: audit Faker accounts used and deleted during integration testing by:
+// https://github.com/systemaccounting/mxfactorial/blob/ace8e2a9ac3a49df57abaab511e414374532dfe1/infrastructure/terraform/aws/modules/environment/rds.tf#L106-L129
 
 const tearDownIntegrationTestDataInRDS = () => {
   // https://github.com/aws/aws-sdk-js/issues/2376
@@ -10,9 +12,7 @@ const tearDownIntegrationTestDataInRDS = () => {
     region: process.env.AWS_REGION
   })
   const params = {
-    FunctionName: `delete-faker-rds-transactions-lambda-${
-      process.env.LOCAL_ENV
-    }`,
+    FunctionName: process.env.RDS_TRANSACTION_TEARDOWN_LAMBDA,
     InvokeArgs: `null`
   }
   lambda.invokeAsync(params, (err, data) => {

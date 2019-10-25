@@ -28,27 +28,12 @@ resource "aws_lambda_function" "transact_service_lambda" {
   environment {
     variables = merge(
       {
-        RULES_URL        = local.RULES_URL,
-        NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn
+        NOTIFY_TOPIC_ARN          = aws_sns_topic.notifications.arn,
+        RULE_INSTANCES_TABLE_NAME = aws_dynamodb_table.rule_instances.name
       },
       local.POSTGRES_VARS
     )
   }
-}
-
-locals {
-  # workaround for aws_api_gateway_deployment.rules.invoke_url cycle error:
-  RULES_URL = join(
-    "",
-    [
-      "https://",
-      aws_api_gateway_rest_api.rules.id,
-      ".execute-api.",
-      data.aws_region.current.name,
-      ".amazonaws.com/",
-      var.environment
-    ]
-  )
 }
 
 resource "aws_cloudwatch_log_group" "transact_service_lambda" {
@@ -127,6 +112,24 @@ data "aws_iam_policy_document" "transact_service_lambda_policy" {
     ]
     resources = [
       aws_sns_topic.notifications.arn,
+    ]
+  }
+
+  statement {
+    sid = "TransactLambdaDynamoDbPolicy${title(var.environment)}"
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:ConditionCheck",
+      "dynamodb:GetItem",
+      "dynamodb:GetRecords",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ]
+    resources = [
+      aws_dynamodb_table.rule_instances.arn,
+      # if indexes added later:
+      # "${aws_dynamodb_table.rule_instances.arn}/index/*"
     ]
   }
 
