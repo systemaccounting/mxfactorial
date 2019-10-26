@@ -39,6 +39,18 @@
 1. disable "Remote" Execution mode under Settings / General in app.terraform.io  
 1. `terraform apply`, expect similar output: `Apply complete! Resources: 125 added, 0 changed, 0 destroyed.` (DNS for new sites require approximately 30 minutes for propagation)  
 1. note outputted values such as `postgres_address` for independent access of resources  
+1. `cd infrastructure/cloudformation`  
+1. provision `stg` websocket stack per [cloudformation doc](https://github.com/systemaccounting/mxfactorial/blob/build-doc/infrastructure/cloudformation/README.md):
+    ```sh
+    STACK=notification-websockets ENV=stg; \
+    aws cloudformation create-stack \
+      --timeout-in-minutes 5 \
+      --capabilities CAPABILITY_NAMED_IAM \
+      --stack-name $STACK-$ENV \
+      --template-body file://$(pwd)/websockets.yaml \
+      --parameters ParameterKey=Environment,ParameterValue=$ENV
+    ```
+1. add `websockets.yaml: notification-websockets-stg` to bottom "current stacks" section of cloudformation doc  
 1. `git add . && git commit -m "add stg env" && git push` to commit new infrastructure code to origin  
 1. repeat `terraform apply` to update configuration after any future changes in `infrastructure/terraform/aws/modules/environment` and commit changes  
 
@@ -77,6 +89,9 @@
 
 **tear down environment**  
 
+1. `cd infrastructure/cloudformation`  
+1. `STACK=notification-websockets ENV=stg; aws cloudformation delete-stack --stack-name $STACK-$ENV` to delete cloudformation websocket stack  
+1. delete `websockets.yaml: notification-websockets-stg` from bottom "current stacks" section of cloudformation doc    
 1. `cd infrastructure/terraform/aws/environments/stg`  
 1. `terraform destroy` (cloudfront cache destroy consumes approximately 18 minutes)
 1.  navigate to console in browser, and delete all objects in `mxfactorial-artifacts-stg` **AND** `mxfactorial-websocket-artifacts-stg` s3 buckets  
@@ -87,3 +102,5 @@
 1. `terraform apply` to delete `stg` environment ssl certificates and artifact buckets  
 1. delete workspace in app.terraform.io
 1. `git add . && git commit -m "delete stg env" && git push` to commit new infrastructure code to remote  
+
+\* *note: when tearing down and setting up only terraform portion of stack, [notification-send-faas](https://github.com/systemaccounting/mxfactorial/tree/build-doc/services/notification/notification-send-faas) loses sns subscription. temp fix: comment out and update websocket [sns subscription](https://github.com/systemaccounting/mxfactorial/blob/005c1679bc92086495501c56f02e4a7ff35c42d3/infrastructure/cloudformation/websockets.yaml#L450-L455) **AND** [DependsOn](https://github.com/systemaccounting/mxfactorial/blob/005c1679bc92086495501c56f02e4a7ff35c42d3/infrastructure/cloudformation/websockets.yaml#L580) in cloudformation stack, then re-add and again update cloudformation stack to subscribe notification-send-faas to new topic in terraform*  
