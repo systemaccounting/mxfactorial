@@ -51,6 +51,7 @@
 1. sign into `stg` environment's dedicated cloud9 instance for direct connetions to `stg` postgres instance  
 1. `sudo yum update && sudo yum install postgresql`  
 1. `PGPASSWORD=replace_with_password psql -h host -p 5432 -U replace_with_user mxfactorial` to access postgres  
+
 **init rule-instance**
 1. `cd services/rules-faas`  
 1. `make init-rules ENV=stg` to add transaction rules  
