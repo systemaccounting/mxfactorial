@@ -31,8 +31,8 @@ install: clean-deps
 
 ###################### build ######################
 
-.PHONY: zip
-zip:
+.PHONY: zip install
+zip: install
 		zip -r $(APP_NAME)-src.zip index.js package.json node_modules
 
 .PHONY: src zip

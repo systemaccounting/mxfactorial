@@ -16,16 +16,18 @@ const {
   TEST_ACCOUNT
 } = require('./utils/testData')
 
-const AWS_REGION = process.env.AWS_REGION
-const NOTIFICATIONS_TABLE_NAME = process.env.NOTIFICATIONS_TABLE_NAME
-const SECRET = process.env.SECRET
 const GET_NOTIFICATIONS_ACTION = {"action":"getnotifications"}
-const CLIENT_ID = process.env.CLIENT_ID
-const POOL_ID = process.env.POOL_ID
-const WSS_CLIENT_URL = process.env.WSS_CLIENT_URL
-const NOTIFY_TOPIC_ARN= process.env.NOTIFY_TOPIC_ARN
 
-const ddb = new AWS.DynamoDB.DocumentClient({ region: AWS_REGION })
+// env var inventory
+// process.env.AWS_REGION
+// process.env.NOTIFICATIONS_TABLE_NAME
+// process.env.SECRET
+// process.env.CLIENT_ID
+// process.env.POOL_ID
+// process.env.WSS_CLIENT_URL
+// process.env.NOTIFY_TOPIC_ARN
+
+const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
 const sns = new AWS.SNS()
 
@@ -38,21 +40,34 @@ const timeout = ms => {
 }
 
 beforeAll(async () => {
-  await createAccount(cognitoIdsp, CLIENT_ID, TEST_ACCOUNT, SECRET)
+  await createAccount(
+    cognitoIdsp,
+    process.env.CLIENT_ID,
+    TEST_ACCOUNT,
+    process.env.SECRET
+  )
 })
 
 afterAll(async () => {
-  await deleteAccount(cognitoIdsp, POOL_ID, TEST_ACCOUNT)
+  await deleteAccount(
+    cognitoIdsp,
+    process.env.POOL_ID,
+    TEST_ACCOUNT
+  )
 })
 
 let storedNotifications = []
 beforeEach(async () => {
-  await sendNotifications(sns, NOTIFY_TOPIC_ARN, transactIntegrationTestEvent)
+  await sendNotifications(
+    sns,
+    process.env.NOTIFY_TOPIC_ARN,
+    transactIntegrationTestEvent
+  )
   await timeout(2e3) // wait 2 second for sns -> lambda -> ddb
   for (account of recipientListIntegrationTests) {
     let queryResult = await queryIndex(
       ddb,
-      NOTIFICATIONS_TABLE_NAME,
+      process.env.NOTIFICATIONS_TABLE_NAME,
       'account-index',
       'account',
       account
@@ -62,7 +77,11 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  await deleteNotifications(ddb, NOTIFICATIONS_TABLE_NAME, storedNotifications)
+  await deleteNotifications(
+    ddb,
+    process.env.NOTIFICATIONS_TABLE_NAME,
+    storedNotifications
+  )
 })
 
 describe('notification send lambda', () => {
@@ -71,11 +90,16 @@ describe('notification send lambda', () => {
   })
 
   test('sends client 1 pending notification', async done => {
-    let token = await getToken(cognitoIdsp, CLIENT_ID, TEST_ACCOUNT, SECRET)
+    let token = await getToken(
+      cognitoIdsp,
+      process.env.CLIENT_ID,
+      TEST_ACCOUNT,
+      process.env.SECRET
+    )
     let options = {
       headers: { Authorization: token }
     }
-    let ws = new WebSocket(WSS_CLIENT_URL, options)
+    let ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
     ws.on('open', () => {
       ws.send(JSON.stringify(GET_NOTIFICATIONS_ACTION))
       ws.on('message', async data => {
@@ -99,11 +123,16 @@ describe('notification send lambda', () => {
   }, 10000)
 
   test('properties in pending transaction notification objects', async done => {
-    let token = await getToken(cognitoIdsp, CLIENT_ID, TEST_ACCOUNT, SECRET)
+    let token = await getToken(
+      cognitoIdsp,
+      process.env.CLIENT_ID,
+      TEST_ACCOUNT,
+      process.env.SECRET
+    )
     let options = {
       headers: { Authorization: token }
     }
-    let ws = new WebSocket(WSS_CLIENT_URL, options)
+    let ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
     ws.on('open', () => {
       ws.send(JSON.stringify(GET_NOTIFICATIONS_ACTION))
       ws.on('message', async data => {

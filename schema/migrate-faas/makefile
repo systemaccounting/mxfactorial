@@ -78,10 +78,8 @@ $(ENV_VARS):
 zip: clean-src
 		zip -r $(APP_NAME)-src.zip index.js package.json
 
-.PHONY: layer
-layer:
-		rm -f $(APP_NAME)-layer.zip
-		yarn install --prod
+.PHONY: layer install-prod clean-layer
+layer: install-prod clean-layer
 		mkdir nodejs
 		cp -r node_modules nodejs/node_modules
 		zip -r $(APP_NAME)-layer.zip nodejs
@@ -128,8 +126,8 @@ deploy-only: test-env-arg
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-layer test-env-arg clean-deps layer
-deploy-layer: test-env-arg clean-deps layer
+.PHONY: deploy-layer test-env-arg layer
+deploy-layer: test-env-arg layer
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-layer.zip \
@@ -141,8 +139,8 @@ deploy-layer: test-env-arg clean-deps layer
 .PHONY: deploy-all deploy-layer deploy
 deploy-all: deploy-layer deploy # layer and source
 
-.PHONY: initial-deploy test-env-arg clean publish-layer zip
-initial-deploy: test-env-arg clean publish-layer zip
+.PHONY: initial-deploy test-env-arg publish-layer zip
+initial-deploy: test-env-arg publish-layer zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -153,8 +151,8 @@ initial-deploy: test-env-arg clean publish-layer zip
 
 ###################### create resource ######################
 
-.PHONY: publish-layer deploy-layer
-publish-layer: deploy-layer
+.PHONY: publish-layer test-env-arg deploy-layer
+publish-layer: test-env-arg deploy-layer
 		@LAYER_VERSION=$$(aws lambda publish-layer-version \
 			--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
 			--description="$(APP_NAME) dependencies in $(ENV)" \

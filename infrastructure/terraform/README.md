@@ -1,85 +1,106 @@
-# build a new environment
+<p align="center">
+  <a href="http://www.systemaccounting.org/math_identity" target="_blank"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></a>
+</p>
 
-1. `cd terraform/environments/global`  
-1. in `terraform/environments/global/main.tf` add, for example, a `stg_certs` module to create ssl certificates for a new `stg` environment (duplicate an existing module in `main.tf`)  
-1. add `stg  = "${module.stg_certs.client_cert}"` to `client_cert_map` output in `outputs.tf`, and also  
-1. add `stg  = "${module.stg_certs.api_cert}"` to `api_cert_map` output  
-1. `terraform init` in `terraform/environments/global` directory to retrieve terraform state for global resources from an [s3 remote backend](https://www.terraform.io/docs/backends/types/s3.html)  
-1. `terraform apply` to **create ssl resources**  
-1. `cd terraform/environments`  
-1. `mkdir stg` in `terraform/environments` to create directory for storing configuration for new `stg` environment  
+## build environment
+
+**ssl certs and artifact storage**  
+1. `cd infrastructure/terraform/aws/environments/us-east-1`  
+1. in `infrastructure/terraform/aws/environments/us-east-1/certs-and-s3.tf` duplicate an existing `*_certs_and_artifact_storage` module and change environment name prefix to, for example, `stg`. also add `stg` to environment property:  
+    ```
+    module "stg_certs_and_artifact_storage" {
+      source      = "../../modules/us-east-1"
+      environment = "stg"
+    }
+    ```
+1. add `stg  = module.stg_certs_and_artifact_storage.client_cert` to `client_cert_map` output in `outputs.tf`, and also  
+1. add `stg  = module.stg_certs_and_artifact_storage.api_cert` to `api_cert_map` output  
+1. `terraform init` in `infrastructure/terraform/aws/environments/us-east-1` directory to retrieve terraform state for shared us-east-1 resources from the [remote backend](https://www.terraform.io/docs/backends/types/remote.html)  
+1. `terraform apply` to **create ssl and s3 artifact storage resources** in us-east-1  
+1. `cd ../../../../..` to project root  
+1. confirm `node --version # returns >= v12.9.1`  
+1. confirm `yarn --version # returns >= 1.19.1`  
+1. confirm `python3 --version # returns >= 3.7.0`  
+1. confirm `go version # returns >= go1.13.3`  
+1. confirm `aws --version # returns >= aws-cli/1.16.168`  
+1. `make deploy ENV=stg` to deploy all service artifacts  
+
+**environment**  
+1. `cd infrastructure/terraform/aws/environments`  
+1. `mkdir stg` to create directory for storing configuration for new `stg` environment  
 1. `cd stg`  
-1. `mkdir remote-state` to create directory for storing configuration for new s3 bucket serving as a remote backend  
-1. `cd remote-state`
-1. `touch main.tf` in `terraform/environments/stg/remote-state`  
-1. copy contents of `terraform/environments/dev/remote-state/main.tf`, an adjacent environment directory, to new `terraform/environments/stg/remote-state/main.tf`  
-1. change `main.tf` values from `dev` to `stg`  
-1. `terraform init` in `terraform/environments/stg/remote-state`  
-1. `terraform apply` to create s3 remote backend for `stg`  
-1. `cd ..` to parent `terraform/environments/stg` directory
 1. `touch main.tf outputs.tf variables.tf terraform.tfvars` to create files storing configuration for new `stg` environment  
-1. copy contents from identical files in adjacent environment directory such as `terraform/environments/dev`  
+1. copy contents from identical files in adjacent environment directory such as `../dev`  
 1. change `dev` values in files duplicated in `terraform/environments/stg` directory to `stg` values  
-1. confirm `environment = "stg"` assignment in `terraform.tfvars`  
+1. confirm `environment = "stg"` assignment in `terraform.tfvars` **AND** search each new file for remaining `dev` vars  
 1. set desired aws `region` for new `stg` environment in `provider` block of `main.tf`  
-1. duplicate desired aws `region` assignment in `terraform.tfvars`  
-1. `cd graphql-faas` to temporarily switch to graphql directory to create `lambda.zip` file for terraform  
-1. `yarn run cp:lambda`
-1. `cd terraform/environments/stg` to return to new `stg` configuration in terraform  
-1. `terraform init`  
-1. `terraform apply`, expect similar output: `Apply complete! Resources: 56 added, 0 changed, 0 destroyed.` (DNS for new sites require approximately 30 minutes for propagation)  
-1. supply outputted values for `cache_id`, `pool_id`, `pool_client_id`, `rds_endpoint`, `api`, etc., to application developers requiring their reference as environment variables, and in configuration objects  
-1. `git add . && git commit -m "add stg env" && git push` to commit new infrastructure code to remote  
-1. repeat `terraform apply` to update configuration after any future changes in `terraform/modules` and commit changes  
+1. duplicate aws `region` assignment in `terraform.tfvars`  
+1. `terraform init`  in `stg` directory to create workspace in app.terraform.io  
+1. disable "Remote" Execution mode under Settings / General in app.terraform.io  
+1. `terraform apply`, expect similar output: `Apply complete! Resources: 125 added, 0 changed, 0 destroyed.` (DNS for new sites require approximately 30 minutes for propagation)  
+1. note outputted values such as `postgres_address` for independent access of resources  
+1. `cd infrastructure/cloudformation`  
+1. provision `stg` websocket stack per [cloudformation doc](https://github.com/systemaccounting/mxfactorial/blob/build-doc/infrastructure/cloudformation/README.md):
+    ```sh
+    STACK=notification-websockets ENV=stg; \
+    aws cloudformation create-stack \
+      --timeout-in-minutes 5 \
+      --capabilities CAPABILITY_NAMED_IAM \
+      --stack-name $STACK-$ENV \
+      --template-body file://$(pwd)/websockets.yaml \
+      --parameters ParameterKey=Environment,ParameterValue=$ENV
+    ```
+1. add `websockets.yaml: notification-websockets-stg` to bottom "current stacks" section of cloudformation doc  
+1. `git add . && git commit -m "add stg env" && git push` to commit new infrastructure code to origin  
+1. repeat `terraform apply` to update configuration after any future changes in `infrastructure/terraform/aws/modules/environment` and commit changes  
 
-# deploy react to new environment
-
-1. `cd react`  
-1. `touch .env.stg`  
-1. add `REACT_APP_COGNITO_POOL_ID`, `REACT_APP_COGNITO_CLIENT_ID`, `REACT_APP_API_URL` variables in `.env.stg` file per [usage instructions](https://www.npmjs.com/package/env-cmd#basic-usage)  
-1. assign variables in `.env.stg` to recently outputted values from creating `stg` environment in terraform (prefix `https://` to `api` terraform output value for `REACT_APP_API_URL` variable value)
-1. avoid automated test failure by adding a `JoeSmith` account with password of `password`. test user may be added quickly through temporarily modifying, then exectuting automated test, OR manually:
-   > automated: change the following lines in `react/e2e/public/createAccount.test.js`: `await accountNameInput.type(account)` to `await accountNameInput.type('JoeSmith')`, and `await passwordInput.type(`bluesky`)` to `await passwordInput.type('password')`. while client continues serving with `yarn start:stg`, open a separate terminal and execute `yarn run test:e2e-public`. if a test fails, press cntrl+c to terminate because "sign in" test may have occurred before "create account" test. after success, `git checkout e2e/public/createAccount.test.js` to restore automated test to original version  
-
-    > manually: `bash start.sh stg` to serve react client on `http://localhost:3000`, then create account 
-1. sign into `JoeSmith` account now available from local environment  
-1. `bash build.sh stg`
-1. `bash deploy.sh stg`
-1. navigate to newly-deployed client in new environment, e.g. stg.mxfactorial.io, and sign in with test user
-1. to add CI to new environment, [base64 encode](https://support.circleci.com/hc/en-us/articles/360003540393-How-to-insert-files-as-environment-variables-with-Base64) the recently-created `.env.stg` with `base64 -i .env.stg -o out.txt`  
-1. add a `STG_REACT_VARS` environment variable in [ci settings](https://circleci.com/gh/systemaccounting/mxfactorial/edit#env-vars), and assign to base64 contents of `out.txt` file created in previous step (exclude new lines when copying)  
-1. `rm out.txt` to avoid inclusion in git  
-1. configure continuous integration tool in `.circle/config.yml` to automate execution of build and deployment commands referencing `$STG_REACT_VARS`  
-
-# add git-stored schema to serverless rds
+**add git-stored schema to postgres**
 1. `cd schema`  
 1. `bash schema.sh`  
 1. input region when prompted, e.g. `us-east-1`  
 1. input environment when prompted, e.g. `stg`  
-1. input name for batch job when prompted, e.g. `commit-08e6725` (latest abbreviated commit on remote branch available, for example, from `git log -1 origin/develop --pretty=format:%h`)
-1. input branch when prompted, e.g. `develop`
-1. sign into `stg` environment's dedicated cloud9 instance for direct connetions to `stg` rds instance using `mysql --user=theadmin -h some-db.cluster-12345678910.us-east-2.rds.amanonaws.com -pthepassword`  
+1. input branch name, e.g. `develop`  
+1. sign into `stg` environment's dedicated cloud9 instance for direct connetions to `stg` postgres instance  
+1. `sudo yum update && sudo yum install postgresql`  
+1. `PGPASSWORD=replace_with_password psql -h host -p 5432 -U replace_with_user mxfactorial` to access postgres  
 
-# manually deploy and test services
-1. `cd services && bash deploy.sh stg`
-1. navigate to newly-deployed api in new environment, e.g. stg-api.mxfactorial.io to view api browsing tool
+**init rule-instance**
+1. `cd services/rules-faas`  
+1. `make init-rules ENV=stg` to add transaction rules  
+
+**deploy react to new environment**  
+
+1. `cd react`  
+1. `make build ENV=stg`  
+1. `make deploy ENV=stg`  
+1. `make create-accounts ENV=stg` to create test accounts for automated and manual testing  
+1. after DNS propagation, navigate to newly-deployed client in new environment, e.g. stg.mxfactorial.io, and sign in with test user  
+1. `make test-e2e ENV=stg` to test service and client 
+1. optionally add `*.yaml` in `.github/workflows` to configure automated build, test and deployment   
+
+**manually test services**  
+1. sign into `stg.mxfactorial.io` in browser  
+1. open developer tools, select "Application" tab, then "Local Storage" subtab (left side), then stg.mxfactorial.io  
+1. copy cognito idToken  
+1. install Modheader in chrome browser to manually configure `Authorization` header  
+1. add `Authorization: $idToken` to installed Modheader in chrome browser  
+1. navigate to newly-deployed api in new environment, e.g. stg-api.mxfactorial.io to view api browsing tool  
 1. test graphql requests documented in `graphql-faas/test-data`  
-1. configure continuous integration tool in `.circle/config.yml` to automate execution of these zip and deployment commands
 
-# tear down environment
+**tear down environment**  
 
-1. `cd terraform/environments/stg`
+1. `cd infrastructure/cloudformation`  
+1. `STACK=notification-websockets ENV=stg; aws cloudformation delete-stack --stack-name $STACK-$ENV` to delete cloudformation websocket stack  
+1. delete `websockets.yaml: notification-websockets-stg` from bottom "current stacks" section of cloudformation doc    
+1. `cd infrastructure/terraform/aws/environments/stg`  
 1. `terraform destroy` (cloudfront cache destroy consumes approximately 18 minutes)
-1. `cd remote-state` to change directory to `terraform/environments/stg/remote-state`  
-1. in `main.tf`, comment in OR add `force_destroy = true` in `aws_s3_bucket` resource, AND
-1. comment out OR delete `lifecycle { prevent_destroy = true }` block from `aws_s3_bucket` resource  
-1. `terraform apply` to change `aws_s3_bucket` resource configuration - prepares for remote backend destroy to proceed without s3 exception  
-1. `terraform destroy`  
-1. `cd terraform/environments` to switch current directory to parent directory storing ALL environments  
-1. `rm -rf stg` to delete `stg` environment configuration directory  
-1. `cd terraform/environments/global`
-1. delete the `stg_certs` in `main.tf`  
-1. delete `stg  = "${module.stg_certs.client_cert}"` entry in `client_cert_map` output from `outputs.tf`, and also  
-1. delete `stg  = "${module.stg_certs.api_cert}"` entry in `api_cert_map` output  
-1. `terraform apply` to delete `stg` environment ssl certificates  
+1.  navigate to console in browser, and delete all objects in `mxfactorial-artifacts-stg` **AND** `mxfactorial-websocket-artifacts-stg` s3 buckets  
+1. `cd infrastructure/terraform/aws/environments/us-east-1`  
+1. delete `stg_certs_and_artifact_storage` in `certs-and-s3.tf`  
+1. delete `stg  = module.stg_certs_and_artifact_storage.client_cert` entry in `client_cert_map` output from `outputs.tf`, and also  
+1. delete `stg  = module.stg_certs_and_artifact_storage.api_cert` entry in `api_cert_map` output  
+1. `terraform apply` to delete `stg` environment ssl certificates and artifact buckets  
+1. delete workspace in app.terraform.io
 1. `git add . && git commit -m "delete stg env" && git push` to commit new infrastructure code to remote  
+
+\* *note: when tearing down and setting up only terraform portion of stack, [notification-send-faas](https://github.com/systemaccounting/mxfactorial/tree/build-doc/services/notification/notification-send-faas) loses sns subscription. temp fix: comment out and update websocket [sns subscription](https://github.com/systemaccounting/mxfactorial/blob/005c1679bc92086495501c56f02e4a7ff35c42d3/infrastructure/cloudformation/websockets.yaml#L450-L455) **AND** [DependsOn](https://github.com/systemaccounting/mxfactorial/blob/005c1679bc92086495501c56f02e4a7ff35c42d3/infrastructure/cloudformation/websockets.yaml#L580) in cloudformation stack, then re-add and again update cloudformation stack to subscribe notification-send-faas to new topic in terraform*  

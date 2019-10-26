@@ -24,9 +24,16 @@ clean-deps:
 clean-env:
 		rm -f .env
 
-.PHONY: clean-artifact
-clean-artifact:
-		rm -f $(APP_NAME)-src.zip $(APP_NAME)-layer.zip
+.PHONY: clean-layer
+clean-layer:
+		rm -f $(APP_NAME)-layer.zip
+
+.PHONY: clean-src
+clean-src:
+		rm -f $(APP_NAME)-src.zip
+
+.PHONY: clean-artifact clean-layer clean-src
+clean-artifact: clean-layer clean-src
 
 .PHONY: clean clean-deps clean-env clean-artifact
 clean: clean-deps clean-env clean-artifact
@@ -94,10 +101,8 @@ src: test
 .PHONY: dev test
 dev: test
 
-.PHONY: layer
-layer:
-		rm -f $(APP_NAME)-layer.zip
-		yarn install --prod
+.PHONY: layer install-prod clean-layer
+layer: install-prod clean-layer
 		mkdir nodejs
 		cp -r node_modules nodejs/node_modules
 		zip -r $(APP_NAME)-layer.zip nodejs

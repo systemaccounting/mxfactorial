@@ -54,7 +54,8 @@ dependencies: aws cli, credentials
     aws cloudformation describe-stacks --stack-name $STACK-$ENV \
       --query 'Stacks[?StackName==`'$STACK-$ENV'`].Outputs'
     ```
-1. document new `template.yaml: $STACK-$ENV` managed by cloudformation in section below
+1. document new `template.yaml: $STACK-$ENV` managed by cloudformation in section below  
+1. [detect drift](https://docs.aws.amazon.com/cli/latest/reference/cloudformation/detect-stack-drift.html) IF non-cloudformation change expected in stack: `STACK=notification-websockets ENV=dev; aws cloudformation detect-stack-drift --stack-name $STACK-$ENV`  
 1. [delete](https://docs.aws.amazon.com/cli/latest/reference/cloudformation/delete-stack.html) stack: `STACK=notification-websockets ENV=dev; aws cloudformation delete-stack --stack-name $STACK-$ENV`
 
 ## current stacks

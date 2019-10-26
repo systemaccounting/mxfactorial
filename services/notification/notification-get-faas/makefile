@@ -23,9 +23,16 @@ clean-deps:
 clean-env:
 		rm -f .env
 
-.PHONY: clean-artifact
-clean-artifact:
+.PHONY: clean-layer
+clean-layer:
+		rm -f $(APP_NAME)-layer.zip
+
+.PHONY: clean-src
+clean-src:
 		rm -f $(APP_NAME)-src.zip
+
+.PHONY: clean-artifact clean-layer clean-src
+clean-artifact: clean-layer clean-src
 
 .PHONY: clean clean-deps clean-env clean-artifact
 clean: clean-deps clean-env clean-artifact
@@ -87,8 +94,8 @@ dev: test # test target alias to create development environment
 src: test-env-arg clean test install-prod
 		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
 
-.PHONY: zip install-prod
-zip: install-prod
+.PHONY: zip install-prod clean-src
+zip: install-prod clean-src
 		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
 
 .PHONY: layer

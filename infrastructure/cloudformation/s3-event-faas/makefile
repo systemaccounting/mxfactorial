@@ -99,7 +99,7 @@ endif
 deploy-all: deploy # layer and source
 
 .PHONY: initial-deploy test-env-arg install zip
-initial-deploy: test-env-arg clean install zip
+initial-deploy: test-env-arg install zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \

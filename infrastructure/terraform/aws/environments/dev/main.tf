@@ -6,7 +6,7 @@ terraform {
     organization = "systemaccounting"
 
     workspaces {
-      name = "aws-dev"
+      name = "aws-dev" // !!! change value when duplicating !!!
     }
   }
 }
