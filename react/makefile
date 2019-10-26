@@ -5,6 +5,7 @@ ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API ENV SECRET ACCOUNT AWS_REGION
 TEST_ACCOUNTS = TEST_ACCOUNT_01 TEST_ACCOUNT_02 TEST_ACCOUNT_03
+MANUAL_ACCOUNTS = JoeSmith Person1 Person2
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -141,7 +142,7 @@ endif
 .PHONY: deploy-all deploy-layer deploy
 deploy-all: deploy-layer deploy
 
-###################### create e2e test accounts ######################
+###################### create e2e test and manual accounts ######################
 
 .PHONY: create-accounts test-env-arg get-secrets
 create-accounts: test-env-arg get-secrets
@@ -152,6 +153,13 @@ create-accounts: test-env-arg get-secrets
 				--client-id $$REACT_APP_CLIENT_ID \
 				--username $$account \
 				--password $$JEST_SECRET; \
+		done; \
+		for manual_account in $(MANUAL_ACCOUNTS); do \
+			aws cognito-idp sign-up \
+				--region $(REGION) \
+				--client-id $$REACT_APP_CLIENT_ID \
+				--username $$manual_account \
+				--password password; \
 		done
 
 .PHONY: delete-accounts test-env-arg get-secrets
@@ -162,7 +170,14 @@ delete-accounts: test-env-arg get-secrets
 				--region $(REGION) \
 				--user-pool-id $$REACT_APP_POOL_ID \
 				--username $$account; \
-		done
+		done; \
+		for manual_account in $(MANUAL_ACCOUNTS); do \
+			aws cognito-idp admin-delete-user \
+				--region $(REGION) \
+				--user-pool-id $$REACT_APP_POOL_ID \
+				--username $$manual_account; \
+		done; \
+		echo 'accounts deleted'
 
 ###################### warm up services ######################
 
