@@ -87,8 +87,8 @@ dev: test # test target alias to create development environment
 src: test-env-arg clean test install-prod
 		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
 
-.PHONY: zip install-prod
-zip: install-prod
+.PHONY: zip install-prod clean-artifact
+zip: install-prod clean-artifact
 		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
 
 .PHONY: layer

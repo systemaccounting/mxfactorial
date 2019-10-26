@@ -83,8 +83,8 @@ test-integration: deploy get-secrets
 .PHONY: src test-env-arg clean test zip
 src: test-env-arg clean test zip
 
-.PHONY: zip install-prod
-zip: install-prod
+.PHONY: zip clean-artifact install-prod
+zip: clean-artifact install-prod
 		zip -r $(APP_NAME)-src.zip \
 			index.js package.json node_modules lib supportedServices \
 			--exclude "*.test.*"
@@ -118,8 +118,8 @@ deploy: test-env-arg zip # lambda layer NOT deployed
 .PHONY: deploy-all test-env-arg deploy-layer deploy
 deploy-all: test-env-arg deploy-layer deploy # layer and source
 
-.PHONY: initial-deploy test-env-arg clean-artifact zip
-initial-deploy: test-env-arg clean-artifact zip
+.PHONY: initial-deploy test-env-arg zip
+initial-deploy: test-env-arg zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \

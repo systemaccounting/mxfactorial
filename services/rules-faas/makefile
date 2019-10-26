@@ -90,7 +90,7 @@ dev: test
 
 .PHONY: zip clean-artifact
 zip: clean-artifact
-		zip -r $(APP_NAME)-src.zip index.js package.json src/* node_modules \
+		zip -r $(APP_NAME)-src.zip index.js package.json src/* \
 			 --exclude "*.test.*"
 
 .PHONY: layer
@@ -135,8 +135,8 @@ deploy-layer: test-env-arg layer
 .PHONY: deploy-all deploy
 deploy-all: deploy # no layer currently
 
-.PHONY: initial-deploy deploy init-rules
-initial-deploy: deploy init-rules
+.PHONY: initial-deploy test-env-arg zip
+initial-deploy: test-env-arg zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \

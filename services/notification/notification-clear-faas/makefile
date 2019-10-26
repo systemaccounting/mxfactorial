@@ -86,8 +86,8 @@ dev: test # aliases test target to create development environment
 .PHONY: src test-env-arg clean test install-prod zip
 src: test-env-arg clean test install-prod zip
 
-.PHONY: zip install-prod
-zip: install-prod
+.PHONY: zip install-prod clean-artifact
+zip: install-prod clean-artifact
 		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
 
 .PHONY: layer
