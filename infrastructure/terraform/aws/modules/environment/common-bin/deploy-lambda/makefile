@@ -82,8 +82,8 @@ deploy-only: test-env-arg
 .PHONY: deploy-all deploy
 deploy-all: deploy
 
-.PHONY: initial-deploy test-env-arg clean zip
-initial-deploy: test-env-arg clean zip
+.PHONY: initial-deploy test-env-arg zip
+initial-deploy: test-env-arg zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
