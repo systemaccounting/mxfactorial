@@ -41,7 +41,7 @@ class Menu extends React.Component {
     document.addEventListener('keydown', this.handleEscClose)
   }
 
-  componentWillUnMount() {
+  componentWillUnmount() {
     document.removeEventListener('keydown', this.handleEscClose)
   }
 
