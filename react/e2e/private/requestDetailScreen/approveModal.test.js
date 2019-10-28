@@ -35,23 +35,25 @@ it('2 - password error', async () => {
   await transactBtn.click()
   expect(await getApproveModalStatus()).toEqual('true')
   await page.waitFor(1000)
-  const passwordInput = await page.$(SELECTORS.passwordInput)
+  const passwordInput = await page.$(SELECTORS.modalPasswordInput)
   await passwordInput.type('FALSE')
   const okButton = await page.$(SELECTORS.okButton)
   await okButton.click()
 
-  await page.waitForSelector(`${SELECTORS.passwordInput}[data-haserror=true]`)
-  const hasError = await page.$eval(SELECTORS.passwordInput, element =>
+  await page.waitForSelector(
+    `${SELECTORS.modalPasswordInput}[data-haserror=true]`
+  )
+  const hasError = await page.$eval(SELECTORS.modalPasswordInput, element =>
     element.getAttribute('data-haserror')
   )
   expect(hasError).toEqual('true')
 })
 
 it('3 - remove error password on pasword input update', async () => {
-  const passwordInput = await page.$(SELECTORS.passwordInput)
+  const passwordInput = await page.$(SELECTORS.modalPasswordInput)
   await passwordInput.type('X')
 
-  const hasError = await page.$eval(SELECTORS.passwordInput, element =>
+  const hasError = await page.$eval(SELECTORS.modalPasswordInput, element =>
     element.getAttribute('data-haserror')
   )
   // await page.waitFor(1500)

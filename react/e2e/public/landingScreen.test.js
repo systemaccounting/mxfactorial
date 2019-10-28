@@ -1,53 +1,52 @@
-const { BASE_URL } = require('../constants')
+const { BASE_URL, SELECTORS } = require('../constants')
 
-describe('Landing screen', () => {
+beforeAll(async () => {
+  jest.setTimeout(15000)
+  await page.goto(BASE_URL)
+  await page.waitForSelector('[data-id="createAccountButton"]')
+})
+
+describe('landing screen', () => {
   it('displays browser title', async () => {
-    await page.goto(BASE_URL)
     let browserTitle = await page.title()
     expect(browserTitle).toBe('Mx! web client')
   })
 
   it('displays buttons and inputs', async () => {
-    await page.goto(BASE_URL)
     const mxfactorialLogoCount = await page.$$eval(
-      '.create-account-logo',
+      SELECTORS.landingScreenLogo,
       logos => logos.length
     )
     const accountInputCount = await page.$$eval(
-      '[name="account"]',
+      SELECTORS.accountInput,
       input => input.length
     )
     const passwordInputCount = await page.$$eval(
-      '[name="password"]',
+      SELECTORS.passwordInput,
       input => input.length
     )
     const createAccountButtonCount = await page.$$eval(
-      '[href="/auth/create-account"]',
+      SELECTORS.createAccountButton,
       a => a.length
     )
     const signInButtonCount = await page.$$eval(
-      '[data-id="login"]',
+      SELECTORS.signInButton,
       button => button.length
     )
-    const landingScreenContent =
+    const landingScreenAssetInventoryCount =
       mxfactorialLogoCount +
       accountInputCount +
       passwordInputCount +
       createAccountButtonCount +
       signInButtonCount
-    expect(landingScreenContent).toBe(5)
+    expect(landingScreenAssetInventoryCount).toBe(5)
   })
 
   it('version displays on landing screen', async () => {
     const versionElCount = await page.$$eval(
-      '[data-id="appVersion"]',
+      SELECTORS.appVersionLabel,
       list => list.length
     )
     expect(versionElCount).toBe(1)
-  })
-
-  it('clicks create button navigates account create page', async () => {
-    const createAccountButton = await page.$(`button[name="create-account"]`)
-    await createAccountButton.click()
   })
 })
