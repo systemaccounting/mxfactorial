@@ -1,6 +1,5 @@
 const { BASE_URL, SELECTORS } = require('../constants')
 const { deleteUser } = require('../utils/teardown')
-const { logout } = require('../utils/auth')
 
 const randomSevenDigitString = () => {
   let num = Math.floor(Math.random() * (9999999 - 1000000)) + 1000000
@@ -21,7 +20,17 @@ beforeEach(async () => {
 })
 
 afterEach(async () => {
-  await logout(page)
+  const navBtn = await page.$(SELECTORS.navButton)
+  await navBtn.click()
+
+  await page.waitForSelector(SELECTORS.signOutButton)
+  // query selector from document used after puppeteer selector failure
+  await page.evaluate(() => {
+    let signOut = document.querySelector('[data-name="sign-out"]')
+    signOut.click()
+  })
+
+  await page.waitForSelector(SELECTORS.landingScreenLogo)
 })
 
 afterAll(async () => {
@@ -38,5 +47,5 @@ it(`create cognito account`, async () => {
   const submitButton = await page.$(SELECTORS.createAccountButton)
   await submitButton.click()
   await page.waitForSelector(SELECTORS.creditButton)
-  await expect(page.url()).toEqual(`${BASE_URL}/account`)
+  expect(page.url()).toEqual(`${BASE_URL}/account`)
 })
