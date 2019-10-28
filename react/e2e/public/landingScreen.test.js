@@ -1,9 +1,9 @@
 const { BASE_URL, SELECTORS } = require('../constants')
 
-beforeAll(async () => {
+beforeEach(async () => {
   jest.setTimeout(15000)
   await page.goto(BASE_URL)
-  await page.waitForSelector('[data-id="createAccountButton"]')
+  await page.waitForSelector(SELECTORS.createAccountButton)
 })
 
 describe('landing screen', () => {
