@@ -10,8 +10,9 @@ beforeEach(async () => {
 })
 
 it('redirects to auth if unauthenticated user navigates to private route', async () => {
-  await page.goto(REQUEST_URL)
-  await page.waitForSelector(SELECTORS.createAccountButton)
+  await page.goto(REQUEST_URL, {
+    waitUntil: 'networkidle2'
+  })
   await expect(page.url()).toEqual(AUTH_URL)
 })
 
