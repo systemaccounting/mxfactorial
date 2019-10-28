@@ -7,7 +7,8 @@ const {
   sendMessageToClient
 } = require('./lib/awsServices')
 
-const AWS_REGION = process.env.AWS_REGION
+// avoid const assignment for env vars 
+// process.env.AWS_REGION
 const NOTIFICATIONS_TABLE_NAME = process.env.NOTIFICATIONS_TABLE_NAME
 const WEBSOCKETS_TABLE_NAME = process.env.WEBSOCKETS_TABLE_NAME
 const WSS_CONNECTION_URL = process.env.WSS_CONNECTION_URL
@@ -20,7 +21,7 @@ exports.handler = async event => {
   console.log(JSON.stringify(event))
 
   // declared within handler for local testing
-  let ddb = new AWS.DynamoDB.DocumentClient({ region: AWS_REGION })
+  let ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
   let ws = new AWS.ApiGatewayManagementApi({ endpoint: WSS_CONNECTION_URL })
 
   let body = JSON.parse(event.body)
