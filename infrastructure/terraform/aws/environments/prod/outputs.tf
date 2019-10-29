@@ -19,5 +19,5 @@ output "cache_id" {
 }
 
 output "www_cache_id_PROD_ONLY" {
-  value = aws_cloudfront_distribution.s3_react_www_distribution.id
+  value = aws_cloudfront_distribution.www_s3_react_distribution.id
 }
