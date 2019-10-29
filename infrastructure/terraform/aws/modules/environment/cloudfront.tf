@@ -4,6 +4,9 @@ resource "aws_cloudfront_distribution" "s3_react_distribution" {
   origin {
     domain_name = aws_s3_bucket.mxfactorial_react.bucket_regional_domain_name
     origin_id   = aws_s3_bucket.mxfactorial_react.id
+    s3_origin_config {
+      origin_access_identity = aws_cloudfront_origin_access_identity.s3_react_distribution.cloudfront_access_identity_path
+    }
   }
 
   enabled         = true
@@ -49,4 +52,8 @@ resource "aws_cloudfront_distribution" "s3_react_distribution" {
     acm_certificate_arn = var.ssl_arn
     ssl_support_method  = "sni-only"
   }
+}
+
+resource "aws_cloudfront_origin_access_identity" "s3_react_distribution" {
+  comment = "cloudfront origin access identity for s3 access in ${var.environment}"
 }
