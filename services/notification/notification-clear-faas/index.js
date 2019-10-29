@@ -9,9 +9,11 @@ const {
 
 // avoid const assignment for env vars 
 // process.env.AWS_REGION
-const NOTIFICATIONS_TABLE_NAME = process.env.NOTIFICATIONS_TABLE_NAME
-const WEBSOCKETS_TABLE_NAME = process.env.WEBSOCKETS_TABLE_NAME
-const WSS_CONNECTION_URL = process.env.WSS_CONNECTION_URL
+// process.env.NOTIFICATIONS_TABLE_NAME
+// process.env.WEBSOCKETS_TABLE_NAME
+// process.env.WSS_CONNECTION_URL
+
+
 const WEBSOCKETS_TABLE_INDEX_NAME = 'account-index'
 const WEBSOCKETS_TABLE_ACCOUNT_ATTRIBUTE = 'account'
 const CLEARED_NOTIFICATIONS_PROPERTY = 'cleared'
@@ -22,7 +24,7 @@ exports.handler = async event => {
 
   // declared within handler for local testing
   let ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
-  let ws = new AWS.ApiGatewayManagementApi({ endpoint: WSS_CONNECTION_URL })
+  let ws = new AWS.ApiGatewayManagementApi({ endpoint: process.env.WSS_CONNECTION_URL })
 
   let body = JSON.parse(event.body)
   let notificationsToClear = body.notifications
@@ -31,13 +33,13 @@ exports.handler = async event => {
   let formattedItemsToDelete = formatNotificationsToClear(notificationsToClear)
 
   // delete notifications
-  await batchWriteTable(ddb, NOTIFICATIONS_TABLE_NAME, formattedItemsToDelete)
+  await batchWriteTable(ddb, process.env.NOTIFICATIONS_TABLE_NAME, formattedItemsToDelete)
 
     // retrieve all wss connection ids owned by account
   let account = event.requestContext.authorizer.account
   let connectionsOwnedByAccount = await queryIndex(
     ddb,
-    WEBSOCKETS_TABLE_NAME,
+    process.env.WEBSOCKETS_TABLE_NAME,
     WEBSOCKETS_TABLE_INDEX_NAME,
     WEBSOCKETS_TABLE_ACCOUNT_ATTRIBUTE,
     account
