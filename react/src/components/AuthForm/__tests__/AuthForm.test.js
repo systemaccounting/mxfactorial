@@ -1,5 +1,5 @@
 import React from 'react'
-import AutoForm from '../index'
+import AuthForm from '../index'
 import { shallow, mount } from 'enzyme'
 import Input from '../Input'
 import DateInput from '../DateInput'
@@ -24,16 +24,13 @@ const formData = {
   }
 }
 
-const submitLabel = 'Next'
-
-describe('<AutoForm />', () => {
+describe('<AuthForm />', () => {
   it('renders', () => {
     const onSubmitSignInMock = jest.fn()
     const onSubmitCreateAccountMock = jest.fn()
     const form = shallow(
-      <AutoForm
+      <AuthForm
         schema={formData}
-        submitLabel={submitLabel}
         onSubmitSignIn={onSubmitSignInMock}
         onSubmitCreateAccount={onSubmitCreateAccountMock}
       />
@@ -45,9 +42,8 @@ describe('<AutoForm />', () => {
     const onSubmitSignInMock = jest.fn()
     const onSubmitCreateAccountMock = jest.fn()
     const form = shallow(
-      <AutoForm
+      <AuthForm
         schema={formData}
-        submitLabel={submitLabel}
         onSubmitSignIn={onSubmitSignInMock}
         onSubmitCreateAccount={onSubmitCreateAccountMock}
         disabled
@@ -56,71 +52,13 @@ describe('<AutoForm />', () => {
     expect(form.exists()).toBeTruthy()
   })
 
-  it('adds event listener', () => {
-    const addEventListenerMock = jest.fn()
-    document.addEventListener = addEventListenerMock
-    const form = mount(
-      <AutoForm schema={formData} submitLabel={submitLabel} submitOnEnter />
-    )
-
-    expect(addEventListenerMock).toHaveBeenCalled()
-  })
-  it('removes event listener', () => {
-    const removeEventListenerMock = jest.fn()
-    document.addEventListener = removeEventListenerMock
-    const form = mount(
-      <AutoForm schema={formData} submitLabel={submitLabel} submitOnEnter />
-    )
-    form.unmount()
-
-    expect(removeEventListenerMock).toHaveBeenCalled()
-  })
-
-  it('listens Enter keydown', () => {
-    const onSubmitSignInMock = jest.fn()
-    const wrapper = shallow(
-      <AutoForm
-        schema={formData}
-        submitLabel={submitLabel}
-        onSubmitSignIn={onSubmitSignInMock}
-        submitOnEnter
-      />
-    )
-    const instance = wrapper.instance()
-    instance.setState({ isValid: true })
-    instance.listenEnterKeyDown({
-      key: 'Enter'
-    })
-
-    expect(onSubmitSignInMock).toHaveBeenCalled()
-  })
-
-  it('listens only Enter keydown', () => {
-    const onSubmitSignInMock = jest.fn()
-    const wrapper = shallow(
-      <AutoForm
-        schema={formData}
-        submitLabel={submitLabel}
-        onSubmitSignIn={onSubmitSignInMock}
-        submitOnEnter
-      />
-    )
-    const instance = wrapper.instance()
-    instance.setState({ isValid: true })
-    instance.listenEnterKeyDown({
-      key: 'Escape'
-    })
-
-    expect(onSubmitSignInMock).not.toHaveBeenCalled()
-  })
-
   it('renders with empty form data', () => {
-    const form = shallow(<AutoForm schema={{}} submitLabel={submitLabel} />)
+    const form = shallow(<AuthForm schema={{}} />)
     expect(form.exists()).toBeTruthy()
   })
 
   it('gets initial state from props', () => {
-    const form = shallow(<AutoForm schema={formData} />)
+    const form = shallow(<AuthForm schema={formData} />)
 
     expect(form.state()).toEqual({
       values: { account: '', password: '' },
@@ -131,7 +69,7 @@ describe('<AutoForm />', () => {
   })
 
   it('renders inputs', () => {
-    const form = shallow(<AutoForm schema={formData} />)
+    const form = shallow(<AuthForm schema={formData} />)
     expect(form.find(Input)).toHaveLength(
       Object.keys(formData.properties).length
     )
@@ -150,7 +88,7 @@ describe('<AutoForm />', () => {
         }
       }
     }
-    const form = shallow(<AutoForm schema={invalidSchema} />)
+    const form = shallow(<AuthForm schema={invalidSchema} />)
 
     expect(form.find(Input)).toHaveLength(0)
   })
@@ -168,18 +106,14 @@ describe('<AutoForm />', () => {
         }
       }
     }
-    const form = shallow(<AutoForm schema={schemaWithDate} />)
+    const form = shallow(<AuthForm schema={schemaWithDate} />)
     expect(form.find(DateInput)).toHaveLength(1)
   })
 
   it('handles sign in input change and update', () => {
     const onSubmitSignInMock = jest.fn()
     const form = shallow(
-      <AutoForm
-        schema={formData}
-        submitLabel={submitLabel}
-        onSubmitSignIn={onSubmitSignInMock}
-      />
+      <AuthForm schema={formData} onSubmitSignIn={onSubmitSignInMock} />
     )
     const instance = form.instance()
     form
@@ -220,11 +154,7 @@ describe('<AutoForm />', () => {
   it('onSubmitSignIn not called with invalid input', () => {
     const onSubmitSignInMock = jest.fn()
     const form = shallow(
-      <AutoForm
-        schema={formData}
-        submitLabel={submitLabel}
-        onSubmitSignIn={onSubmitSignInMock}
-      />
+      <AuthForm schema={formData} onSubmitSignIn={onSubmitSignInMock} />
     )
     const instance = form.instance()
     instance.handleSubmitSignIn()
@@ -235,9 +165,8 @@ describe('<AutoForm />', () => {
     const onSubmitSignInMock = jest.fn()
     const onSubmitCreateAccountMock = jest.fn()
     const form = shallow(
-      <AutoForm
+      <AuthForm
         schema={formData}
-        submitLabel={submitLabel}
         onSubmitSignIn={onSubmitSignInMock}
         onSubmitCreateAccount={onSubmitCreateAccountMock}
       />
@@ -282,7 +211,7 @@ describe('<AutoForm />', () => {
     const onSubmitSignInMock = jest.fn()
     const onSubmitCreateAccountMock = jest.fn()
     const form = shallow(
-      <AutoForm
+      <AuthForm
         schema={formData}
         onSubmitSignIn={onSubmitSignInMock}
         onSubmitCreateAccount={onSubmitCreateAccountMock}
@@ -296,7 +225,7 @@ describe('<AutoForm />', () => {
   it('calls onValues update', () => {
     const onValuesUpdateMock = jest.fn()
     const form = shallow(
-      <AutoForm schema={formData} onValuesUpdate={onValuesUpdateMock} />
+      <AuthForm schema={formData} onValuesUpdate={onValuesUpdateMock} />
     )
     form
       .find(Input)
@@ -317,7 +246,7 @@ describe('<AutoForm />', () => {
     const ClearButtonMock = props => <button {...props}>clear</button>
     ClearButtonMock.displayName = 'TestClearButton'
     const form = shallow(
-      <AutoForm schema={formData} clearButton={ClearButtonMock} />
+      <AuthForm schema={formData} clearButton={ClearButtonMock} />
     )
     const instance = form.instance()
     const clearSpy = jest.spyOn(instance, 'handleClear')
@@ -329,9 +258,8 @@ describe('<AutoForm />', () => {
     const onSubmitSignInMock = jest.fn()
     const onValuesUpdateMock = jest.fn()
     const form = shallow(
-      <AutoForm
+      <AuthForm
         schema={formData}
-        submitLabel={submitLabel}
         onSubmitSignIn={onSubmitSignInMock}
         onValuesUpdate={onValuesUpdateMock}
       />
@@ -351,16 +279,15 @@ describe('<AutoForm />', () => {
       account: '',
       password: ''
     })
-    expect(onValuesUpdateMock).toHaveBeenCalledTimes(3)
+    expect(onValuesUpdateMock).toHaveBeenCalledTimes(2)
   })
 
   it('updates values from props', () => {
     const onSubmitSignInMock = jest.fn()
     const onValuesUpdateMock = jest.fn()
     const form = shallow(
-      <AutoForm
+      <AuthForm
         schema={formData}
-        submitLabel={submitLabel}
         onSubmitSignIn={onSubmitSignInMock}
         onValuesUpdate={onValuesUpdateMock}
       />
@@ -377,7 +304,7 @@ describe('<AutoForm />', () => {
   })
 
   it('passes the name prefix to inputs', () => {
-    const form = shallow(<AutoForm namePrefix="test" schema={formData} />)
+    const form = shallow(<AuthForm namePrefix="test" schema={formData} />)
     const accountInput = form.find(Input).find({ name: 'test-account' })
     expect(accountInput.exists()).toBeTruthy()
 
