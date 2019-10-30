@@ -2,9 +2,8 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
-import Form from 'components/Form'
+import AuthForm from 'components/AuthForm'
 import Header from 'components/Header'
-import ButtonLink from 'components/ButtonLink'
 
 import s from './LandingScreen.module.css'
 
@@ -75,6 +74,14 @@ class LandingScreen extends Component {
       .catch(err => this.showErrors(err))
   }
 
+  handleSignUp = data => {
+    const { signUp } = this.props
+    const { account, password } = data
+    return signUp({ username: account, password }, {})
+      .then(res => res)
+      .catch(err => this.showErrors(err))
+  }
+
   render() {
     return (
       <LandingScreenWrapper>
@@ -91,17 +98,12 @@ class LandingScreen extends Component {
           .
         </IntroStyled>
         <div>
-          <Form
+          <AuthForm
             id="login"
             schema={loginSchema}
-            submitLabel="Sign In"
-            onSubmit={this.handleAuth}
+            onSubmitSignIn={this.handleAuth}
+            onSubmitCreateAccount={this.handleSignUp}
             submitOnEnter
-          />
-          <ButtonLink
-            to="/auth/create-account"
-            text="Create"
-            name="create-account"
           />
         </div>
         <div className={s.version} data-id="appVersion">

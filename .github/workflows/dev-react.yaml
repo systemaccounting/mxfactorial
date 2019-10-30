@@ -34,11 +34,14 @@ jobs:
       - name: install dependencies
         run: make install
         working-directory: react
-      - name: execute unit tests
+      - name: unit tests
         run: make test-unit
         working-directory: react
-      - name: execute integration tests
-        run: make test-e2e ENV=dev
+      - name: integration tests
+        run: |
+          make get-secrets ENV=dev
+          yarn test:e2e-public
+          yarn test:e2e-private
         working-directory: react
       - name: build for dev
         run: make build ENV=dev

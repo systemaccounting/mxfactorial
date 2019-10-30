@@ -76,8 +76,8 @@ $(ENV_VARS):
 
 ###################### start ######################
 
-.PHONY: start install
-start: install
+.PHONY: start get-secrets install
+start: get-secrets install
 		yarn start:env
 
 ###################### build and test ######################
