@@ -9,7 +9,7 @@ import Input from './Input'
 import Button from 'components/Button'
 import DateInput from './DateInput'
 
-export const FormWrapper = styled.div`
+export const FormWrapper = styled.form`
   text-align: center;
   > a {
     display: inline-block;
@@ -95,17 +95,6 @@ class AuthForm extends React.Component {
     return values && !focused ? { values } : null
   }
 
-  componentDidMount() {
-    if (this.props.submitOnEnter) {
-      document.addEventListener('keydown', this.listenEnterKeyDown)
-    }
-    this.validateInputs()
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('keydown', this.listenEnterKeyDown)
-  }
-
   clearValues = () =>
     this.setState(
       {
@@ -118,12 +107,6 @@ class AuthForm extends React.Component {
       },
       () => this.validateInputs()
     )
-
-  listenEnterKeyDown = e => {
-    if (e.key === 'Enter') {
-      this.handleSubmitSignIn()
-    }
-  }
 
   updateValue = key => e => {
     const newValue = e.target.value
@@ -241,7 +224,12 @@ class AuthForm extends React.Component {
       clearButton: ClearButton
     } = this.props
     return (
-      <FormWrapper>
+      <FormWrapper
+        onSubmit={e => {
+          this.handleSubmitSignIn()
+          e.preventDefault()
+        }}
+      >
         <FormContainer>
           <ClearButtonWrapper>
             <ClearButton
@@ -257,7 +245,7 @@ class AuthForm extends React.Component {
                 theme={theme}
                 disabled={!isValid}
                 onClick={this.handleSubmitSignIn}
-                type="button"
+                type="submit"
               >
                 Sign In
               </Button>
