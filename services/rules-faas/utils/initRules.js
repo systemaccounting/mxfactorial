@@ -22,6 +22,7 @@ const formatDynamoDbPutItems = rulesToInit => {
       PutRequest: {
         Item: {
           key_schema, rule_instance_id, rule,
+          time_added_utc: new Date().toUTCString(),
           description: 'created from services/rules-faas/utils/initRules.js'
         }
       }
@@ -103,7 +104,7 @@ const formattedItems = formatDynamoDbPutItems(rulesToInitInDynamoDb)
 ;(async () => {
   await batchWriteTable(
     ddb,
-    'rule-instances-dev',
+    process.env.RULE_INSTANCE_TABLE_NAME,
     formattedItems
   )
 })();
