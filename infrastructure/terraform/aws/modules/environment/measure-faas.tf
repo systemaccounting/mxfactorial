@@ -15,15 +15,6 @@ resource "aws_lambda_function" "measure_service_lambda" {
   runtime = "go1.x"
   role    = aws_iam_role.measure_service_lambda_role.arn
 
-  vpc_config {
-    subnet_ids = data.aws_subnet_ids.default.ids
-
-    security_group_ids = [
-      aws_security_group.rds.id,
-      data.aws_security_group.default.id,
-    ]
-  }
-
   environment {
     variables = local.POSTGRES_VARS
   }
