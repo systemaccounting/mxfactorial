@@ -20,15 +20,6 @@ resource "aws_lambda_function" "migrate_lambda" {
     "arn:aws:lambda:${data.aws_region.current.name}:744348701589:layer:bash:8",
   ]
 
-  vpc_config {
-    subnet_ids = data.aws_subnet_ids.default.ids
-
-    security_group_ids = [
-      aws_security_group.rds.id,
-      data.aws_security_group.default.id,
-    ]
-  }
-
   environment {
     variables = local.POSTGRES_VARS
   }
