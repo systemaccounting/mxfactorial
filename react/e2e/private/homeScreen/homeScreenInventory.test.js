@@ -63,4 +63,9 @@ describe('homeScreen inventory', () => {
     expect(debitButton).toHaveLength(1)
     expect(creditButton).toHaveLength(1)
   })
+
+  it('displays notification button', async () => {
+    const notificationBtn = await page.$$(SELECTORS.notificationButton)
+    expect(notificationBtn).toHaveLength(1)
+  })
 })

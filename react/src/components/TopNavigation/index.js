@@ -40,6 +40,7 @@ const TopNavigation = () => {
     return (
       <i
         className="fa fa-2x fa-flag"
+        data-id="notificationButton"
         ref={ref}
         onClick={openNotificationsMenu}
       />

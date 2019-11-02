@@ -14,6 +14,7 @@ const SELECTORS = {
   HOME: '[name="account-label"]',
   homeScreen: '[data-id="homeScreen"]',
   homeButton: '[data-id="homeButton"]',
+  notificationButton: '[data-id="notificationButton"]',
   backButton: '[data-id="backButton"]',
   historyItemIndicator: '[data-id="historyItemIndicator"]',
   transactionPartner: '[data-id="transactionPartner"]',
