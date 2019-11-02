@@ -1,0 +1,20 @@
+.root {
+    display: flex;
+    padding: 10px 0;
+    list-style: none;
+}
+
+.menuItem {
+    cursor: pointer;
+    margin-right: 10px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.menuItem:last-child {
+    margin-right: 0;
+}
+
+.menuItem_active,
+.menuItem:hover {
+    color: #fff;
+}

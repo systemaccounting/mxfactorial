@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import cx from 'classnames'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
-import NotificationsMenu from '../NotificationsMenu'
+import NotificationMenu from '../NotificationMenu'
+import s from './TopNavigation.module.css'
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,47 +14,55 @@ const NavItem = styled.div`
   color: #efefef;
   cursor: pointer;
   margin-right: 10px;
+  color: #fff;
+  opacity: 0.7;
 
   &:last-child: {
     margin-right: 0;
   }
 
-  i {
-    color: #efefef;
-    text-decoration: none;
-    opacity: 0.7;
+  &:hover {
+    opacity: 1;
+  }
 
-    &:hover {
-      opacity: 1;
-    }
+  i {
+    color: inherit;
   }
 `
 
 const TopNavigation = () => {
-  const [isNotificationsMenuOpen, setNotificationsMenu] = useState(false)
+  const [isNotificationsOpen, setNotificationsOpen] = useState(false)
 
-  const openNotificationsMenu = () => setNotificationsMenu(true)
-  const closeNotificationsMenu = () => setNotificationsMenu(false)
+  const openNotificationsMenu = () => setNotificationsOpen(true)
+  const closeNotificationsMenu = () => setNotificationsOpen(false)
 
   const renderNotificationsTarget = ({ ref }) => {
-    return <i className="fa fa-2x fa-flag" ref={ref} />
+    return (
+      <i
+        className="fa fa-2x fa-flag"
+        ref={ref}
+        onClick={openNotificationsMenu}
+      />
+    )
   }
 
   return (
-    <Wrapper>
-      <NavItem>
+    <ul className={s.root}>
+      <li className={s.menuItem}>
         <Link to="/account" data-id="homeButton">
           <i className="fa fa-2x fa-home" />
         </Link>
-      </NavItem>
-      <NavItem onClick={openNotificationsMenu}>
-        <NotificationsMenu
+      </li>
+      <li
+        className={cx(s.menuItem, { [s.menuItem_active]: isNotificationsOpen })}
+      >
+        <NotificationMenu
           renderTarget={renderNotificationsTarget}
-          isOpen={isNotificationsMenuOpen}
+          isOpen={isNotificationsOpen}
           onClose={closeNotificationsMenu}
         />
-      </NavItem>
-    </Wrapper>
+      </li>
+    </ul>
   )
 }
 
