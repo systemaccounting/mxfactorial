@@ -54,7 +54,11 @@ export default class RequestScreen extends React.Component {
                   data-request-id={request.id}
                 >
                   <Small>
-                    {fromNow(request.expiration_time)}
+                    {fromNow(
+                      request.creditor_approval_time
+                      ? request.creditor_approval_time
+                      : request.debitor_approval_time
+                    )}
                     {', '}
                     {isCredit ? (
                       <span>
