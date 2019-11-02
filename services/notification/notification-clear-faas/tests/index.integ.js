@@ -15,30 +15,33 @@ const {
   pendingReceivedNotifications
 } = require('./utils/testData')
 
-const AWS_REGION = process.env.AWS_REGION
-const NOTIFICATIONS_TABLE_NAME = process.env.NOTIFICATIONS_TABLE_NAME
-const SECRET = process.env.SECRET
-const GET_NOTIFICATIONS_ACTION = {"action":"getnotifications"}
-const CLIENT_ID = process.env.CLIENT_ID
-const POOL_ID = process.env.POOL_ID
-const WSS_CLIENT_URL = process.env.WSS_CLIENT_URL
+// avoid const assignment for env vars 
+// process.env.AWS_REGION
+// process.env.NOTIFICATIONS_TABLE_NAME
+// process.env.SECRET
+// process.env.CLIENT_ID
+// process.env.POOL_ID
+// process.env.WSS_CLIENT_URL
 
-const ddb = new AWS.DynamoDB.DocumentClient({ region: AWS_REGION })
+const GET_NOTIFICATIONS_ACTION = {"action":"getnotifications"}
+
+
+const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION})
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
 
 
 beforeAll(async () => {
-  await createAccount(cognitoIdsp, CLIENT_ID, TEST_ACCOUNT, SECRET)
+  await createAccount(cognitoIdsp, process.env.CLIENT_ID, TEST_ACCOUNT, process.env.SECRET)
 })
 
 afterAll(async() => {
-  await deleteAccount(cognitoIdsp, POOL_ID, TEST_ACCOUNT)
+  await deleteAccount(cognitoIdsp, process.env.POOL_ID, TEST_ACCOUNT)
 })
 
 beforeEach(async () => {
   await createNotifications(
     ddb,
-    NOTIFICATIONS_TABLE_NAME,
+    process.env.NOTIFICATIONS_TABLE_NAME,
     pendingReceivedNotifications
   )
 })
@@ -46,18 +49,18 @@ beforeEach(async () => {
 afterEach(async () => {
   await deleteNotifications(
     ddb,
-    NOTIFICATIONS_TABLE_NAME,
+    process.env.NOTIFICATIONS_TABLE_NAME,
     pendingReceivedNotifications
   )
 })
 
 describe('notification pending lambda', () => {
   test('clears 1 pending message', async done => {
-    let token = await getToken(cognitoIdsp, CLIENT_ID, TEST_ACCOUNT, SECRET)
+    let token = await getToken(cognitoIdsp, process.env.CLIENT_ID, TEST_ACCOUNT, process.env.SECRET)
     let options = {
       headers: { Authorization: token }
     }
-    let ws = new WebSocket(WSS_CLIENT_URL, options)
+    let ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
     ws.on('open', () => {
       ws.send(JSON.stringify(GET_NOTIFICATIONS_ACTION))
       ws.on('message', data => {

@@ -2,23 +2,6 @@
 resource "aws_s3_bucket" "www_mxfactorial_react" {
   bucket = "www-mxfactorial-react-prod"
 
-  policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "CloudFrontReadForGetBucketObjects",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "cloudfront.amazonaws.com"
-      },
-      "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::www-mxfactorial-react-prod/*"
-    }
-  ]
-}
-POLICY
-
   website {
     # aws parses https prefix and bucket name when creating redirect rule
     redirect_all_requests_to = "https://${module.prod.s3_react_distribution_domain_name}"
@@ -27,7 +10,36 @@ POLICY
   force_destroy = true
 }
 
-resource "aws_cloudfront_distribution" "s3_react_www_distribution" {
+resource "aws_s3_bucket_policy" "www_mxfactorial_react" {
+  bucket = aws_s3_bucket.www_mxfactorial_react.id
+  policy = data.aws_iam_policy_document.www_mxfactorial_react.json
+}
+
+data "aws_iam_policy_document" "www_mxfactorial_react" {
+  version = "2012-10-17"
+
+  statement {
+    sid = "CloudFrontGetWWWBucketObjects${title(var.environment)}"
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.www_s3_react_distribution.iam_arn]
+    }
+    actions   = ["s3:GetObject"]
+    resources = ["${aws_s3_bucket.www_mxfactorial_react.arn}/*"]
+  }
+
+  statement {
+    sid       = "CloudFrontListWWWBucketObjects${title(var.environment)}"
+    actions   = ["s3:ListBucket"]
+    resources = [aws_s3_bucket.www_mxfactorial_react.arn]
+    principals {
+      type        = "AWS"
+      identifiers = [aws_cloudfront_origin_access_identity.www_s3_react_distribution.iam_arn]
+    }
+  }
+}
+
+resource "aws_cloudfront_distribution" "www_s3_react_distribution" {
   comment = "prod www cache"
 
   aliases = ["www.mxfactorial.io"]
@@ -78,4 +90,8 @@ resource "aws_cloudfront_distribution" "s3_react_www_distribution" {
     acm_certificate_arn = data.terraform_remote_state.aws-us-east-1.outputs.client_www_cert
     ssl_support_method  = "sni-only"
   }
+}
+
+resource "aws_cloudfront_origin_access_identity" "www_s3_react_distribution" {
+  comment = "cloudfront origin access identity for www s3 access in prod"
 }

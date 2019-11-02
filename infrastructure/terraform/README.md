@@ -62,7 +62,7 @@
 1. input branch name, e.g. `develop`  
 1. sign into `stg` environment's dedicated cloud9 instance for direct connetions to `stg` postgres instance  
 1. `sudo yum update && sudo yum install postgresql`  
-1. `PGPASSWORD=replace_with_password psql -h host -p 5432 -U replace_with_user mxfactorial` to access postgres  
+1. `PGPASSWORD=replace_with_password psql -h replace_with_host -p 5432 -U replace_with_user mxfactorial` to access postgres  
 
 **init rule-instance**
 1. `cd services/rules-faas`  

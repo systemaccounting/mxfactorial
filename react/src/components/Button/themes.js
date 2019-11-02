@@ -23,12 +23,18 @@ const info = {
   color: 'white'
 }
 
+const createAccount = {
+  backgroundColor: 'rgb(0, 153, 230)',
+  color: 'white'
+}
+
 const themes = {
   primary,
   secondary,
   success,
   error,
-  info
+  info,
+  createAccount
 }
 
 export default themes

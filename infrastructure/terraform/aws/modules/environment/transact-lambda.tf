@@ -15,16 +15,6 @@ resource "aws_lambda_function" "transact_service_lambda" {
   timeout           = 30
   role              = aws_iam_role.transact_service_lambda_role.arn
 
-  vpc_config {
-    subnet_ids = data.aws_subnet_ids.default.ids
-
-    security_group_ids = [
-      aws_security_group.rds.id,
-      data.aws_security_group.default.id,
-      data.aws_security_group.us-east-1_vpce.id
-    ]
-  }
-
   environment {
     variables = merge(
       {

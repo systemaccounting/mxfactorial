@@ -43,7 +43,49 @@ describe('<Landing Screen />', () => {
 
     const instance = wrapper.instance()
     const spy = jest.spyOn(instance, 'showErrors')
-    await instance.handleAuth([data])
+    await instance.handleAuth(data)
+    expect(wrapper.state('errors')).toEqual(error)
+  })
+
+  it('handles account creation', () => {
+    const data = {
+      account: 'x',
+      password: 'x'
+    }
+    const createAccountMock = promiseToResolve(data)
+    const replaceMock = jest.fn()
+    const wrapper = shallow(
+      <LandingScreen
+        history={{ replace: replaceMock }}
+        signUp={createAccountMock}
+      />
+    )
+
+    const instance = wrapper.instance()
+
+    instance
+      .handleSignUp([data])
+      .then(() => expect(replaceMock).toHaveBeenCalled())
+  })
+
+  it('errors on account creation', async () => {
+    const data = {
+      account: 'x',
+      password: 'x'
+    }
+    const error = { message: 'cant register' }
+    const createAccountMock = jest.fn().mockRejectedValue(error)
+    const replaceMock = jest.fn()
+    const wrapper = shallow(
+      <LandingScreen
+        history={{ replace: replaceMock }}
+        signUp={createAccountMock}
+      />
+    )
+
+    const instance = wrapper.instance()
+    const spy = jest.spyOn(instance, 'showErrors')
+    await instance.handleSignUp(data)
     expect(wrapper.state('errors')).toEqual(error)
   })
 

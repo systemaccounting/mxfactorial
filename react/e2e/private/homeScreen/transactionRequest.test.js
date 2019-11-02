@@ -42,7 +42,7 @@ describe('transaction request', async () => {
 
     // await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
     await page.waitForSelector(SELECTORS.requestItem)
-
+    // todo: fix 17921 ms cold start
     // redirect to historyScreen
     await expect(page.url()).toMatch(REQUEST_URL)
   })

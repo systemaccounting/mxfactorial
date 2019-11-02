@@ -56,7 +56,7 @@ const SELECTORS = {
   transactButton: '[data-id="transactButton"]',
   cancelButton: '[data-id="cancelButton"]',
   okButton: '[data-id="okButton"]',
-  passwordInput: '[data-id="passwordInputField"]',
+  modalPasswordInput: '[data-id="passwordInputField"]',
   activeButton: 'button[data-id="activeButton"]',
   rejectedButton: 'button[data-id="rejectedButton"]',
   requestingAccountIndicator: '[data-id="requestingAccountIndicator"]',
@@ -74,7 +74,12 @@ const SELECTORS = {
   draftTransaction: '[data-id="draft-transaction"]',
   signOutButton: '[data-name="sign-out"]',
   landingScreenLogo: '.create-account-logo',
-  ruleItem: '[data-id="rule-item"]'
+  ruleItem: '[data-id="rule-item"]',
+  signInButton: '[data-id="signInButton"]',
+  createAccountButton: '[data-id="createAccountButton"]',
+  accountInput: '[name="account"]',
+  passwordInput: '[name="password"]',
+  appVersionLabel: '[data-id="appVersion"]'
 }
 
 module.exports = {
