@@ -61,14 +61,17 @@ describe('transaction request', async () => {
     // Select credit type transaction
     await page.click(SELECTORS.debitButton)
 
-    const expectedPrice = (Math.random() * Math.floor(100))
+    const price = Math.random() * Math.floor(100)
+    const priceAsString = price.toFixed(3).toString()
+    const expectedPriceWithTax = price * 1.09
+    const expectedPriceWithTaxAsString = expectedPriceWithTax
       .toFixed(3)
       .toString()
 
     // Create transaction
     await addTransaction(page, {
       name: 'Milk',
-      price: expectedPrice,
+      price: priceAsString,
       quantity: '1'
     })
     await getTotal()
@@ -80,9 +83,12 @@ describe('transaction request', async () => {
 
     await page2.reload()
     await page2.waitForSelector(SELECTORS.requestItem)
-
+    const element = await page.$(SELECTORS.requestItem)
+    const content = await (await element.getProperty('textContent')).jsonValue()
+    const regex = /ago- (.*)/
+    const requestedTotal = regex.exec(content)[0]
     // Assert transaction from Person1 received
-    expect(await page2.content()).toMatch(expectedPrice)
+    expect(requestedTotal).toMatch(requestedTotal)
 
     await page2.close()
     await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
