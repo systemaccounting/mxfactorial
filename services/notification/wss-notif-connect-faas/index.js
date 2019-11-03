@@ -22,8 +22,8 @@ exports.handler = async event => {
   if (event.requestContext.eventType === "CONNECT") {
 
     let time = Date.now()
-    let account = event.requestContext.authorizer.account
-    await putItem(ddb, WEBSOCKETS_TABLE_NAME, time, connectionId, account)
+    // let account = event.requestContext.authorizer.account
+    await putItem(ddb, WEBSOCKETS_TABLE_NAME, time, connectionId/*, account*/)
 
   // or delete connection id item if disconnecting web websocket
   } else if (event.requestContext.eventType === "DISCONNECT") {
