@@ -49,7 +49,8 @@ export default function withGroupedTransactions(WrappedComponent) {
           let perItemTotal = itemPrice * itemQuantity
           return acc + perItemTotal
         }, 0)
-        transactionTotals.push(total)
+        let threeDecimalTotal = total.toFixed(3)
+        transactionTotals.push(threeDecimalTotal)
       }
       return transactionTotals
     }
