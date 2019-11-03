@@ -28,6 +28,8 @@ export const fetchTransactions = gql`
       creditor_approval_time
       debitor_approval_time
       expiration_time
+      transaction_id
+      rule_instance_id
     }
   }
 `
