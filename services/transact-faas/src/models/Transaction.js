@@ -15,7 +15,8 @@ module.exports = (sequelize, type) =>
       debitor: type.STRING,
       debitor_approval_time: type.DATE,
       creditor_approval_time: type.DATE,
-      transaction_id: type.STRING
+      transaction_id: type.STRING,
+      rule_instance_id: type.STRING
     },
     {
       // There are no `createdAt` and `updatedAt` transaction columns yet
