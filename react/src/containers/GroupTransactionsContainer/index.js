@@ -44,8 +44,8 @@ export default function withGroupedTransactions(WrappedComponent) {
       let transactionTotals = []
       for (let grouped of transactionsGroupedById) {
         let total = grouped.reduce((acc, item) => {
-          let itemPrice = Number.parseFloat(item.price)
-          let itemQuantity = Number.parseFloat(item.quantity)
+          let itemPrice = Number.parseFloat(item.price || 0)
+          let itemQuantity = Number.parseFloat(item.quantity || 0)
           let perItemTotal = itemPrice * itemQuantity
           return acc + perItemTotal
         }, 0)
