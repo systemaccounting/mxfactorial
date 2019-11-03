@@ -77,10 +77,10 @@ func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 	if event.User != "" {
 		initQuery := `
 		SELECT * FROM transactions
-		WHERE creditor='%s' OR debitor='%s'
+		WHERE creditor='%s' OR debitor='%s' OR author='%s'
 		AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL)
 		ORDER BY id DESC LIMIT $1;`
-		queryString := fmt.Sprintf(initQuery, event.User, event.User)
+		queryString := fmt.Sprintf(initQuery, event.User, event.User, event.User)
 		return getLastNTransactions(db, queryString, 20)
 	}
 
