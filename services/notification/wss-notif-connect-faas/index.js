@@ -18,12 +18,11 @@ exports.handler = async event => {
   let ddb = new AWS.DynamoDB.DocumentClient({ region: AWS_REGION})
   let connectionId = event.requestContext.connectionId
 
-  // store connection id and account in ddb if connecting websocket
+  // store connection id in ddb
   if (event.requestContext.eventType === "CONNECT") {
 
     let time = Date.now()
-    // let account = event.requestContext.authorizer.account
-    await putItem(ddb, WEBSOCKETS_TABLE_NAME, time, connectionId/*, account*/)
+    await putItem(ddb, WEBSOCKETS_TABLE_NAME, time, connectionId)
 
   // or delete connection id item if disconnecting web websocket
   } else if (event.requestContext.eventType === "DISCONNECT") {
