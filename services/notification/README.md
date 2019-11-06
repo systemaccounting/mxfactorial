@@ -7,14 +7,21 @@
 1. `cd services/notification/client-instructions`
 1. assign test account and password to `ACCOUNT` and `SECRET` env vars in .env file
 1. add `WSS_CLIENT_URL`, `CLIENT_ID` and `AWS_REGION` env var assignments in .env file
-1. `yarn get` to print pending notifications for `ACCOUNT`
-1. `yarn clear` to print cleared notifications for `ACCOUNT`
+1. `yarn get` to print **pending** notifications for `ACCOUNT`
+1. `yarn clear` to print **cleared** notifications for `ACCOUNT`
 
-**authentication and connection**  
-websocket authentication and connection depends on passing cognito `idToken` as `Authorization` header to `Websocket` instance:
+**node.js connection**  
 
 ```js
 const WebSocket = require('ws')
+
+const ws = new WebSocket(process.env.WSS_CLIENT_URL)
+```
+
+**get notifications**  
+`pending` transaction notifications retrieved with `JSON.stringify({"action":"getnotifications","token":"eyJraW..."})` websocket message:
+
+```js
 
 const token = await getToken(
   cognitoIdsp,
@@ -22,21 +29,13 @@ const token = await getToken(
   process.env.ACCOUNT,
   process.env.SECRET
 )
-const options = {
-  headers: {
-    Authorization: token
-  }
-}
-const ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
-```
 
-**get notifications**  
-`pending` transaction notifications retrieved with `JSON.stringify({"action":"getnotifications"})` websocket message:
-
-```js
 ws.on('open', () => {
   console.log('socket opened')
-  ws.send(JSON.stringify({"action":"getnotifications"}))
+  ws.send(JSON.stringify({
+    action: "getnotifications",
+    token // pass token in every getnotifications message
+  }))
 })
 ws.on('message', data => {
   console.log(data)
@@ -87,25 +86,20 @@ transaction item array stored as notification `message` value. items grouped by 
 **clear notifications**  
 transaction notifications cleared by sending `clearnotifications` websocket message:
 ```js
-const shapeClearnNotificationsRequest = notifications => {
-  let notificationsToClear = []
-  for (notification of notifications) {
-    notificationsToClear.push(notification)
-  }
-  let clearNotificationsRequest = {
-    action: 'clearnotifications',
-    notifications: notificationsToClear
-  }
-  return JSON.stringify(clearNotificationsRequest)
-}
-
 const getNotificationEvent = JSON.parse(data)
-const clearMessageRequest = shapeClearnNotificationsRequest(getNotificationEvent.pending)
+
+const clearMessageRequest = JSON.stringify({
+  action: "clearnotifications",
+  notifications: getNotificationEvent.pending),
+  token // pass token in every clearnotifications message
+})
+
 ws.send(clearMessageRequest)
 
 // sent as:
 {
   "action": "clearnotifications",
+  "token": "eyJraW...",
   "notifications": [
     {
       "account": "testdebitor1",
