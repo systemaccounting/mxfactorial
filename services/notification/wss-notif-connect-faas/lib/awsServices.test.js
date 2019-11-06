@@ -29,16 +29,14 @@ describe('awsServices', () => {
     let table = 'testtable'
     let time = Date.now()
     let connectionId = 'testconnection'
-    let account = 'testaccount'
     let expected = {
       TableName: table,
       Item: {
         connection_id: connectionId,
-        timestamp: time,
-        account
+        timestamp: time
       }
     }
-    putItem(ddb, table, time, connectionId, account)
+    putItem(ddb, table, time, connectionId)
     expect(ddb.put).toHaveBeenCalledWith(expected)
   })
 
