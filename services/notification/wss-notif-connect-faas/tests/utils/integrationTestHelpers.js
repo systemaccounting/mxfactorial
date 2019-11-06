@@ -79,9 +79,32 @@ const queryIndex = (
     })
 }
 
+const queryTable = (service, table, key, val) => {
+  let params = {
+    TableName: table,
+    KeyConditions: {
+      [key]: {
+        ComparisonOperator: 'EQ',
+        AttributeValueList: [ val ]
+      }
+    }
+  }
+  return service.query(params)
+    .promise()
+    .then(async data => {
+      console.log(data.Items)
+      return data.Items
+    })
+    .catch(async err => {
+      console.log(err, err.stack)
+      throw err
+    })
+}
+
 module.exports = {
   createAccount,
   deleteAccount,
   getToken,
-  queryIndex
+  queryIndex,
+  queryTable
 }
