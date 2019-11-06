@@ -1,8 +1,8 @@
 const {
+  updateItem,
   queryIndex,
   queryTable,
-  sendMessageToClient
-} = require('./awsServices')
+} = require('./dynamodb')
 
 afterEach(() => {
   jest.clearAllMocks()
@@ -26,7 +26,46 @@ const mockAws = method => {
   }
 }
 
-describe('awsServices', () => {
+describe('dynamodb', () => {
+  test('updateItem params', () => {
+    let ddb = mockAws('update')
+    let testtable = 'testtable'
+    let testpartitionKey = 'testpartitionkey'
+    let testsortkey = 'testsortkey'
+    let testconnectionid = 'testconnectionid'
+    let testtimestamp = 'testtimestamp'
+    let testattributekey = 'testattributekey'
+    let testattributevalue = 'testattributevalue'
+    let testupdateconditionexpression = 'testupdateconditionexpression'
+    let expected = {
+      TableName: testtable,
+      Key: {
+        [testpartitionKey]: testconnectionid,
+        [testsortkey]: testtimestamp
+      },
+      ExpressionAttributeNames: {
+        "#key": testattributekey
+      },
+      ExpressionAttributeValues: {
+        ":value": testattributevalue
+      },
+      UpdateExpression: `SET #key = :value`,
+      ConditionExpression: `${testupdateconditionexpression}(#key)` // 'attribute_not_exists'
+    }
+    let result = updateItem(
+      ddb,
+      testtable,
+      testpartitionKey,
+      testsortkey,
+      testconnectionid,
+      testtimestamp,
+      testattributekey,
+      testattributevalue,
+      testupdateconditionexpression
+    )
+    expect(ddb.update).toHaveBeenCalledWith(expected)
+  })
+
   test('queryTable params', async () => {
     let ddb = mockAws('query')
     let expected = {
@@ -70,20 +109,6 @@ describe('awsServices', () => {
       expected.KeyConditions.account.AttributeValueList[0]
     )
     await expect(ddb.query).toHaveBeenCalledWith(expected)
-  })
-
-  test('sendMessageToClient params', async () => {
-    const ws = mockAws('postToConnection')
-    let expected = {
-      ConnectionId: '123456789',
-      Data: "{\"account\":\"FakerAccount4\",\"messsage\":\"testmessage\"}"
-    }
-    await sendMessageToClient(
-      ws,
-      expected.ConnectionId,
-      { account: 'FakerAccount4', messsage: 'testmessage' }
-    )
-    await expect(ws.postToConnection).toHaveBeenCalledWith(expected)
   })
 
   // todo: test sendMessageToClient Data object type

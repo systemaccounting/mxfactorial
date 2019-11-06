@@ -14,19 +14,6 @@ const cognitoIdsp = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION
 })
 
-const shapeClearnNotificationsRequest = notifications => {
-  let notificationsToClear = []
-  for (notification of notifications) {
-    // console.log('clearing' + JSON.stringify(notification))
-    notificationsToClear.push(notification)
-  }
-  let clearNotificationsRequest = {
-    action: 'clearnotifications',
-    notifications: notifications
-  }
-  return JSON.stringify(clearNotificationsRequest)
-}
-
 ;(async () => {
   const token = await getToken(
     cognitoIdsp,
@@ -34,15 +21,13 @@ const shapeClearnNotificationsRequest = notifications => {
     process.env.ACCOUNT,
     process.env.SECRET
   )
-  const options = {
-    headers: {
-      Authorization: token
-    }
-  }
-  const ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
+  const ws = new WebSocket(process.env.WSS_CLIENT_URL)
   ws.on('open', () => {
     console.log('socket opened')
-    ws.send(JSON.stringify({"action":"getnotifications"}))
+    ws.send(JSON.stringify({
+      action: "getnotifications",
+      token // pass token in every getnotifications message
+    }))
   })
   ws.on('message', data => {
     if (process.env.FLAG === 'get') {
@@ -58,7 +43,11 @@ const shapeClearnNotificationsRequest = notifications => {
         ws.close()
       } else {
         const event = JSON.parse(data)
-        const clearMessageRequest = shapeClearnNotificationsRequest(event.pending)
+        const clearMessageRequest = JSON.stringify({
+          action: "clearnotifications",
+          notifications: event.pending,
+          token // pass token in every clearnotifications message
+        })
         console.log('sending clear message request as:')
         console.log(clearMessageRequest)
         ws.send(clearMessageRequest)

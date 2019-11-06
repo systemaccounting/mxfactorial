@@ -14,7 +14,7 @@
 ## react
 
 # testing
-react/coverage
+**/coverage
 react/screenshot.png
 
 # production

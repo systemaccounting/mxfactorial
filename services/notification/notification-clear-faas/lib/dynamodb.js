@@ -1,3 +1,62 @@
+const updateItem = (
+  service,
+  table,
+  partitionKey,
+  sortKey,
+  connectionId,
+  timestamp,
+  newAttributeKey,
+  newAttributeValue,
+  updateConditionExpression
+  ) => {
+  let params = {
+    TableName: table,
+    Key: {
+      [partitionKey]: connectionId,
+      [sortKey]: timestamp
+    },
+    ExpressionAttributeNames: {
+      "#key": newAttributeKey
+    },
+    ExpressionAttributeValues: {
+      ":value": newAttributeValue
+    },
+    UpdateExpression: `SET #key = :value`,
+    ConditionExpression: `${updateConditionExpression}(#key)` // 'attribute_not_exists'
+  }
+  return service.update(params)
+    .promise()
+    .then(async data => {
+      console.log(`${newAttributeValue} added to ${connectionId} connection_id record`)
+    })
+    .catch(async err => {
+      console.log(err, err.stack)
+      throw err
+    })
+}
+
+const queryTable = (service, table, key, val) => {
+  let params = {
+    TableName: table,
+    KeyConditions: {
+      [key]: {
+        ComparisonOperator: 'EQ',
+        AttributeValueList: [ val ]
+      }
+    }
+  }
+  return service.query(params)
+    .promise()
+    .then(async data => {
+      console.log(data.Items)
+      return data.Items
+    })
+    .catch(async err => {
+      console.log(err, err.stack)
+      throw err
+    })
+}
+
 const formatNotificationsToClear = notificationArray => {
   let ddbDeleteItems = []
   for (let i = 0; i < notificationArray.length; i++) {
@@ -56,28 +115,10 @@ const queryIndex = (service, table, indexName, key, val) => {
     })
 }
 
-const sendMessageToClient = (service, connectionId, data) => {
-  let params = {
-    ConnectionId: connectionId, // event.requestContext.connectionId
-    Data: JSON.stringify(data)
-  }
-  return service.postToConnection(params)
-    .promise()
-    .then(data => {
-      if (data) {
-        console.log(`sent: ${params.Data}`)
-      }
-      return
-    })
-    .catch(err => {
-      console.log(err, err.stack)
-      throw err
-    })
-}
-
 module.exports = {
+  updateItem,
+  queryTable,
   formatNotificationsToClear,
   batchWriteTable,
-  queryIndex,
-  sendMessageToClient
+  queryIndex
 }
