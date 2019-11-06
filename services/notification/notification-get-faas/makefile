@@ -5,7 +5,8 @@ LAMBDA_NAME = notification-get
 ARTIFACT_BUCKET= mxfactorial-websocket-artifacts
 REGION = us-east-1
 ENV_VARS := AWS_REGION NOTIFICATIONS_TABLE_NAME SECRET \
-CLIENT_ID POOL_ID WSS_CLIENT_URL
+CLIENT_ID POOL_ID WSS_CONNECTION_URL WSS_CLIENT_URL \
+WEBSOCKETS_TABLE_NAME
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -90,13 +91,13 @@ test-integration: deploy
 .PHONY: dev test
 dev: test # test target alias to create development environment
 
-.PHONY: src test-env-arg clean test install-prod
-src: test-env-arg clean test install-prod
-		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
+.PHONY: src test-env-arg clean-src test install-prod
+src: test-env-arg clean-src test install-prod
+		zip -r $(APP_NAME)-src.zip index.js package.json node_modules lib/* --exclude "*.test.*"
 
 .PHONY: zip install-prod clean-src
 zip: install-prod clean-src
-		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip index.js package.json node_modules lib/* --exclude "*.test.*"
 
 .PHONY: layer
 layer:
@@ -124,8 +125,8 @@ deploy: test-env-arg src # lambda layer NOT deployed
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-all test-env-arg deploy-layer deploy
-deploy-all: test-env-arg deploy-layer deploy # layer and source
+.PHONY: deploy-all test-env-arg deploy-layer initial-deploy
+deploy-all: test-env-arg deploy-layer initial-deploy # layer and source
 
 .PHONY: initial-deploy test-env-arg zip
 initial-deploy: test-env-arg zip
