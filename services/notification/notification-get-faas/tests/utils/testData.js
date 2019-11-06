@@ -1,10 +1,14 @@
+const {
+  TEST_TOKEN
+} = require('./testConstants')
+
 const randomFourDigitInt = () => {
   return Math.floor(Math.random() * (9999 - 1000)) + 1000
 }
 
 const TEST_ACCOUNT = `Faker${randomFourDigitInt()}`
 
-let pendingReceivedNotifications = [
+const pendingReceivedNotifications = [
   {
     uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8c',
     timestamp: 1570139563495635,
@@ -43,7 +47,16 @@ let pendingReceivedNotifications = [
   }
 ]
 
+const getNotificationsAction = `{"action":"getnotifications","token":"${TEST_TOKEN}"}`
+
+const getNotificationsActionWithMissingToken = `{"action":"getnotifications","token":""}`
+
+const getNotificationsActionWithMalformedToken = `{"action":"getnotifications","token":"malformed"}`
+
 module.exports = {
   TEST_ACCOUNT,
-  pendingReceivedNotifications
+  pendingReceivedNotifications,
+  getNotificationsAction,
+  getNotificationsActionWithMissingToken,
+  getNotificationsActionWithMalformedToken,
 }
