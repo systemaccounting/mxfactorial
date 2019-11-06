@@ -4,8 +4,8 @@ APP_TYPE = faas
 LAMBDA_NAME = notification-clear
 ARTIFACT_BUCKET= mxfactorial-websocket-artifacts
 REGION = us-east-1
-ENV_VARS := AWS_REGION POOL_ID CLIENT_ID SECRET WSS_CLIENT_URL \
-NOTIFICATIONS_TABLE_NAME WEBSOCKETS_TABLE_NAME
+ENV_VARS := AWS_REGION POOL_ID CLIENT_ID SECRET WSS_CONNECTION_URL \
+NOTIFICATIONS_TABLE_NAME WEBSOCKETS_TABLE_NAME POOL_NAME WSS_CLIENT_URL
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -88,7 +88,7 @@ src: test-env-arg clean test install-prod zip
 
 .PHONY: zip install-prod clean-artifact
 zip: install-prod clean-artifact
-		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip index.js package.json node_modules lib/* --exclude "*.test.*"
 
 .PHONY: layer
 layer:

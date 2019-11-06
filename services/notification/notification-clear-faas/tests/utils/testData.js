@@ -1,3 +1,7 @@
+const {
+  TEST_TOKEN
+} = require('./testConstants')
+
 const randomFourDigitInt = () => {
   return Math.floor(Math.random() * (9999 - 1000)) + 1000
 }
@@ -68,7 +72,7 @@ const pendingReceivedNotifications = [
 const notificationsToClear = {
   "action":"clearnotifications",
   "notifications":[
-    {"uuid":"8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d","timestamp":1570139563495636},
+    {"uuid":"8f93fd24-e60b-11e9-a7a9-2b4645cb9b8c","timestamp":1570139563495706},
   ]
 }
 
@@ -115,11 +119,20 @@ let websocketConnectionIds = [
   }
 ]
 
+const clearNotificationsAction = `{"action":"clearnotifications","notifications":[{"uuid":"8f93fd24-e60b-11e9-a7a9-2b4645cb9b8c","timestamp":1570139563495706}],"token":"${TEST_TOKEN}"}`
+
+const clearNotificationsActionWithMissingToken = `{"action":"clearnotifications","notifications":[{"uuid":"8f93fd24-e60b-11e9-a7a9-2b4645cb9b8c","timestamp":1570139563495706}],"token":""}`
+
+const clearNotificationsActionWithMalformedToken = `{"action":"clearnotifications","notifications":[{"uuid":"8f93fd24-e60b-11e9-a7a9-2b4645cb9b8c","timestamp":1570139563495706}],"token":"malformed"}`
+
 module.exports = {
   TEST_ACCOUNT,
   pendingNotifications,
   pendingReceivedNotifications,
   notificationsToClear,
   batchWriteNotifications,
-  websocketConnectionIds
+  websocketConnectionIds,
+  clearNotificationsAction,
+  clearNotificationsActionWithMissingToken,
+  clearNotificationsActionWithMalformedToken
 }

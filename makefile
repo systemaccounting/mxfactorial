@@ -17,7 +17,6 @@ deploy: test-env-arg
 	@$(MAKE) -C services/notification/notification-clear-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/notification/notification-get-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/notification/notification-send-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/notification/wss-notif-auth-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/notification/wss-notif-connect-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/rules-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/transact-faas ENV=$(ENV) $(CMD)

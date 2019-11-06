@@ -7,8 +7,8 @@ const {
   deleteConnection
 } = require('./lib/awsServices')
 
-const AWS_REGION = process.env.AWS_REGION
-const WEBSOCKETS_TABLE_NAME = process.env.WEBSOCKETS_TABLE_NAME
+// process.env.AWS_REGION
+// process.env.WEBSOCKETS_TABLE_NAME
 const WEBSOCKET_TABLE_PRIMARY_KEY = 'connection_id'
 const WEBSOCKET_TABLE_SORT_KEY = 'timestamp'
 const TIMESTAMP = 1570334570969
@@ -69,7 +69,7 @@ describe('lambda handerl', () => {
   test('calls DocumentClient with config', async () => {
     let event = createEvent('CONNECT')
     let expected = {
-      region: AWS_REGION
+      region: process.env.AWS_REGION
     }
     await handler(event)
     await expect(AWS.DynamoDB.DocumentClient)
@@ -81,10 +81,9 @@ describe('lambda handerl', () => {
     await handler(event)
     expect(putItem).toHaveBeenCalledWith(
       { put: 'func' },
-      WEBSOCKETS_TABLE_NAME,
+      process.env.WEBSOCKETS_TABLE_NAME,
       TIMESTAMP,
-      CONNECTION_ID,
-      ACCOUNT
+      CONNECTION_ID
     )
   })
 
@@ -93,7 +92,7 @@ describe('lambda handerl', () => {
     await handler(event)
     expect(queryTable).toHaveBeenCalledWith(
       { put: 'func' },
-      WEBSOCKETS_TABLE_NAME,
+      process.env.WEBSOCKETS_TABLE_NAME,
       WEBSOCKET_TABLE_PRIMARY_KEY,
       CONNECTION_ID
     )
@@ -104,7 +103,7 @@ describe('lambda handerl', () => {
     await handler(event)
     expect(deleteConnection).toHaveBeenCalledWith(
       { put: 'func' },
-      WEBSOCKETS_TABLE_NAME,
+      process.env.WEBSOCKETS_TABLE_NAME,
       WEBSOCKET_TABLE_PRIMARY_KEY,
       WEBSOCKET_TABLE_SORT_KEY,
       CONNECTION[0] // let singleConnection = connectionValues[0]

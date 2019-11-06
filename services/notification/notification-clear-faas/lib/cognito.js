@@ -1,4 +1,4 @@
-const getPools = async (service) => {
+const getPools = async service => {
 
   let cognitoPools = []
   let nextPage
