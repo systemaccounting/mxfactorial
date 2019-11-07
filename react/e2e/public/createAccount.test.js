@@ -36,6 +36,7 @@ afterEach(async () => {
 afterAll(async () => {
   // Faker value matched by daily db cleanup script if afterAll fails
   // terraform/workspaces/cognito/delete-faker-accounts/index.js:8
+  await page.waitFor(1500) // buffer teardown after create account test
   await deleteUser(process.env.REACT_APP_POOL_ID, PUBLIC_TEST_ACCOUNT)
 })
 
