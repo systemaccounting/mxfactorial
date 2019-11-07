@@ -40,7 +40,6 @@ export default class RequestScreen extends React.Component {
   render() {
     const { status } = this.state
     const { user, groupedTransactions } = this.props
-    console.log(groupedTransactions)
     return (
       <MainLayout>
         <Wrapper data-id="request-screen-wrapper">
@@ -71,7 +70,7 @@ export default class RequestScreen extends React.Component {
                   </Small>
                   <Text textAlign="right" variant="medium">
                     <strong>
-                      {request.isCreditor ? '+' : '-'} {request.total}
+                      {request.isCreditor ? '' : '-'} {request.total}
                     </strong>
                   </Text>
                 </Paper>
