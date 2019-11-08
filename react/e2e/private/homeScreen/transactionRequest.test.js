@@ -86,9 +86,9 @@ describe('transaction request', async () => {
     const element = await page.$(SELECTORS.requestItem)
     const content = await (await element.getProperty('textContent')).jsonValue()
     const regex = /ago- (.*)/
-    const requestedTotal = regex.exec(content)[0]
+    const requestedTotal = regex.exec(content)[1]
     // Assert transaction from Person1 received
-    expect(requestedTotal).toMatch(requestedTotal)
+    expect(requestedTotal).toBe(expectedPriceWithTaxAsString)
 
     await page2.close()
     await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
