@@ -62,11 +62,10 @@ describe('transaction request', async () => {
     await page.click(SELECTORS.debitButton)
 
     const price = Math.random() * Math.floor(100)
-    const priceAsString = price.toFixed(3).toString()
-    const expectedPriceWithTax = price * 1.09
-    const expectedPriceWithTaxAsString = expectedPriceWithTax
-      .toFixed(3)
-      .toString()
+    const priceRounded = Math.round(price * 1000) / 1000
+    const priceAsString = priceRounded.toFixed(3)
+    const expectedPriceWithTax = Math.round(priceRounded * 1.09 * 1000) / 1000
+    const expectedPriceWithTaxAsString = expectedPriceWithTax.toFixed(3)
 
     // Create transaction
     await addTransaction(page, {
