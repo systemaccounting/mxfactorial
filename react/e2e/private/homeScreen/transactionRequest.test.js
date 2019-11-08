@@ -48,7 +48,7 @@ describe('transaction request', async () => {
   })
 
   it('displays stored transaction', async () => {
-    // Login as TEST_ACCOUNT_02 (TEST_ACCOUNTS[1])
+    // login as TEST_ACCOUNT_02 (TEST_ACCOUNTS[1])
     const page2 = await browser.newPage()
     await login(page2, TEST_ACCOUNTS[1], process.env.JEST_SECRET)
     await page2.goto(REQUEST_URL)
@@ -58,24 +58,47 @@ describe('transaction request', async () => {
 
     await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
-    // Select credit type transaction
+    // select credit type transaction
     await page.click(SELECTORS.debitButton)
 
-    const price = Math.random() * Math.floor(100)
-    const priceRounded = Math.round(price * 1000) / 1000
-    const priceAsString = priceRounded.toFixed(3)
-    const expectedPriceWithTax = Math.round(priceRounded * 1.09 * 1000) / 1000
+    const getRoundedPriceAsFloat = () => {
+      let price = Math.random() * Math.floor(100)
+      return Math.round(price * 1000) / 1000
+    }
+
+    const salesTaxRate = 1.09
+    const milkPrice = getRoundedPriceAsFloat()
+    const milkPriceAsString = milkPrice.toFixed(3)
+    const milkQuantity = 2
+
+    const breadPrice = getRoundedPriceAsFloat()
+    const breadPriceAsString = breadPrice.toFixed(3)
+    const breadQuantity = 4
+
+    const expectedPriceWithTax =
+      Math.round(
+        (milkPrice * milkQuantity + breadPrice * breadQuantity) *
+          salesTaxRate *
+          1000
+      ) / 1000
     const expectedPriceWithTaxAsString = expectedPriceWithTax.toFixed(3)
 
-    // Create transaction
+    // create request
     await addTransaction(page, {
-      name: 'Milk',
-      price: priceAsString,
-      quantity: '1'
+      name: 'milk',
+      price: milkPriceAsString,
+      quantity: '2'
     })
+
+    await addTransaction(page, {
+      name: 'bread',
+      price: breadPriceAsString,
+      quantity: '4'
+    })
+
     await getTotal()
 
-    // Request transacton
+    // request transacton
     await page.click(SELECTORS.requestDebitTransactionBtn)
     await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
     // await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
