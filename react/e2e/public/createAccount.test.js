@@ -25,10 +25,10 @@ afterEach(async () => {
 
   await page.waitForSelector(SELECTORS.signOutButton)
   // query selector from document used after puppeteer selector failure
-  await page.evaluate(() => {
-    let signOut = document.querySelector('[data-name="sign-out"]')
+  await page.evaluate(signOutButton => {
+    let signOut = document.querySelector(signOutButton)
     signOut.click()
-  })
+  }, SELECTORS.signOutButton)
 
   await page.waitForSelector(SELECTORS.landingScreenLogo)
 })
