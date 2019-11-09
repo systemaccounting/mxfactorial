@@ -26,7 +26,6 @@ describe('request performace', () => {
     await page.waitForSelector(SELECTORS.requestItem)
     let endTime = Date.now()
     let duration = endTime - startTime
-    console.log(duration)
     expect(duration).toBeLessThan(8000)
   })
 })

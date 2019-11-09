@@ -39,41 +39,38 @@ export default class RequestScreen extends React.Component {
 
   render() {
     const { status } = this.state
-    const { user, transactions } = this.props
+    const { user, groupedTransactions } = this.props
     return (
       <MainLayout>
         <Wrapper data-id="request-screen-wrapper">
           <TypeSwitch active={status} onSwitch={this.handleSwitch} />
-          {transactions.map(request => {
-            const isCredit = request.creditor === user.username
-            const amount = request.price * request.quantity
+          {groupedTransactions.map(request => {
+            let isCurrentAccountAuthor = request.author === user.username
             return (
-              <Link key={request.id} to={`requests/${request.id}`}>
+              <Link
+                key={request.transaction_id}
+                to={`requests/${request.transaction_id}`}
+              >
                 <Paper
                   data-id="requestItemIndicator"
-                  data-request-id={request.id}
+                  data-request-id={request.transaction_id}
                 >
                   <Small>
-                    {fromNow(
-                      request.creditor_approval_time
-                      ? request.creditor_approval_time
-                      : request.debitor_approval_time
-                    )}
-                    {', '}
-                    {isCredit ? (
+                    {isCurrentAccountAuthor ? (
                       <span>
-                        <strong>{request.debitor}</strong> recieved your request
-                        of
+                        sent <strong>{request.contraAccount}</strong> a request{' '}
                       </span>
                     ) : (
                       <span>
-                        <strong>{request.creditor}</strong> requested
+                        received <strong>{request.contraAccount}</strong>{' '}
+                        request{' '}
                       </span>
                     )}
+                    {fromNow(request.time)}
                   </Small>
                   <Text textAlign="right" variant="medium">
                     <strong>
-                      {isCredit ? '-' : ''} {amount}
+                      {request.isCreditor ? '' : '-'} {request.total}
                     </strong>
                   </Text>
                 </Paper>

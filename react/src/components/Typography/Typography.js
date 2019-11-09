@@ -40,6 +40,7 @@ export const Base = styled.div`
 
 const SmallBase = Base.withComponent('small')
 export const Small = styled(SmallBase)`
+  margin-bottom: 10px;
   font-size: 0.65rem;
   display: block;
   line-height: 1.2;

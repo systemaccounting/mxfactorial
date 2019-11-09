@@ -48,7 +48,7 @@ describe('transaction request', async () => {
   })
 
   it('displays stored transaction', async () => {
-    // Login as TEST_ACCOUNT_02 (TEST_ACCOUNTS[1])
+    // login as TEST_ACCOUNT_02 (TEST_ACCOUNTS[1])
     const page2 = await browser.newPage()
     await login(page2, TEST_ACCOUNTS[1], process.env.JEST_SECRET)
     await page2.goto(REQUEST_URL)
@@ -58,31 +58,59 @@ describe('transaction request', async () => {
 
     await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
-    // Select credit type transaction
+    // select credit type transaction
     await page.click(SELECTORS.debitButton)
 
-    const expectedPrice = (Math.random() * Math.floor(100))
-      .toFixed(3)
-      .toString()
+    const getRoundedPriceAsFloat = () => {
+      let price = Math.random() * Math.floor(100)
+      return Math.round(price * 1000) / 1000
+    }
 
-    // Create transaction
+    const salesTaxRate = 1.09
+    const milkPrice = getRoundedPriceAsFloat()
+    const milkPriceAsString = milkPrice.toFixed(3)
+    const milkQuantity = 2
+
+    const breadPrice = getRoundedPriceAsFloat()
+    const breadPriceAsString = breadPrice.toFixed(3)
+    const breadQuantity = 4
+
+    const expectedPriceWithTax =
+      Math.round(
+        (milkPrice * milkQuantity + breadPrice * breadQuantity) *
+          salesTaxRate *
+          1000
+      ) / 1000
+    const expectedPriceWithTaxAsString = expectedPriceWithTax.toFixed(3)
+
+    // create request
     await addTransaction(page, {
-      name: 'Milk',
-      price: expectedPrice,
-      quantity: '1'
+      name: 'milk',
+      price: milkPriceAsString,
+      quantity: '2'
     })
+
+    await addTransaction(page, {
+      name: 'bread',
+      price: breadPriceAsString,
+      quantity: '4'
+    })
+
     await getTotal()
 
-    // Request transacton
+    // request transacton
     await page.click(SELECTORS.requestDebitTransactionBtn)
     await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
     // await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
 
     await page2.reload()
     await page2.waitForSelector(SELECTORS.requestItem)
-
+    const element = await page.$(SELECTORS.requestItem)
+    const content = await (await element.getProperty('textContent')).jsonValue()
+    const regex = /ago- (.*)/
+    const requestedTotal = regex.exec(content)[1]
     // Assert transaction from Person1 received
-    expect(await page2.content()).toMatch(expectedPrice)
+    expect(requestedTotal).toBe(expectedPriceWithTaxAsString)
 
     await page2.close()
     await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)

@@ -12,8 +12,8 @@ const deleteUser = (poolId, account) => {
   return cognitoIdsp
     .adminDeleteUser(params)
     .promise()
-    .catch()
-    .then()
+    .then(data => data)
+    .catch(err => console.log(err))
 }
 
 module.exports = {
