@@ -43,7 +43,21 @@
     padding: 10px
 }
 
+.menuItem:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
 .menuItem_none {
     font-style: italic;
     text-align: center;
+}
+
+.when {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.54);
+}
+
+.menuItemWrapper {
+    display: flex;
+    justify-content: space-between;
 }

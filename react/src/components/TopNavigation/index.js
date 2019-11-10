@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import cx from 'classnames'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
+import useNotifications from 'hooks/useNotifications'
 import NotificationMenu from '../NotificationMenu'
 import s from './TopNavigation.module.css'
 
@@ -32,6 +33,7 @@ const NavItem = styled.div`
 
 const TopNavigation = () => {
   const [isNotificationsOpen, setNotificationsOpen] = useState(false)
+  const [notifications] = useNotifications()
 
   const openNotificationsMenu = () => setNotificationsOpen(true)
   const closeNotificationsMenu = () => setNotificationsOpen(false)
@@ -61,6 +63,7 @@ const TopNavigation = () => {
           renderTarget={renderNotificationsTarget}
           isOpen={isNotificationsOpen}
           onClose={closeNotificationsMenu}
+          notifications={notifications}
         />
       </li>
     </ul>

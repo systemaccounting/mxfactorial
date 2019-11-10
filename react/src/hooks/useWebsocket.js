@@ -23,7 +23,7 @@ function joinOrCreateConnection(url) {
 export default function useWebsocket(
   url = process.env.REACT_APP_WSS_CLIENT_URL
 ) {
-  const [socket, setSocket] = useState()
+  const [socket, setSocket] = useState(null)
 
   useEffect(() => {
     const connection = joinOrCreateConnection(url)

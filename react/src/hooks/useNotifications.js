@@ -26,7 +26,26 @@ const requestNotifications = async socket => {
 
 const onMessage = ({ data }) => {
   const notifications = JSON.parse(data)
-  state.pending = notifications.pending
+  state.pending = notifications.pending.map(item => {
+    const message = JSON.parse(item.message)
+
+    const transactions = message.filter(obj => !obj.rule_instance_id)
+    const isCreditor = transactions[0].author === item.account
+    const contraAccount = isCreditor
+      ? transactions[0].debitor
+      : transactions[0].creditor
+    const totalPrice = message.reduce(
+      (sum, obj) => parseFloat(obj.price) * parseInt(obj.quantity, 10) + sum,
+      0
+    )
+
+    return {
+      ...item,
+      contraAccount,
+      totalPrice: isCreditor ? totalPrice : totalPrice * -1,
+      message
+    }
+  })
   listeners.forEach(listener => listener(state.pending))
 }
 
@@ -48,7 +67,6 @@ export default function useNotifications() {
 
     // Subscribe to notifications update only once
     if (!state.isSubscribed) {
-      console.log('Subscribe count: ', listeners.length)
       state.isSubscribed = true
 
       if (socket.readyState === WebSocket.OPEN) {
