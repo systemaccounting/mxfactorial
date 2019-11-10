@@ -8,7 +8,7 @@ const ACCOUNTS_FROM_MAKE = Object.keys(process.env).filter(prop =>
   prop.includes('TEST_ACCOUNT_')
 )
 
-const TEST_ACCOUNTS = ACCOUNTS_FROM_MAKE.sort() // get vars from .env file created by make
+const TEST_ACCOUNTS = ACCOUNTS_FROM_MAKE.sort((a, b) => (a > b ? -1 : 1)) // get vars from .env file created by make
 
 const SELECTORS = {
   HOME: '[name="account-label"]',

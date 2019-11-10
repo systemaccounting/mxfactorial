@@ -1,10 +1,9 @@
-const putItem = (service, table, time, connectionId, account) => {
+const putItem = (service, table, time, connectionId) => {
   let params = {
     TableName: table,
     Item: {
       connection_id: connectionId,
-      timestamp: time,
-      account
+      timestamp: time
     }
   }
   return service.put(params)

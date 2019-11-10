@@ -71,7 +71,6 @@
       "!src/registerServiceWorker.js",
       "!src/config/**/*.js",
       "!src/mock/**/*.js",
-      "!src/containers/**/*.js",
       "!src/lib/**/*.js"
     ]
   },

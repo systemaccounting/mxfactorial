@@ -146,17 +146,43 @@ const getToken = async (service, clientId, account, secret) => {
     .catch(err => err)
 }
 
-const shapeClearNotificationsRequest = notifications => {
+const shapeClearNotificationsRequest = (action, token, notifications) => {
   let notificationsToClear = []
   for (notification of notifications) {
     // console.log('clearing' + JSON.stringify(notification))
     notificationsToClear.push(notification)
   }
   let clearNotificationsRequest = {
-    action: 'clearnotifications',
-    notifications: notificationsToClear
+    action,
+    notifications: notificationsToClear,
+    token
   }
   return JSON.stringify(clearNotificationsRequest)
+}
+
+const queryIndex = (
+  service, table, indexName, hash, hashVal
+  ) => {
+  let params = {
+    TableName: table,
+    IndexName: indexName,
+    KeyConditions: {
+      [hash]: {
+        ComparisonOperator: 'EQ',
+        AttributeValueList: [ hashVal ]
+      }
+    }
+  }
+  return service.query(params)
+    .promise()
+    .then(async data => {
+      // console.log(data.Items)
+      return data.Items
+    })
+    .catch(async err => {
+      console.log(err, err.stack)
+      throw err
+    })
 }
 
 module.exports = {
@@ -166,5 +192,6 @@ module.exports = {
   createAccount,
   deleteAccount,
   getToken,
-  shapeClearNotificationsRequest
+  shapeClearNotificationsRequest,
+  queryIndex
 }

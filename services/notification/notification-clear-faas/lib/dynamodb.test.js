@@ -1,9 +1,9 @@
 const {
+  updateItem,
   formatNotificationsToClear,
   batchWriteTable,
-  queryIndex,
-  sendMessageToClient
-} = require('./awsServices')
+  queryIndex
+} = require('./dynamodb')
 
 const {
   pendingReceivedNotifications,
@@ -32,7 +32,45 @@ const mockAws = method => {
   }
 }
 
-describe('awsServices', () => {
+describe('dynamodb', () => {
+  test('updateItem params', () => {
+    let ddb = mockAws('update')
+    let testtable = 'testtable'
+    let testpartitionKey = 'testpartitionkey'
+    let testsortkey = 'testsortkey'
+    let testconnectionid = 'testconnectionid'
+    let testtimestamp = 'testtimestamp'
+    let testattributekey = 'testattributekey'
+    let testattributevalue = 'testattributevalue'
+    let testupdateconditionexpression = 'testupdateconditionexpression'
+    let expected = {
+      TableName: testtable,
+      Key: {
+        [testpartitionKey]: testconnectionid,
+        [testsortkey]: testtimestamp
+      },
+      ExpressionAttributeNames: {
+        "#key": testattributekey
+      },
+      ExpressionAttributeValues: {
+        ":value": testattributevalue
+      },
+      UpdateExpression: `SET #key = :value`,
+      ConditionExpression: `${testupdateconditionexpression}(#key)` // 'attribute_not_exists'
+    }
+    let result = updateItem(
+      ddb,
+      testtable,
+      testpartitionKey,
+      testsortkey,
+      testconnectionid,
+      testtimestamp,
+      testattributekey,
+      testattributevalue,
+      testupdateconditionexpression
+    )
+    expect(ddb.update).toHaveBeenCalledWith(expected)
+  })
 
   test('formatNotificationsToClear', () => {
     let expected = batchWriteNotifications
@@ -71,21 +109,5 @@ describe('awsServices', () => {
     }
     queryIndex(ddb, table, indexName, key, val)
     expect(ddb.query).toHaveBeenCalledWith(expected)
-  })
-
-  test('sendMessageToClient params', () => {
-    let apig = mockAws('postToConnection')
-    let connectionId = '1234567'
-    let data = {
-      cleared: [
-        {"account":"testaccount","time_uuid":"1234","message":"test message"}
-      ]
-    }
-    let expected = {
-      ConnectionId: connectionId,
-      Data: JSON.stringify(data)
-    }
-    sendMessageToClient(apig, connectionId, data)
-    expect(apig.postToConnection).toHaveBeenCalledWith(expected)
   })
 })

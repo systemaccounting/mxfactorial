@@ -34,6 +34,7 @@ const mockRequests = {
 const mockUser = { username: 'JoeSmith' }
 const currentUserInfoMock = promiseToResolve(mockUser)
 const fetchRequestsMock = promiseToResolve(mockRequests)
+const sortedTransactions = []
 
 describe('<RequestScreen />', () => {
   it('renders', () => {
@@ -42,6 +43,7 @@ describe('<RequestScreen />', () => {
         user={mockUser}
         fetchRequests={fetchRequestsMock}
         currentUserInfo={currentUserInfoMock}
+        groupedTransactions={sortedTransactions}
       />
     )
     expect(wrapper.exists()).toBeTruthy()
@@ -53,6 +55,7 @@ describe('<RequestScreen />', () => {
         user={mockUser}
         currentUserInfo={currentUserInfoMock}
         fetchRequests={fetchRequestsMock}
+        groupedTransactions={sortedTransactions}
       />
     )
     const instance = wrapper.instance()
@@ -66,6 +69,7 @@ describe('<RequestScreen />', () => {
         user={mockUser}
         fetchRequests={fetchRequestsMock}
         currentUserInfo={currentUserInfoMock}
+        groupedTransactions={sortedTransactions}
       />
     )
     const instance = wrapper.instance()

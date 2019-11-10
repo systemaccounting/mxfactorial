@@ -13,6 +13,7 @@ function sortByArrpovalTime(a, b) {
   return 0
 }
 
+// https://www.apollographql.com/docs/react/api/react-apollo/#render-prop-function
 export function renderProps({ data: { transactions, loading, refetch } }) {
   return {
     transactions: transactions ? transactions.sort(sortByArrpovalTime) : [],
