@@ -40,12 +40,17 @@ const TopNavigation = () => {
 
   const renderNotificationsTarget = ({ ref }) => {
     return (
-      <i
-        className="fa fa-2x fa-flag"
-        data-id="notificationButton"
-        ref={ref}
-        onClick={openNotificationsMenu}
-      />
+      <div className={s.badgeWrapper}>
+        <i
+          className="fa fa-2x fa-flag"
+          data-id="notificationButton"
+          ref={ref}
+          onClick={openNotificationsMenu}
+        />
+        {notifications.length && (
+          <span className={s.badge}>{notifications.length}</span>
+        )}
+      </div>
     )
   }
 
