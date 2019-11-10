@@ -2,6 +2,7 @@ import React, { useCallback } from 'react'
 import cx from 'classnames'
 import PropTypes from 'prop-types'
 import { Manager, Reference, Popper } from 'react-popper'
+import { NotificationType } from 'types'
 import { noop } from 'utils'
 import { fromNow } from 'utils/date'
 import ClickAwayListener from '../ClickAwayListener'
@@ -62,7 +63,7 @@ NotificationMenu.propTypes = {
   renderTarget: PropTypes.func.isRequired,
   onClose: PropTypes.func,
   placement: PropTypes.string,
-  notifications: PropTypes.shape({})
+  notifications: PropTypes.arrayOf(NotificationType)
 }
 
 NotificationMenu.defaultProps = {
