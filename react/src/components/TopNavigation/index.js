@@ -47,7 +47,7 @@ const TopNavigation = () => {
           ref={ref}
           onClick={openNotificationsMenu}
         />
-        {notifications.length && (
+        {notifications.length > 0 && (
           <span className={s.badge}>{notifications.length}</span>
         )}
       </div>
