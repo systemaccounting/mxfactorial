@@ -16,7 +16,7 @@ const putItem = (
   return service.put(params)
     .promise()
     .then(async data => {
-      console.log(`connectionId stored: ${attributeValue}`)
+      console.log(`connectionId stored: ${primaryKeyValue}`)
     })
     .catch(async err => {
       console.log(err, err.stack)
