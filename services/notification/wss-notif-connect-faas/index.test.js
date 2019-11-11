@@ -3,27 +3,21 @@ const AWS = require('aws-sdk')
 
 const {
   putItem,
-  queryTable,
   deleteConnection
 } = require('./lib/awsServices')
 
 // process.env.AWS_REGION
 // process.env.WEBSOCKETS_TABLE_NAME
+
 const WEBSOCKET_TABLE_PRIMARY_KEY = 'connection_id'
-const WEBSOCKET_TABLE_SORT_KEY = 'timestamp'
-const TIMESTAMP = 1570334570969
+const WEBSOCKET_TABLE_CONNECTED_AT_ATTRIBUTE = 'created_at'
 const CONNECTION_ID = '123456789'
+const CONNECTED_AT = 1573440182072
 const ACCOUNT = 'testaccount'
-const CONNECTION = [
-  { connection_id: CONNECTION_ID, timestamp: TIMESTAMP, account: ACCOUNT }
-]
 
 jest.mock('./lib/awsServices', () => {
   return {
     putItem: jest.fn(),
-    queryTable: jest.fn().mockResolvedValue(
-      [{ connection_id: '123456789', timestamp: 1570334570969, account: 'testaccount' }]
-    ),
     deleteConnection: jest.fn()
   }
 })
@@ -41,8 +35,6 @@ jest.mock('aws-sdk', () => {
   }
 })
 
-Date.now = jest.fn(() => TIMESTAMP)
-
 const createEvent = eventType => {
   return {
     requestContext: {
@@ -50,7 +42,8 @@ const createEvent = eventType => {
       authorizer: {
         account: ACCOUNT
       },
-      eventType: eventType
+      eventType: eventType,
+      connectedAt: CONNECTED_AT
     }
   }
 }
@@ -82,19 +75,10 @@ describe('lambda handerl', () => {
     expect(putItem).toHaveBeenCalledWith(
       { put: 'func' },
       process.env.WEBSOCKETS_TABLE_NAME,
-      TIMESTAMP,
-      CONNECTION_ID
-    )
-  })
-
-  test('calls queryTable', async () => {
-    let event = createEvent('DISCONNECT')
-    await handler(event)
-    expect(queryTable).toHaveBeenCalledWith(
-      { put: 'func' },
-      process.env.WEBSOCKETS_TABLE_NAME,
       WEBSOCKET_TABLE_PRIMARY_KEY,
-      CONNECTION_ID
+      CONNECTION_ID,
+      WEBSOCKET_TABLE_CONNECTED_AT_ATTRIBUTE,
+      CONNECTED_AT
     )
   })
 
@@ -105,8 +89,7 @@ describe('lambda handerl', () => {
       { put: 'func' },
       process.env.WEBSOCKETS_TABLE_NAME,
       WEBSOCKET_TABLE_PRIMARY_KEY,
-      WEBSOCKET_TABLE_SORT_KEY,
-      CONNECTION[0] // let singleConnection = connectionValues[0]
+      CONNECTION_ID
     )
   })
 
