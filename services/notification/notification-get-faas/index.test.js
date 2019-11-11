@@ -268,22 +268,17 @@ describe('lambda function', () => {
 
   test('calls updateItem with args', async () => {
     let ddb = {}
-    let tableName = process.env.WEBSOCKETS_TABLE_NAME
     let partitiionKey = 'connection_id'
-    let sortKey = 'timestamp'
     let connectionId = '123456789'
-    let timestamp = 12345678910
     let indexAttribute = 'account'
     let account = 'testaccount'
     let updateConditionExpression = 'attribute_not_exists'
     await handler(event)
     await expect(updateItem).toHaveBeenCalledWith(
       ddb,
-      tableName,
+      process.env.WEBSOCKETS_TABLE_NAME,
       partitiionKey,
-      sortKey,
       connectionId,
-      timestamp,
       indexAttribute,
       account,
       updateConditionExpression

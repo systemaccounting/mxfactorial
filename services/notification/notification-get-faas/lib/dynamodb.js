@@ -2,9 +2,7 @@ const updateItem = (
   service,
   table,
   partitionKey,
-  sortKey,
-  connectionId,
-  timestamp,
+  partitionKeyValue,
   newAttributeKey,
   newAttributeValue,
   updateConditionExpression
@@ -12,8 +10,7 @@ const updateItem = (
   let params = {
     TableName: table,
     Key: {
-      [partitionKey]: connectionId,
-      [sortKey]: timestamp
+      [partitionKey]: partitionKeyValue
     },
     ExpressionAttributeNames: {
       "#key": newAttributeKey
@@ -27,7 +24,7 @@ const updateItem = (
   return service.update(params)
     .promise()
     .then(async data => {
-      console.log(`${newAttributeValue} added to ${connectionId} connection_id record`)
+      console.log(`${newAttributeValue} added to ${partitionKeyValue} connection_id record`)
     })
     .catch(async err => {
       console.log(err, err.stack)

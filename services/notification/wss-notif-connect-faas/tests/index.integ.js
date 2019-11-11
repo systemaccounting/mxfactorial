@@ -4,7 +4,6 @@ const WebSocket = require('ws')
 const {
   createAccount,
   deleteAccount,
-  queryIndex,
   queryTable
 } = require('./utils/integrationTestHelpers')
 
@@ -21,8 +20,6 @@ const randomFourDigitInt = () => {
 
 const TEST_ACCOUNT = `FakerAccount${randomFourDigitInt()}`
 const WEBSOCKET_TABLE_RANGE_KEY = 'connection_id'
-const WEBSOCKET_ATTRIBUTE = 'account'
-const WEBSOCKET_INDEX_NAME = `${WEBSOCKET_ATTRIBUTE}-index`
 
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })

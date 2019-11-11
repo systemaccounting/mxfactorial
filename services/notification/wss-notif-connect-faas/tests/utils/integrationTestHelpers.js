@@ -54,31 +54,6 @@ const getToken = async (service, clientId, account, secret) => {
     .catch(err => err)
 }
 
-const queryIndex = (
-  service, table, indexName, key, val
-  ) => {
-  let params = {
-    TableName: table,
-    IndexName: indexName,
-    KeyConditions: {
-      [key]: {
-        ComparisonOperator: 'EQ',
-        AttributeValueList: [ val ]
-      }
-    }
-  }
-  return service.query(params)
-    .promise()
-    .then(async data => {
-      // console.log(data.Items)
-      return data.Items
-    })
-    .catch(async err => {
-      console.log(err, err.stack)
-      throw err
-    })
-}
-
 const queryTable = (service, table, key, val) => {
   let params = {
     TableName: table,
@@ -105,6 +80,5 @@ module.exports = {
   createAccount,
   deleteAccount,
   getToken,
-  queryIndex,
   queryTable
 }

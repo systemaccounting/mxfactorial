@@ -1,6 +1,5 @@
 const {
   putItem,
-  queryTable,
   deleteConnection
 } = require('./awsServices')
 
@@ -27,54 +26,33 @@ describe('awsServices', () => {
   test('putItem params', () => {
     let ddb = mockAws('put')
     let table = 'testtable'
-    let time = Date.now()
-    let connectionId = 'testconnection'
+    let primaryKey = 'connection_id'
+    let primaryKeyValue = 'testconnection'
+    let attributeKey = 'created_at'
+    let attributeKeyValue = 1573440182072
     let expected = {
       TableName: table,
       Item: {
-        connection_id: connectionId,
-        timestamp: time
+        [primaryKey]: primaryKeyValue,
+        [attributeKey]: attributeKeyValue
       }
     }
-    putItem(ddb, table, time, connectionId)
+    putItem(ddb, table, primaryKey, primaryKeyValue, attributeKey, attributeKeyValue)
     expect(ddb.put).toHaveBeenCalledWith(expected)
-  })
-
-  test('queryTable params', () => {
-    let ddb = mockAws('query')
-    let table = 'testtable'
-    let key = 'connection_id'
-    let val = '123456789'
-    let expected = {
-      TableName: table,
-      KeyConditions: {
-        [key]: {
-          ComparisonOperator: 'EQ',
-          AttributeValueList: [ val ]
-        }
-      }
-    }
-    queryTable(ddb, table, key, val)
-    expect(ddb.query).toHaveBeenCalledWith(expected)
   })
 
   test('deleteConnection params', () => {
     let ddb = mockAws('delete')
     let table = 'testtable'
     let primaryKey = 'connection_id'
-    let sortKey = 'timestamp'
-    let connection = {
-      connection_id: '123456789',
-      timestamp: Date.now()
-    }
+    let primaryKeyValue = 'testconnection'
     let expected = {
       TableName: table,
       Key: {
-        [primaryKey]: connection.connection_id,
-        [sortKey]: connection.timestamp
+        [primaryKey]: primaryKeyValue,
       }
     }
-    deleteConnection(ddb, table, primaryKey, sortKey, connection)
+    deleteConnection(ddb, table, primaryKey, primaryKeyValue)
     expect(ddb.delete).toHaveBeenCalledWith(expected)
   })
 

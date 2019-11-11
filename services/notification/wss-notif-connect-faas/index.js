@@ -2,46 +2,46 @@ const AWS = require('aws-sdk')
 
 const {
   putItem,
-  queryTable,
   deleteConnection
 } = require('./lib/awsServices')
 
-const WEBSOCKETS_TABLE_NAME = process.env.WEBSOCKETS_TABLE_NAME
-const AWS_REGION = process.env.AWS_REGION
+// env var inventory (avoid const assignments):
+// process.env.WEBSOCKETS_TABLE_NAME
+// process.env.AWS_REGION
+
 const WEBSOCKET_TABLE_PRIMARY_KEY = 'connection_id'
-const WEBSOCKET_TABLE_SORT_KEY = 'timestamp'
+const WEBSOCKET_TABLE_CONNECTED_AT_ATTRIBUTE = 'created_at'
 
 
 exports.handler = async event => {
   console.log(JSON.stringify(event))
 
-  let ddb = new AWS.DynamoDB.DocumentClient({ region: AWS_REGION})
+  let ddb = new AWS.DynamoDB.DocumentClient({
+    region: process.env.AWS_REGION
+  })
+  let connectedAt = event.requestContext.connectedAt
   let connectionId = event.requestContext.connectionId
 
   // store connection id in ddb
   if (event.requestContext.eventType === "CONNECT") {
 
-    let time = Date.now()
-    await putItem(ddb, WEBSOCKETS_TABLE_NAME, time, connectionId)
+    await putItem(
+      ddb,
+      process.env.WEBSOCKETS_TABLE_NAME,
+      WEBSOCKET_TABLE_PRIMARY_KEY,
+      connectionId,
+      WEBSOCKET_TABLE_CONNECTED_AT_ATTRIBUTE,
+      connectedAt
+    )
 
   // or delete connection id item if disconnecting web websocket
   } else if (event.requestContext.eventType === "DISCONNECT") {
 
-    let connectionValues = await queryTable(
-      ddb,
-      WEBSOCKETS_TABLE_NAME,
-      WEBSOCKET_TABLE_PRIMARY_KEY,
-      connectionId
-    )
-
-    let singleConnection = connectionValues[0]
-
     await deleteConnection(
       ddb,
-      WEBSOCKETS_TABLE_NAME,
+      process.env.WEBSOCKETS_TABLE_NAME,
       WEBSOCKET_TABLE_PRIMARY_KEY,
-      WEBSOCKET_TABLE_SORT_KEY,
-      singleConnection
+      connectionId
     )
 
   } else {

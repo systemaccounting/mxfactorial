@@ -512,15 +512,11 @@ Resources:
       AttributeDefinitions:
       - AttributeName: "connection_id"
         AttributeType: "S"
-      - AttributeName: "timestamp"
-        AttributeType: "N"
       - AttributeName: "account"
         AttributeType: "S"
       KeySchema:
       - AttributeName: "connection_id"
         KeyType: "HASH"
-      - AttributeName: "timestamp"
-        KeyType: "RANGE"
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
