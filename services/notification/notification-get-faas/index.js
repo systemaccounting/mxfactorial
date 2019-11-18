@@ -40,7 +40,6 @@ let cognito = new AWS.CognitoIdentityServiceProvider({
 })
 
 const WEBSOCKETS_TABLE_PARTITION_KEY = 'connection_id'
-const WEBSOCKETS_TABLE_SORT_KEY = 'timestamp'
 const NOTIFICATIONS_TABLE_INDEX_NAME = 'account-index'
 const NOTIFICATIONS_TABLE_INDEX_ATTRIBUTE = 'account'
 const WEBSOCKET_TABLE_INDEX_ATTRIBUTE = 'account'
@@ -120,8 +119,6 @@ exports.handler = async event => {
     websocketConnectionId
   )
 
-  let websocketCreationTimestamp = websocketItems[0].timestamp
-
   // console.log(websocketItems)
   // add account value to connection id record if not included
   if (websocketItems.length > 0) {
@@ -131,9 +128,7 @@ exports.handler = async event => {
         ddb,
         process.env.WEBSOCKETS_TABLE_NAME,
         WEBSOCKETS_TABLE_PARTITION_KEY,
-        WEBSOCKETS_TABLE_SORT_KEY,
         websocketConnectionId,
-        websocketCreationTimestamp,
         WEBSOCKET_TABLE_INDEX_ATTRIBUTE, // newAttributeKey
         accountFromJWT, // newAttributeValue
         DYNAMODB_UPDATE_CONDITION_EXPRESSION // updateConditionExpression

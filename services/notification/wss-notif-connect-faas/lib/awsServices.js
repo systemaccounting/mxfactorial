@@ -1,37 +1,22 @@
-const putItem = (service, table, time, connectionId) => {
+const putItem = (
+  service,
+  table,
+  primaryKey,
+  primaryKeyValue,
+  attributeKey,
+  attributeValue
+  ) => {
   let params = {
     TableName: table,
     Item: {
-      connection_id: connectionId,
-      timestamp: time
+      [primaryKey]: primaryKeyValue,
+      [attributeKey]: attributeValue
     }
   }
   return service.put(params)
     .promise()
     .then(async data => {
-      console.log(`connectionId stored: ${connectionId}`)
-    })
-    .catch(async err => {
-      console.log(err, err.stack)
-      throw err
-    })
-}
-
-const queryTable = (service, table, key, val) => {
-  let params = {
-    TableName: table,
-    KeyConditions: {
-      [key]: {
-        ComparisonOperator: 'EQ',
-        AttributeValueList: [ val ]
-      }
-    }
-  }
-  return service.query(params)
-    .promise()
-    .then(async data => {
-      console.log(data.Items)
-      return data.Items
+      console.log(`connectionId stored: ${primaryKeyValue}`)
     })
     .catch(async err => {
       console.log(err, err.stack)
@@ -43,20 +28,18 @@ const deleteConnection = (
   service,
   table,
   primaryKey,
-  sortKey,
-  connection
+  primaryKeyValue,
   ) => {
     let params = {
       TableName: table,
       Key: {
-        [primaryKey]: connection.connection_id,
-        [sortKey]: connection.timestamp
+        [primaryKey]: primaryKeyValue
       }
     }
     return service.delete(params)
       .promise()
       .then(async data => {
-        console.log(`connection_id for '${connection.account}' account deleted: ${connection.connection_id}`)
+        console.log(`deleted connection_id: '${primaryKeyValue}'`)
       })
       .catch(async err => {
         console.log(err, err.stack)
@@ -66,6 +49,5 @@ const deleteConnection = (
 
 module.exports = {
   putItem,
-  queryTable,
   deleteConnection
 }

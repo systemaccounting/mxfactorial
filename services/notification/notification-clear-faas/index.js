@@ -40,7 +40,6 @@ const ws = new AWS.ApiGatewayManagementApi({ endpoint: process.env.WSS_CONNECTIO
 let cognito = new AWS.CognitoIdentityServiceProvider({ region: process.env.AWS_REGION })
 
 const WEBSOCKETS_TABLE_PARTITION_KEY = 'connection_id'
-const WEBSOCKETS_TABLE_SORT_KEY = 'timestamp'
 const WEBSOCKETS_TABLE_INDEX_NAME = 'account-index'
 const WEBSOCKET_TABLE_INDEX_ATTRIBUTE = 'account'
 const CLEARED_NOTIFICATIONS_PROPERTY = 'cleared'
@@ -113,8 +112,6 @@ exports.handler = async event => {
     websocketConnectionId
   )
 
-  let websocketCreationTimestamp = websocketItems[0].timestamp
-
   if (websocketItems.length > 0) {
     if (!websocketItems[0].account) {
       console.log(`adding ${accountFromJWT} to ${websocketConnectionId} connection id dynamodb record`)
@@ -122,9 +119,7 @@ exports.handler = async event => {
         ddb,
         process.env.WEBSOCKETS_TABLE_NAME,
         WEBSOCKETS_TABLE_PARTITION_KEY,
-        WEBSOCKETS_TABLE_SORT_KEY,
         websocketConnectionId,
-        websocketCreationTimestamp,
         WEBSOCKET_TABLE_INDEX_ATTRIBUTE, // newAttributeKey
         accountFromJWT, // newAttributeValue
         DYNAMODB_UPDATE_CONDITION_EXPRESSION // updateConditionExpression

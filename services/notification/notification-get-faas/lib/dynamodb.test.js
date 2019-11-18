@@ -31,17 +31,14 @@ describe('dynamodb', () => {
     let ddb = mockAws('update')
     let testtable = 'testtable'
     let testpartitionKey = 'testpartitionkey'
-    let testsortkey = 'testsortkey'
     let testconnectionid = 'testconnectionid'
-    let testtimestamp = 'testtimestamp'
     let testattributekey = 'testattributekey'
     let testattributevalue = 'testattributevalue'
     let testupdateconditionexpression = 'testupdateconditionexpression'
     let expected = {
       TableName: testtable,
       Key: {
-        [testpartitionKey]: testconnectionid,
-        [testsortkey]: testtimestamp
+        [testpartitionKey]: testconnectionid
       },
       ExpressionAttributeNames: {
         "#key": testattributekey
@@ -52,13 +49,11 @@ describe('dynamodb', () => {
       UpdateExpression: `SET #key = :value`,
       ConditionExpression: `${testupdateconditionexpression}(#key)` // 'attribute_not_exists'
     }
-    let result = updateItem(
+    updateItem(
       ddb,
       testtable,
       testpartitionKey,
-      testsortkey,
       testconnectionid,
-      testtimestamp,
       testattributekey,
       testattributevalue,
       testupdateconditionexpression
