@@ -9,24 +9,9 @@ const state = {
 
 const listeners = []
 
-const requestNotifications = async socket => {
-  if (!socket) {
-    return
-  }
-  const session = await Auth.currentSession()
-  const token = session.getIdToken().getJwtToken()
-
-  socket.send(
-    JSON.stringify({
-      action: 'getnotifications',
-      token
-    })
-  )
-}
-
-const onMessage = ({ data }) => {
-  const notifications = JSON.parse(data)
-  state.pending = notifications.pending.map(item => {
+const parseNotifications = data => {
+  const notifications = JSON.parse(data) || []
+  return notifications.pending.map(item => {
     const message = JSON.parse(item.message)
 
     const transactions = message.filter(obj => !obj.rule_instance_id)
@@ -46,7 +31,37 @@ const onMessage = ({ data }) => {
       message
     }
   })
+}
+
+const onNewNotificationsReceived = event => {
+  const newNotifications = parseNotifications(event.data)
+  state.pending = [...state.pending, ...newNotifications]
   listeners.forEach(listener => listener(state.pending))
+}
+
+const onGetNotifications = event => {
+  const socket = event.currentTarget
+  state.pending = parseNotifications(event.data)
+  listeners.forEach(listener => listener(state.pending))
+  socket.removeEventListener('message', onGetNotifications)
+  socket.addEventListener('message', onNewNotificationsReceived)
+}
+
+const getNotifications = async socket => {
+  if (!socket) {
+    return
+  }
+  const session = await Auth.currentSession()
+  const token = session.getIdToken().getJwtToken()
+
+  socket.send(
+    JSON.stringify({
+      action: 'getnotifications',
+      token
+    })
+  )
+
+  socket.addEventListener('message', onGetNotifications)
 }
 
 export default function useNotifications() {
@@ -70,12 +85,10 @@ export default function useNotifications() {
       state.isSubscribed = true
 
       if (socket.readyState === WebSocket.OPEN) {
-        requestNotifications(socket)
+        getNotifications(socket)
       } else if (socket.readyState === WebSocket.CONNECTING) {
-        socket.addEventListener('open', () => requestNotifications(socket))
+        socket.addEventListener('open', () => getNotifications(socket))
       }
-
-      socket.addEventListener('message', onMessage)
     }
 
     const removeListeners = () => {
@@ -83,10 +96,11 @@ export default function useNotifications() {
       listeners.splice(listenerIdx, 1)
       if (!listeners.length) {
         state.isSubscribed = false
+        state.pending = []
         console.log(
           'There are no more notification listeners. Unsubscribing....'
         )
-        socket.removeEventListener('message', onMessage)
+        socket.removeEventListener('message', onNewNotificationsReceived)
       }
     }
     return removeListeners

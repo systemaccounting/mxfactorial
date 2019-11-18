@@ -43,7 +43,6 @@ export default function NotificationMenu(props) {
                 className={s.root}
               >
                 <div className={s.menuHeader}>
-                  <i className="fa fa-lg fa-flag" />
                   <button type="button" className={s.clearBtn}>
                     Clear all
                     <i className="fa fa-close" />
