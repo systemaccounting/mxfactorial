@@ -6660,6 +6660,11 @@ jest-watcher@^24.3.0, jest-watcher@^24.9.0:
     jest-util "^24.9.0"
     string-length "^2.0.0"
 
+jest-websocket-mock@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/jest-websocket-mock/-/jest-websocket-mock-2.0.0.tgz#d02b867f7bc91929a9b10455e0c96372baaa3ea8"
+  integrity sha512-TDRbWOPMBPX7ly/RkAs+GQLnMZ5nwiLNdQUskGvSlhEV6bfprSW2nzdHQ1byFHI2dku8kIIKlbnmqIKQFfIRcg==
+
 jest-worker@^24.6.0, jest-worker@^24.9.0:
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-24.9.0.tgz#5dbfdb5b2d322e98567898238a9697bcce67b3e5"
@@ -7396,6 +7401,13 @@ mkdirp@0.5.1, mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.1:
   integrity sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
   dependencies:
     minimist "0.0.8"
+
+mock-socket@^9.0.2:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/mock-socket/-/mock-socket-9.0.2.tgz#8197f7e830f2f9d4b3a687eb69dce160689c23e4"
+  integrity sha512-VIs8Hp/FCKbs2rQeI5Zm7SGZAffTYQufooWFXTLF032ru/pv6W+KqQ1cOL4QMOktV2ugqYSP04JyE4SVG6QmWw==
+  dependencies:
+    url-parse "^1.4.4"
 
 moo@^0.4.3:
   version "0.4.3"
@@ -11092,7 +11104,7 @@ url-loader@2.1.0:
     mime "^2.4.4"
     schema-utils "^2.0.0"
 
-url-parse@^1.4.3:
+url-parse@^1.4.3, url-parse@^1.4.4:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/url-parse/-/url-parse-1.4.7.tgz#a8a83535e8c00a316e403a5db4ac1b9b853ae278"
   integrity sha512-d3uaVyzDB9tQoSXFvuSUNFibTd9zxd2bkVrDRvF5TmvWWQwqE4lgYJ5m+x1DbecWkw+LK4RNl2CU1hHuOKPVlg==

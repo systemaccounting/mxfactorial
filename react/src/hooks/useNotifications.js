@@ -51,8 +51,13 @@ const getNotifications = async socket => {
   if (!socket) {
     return
   }
-  const session = await Auth.currentSession()
-  const token = session.getIdToken().getJwtToken()
+  let token = ''
+  try {
+    const session = await Auth.currentSession()
+    token = session.getIdToken().getJwtToken()
+  } catch (e) {
+    // handle error
+  }
 
   socket.send(
     JSON.stringify({
