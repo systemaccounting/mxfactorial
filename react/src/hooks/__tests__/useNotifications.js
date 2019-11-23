@@ -44,4 +44,22 @@ describe('useNotifications hook', () => {
       expect(item.uuid).toBe(mockItem.uuid)
     })
   })
+
+  it('shares state across subscribed components', async () => {
+    const component1 = mount(<NotificationsWrapper />)
+    const component2 = mount(<NotificationsWrapper />)
+
+    await server.connected
+    await server.send(JSON.stringify(mockNotifications))
+    component1.update()
+    component2.update()
+
+    const component1Notifications = component1
+      .find('span')
+      .prop('notifications')
+    const component2Notifications = component2
+      .find('span')
+      .prop('notifications')
+    expect(component1Notifications).toBe(component2Notifications)
+  })
 })
