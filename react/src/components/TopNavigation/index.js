@@ -33,7 +33,7 @@ const NavItem = styled.div`
 
 const TopNavigation = () => {
   const [isNotificationsOpen, setNotificationsOpen] = useState(false)
-  const [notifications] = useNotifications()
+  const [notifications, clearNotifications] = useNotifications()
 
   const openNotificationsMenu = () => setNotificationsOpen(true)
   const closeNotificationsMenu = () => setNotificationsOpen(false)
@@ -68,6 +68,7 @@ const TopNavigation = () => {
           renderTarget={renderNotificationsTarget}
           isOpen={isNotificationsOpen}
           onClose={closeNotificationsMenu}
+          onClear={clearNotifications}
           notifications={notifications}
         />
       </li>

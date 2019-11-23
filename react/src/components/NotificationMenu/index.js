@@ -43,7 +43,11 @@ export default function NotificationMenu(props) {
                 className={s.root}
               >
                 <div className={s.menuHeader}>
-                  <button type="button" className={s.clearBtn}>
+                  <button
+                    type="button"
+                    className={s.clearBtn}
+                    onClick={props.onClear}
+                  >
                     Clear all
                     <i className="fa fa-close" />
                   </button>
@@ -61,6 +65,7 @@ export default function NotificationMenu(props) {
 NotificationMenu.propTypes = {
   renderTarget: PropTypes.func.isRequired,
   onClose: PropTypes.func,
+  onClear: PropTypes.func,
   placement: PropTypes.string,
   notifications: PropTypes.arrayOf(NotificationType)
 }
@@ -68,5 +73,6 @@ NotificationMenu.propTypes = {
 NotificationMenu.defaultProps = {
   notifications: [],
   onClose: noop,
+  onClear: noop,
   placement: 'top-start'
 }

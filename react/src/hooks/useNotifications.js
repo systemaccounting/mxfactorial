@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Auth from '@aws-amplify/auth'
 import useWebsocket from './useWebsocket'
 
@@ -8,6 +8,15 @@ const state = {
 }
 
 const listeners = []
+
+const getAuthToken = async () => {
+  try {
+    const session = await Auth.currentSession()
+    return session.getIdToken().getJwtToken()
+  } catch (e) {
+    return ''
+  }
+}
 
 const parseNotifications = data => {
   const notifications = JSON.parse(data) || []
@@ -47,22 +56,28 @@ const onGetNotifications = event => {
   socket.addEventListener('message', onNewNotificationsReceived)
 }
 
-const getNotifications = async socket => {
+const clearNotifications = async socket => {
   if (!socket) {
     return
   }
-  let token = ''
-  try {
-    const session = await Auth.currentSession()
-    token = session.getIdToken().getJwtToken()
-  } catch (e) {
-    // handle error
+  socket.send(
+    JSON.stringify({
+      action: 'clearnotifications',
+      notifications: state.pending,
+      token: getAuthToken()
+    })
+  )
+}
+
+const getNotifications = async socket => {
+  if (!socket) {
+    return
   }
 
   socket.send(
     JSON.stringify({
       action: 'getnotifications',
-      token
+      token: getAuthToken()
     })
   )
 
@@ -73,6 +88,10 @@ export default function useNotifications() {
   const socketUrl = process.env.REACT_APP_WSS_CLIENT_URL
   const [notifications, setNotifications] = useState(state.pending)
   const [socket] = useWebsocket(socketUrl, 'notifications')
+
+  const clearNotifications = useCallback(() => clearNotifications(socket), [
+    socket
+  ])
 
   useEffect(() => {
     if (!socket) {
@@ -111,5 +130,5 @@ export default function useNotifications() {
     return removeListeners
   }, [socket])
 
-  return [notifications]
+  return [notifications, clearNotifications]
 }
