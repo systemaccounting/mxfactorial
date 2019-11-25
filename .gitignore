@@ -55,3 +55,6 @@ yarn.lock
 cdk.out
 infrastructure/aws-cdk/**/*.js
 infrastructure/aws-cdk/**/*.d.ts
+
+# ipython
+.ipynb_checkpoints
