@@ -9,7 +9,8 @@ import ClickAwayListener from '../ClickAwayListener'
 import s from './NotificationMenu.module.css'
 
 export default function NotificationMenu(props) {
-  const { notifications } = props
+  const { notifications, onClear, onClose } = props
+
   const renderNotifications = useCallback(() => {
     if (!notifications.length) {
       return (
@@ -29,13 +30,18 @@ export default function NotificationMenu(props) {
     ))
   }, [notifications])
 
+  const clearNotifications = useCallback(() => {
+    onClear()
+    onClose()
+  }, [onClear, onClose])
+
   return (
     <Manager>
       <Reference>{props.renderTarget}</Reference>
       {props.isOpen && (
         <Popper placement={props.placement}>
           {({ ref, style, placement }) => (
-            <ClickAwayListener onClickAway={props.onClose}>
+            <ClickAwayListener onClickAway={onClose}>
               <div
                 ref={ref}
                 style={style}
@@ -46,7 +52,7 @@ export default function NotificationMenu(props) {
                   <button
                     type="button"
                     className={s.clearBtn}
-                    onClick={props.onClear}
+                    onClick={clearNotifications}
                   >
                     Clear all
                     <i className="fa fa-close" />

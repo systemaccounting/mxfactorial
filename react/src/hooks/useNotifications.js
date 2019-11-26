@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import Auth from '@aws-amplify/auth'
 import useWebsocket from './useWebsocket'
+import { update } from 'ramda'
 
 const state = {
   pending: [],
@@ -18,9 +19,8 @@ const getAuthToken = async () => {
   }
 }
 
-const parseNotifications = data => {
-  const notifications = JSON.parse(data) || []
-  return notifications.pending.map(item => {
+const parseNotifications = notifications => {
+  return notifications.map(item => {
     const message = JSON.parse(item.message)
 
     const transactions = message.filter(obj => !obj.rule_instance_id)
@@ -42,29 +42,37 @@ const parseNotifications = data => {
   })
 }
 
-const onNewNotificationsReceived = event => {
-  const newNotifications = parseNotifications(event.data)
-  state.pending = [...state.pending, ...newNotifications]
+const updateNotifications = notifications => {
+  state.pending = notifications || []
   listeners.forEach(listener => listener(state.pending))
 }
 
-const onGetNotifications = event => {
-  const socket = event.currentTarget
-  state.pending = parseNotifications(event.data)
-  listeners.forEach(listener => listener(state.pending))
-  socket.removeEventListener('message', onGetNotifications)
-  socket.addEventListener('message', onNewNotificationsReceived)
+const onMessageReceived = event => {
+  const data = JSON.parse(event.data)
+  if (data.pending) {
+    const newNotifications = [
+      ...state.pending,
+      ...parseNotifications(data.pending)
+    ]
+    updateNotifications(newNotifications)
+  }
+  if (data.cleared) {
+    updateNotifications([])
+  }
 }
 
 const clearNotifications = async socket => {
   if (!socket) {
     return
   }
+  if (!state.pending.length) {
+    return
+  }
   socket.send(
     JSON.stringify({
       action: 'clearnotifications',
       notifications: state.pending,
-      token: getAuthToken()
+      token: await getAuthToken()
     })
   )
 }
@@ -73,15 +81,13 @@ const getNotifications = async socket => {
   if (!socket) {
     return
   }
-
   socket.send(
     JSON.stringify({
       action: 'getnotifications',
-      token: getAuthToken()
+      token: await getAuthToken()
     })
   )
-
-  socket.addEventListener('message', onGetNotifications)
+  socket.addEventListener('message', onMessageReceived)
 }
 
 export default function useNotifications() {
@@ -89,9 +95,7 @@ export default function useNotifications() {
   const [notifications, setNotifications] = useState(state.pending)
   const [socket] = useWebsocket(socketUrl, 'notifications')
 
-  const clearNotifications = useCallback(() => clearNotifications(socket), [
-    socket
-  ])
+  const clear = useCallback(() => clearNotifications(socket), [socket])
 
   useEffect(() => {
     if (!socket) {
@@ -124,11 +128,11 @@ export default function useNotifications() {
         console.log(
           'There are no more notification listeners. Unsubscribing....'
         )
-        socket.removeEventListener('message', onNewNotificationsReceived)
+        socket.removeEventListener('message', onMessageReceived)
       }
     }
     return removeListeners
   }, [socket])
 
-  return [notifications, clearNotifications]
+  return [notifications, clear]
 }
