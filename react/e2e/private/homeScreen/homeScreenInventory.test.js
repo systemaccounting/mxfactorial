@@ -64,8 +64,28 @@ describe('homeScreen inventory', () => {
     expect(creditButton).toHaveLength(1)
   })
 
-  it('displays notification button', async () => {
-    const notificationBtn = await page.$$(SELECTORS.notificationButton)
-    expect(notificationBtn).toHaveLength(1)
+  describe('Notifications menu', () => {
+    it('hasn notifications menu button', async () => {
+      const notificationBtn = await page.$$(SELECTORS.notificationButton)
+      expect(notificationBtn).toHaveLength(1)
+    })
+
+    it('has notificatons menu', async () => {
+      const notificationBtn = await page.$(SELECTORS.notificationButton)
+      notificationBtn.click()
+      await page.waitForSelector(SELECTORS.notificationsMenu)
+
+      const notificationsMenu = await page.$$(SELECTORS.notificationsMenu)
+      const notificationsClearBtn = await page.$$(
+        SELECTORS.notificationsClearBtn
+      )
+      const notificationsMenuItem = await page.$$(
+        SELECTORS.notificationsMenuItem
+      )
+
+      expect(notificationsMenu).toHaveLength(1)
+      expect(notificationsClearBtn).toHaveLength(1)
+      expect(notificationsMenuItem.length).toBeGreaterThanOrEqual(1)
+    })
   })
 })

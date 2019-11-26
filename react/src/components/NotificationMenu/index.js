@@ -14,13 +14,20 @@ export default function NotificationMenu(props) {
   const renderNotifications = useCallback(() => {
     if (!notifications.length) {
       return (
-        <li className={cx(s.menuItem, s.menuItem_none)}>
+        <li
+          className={cx(s.menuItem, s.menuItem_none)}
+          data-id="notificationsMenuItem"
+        >
           No notifications yet
         </li>
       )
     }
     return notifications.map(item => (
-      <li className={s.menuItem} key={item.uuid}>
+      <li
+        className={s.menuItem}
+        key={item.uuid}
+        data-id="notificationsMenuItem"
+      >
         <span className={s.when}>{fromNow(item.human_timestamp)}</span>
         <div className={s.menuItemWrapper}>
           <span>{item.contraAccount}</span>
@@ -46,6 +53,7 @@ export default function NotificationMenu(props) {
                 ref={ref}
                 style={style}
                 data-placement={placement}
+                data-id="notificationsMenu"
                 className={s.root}
               >
                 <div className={s.menuHeader}>
@@ -53,6 +61,7 @@ export default function NotificationMenu(props) {
                     type="button"
                     className={s.clearBtn}
                     onClick={clearNotifications}
+                    data-id="notificationsClear"
                   >
                     Clear all
                     <i className="fa fa-close" />
