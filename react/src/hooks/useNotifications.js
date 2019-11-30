@@ -91,9 +91,8 @@ const getNotifications = async socket => {
 }
 
 export default function useNotifications() {
-  const socketUrl = process.env.REACT_APP_WSS_CLIENT_URL
   const [notifications, setNotifications] = useState(state.pending)
-  const [socket] = useWebsocket(socketUrl, 'notifications')
+  const [socket] = useWebsocket()
 
   const clear = useCallback(() => clearNotifications(socket), [socket])
 

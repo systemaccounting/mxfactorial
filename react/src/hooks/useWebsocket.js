@@ -21,7 +21,7 @@ function joinOrCreateConnection(url) {
 }
 
 export default function useWebsocket(
-  url = process.env.REACT_APP_WSS_CLIENT_URL || ''
+  url = process.env.REACT_APP_WSS_CLIENT_URL || 'wss://localhost:8080'
 ) {
   const [socket, setSocket] = useState(null)
 

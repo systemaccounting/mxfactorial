@@ -3,7 +3,9 @@ import { mount } from 'enzyme'
 import WS from 'jest-websocket-mock'
 import useNotifications from '../useNotifications'
 
-const server = new WS(process.env.REACT_APP_WSS_CLIENT_URL)
+const server = new WS(
+  process.env.REACT_APP_WSS_CLIENT_URL || 'wss://localhost:8080'
+)
 const mockNotifications = {
   pending: [
     {
