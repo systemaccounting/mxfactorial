@@ -11,7 +11,7 @@ const lastName = randomSevenDigitString()
 const PUBLIC_TEST_ACCOUNT = firstName + lastName
 
 beforeAll(async () => {
-  jest.setTimeout(20000)
+  jest.setTimeout(30000)
 })
 
 beforeEach(async () => {
