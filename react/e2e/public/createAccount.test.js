@@ -11,12 +11,12 @@ const lastName = randomSevenDigitString()
 const PUBLIC_TEST_ACCOUNT = firstName + lastName
 
 beforeAll(async () => {
-  jest.setTimeout(20000)
+  jest.setTimeout(30000)
 })
 
 beforeEach(async () => {
-  await page.goto(BASE_URL)
-  await page.waitForSelector(SELECTORS.createAccountButton)
+  await page.goto(BASE_URL, { timeout: 0, waitUntil: 'networkidle2' })
+  await page.waitForSelector(SELECTORS.accountInput)
 })
 
 afterEach(async () => {
