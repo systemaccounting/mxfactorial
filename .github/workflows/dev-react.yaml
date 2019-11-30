@@ -35,11 +35,12 @@ jobs:
         run: make install
         working-directory: react
       - name: unit tests
-        run: make test-unit
+        run: |
+          make get-secrets ENV=dev
+          make test-unit
         working-directory: react
       - name: integration tests
         run: |
-          make get-secrets ENV=dev
           yarn test:e2e-public
           yarn test:e2e-private
         working-directory: react
