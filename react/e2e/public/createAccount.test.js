@@ -15,8 +15,8 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-  await page.goto(BASE_URL)
-  await page.waitForSelector(SELECTORS.createAccountButton)
+  await page.goto(BASE_URL, { timeout: 0, waitUntil: 'networkidle2' })
+  await page.waitForSelector(SELECTORS.accountInput)
 })
 
 afterEach(async () => {
