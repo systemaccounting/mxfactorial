@@ -1,35 +1,9 @@
 import React, { useState } from 'react'
 import cx from 'classnames'
-import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import useNotifications from 'hooks/useNotifications'
 import NotificationMenu from '../NotificationMenu'
 import s from './TopNavigation.module.css'
-
-const Wrapper = styled.div`
-  display: flex;
-  padding: 10px 0;
-`
-
-const NavItem = styled.div`
-  color: #efefef;
-  cursor: pointer;
-  margin-right: 10px;
-  color: #fff;
-  opacity: 0.7;
-
-  &:last-child: {
-    margin-right: 0;
-  }
-
-  &:hover {
-    opacity: 1;
-  }
-
-  i {
-    color: inherit;
-  }
-`
 
 const TopNavigation = () => {
   const [isNotificationsOpen, setNotificationsOpen] = useState(false)

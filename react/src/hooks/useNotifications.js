@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import Auth from '@aws-amplify/auth'
 import useWebsocket from './useWebsocket'
-import { update } from 'ramda'
 
 const state = {
   pending: [],
@@ -96,42 +95,45 @@ export default function useNotifications() {
 
   const clear = useCallback(() => clearNotifications(socket), [socket])
 
-  useEffect(() => {
-    if (!socket) {
-      return
-    }
-
-    const listener = newNotifications => {
-      setNotifications(newNotifications)
-    }
-
-    listeners.push(listener)
-
-    // Subscribe to notifications update only once
-    if (!state.isSubscribed) {
-      state.isSubscribed = true
-
-      if (socket.readyState === WebSocket.OPEN) {
-        getNotifications(socket)
-      } else if (socket.readyState === WebSocket.CONNECTING) {
-        socket.addEventListener('open', () => getNotifications(socket))
+  useEffect(
+    () => {
+      if (!socket) {
+        return
       }
-    }
 
-    const removeListeners = () => {
-      const listenerIdx = listeners.indexOf(listener)
-      listeners.splice(listenerIdx, 1)
-      if (!listeners.length) {
-        state.isSubscribed = false
-        state.pending = []
-        console.log(
-          'There are no more notification listeners. Unsubscribing....'
-        )
-        socket.removeEventListener('message', onMessageReceived)
+      const listener = newNotifications => {
+        setNotifications(newNotifications)
       }
-    }
-    return removeListeners
-  }, [socket])
+
+      listeners.push(listener)
+
+      // Subscribe to notifications update only once
+      if (!state.isSubscribed) {
+        state.isSubscribed = true
+
+        if (socket.readyState === WebSocket.OPEN) {
+          getNotifications(socket)
+        } else if (socket.readyState === WebSocket.CONNECTING) {
+          socket.addEventListener('open', () => getNotifications(socket))
+        }
+      }
+
+      const removeListeners = () => {
+        const listenerIdx = listeners.indexOf(listener)
+        listeners.splice(listenerIdx, 1)
+        if (!listeners.length) {
+          state.isSubscribed = false
+          state.pending = []
+          console.log(
+            'There are no more notification listeners. Unsubscribing....'
+          )
+          socket.removeEventListener('message', onMessageReceived)
+        }
+      }
+      return removeListeners
+    },
+    [socket]
+  )
 
   return [notifications, clear]
 }
