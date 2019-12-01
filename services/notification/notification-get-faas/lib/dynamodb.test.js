@@ -47,7 +47,8 @@ describe('dynamodb', () => {
         ":value": testattributevalue
       },
       UpdateExpression: `SET #key = :value`,
-      ConditionExpression: `${testupdateconditionexpression}(#key)` // 'attribute_not_exists'
+      ConditionExpression: `${testupdateconditionexpression}(#key)`, // 'attribute_not_exists'
+      ReturnValues: "ALL_NEW"
     }
     updateItem(
       ddb,

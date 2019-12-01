@@ -50,7 +50,8 @@ describe('awsServices', () => {
       TableName: table,
       Key: {
         [primaryKey]: primaryKeyValue,
-      }
+      },
+      ReturnValues: "ALL_OLD"
     }
     deleteConnection(ddb, table, primaryKey, primaryKeyValue)
     expect(ddb.delete).toHaveBeenCalledWith(expected)
