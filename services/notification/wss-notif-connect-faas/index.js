@@ -19,7 +19,15 @@ exports.handler = async event => {
   let ddb = new AWS.DynamoDB.DocumentClient({
     region: process.env.AWS_REGION
   })
+
+  if (!event.requestContext.connectedAt) {
+    console.log("ERROR: event.requestContext.connectedAt empty")
+  }
   let connectedAt = event.requestContext.connectedAt
+
+  if (!event.requestContext.connectionId) {
+    console.log("ERROR: event.requestContext.connectionId empty")
+  }
   let connectionId = event.requestContext.connectionId
 
   // store connection id in ddb
