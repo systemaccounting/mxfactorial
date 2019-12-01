@@ -19,12 +19,13 @@ const updateItem = (
       ":value": newAttributeValue
     },
     UpdateExpression: `SET #key = :value`,
-    ConditionExpression: `${updateConditionExpression}(#key)` // 'attribute_not_exists'
+    ConditionExpression: `${updateConditionExpression}(#key)`, // 'attribute_not_exists'
+    ReturnValues: "ALL_NEW"
   }
   return service.update(params)
     .promise()
     .then(async data => {
-      console.log(`${newAttributeValue} added to ${partitionKeyValue} connection_id record`)
+      console.log("new attribute values added: ", JSON.stringify(data.Attributes))
     })
     .catch(async err => {
       console.log(err, err.stack)
