@@ -129,7 +129,7 @@ describe('graphql transact', () => {
       user: TEST_ACCOUNT
     })
     response.transactions.forEach(item => {
-      expect([item.debitor, item.creditor]).toContain(TEST_ACCOUNT)
+      expect([item.debitor, item.creditor, item.author]).toContain(TEST_ACCOUNT)
     })
   })
 })
