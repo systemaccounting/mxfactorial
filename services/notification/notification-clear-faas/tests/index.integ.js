@@ -133,7 +133,7 @@ describe('notification pending lambda', () => {
     })
   })
 
-  test('account attribute added to dynamodb connection id record', async done => {
+  test('account attribute added to dynamodb connection id record storing created_at timestamp', async done => {
     let token = await getToken(
       cognitoIdsp,
       process.env.CLIENT_ID,
@@ -168,6 +168,7 @@ describe('notification pending lambda', () => {
           let currentRecord = connectionIdRecordsInDynamodb.filter(record => {
             return record.connection_id == connectionId
           })
+          expect(currentRecord[0].created_at).toBeTruthy()
           expect(currentRecord[0].account).toBe(TEST_ACCOUNT)
           done()
         }

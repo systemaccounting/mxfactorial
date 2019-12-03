@@ -40,20 +40,21 @@ describe('dynamodb', () => {
     let testconnectionid = 'testconnectionid'
     let testattributekey = 'testattributekey'
     let testattributevalue = 'testattributevalue'
-    let testupdateconditionexpression = 'testupdateconditionexpression'
     let expected = {
       TableName: testtable,
       Key: {
         [testpartitionKey]: testconnectionid
       },
       ExpressionAttributeNames: {
-        "#key": testattributekey
+        "#pk": testpartitionKey,
+        "#newkey": testattributekey,
       },
       ExpressionAttributeValues: {
-        ":value": testattributevalue
+        ":pkv": testconnectionid,
+        ":newval": testattributevalue,
       },
-      UpdateExpression: `SET #key = :value`,
-      ConditionExpression: `${testupdateconditionexpression}(#key)`, // 'attribute_not_exists'
+      UpdateExpression: `SET #newkey = :newval`,
+      ConditionExpression: `#pk = :pkv and attribute_not_exists(#newkey)`,
       ReturnValues: "ALL_NEW"
     }
     updateItem(
@@ -63,7 +64,6 @@ describe('dynamodb', () => {
       testconnectionid,
       testattributekey,
       testattributevalue,
-      testupdateconditionexpression
     )
     expect(ddb.update).toHaveBeenCalledWith(expected)
   })
