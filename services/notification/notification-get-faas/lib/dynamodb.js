@@ -5,7 +5,6 @@ const updateItem = (
   partitionKeyValue,
   newAttributeKey,
   newAttributeValue,
-  updateConditionExpression
   ) => {
   let params = {
     TableName: table,
@@ -13,13 +12,15 @@ const updateItem = (
       [partitionKey]: partitionKeyValue
     },
     ExpressionAttributeNames: {
-      "#key": newAttributeKey
+      "#pk": partitionKey,
+      "#newkey": newAttributeKey,
     },
     ExpressionAttributeValues: {
-      ":value": newAttributeValue
+      ":pkv": partitionKeyValue,
+      ":newval": newAttributeValue,
     },
-    UpdateExpression: `SET #key = :value`,
-    ConditionExpression: `${updateConditionExpression}(#key)`, // 'attribute_not_exists'
+    UpdateExpression: `SET #newkey = :newval`,
+    ConditionExpression: `#pk = :pkv and attribute_not_exists(#newkey)`,
     ReturnValues: "ALL_NEW"
   }
   return service.update(params)
