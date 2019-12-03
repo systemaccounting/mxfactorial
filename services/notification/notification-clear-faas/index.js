@@ -43,7 +43,6 @@ const WEBSOCKETS_TABLE_PARTITION_KEY = 'connection_id'
 const WEBSOCKETS_TABLE_INDEX_NAME = 'account-index'
 const WEBSOCKET_TABLE_INDEX_ATTRIBUTE = 'account'
 const CLEARED_NOTIFICATIONS_PROPERTY = 'cleared'
-const DYNAMODB_UPDATE_CONDITION_EXPRESSION = 'attribute_not_exists'
 
 // {"action":"clearnotifications","notifications":[{"uuid":"...","timestamp":"..."}],"token":"eyJraWQiO..."}
 exports.handler = async event => {
@@ -122,7 +121,6 @@ exports.handler = async event => {
         websocketConnectionId,
         WEBSOCKET_TABLE_INDEX_ATTRIBUTE, // newAttributeKey
         accountFromJWT, // newAttributeValue
-        DYNAMODB_UPDATE_CONDITION_EXPRESSION // updateConditionExpression
       )
     }
   }
