@@ -13,7 +13,7 @@ const putItem = (
       [attributeKey]: attributeValue
     }
   }
-  console.log("connection storing :", JSON.stringify(params))
+  console.log("storing connection: ", JSON.stringify(params))
   return service.put(params)
     .promise()
     .then(async data => {
