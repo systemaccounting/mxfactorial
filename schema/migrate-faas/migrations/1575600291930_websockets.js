@@ -28,10 +28,11 @@ exports.up = pgm => {
 }
 
 exports.down = pgm => {
-  pgm.dropFunction(FUNCTION_NAME, {
+  pgm.dropFunction(FUNCTION_NAME, null, {
     ifExists: true,
     cascade: true
   })
+
   pgm.dropTable(TABLE_NAME, {
     ifExists: true,
     cascade: true
