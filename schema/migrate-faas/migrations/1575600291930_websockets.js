@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 
 const TABLE_NAME = 'notification_websockets'
-const FUNCTION_NAME = 'convert_epoch_timestamp'
+const TRIGGER_NAME = 'convert_epoch_timestamp'
 
 exports.up = pgm => {
   pgm.createTable(TABLE_NAME, {
@@ -12,7 +12,7 @@ exports.up = pgm => {
     account: { type: 'varchar(64)' }
   })
   // https://github.com/salsita/node-pg-migrate/issues/387#issuecomment-456749126
-  pgm.createTrigger(TABLE_NAME, FUNCTION_NAME, {
+  pgm.createTrigger(TABLE_NAME, TRIGGER_NAME, {
     when: 'BEFORE',
     operation: 'INSERT',
     level: 'ROW',
@@ -28,7 +28,7 @@ exports.up = pgm => {
 }
 
 exports.down = pgm => {
-  pgm.dropFunction(FUNCTION_NAME, null, {
+  pgm.dropTrigger(TABLE_NAME, TRIGGER_NAME, {
     ifExists: true,
     cascade: true
   })
