@@ -2,6 +2,7 @@
 
 const TABLE_NAME = 'notification_websockets'
 const TRIGGER_NAME = 'convert_epoch_timestamp'
+const FUNCTION_NAME = TRIGGER_NAME
 
 exports.up = pgm => {
   pgm.createTable(TABLE_NAME, {
@@ -28,12 +29,12 @@ exports.up = pgm => {
 }
 
 exports.down = pgm => {
-  pgm.dropTrigger(TABLE_NAME, TRIGGER_NAME, {
+  pgm.dropTable(TABLE_NAME, {
     ifExists: true,
     cascade: true
   })
 
-  pgm.dropTable(TABLE_NAME, {
+  pgm.dropFunction(FUNCTION_NAME, [], {
     ifExists: true,
     cascade: true
   })
