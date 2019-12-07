@@ -1,11 +1,11 @@
 const AWS = require('aws-sdk')
 const uuid = require('uuid/v1')
 const microtime = require('microtime')
+const Sequelize = require('sequelize') // added as dev dep since published in lambda layer
 
 const {
   formatPendingNotifications,
   batchWriteTable,
-  queryIndex,
   sendMessageToClient
 } = require('./lib/awsServices')
 
@@ -22,8 +22,6 @@ const {
 // process.env.NOTIFICATIONS_TABLE_NAME
 // process.env.WEBSOCKETS_TABLE_NAME
 
-const WEBSOCKETS_TABLE_INDEX_NAME = 'account-index'
-const WEBSOCKETS_TABLE_ACCOUNT_ATTRIBUTE = 'account'
 const PENDING_NOTIFICATIONS_PROPERTY = 'pending'
 const CREDITOR_PROPERTY = 'creditor'
 const DEBITOR_PROPERTY = 'debitor'
@@ -36,6 +34,46 @@ const ws = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.WSS_CONNECTION_URL
 })
 
+// https://sequelize.readthedocs.io/en/2.0/docs/models-definition/
+const notificationWebsocketsModel = (sequelize, type) => {
+  return sequelize.define(
+    'notification_websockets',
+    {
+      id: {
+        type: type.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      connection_id: type.STRING,
+      created_at: type.DATE,
+      epoch_created_at: type.BIGINT,
+      account: type.STRING
+    },
+    {
+      timestamps: false
+    }
+  )
+}
+
+// create db connection outside of handler for multiple invocations
+const pgConnection = new Sequelize(
+  process.env.PGDATABASE,
+  process.env.PGUSER,
+  process.env.PGPASSWORD,
+  {
+    host: process.env.PGHOST,
+    operatorAliases: false,
+    logging: console.log,
+    port: process.env.PGPORT,
+    dialect: 'postgres',
+    pool: {
+      min: 0,
+      max: 5,
+      acquire: 30000,
+      idle: 10000
+    }
+  }
+)
 
 exports.handler = async event => {
   // todo: test notifications for account and message values, types
@@ -92,26 +130,26 @@ exports.handler = async event => {
       }
     }
 
-    // retrieve wss connection ids owned by account
-    let connectionsOwnedByAccount = await queryIndex(
-      ddb,
-      process.env.WEBSOCKETS_TABLE_NAME,
-      WEBSOCKETS_TABLE_INDEX_NAME,
-      WEBSOCKETS_TABLE_ACCOUNT_ATTRIBUTE,
-      account
+    let notificationWebsocketsTable = notificationWebsocketsModel(
+      pgConnection,
+      Sequelize
     )
 
-    if (connectionsOwnedByAccount.length > 0) {
+    let websocketsOwnedByCurrentAccount = await notificationWebsocketsTable
+      .findAll({ where: { account } })
+
+    if (websocketsOwnedByCurrentAccount.length > 0) {
+
       // broadcast pending notifications to each client
-      for (let i = 0; i < connectionsOwnedByAccount.length; i++) {
+      let connId = websocketsOwnedByCurrentAccount[i].connection_id
+      let acct = websocketsOwnedByCurrentAccount[i].account
+      console.log(`sending account ${acct} clear notification confirmation to ${connId} websocket`)
+
+      for (let i = 0; i < websocketsOwnedByCurrentAccount.length; i++) {
         let confirmed = {
           [PENDING_NOTIFICATIONS_PROPERTY]: notificationsPerAccount
         }
-        await sendMessageToClient(
-          ws,
-          connectionsOwnedByAccount[i].connection_id,
-          confirmed
-        )
+        await sendMessageToClient(ws, connId, confirmed)
       }
     } else {
       console.log('0 notifcation websockets for account: ', account)
