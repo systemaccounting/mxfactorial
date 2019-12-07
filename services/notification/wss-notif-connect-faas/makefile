@@ -85,15 +85,18 @@ dev: test # test target alias to create development environment
 
 .PHONY: src test-env-arg clean test install-prod
 src: test-env-arg clean test install-prod
-		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip index.js package.json \
+			lib/* --exclude "*.test.*"
 
 .PHONY: zip install-prod clean-artifact
 zip: install-prod clean-artifact
-		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip index.js package.json \
+			lib/* --exclude "*.test.*"
 
 .PHONY: layer
 layer:
-		@echo "$(APP_NAME)-$(APP_TYPE) has few deps. not building layer"
+		@echo "$(APP_NAME)-$(APP_TYPE) layer deployed separately:"
+		@echo "https://github.com/mxfactorial/pg-sequelize-lambda-layer"
 
 ###################### deploy ######################
 
