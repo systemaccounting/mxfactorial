@@ -44,7 +44,6 @@ const NOTIFICATIONS_TABLE_INDEX_NAME = 'account-index'
 const NOTIFICATIONS_TABLE_INDEX_ATTRIBUTE = 'account'
 const WEBSOCKET_TABLE_INDEX_ATTRIBUTE = 'account'
 const PENDING_NOTIFICATIONS_PROPERTY = 'pending'
-const DYNAMODB_UPDATE_CONDITION_EXPRESSION = 'attribute_not_exists'
 
 // env var inventory (avoid const declaration):
 // process.env.AWS_REGION
@@ -131,7 +130,6 @@ exports.handler = async event => {
         websocketConnectionId,
         WEBSOCKET_TABLE_INDEX_ATTRIBUTE, // newAttributeKey
         accountFromJWT, // newAttributeValue
-        DYNAMODB_UPDATE_CONDITION_EXPRESSION // updateConditionExpression
       )
     }
   }

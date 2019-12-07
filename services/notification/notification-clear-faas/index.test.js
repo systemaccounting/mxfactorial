@@ -266,7 +266,6 @@ describe('lambda function', () => {
     let connectionId = '123456789'
     let indexAttribute = 'account'
     let account = 'testaccount'
-    let updateConditionExpression = 'attribute_not_exists'
     await handler(event)
     await expect(updateItem).toHaveBeenCalledWith(
       ddb,
@@ -275,7 +274,6 @@ describe('lambda function', () => {
       connectionId,
       indexAttribute,
       account,
-      updateConditionExpression
     )
     jest.clearAllMocks()
   })
