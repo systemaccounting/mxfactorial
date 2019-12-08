@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk')
 const WebSocket = require('ws')
+const Sequelize = require('sequelize')
 
 const {
   createNotifications,
@@ -7,7 +8,7 @@ const {
   createAccount,
   deleteAccount,
   getToken,
-  queryIndex
+  queryTable
 } = require('./utils/integrationTestHelpers')
 
 const {
@@ -21,13 +22,61 @@ const {
 // process.env.CLIENT_ID
 // process.env.POOL_ID
 // process.env.WSS_CLIENT_URL
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
 
+const notificationWebsocketsModel = (sequelize, sequelizeType) => {
+  return sequelize.define(
+    'notification_websockets',
+    {
+      id: {
+        type: sequelizeType.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      connection_id: sequelizeType.STRING,
+      created_at: sequelizeType.DATE,
+      epoch_created_at: sequelizeType.BIGINT,
+      account: sequelizeType.STRING
+    },
+    {
+      timestamps: false
+    }
+  )
+}
+
+const pgConnection = new Sequelize(
+  process.env.PGDATABASE,
+  process.env.PGUSER,
+  process.env.PGPASSWORD,
+  {
+    host: process.env.PGHOST,
+    operatorAliases: false,
+    logging: console.log,
+    port: process.env.PGPORT,
+    dialect: 'postgres',
+    pool: {
+      min: 0,
+      max: 5,
+      acquire: 30000,
+      idle: 10000
+    }
+  }
+)
+
+const notificationWebsocketsTable = notificationWebsocketsModel(
+  pgConnection,
+  Sequelize
+)
 
 beforeAll(async () => {
-  jest.setTimeout(10000)
+  jest.setTimeout(15000)
   await createAccount(
     cognitoIdsp,
     process.env.CLIENT_ID,
@@ -42,6 +91,7 @@ afterAll(async() => {
     process.env.POOL_ID,
     TEST_ACCOUNT
   )
+  pgConnection.close().then(() => console.log('postgres connection closed'))
 })
 
 beforeEach(async () => {
@@ -116,7 +166,7 @@ describe('notification pending lambda', () => {
     })
   })
 
-  test('account attribute added to dynamodb connection id record storing created_at timestamp', async done => {
+  test('account attribute added to postgres connection id record storing created_at timestamp', async done => {
     let token = await getToken(
       cognitoIdsp,
       process.env.CLIENT_ID,
@@ -131,11 +181,8 @@ describe('notification pending lambda', () => {
       })
       ws.send(getNotificationsAction)
       await timeout(2e3) // wait 2 second for lambda to update ddb record
-      let connectionIdRecordsInDynamodb = await queryIndex(
-        ddb,
-        process.env.WEBSOCKETS_TABLE_NAME,
-        'account-index',
-        'account',
+      let websocketRecordsInPostgres = await queryTable(
+        notificationWebsocketsTable,
         TEST_ACCOUNT
       )
       let getConnectionIdFromErrorMessage = JSON.stringify({
@@ -147,7 +194,7 @@ describe('notification pending lambda', () => {
         if (JSON.parse(data).connectionId) {
           let connectionId = JSON.parse(data).connectionId
           ws.close()
-          let currentRecord = connectionIdRecordsInDynamodb.filter(record => {
+          let currentRecord = websocketRecordsInPostgres.filter(record => {
             return record.connection_id == connectionId
           })
           expect(currentRecord[0].created_at).toBeTruthy()

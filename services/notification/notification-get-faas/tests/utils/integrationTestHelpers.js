@@ -188,6 +188,12 @@ const queryIndex = (
     })
 }
 
+const queryTable = (service, account) => {
+  return service.findAll({
+    where: { account }
+  })
+}
+
 module.exports = {
   createNotifications,
   deleteNotifications,
@@ -197,5 +203,6 @@ module.exports = {
   getToken,
   shapeClearNotificationsRequest,
   sendNotifications,
-  queryIndex
+  queryIndex,
+  queryTable
 }
