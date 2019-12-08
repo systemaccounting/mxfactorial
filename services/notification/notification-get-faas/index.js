@@ -23,6 +23,11 @@ const {
   sendMessageToClient
 } = require('./lib/apiGateway')
 
+const {
+  connection,
+  tableModel
+} = require('./lib/postgres')
+
 const ddb = new AWS.DynamoDB.DocumentClient({
   region: process.env.AWS_REGION
 })
@@ -31,7 +36,7 @@ const ws = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.WSS_CONNECTION_URL
 })
 
-let cognito = new AWS.CognitoIdentityServiceProvider({
+const cognito = new AWS.CognitoIdentityServiceProvider({
   apiVersion: '2016-04-18',
   region: process.env.AWS_REGION
 })
@@ -46,47 +51,12 @@ const PENDING_NOTIFICATIONS_PROPERTY = 'pending'
 // process.env.NOTIFICATIONS_TABLE_NAME
 // process.env.WEBSOCKETS_TABLE_NAME
 // process.env.POOL_NAME
-
-// https://sequelize.readthedocs.io/en/2.0/docs/models-definition/
-const notificationWebsocketsModel = (sequelize, type) => {
-  return sequelize.define(
-    'notification_websockets',
-    {
-      id: {
-        type: type.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      connection_id: type.STRING,
-      created_at: type.DATE,
-      epoch_created_at: type.BIGINT,
-      account: type.STRING
-    },
-    {
-      timestamps: false
-    }
-  )
-}
-
-// create db connection outside of handler for multiple invocations
-const pgConnection = new Sequelize(
-  process.env.PGDATABASE,
-  process.env.PGUSER,
-  process.env.PGPASSWORD,
-  {
-    host: process.env.PGHOST,
-    operatorAliases: false,
-    logging: console.log,
-    port: process.env.PGPORT,
-    dialect: 'postgres',
-    pool: {
-      min: 0,
-      max: 5,
-      acquire: 30000,
-      idle: 10000
-    }
-  }
-)
+// process.env.AWS_REGION
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
 // {"action":"getnotifications"}
 exports.handler = async event => {
@@ -151,12 +121,13 @@ exports.handler = async event => {
   // adding account values to all connection id records supports notification
   // broadcast (send notifications to all connection ids owned by current account)
   // query for connection id:
-  let notificationWebsocketsTable = notificationWebsocketsModel(
-    pgConnection,
-    Sequelize
+  let websocketsTable = tableModel(
+    connection,
+    Sequelize,
+    'notification_websockets',
   )
 
-  let currentConnection = await notificationWebsocketsTable.findOne({
+  let currentConnection = await websocketsTable.findOne({
     where: {
       connection_id: websocketConnectionId
     }
@@ -164,8 +135,12 @@ exports.handler = async event => {
 
   console.log('current connection: ' + JSON.stringify(currentConnection))
 
+  if (!currentConnection) {
+    throw Error('0 stored connections')
+  }
+
   if (!currentConnection.account) {
-    await notificationWebsocketsTable.update({
+    await websocketsTable.update({
       account: accountFromJWT
     }, {
       where: {
