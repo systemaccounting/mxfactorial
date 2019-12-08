@@ -25,15 +25,15 @@ const {
   verifyToken
 } = require('./lib/jwt')
 
-const {
-  updateItem,
-  queryIndex,
-  queryTable
-} = require('./lib/dynamodb')
+const queryIndex = require('./lib/dynamodb')
 
 const {
   sendMessageToClient
 } = require('./lib/apiGateway')
+
+const {
+  tableModel
+} = require('./lib/postgres')
 
 const {
   pendingReceivedNotifications,
@@ -61,6 +61,8 @@ jest.mock('axios', () => {
 })
 
 jest.mock('jwk-to-pem')
+
+jest.mock('sequelize', () => ({}))
 
 jest.mock('./lib/cognito', () => {
   return {
@@ -93,29 +95,30 @@ jest.mock('./lib/jwt', () => {
   }
 })
 
-jest.mock('./lib/dynamodb', () => {
-  return {
-    updateItem: jest.fn(),
-    queryTable: jest.fn().mockImplementationOnce(
-      () => [{
-        timestamp: 12345678910,
-        account: 'testaccount' // first test
-      }]
-    ).mockImplementation(
-      () => [{
-        timestamp: 12345678910
-      }]
-    ),
-    queryIndex: jest.fn().mockImplementation(() => {
-      return jest.requireActual('./tests/utils/testData').pendingReceivedNotifications
-    }),
-  }
-})
+jest.mock('./lib/dynamodb', () => jest.fn(
+  () => jest.requireActual('./tests/utils/testData')
+    .pendingReceivedNotifications)
+)
 
 jest.mock('./lib/apiGateway', () => {
   return {
     sendMessageToClient: jest.fn()
   }
+})
+
+jest.mock('./lib/postgres', () => {
+  const findOne = jest.fn()
+    .mockImplementationOnce(() => {})
+    .mockImplementationOnce(
+      () => ({ account: 'testaccount' })
+    )
+    .mockImplementation(
+      () => ({})
+    )
+  const update = jest.fn()
+  const tableModel = jest.fn(() => ({ findOne, update }))
+  const connection = {}
+  return { tableModel, connection }
 })
 
 afterEach(() => {
@@ -141,10 +144,28 @@ const event = {
 }
 
 describe('lambda function', () => {
-  // first test to avoid multiple mockImplementationOnce in mock ./lib/dynamodb
-  test('updateItem NOT called IF account attribute present in dynamodb record', async () => {
+  // sequence of first 3 tests relevant to avoid multiple
+  // mockImplementationOnce from mock ./lib/postgres
+  test('throws 0 stored connections', async () => {
+    await expect(handler(event)).rejects.toThrow('0 stored connections')
+  })
+
+  test('update NOT called IF account attribute present in websocket record', async () => {
     await handler(event)
-    await expect(updateItem).toHaveBeenCalledTimes(0)
+    await expect(tableModel.mock.results[0].value.update)
+      .toHaveBeenCalledTimes(0)
+  })
+
+  test('calls update with args IF account absent from postgres', async () => {
+    const expectedAccount = { account: 'testaccount' }
+    const expectedConnection = {
+      where: {
+        connection_id: event.requestContext.connectionId
+      }
+    }
+    await handler(event)
+    await expect(tableModel.mock.results[0].value.update)
+      .toHaveBeenCalledWith(expectedAccount, expectedConnection)
   })
 
   test('calls CognitoIdentityServiceProvider with config', async () => {
@@ -258,29 +279,21 @@ describe('lambda function', () => {
     jest.clearAllMocks()
   })
 
-  test('calls queryTable with service, table name, partition key and connection id', async () => {
+  test('calls tableModel with service, dependency and table name', async () => {
     await handler(event)
-    await expect(queryTable).toHaveBeenCalledWith(
-      {}, process.env.WEBSOCKETS_TABLE_NAME, 'connection_id', '123456789'
-    )
+    await expect(tableModel).toHaveBeenCalledWith({}, {}, 'notification_websockets')
     jest.clearAllMocks()
   })
 
-  test('calls updateItem with args', async () => {
-    let ddb = {}
-    let partitiionKey = 'connection_id'
-    let connectionId = '123456789'
-    let indexAttribute = 'account'
-    let account = 'testaccount'
+  test('calls findOne with connection id', async () => {
+    const expected = {
+      where: {
+        connection_id: event.requestContext.connectionId
+      }
+    }
     await handler(event)
-    await expect(updateItem).toHaveBeenCalledWith(
-      ddb,
-      process.env.WEBSOCKETS_TABLE_NAME,
-      partitiionKey,
-      connectionId,
-      indexAttribute,
-      account,
-    )
+    await expect(tableModel.mock.results[0].value.findOne)
+      .toHaveBeenCalledWith(expected)
     jest.clearAllMocks()
   })
 
