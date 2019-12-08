@@ -1,19 +1,19 @@
-const Sequelize = require('sequelize')
+const Sequelize = require('sequelize') // added as dev dep since published in lambda layer
 
 // https://sequelize.readthedocs.io/en/2.0/docs/models-definition/
-const notificationWebsocketsModel = (sequelize, type) => {
+const notificationWebsocketsModel = (sequelize, sequelizeType) => {
   return sequelize.define(
     'notification_websockets',
     {
       id: {
-        type: type.INTEGER,
+        type: sequelizeType.INTEGER,
         primaryKey: true,
         autoIncrement: true
       },
-      connection_id: type.STRING,
-      created_at: type.DATE,
-      epoch_created_at: type.BIGINT,
-      account: type.STRING
+      connection_id: sequelizeType.STRING,
+      created_at: sequelizeType.DATE,
+      epoch_created_at: sequelizeType.BIGINT,
+      account: sequelizeType.STRING
     },
     {
       timestamps: false
@@ -45,13 +45,13 @@ exports.handler = async event => {
   console.log(JSON.stringify(event))
 
   if (!event.requestContext.connectedAt) {
-    throw Error("empty connectedAt")
+    throw Error('empty connectedAt')
   }
 
   let connectedAt = event.requestContext.connectedAt
 
   if (!event.requestContext.connectionId) {
-    throw Error("empty connectionId")
+    throw Error('empty connectionId')
   }
 
   let connectionId = event.requestContext.connectionId
