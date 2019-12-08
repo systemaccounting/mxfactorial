@@ -1,113 +1,162 @@
-const { handler } = require('./index')
-const AWS = require('aws-sdk')
+const rewire = require('rewire')
+const unexportedFunctions = rewire('./index')
+const Sequelize = require('sequelize')
 
-const {
-  putItem,
-  deleteConnection
-} = require('./lib/awsServices')
-
-// process.env.AWS_REGION
-// process.env.WEBSOCKETS_TABLE_NAME
-
-const WEBSOCKET_TABLE_PRIMARY_KEY = 'connection_id'
-const WEBSOCKET_TABLE_CONNECTED_AT_ATTRIBUTE = 'created_at'
-const CONNECTION_ID = '123456789'
-const CONNECTED_AT = 1573440182072
-const ACCOUNT = 'testaccount'
-
-jest.mock('./lib/awsServices', () => {
+jest.mock('sequelize', () => jest.fn(() => {
   return {
-    putItem: jest.fn(),
-    deleteConnection: jest.fn()
+    define: jest.fn(() => ({ create: jest.fn(), destroy: jest.fn() }))
   }
-})
-
-jest.mock('aws-sdk', () => {
-  return {
-    DynamoDB: {
-      DocumentClient: jest.fn()
-      .mockImplementation(() => {
-        return {
-          put: 'func'
-        }
-      })
-    }
-  }
-})
+}))
 
 const createEvent = eventType => {
   return {
     requestContext: {
-      connectionId: CONNECTION_ID,
-      authorizer: {
-        account: ACCOUNT
-      },
+      connectionId: '123456789',
       eventType: eventType,
-      connectedAt: CONNECTED_AT
+      connectedAt: 1573440182072
     }
   }
 }
 
-afterEach(() => {
-  jest.clearAllMocks()
-})
-
-afterAll(() => {
-  jest.unmock('aws-sdk')
-  jest.unmock('./lib/awsServices')
-})
-
-describe('lambda handerl', () => {
-
-  test('calls DocumentClient with config', async () => {
-    let event = createEvent('CONNECT')
-    let expected = {
-      region: process.env.AWS_REGION
+describe('unexported functions', () => {
+  test('notificationWebsocketsModel called with params', () => {
+    const notificationWebsocketsModel = unexportedFunctions
+      .__get__('notificationWebsocketsModel')
+    const mockSequelize = { define: jest.fn() }
+    const mockType = {
+      INTEGER: 'INTEGER',
+      STRING: 'STRING',
+      DATE: 'DATE',
+      BIGINT: 'BIGINT',
     }
-    await handler(event)
-    await expect(AWS.DynamoDB.DocumentClient)
-      .toHaveBeenCalledWith(expected)
-  })
-
-  test('calls putItem', async () => {
-    let event = createEvent('CONNECT')
-    await handler(event)
-    expect(putItem).toHaveBeenCalledWith(
-      { put: 'func' },
-      process.env.WEBSOCKETS_TABLE_NAME,
-      WEBSOCKET_TABLE_PRIMARY_KEY,
-      CONNECTION_ID,
-      WEBSOCKET_TABLE_CONNECTED_AT_ATTRIBUTE,
-      CONNECTED_AT
+    const testtable = 'notification_websockets'
+    const testsequelizemodel = {
+      id: {
+        type: 'INTEGER',
+        primaryKey: true,
+        autoIncrement: true
+      },
+      connection_id: 'STRING',
+      created_at: 'DATE',
+      epoch_created_at: 'BIGINT',
+      account: 'STRING'
+    }
+    const testconfigobj = { timestamps: false }
+    notificationWebsocketsModel(mockSequelize, mockType)
+    expect(mockSequelize.define).toHaveBeenCalledWith(
+      testtable,
+      testsequelizemodel,
+      testconfigobj
     )
   })
 
-  test('calls deleteConnection', async () => {
-    let event = createEvent('DISCONNECT')
-    await handler(event)
-    expect(deleteConnection).toHaveBeenCalledWith(
-      { put: 'func' },
-      process.env.WEBSOCKETS_TABLE_NAME,
-      WEBSOCKET_TABLE_PRIMARY_KEY,
-      CONNECTION_ID
-    )
+  test('notificationWebsocketsModel returns', () => {
+    const notificationWebsocketsModel = unexportedFunctions
+      .__get__('notificationWebsocketsModel')
+    const mockSequelize = { define: jest.fn(() => 1) }
+    const mockType = {
+      INTEGER: 'INTEGER',
+      STRING: 'STRING',
+      DATE: 'DATE',
+      BIGINT: 'BIGINT',
+    }
+    const result = notificationWebsocketsModel(mockSequelize, mockType)
+    expect(result).toBe(1)
   })
 
-  test('throws unmatched eventType error', async () => {
-    let unmatchedEvent = createEvent('TESTTHROW')
+  test('Sequelize called with params', () => {
+    const testdb = 'testdb'
+    const testuser = 'testuser'
+    const testpwd = 'testpwd'
+    const testhost = 'testhost'
+    const testport = '5432' // $ VAR=5432 node -e 'console.log(typeof process.env.VAR)' // => string
+    process.env.PGDATABASE = testdb
+    process.env.PGUSER = testuser
+    process.env.PGPASSWORD = testpwd
+    process.env.PGHOST = testhost
+    process.env.PGPORT = testport
+    const expectedConfig = {
+      host: testhost,
+      operatorAliases: false,
+      logging: console.log,
+      port: testport,
+      dialect: 'postgres',
+      pool: {
+        min: 0,
+        max: 5,
+        acquire: 30000,
+        idle: 10000
+      }
+    }
+    const testevent = {
+      requestContext: {
+        eventType: 'CONNECT',
+        connectedAt: 123,
+        connectionId: '123'
+      }
+    }
+    const { handler } = require('./index') // require in test for scoped env vars
+    handler(testevent)
+    expect(Sequelize).toHaveBeenCalledWith(
+      testdb,
+      testuser,
+      testpwd,
+      expectedConfig
+    )
+  })
+})
+
+describe('lambda handler', () => {
+  test('throws empty connectionId error', async () => {
+    const unmatchedEvent = {
+      requestContext: {
+        connectionId: null,
+        authorizer: {
+          account: 'testaccount'
+        },
+        eventType: 'CONNECT',
+        connectedAt: 1573440182072
+      }
+    }
+    const { handler } = require('./index') // scoped to avoid error
     await expect(handler(unmatchedEvent))
-      .rejects.toThrow('unmatched eventType')
+      .rejects.toThrow('empty connectionId')
+  })
+
+  test('throws empty connectedAt error', async () => {
+    const unmatchedEvent = {
+      requestContext: {
+        connectionId: '123456789',
+        authorizer: {
+          account: 'testaccount'
+        },
+        eventType: 'CONNECT',
+        connectedAt: null
+      }
+    }
+    const { handler } = require('./index') // scoped to avoid error
+    await expect(handler(unmatchedEvent))
+      .rejects.toThrow('empty connectedAt')
   })
 
   test('returns 200 on CONNECT', async () => {
-    let event = createEvent('CONNECT')
-    let result = await handler(event)
+    const testevent = createEvent('CONNECT')
+    const { handler } = require('./index') // scoped to avoid error
+    const result = await handler(testevent)
     await expect(result).toEqual({ statusCode: 200 })
   })
 
   test('returns 200 on DISCONNECT', async () => {
-    let event = createEvent('DISCONNECT')
-    let result = await handler(event)
+    const event = createEvent('DISCONNECT')
+    const { handler } = require('./index') // scoped to avoid error
+    const result = await handler(event)
     await expect(result).toEqual({ statusCode: 200 })
+  })
+
+  test('throws unmatched eventType error', async () => {
+    const testevent = createEvent('')
+    const { handler } = require('./index') // scoped to avoid error
+    await expect(handler(testevent))
+      .rejects.toThrow('unmatched eventType')
   })
 })
