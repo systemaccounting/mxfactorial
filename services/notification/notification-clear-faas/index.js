@@ -154,6 +154,22 @@ exports.handler = async event => {
 
     let currConnId = websocketsOwnedByCurrentAccount[i].connection_id
     let currAcct = websocketsOwnedByCurrentAccount[i].account
+
+    // delete and skip expired websocket connections before sending
+    try {
+      await sendMessageToClient(ws, currConnId, 'ping')
+    } catch(err) {
+      if (err.message == '410') {
+        let deleteResult = await websocketsTable.destroy({
+          where: {
+            connection_id: currConnId
+          }
+        })
+        console.log(deleteResult)
+        continue
+      }
+    }
+
     console.log(`sending account ${currAcct} clear notification confirmation to ${currConnId} websocket`)
 
     let confirmed = {
