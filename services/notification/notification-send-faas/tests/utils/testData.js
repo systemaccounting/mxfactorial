@@ -1,7 +1,6 @@
-const randomFourDigitInt = () => {
-  return Math.floor(Math.random() * (9999 - 1000)) + 1000
+const randomSevenDigitInt = () => {
+  return Math.floor(Math.random() * (9999999 - 1000000)) + 1000000
 }
-
 const pendingNotifications = [
   {
     id: 984,
@@ -151,7 +150,7 @@ const notificationsToSend = [
 
 const dedupedRecipientList = [ 'testcreditor1', 'testcreditor2', 'testdebitor1' ]
 
-const TEST_ACCOUNT = 'Faker' + randomFourDigitInt()
+const TEST_ACCOUNT = 'Faker' + randomSevenDigitInt()
 
 const pendingNotificationsForIntegrationTests = [
   {
@@ -186,7 +185,7 @@ const recipientListIntegrationTests = [ 'testcreditor1', 'testcreditor2', TEST_A
 
 const websocketConnectionIds = [
   {
-    uuid: '12345678910',
+    connection_id: '12345678910',
     timestamp: 1570139563495635,
     account: TEST_ACCOUNT
   }

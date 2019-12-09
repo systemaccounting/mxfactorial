@@ -188,6 +188,23 @@ const queryIndex = (
     })
 }
 
+const queryTable = (service, account) => {
+  return service.findAll({
+    where: { account }
+  })
+}
+
+const insert = (service, connectionId, connectedAt, account) => {
+  return service.create({
+    connection_id: connectionId,
+    created_at: null,
+    epoch_created_at: connectedAt,
+    account: account
+  })
+}
+
+const deleteFromTable = (service, account) => service.destroy({ where: { account } })
+
 module.exports = {
   createNotifications,
   deleteNotifications,
@@ -197,5 +214,8 @@ module.exports = {
   getToken,
   shapeClearNotificationsRequest,
   sendNotifications,
-  queryIndex
+  queryIndex,
+  queryTable,
+  insert,
+  deleteFromTable
 }
