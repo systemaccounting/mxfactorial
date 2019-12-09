@@ -26,62 +26,27 @@ const {
   sendMessageToClient
 } = require('./lib/apiGateway')
 
+const {
+  connection,
+  tableModel
+} = require('./lib/postgres')
+
 // avoid const assignment for env vars
 // process.env.AWS_REGION
 // process.env.NOTIFICATIONS_TABLE_NAME
-// process.env.WEBSOCKETS_TABLE_NAME
 // process.env.WSS_CONNECTION_URL
 // process.env.POOL_NAME
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 const ws = new AWS.ApiGatewayManagementApi({ endpoint: process.env.WSS_CONNECTION_URL })
 let cognito = new AWS.CognitoIdentityServiceProvider({ region: process.env.AWS_REGION })
 
-const WEBSOCKETS_TABLE_PARTITION_KEY = 'connection_id'
-const WEBSOCKETS_TABLE_INDEX_NAME = 'account-index'
-const WEBSOCKET_TABLE_INDEX_ATTRIBUTE = 'account'
 const CLEARED_NOTIFICATIONS_PROPERTY = 'cleared'
-
-// https://sequelize.readthedocs.io/en/2.0/docs/models-definition/
-const notificationWebsocketsModel = (sequelize, type) => {
-  return sequelize.define(
-    'notification_websockets',
-    {
-      id: {
-        type: type.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-      },
-      connection_id: type.STRING,
-      created_at: type.DATE,
-      epoch_created_at: type.BIGINT,
-      account: type.STRING
-    },
-    {
-      timestamps: false
-    }
-  )
-}
-
-// create db connection outside of handler for multiple invocations
-const pgConnection = new Sequelize(
-  process.env.PGDATABASE,
-  process.env.PGUSER,
-  process.env.PGPASSWORD,
-  {
-    host: process.env.PGHOST,
-    operatorAliases: false,
-    logging: console.log,
-    port: process.env.PGPORT,
-    dialect: 'postgres',
-    pool: {
-      min: 0,
-      max: 5,
-      acquire: 30000,
-      idle: 10000
-    }
-  }
-)
 
 // {"action":"clearnotifications","notifications":[{"uuid":"...","timestamp":"..."}],"token":"eyJraWQiO..."}
 exports.handler = async event => {
@@ -143,12 +108,13 @@ exports.handler = async event => {
   // adding account values to all connection id records supports notification
   // broadcast (send notifications to all connection ids owned by current account)
   // query for connection id:
-  let notificationWebsocketsTable = notificationWebsocketsModel(
-    pgConnection,
-    Sequelize
+  let websocketsTable = tableModel(
+    connection,
+    Sequelize,
+    'notification_websockets',
   )
 
-  let currentConnection = await notificationWebsocketsTable.findOne({
+  let currentConnection = await websocketsTable.findOne({
     where: {
       connection_id: websocketConnectionId
     }
@@ -156,8 +122,12 @@ exports.handler = async event => {
 
   console.log('current connection: ' + JSON.stringify(currentConnection))
 
+  if (!currentConnection) {
+    throw Error('0 stored connections')
+  }
+
   if (!currentConnection.account) {
-    await notificationWebsocketsTable.update({
+    await websocketsTable.update({
       account: accountFromJWT
     }, {
       where: {
@@ -175,12 +145,10 @@ exports.handler = async event => {
   await batchWriteTable(ddb, process.env.NOTIFICATIONS_TABLE_NAME, formattedItemsToDelete)
 
   // retrieve all wss connection ids owned by account
-  let websocketsOwnedByCurrentAccount = await notificationWebsocketsTable.findAll({
-    where: {
-      account: accountFromJWT
-    }
+  let websocketsOwnedByCurrentAccount = await websocketsTable.findAll({
+    where: { account: accountFromJWT }
   })
-
+  console.log(websocketsOwnedByCurrentAccount)
   // broadcast which messages cleared to each client
   for (let i = 0; i < websocketsOwnedByCurrentAccount.length; i++) {
 
