@@ -48,26 +48,6 @@ describe('awsServices', () => {
     expect(ddb.batchWrite).toHaveBeenCalledWith(expected)
   })
 
-  test('queryIndex params', () => {
-    let ddb = mockAws('query')
-    let table = 'testtable'
-    let indexName = 'account-index'
-    let key = 'account'
-    let val = 'testaccount'
-    let expected = {
-      TableName: table,
-      IndexName: indexName,
-      KeyConditions: {
-        [key]: {
-          ComparisonOperator: 'EQ',
-          AttributeValueList: [ val ]
-        }
-      }
-    }
-    queryIndex(ddb, table, indexName, key, val)
-    expect(ddb.query).toHaveBeenCalledWith(expected)
-  })
-
   test('sendMessageToClient params', () => {
     let apig = mockAws('postToConnection')
     let connectionId = '1234567'

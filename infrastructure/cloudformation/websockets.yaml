@@ -59,12 +59,18 @@ Resources:
       Handler: index.handler
       MemorySize: 256
       Runtime: nodejs10.x
+      Layers:
+        - 'arn:aws:lambda:us-east-1:170110910042:layer:pg-sequelize-nodejs-deps:1'
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref WebsocketConnectFunctionArtifact
       Environment:
         Variables:
-          WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
+          PGDATABASE: !Sub "{{resolve:secretsmanager:${Environment}/PGDATABASE}}"
+          PGUSER: !Sub "{{resolve:secretsmanager:${Environment}/PGUSER}}"
+          PGPASSWORD: !Sub "{{resolve:secretsmanager:${Environment}/PGPASSWORD}}"
+          PGHOST: !Sub "{{resolve:secretsmanager:${Environment}/PGHOST}}"
+          PGPORT: !Sub "{{resolve:secretsmanager:${Environment}/PGPORT}}"
       Role: !GetAtt WebsocketNotificationConnectLambdaRole.Arn
   WebsocketNotificationConnectLambdaRole:
     Type: AWS::IAM::Role
@@ -90,32 +96,6 @@ Resources:
             - 'logs:CreateLogStream'
             - 'logs:PutLogEvents'
             Resource: arn:aws:logs:*:*:*
-      - PolicyName: !Sub "allow-dynamodb-access-websocket-notification-connect-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:BatchGetItem'
-            - 'dynamodb:BatchWriteItem'
-            - 'dynamodb:ConditionCheck'
-            - 'dynamodb:DeleteItem'
-            - 'dynamodb:GetItem'
-            - 'dynamodb:GetRecords'
-            - 'dynamodb:PutItem'
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            - 'dynamodb:UpdateItem'
-            Resource: !GetAtt WebsocketConnectionsTable.Arn
-      - PolicyName: !Sub "allow-dynamodb-index-access-websocket-notification-connect-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
   WebsocketNotificationConnectLambdaLogGroup:
     Type: AWS::Logs::LogGroup
     DependsOn:
@@ -157,12 +137,18 @@ Resources:
       MemorySize: 256
       Runtime: nodejs10.x
       Role: !GetAtt NotificationGetLambdaExecutionRole.Arn
+      Layers:
+        - 'arn:aws:lambda:us-east-1:170110910042:layer:pg-sequelize-nodejs-deps:1'
       Environment:
           Variables:
             NOTIFICATIONS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt NotificationsTable.Arn]]
-            WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
             WSS_CONNECTION_URL: !Sub "https://${NotificationWebsocket}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
             POOL_NAME: !Sub "mxfactorial-${Environment}"
+            PGDATABASE: !Sub "{{resolve:secretsmanager:${Environment}/PGDATABASE}}"
+            PGUSER: !Sub "{{resolve:secretsmanager:${Environment}/PGUSER}}"
+            PGPASSWORD: !Sub "{{resolve:secretsmanager:${Environment}/PGPASSWORD}}"
+            PGHOST: !Sub "{{resolve:secretsmanager:${Environment}/PGHOST}}"
+            PGPORT: !Sub "{{resolve:secretsmanager:${Environment}/PGPORT}}"
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref NotificationGetFunctionArtifact
@@ -212,30 +198,6 @@ Resources:
             - 'dynamodb:Query'
             - 'dynamodb:Scan'
             Resource: !Join [ '/', [!GetAtt NotificationsTable.Arn, 'index', '*'] ]
-      - PolicyName: !Sub "allow-websocket-table-access-notification-get-lambda-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:BatchGetItem'
-            - 'dynamodb:ConditionCheck'
-            - 'dynamodb:GetItem'
-            - 'dynamodb:GetRecords'
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            - 'dynamodb:UpdateItem'
-            Resource: !GetAtt WebsocketConnectionsTable.Arn
-      - PolicyName: !Sub "allow-websocket-table-index-access-notification-get-lambda-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            - 'dynamodb:UpdateItem'
-            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
       - PolicyName: !Sub "api-manage-connections-get-lambda-${Environment}"
         PolicyDocument:
           Version: '2012-10-17'
@@ -270,12 +232,18 @@ Resources:
       MemorySize: 256
       Runtime: nodejs10.x
       Role: !GetAtt NotificationClearLambdaExecutionRole.Arn
+      Layers:
+        - 'arn:aws:lambda:us-east-1:170110910042:layer:pg-sequelize-nodejs-deps:1'
       Environment:
           Variables:
             NOTIFICATIONS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt NotificationsTable.Arn]]
-            WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
             WSS_CONNECTION_URL: !Sub "https://${NotificationWebsocket}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
             POOL_NAME: !Sub "mxfactorial-${Environment}"
+            PGDATABASE: !Sub "{{resolve:secretsmanager:${Environment}/PGDATABASE}}"
+            PGUSER: !Sub "{{resolve:secretsmanager:${Environment}/PGUSER}}"
+            PGPASSWORD: !Sub "{{resolve:secretsmanager:${Environment}/PGPASSWORD}}"
+            PGHOST: !Sub "{{resolve:secretsmanager:${Environment}/PGHOST}}"
+            PGPORT: !Sub "{{resolve:secretsmanager:${Environment}/PGPORT}}"
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref NotificationsClearFunctionArtifact
@@ -320,30 +288,6 @@ Resources:
             - 'dynamodb:Scan'
             - 'dynamodb:UpdateItem'
             Resource: !GetAtt NotificationsTable.Arn
-      - PolicyName: !Sub "allow-websocket-table-access-notification-clear-lambda-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:BatchGetItem'
-            - 'dynamodb:ConditionCheck'
-            - 'dynamodb:GetItem'
-            - 'dynamodb:GetRecords'
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            - 'dynamodb:UpdateItem'
-            Resource: !GetAtt WebsocketConnectionsTable.Arn
-      - PolicyName: !Sub "allow-websocket-index-access-notification-clear-lambda-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            - 'dynamodb:UpdateItem'
-            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
       - PolicyName: !Sub "allow-api-invoke-clear-lambda-${Environment}"
         PolicyDocument:
           Version: '2012-10-17'
@@ -383,15 +327,21 @@ Resources:
       Handler: index.handler
       MemorySize: 256
       Runtime: nodejs10.x
+      Layers:
+        - 'arn:aws:lambda:us-east-1:170110910042:layer:pg-sequelize-nodejs-deps:1'
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref NotificationSendFunctionArtifact
       Environment:
         Variables:
-          WEBSOCKETS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt WebsocketConnectionsTable.Arn]]
           NOTIFICATIONS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt NotificationsTable.Arn]]
           ENVIRONMENT: !Sub ${Environment
           WSS_CONNECTION_URL: !Sub "https://${NotificationWebsocket}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+          PGDATABASE: !Sub "{{resolve:secretsmanager:${Environment}/PGDATABASE}}"
+          PGUSER: !Sub "{{resolve:secretsmanager:${Environment}/PGUSER}}"
+          PGPASSWORD: !Sub "{{resolve:secretsmanager:${Environment}/PGPASSWORD}}"
+          PGHOST: !Sub "{{resolve:secretsmanager:${Environment}/PGHOST}}"
+          PGPORT: !Sub "{{resolve:secretsmanager:${Environment}/PGPORT}}"
       Role: !GetAtt NotificationSendLambdaRole.Arn
   NotificationSendLambdaRole:
     Type: AWS::IAM::Role
@@ -456,28 +406,6 @@ Resources:
             - 'dynamodb:Query'
             - 'dynamodb:Scan'
             Resource: !GetAtt NotificationsTable.Arn
-      - PolicyName: !Sub "allow-websocket-table-access-notification-send-lambda-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:BatchGetItem'
-            - 'dynamodb:ConditionCheck'
-            - 'dynamodb:GetItem'
-            - 'dynamodb:GetRecords'
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            Resource: !GetAtt WebsocketConnectionsTable.Arn
-      - PolicyName: !Sub "allow-websocket-ddb-index-access-notification-send-lambda-${Environment}"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action:
-            - 'dynamodb:Query'
-            - 'dynamodb:Scan'
-            Resource: !Join [ '/', [!GetAtt WebsocketConnectionsTable.Arn, 'index', '*'] ]
       - PolicyName: !Sub "api-manage-connections-send-lambda-${Environment}"
         PolicyDocument:
           Version: '2012-10-17'
@@ -505,55 +433,6 @@ Resources:
       FunctionName: !Ref NotificationSendLambda
       Principal: sns.amazonaws.com
       SourceArn: !Sub "arn:aws:sns:${AWS::Region}:${AWS::AccountId}:notifications-${Environment}"
-  WebsocketConnectionsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub "notification-websocket-${Environment}"
-      AttributeDefinitions:
-      - AttributeName: "connection_id"
-        AttributeType: "S"
-      - AttributeName: "account"
-        AttributeType: "S"
-      KeySchema:
-      - AttributeName: "connection_id"
-        KeyType: "HASH"
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
-      GlobalSecondaryIndexes:
-        - IndexName: account-index
-          KeySchema:
-            - AttributeName: account
-              KeyType: HASH
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
-  WebsocketConnectionsTableWriteCapacityScalableTarget:
-    Type: AWS::ApplicationAutoScaling::ScalableTarget
-    Properties:
-      MaxCapacity: 15
-      MinCapacity: 5
-      ResourceId: !Join
-        - /
-        - - table
-          - !Ref WebsocketConnectionsTable
-      RoleARN: !GetAtt WebsocketConnectionsTable.Arn
-      ScalableDimension: dynamodb:table:WriteCapacityUnits
-      ServiceNamespace: dynamodb
-  WebsocketConnectionsWriteScalingPolicy:
-    Type: AWS::ApplicationAutoScaling::ScalingPolicy
-    Properties:
-      PolicyName: WriteAutoScalingPolicy
-      PolicyType: TargetTrackingScaling
-      ScalingTargetId: !Ref WebsocketConnectionsTableWriteCapacityScalableTarget
-      TargetTrackingScalingPolicyConfiguration:
-        TargetValue: 50.0
-        ScaleInCooldown: 60
-        ScaleOutCooldown: 60
-        PredefinedMetricSpecification:
-          PredefinedMetricType: DynamoDBWriteCapacityUtilization
   NotificationsTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -927,12 +806,6 @@ Resources:
       Description: !Sub "notifications table name in ${Environment}"
       Name: !Sub "${Environment}/NOTIFICATIONS_TABLE_NAME"
       SecretString: !Ref NotificationsTable
-  WebsocketsTableName:
-    Type: AWS::SecretsManager::Secret
-    Properties:
-      Description: !Sub "websockets table name in ${Environment}"
-      Name: !Sub "${Environment}/WEBSOCKETS_TABLE_NAME"
-      SecretString: !Ref WebsocketConnectionsTable
 Outputs:
   NotificationWebsocketEndpoint:
     Description: wss notification endpoint

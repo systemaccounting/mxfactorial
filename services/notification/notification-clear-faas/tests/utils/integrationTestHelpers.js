@@ -160,30 +160,22 @@ const shapeClearNotificationsRequest = (action, token, notifications) => {
   return JSON.stringify(clearNotificationsRequest)
 }
 
-const queryIndex = (
-  service, table, indexName, hash, hashVal
-  ) => {
-  let params = {
-    TableName: table,
-    IndexName: indexName,
-    KeyConditions: {
-      [hash]: {
-        ComparisonOperator: 'EQ',
-        AttributeValueList: [ hashVal ]
-      }
-    }
-  }
-  return service.query(params)
-    .promise()
-    .then(async data => {
-      // console.log(data.Items)
-      return data.Items
-    })
-    .catch(async err => {
-      console.log(err, err.stack)
-      throw err
-    })
+const queryTable = (service, account) => {
+  return service.findAll({
+    where: { account }
+  })
 }
+
+const insert = (service, connectionId, connectedAt, account) => {
+  return service.create({
+    connection_id: connectionId,
+    created_at: null,
+    epoch_created_at: connectedAt,
+    account: account
+  })
+}
+
+const deleteFromTable = (service, account) => service.destroy({ where: { account } })
 
 module.exports = {
   createNotifications,
@@ -193,5 +185,7 @@ module.exports = {
   deleteAccount,
   getToken,
   shapeClearNotificationsRequest,
-  queryIndex
+  queryTable,
+  insert,
+  deleteFromTable
 }

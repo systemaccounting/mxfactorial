@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk')
 const WebSocket = require('ws')
+const Sequelize = require('sequelize')
 
 const {
   deleteNotifications,
@@ -7,8 +8,17 @@ const {
   deleteAccount,
   getToken,
   sendNotifications,
-  queryIndex
+  queryIndex,
+  queryTable,
+  insert,
+  deleteFromTable
 } = require('./utils/integrationTestHelpers')
+
+const {
+  connection,
+  tableModel
+} = require('../lib/postgres')
+
 
 const {
   transactIntegrationTestEvent,
@@ -16,7 +26,6 @@ const {
   TEST_ACCOUNT
 } = require('./utils/testData')
 
-const GET_NOTIFICATIONS_ACTION = {"action":"getnotifications"}
 
 // env var inventory
 // process.env.AWS_REGION
@@ -26,10 +35,21 @@ const GET_NOTIFICATIONS_ACTION = {"action":"getnotifications"}
 // process.env.POOL_ID
 // process.env.WSS_CLIENT_URL
 // process.env.NOTIFY_TOPIC_ARN
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
 const sns = new AWS.SNS()
+
+const websocketsTable = tableModel(
+  connection,
+  Sequelize,
+  'notification_websockets',
+)
 
 const timeout = ms => {
   return new Promise(resolve => {
@@ -40,6 +60,7 @@ const timeout = ms => {
 }
 
 beforeAll(async () => {
+  jest.setTimeout(30000)
   await createAccount(
     cognitoIdsp,
     process.env.CLIENT_ID,
@@ -54,6 +75,8 @@ afterAll(async () => {
     process.env.POOL_ID,
     TEST_ACCOUNT
   )
+  await deleteFromTable(websocketsTable, TEST_ACCOUNT)
+  connection.close().then(() => console.log('postgres connection closed'))
 })
 
 let storedNotifications = []
@@ -63,7 +86,7 @@ beforeEach(async () => {
     process.env.NOTIFY_TOPIC_ARN,
     transactIntegrationTestEvent
   )
-  await timeout(2e3) // wait 2 second for sns -> lambda -> ddb
+  await timeout(5e3) // wait 5 second for sns -> lambda -> ddb
   for (account of recipientListIntegrationTests) {
     let queryResult = await queryIndex(
       ddb,
@@ -82,6 +105,7 @@ afterEach(async () => {
     process.env.NOTIFICATIONS_TABLE_NAME,
     storedNotifications
   )
+  storedNotifications = []
 })
 
 describe('notification send lambda', () => {
@@ -96,12 +120,13 @@ describe('notification send lambda', () => {
       TEST_ACCOUNT,
       process.env.SECRET
     )
-    let options = {
-      headers: { Authorization: token }
-    }
-    let ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
+    let ws = new WebSocket(process.env.WSS_CLIENT_URL)
     ws.on('open', () => {
-      ws.send(JSON.stringify(GET_NOTIFICATIONS_ACTION))
+      let getNotificationsAction = JSON.stringify({
+        action: "getnotifications",
+        token
+      })
+      ws.send(getNotificationsAction)
       ws.on('message', async data => {
         let event = JSON.parse(data)
         if (event.message === 'Internal server error') {
@@ -120,7 +145,7 @@ describe('notification send lambda', () => {
         done()
       })
     })
-  }, 10000)
+  })
 
   test('properties in pending transaction notification objects', async done => {
     let token = await getToken(
@@ -129,12 +154,13 @@ describe('notification send lambda', () => {
       TEST_ACCOUNT,
       process.env.SECRET
     )
-    let options = {
-      headers: { Authorization: token }
-    }
-    let ws = new WebSocket(process.env.WSS_CLIENT_URL, options)
+    let ws = new WebSocket(process.env.WSS_CLIENT_URL)
     ws.on('open', () => {
-      ws.send(JSON.stringify(GET_NOTIFICATIONS_ACTION))
+      let getNotificationsAction = JSON.stringify({
+        action: "getnotifications",
+        token
+      })
+      ws.send(getNotificationsAction)
       ws.on('message', async data => {
         let event = JSON.parse(data)
         if (event.message === 'Internal server error') {
@@ -161,5 +187,48 @@ describe('notification send lambda', () => {
         done()
       })
     })
-  }, 10000)
+  })
+
+  test('deletes expired websocket from postgres', async () => {
+    // create expired websocket record
+    let testconnectionid = 'EbpcocZ1oAMCI1Q='
+    let testtimestamp = 1575887543160
+    await insert(websocketsTable, testconnectionid, testtimestamp, TEST_ACCOUNT)
+    // send notification
+    let token = await getToken(
+      cognitoIdsp,
+      process.env.CLIENT_ID,
+      TEST_ACCOUNT,
+      process.env.SECRET
+    )
+    let ws = new WebSocket(process.env.WSS_CLIENT_URL)
+    ws.on('open', () => {
+      let getNotificationsAction = JSON.stringify({
+        action: "getnotifications",
+        token
+      })
+      ws.send(getNotificationsAction)
+      ws.on('message', async data => {
+        let event = JSON.parse(data)
+        if (event.message === 'Internal server error') {
+          ws.close()
+          done()
+          throw event
+        }
+        ws.close()
+        await timeout(5e3) // wait 5 second for lambda to remove websocket db record
+        // query db for expired record
+        let websocketRecordsInPostgres = await queryTable(
+          websocketsTable,
+          TEST_ACCOUNT
+        )
+        // filter expired connection
+        let recordsContainingExpiredWebsocket = websocketRecordsInPostgres.filter(record => {
+          return record.connection_id = testconnectionid
+        })
+        expect(recordsContainingExpiredWebsocket).toHaveLength(0)
+        done()
+      })
+    })
+  })
 })

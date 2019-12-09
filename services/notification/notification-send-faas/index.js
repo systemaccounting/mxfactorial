@@ -1,11 +1,11 @@
 const AWS = require('aws-sdk')
 const uuid = require('uuid/v1')
 const microtime = require('microtime')
+const Sequelize = require('sequelize') // added as dev dep since published in lambda layer
 
 const {
   formatPendingNotifications,
   batchWriteTable,
-  queryIndex,
   sendMessageToClient
 } = require('./lib/awsServices')
 
@@ -16,14 +16,21 @@ const {
   idAndTimestampNotifications
 } = require('./supportedServices/transact')
 
+const {
+  connection,
+  tableModel
+} = require('./lib/postgres')
+
 // env var inventory (avoid declaring as const):
 // process.env.AWS_REGION
 // process.env.WSS_CONNECTION_URL
 // process.env.NOTIFICATIONS_TABLE_NAME
-// process.env.WEBSOCKETS_TABLE_NAME
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
-const WEBSOCKETS_TABLE_INDEX_NAME = 'account-index'
-const WEBSOCKETS_TABLE_ACCOUNT_ATTRIBUTE = 'account'
 const PENDING_NOTIFICATIONS_PROPERTY = 'pending'
 const CREDITOR_PROPERTY = 'creditor'
 const DEBITOR_PROPERTY = 'debitor'
@@ -35,7 +42,6 @@ const ddb = new AWS.DynamoDB.DocumentClient({
 const ws = new AWS.ApiGatewayManagementApi({
   endpoint: process.env.WSS_CONNECTION_URL
 })
-
 
 exports.handler = async event => {
   // todo: test notifications for account and message values, types
@@ -92,26 +98,42 @@ exports.handler = async event => {
       }
     }
 
-    // retrieve wss connection ids owned by account
-    let connectionsOwnedByAccount = await queryIndex(
-      ddb,
-      process.env.WEBSOCKETS_TABLE_NAME,
-      WEBSOCKETS_TABLE_INDEX_NAME,
-      WEBSOCKETS_TABLE_ACCOUNT_ATTRIBUTE,
-      account
+    let websocketsTable = tableModel(
+      connection,
+      Sequelize,
+      'notification_websockets',
     )
 
-    if (connectionsOwnedByAccount.length > 0) {
+    let websocketsOwnedByCurrentAccount = await websocketsTable.findAll({ where: { account } })
+
+    if (websocketsOwnedByCurrentAccount.length > 0) {
       // broadcast pending notifications to each client
-      for (let i = 0; i < connectionsOwnedByAccount.length; i++) {
+      for (let i = 0; i < websocketsOwnedByCurrentAccount.length; i++) {
+
+        let currConnId = websocketsOwnedByCurrentAccount[i].connection_id
+        let currAcct = websocketsOwnedByCurrentAccount[i].account
+
+        // delete and skip expired websocket connections before sending
+        try {
+          await sendMessageToClient(ws, currConnId, 'ping')
+        } catch(err) {
+          if (err.message == '410') {
+            let deleteResult = await websocketsTable.destroy({
+              where: {
+                connection_id: currConnId
+              }
+            })
+            console.log(deleteResult)
+            continue
+          }
+        }
+
+        // send
+        console.log(`sending account ${currAcct} clear notification confirmation to ${currConnId} websocket`)
         let confirmed = {
           [PENDING_NOTIFICATIONS_PROPERTY]: notificationsPerAccount
         }
-        await sendMessageToClient(
-          ws,
-          connectionsOwnedByAccount[i].connection_id,
-          confirmed
-        )
+        await sendMessageToClient(ws, currConnId, confirmed)
       }
     } else {
       console.log('0 notifcation websockets for account: ', account)
