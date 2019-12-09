@@ -49,7 +49,6 @@ const PENDING_NOTIFICATIONS_PROPERTY = 'pending'
 // process.env.AWS_REGION
 // process.env.WSS_CONNECTION_URL
 // process.env.NOTIFICATIONS_TABLE_NAME
-// process.env.WEBSOCKETS_TABLE_NAME
 // process.env.POOL_NAME
 // process.env.AWS_REGION
 // process.env.PGDATABASE
