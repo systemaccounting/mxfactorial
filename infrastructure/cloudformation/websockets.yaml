@@ -337,6 +337,11 @@ Resources:
           NOTIFICATIONS_TABLE_NAME: !Select [1, !Split ["/", !GetAtt NotificationsTable.Arn]]
           ENVIRONMENT: !Sub ${Environment
           WSS_CONNECTION_URL: !Sub "https://${NotificationWebsocket}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
+          PGDATABASE: !Sub "{{resolve:secretsmanager:${Environment}/PGDATABASE}}"
+          PGUSER: !Sub "{{resolve:secretsmanager:${Environment}/PGUSER}}"
+          PGPASSWORD: !Sub "{{resolve:secretsmanager:${Environment}/PGPASSWORD}}"
+          PGHOST: !Sub "{{resolve:secretsmanager:${Environment}/PGHOST}}"
+          PGPORT: !Sub "{{resolve:secretsmanager:${Environment}/PGPORT}}"
       Role: !GetAtt NotificationSendLambdaRole.Arn
   NotificationSendLambdaRole:
     Type: AWS::IAM::Role
