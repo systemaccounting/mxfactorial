@@ -120,16 +120,10 @@ jest.mock('./lib/postgres', () => {
     .mockImplementation(
       () => ({})
     )
-  const findAll = jest.fn()
-      .mockImplementationOnce(() => (
-        [
-          ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
-          ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
-        ]
-      ))
-      .mockImplementation(() => ([]))
+  const findAll = jest.fn().mockImplementation(() => ([]))
   const update = jest.fn()
-  const tableModel = jest.fn(() => ({ findOne, update, findAll }))
+  const destroy = jest.fn()
+  const tableModel = jest.fn(() => ({ findOne, update, destroy, findAll }))
   const connection = {}
   return { tableModel, connection }
 })
@@ -343,6 +337,37 @@ describe('lambda function', () => {
     await expect(sendMessageToClient).toHaveBeenCalledTimes(0)
   })
 
+  test('deletes websocket if expired', async () => {
+    sendMessageToClient.mockImplementation(
+      () => {
+        throw new Error('410')
+      }
+    )
+    const destroyMock = jest.fn()
+    tableModel.mockImplementation(
+      () => {
+        return {
+          findOne: jest.fn(() => ({})),
+          update: jest.fn(),
+          destroy: destroyMock,
+          findAll: jest.fn().mockImplementation(() => {
+            return [
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
+            ]
+          })
+        }
+      }
+    )
+    await handler(event)
+    await expect(destroyMock)
+      .toHaveBeenCalledWith({
+        where: {
+          connection_id: '12345678910'
+        }
+      })
+  })
+
   test('calls sendMessageToClient for each connection id', async () => {
     tableModel.mockImplementation(
       () => {
@@ -354,11 +379,12 @@ describe('lambda function', () => {
               ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
               ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
             ]
-          )
+          ),
+          destroy: () => {}
         }
       }
     )
     await handler(event)
-    await expect(sendMessageToClient).toHaveBeenCalledTimes(2)
+    await expect(sendMessageToClient).toHaveBeenCalledTimes(4)
   })
 })
