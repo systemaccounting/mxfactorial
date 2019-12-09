@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk')
 const WebSocket = require('ws')
+const Sequelize = require('sequelize')
 
 const {
   createNotifications,
@@ -8,8 +9,13 @@ const {
   deleteAccount,
   getToken,
   shapeClearNotificationsRequest,
-  queryIndex
+  queryTable
 } = require('./utils/integrationTestHelpers')
+
+const {
+  connection,
+  tableModel
+} = require('../lib/postgres')
 
 const {
   TEST_ACCOUNT,
@@ -18,22 +24,33 @@ const {
 
 // avoid const assignment for env vars
 // process.env.AWS_REGION
-// process.env.NOTIFICATIONS_TABLE_NAME
 // process.env.SECRET
 // process.env.CLIENT_ID
 // process.env.POOL_ID
 // process.env.WSS_CLIENT_URL
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION})
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
 
+let websocketsTable = tableModel(
+  connection,
+  Sequelize,
+  'notification_websockets',
+)
+
 beforeAll(async () => {
-  jest.setTimeout(10000)
+  jest.setTimeout(15000)
   await createAccount(cognitoIdsp, process.env.CLIENT_ID, TEST_ACCOUNT, process.env.SECRET)
 })
 
 afterAll(async() => {
   await deleteAccount(cognitoIdsp, process.env.POOL_ID, TEST_ACCOUNT)
+  connection.close().then(() => console.log('postgres connection closed'))
 })
 
 beforeEach(async () => {
@@ -145,15 +162,12 @@ describe('notification pending lambda', () => {
       let clearNotificationsRequest = JSON.stringify({
         action: "clearnotifications",
         notifications: pendingReceivedNotifications,
-        token // send authed request to add account attribute to dynamodb record
+        token // send authed request to add account attribute to websocket db record
       })
       ws.send(clearNotificationsRequest)
-      await timeout(2e3) // wait 2 second for lambda to update ddb record
-      let connectionIdRecordsInDynamodb = await queryIndex(
-        ddb,
-        process.env.WEBSOCKETS_TABLE_NAME,
-        'account-index',
-        'account',
+      await timeout(2e3) // wait 2 second for lambda to update websocket db record
+      let websocketRecordsInPostgres = await queryTable(
+        websocketsTable,
         TEST_ACCOUNT
       )
       let getConnectionIdFromErrorMessage = JSON.stringify({
@@ -165,7 +179,7 @@ describe('notification pending lambda', () => {
         if (JSON.parse(data).connectionId) {
           let connectionId = JSON.parse(data).connectionId
           ws.close()
-          let currentRecord = connectionIdRecordsInDynamodb.filter(record => {
+          let currentRecord = websocketRecordsInPostgres.filter(record => {
             return record.connection_id == connectionId
           })
           expect(currentRecord[0].created_at).toBeTruthy()

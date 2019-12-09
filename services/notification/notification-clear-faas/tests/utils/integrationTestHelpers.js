@@ -160,29 +160,10 @@ const shapeClearNotificationsRequest = (action, token, notifications) => {
   return JSON.stringify(clearNotificationsRequest)
 }
 
-const queryIndex = (
-  service, table, indexName, hash, hashVal
-  ) => {
-  let params = {
-    TableName: table,
-    IndexName: indexName,
-    KeyConditions: {
-      [hash]: {
-        ComparisonOperator: 'EQ',
-        AttributeValueList: [ hashVal ]
-      }
-    }
-  }
-  return service.query(params)
-    .promise()
-    .then(async data => {
-      // console.log(data.Items)
-      return data.Items
-    })
-    .catch(async err => {
-      console.log(err, err.stack)
-      throw err
-    })
+const queryTable = (service, account) => {
+  return service.findAll({
+    where: { account }
+  })
 }
 
 module.exports = {
@@ -193,5 +174,5 @@ module.exports = {
   deleteAccount,
   getToken,
   shapeClearNotificationsRequest,
-  queryIndex
+  queryTable
 }
