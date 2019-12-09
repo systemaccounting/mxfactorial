@@ -27,15 +27,16 @@ const {
 
 const {
   formatNotificationsToClear,
-  updateItem,
-  queryIndex,
-  queryTable,
   batchWriteTable
 } = require('./lib/dynamodb')
 
 const {
   sendMessageToClient
 } = require('./lib/apiGateway')
+
+const {
+  tableModel
+} = require('./lib/postgres')
 
 const {
   batchWriteNotifications,
@@ -97,20 +98,6 @@ jest.mock('./lib/jwt', () => {
 
 jest.mock('./lib/dynamodb', () => {
   return {
-    updateItem: jest.fn(),
-    queryTable: jest.fn().mockImplementationOnce(
-      () => [{
-        timestamp: 12345678910,
-        account: 'testaccount' // first test
-      }]
-    ).mockImplementation(
-      () => [{
-        timestamp: 12345678910
-      }]
-    ),
-    queryIndex: jest.fn().mockImplementation(() => {
-      return jest.requireActual('./tests/utils/testData').pendingReceivedNotifications
-    }),
     formatNotificationsToClear: jest.fn().mockImplementation(() => {
       return jest.requireActual('./tests/utils/testData').batchWriteNotifications
     }),
@@ -123,6 +110,31 @@ jest.mock('./lib/apiGateway', () => {
     sendMessageToClient: jest.fn()
   }
 })
+
+jest.mock('./lib/postgres', () => {
+  const findOne = jest.fn()
+    .mockImplementationOnce(() => {})
+    .mockImplementationOnce(
+      () => ({ account: 'testaccount' })
+    )
+    .mockImplementation(
+      () => ({})
+    )
+  const findAll = jest.fn()
+      .mockImplementationOnce(() => (
+        [
+          ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
+          ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
+        ]
+      ))
+      .mockImplementation(() => ([]))
+  const update = jest.fn()
+  const tableModel = jest.fn(() => ({ findOne, update, findAll }))
+  const connection = {}
+  return { tableModel, connection }
+})
+
+jest.mock('sequelize', () => ({}))
 
 afterEach(() => {
   // jest.clearAllMocks() // breaks aws service tests
@@ -147,9 +159,26 @@ const event = {
 }
 
 describe('lambda function', () => {
-  test('updateItem NOT called IF account attribute present in dynamodb record', async () => {
+  test('throws 0 stored connections', async () => {
+    await expect(handler(event)).rejects.toThrow('0 stored connections')
+  })
+
+  test('update NOT called IF account attribute present in websocket record', async () => {
     await handler(event)
-    await expect(updateItem).toHaveBeenCalledTimes(0)
+    await expect(tableModel.mock.results[0].value.update)
+      .toHaveBeenCalledTimes(0)
+  })
+
+  test('calls update with args IF account absent from postgres', async () => {
+    const expectedAccount = { account: 'testaccount' }
+    const expectedConnection = {
+      where: {
+        connection_id: event.requestContext.connectionId
+      }
+    }
+    await handler(event)
+    await expect(tableModel.mock.results[0].value.update)
+      .toHaveBeenCalledWith(expectedAccount, expectedConnection)
   })
 
   test('calls CognitoIdentityServiceProvider with config', async () => {
@@ -170,6 +199,16 @@ describe('lambda function', () => {
     await expect(AWS.ApiGatewayManagementApi)
       .toHaveBeenCalledWith(expected)
     AWS.ApiGatewayManagementApi.mockClear()
+  })
+
+  test('calls DocumentClient with config', async () => {
+    let expected = {
+      region: process.env.AWS_REGION
+    }
+    await handler(event)
+    await expect(AWS.DynamoDB.DocumentClient)
+      .toHaveBeenCalledWith(expected)
+    AWS.DynamoDB.DocumentClient.mockClear()
   })
 
   test('throws unauthorized error on missing Authorization header', async () => {
@@ -252,29 +291,21 @@ describe('lambda function', () => {
     jest.clearAllMocks()
   })
 
-  test('calls queryTable with service, table name, partition key and connection id', async () => {
+  test('calls tableModel with service, dependency and table name', async () => {
     await handler(event)
-    await expect(queryTable).toHaveBeenCalledWith(
-      {}, process.env.WEBSOCKETS_TABLE_NAME, 'connection_id', '123456789'
-    )
+    await expect(tableModel).toHaveBeenCalledWith({}, {}, 'notification_websockets')
     jest.clearAllMocks()
   })
 
-  test('calls updateItem with args', async () => {
-    let ddb = {}
-    let partitiionKey = 'connection_id'
-    let connectionId = '123456789'
-    let indexAttribute = 'account'
-    let account = 'testaccount'
+  test('calls findOne with connection id', async () => {
+    const expected = {
+      where: {
+        connection_id: event.requestContext.connectionId
+      }
+    }
     await handler(event)
-    await expect(updateItem).toHaveBeenCalledWith(
-      ddb,
-      process.env.WEBSOCKETS_TABLE_NAME,
-      partitiionKey,
-      connectionId,
-      indexAttribute,
-      account,
-    )
+    await expect(tableModel.mock.results[0].value.findOne)
+      .toHaveBeenCalledWith(expected)
     jest.clearAllMocks()
   })
 
@@ -298,36 +329,35 @@ describe('lambda function', () => {
     jest.clearAllMocks()
   })
 
-  test('calls queryIndex with args', async () => {
-    let ddb = {}
-    let tableName = process.env.WEBSOCKETS_TABLE_NAME
-    let indexName = 'account-index'
-    let indexAttribute = 'account'
-    let account = 'testaccount'
+  test('calls findAll with args', async () => {
+    const expected = {
+      where: { account: 'testaccount' }
+    }
     await handler(event)
-    await expect(queryIndex).toHaveBeenCalledWith(
-      ddb,
-      tableName,
-      indexName,
-      indexAttribute,
-      account
-    )
-    jest.clearAllMocks()
+    await expect(tableModel.mock.results[0].value.findAll)
+      .toHaveBeenCalledWith(expected)
   })
 
   test('calls sendMessageToClient 0 times', async () => {
-    queryIndex.mockImplementation(() => [])
     await handler(event)
     await expect(sendMessageToClient).toHaveBeenCalledTimes(0)
   })
 
   test('calls sendMessageToClient for each connection id', async () => {
-    queryIndex.mockImplementation(() => {
-      return [
-        ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
-        ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
-      ]
-    })
+    tableModel.mockImplementation(
+      () => {
+        return {
+          findOne: () => ({}),
+          update: () => ({}),
+          findAll: () => (
+            [
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
+            ]
+          )
+        }
+      }
+    )
     await handler(event)
     await expect(sendMessageToClient).toHaveBeenCalledTimes(2)
   })
