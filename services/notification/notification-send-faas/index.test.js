@@ -1,12 +1,12 @@
+const { handler } = require('./index')
+
 const AWS = require('aws-sdk')
 const uuid = require('uuid/v1')
 const microtime = require('microtime')
-const { handler } = require('./index')
 
 const {
   formatPendingNotifications,
   batchWriteTable,
-  queryIndex,
   sendMessageToClient
 } = require('./lib/awsServices')
 
@@ -16,6 +16,10 @@ const {
   dedupeTransactionNotificationRecipients,
   idAndTimestampNotifications
 } = require('./supportedServices/transact')
+
+const {
+  tableModel
+} = require('./lib/postgres')
 
 const {
   dedupedRecipientList,
@@ -45,12 +49,6 @@ jest.mock('./lib/awsServices', () => {
       }
     ),
     batchWriteTable: jest.fn(),
-    queryIndex: jest.fn().mockImplementation(
-      () => {
-        return jest.requireActual('./tests/utils/testData')
-          .websocketConnectionIds
-      }
-    ),
     sendMessageToClient: jest.fn()
   }
 })
@@ -71,6 +69,22 @@ jest.mock('./supportedServices/transact', () => {
   }
 })
 
+jest.mock('./lib/postgres', () => {
+  const findAll = jest.fn()
+      .mockImplementationOnce(() => (
+        [
+          ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
+          ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
+        ]
+      ))
+      .mockImplementation(() => ([]))
+  const tableModel = jest.fn(() => ({ findAll }))
+  const connection = {}
+  return { tableModel, connection }
+})
+
+jest.mock('sequelize', () => ({}))
+
 afterEach(() => {
   jest.clearAllMocks()
 })
@@ -79,7 +93,9 @@ afterAll(() => {
   jest.unmock('uuid/v1')
   jest.unmock('microtime')
   jest.unmock('aws-sdk')
+  jest.unmock('sequelize')
   jest.unmock('./supportedServices/transact')
+  jest.unmock('./lib/postgres')
 })
 
 describe('lambda function', () => {
@@ -129,34 +145,74 @@ describe('lambda function', () => {
       .toBe(pendingReceivedNotifications)
   })
 
-  test('calls queryIndex with args', async () => {
-    process.env.WEBSOCKETS_TABLE_NAME = 'websocket-table'
+  test('calls tableModel with service, dependency and table name', async () => {
     await handler(snsEvent)
-    expect(queryIndex.mock.calls[0][0])
-      .toEqual({})
-    expect(queryIndex.mock.calls[0][1])
-      .toBe('websocket-table')
-    expect(queryIndex.mock.calls[0][2])
-      .toBe('account-index')
-    expect(queryIndex.mock.calls[0][3])
-      .toBe('account')
-    expect(queryIndex.mock.calls[0][4])
-      .toBe(dedupedRecipientList[0])
+    await expect(tableModel).toHaveBeenCalledWith({}, {}, 'notification_websockets')
+    jest.clearAllMocks()
+  })
+
+  test('calls findAll with args', async () => {
+    await handler(snsEvent)
+    await expect(tableModel.mock.results[0].value.findAll.mock.calls[0][0])
+      .toEqual({ where: { account: 'testcreditor1' } })
+    await expect(tableModel.mock.results[0].value.findAll.mock.calls[1][0])
+      .toEqual({ where: { account: 'testcreditor2' } })
+    await expect(tableModel.mock.results[0].value.findAll.mock.calls[2][0])
+      .toEqual({ where: { account: 'testdebitor1' } })
   })
 
   test('calls sendMessageToClient 0 times', async () => {
-    queryIndex.mockImplementation(() => [])
     await handler(snsEvent)
     await expect(sendMessageToClient).toHaveBeenCalledTimes(0)
   })
 
+  test('deletes websocket if expired', async () => {
+    sendMessageToClient.mockImplementation(
+      () => {
+        throw new Error('410')
+      }
+    )
+    const destroyMock = jest.fn()
+    tableModel.mockImplementation(
+      () => {
+        return {
+          findOne: jest.fn(() => ({})),
+          update: jest.fn(),
+          destroy: destroyMock,
+          findAll: jest.fn().mockImplementation(() => {
+            return [
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
+            ]
+          })
+        }
+      }
+    )
+    await handler(snsEvent)
+    await expect(destroyMock)
+      .toHaveBeenCalledWith({
+        where: {
+          connection_id: '12345678910'
+        }
+      })
+  })
+
   test('calls sendMessageToClient for each connection id', async () => {
-    queryIndex.mockImplementation(() => {
-      return [
-        ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
-        ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
-      ]
-    })
+    tableModel.mockImplementation(
+      () => {
+        return {
+          findOne: () => ({}),
+          update: () => ({}),
+          findAll: () => (
+            [
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds,
+              ...jest.requireActual('./tests/utils/testData').websocketConnectionIds
+            ]
+          ),
+          destroy: () => {}
+        }
+      }
+    )
     await handler(snsEvent)
     await expect(sendMessageToClient).toHaveBeenCalledTimes(6)
   })
