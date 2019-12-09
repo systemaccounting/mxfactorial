@@ -9,7 +9,9 @@ const {
   deleteAccount,
   getToken,
   shapeClearNotificationsRequest,
-  queryTable
+  queryTable,
+  insert,
+  deleteFromTable
 } = require('./utils/integrationTestHelpers')
 
 const {
@@ -37,7 +39,7 @@ const {
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION})
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
 
-let websocketsTable = tableModel(
+const websocketsTable = tableModel(
   connection,
   Sequelize,
   'notification_websockets',
@@ -50,6 +52,7 @@ beforeAll(async () => {
 
 afterAll(async() => {
   await deleteAccount(cognitoIdsp, process.env.POOL_ID, TEST_ACCOUNT)
+  // await deleteFromTable(websocketsTable, TEST_ACCOUNT)
   connection.close().then(() => console.log('postgres connection closed'))
 })
 
@@ -121,8 +124,8 @@ describe('notification pending lambda', () => {
         }
         let clearNotificationsRequest = shapeClearNotificationsRequest(
           'clearnotifications',
-          pending,
-          token
+          token,
+          pendingReceivedNotifications,
         )
         ws.send(clearNotificationsRequest)
         ws.close()
@@ -150,7 +153,7 @@ describe('notification pending lambda', () => {
     })
   })
 
-  test('account attribute added to dynamodb connection id record storing created_at timestamp', async done => {
+  test('account attribute added to postgres connection id record storing created_at timestamp', async done => {
     let token = await getToken(
       cognitoIdsp,
       process.env.CLIENT_ID,
@@ -161,8 +164,8 @@ describe('notification pending lambda', () => {
     ws.on('open', async () => {
       let clearNotificationsRequest = JSON.stringify({
         action: "clearnotifications",
+        token, // send authed request to add account attribute to websocket db record
         notifications: pendingReceivedNotifications,
-        token // send authed request to add account attribute to websocket db record
       })
       ws.send(clearNotificationsRequest)
       await timeout(2e3) // wait 2 second for lambda to update websocket db record
@@ -187,6 +190,42 @@ describe('notification pending lambda', () => {
           done()
         }
       })
+    })
+  })
+
+  test('deletes expired websocket from postgres', async () => {
+    // create expired websocket record
+    let testconnectionid = 'EU6WPd3nIAMCL1A='
+    let testtimestamp = 1575710964616
+    await insert(websocketsTable, testconnectionid, testtimestamp, TEST_ACCOUNT)
+    // send clearnotifications
+    let token = await getToken(
+      cognitoIdsp,
+      process.env.CLIENT_ID,
+      TEST_ACCOUNT,
+      process.env.SECRET
+    )
+    let ws = new WebSocket(process.env.WSS_CLIENT_URL)
+    ws.on('open', async () => {
+      let clearNotificationsRequest = JSON.stringify({
+        action: "clearnotifications",
+        token, // send authed request to add account attribute to websocket db record
+        notifications: pendingReceivedNotifications,
+      })
+      ws.send(clearNotificationsRequest)
+      ws.close()
+      await timeout(2e3) // wait 2 second for lambda to remove websocket db record
+      // query db for expired record
+      let websocketRecordsInPostgres = await queryTable(
+        websocketsTable,
+        TEST_ACCOUNT
+      )
+      // filter expired connection
+      let recordsContainingExpiredWebsocket = websocketRecordsInPostgres.filter(record => {
+        return record.connection_id = testconnectionid
+      })
+      expect(recordsContainingExpiredWebsocket).toHaveLength(0)
+      done()
     })
   })
 
