@@ -18,6 +18,9 @@ Parameters:
   NotificationsClearFunctionArtifact:
     Type: String
     Default: notification-clear-src.zip
+  NotificationRetrievalLimitCount:
+    Type: Number
+    Default: 20
 Resources:
   NotificationWebsocket:
     Type: AWS::ApiGatewayV2::Api
@@ -149,6 +152,7 @@ Resources:
             PGPASSWORD: !Sub "{{resolve:secretsmanager:${Environment}/PGPASSWORD}}"
             PGHOST: !Sub "{{resolve:secretsmanager:${Environment}/PGHOST}}"
             PGPORT: !Sub "{{resolve:secretsmanager:${Environment}/PGPORT}}"
+            NOTIFICATION_RETRIEVAL_LIMIT_COUNT: !Ref NotificationRetrievalLimitCount
       Code:
         S3Bucket: !Sub "mxfactorial-websocket-artifacts-${Environment}"
         S3Key: !Ref NotificationGetFunctionArtifact
@@ -806,6 +810,12 @@ Resources:
       Description: !Sub "notifications table name in ${Environment}"
       Name: !Sub "${Environment}/NOTIFICATIONS_TABLE_NAME"
       SecretString: !Ref NotificationsTable
+  NotificationRetrievalLimitCountSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: !Sub "notifications table name in ${Environment}"
+      Name: !Sub "${Environment}/NOTIFICATION_RETRIEVAL_LIMIT_COUNT"
+      SecretString: !Ref NotificationRetrievalLimitCount
 Outputs:
   NotificationWebsocketEndpoint:
     Description: wss notification endpoint
