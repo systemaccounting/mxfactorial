@@ -301,7 +301,7 @@ describe('lambda function', () => {
     let ddb = {}
     let tableName = process.env.NOTIFICATIONS_TABLE_NAME
     let indexName = 'account-index'
-    let recordReturnLimit = 100
+    let recordReturnLimit = 20
     let indexAttribute = 'account'
     let account = 'testaccount'
     await handler(event)
