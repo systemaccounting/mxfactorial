@@ -86,7 +86,7 @@ const timeout = ms => {
 }
 
 describe('notification pending lambda', () => {
-  test('client recevies 3 pending notifications', async done => {
+  test('client receives 3 pending notifications', async done => {
     let token = await getToken(
       cognitoIdsp,
       process.env.CLIENT_ID,
