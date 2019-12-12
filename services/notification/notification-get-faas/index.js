@@ -56,6 +56,7 @@ const PENDING_NOTIFICATIONS_PROPERTY = 'pending'
 // process.env.PGPASSWORD
 // process.env.PGHOST
 // process.env.PGPORT
+// process.env.NOTIFICATION_RETRIEVAL_LIMIT_COUNT
 
 // {"action":"getnotifications"}
 exports.handler = async event => {
@@ -153,7 +154,7 @@ exports.handler = async event => {
     ddb,
     process.env.NOTIFICATIONS_TABLE_NAME,
     NOTIFICATIONS_TABLE_INDEX_NAME,
-    100,
+    parseInt(process.env.NOTIFICATION_RETRIEVAL_LIMIT_COUNT),
     NOTIFICATIONS_TABLE_INDEX_ATTRIBUTE,
     accountFromJWT
   )

@@ -2,11 +2,12 @@ const {
   TEST_TOKEN
 } = require('./testConstants')
 
-const randomFourDigitInt = () => {
-  return Math.floor(Math.random() * (9999 - 1000)) + 1000
+const randomSevenDigitString = () => {
+  let num = Math.floor(Math.random() * (9999999 - 1000000)) + 1000000
+  return num.toString()
 }
 
-const TEST_ACCOUNT = `Faker${randomFourDigitInt()}`
+const TEST_ACCOUNT = `Faker${randomSevenDigitString()}`
 
 const pendingReceivedNotifications = [
   {
@@ -47,6 +48,20 @@ const pendingReceivedNotifications = [
   }
 ]
 
+ const createTwentyFivePendingNotifications = (service, time, account) => {
+    let notificationArray = []
+      for (let i = 1; i <= 25; i++) {
+        let notificationObject = {}
+        notificationObject["uuid"] = service()
+        notificationObject["timestamp"] = time
+        notificationObject["account"] = account
+        notificationObject["message"] = 'message ' + i
+        notificationArray.push(notificationObject)
+        time++
+      }
+    return notificationArray
+  }
+
 const getNotificationsAction = `{"action":"getnotifications","token":"${TEST_TOKEN}"}`
 
 const getNotificationsActionWithMissingToken = `{"action":"getnotifications","token":""}`
@@ -59,4 +74,5 @@ module.exports = {
   getNotificationsAction,
   getNotificationsActionWithMissingToken,
   getNotificationsActionWithMalformedToken,
+  createTwentyFivePendingNotifications
 }
