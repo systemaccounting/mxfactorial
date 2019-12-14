@@ -1,8 +1,4 @@
-const {
-  updateItem,
-  queryIndex,
-  queryTable,
-} = require('./dynamodb')
+const queryIndex = require('./dynamodb')
 
 afterEach(() => {
   jest.clearAllMocks()
@@ -27,61 +23,6 @@ const mockAws = method => {
 }
 
 describe('dynamodb', () => {
-  test('updateItem params', () => {
-    let ddb = mockAws('update')
-    let testtable = 'testtable'
-    let testpartitionKey = 'testpartitionkey'
-    let testconnectionid = 'testconnectionid'
-    let testattributekey = 'testattributekey'
-    let testattributevalue = 'testattributevalue'
-    let expected = {
-      TableName: testtable,
-      Key: {
-        [testpartitionKey]: testconnectionid
-      },
-      ExpressionAttributeNames: {
-        "#pk": testpartitionKey,
-        "#newkey": testattributekey,
-      },
-      ExpressionAttributeValues: {
-        ":pkv": testconnectionid,
-        ":newval": testattributevalue,
-      },
-      UpdateExpression: `SET #newkey = :newval`,
-      ConditionExpression: `#pk = :pkv and attribute_not_exists(#newkey)`,
-      ReturnValues: "ALL_NEW"
-    }
-    updateItem(
-      ddb,
-      testtable,
-      testpartitionKey,
-      testconnectionid,
-      testattributekey,
-      testattributevalue,
-    )
-    expect(ddb.update).toHaveBeenCalledWith(expected)
-  })
-
-  test('queryTable params', async () => {
-    let ddb = mockAws('query')
-    let expected = {
-      TableName: 'testtable',
-      KeyConditions: {
-        connection_id: {
-          ComparisonOperator: 'EQ',
-          AttributeValueList: [ '123456789' ]
-        }
-      }
-    }
-    await queryTable(
-      ddb,
-      expected.TableName,
-      'connection_id',
-      expected.KeyConditions.connection_id.AttributeValueList[0]
-    )
-    await expect(ddb.query).toHaveBeenCalledWith(expected)
-  })
-
   test('queryIndex params', async () => {
     const ddb = mockAws('query')
     let expected = {

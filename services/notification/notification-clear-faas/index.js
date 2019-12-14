@@ -2,6 +2,7 @@ const AWS = require('aws-sdk')
 const jwt = require('jsonwebtoken')
 const jwkToPem = require('jwk-to-pem')
 const axios = require('axios')
+const Sequelize = require('sequelize') // added as dev dep since published in lambda layer
 
 const {
   getPools,
@@ -17,31 +18,34 @@ const {
 } = require('./lib/jwt')
 
 const {
-  updateItem,
-  queryTable,
   formatNotificationsToClear,
   batchWriteTable,
-  queryIndex
 } = require('./lib/dynamodb')
 
 const {
   sendMessageToClient
 } = require('./lib/apiGateway')
 
+const {
+  connection,
+  tableModel
+} = require('./lib/postgres')
+
 // avoid const assignment for env vars
 // process.env.AWS_REGION
 // process.env.NOTIFICATIONS_TABLE_NAME
-// process.env.WEBSOCKETS_TABLE_NAME
 // process.env.WSS_CONNECTION_URL
 // process.env.POOL_NAME
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 const ws = new AWS.ApiGatewayManagementApi({ endpoint: process.env.WSS_CONNECTION_URL })
 let cognito = new AWS.CognitoIdentityServiceProvider({ region: process.env.AWS_REGION })
 
-const WEBSOCKETS_TABLE_PARTITION_KEY = 'connection_id'
-const WEBSOCKETS_TABLE_INDEX_NAME = 'account-index'
-const WEBSOCKET_TABLE_INDEX_ATTRIBUTE = 'account'
 const CLEARED_NOTIFICATIONS_PROPERTY = 'cleared'
 
 // {"action":"clearnotifications","notifications":[{"uuid":"...","timestamp":"..."}],"token":"eyJraWQiO..."}
@@ -98,31 +102,38 @@ exports.handler = async event => {
   let accountFromJWT = currentVerifiedToken['cognito:username']
 
   // account values not available when websocket connection ids
-  // initially stored in dynamodb. workaround: each lambda retrieves
+  // initially stored in postgres. workaround: each lambda retrieves
   // current record for connection id to test for account value, then adds
-  // account from token to dynamodb connection id record if not present.
+  // account from token to postgres connection id record if not present.
   // adding account values to all connection id records supports notification
-  // broadcase (send notifications to all connection ids owned by current account)
+  // broadcast (send notifications to all connection ids owned by current account)
   // query for connection id:
-  let websocketItems = await queryTable(
-    ddb,
-    process.env.WEBSOCKETS_TABLE_NAME,
-    WEBSOCKETS_TABLE_PARTITION_KEY,
-    websocketConnectionId
+  let websocketsTable = tableModel(
+    connection,
+    Sequelize,
+    'notification_websockets',
   )
 
-  if (websocketItems.length > 0) {
-    if (!websocketItems[0].account) {
-      console.log(`adding ${accountFromJWT} to ${websocketConnectionId} connection id dynamodb record`)
-      await updateItem(
-        ddb,
-        process.env.WEBSOCKETS_TABLE_NAME,
-        WEBSOCKETS_TABLE_PARTITION_KEY,
-        websocketConnectionId,
-        WEBSOCKET_TABLE_INDEX_ATTRIBUTE, // newAttributeKey
-        accountFromJWT, // newAttributeValue
-      )
+  let currentConnection = await websocketsTable.findOne({
+    where: {
+      connection_id: websocketConnectionId
     }
+  })
+
+  console.log('current connection: ' + JSON.stringify(currentConnection))
+
+  if (!currentConnection) {
+    throw Error('0 stored connections')
+  }
+
+  if (!currentConnection.account) {
+    await websocketsTable.update({
+      account: accountFromJWT
+    }, {
+      where: {
+        connection_id: websocketConnectionId
+      }
+    })
   }
 
   let notificationsToClear = websocketMessage.notifications
@@ -133,29 +144,41 @@ exports.handler = async event => {
   // delete notifications
   await batchWriteTable(ddb, process.env.NOTIFICATIONS_TABLE_NAME, formattedItemsToDelete)
 
-    // retrieve all wss connection ids owned by account
-  let connectionsOwnedByAccount = await queryIndex(
-    ddb,
-    process.env.WEBSOCKETS_TABLE_NAME,
-    WEBSOCKETS_TABLE_INDEX_NAME,
-    WEBSOCKET_TABLE_INDEX_ATTRIBUTE,
-    accountFromJWT
-  )
-
+  // retrieve all wss connection ids owned by account
+  let websocketsOwnedByCurrentAccount = await websocketsTable.findAll({
+    where: { account: accountFromJWT }
+  })
+  console.log(websocketsOwnedByCurrentAccount)
   // broadcast which messages cleared to each client
-  for (let i = 0; i < connectionsOwnedByAccount.length; i++) {
+  for (let i = 0; i < websocketsOwnedByCurrentAccount.length; i++) {
+
+    let currConnId = websocketsOwnedByCurrentAccount[i].connection_id
+    let currAcct = websocketsOwnedByCurrentAccount[i].account
+
+    // delete and skip expired websocket connections before sending
+    try {
+      await sendMessageToClient(ws, currConnId, 'ping')
+    } catch(err) {
+      if (err.message == '410') {
+        let deleteResult = await websocketsTable.destroy({
+          where: {
+            connection_id: currConnId
+          }
+        })
+        console.log(deleteResult)
+        continue
+      }
+    }
+
+    console.log(`sending account ${currAcct} clear notification confirmation to ${currConnId} websocket`)
+
     let confirmed = {
       [CLEARED_NOTIFICATIONS_PROPERTY]: notificationsToClear
     }
-    await sendMessageToClient(
-      ws,
-      connectionsOwnedByAccount[i].connection_id,
-      confirmed
-    )
+    await sendMessageToClient(ws, currConnId, confirmed)
   }
   // notify success to gateway
   return {
-    statusCode: 200,
-    body: 'notifications cleared:' + JSON.stringify(notificationsToClear)
+    statusCode: 200
   }
 }

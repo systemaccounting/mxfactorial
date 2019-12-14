@@ -54,26 +54,12 @@ const getToken = async (service, clientId, account, secret) => {
     .catch(err => err)
 }
 
-const queryTable = (service, table, key, val) => {
-  let params = {
-    TableName: table,
-    KeyConditions: {
-      [key]: {
-        ComparisonOperator: 'EQ',
-        AttributeValueList: [ val ]
-      }
+const queryTable = (service, connectionId) => {
+  return service.findOne({
+    where: {
+      connection_id: connectionId
     }
-  }
-  return service.query(params)
-    .promise()
-    .then(async data => {
-      console.log(data.Items)
-      return data.Items
-    })
-    .catch(async err => {
-      console.log(err, err.stack)
-      throw err
-    })
+  })
 }
 
 module.exports = {

@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk')
 const WebSocket = require('ws')
+const Sequelize = require('sequelize')
 
 const {
   createAccount,
@@ -16,16 +17,62 @@ const randomFourDigitInt = () => {
 // process.env.POOL_ID
 // process.env.process.env.WSS_CLIENT_URL
 // process.env.AWS_REGION
-// process.env.WEBSOCKETS_TABLE_NAME
+// process.env.PGDATABASE
+// process.env.PGUSER
+// process.env.PGPASSWORD
+// process.env.PGHOST
+// process.env.PGPORT
 
 const TEST_ACCOUNT = `FakerAccount${randomFourDigitInt()}`
-const WEBSOCKET_TABLE_RANGE_KEY = 'connection_id'
 
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider()
-const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
+
+const notificationWebsocketsModel = (sequelize, sequelizeType) => {
+  return sequelize.define(
+    'notification_websockets',
+    {
+      id: {
+        type: sequelizeType.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+      },
+      connection_id: sequelizeType.STRING,
+      created_at: sequelizeType.DATE,
+      epoch_created_at: sequelizeType.BIGINT,
+      account: sequelizeType.STRING
+    },
+    {
+      timestamps: false
+    }
+  )
+}
+
+const pgConnection = new Sequelize(
+  process.env.PGDATABASE,
+  process.env.PGUSER,
+  process.env.PGPASSWORD,
+  {
+    host: process.env.PGHOST,
+    operatorAliases: false,
+    logging: console.log,
+    port: process.env.PGPORT,
+    dialect: 'postgres',
+    pool: {
+      min: 0,
+      max: 5,
+      acquire: 30000,
+      idle: 10000
+    }
+  }
+)
+
+const notificationWebsocketsTable = notificationWebsocketsModel(
+  pgConnection,
+  Sequelize
+)
 
 beforeAll(async () => {
-  jest.setTimeout(10000)
+  jest.setTimeout(15000)
   await createAccount(
     cognitoIdsp,
     process.env.CLIENT_ID,
@@ -40,6 +87,7 @@ afterAll(async() => {
     process.env.POOL_ID,
     TEST_ACCOUNT
   )
+  pgConnection.close().then(() => console.log('postgres connection closed'))
 })
 
 
@@ -64,56 +112,49 @@ describe('websocket connection lambda', () => {
     })
   })
 
-  test('connection id stored in dynamodb on CONNECT', async done => {
+  test('connection id stored in postgres on CONNECT', async done => {
     let ws = new WebSocket(process.env.WSS_CLIENT_URL)
     ws.on('open', async () => {
-      await timeout(1e3) // wait for connection id record addition in dynamodb
+      await timeout(1e3) // wait for addition of connection id in postgres
       ws.send(JSON.stringify({ action: 'getnotifications', token: '' })) // return error with connection id
       ws.on('message', async data => {
         if (JSON.parse(data).connectionId) {
           let connectionIdFromRequest = JSON.parse(data).connectionId
-          console.log(connectionIdFromRequest)
-          let connectionIdFromDynamoDB = await queryTable(
-            ddb,
-            process.env.WEBSOCKETS_TABLE_NAME,
-            WEBSOCKET_TABLE_RANGE_KEY,
+          let connectionRecord = await queryTable(
+            notificationWebsocketsTable,
             connectionIdFromRequest
           )
           ws.close()
-          expect(connectionIdFromDynamoDB.length).toBeGreaterThan(0)
+          expect(connectionRecord.connection_id).toBe(connectionIdFromRequest)
           done()
         }
       })
     })
   })
 
-  test('connection id removed from dynamodb on DISCONNECT', async done => {
+  test('connection id removed from postgres on DISCONNECT', async done => {
     let ws = new WebSocket(process.env.WSS_CLIENT_URL)
     ws.on('open', async () => {
       ws.send(JSON.stringify({ action: 'getnotifications', token: '' })) // return error with connection id
       ws.on('message', async data => {
         if (JSON.parse(data).connectionId) {
           let connectionIdFromRequest = JSON.parse(data).connectionId
-          let connectionIdFromDynamoDB = await queryTable(
-            ddb,
-            process.env.WEBSOCKETS_TABLE_NAME,
-            WEBSOCKET_TABLE_RANGE_KEY,
+          let connectionIdFromPostgres = await queryTable(
+            notificationWebsocketsTable,
             connectionIdFromRequest
           )
-          if (connectionIdFromDynamoDB.length > 0) {
+          if (connectionIdFromPostgres) {
             ws.close()
-            await timeout(1e3) // wait for connection id record removal
+            await timeout(1e3) // wait for removal of connection id record in db
             let connectionsAfterClose = await queryTable(
-              ddb,
-              process.env.WEBSOCKETS_TABLE_NAME,
-              WEBSOCKET_TABLE_RANGE_KEY,
+              notificationWebsocketsTable,
               connectionIdFromRequest
             )
-            expect(connectionsAfterClose.length).toBe(0)
+            expect(connectionsAfterClose).toBeNull()
             done()
           } else {
             ws.close()
-            done.fail(new Error('0 websockets in ddb'))
+            done.fail(new Error('0 websockets in postgres'))
           }
         }
       })

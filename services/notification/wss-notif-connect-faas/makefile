@@ -4,7 +4,8 @@ APP_TYPE = faas
 LAMBDA_NAME = websocket-notification-connect
 ARTIFACT_BUCKET= mxfactorial-websocket-artifacts
 REGION = us-east-1
-ENV_VARS := AWS_REGION WEBSOCKETS_TABLE_NAME SECRET CLIENT_ID POOL_ID WSS_CLIENT_URL
+ENV_VARS := AWS_REGION SECRET CLIENT_ID POOL_ID WSS_CLIENT_URL \
+PGDATABASE PGUSER PGPASSWORD PGHOST PGPORT
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -85,15 +86,18 @@ dev: test # test target alias to create development environment
 
 .PHONY: src test-env-arg clean test install-prod
 src: test-env-arg clean test install-prod
-		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip index.js package.json \
+			lib/* --exclude "*.test.*"
 
 .PHONY: zip install-prod clean-artifact
 zip: install-prod clean-artifact
-		zip -r $(APP_NAME)-src.zip index.js package.json lib/* --exclude "*.test.*"
+		zip -r $(APP_NAME)-src.zip index.js package.json \
+			lib/* --exclude "*.test.*"
 
 .PHONY: layer
 layer:
-		@echo "$(APP_NAME)-$(APP_TYPE) has few deps. not building layer"
+		@echo "$(APP_NAME)-$(APP_TYPE) layer deployed separately:"
+		@echo "https://github.com/mxfactorial/pg-sequelize-lambda-layer"
 
 ###################### deploy ######################
 

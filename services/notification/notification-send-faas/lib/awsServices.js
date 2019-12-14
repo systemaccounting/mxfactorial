@@ -43,29 +43,6 @@ const batchWriteTable = (service, table, formattedItems) => {
     })
 }
 
-const queryIndex = (service, table, indexName, key, val) => {
-  let params = {
-    TableName: table,
-    IndexName: indexName,
-    KeyConditions: {
-      [key]: {
-        ComparisonOperator: 'EQ',
-        AttributeValueList: [ val ]
-      }
-    }
-  }
-  return service.query(params)
-    .promise()
-    .then(async data => {
-      console.log(data.Items)
-      return data.Items
-    })
-    .catch(async err => {
-      console.log(err, err.stack)
-      throw err
-    })
-}
-
 const sendMessageToClient = (service, connectionId, data) => {
   let params = {
     ConnectionId: connectionId, // event.requestContext.connectionId
@@ -86,6 +63,5 @@ const sendMessageToClient = (service, connectionId, data) => {
 module.exports = {
   formatPendingNotifications,
   batchWriteTable,
-  queryIndex,
   sendMessageToClient
 }
