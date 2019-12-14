@@ -69,6 +69,9 @@ describe('Notifications menu', () => {
       counterEl
     )
 
+    await page2.close()
+    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
+
     // Notifications counter incremented
     expect(beforeCounter + 1).toBe(afterCounter)
   })
