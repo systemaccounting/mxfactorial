@@ -62,7 +62,8 @@ describe('Notifications menu', () => {
     await page.click(SELECTORS.requestDebitTransactionBtn)
     await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
 
-    await page2.waitFor(1000)
+    // wait for notifications to update
+    await page2.waitFor(2000)
     const afterCounter = await page2.evaluate(
       element => (element ? parseInt(element.textContent, 10) : 0),
       counterEl
