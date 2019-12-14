@@ -18,6 +18,7 @@ const SELECTORS = {
   notificationsMenu: '[data-id="notificationsMenu"]',
   notificationsMenuItem: '[data-id="notificationsMenuItem"]',
   notificationsClearBtn: '[data-id="notificationsClear"]',
+  notificationsCounter: '[data-id="notificationsCounter"]',
   backButton: '[data-id="backButton"]',
   historyItemIndicator: '[data-id="historyItemIndicator"]',
   transactionPartner: '[data-id="transactionPartner"]',

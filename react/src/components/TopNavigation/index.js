@@ -22,7 +22,9 @@ const TopNavigation = () => {
           onClick={openNotificationsMenu}
         />
         {notifications.length > 0 && (
-          <span className={s.badge}>{notifications.length}</span>
+          <span className={s.badge} data-id="notificationsCounter">
+            {notifications.length}
+          </span>
         )}
       </div>
     )
