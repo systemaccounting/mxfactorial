@@ -17,7 +17,7 @@ afterAll(async () => {
   await page.reload()
 })
 
-describe('transaction request', async () => {
+describe('transaction request', () => {
   it('redirects to history screen after successful transaction request', async () => {
     // Assert receiving successful response from the api
     page.on('response', response => {
