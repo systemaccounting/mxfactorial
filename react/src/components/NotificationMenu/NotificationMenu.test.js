@@ -45,4 +45,31 @@ describe('<NotificationMenu />', () => {
       expect(menuItemText).toMatch(fromNow(item.human_timestamp))
     })
   })
+
+  it('should close dropdown menu on clear btn click', () => {
+    const onClose = jest.fn()
+    const onClear = jest.fn()
+
+    const renderTarget = ({ ref }) => <span ref={ref} />
+    const component = shallow(
+      <NotificationMenu
+        renderTarget={renderTarget}
+        notifications={mockNotifications}
+        onClose={onClose}
+        onClear={onClear}
+        isOpen
+      />
+    )
+
+    const dropdown = component
+      .find(Popper)
+      .dive()
+      .dive()
+      .dive()
+    const clearBtn = dropdown.find({ 'data-id': 'notificationsClear' })
+    clearBtn.simulate('click')
+
+    expect(onClear).toHaveBeenCalledTimes(1)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })
