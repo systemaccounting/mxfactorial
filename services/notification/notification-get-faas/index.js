@@ -17,7 +17,11 @@ const {
   verifyToken
 } = require('./lib/jwt')
 
-const queryIndex = require('./lib/dynamodb')
+const {
+  queryIndex,
+  setNotificationLimit,
+  computeRequestedNotificationCount
+} = require('./lib/dynamodb')
 
 const {
   sendMessageToClient
@@ -149,12 +153,18 @@ exports.handler = async event => {
     })
   }
 
+  let requestedNotificationCount = computeRequestedNotificationCount(
+    websocketMessage,
+    setNotificationLimit,
+    parseInt(process.env.NOTIFICATION_RETRIEVAL_LIMIT_COUNT)
+  )
+
   // retrieve pending notifications
   let pendingNotifications = await queryIndex(
     ddb,
     process.env.NOTIFICATIONS_TABLE_NAME,
     NOTIFICATIONS_TABLE_INDEX_NAME,
-    parseInt(process.env.NOTIFICATION_RETRIEVAL_LIMIT_COUNT),
+    requestedNotificationCount,
     NOTIFICATIONS_TABLE_INDEX_ATTRIBUTE,
     accountFromJWT
   )
