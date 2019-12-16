@@ -17,7 +17,7 @@ clean:
 
 .PHONY: zip clean
 zip: clean
-		zip -r $(APP_NAME)-src.zip index.js
+		zip -r $(APP_NAME)-src.zip index.sh
 
 ###################### secrets ######################
 
@@ -50,19 +50,6 @@ $(ENV_VARS):
 # aliases zip target
 .PHONY: src zip
 src: zip
-
-# todo: add unit and integration tests
-# .PHONY: test test-unit test-integration
-# test: test-unit test-integration
-
-# .PHONY: test-unit test-env-arg get-secrets install
-# test-unit: test-env-arg get-secrets install
-# 		yarn test
-
-# .PHONY: test-integration deploy
-# test-integration: deploy
-# 		@yarn install; \
-# 		yarn test:integration
 
 ###################### deploy ######################
 
