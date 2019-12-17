@@ -2,13 +2,11 @@ import React, { useState } from 'react'
 import cx from 'classnames'
 import { Link } from 'react-router-dom'
 import withNotifications from 'decorators/withNotifcations'
-import useNotifications from 'hooks/useNotifications'
 import NotificationMenu from '../NotificationMenu'
 import s from './TopNavigation.module.css'
 
 const TopNavigation = ({ notifications, clearNotifications }) => {
   const [isNotificationsOpen, setNotificationsOpen] = useState(false)
-  // const [notifications, clearNotifications] = useNotifications()
 
   const openNotificationsMenu = () => setNotificationsOpen(true)
   const closeNotificationsMenu = () => setNotificationsOpen(false)

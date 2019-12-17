@@ -1,6 +1,6 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, createRef } from 'react'
 import Auth from '@aws-amplify/auth'
-import withWebsocket from './withWebsocket'
+import Websocket from 'react-websocket'
 
 const getAuthToken = async () => {
   try {
@@ -34,111 +34,90 @@ const parseNotifications = notifications => {
   })
 }
 
-class WithNotifications extends PureComponent {
-  static notifications = []
-  static listeners = []
+export default function withNotifications({ url }) {
+  return WrappedComponent => {
+    return class extends PureComponent {
+      socketRef = createRef()
 
-  static addNotificationsListener = listener => {
-    WithNotifications.listeners.push(listener)
-  }
+      state = {
+        notifications: []
+      }
 
-  static removeNotificationsListener = listener => {
-    WithNotifications.listeners = WithNotifications.listeners.filter(
-      item => item === listener
-    )
-  }
+      getNotifications = async count => {
+        const socket = this.socketRef.current
+        if (!socket) {
+          return
+        }
+        socket.sendMessage(
+          JSON.stringify({
+            action: 'getnotifications',
+            token: await getAuthToken(),
+            count
+          })
+        )
+      }
 
-  static handleMessage = event => {
-    const data = JSON.parse(event.data)
-    if (data.pending) {
-      const newNotifications = [
-        ...WithNotifications.notifications,
-        ...parseNotifications(data.pending)
-      ]
-      WithNotifications.notifications = newNotifications
-      WithNotifications.listeners.forEach(listener =>
-        listener(newNotifications)
-      )
+      onOpen = () => {
+        const count = 20 - this.state.notifications.length
+        this.getNotifications(count)
+      }
+
+      onMessage = message => {
+        const data = JSON.parse(message)
+        // Received notifications
+        if (data.pending) {
+          this.setState(prevState => ({
+            notifications: [...prevState.notifications, ...data.pending]
+          }))
+        }
+        if (data.cleared) {
+          const clearedIds = data.cleared.map(item => item.uuid)
+          this.setState(
+            prevState => ({
+              notifications: prevState.notifications.filter(
+                item => !clearedIds.includes(item.uuid)
+              )
+            }),
+            // Request n more notifcations
+            () => this.getNotifications(data.cleared.length)
+          )
+        }
+      }
+
+      clearNotifications = async () => {
+        const socket = this.socketRef.current
+        const { notifications } = this.state
+        if (!socket) {
+          return
+        }
+        socket.sendMessage(
+          JSON.stringify({
+            action: 'clearnotifications',
+            token: await getAuthToken(),
+            notifications
+          })
+        )
+      }
+
+      render() {
+        const { notifications } = this.state
+        return (
+          <>
+            <WrappedComponent
+              notifications={parseNotifications(notifications)}
+              clearNotifications={this.clearNotifications}
+              {...this.props}
+            />
+            <Websocket
+              url={url}
+              onOpen={this.onOpen}
+              onMessage={this.onMessage}
+              ref={this.socketRef}
+              debug
+            />
+          </>
+        )
+      }
     }
   }
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      notifications: WithNotifications.notifications
-    }
-    if (!WithNotifications.listeners.length) {
-      this.subscribeToNotifications()
-    }
-    WithNotifications.addNotificationsListener(this.onNotificationsUpdate)
-  }
-
-  componentDidMount() {
-    const { socket } = this.props
-    if (socket.readyState === WebSocket.OPEN) {
-      this.getNotifications()
-    } else if (socket.readyState === WebSocket.CONNECTING) {
-      socket.addEventListener('open', this.getNotifications)
-    }
-  }
-
-  componentWillUnmount() {
-    const { socket } = this.props
-    WithNotifications.removeNotificationsListener(this.onNotificationsUpdate)
-    if (!WithNotifications.listeners.length) {
-      WithNotifications.notifications = []
-      socket.removeEventListener('message', WithNotifications.handleMessage)
-    }
-  }
-
-  subscribeToNotifications = async () => {
-    const { socket } = this.props
-    if (!socket) {
-      return
-    }
-    socket.addEventListener('message', WithNotifications.handleMessage)
-  }
-
-  getNotifications = async () => {
-    const { socket } = this.props
-    if (!socket) {
-      return
-    }
-    socket.send(
-      JSON.stringify({
-        action: 'getnotifications',
-        count: 20 - this.state.notifications.length,
-        token: await getAuthToken()
-      })
-    )
-  }
-
-  clearNotifications = () => {
-    console.log('Clear notifications')
-  }
-
-  onNotificationsUpdate = notifications => this.setState({ notifications })
-
-  render() {
-    return this.props.children({
-      notifications: this.state.notifications,
-      clearNotifications: this.clearNotifications
-    })
-  }
-}
-
-export default function withNotifications({ url } = {}) {
-  const NotificationsWithSocket = withWebsocket(url)(WithNotifications)
-
-  return WrappedComponent => props => (
-    <NotificationsWithSocket>
-      {({ notifications, clearNotifications }) => (
-        <WrappedComponent
-          {...props}
-          notifications={notifications}
-          clearNotifications={clearNotifications}
-        />
-      )}
-    </NotificationsWithSocket>
-  )
 }
