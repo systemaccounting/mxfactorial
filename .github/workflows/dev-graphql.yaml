@@ -6,11 +6,6 @@ on:
     - 'services/graphql-faas/**'
     branches-ignore:
     - 'master'
-  pull_request:
-    paths:
-    - 'services/graphql-faas/**'
-    branches-ignore:
-    - 'master'
 
 jobs:
   test:
@@ -22,15 +17,6 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       CI: true
     steps:
-      - uses: actions/checkout@v1
-      - name: use node.js 12
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-      - name: install yarn
-        uses: sergioramos/yarn-actions/install@master
-      - name: install aws cli
-        uses: chrislennon/action-aws-cli@v1.1
       - name: install dependencies
         run: make install
         working-directory: services/graphql-faas
