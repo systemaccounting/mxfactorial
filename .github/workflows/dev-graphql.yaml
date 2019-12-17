@@ -6,7 +6,7 @@ on:
     - 'services/graphql-faas/**'
     branches-ignore:
     - 'master'
-
+    
 jobs:
   test:
     name: graphql-faas unit and integration tests
@@ -17,6 +17,7 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       CI: true
     steps:
+      - uses: actions/checkout@v1
       - name: install dependencies
         run: make install
         working-directory: services/graphql-faas
