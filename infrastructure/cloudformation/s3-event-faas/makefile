@@ -27,7 +27,7 @@ clean: clean-deps clean-artifact
 
 .PHONY: install-env clean-deps
 install-env: clean-deps
-		@python3.7 -m venv .; \
+		@python3 -m venv .; \
 		. ./bin/activate; \
 		pip install pipenv
 
