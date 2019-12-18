@@ -16,8 +16,10 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       CI: true
-    steps:
+    steps: 
       - uses: actions/checkout@v1
+      - name: add python3-venv to build server
+        run: apt-get install python3-venv
       - name: install environment
         run: make install-env
         working-directory: infrastructure/cloudformation/s3-event-faas
