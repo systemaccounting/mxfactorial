@@ -20,7 +20,6 @@ topic_list_name = 'TopicConfigurations'
 print('Loading function')
 s3 = boto3.client('s3')
 
-
 def lambda_handler(event, context):
     print("Received event:")
     print(event)
