@@ -19,7 +19,7 @@ jobs:
     steps: 
       - uses: actions/checkout@v1
       - name: add python3-venv to build server
-        run: apt-get install python3-venv
+        run: sudo apt-get install python3-venv
       - name: install environment
         run: make install-env
         working-directory: infrastructure/cloudformation/s3-event-faas
