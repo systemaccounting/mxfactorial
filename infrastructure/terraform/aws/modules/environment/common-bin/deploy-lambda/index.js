@@ -96,4 +96,5 @@ exports.handler = async (event) => {
   } else {
     return `no layer or src matched in evented ${S3Key} update`
   }
+  
 }

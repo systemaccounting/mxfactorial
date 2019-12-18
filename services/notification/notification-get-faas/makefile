@@ -115,8 +115,8 @@ deploy-layer: layer
 			--output=text | sed 's/"//g'); \
 #		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy test-env-arg src
-deploy: test-env-arg src # lambda layer NOT deployed
+.PHONY: deploy src
+deploy: src # lambda layer NOT deployed
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \

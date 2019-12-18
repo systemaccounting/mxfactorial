@@ -45,6 +45,7 @@ handler () {
     cat "$WRITABLE_LAMBDA_PATH/invoke.log"
     printf "\n"
 
+
     # ...must send your return value to stderr https://github.com/gkrizek/bash-lambda-layer/blob/master/README.md#caveats
     echo "$(cat $WRITABLE_LAMBDA_PATH/invoke.log)" >&2
 }

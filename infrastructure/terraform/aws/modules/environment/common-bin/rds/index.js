@@ -1,5 +1,6 @@
 const { Client } = require('pg')
 
+
 exports.handler = async (event) => {
   let client = new Client()
   await client.connect()
