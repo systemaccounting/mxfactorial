@@ -81,6 +81,7 @@ const SELECTORS = {
   appVersionLabel: '[data-id="appVersion"]'
 }
 
+
 module.exports = {
   SELECTORS,
   BASE_URL,

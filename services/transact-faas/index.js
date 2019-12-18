@@ -95,4 +95,5 @@ exports.handler = async event => {
     status: STATUS_SUCCESS,
     data: storedTransactions
   }
+  
 }
