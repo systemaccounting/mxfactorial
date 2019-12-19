@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import { Text, P } from 'components/Typography'
 import { formatCurrency } from 'utils/currency'
@@ -79,22 +78,20 @@ class HistoryScreen extends Component {
 
   render() {
     return (
-      <MainLayout>
-        <div data-id="historyScreen">
-          <Text
-            variant="medium"
-            fontWeight="bold"
-            textAlign="center"
-            style={{ color: '#efefef' }}
-          >
-            History
-          </Text>
-          <div className={s.content}>
-            {this.accountBalance}
-            {this.historyList}
-          </div>
+      <div data-id="historyScreen">
+        <Text
+          variant="medium"
+          fontWeight="bold"
+          textAlign="center"
+          style={{ color: '#efefef' }}
+        >
+          History
+        </Text>
+        <div className={s.content}>
+          {this.accountBalance}
+          {this.historyList}
         </div>
-      </MainLayout>
+      </div>
     )
   }
 }

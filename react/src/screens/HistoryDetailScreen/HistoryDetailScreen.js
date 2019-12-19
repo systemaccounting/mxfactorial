@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
@@ -183,10 +182,10 @@ class HistoryDetailScreen extends Component {
 
   render() {
     return (
-      <MainLayout>
+      <>
         <HistoryDetailHeader />
         {this.content}
-      </MainLayout>
+      </>
     )
   }
 }

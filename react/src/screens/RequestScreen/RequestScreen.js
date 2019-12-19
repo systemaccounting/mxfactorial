@@ -3,7 +3,6 @@ import T from 'prop-types'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 
-import MainLayout from 'components/MainLayout'
 import TypeSwitch from './components/TypeSwitch'
 import Paper from 'components/Paper'
 import { Text, Small } from 'components/Typography'
@@ -41,44 +40,41 @@ export default class RequestScreen extends React.Component {
     const { status } = this.state
     const { user, groupedTransactions } = this.props
     return (
-      <MainLayout>
-        <Wrapper data-id="request-screen-wrapper">
-          <TypeSwitch active={status} onSwitch={this.handleSwitch} />
-          {groupedTransactions.map(request => {
-            let isCurrentAccountAuthor = request.author === user.username
-            return (
-              <Link
-                key={request.transaction_id}
-                to={`requests/${request.transaction_id}`}
+      <Wrapper data-id="request-screen-wrapper">
+        <TypeSwitch active={status} onSwitch={this.handleSwitch} />
+        {groupedTransactions.map(request => {
+          let isCurrentAccountAuthor = request.author === user.username
+          return (
+            <Link
+              key={request.transaction_id}
+              to={`requests/${request.transaction_id}`}
+            >
+              <Paper
+                data-id="requestItemIndicator"
+                data-request-id={request.transaction_id}
               >
-                <Paper
-                  data-id="requestItemIndicator"
-                  data-request-id={request.transaction_id}
-                >
-                  <Small>
-                    {isCurrentAccountAuthor ? (
-                      <span>
-                        sent <strong>{request.contraAccount}</strong> a request{' '}
-                      </span>
-                    ) : (
-                      <span>
-                        received <strong>{request.contraAccount}</strong>{' '}
-                        request{' '}
-                      </span>
-                    )}
-                    {fromNow(request.time)}
-                  </Small>
-                  <Text textAlign="right" variant="medium">
-                    <strong>
-                      {request.isCreditor ? '' : '-'} {request.total}
-                    </strong>
-                  </Text>
-                </Paper>
-              </Link>
-            )
-          })}
-        </Wrapper>
-      </MainLayout>
+                <Small>
+                  {isCurrentAccountAuthor ? (
+                    <span>
+                      sent <strong>{request.contraAccount}</strong> a request{' '}
+                    </span>
+                  ) : (
+                    <span>
+                      received <strong>{request.contraAccount}</strong> request{' '}
+                    </span>
+                  )}
+                  {fromNow(request.time)}
+                </Small>
+                <Text textAlign="right" variant="medium">
+                  <strong>
+                    {request.isCreditor ? '' : '-'} {request.total}
+                  </strong>
+                </Text>
+              </Paper>
+            </Link>
+          )
+        })}
+      </Wrapper>
     )
   }
 }

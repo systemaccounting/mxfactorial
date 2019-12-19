@@ -3,7 +3,6 @@ import { graphql } from 'react-apollo'
 import { fetchRules } from 'queries/rules'
 import { createTransaction } from 'queries/transactions'
 
-import MainLayout from 'components/MainLayout'
 import AccountHeader from './components/AccountHeader'
 import Transaction from './components/Transaction/index'
 
@@ -50,17 +49,15 @@ class HomeScreen extends Component {
   render() {
     const { user } = this.props
     return (
-      <MainLayout>
-        <div data-id="homeScreen">
-          <AccountHeader title={user.username} balance={this.state.balance} />
-          <Transaction
-            username={user.username}
-            fetchTransactions={this.props.fetchTransactions}
-            onRequestTransactions={this.onRequestTransactions}
-            fetchRules={this.fetchRules}
-          />
-        </div>
-      </MainLayout>
+      <div data-id="homeScreen">
+        <AccountHeader title={user.username} balance={this.state.balance} />
+        <Transaction
+          username={user.username}
+          fetchTransactions={this.props.fetchTransactions}
+          onRequestTransactions={this.onRequestTransactions}
+          fetchRules={this.fetchRules}
+        />
+      </div>
     )
   }
 }
