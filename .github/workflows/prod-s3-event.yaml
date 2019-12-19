@@ -18,13 +18,8 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v1
-      - name: use python
-        uses: actions/setup-python@v1
-        with:
-          python-version: '3.x'
-          architecture: 'x64'
-      - name: install aws cli
-        uses: chrislennon/action-aws-cli@v1.1
+      - name: add python3-venv to build server
+        run: sudo apt-get install python3-venv
       - name: install environment
         run: make install-env
         working-directory: infrastructure/cloudformation/s3-event-faas

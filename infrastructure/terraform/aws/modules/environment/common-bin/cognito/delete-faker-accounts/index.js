@@ -76,5 +76,4 @@ exports.handler = async (event) => {
   } else {
     return
   }
-
 }

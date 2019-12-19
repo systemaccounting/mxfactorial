@@ -25,7 +25,11 @@ const {
   verifyToken
 } = require('./lib/jwt')
 
-const queryIndex = require('./lib/dynamodb')
+const {
+  queryIndex,
+  setNotificationLimit,
+  computeRequestedNotificationCount
+} = require('./lib/dynamodb')
 
 const {
   sendMessageToClient
@@ -95,10 +99,17 @@ jest.mock('./lib/jwt', () => {
   }
 })
 
-jest.mock('./lib/dynamodb', () => jest.fn(
-  () => jest.requireActual('./tests/utils/testData')
-    .pendingReceivedNotifications)
-)
+jest.mock('./lib/dynamodb', () => {
+  return {
+    queryIndex: jest.fn(
+      () => jest.requireActual('./tests/utils/testData')
+        .pendingReceivedNotifications),
+    setNotificationLimit: () => {},
+    computeRequestedNotificationCount: jest.fn(
+      () => parseInt(process.env.NOTIFICATION_RETRIEVAL_LIMIT_COUNT)
+    )
+  }
+})
 
 jest.mock('./lib/apiGateway', () => {
   return {
@@ -294,6 +305,16 @@ describe('lambda function', () => {
     await handler(event)
     await expect(tableModel.mock.results[0].value.findOne)
       .toHaveBeenCalledWith(expected)
+    jest.clearAllMocks()
+  })
+
+  test('calls computeRequestedNotificationCount with args', async () => {
+    await handler(event)
+    await expect(computeRequestedNotificationCount).toHaveBeenCalledWith(
+      JSON.parse(getNotificationsAction),
+      setNotificationLimit,
+      parseInt(process.env.NOTIFICATION_RETRIEVAL_LIMIT_COUNT)
+    )
     jest.clearAllMocks()
   })
 

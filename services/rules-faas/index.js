@@ -41,6 +41,5 @@ exports.handler = async event => {
     RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME,
     RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME,
   )
-
   return transactionsWithRulesApplied
 }

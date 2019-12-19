@@ -27,7 +27,7 @@ clean: clean-deps clean-artifact
 
 .PHONY: install-env clean-deps
 install-env: clean-deps
-		@python3.7 -m venv .; \
+		@python3 -m venv .; \
 		. ./bin/activate; \
 		pip install pipenv
 
@@ -62,7 +62,7 @@ dev: test
 zip: clean-artifact
 		zip -r -j $(APP_NAME)-src.zip src/main.py
 
-# aliases test target which creates tested artifact
+# aliases test target which creates tested artifact 
 .PHONY: src zip
 src: zip
 

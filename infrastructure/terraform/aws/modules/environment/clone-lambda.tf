@@ -12,7 +12,7 @@ resource "aws_lambda_function" "clone_tool_lambda" {
   handler           = "index.handler"
   # https://github.com/gkrizek/bash-lambda-layer
   layers  = ["arn:aws:lambda:${data.aws_region.current.name}:744348701589:layer:bash:8"]
-  runtime = "nodejs8.10"
+  runtime = "provided"
   timeout = 60
   role    = aws_iam_role.clone_tool_lambda.arn
 

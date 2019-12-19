@@ -40,4 +40,5 @@ exports.handler = async event => {
     migrationsTable: MIGRATIONS_TABLE_NAME
   }
   return runner(opts)
+  
 }

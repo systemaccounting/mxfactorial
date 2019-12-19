@@ -62,11 +62,11 @@ const pendingReceivedNotifications = [
     return notificationArray
   }
 
-const getNotificationsAction = `{"action":"getnotifications","token":"${TEST_TOKEN}"}`
+const getNotificationsAction = `{"action":"getnotifications","token":"${TEST_TOKEN}","count":19}`
 
-const getNotificationsActionWithMissingToken = `{"action":"getnotifications","token":""}`
+const getNotificationsActionWithMissingToken = `{"action":"getnotifications","token":"","count":19}`
 
-const getNotificationsActionWithMalformedToken = `{"action":"getnotifications","token":"malformed"}`
+const getNotificationsActionWithMalformedToken = `{"action":"getnotifications","token":"malformed","count":19}`
 
 module.exports = {
   TEST_ACCOUNT,
