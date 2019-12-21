@@ -87,6 +87,7 @@ export default function withNotifications({ url }) {
       clearNotifications = async () => {
         const socket = this.socketRef.current
         const { notifications } = this.state
+        console.log(socket)
         if (!socket) {
           return
         }
@@ -113,7 +114,6 @@ export default function withNotifications({ url }) {
               onOpen={this.onOpen}
               onMessage={this.onMessage}
               ref={this.socketRef}
-              debug
             />
           </>
         )
