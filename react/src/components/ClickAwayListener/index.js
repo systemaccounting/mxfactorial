@@ -49,9 +49,9 @@ const ClickAwayListener = React.forwardRef(function ClickAwayListener(
 
   const handleClickAway = useEventCallback(event => {
     // Ignore events that have been `event.preventDefault()` marked.
-    if (event.defaultPrevented) {
-      return
-    }
+    // if (event.defaultPrevented) {
+    //   return
+    // }
 
     // IE 11 support, which trigger the handleClickAway even after the unbind
     if (!mountedRef.current) {

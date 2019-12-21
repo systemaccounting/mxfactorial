@@ -16,9 +16,8 @@ it('redirects to auth if unauthenticated user navigates to private route', async
   await expect(page.url()).toEqual(AUTH_URL)
 })
 
-it('redirects to not found if route doesnt exist', async () => {
+it('redirects /auth if route doesnt exist', async () => {
   await page.goto(`${AUTH_URL}/not-valid-route`)
-  await page.waitForSelector(SELECTORS.notFound)
-  const notFound = await page.$$eval(SELECTORS.notFound, list => list.length)
-  await expect(notFound).toEqual(1)
+  await page.waitForSelector(SELECTORS.createAccountButton)
+  expect(page.url()).toBe(AUTH_URL)
 })

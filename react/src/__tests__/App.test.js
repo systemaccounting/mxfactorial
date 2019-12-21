@@ -1,5 +1,6 @@
 import React from 'react'
 import { shallow } from 'enzyme'
+import { Route } from 'react-router-dom'
 import PrivateRoutes from 'screens/private'
 import PublicRoutes from 'screens/public'
 import { App } from '../App'
@@ -26,8 +27,14 @@ describe('<App />', () => {
     const wrapper = shallow(
       <App user={{ username: 'test' }} userLoading={false} />
     )
-    expect(wrapper.find(PrivateRoutes)).toHaveLength(1)
-    expect(wrapper.find(PublicRoutes)).toHaveLength(0)
+    const routesMapping = {
+      '/auth': PublicRoutes,
+      '/': PrivateRoutes
+    }
+    wrapper.find(Route).forEach(item => {
+      const routePath = item.prop('path')
+      expect(item.prop('component')).toBe(routesMapping[routePath])
+    })
   })
 
   it('renders public routes if user does not exist', () => {
