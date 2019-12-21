@@ -1,9 +1,7 @@
 import React from 'react'
 
-import { compose } from 'react-apollo'
 import { Switch, Route } from 'react-router-dom'
 
-import withUser from 'decorators/withUser'
 import MainLayout from 'components/MainLayout'
 import HomeScreen from '../HomeScreen'
 import RequestScreen from '../RequestScreen'
@@ -12,7 +10,7 @@ import HistoryScreen from '../HistoryScreen'
 import HistoryDetailScreen from '../HistoryDetailScreen'
 import NotFound from '../notFound'
 
-function PrivateRoutes() {
+export default function PrivateRoutes() {
   return (
     <MainLayout>
       <Switch>
@@ -26,5 +24,3 @@ function PrivateRoutes() {
     </MainLayout>
   )
 }
-
-export default compose(withUser)(PrivateRoutes)

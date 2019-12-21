@@ -7,7 +7,7 @@ import PublicRoutes from 'screens/public'
 
 import './App.css'
 
-function App({ userLoading, user }) {
+export function App({ userLoading, user }) {
   if (userLoading) {
     return <div>Loading...</div>
   }
