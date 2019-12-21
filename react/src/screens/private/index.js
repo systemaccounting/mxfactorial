@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Switch, Route } from 'react-router-dom'
+import { Switch, Route, Redirect } from 'react-router-dom'
 
 import MainLayout from 'components/MainLayout'
 import HomeScreen from '../HomeScreen'
@@ -19,6 +19,7 @@ export default function PrivateRoutes() {
         <Route exact path="/requests/:uuid" component={RequestDetailScreen} />
         <Route exact path="/history" component={HistoryScreen} />
         <Route exact path="/history/:uuid" component={HistoryDetailScreen} />
+        <Redirect to="/account" />
         <Route component={NotFound} />
       </Switch>
     </MainLayout>
