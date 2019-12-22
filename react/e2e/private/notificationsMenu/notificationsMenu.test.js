@@ -22,6 +22,7 @@ describe('Notifications menu', () => {
 
   it('should close menu on clear button click', async () => {
     const notificationBtn = await page.$(SELECTORS.notificationButton)
+    await page.waitFor(1000) // avoid Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.
     notificationBtn.click()
     await page.waitForSelector(SELECTORS.notificationsMenu)
     expect(await page.$$(SELECTORS.notificationsMenu)).toHaveLength(1)
