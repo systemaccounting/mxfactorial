@@ -87,7 +87,6 @@ export default function withNotifications({ url }) {
       clearNotifications = async () => {
         const socket = this.socketRef.current
         const { notifications } = this.state
-        console.log(socket)
         if (!socket) {
           return
         }
