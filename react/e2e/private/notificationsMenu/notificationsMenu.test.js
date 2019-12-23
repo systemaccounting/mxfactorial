@@ -2,13 +2,17 @@ const { SELECTORS, HOME_URL, TEST_ACCOUNTS } = require('../../constants')
 const { login } = require('../../utils/auth')
 const { addTransaction, getTotal, milk } = require('../homeScreen/utils')
 
-beforeAll(async () => {
-  jest.setTimeout(30000)
-  await page.goto(HOME_URL)
-  await page.waitForSelector(SELECTORS.HOME)
-})
-
 describe('Notifications menu', () => {
+  beforeAll(async () => {
+    jest.setTimeout(30000)
+    await page.goto(HOME_URL)
+    await page.waitForSelector(SELECTORS.HOME)
+  })
+
+  afterAll(async () => {
+    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
+  })
+
   it('should close menu when clicked elsewhere', async () => {
     const notificationBtn = await page.$(SELECTORS.notificationButton)
     notificationBtn.click()
@@ -71,9 +75,28 @@ describe('Notifications menu', () => {
     )
 
     await page2.close()
-    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
 
     // Notifications counter incremented
     expect(beforeCounter + 1).toBe(afterCounter)
+  })
+
+  it('should decrease notifications counter on clear button click', async () => {
+    const notificationBtn = await page.$(SELECTORS.notificationButton)
+    await page.waitForSelector(SELECTORS.notificationsCounter)
+    const counterEl1 = await page.$(SELECTORS.notificationsCounter)
+    const valueBefore = await page.evaluate(
+      element => (element ? parseInt(element.textContent, 10) : 0),
+      counterEl1
+    )
+
+    notificationBtn.click()
+    await page.waitForSelector(SELECTORS.notificationsMenu)
+    await page.click(SELECTORS.notificationsClearBtn)
+    const counterEl2 = await page.$(SELECTORS.notificationsCounter)
+    const valueAfter = await page.evaluate(
+      element => (element ? parseInt(element.textContent, 10) : 0),
+      counterEl2
+    )
+    expect(valueAfter).toBeLessThan(valueBefore)
   })
 })
