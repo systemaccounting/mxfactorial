@@ -91,4 +91,16 @@ describe('withNotifications', () => {
       })
     )
   })
+
+  it('should 0 increase in pending notifications from websocket refresh', async () => {
+    const lengthBeforeConnect = wrapper
+      .find(SomeComponent)
+      .prop('notifications').length
+    // Simulate resend notifications on websocket reconnect
+    await server.send(JSON.stringify(mockNotifications))
+    await wrapper.update()
+    const lengthAfterConnect = wrapper.find(SomeComponent).prop('notifications')
+      .length
+    expect(lengthBeforeConnect).toBe(lengthAfterConnect)
+  })
 })

@@ -66,9 +66,16 @@ export default function withNotifications({ url }) {
         const data = JSON.parse(message)
         // Received notifications
         if (data.pending) {
-          this.setState(prevState => ({
-            notifications: [...prevState.notifications, ...data.pending]
-          }))
+          this.setState(prevState => {
+            const existingIds = prevState.notifications.map(item => item.uuid)
+            return {
+              notifications: [
+                ...prevState.notifications,
+                // dedupe notifications
+                ...data.pending.filter(item => !existingIds.includes(item.uuid))
+              ]
+            }
+          })
         }
         if (data.cleared) {
           const clearedIds = data.cleared.map(item => item.uuid)
