@@ -90,6 +90,7 @@ export default function withNotifications({ url }) {
         if (!socket) {
           return
         }
+        this.setState({ notifications: [] })
         socket.sendMessage(
           JSON.stringify({
             action: 'clearnotifications',

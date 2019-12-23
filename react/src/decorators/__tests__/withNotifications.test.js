@@ -60,13 +60,12 @@ describe('withNotifications', () => {
     expect(notifications).toHaveLength(mockNotifications.pending.length)
   })
 
-  it('should clear pending notifications', async () => {
+  it('should clear pending notifications once clearNotifications called', () => {
     const clearNotifications = wrapper
       .find(SomeComponent)
       .prop('clearNotifications')
     clearNotifications()
-    await server.send(JSON.stringify(mockClearNotifications))
-    await wrapper.update()
+    wrapper.update()
     const notifications = wrapper.find(SomeComponent).prop('notifications')
     expect(notifications).toHaveLength(0)
   })
