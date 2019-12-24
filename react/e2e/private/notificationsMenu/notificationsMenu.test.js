@@ -31,6 +31,7 @@ describe('Notifications menu', () => {
     await page.waitForSelector(SELECTORS.notificationsMenu)
     expect(await page.$$(SELECTORS.notificationsMenu)).toHaveLength(1)
 
+    await page.waitForSelector(SELECTORS.notificationsClearBtn)
     await page.click(SELECTORS.notificationsClearBtn)
     const notificationsMenu = await page.$$(SELECTORS.notificationsMenu)
     expect(notificationsMenu).toHaveLength(0)
