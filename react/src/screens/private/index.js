@@ -1,9 +1,8 @@
 import React from 'react'
 
-import { compose } from 'react-apollo'
-import { Switch, Route } from 'react-router-dom'
+import { Switch, Route, Redirect } from 'react-router-dom'
 
-import withUser from 'decorators/withUser'
+import MainLayout from 'components/MainLayout'
 import HomeScreen from '../HomeScreen'
 import RequestScreen from '../RequestScreen'
 import RequestDetailScreen from '../RequestDetailScreen'
@@ -11,50 +10,18 @@ import HistoryScreen from '../HistoryScreen'
 import HistoryDetailScreen from '../HistoryDetailScreen'
 import NotFound from '../notFound'
 
-export const Loading = () => <div>Loading...</div>
-
-export class PrivateRoutes extends React.Component {
-  state = {
-    userLoading: false,
-    user: null
-  }
-
-  static getDerivedStateFromProps(nextProps) {
-    const { userLoading, user } = nextProps
-    return { user, userLoading }
-  }
-
-  componentDidUpdate() {
-    const { userLoading, user, location, history } = this.props
-    if (!userLoading && user === null) {
-      return history.replace('/auth')
-    } else {
-      return location.pathname === '/' ? history.push('/account') : null
-    }
-  }
-
-  renderRoutes = () => {
-    return (
+export default function PrivateRoutes() {
+  return (
+    <MainLayout>
       <Switch>
-        <Route exact path={`/account`} component={HomeScreen} />
-        <Route exact path={`/requests`} component={RequestScreen} />
-        <Route exact path={`/requests/:uuid`} component={RequestDetailScreen} />
-        <Route exact path={`/history`} component={HistoryScreen} />
-        <Route exact path={`/history/:uuid`} component={HistoryDetailScreen} />
+        <Route exact path="/account" component={HomeScreen} />
+        <Route exact path="/requests" component={RequestScreen} />
+        <Route exact path="/requests/:uuid" component={RequestDetailScreen} />
+        <Route exact path="/history" component={HistoryScreen} />
+        <Route exact path="/history/:uuid" component={HistoryDetailScreen} />
+        <Redirect to="/account" />
         <Route component={NotFound} />
       </Switch>
-    )
-  }
-
-  render() {
-    const { user, userLoading } = this.state
-    if (user && !userLoading) {
-      return this.renderRoutes()
-    } else if (userLoading) {
-      return <Loading />
-    }
-    return null
-  }
+    </MainLayout>
+  )
 }
-
-export default compose(withUser)(PrivateRoutes)

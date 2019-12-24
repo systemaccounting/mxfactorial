@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { shallow } from 'enzyme'
-import { getTestVars } from 'utils'
+import { getTestVars, noop } from 'utils'
 
 import MobileNav from './index'
 
@@ -42,5 +42,13 @@ describe('<MobileNav />', () => {
     const testItemsLength = wrapper.find('[data-id="nav-menu-test-item"]')
       .length
     expect(testItemsLength).toEqual(getTestVars().length)
+  })
+
+  it('should close menu on menu item click', () => {
+    const onCloseMock = jest.fn()
+    const wrapper = shallow(<MobileNav onClose={onCloseMock} />)
+    const menuItems = wrapper.find({ 'data-id': 'nav-menu-item' })
+    menuItems.forEach(item => item.simulate('click'))
+    expect(onCloseMock).toHaveBeenCalledTimes(menuItems.length)
   })
 })

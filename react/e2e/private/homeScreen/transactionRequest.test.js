@@ -17,7 +17,7 @@ afterAll(async () => {
   await page.reload()
 })
 
-describe('transaction request', async () => {
+describe('transaction request', () => {
   it('redirects to history screen after successful transaction request', async () => {
     // Assert receiving successful response from the api
     page.on('response', response => {
@@ -107,7 +107,7 @@ describe('transaction request', async () => {
     await page2.waitForSelector(SELECTORS.requestItem)
     const element = await page.$(SELECTORS.requestItem)
     const content = await (await element.getProperty('textContent')).jsonValue()
-    const regex = /ago- (.*)/
+    const regex = /- (\d+.\d{3})/
     const requestedTotal = regex.exec(content)[1]
     // Assert transaction from Person1 received
     expect(requestedTotal).toBe(expectedPriceWithTaxAsString)

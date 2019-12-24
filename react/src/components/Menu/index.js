@@ -41,7 +41,7 @@ class Menu extends React.Component {
     document.addEventListener('keydown', this.handleEscClose)
   }
 
-  componentWillUnMount() {
+  componentWillUnmount() {
     document.removeEventListener('keydown', this.handleEscClose)
   }
 
@@ -70,7 +70,11 @@ class Menu extends React.Component {
       <Container>
         <Mask data-id="nav-mask" active={active} onClick={this.handleClose} />
         {this.state.active && (
-          <MobileNav history={history} signOut={this.handleSignOut} />
+          <MobileNav
+            history={history}
+            onClose={this.handleClose}
+            signOut={this.handleSignOut}
+          />
         )}
         <MenuButton data-id="nav-button">
           <Hamburger active={active} onClick={this.handleToggle} />

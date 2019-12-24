@@ -17,7 +17,7 @@ describe('<Menu />', () => {
     const wrapper = shallow(<Menu />)
     expect(spyAdd).toHaveBeenCalled()
     const instance = wrapper.instance()
-    instance.componentWillUnMount()
+    instance.componentWillUnmount()
     expect(spyRemove).toHaveBeenCalled()
   })
 

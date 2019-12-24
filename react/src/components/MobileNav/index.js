@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import T from 'prop-types'
 import cx from 'classnames'
 import { Link } from 'react-router-dom'
-import { getTestVars } from 'utils'
+import { getTestVars, noop } from 'utils'
 import s from './MobileNav.module.css'
 
 function renderItem(itemKey) {
@@ -27,11 +27,13 @@ function renderItem(itemKey) {
 
 class MobileNav extends Component {
   static propTypes = {
-    signOut: T.func
+    signOut: T.func,
+    onClose: T.func
   }
 
   static defaultProps = {
-    signOut: null
+    signOut: noop,
+    onClose: noop
   }
 
   componentDidMount() {
@@ -60,35 +62,40 @@ class MobileNav extends Component {
     })
   }
 
+  onSignOut = () => {
+    this.props.onClose()
+    this.props.signOut()
+  }
+
   render() {
-    const { signOut } = this.props
+    const { onClose } = this.props
     return (
       <div className={s.root}>
         <ul className={s.list} data-id="nav-menu">
-          <li className={s.listItem} data-id="nav-menu-item">
+          <li className={s.listItem} onClick={onClose} data-id="nav-menu-item">
             <Link to="/requests" data-id="requestsLink">
               Requests
             </Link>
           </li>
-          <li className={s.listItem} data-id="nav-menu-item">
+          <li className={s.listItem} onClick={onClose} data-id="nav-menu-item">
             <Link to="/history" data-id="historyLink">
               History
             </Link>
           </li>
-          <li className={s.listItem} data-id="nav-menu-item">
+          <li className={s.listItem} onClick={onClose} data-id="nav-menu-item">
             Rules
           </li>
-          <li className={s.listItem} data-id="nav-menu-item">
+          <li className={s.listItem} onClick={onClose} data-id="nav-menu-item">
             Query
           </li>
-          <li className={s.listItem} data-id="nav-menu-item">
+          <li className={s.listItem} onClick={onClose} data-id="nav-menu-item">
             Support
           </li>
           <li
             className={s.listItem}
             data-name="sign-out"
             data-id="nav-menu-item"
-            onClick={signOut}
+            onClick={this.onSignOut}
           >
             Sign Out
           </li>

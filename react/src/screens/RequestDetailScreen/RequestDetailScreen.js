@@ -1,7 +1,6 @@
 import React from 'react'
 
 import { dateString } from 'utils/date'
-import MainLayout from 'components/MainLayout'
 import Paper from 'components/Paper'
 import { Text, Small, P } from 'components/Typography'
 import Button from 'components/Button'
@@ -177,7 +176,7 @@ class RequestDetailScreen extends React.Component {
 
     const { approveRequest } = this.props
     return (
-      <MainLayout>
+      <>
         <Modal
           isOpen={isApproveModalOpen}
           onModalToggle={this.toggleApproveModal}
@@ -198,7 +197,7 @@ class RequestDetailScreen extends React.Component {
         </Modal>
         <RequestDetailHeader />
         {this.requestInfo}
-      </MainLayout>
+      </>
     )
   }
 }
