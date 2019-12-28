@@ -1,23 +1,26 @@
 import gql from 'graphql-tag'
 
 export const createTransaction = gql`
-  mutation CreateTransaction($items: [TransactionInputType]) {
-    createTransaction(items: $items) {
-      name
-      quantity
-      price
+  mutation createRequest($items: [RequestCreateInputType]!) {
+    createRequest(items: $items) {
       author
       debitor
+      debitor_approval_time
       creditor
       creditor_approval_time
-      debitor_approval_time
+      name
+      price
+      quantity
+      rule_instance_id
+      transaction_id
+      id
     }
   }
 `
 
 export const fetchTransactions = gql`
-  query FetchTransactions($user: String) {
-    transactions(user: $user) {
+  query FetchTransactions($account: String) {
+    requestsByAccount(account: $account) {
       id
       name
       quantity
