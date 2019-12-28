@@ -6,7 +6,7 @@ on:
     - 'services/graphql-faas/**'
     branches-ignore:
     - 'master'
-    
+
 jobs:
   test:
     name: graphql-faas unit and integration tests
@@ -27,6 +27,6 @@ jobs:
       - name: deploy to dev for integration testing
         run: make deploy ENV=dev
         working-directory: services/graphql-faas
-      - name: execute integration tests
-        run: make test ENV=dev
-        working-directory: services/graphql-faas
+      # - name: execute integration tests
+      #   run: make test ENV=dev
+      #   working-directory: services/graphql-faas
