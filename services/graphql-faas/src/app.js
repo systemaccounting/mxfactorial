@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const body_parser = require('body-parser-graphql')
 const graphqlHTTP = require('express-graphql')
+const { GraphQLSchema, GraphQLObjectType, GraphQLString } = require('graphql')
 
 const schema = require('./graphql/schema')
 
@@ -10,19 +11,17 @@ const schema = require('./graphql/schema')
 // to signal completed async operation
 const appWrapper = (event, context) => {
   const app = express()
-
   app.use(cors())
   app.use(
     '/',
     graphqlHTTP({
+      schema,
       graphiql: true,
-      schema: schema
+      context: event
     })
   )
   app.use(body_parser.graphql())
   return app
 }
 
-module.exports = {
-  appWrapper
-}
+module.exports = appWrapper
