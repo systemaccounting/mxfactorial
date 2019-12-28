@@ -15,11 +15,11 @@ output "client" {
 }
 
 output "graphql_lambda_function_name" {
-  value = aws_lambda_function.mxfactorial_graphql_server.function_name
+  value = aws_lambda_function.graphql.function_name
 }
 
 output "graphql_lambda_function_arn" {
-  value = aws_lambda_function.mxfactorial_graphql_server.invoke_arn
+  value = aws_lambda_function.graphql.invoke_arn
 }
 
 output "pool_id" {
@@ -43,11 +43,11 @@ output "s3_react_distribution_hosted_zone_id" {
 }
 
 output "cloudfront_domain_name" {
-  value = aws_api_gateway_domain_name.mxfactorial.cloudfront_domain_name
+  value = aws_api_gateway_domain_name.graphql.cloudfront_domain_name
 }
 
 output "cloudfront_zone_id" {
-  value = aws_api_gateway_domain_name.mxfactorial.cloudfront_zone_id
+  value = aws_api_gateway_domain_name.graphql.cloudfront_zone_id
 }
 
 output "postgres_address" {
