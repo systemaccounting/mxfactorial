@@ -1,24 +1,24 @@
-resource "aws_api_gateway_rest_api" "mxfactorial_api" {
-  name        = "mxfactorial-api-${var.environment}"
-  description = "GraphQL Endpoint"
+resource "aws_api_gateway_rest_api" "graphql" {
+  name        = "graphql-${var.environment}"
+  description = "graphql api in ${var.environment}"
 }
 
 resource "aws_api_gateway_resource" "proxy" {
-  rest_api_id = aws_api_gateway_rest_api.mxfactorial_api.id
-  parent_id   = aws_api_gateway_rest_api.mxfactorial_api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.graphql.id
+  parent_id   = aws_api_gateway_rest_api.graphql.root_resource_id
   path_part   = "{proxy+}"
 }
 
 resource "aws_api_gateway_authorizer" "api_authorizer" {
   name            = "cognito-pool-api-authorizer-${var.environment}"
   type            = "COGNITO_USER_POOLS"
-  rest_api_id     = aws_api_gateway_rest_api.mxfactorial_api.id
+  rest_api_id     = aws_api_gateway_rest_api.graphql.id
   provider_arns   = [aws_cognito_user_pool.pool.arn]
   identity_source = "method.request.header.Authorization"
 }
 
 resource "aws_api_gateway_method" "proxy" {
-  rest_api_id   = aws_api_gateway_rest_api.mxfactorial_api.id
+  rest_api_id   = aws_api_gateway_rest_api.graphql.id
   resource_id   = aws_api_gateway_resource.proxy.id
   http_method   = "ANY"
   authorization = "COGNITO_USER_POOLS"
@@ -26,31 +26,31 @@ resource "aws_api_gateway_method" "proxy" {
 }
 
 resource "aws_api_gateway_integration" "lambda" {
-  rest_api_id = aws_api_gateway_rest_api.mxfactorial_api.id
+  rest_api_id = aws_api_gateway_rest_api.graphql.id
   resource_id = aws_api_gateway_method.proxy.resource_id
   http_method = aws_api_gateway_method.proxy.http_method
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.mxfactorial_graphql_server.invoke_arn
+  uri                     = aws_lambda_function.graphql.invoke_arn
 }
 
 resource "aws_api_gateway_method" "proxy_root" {
-  rest_api_id   = aws_api_gateway_rest_api.mxfactorial_api.id
-  resource_id   = aws_api_gateway_rest_api.mxfactorial_api.root_resource_id
+  rest_api_id   = aws_api_gateway_rest_api.graphql.id
+  resource_id   = aws_api_gateway_rest_api.graphql.root_resource_id
   http_method   = "ANY"
   authorization = "COGNITO_USER_POOLS"
   authorizer_id = aws_api_gateway_authorizer.api_authorizer.id
 }
 
 resource "aws_api_gateway_integration" "lambda_root" {
-  rest_api_id = aws_api_gateway_rest_api.mxfactorial_api.id
+  rest_api_id = aws_api_gateway_rest_api.graphql.id
   resource_id = aws_api_gateway_method.proxy_root.resource_id
   http_method = aws_api_gateway_method.proxy_root.http_method
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.mxfactorial_graphql_server.invoke_arn
+  uri                     = aws_lambda_function.graphql.invoke_arn
 }
 
 resource "aws_api_gateway_deployment" "environment" {
@@ -60,7 +60,7 @@ resource "aws_api_gateway_deployment" "environment" {
   ]
 
   stage_description = "deploy-001"
-  rest_api_id       = aws_api_gateway_rest_api.mxfactorial_api.id
+  rest_api_id       = aws_api_gateway_rest_api.graphql.id
   stage_name        = var.environment
 
   lifecycle {
@@ -68,10 +68,10 @@ resource "aws_api_gateway_deployment" "environment" {
   }
 }
 
-resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
+resource "aws_lambda_permission" "graphql_to_lambda" {
   statement_id  = "AllowAPIGatewayInvoke${title(var.environment)}"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.mxfactorial_graphql_server.function_name
+  function_name = aws_lambda_function.graphql.function_name
   principal     = "apigateway.amazonaws.com"
 
   # The /*/* portion grants access from any method on any resource
@@ -79,7 +79,7 @@ resource "aws_lambda_permission" "mxfactorial_api_to_lambda" {
   source_arn = "${aws_api_gateway_deployment.environment.execution_arn}/*/*"
 }
 
-resource "aws_api_gateway_account" "mxfactorial_api_account" {
+resource "aws_api_gateway_account" "graphql_account" {
   cloudwatch_role_arn = aws_iam_role.api_gateway_cloudwatch.arn
 }
 
@@ -127,27 +127,27 @@ data "aws_iam_policy_document" "api_gateway_cloudwatch_policy" {
   }
 }
 
-resource "aws_api_gateway_domain_name" "mxfactorial" {
+resource "aws_api_gateway_domain_name" "graphql" {
   domain_name     = local.api_url
   certificate_arn = var.certificate_arn
 }
 
-resource "aws_api_gateway_base_path_mapping" "mxfactorial" {
-  api_id      = aws_api_gateway_rest_api.mxfactorial_api.id
+resource "aws_api_gateway_base_path_mapping" "graphql" {
+  api_id      = aws_api_gateway_rest_api.graphql.id
   stage_name  = aws_api_gateway_deployment.environment.stage_name
-  domain_name = aws_api_gateway_domain_name.mxfactorial.domain_name
+  domain_name = aws_api_gateway_domain_name.graphql.domain_name
 }
 
 resource "aws_api_gateway_method" "resource_options" {
-  rest_api_id   = aws_api_gateway_rest_api.mxfactorial_api.id
-  resource_id   = aws_api_gateway_rest_api.mxfactorial_api.root_resource_id
+  rest_api_id   = aws_api_gateway_rest_api.graphql.id
+  resource_id   = aws_api_gateway_rest_api.graphql.root_resource_id
   http_method   = "OPTIONS"
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "resource_options_integration" {
-  rest_api_id = aws_api_gateway_rest_api.mxfactorial_api.id
-  resource_id = aws_api_gateway_rest_api.mxfactorial_api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.graphql.id
+  resource_id = aws_api_gateway_rest_api.graphql.root_resource_id
   http_method = aws_api_gateway_method.resource_options.http_method
   type        = "MOCK"
 
@@ -160,8 +160,8 @@ resource "aws_api_gateway_integration" "resource_options_integration" {
 
 resource "aws_api_gateway_integration_response" "resource_options_integration_response" {
   depends_on  = ["aws_api_gateway_integration.resource_options_integration"]
-  rest_api_id = aws_api_gateway_rest_api.mxfactorial_api.id
-  resource_id = aws_api_gateway_rest_api.mxfactorial_api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.graphql.id
+  resource_id = aws_api_gateway_rest_api.graphql.root_resource_id
   http_method = aws_api_gateway_method.resource_options.http_method
   status_code = "200"
 
@@ -174,8 +174,8 @@ resource "aws_api_gateway_integration_response" "resource_options_integration_re
 
 resource "aws_api_gateway_method_response" "resource_options_200" {
   depends_on  = ["aws_api_gateway_method.resource_options"]
-  rest_api_id = aws_api_gateway_rest_api.mxfactorial_api.id
-  resource_id = aws_api_gateway_rest_api.mxfactorial_api.root_resource_id
+  rest_api_id = aws_api_gateway_rest_api.graphql.id
+  resource_id = aws_api_gateway_rest_api.graphql.root_resource_id
   http_method = "OPTIONS"
   status_code = "200"
 
@@ -191,7 +191,7 @@ resource "aws_api_gateway_method_response" "resource_options_200" {
 }
 
 resource "aws_api_gateway_method_settings" "graphql_settings" {
-  rest_api_id = aws_api_gateway_rest_api.mxfactorial_api.id
+  rest_api_id = aws_api_gateway_rest_api.graphql.id
   stage_name  = aws_api_gateway_deployment.environment.stage_name
   method_path = "*/*"
 
