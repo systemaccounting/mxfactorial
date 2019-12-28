@@ -1,12 +1,11 @@
 DIR := ${CURDIR}
 APP_NAME = graphql
 APP_TYPE = faas
-LAMBDA_NAME = mxfactorial-graphql-server
 ARTIFACT_BUCKET = mxfactorial-artifacts
 RUNTIME = node
 REGION = us-east-1
 ENV_VARS := AWS_REGION POOL_ID CLIENT_ID GRAPHQL_API \
-SECRET RDS_TRANSACTION_TEARDOWN_LAMBDA
+SECRET RDS_TRANSACTION_TEARDOWN_LAMBDA JWKS_URL
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -164,6 +163,6 @@ warm-up: test-env-arg
 		@aws lambda invoke \
 			--region $(REGION) \
 			--invocation-type RequestResponse \
-			--function-name $(LAMBDA_NAME)-$(ENV) \
+			--function-name $(APP_TYPE)-$(ENV) \
 			--payload '{}' \
 			invoke.log
