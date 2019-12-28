@@ -1,0 +1,26 @@
+name: dev-request-create
+
+on:
+  push:
+    paths:
+    - 'services/request-create-faas/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  test:
+    name: request-create-faas in dev
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      # - name: install dependencies and execute unit tests
+      #   run: make test-unit ENV=dev
+        working-directory: services/request-create-faas
+      - name: deploy to dev
+        run: make deploy ENV=dev
+        working-directory: services/request-create-faas
