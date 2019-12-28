@@ -8,104 +8,95 @@ const {
 
 const TransactionType = new GraphQLObjectType({
   name: 'Transaction',
-  description: 'Transactions',
+  description: 'fields on transactions',
   fields: {
     id: {
       type: GraphQLID,
-      description: 'Transaction ID'
+      description: 'transaction item id'
     },
-    uuid: { type: GraphQLID },
     debitor: {
       type: GraphQLString,
-      description: 'Debitor account; sending payment'
+      description: 'debitor account sending payment'
     },
     debitor_profile_latlng: {
       type: GraphQLString,
-      description: 'Lat long of debitor account profile'
+      description: 'lat long of debitor account profile'
     },
     debitor_transaction_latlng: {
       type: GraphQLString,
-      description: 'Lat long of debitor transaction'
+      description: 'lat long of debitor transaction'
     },
     debitor_approval_time: {
       type: GraphQLString,
-      description: 'Time debitor approved transaction'
+      description: 'time debitor approved transaction'
     },
     debitor_device: {
       type: GraphQLString,
-      description: 'Device used by debitor for transaction'
+      description: 'device used by debitor for transaction'
     },
     creditor: {
       type: GraphQLString,
-      description: 'Creditor account; receiving payment'
+      description: 'creditor account; receiving payment'
     },
     creditor_profile_latlng: {
       type: GraphQLString,
-      description: 'Lat long of creditor account profile'
+      description: 'lat long of creditor account profile'
     },
     creditor_transaction_latlng: {
       type: GraphQLString,
-      description: 'Lat long of creditor transaction'
+      description: 'lat long of creditor transaction'
     },
     creditor_approval_time: {
       type: GraphQLString,
-      description: 'Time creditor approved transaction'
+      description: 'time creditor approved transaction'
     },
     creditor_device: {
       type: GraphQLString,
-      description: 'Device used by creditor for transaction'
+      description: 'device used by creditor for transaction'
     },
     name: {
       type: GraphQLString,
-      description: 'Name of good or service'
+      description: 'name of good or service'
     },
     price: {
       type: GraphQLString,
-      description: 'Value of good or service'
+      description: 'value of good or service'
     },
     quantity: {
       type: GraphQLString,
-      description: 'Quantity of good or service'
+      description: 'quantity of good or service'
     },
     unit_of_measurement: {
       type: GraphQLString,
-      description: 'Unit of measurement of good or service'
+      description: 'unit of measurement of good or service'
     },
     units_measured: {
       type: GraphQLString,
-      description: 'Units measured of good or service'
+      description: 'units measured of good or service'
     },
     rule_instance_id: {
       type: GraphQLString,
-      description: 'ID of rule instance automatically adding transaction item'
+      description: 'id of rule instance automatically adding transaction item'
     },
     transaction_id: {
       type: GraphQLString,
-      description: 'ID shared by goods and services grouped in a transaction'
-    },
-    debit_approver: {
-      type: GraphQLString,
-      description: 'Debitor account approving transaction group'
-    },
-    credit_approver: {
-      type: GraphQLString,
-      description: 'Creditor account approving transaction group'
+      description: 'id shared by goods and services grouped in a transaction'
     },
     author: {
       type: GraphQLString,
-      description: 'Initial author of transaction'
+      description: 'initial author of transaction'
     },
     expiration_time: {
       type: GraphQLString,
-      description: 'Time incomplete transaction expires'
+      description: 'time incomplete transaction expires'
     },
     creditor_rejection_time: {
       type: GraphQLString,
-      description: 'Time transaction rejected by creditor'
+      description: 'time transaction rejected by creditor'
     },
     debitor_rejection_time: {
       type: GraphQLString,
-      description: 'Time transaction rejected by debitor'
+      description: 'time transaction rejected by debitor'
     }
   }
 })
@@ -114,7 +105,7 @@ const TransactionInputType = new GraphQLInputObjectType({
   name: 'TransactionInputType',
   type: TransactionType,
   fields: {
-    uuid: { type: GraphQLID },
+    id: { type: GraphQLID },
     debitor: { type: new GraphQLNonNull(GraphQLString) },
     debitor_profile_latlng: { type: GraphQLString },
     debitor_transaction_latlng: { type: GraphQLString },
@@ -129,9 +120,7 @@ const TransactionInputType = new GraphQLInputObjectType({
     unit_of_measurement: { type: GraphQLString },
     units_measured: { type: GraphQLString },
     rule_instance_id: { type: GraphQLString },
-    // transaction_id: { type: new GraphQLNonNull(GraphQLString) },
-    // debit_approver: { type: new GraphQLNonNull(GraphQLString) },
-    // credit_approver: { type: new GraphQLNonNull(GraphQLString) },
+    transaction_id: { type: GraphQLString },
     author: { type: new GraphQLNonNull(GraphQLString) },
     expiration_time: { type: GraphQLString },
     creditor_rejection_time: { type: GraphQLString },
@@ -141,5 +130,5 @@ const TransactionInputType = new GraphQLInputObjectType({
 
 module.exports = {
   TransactionType,
-  TransactionInputType
+  TransactionInputType,
 }
