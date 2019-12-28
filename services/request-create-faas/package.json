@@ -1,0 +1,19 @@
+{
+  "name": "transact-faas",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles --verbose --silent"
+  },
+  "dependencies": {
+    "lodash": "^4.17.13",
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.15.1",
+    "uuid": "^3.3.3"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.555.0",
+    "jest": "^24.5.0"
+  }
+}
