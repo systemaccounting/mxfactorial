@@ -139,5 +139,4 @@ exports.handler = async event => {
       console.log('0 notifcation websockets for account: ', account)
     }
   }
-  
 }
