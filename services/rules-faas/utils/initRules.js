@@ -61,7 +61,7 @@ const batchWriteTable = (service, table, formattedItems) => {
 const TAX_RULE_WITH_SEMICOLONS = `
 let TAX_TRANSACTION_NAME = '9% state sales tax';
 // Remove any existing “9% state sales tax” item to avoid duplicating objects in the array
-let accountItems = transactionItems.filter(item => {
+let accountItems = items.filter(item => {
   return item.name !== TAX_TRANSACTION_NAME;
 });
 

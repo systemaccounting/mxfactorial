@@ -49,8 +49,8 @@ describe('rules function handler', () => {
 
   it('calls applyRules with args', async () => {
     let ruleIdParam = 'ruleId'
-    let itemsParam = 'transactionItems'
-    await handler({ transactions: itemsStandardArray })
+    let itemsParam = 'items'
+    await handler({ items: itemsStandardArray })
     expect(applyRules).toHaveBeenCalledWith(
       itemsStandardArray,
       testRuleInstances,
@@ -60,7 +60,7 @@ describe('rules function handler', () => {
   })
 
   it('returns rule-modified transactions', async () => {
-    let result = await handler({ transactions: itemsUnderTestArray })
+    let result = await handler({ items: itemsUnderTestArray })
     expect(result).toEqual(itemsStandardArray)
   })
 })

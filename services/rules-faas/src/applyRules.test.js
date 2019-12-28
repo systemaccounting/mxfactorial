@@ -13,7 +13,7 @@ const {
 describe('applyRules', () => {
   test('rules applied to transactions', () => {
     let ruleIdParam = 'ruleId'
-    let itemsParam = 'transactionItems'
+    let itemsParam = 'items'
     let result = applyRules(
       itemsUnderTestArray,
       testRuleInstances,
