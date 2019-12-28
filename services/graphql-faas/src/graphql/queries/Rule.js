@@ -1,53 +1,51 @@
 const {
   GraphQLList,
-  GraphQLID,
   GraphQLString,
-  GraphQLInputObjectType
 } = require('graphql')
 
 const {
   TransactionType,
   TransactionInputType
 } = require('../types/Transaction')
-const { GetRuleTransactionsResolver } = require('../resolvers/Rule')
 
-// const TransactionItemType = new GraphQLInputObjectType({
-//   name: 'TransactionItem',
-//   description: 'Transaction Item',
-//   fields: {
-//     uuid: {
-//       type: GraphQLID,
-//       description: 'Transaction ID'
-//     },
-//     name: {
-//       type: GraphQLString,
-//       description: 'Name of good or service'
-//     },
-//     price: {
-//       type: GraphQLString,
-//       description: 'Value of good or service'
-//     },
-//     quantity: {
-//       type: GraphQLString,
-//       description: 'Quantity of good or service'
-//     }
-//   }
-// })
+const {
+  RuleInstanceType,
+} = require('../types/Rule')
+
+const {
+  GetRuleTransactionsResolver,
+  GetRuleInstanceResolver
+} = require('../resolvers/Rule')
 
 const RuleQueryType = () => ({
   type: new GraphQLList(TransactionType),
-  description: 'Returns a list of modified transactions',
+  description: 'returns a list of rules-adjusted transactions',
   args: {
     transactions: {
       type: new GraphQLList(TransactionInputType),
-      description: 'Please, specify transactions'
+      description: 'please specify transactions'
     }
   },
-  resolve: async (parent, args) => {
-    return await GetRuleTransactionsResolver(args)
+  resolve: async (parentValue, args) => {
+    return GetRuleTransactionsResolver(args)
+  }
+})
+
+const RuleInstanceQueryType = () => ({
+  type: new GraphQLList(RuleInstanceType),
+  description: 'returns rule instance contents',
+  args: {
+    keySchema: {
+      type: new GraphQLList(GraphQLString),
+      description: 'please specifiy key schema of rule instance, e.g. "name:"'
+    }
+  },
+  resolve: async(parentValue, args) => {
+    return GetRuleInstanceResolver(args.keySchema)
   }
 })
 
 module.exports = {
-  RuleQueryType
+  RuleQueryType,
+  RuleInstanceQueryType
 }

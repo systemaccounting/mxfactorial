@@ -1,14 +1,42 @@
-const { GraphQLObjectType, GraphQLID } = require('graphql')
+const {
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLInputObjectType,
+  GraphQLNonNull
+} = require('graphql')
 
-const RuleType = new GraphQLObjectType({
-  name: 'Rule',
-  description: 'Rule',
+const RuleInstanceType = new GraphQLObjectType({
+  name: 'RuleInstance',
+  description: 'view rule contents',
   fields: {
-    id: {
-      type: GraphQLID,
-      description: 'Rule ID'
+    key_schema: {
+      type: GraphQLString,
+      description: 'colon seperated list of transaction item fields affected by rule, e.g. name:price'
+    },
+    rule_instance_id: {
+      type: GraphQLString,
+      description: 'id of rule instance record'
+    },
+    description: {
+      type: GraphQLString,
+      description: 'description of rule'
+    },
+    rule: {
+      type: GraphQLString,
+      description: 'rule contents'
     }
   }
 })
 
-module.exports = { RuleType }
+const RuleInstanceInputType = new GraphQLInputObjectType({
+  name: 'RuleInstanceInputType',
+  type: RuleInstanceType,
+  fields: {
+    key_schema: { type: new GraphQLNonNull(GraphQLString) },
+  }
+})
+
+module.exports = {
+  RuleInstanceType,
+  RuleInstanceInputType
+}
