@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v1
       # - name: install dependencies and execute unit tests
       #   run: make test-unit ENV=dev
-        working-directory: services/request-approve-faas
+      #   working-directory: services/request-approve-faas
       - name: deploy to dev
         run: make deploy ENV=dev
         working-directory: services/request-approve-faas
