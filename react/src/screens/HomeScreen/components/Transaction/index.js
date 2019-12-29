@@ -216,8 +216,7 @@ class Transaction extends React.Component {
     }
     return (
       <div data-id="transaction-rules" style={{ marginTop: 20 }}>
-        {rules.map(transaction => {
-          return (
+        {rules.map(transaction => (
           <div key={transaction.uuid} data-id="rule-item">
             <TransactionItem
               data-uuid={transaction.uuid}
@@ -226,8 +225,7 @@ class Transaction extends React.Component {
               editable={false}
             />
           </div>
-          )
-        })}
+          ))}
       </div>
     )
   }
