@@ -159,3 +159,14 @@ resource "aws_secretsmanager_secret_version" "cognito_jsonwebkey_url" {
   secret_id     = aws_secretsmanager_secret.cognito_jsonwebkey_url.id
   secret_string = aws_lambda_function.graphql.environment[0].variables.JWKS_URL
 }
+
+resource "aws_secretsmanager_secret" "request_create_lambda_arn" {
+  name                    = "${var.environment}/REQUEST_CREATE_LAMBDA_ARN"
+  recovery_window_in_days = 0
+  description             = "cognito jsonwebkey url in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "request_create_lambda_arn" {
+  secret_id     = aws_secretsmanager_secret.request_create_lambda_arn.id
+  secret_string = aws_lambda_function.request_create.arn
+}
