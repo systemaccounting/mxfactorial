@@ -3,7 +3,9 @@ APP_NAME = request-create
 RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
-ENV_VARS := AWS_REGION NOTIFY_TOPIC_ARN RULE_INSTANCE_TABLE_NAME
+ENV_VARS := AWS_REGION NOTIFY_TOPIC_ARN RULE_INSTANCE_TABLE_NAME \
+PGDATABASE PGUSER PGPASSWORD PGHOST PGPORT \
+REQUEST_CREATE_LAMBDA_ARN NOTIFICATIONS_TABLE_NAME
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -73,18 +75,17 @@ $(ENV_VARS):
 
 ###################### build and test ######################
 
-.PHONY: test test-env-arg test-unit
-test: test-env-arg test-unit
+.PHONY: test test-env-arg install test-unit test-integration
+test: test-env-arg install test-unit test-integration
 
 .PHONY: test-unit test-env-arg install
 test-unit: test-env-arg install
 		yarn test
 
-# todo: add integration tests
-# .PHONY: test-integration deploy get-secrets
-# test-integration: deploy get-secrets
-# 		@yarn install; \
-# 		yarn test:integration
+.PHONY: test-integration deploy get-secrets
+test-integration: deploy get-secrets
+		@yarn install; \
+		yarn test:integration
 
 # aliases test target which creates tested artifact
 .PHONY: src test
