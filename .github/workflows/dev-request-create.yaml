@@ -18,9 +18,9 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v1
-      # - name: install dependencies and execute unit tests
-      #   run: make test-unit ENV=dev
-      #   working-directory: services/request-create-faas
-      - name: deploy to dev
-        run: make deploy ENV=dev
+      - name: install dependencies and execute unit tests
+        run: make test-unit ENV=dev
+        working-directory: services/request-create-faas
+      - name: deploy to dev and execute integration tests
+        run: make test-integration ENV=dev
         working-directory: services/request-create-faas

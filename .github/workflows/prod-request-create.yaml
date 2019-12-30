@@ -18,6 +18,9 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v1
+      - name: install dependencies
+        working-directory: services/request-create-faas
+        run: make install-prod ENV=prod
       - name: deploy to prod
         working-directory: services/request-create-faas
         run: make deploy ENV=prod
