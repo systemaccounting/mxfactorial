@@ -34,6 +34,7 @@ const sns = new AWS.SNS({
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 
 exports.handler = async event => {
+
   if (!event.items) {
     console.log('empty object received by resolver')
     return {
@@ -42,11 +43,11 @@ exports.handler = async event => {
     }
   }
 
-  let requests = event.items
+  const requests = event.items
 
-  // todo: if debitor === creditor, return 'error: self payment'
+  // todo: if debitor === creditor, return 'self payment' error
 
-  let rules = await getRules(
+  const rules = await getRules(
     rulesToQuery,
     queryTable,
     ddb,
@@ -54,7 +55,7 @@ exports.handler = async event => {
     RULE_INSTANCES_TABLE_RANGE_KEY
   )
 
-  let requestsWithRulesApplied = applyRules(
+  const requestsWithRulesApplied = applyRules(
     requests,
     rules,
     RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME,
@@ -62,7 +63,7 @@ exports.handler = async event => {
   )
 
   // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
-  let isEqual = compareRequests(requests, requestsWithRulesApplied)
+  const isEqual = compareRequests(requests, requestsWithRulesApplied)
 
   if (!isEqual) {
     return {
@@ -71,25 +72,25 @@ exports.handler = async event => {
     }
   }
 
-  let transactionId = uuid() // same for all request items, identifies set
+  const transactionId = uuid() // same for all request items, identifies set
 
   // Always ignore approval time fields sent from client
-  let preparedItems = requests.map(item => {
-    let {
+  const preparedItems = requests.map(item => {
+    const {
       debitor_approval_time,
       creditor_approval_time,
-      ...allowedItems
+      ...allowedItem
     } = item
-    allowedItems.transaction_id = transactionId
-    return allowedItems
+    allowedItem.transaction_id = transactionId
+    return allowedItem
   })
 
-  let storedRequests = await storeRequests(
+  const storedRequests = await storeRequests(
     preparedItems,
     event.graphqlRequestSender
   )
 
-  let notification = {
+  const notification = {
     service: 'TRANSACT',
     message: storedRequests
   }
