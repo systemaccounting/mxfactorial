@@ -34,7 +34,7 @@ describe('storeRequests', () => {
     process.env.PGPASSWORD = 'testpassword'
     process.env.PGHOST = 'testhost'
     process.env.PGPORT = 'testport'
-    let expectedConfig =     {
+    let expectedConfig = {
       host: 'testhost',
       operatorsAliases: false,
       logging: console.log,

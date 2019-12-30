@@ -11,7 +11,8 @@ const {
   itemsStandardArray,
   testRuleInstances,
   testedItemsIntendedForStorage,
-  testNotification
+  testNotification,
+  testGraphqlRequestSender
 } = require('./tests/utils/testData')
 
 const STATUS_FAILED = 'failed'
@@ -41,6 +42,7 @@ jest.mock('./src/compareRequests', () => {
   }
 )
 jest.mock('./src/storeRequests', () => {
+  console.log('called')
   return jest.fn().mockImplementation(
     () => jest.requireActual('./tests/utils/testData').itemsStandardArray
   )
@@ -49,9 +51,12 @@ jest.mock('./src/sendNotification')
 
 describe('transact function handler', () => {
   // test position avoids multiple mockImplementationOnce for compareRequests
-  it('"Required items missing" returned from rule test failure', async () => {
-    let result = await handler({ items: itemsStandardArray })
-    expect(result.message).toBe('Required items missing')
+  it('"required items missing" returned from rule test failure', async () => {
+    let result =     await handler({
+      items: itemsStandardArray,
+      graphqlRequestSender: testGraphqlRequestSender
+    })
+    expect(result.message).toBe('required items missing')
   })
 
   test('returns failed status from empty event', async () => {
@@ -73,7 +78,10 @@ describe('transact function handler', () => {
     let testTable = 'testtable'
     process.env.RULE_INSTANCES_TABLE_NAME = testTable
     let testRangeKey = 'key_schema'
-    await handler({ items: itemsStandardArray })
+    await handler({
+      items: itemsStandardArray,
+      graphqlRequestSender: testGraphqlRequestSender
+    })
     expect(getRules.mock.calls[0][0]).toEqual(testRulesToQuery)
     expect(getRules.mock.calls[0][1]).toEqual(testQueryFunc)
     // https://github.com/facebook/jest/issues/2982
@@ -85,7 +93,10 @@ describe('transact function handler', () => {
   it('calls applyRules with args', async () => {
     let ruleIdParam = 'ruleId'
     let itemsParam = 'items'
-    await handler({ items: itemsStandardArray })
+    await handler({
+      items: itemsStandardArray,
+      graphqlRequestSender: testGraphqlRequestSender
+    })
     expect(applyRules).toHaveBeenCalledWith(
       itemsStandardArray,
       testRuleInstances,
@@ -95,7 +106,10 @@ describe('transact function handler', () => {
   })
 
   it('calls compareRequests with requests', async () => {
-    await handler({ items: itemsStandardArray })
+    await handler({
+      items: itemsStandardArray,
+      graphqlRequestSender: testGraphqlRequestSender
+    })
     expect(compareRequests).toHaveBeenCalledWith(
       itemsStandardArray,
       itemsStandardArray
@@ -103,23 +117,29 @@ describe('transact function handler', () => {
   })
 
   it('ignores debitor_approval_time and creditor_approval_time sent from client', async () => {
-    await handler({ items: itemsStandardArray })
-    let expected = itemsStandardArray.map(item => {
+    await handler({
+      items: itemsStandardArray,
+      graphqlRequestSender: testGraphqlRequestSender
+    })
+    let testexpecteditems = itemsStandardArray.map(item => {
       let {
         debitor_approval_time,
         creditor_approval_time,
-        ...allowedItems
+        ...allowedItem
       } = item
-      allowedItems.transaction_id = testedItemsIntendedForStorage[0].transaction_id
-      return allowedItems
+      allowedItem.transaction_id = testedItemsIntendedForStorage[0].transaction_id
+      return allowedItem
     })
-    expect(storeRequests).toHaveBeenCalledWith(expected)
+    expect(storeRequests).toHaveBeenCalledWith(testexpecteditems, 'testsender')
   })
 
   it('sendNotification called with args', async () => {
     process.env.NOTIFY_TOPIC_ARN = 'testarn'
     let testService = {}
-    await handler({ items: itemsStandardArray })
+    await handler({
+      items: itemsStandardArray,
+      graphqlRequestSender: testGraphqlRequestSender
+    })
     // expect(sendNotification.mock.calls[0][0]).toBe(testService)
     expect(sendNotification.mock.calls[0][1]).toBe('testarn')
     expect(sendNotification.mock.calls[0][2]).toEqual(testNotification)
