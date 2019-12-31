@@ -61,14 +61,14 @@ afterAll(async() => {
 describe('tax rule returned by service', () => {
   test('adds 1 rule-generated object', async () => {
     let { rules } = await graphQLClient.request(fetchRules, {
-      transactions: itemsUnderTestArray
+      input: itemsUnderTestArray
     })
     expect(rules).toHaveLength(2)
   })
 
   test('0.540 tax price', async () => {
     let { rules } = await graphQLClient.request(fetchRules, {
-      transactions: itemsUnderTestArray
+      input: itemsUnderTestArray
     })
     let taxItem = rules.find(item => item.name === '9% state sales tax')
     expect(taxItem.price).toBe('0.540')
