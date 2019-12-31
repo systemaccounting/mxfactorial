@@ -31,6 +31,7 @@ const {
 // process.env.PGPASSWORD
 // process.env.PGHOST
 // process.env.PGPORT
+// process.env.REQUEST_CREATE_LAMBDA_ARN
 
 // https://stackoverflow.com/questions/14249506/how-can-i-wait-in-node-js-javascript-l-need-to-pause-for-a-period-of-time#comment88208673_41957152
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -92,14 +93,8 @@ afterEach(async() => {
 })
 
 describe('create request service', () => {
-  test('creates rules-adjusted transaction requests in postgres', async () => {
-    await invokeLambda(
-      lambda,
-      {
-        items: itemsStandardArray,
-        graphqlRequestSender: TEST_ACCOUNTS[1]
-      }
-    )
+  test('creates rules-adjusted debit request in postgres', async () => {
+    await invokeLambda(lambda, itemsStandardArray, TEST_ACCOUNTS[1])
     const requestsInDb = await queryPgTable(
       transactionsTable,
       'author',
@@ -108,6 +103,8 @@ describe('create request service', () => {
      // !!! always push transactions for teardown in each test
     transactionIDsToTeardown.push(requestsInDb[0].transaction_id)
     expect(requestsInDb).toHaveLength(2)
+    expect(requestsInDb[0].creditor_approval_time).toBeTruthy()
+    expect(requestsInDb[1].creditor_approval_time).toBeTruthy()
   })
 })
 
