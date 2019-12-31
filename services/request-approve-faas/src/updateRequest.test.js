@@ -1,59 +1,44 @@
-const storeRequest = require('./updateRequest')
-const Sequelize = require('sequelize')
+const updateRequest = require('./updateRequest.js')
+const RequestModel = require('./models/Request')
 
-jest.mock('sequelize', () => {
-  return jest.fn().mockImplementation(
-    () => {
-      return {
-        close: jest.fn().mockImplementation(
-          () => {
-            return {
-              then: jest.fn()
-            }
-          }
-        )
-      }
-    }
-  )
+jest.mock('sequelize', () => ({}))
+jest.mock('./models/Request', () => jest.fn(() => ({
+  define: jest.fn(),
+  update: jest.fn()
+})))
+
+afterEach(() => {
+  jest.clearAllMocks()
 })
 
-jest.mock('./models/UpdateRequest', () => {
-  return jest.fn().mockImplementation(
-    () => {
-      return {
-        bulkCreate: jest.fn()
-      }
-    }
-  )
-})
-
-describe('storeRequest', () => {
-  test('sequelize passed params', async () => {
-    process.env.PGDATABASE = 'testdb'
-    process.env.PGUSER = 'testuser'
-    process.env.PGPASSWORD = 'testpassword'
-    process.env.PGHOST = 'testhost'
-    process.env.PGPORT = 'testport'
-    let expectedConfig =     {
-      host: 'testhost',
-      operatorsAliases: false,
-      logging: console.log,
-      port: 'testport',
-      dialect: 'postgres',
-      pool: {
-        min: 0,
-        max: 5,
-        acquire: 30000,
-        idle: 10000,
-        handleDisconnects: true
-      }
-    }
-    await storeRequest()
-    expect(Sequelize).toHaveBeenCalledWith(
-      'testdb',
-      'testuser',
-      'testpassword',
-      expectedConfig
+describe('updateRequest', () => {
+  test('calls RequestModel with args', () => {
+    const testsequelizeinstance = {}
+    const testtimestamp = '1234'
+    const testtransactionid = 'testtransactionid'
+    updateRequest({}, testtransactionid, testtimestamp)
+    expect(RequestModel).toHaveBeenCalledWith(
+      testsequelizeinstance,
+      {}
     )
+  })
+
+  test('calls update with args', () => {
+    const testtransactionid = 'testtransactionid'
+    const expected = {
+      where: { transaction_id: testtransactionid },
+      returning: 1
+    }
+    updateRequest({}, testtransactionid, testtransactionid)
+    expect(
+      RequestModel.mock.results[0]
+        .value.update.mock.calls[0][0][testtransactionid]
+    ).toBeTruthy()
+    expect(
+      RequestModel.mock.results[0]
+        .value.update.mock.calls[0][0][testtransactionid].getTime().toString()
+    ).toMatch(/\d{13}/) // test for new Date() after converting to string
+    expect(RequestModel.mock.results[0].value.update.mock.calls[0][1])
+      .toEqual(expected)
   })
 })
