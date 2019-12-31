@@ -13,13 +13,18 @@ function compareRequests(requests1, requests2) {
   console.log('Item under test array: ', JSON.stringify(itemsUnderTestArray))
   console.log('Items standard array: ', JSON.stringify(itemsStandardArray))
 
-  const mapFn = ({ name, price, quantity }) => {
-    // Omit rules-generated uuid, rule_instance_id, etc
+  const mapFn = item => {
     return {
-      name,
-      // Stringify, since values can be of different types
-      price: _.toString(price),
-      quantity: _.toString(quantity)
+      name: item.name,
+      // stringify, since values can be of different types
+      price: _.toString(item.price),
+      quantity: _.toString(item.quantity),
+      debitor: item.debitor,
+      creditor: item.creditor,
+      author: item.author,
+      // omit transaction_id, not issued until after create
+      // transaction_id: item.transaction_id,
+      rule_instance_id: item.rule_instance_id
     }
   }
 
