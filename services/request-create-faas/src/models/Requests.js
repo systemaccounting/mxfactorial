@@ -4,8 +4,8 @@ module.exports = (sequelize, type, requesterAccount) =>
     {
       id: {
         type: type.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        primaryKey: 1,
+        autoIncrement: 1
       },
       name: type.STRING,
       price: type.STRING,
@@ -20,7 +20,7 @@ module.exports = (sequelize, type, requesterAccount) =>
     },
     {
       // There are no `createdAt` and `updatedAt` transaction columns yet
-      timestamps: false,
+      timestamps: 0,
       hooks: {
         beforeCreate: (instance, options) => {
           if (requesterAccount === instance.creditor) {
