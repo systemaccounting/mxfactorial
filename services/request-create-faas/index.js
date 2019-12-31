@@ -43,6 +43,14 @@ exports.handler = async event => {
     }
   }
 
+  if (!event.graphqlRequestSender) {
+    console.log('event.graphqlRequestSender missing')
+    return {
+      status: STATUS_FAILED,
+      message: 'missing graphqlRequestSender'
+    }
+  }
+
   const requests = event.items
 
   // todo: if debitor === creditor, return 'self payment' error
@@ -62,6 +70,9 @@ exports.handler = async event => {
     RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME,
   )
 
+  // save for later merge into tested transaction requests
+  const savedRuleItems = requestsWithRulesApplied.filter(item => item.rule_instance_id)
+
   // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
   const isEqual = compareRequests(requests, requestsWithRulesApplied)
 
@@ -72,18 +83,35 @@ exports.handler = async event => {
     }
   }
 
-  const transactionId = uuid() // same for all request items, identifies set
-
-  // Always ignore approval time fields sent from client
-  const preparedItems = requests.map(item => {
+  // prep request for storage
+  // always ignore approval time fields sent from client
+  const strippedApprovals = requests.map(item => {
     const {
       debitor_approval_time,
       creditor_approval_time,
       ...allowedItem
     } = item
-    allowedItem.transaction_id = transactionId
     return allowedItem
   })
+
+  // remove unauthenticated, rule-generated approval times
+  const ruleStrippedItems = strippedApprovals.filter(item => !item.rule_instance_id)
+
+  // add rule-generated approvals after stripping
+  // unauthenticated versions sent from client
+  const reappliedApprovalsFromRules = [ ...ruleStrippedItems, ...savedRuleItems]
+
+  // always ingore transaction_ids sent from client
+  const strippedTransactionIDs = reappliedApprovalsFromRules.map(
+    ({ transaction_id, ...item }) => item
+  )
+
+  // prep for storage
+  const transactionID = uuid() // same for all request items, identifies set
+
+  const preparedItems = strippedTransactionIDs.map(
+    item => ({ transaction_id: transactionID, ...item })
+  )
 
   const storedRequests = await storeRequests(
     preparedItems,
