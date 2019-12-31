@@ -1,15 +1,7 @@
 const AWS = require('aws-sdk')
 const Sequelize = require('sequelize')
 
-// todo: integration tests
-const {
-  applyRules,
-  getRules,
-  queryTable
-} = require('./src/applyRules')
-
-const compareRequestItems = require('./src/compareRequestItems')
-const compareRequestRuleItems = require('./src/compareRequestRuleItems')
+const compareRequests = require('./src/compareRequests')
 const getRequest = require('./src/getRequest')
 const updateRequest = require('./src/updateRequest')
 const sendNotification = require('./src/sendNotification')
@@ -20,22 +12,10 @@ const sendNotification = require('./src/sendNotification')
 const STATUS_SUCCESS = 'success'
 const STATUS_FAILED = 'failed'
 
-// keySchema examples for rules:
-// 1. creditor:Person2|name:petrol (any sale of petrol with Person2 as creditor)
-// 2. name: (any request)
-const anyItemKeySchema = 'name:' // applies to all requests
-const rulesToQuery = [ anyItemKeySchema ] // array initd for extensibility
-// todo: convert multi-service constants to env vars set in terraform
-const RULE_INSTANCES_TABLE_RANGE_KEY = 'key_schema'
-const RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME = 'ruleId'
-const RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME = 'items'
-
 const sns = new AWS.SNS({
   apiVersion: '2010-03-31',
   region: process.env.AWS_REGION
 })
-
-const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 
 // options.dialectModule default = pg per:
 // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-constructor-constructor
@@ -61,10 +41,18 @@ const sequelize = new Sequelize(
 
 exports.handler = async event => {
   if (!event.items) {
-    console.log(`Empty object received by resolver`)
+    console.log('0 items received')
     return {
       status: STATUS_FAILED,
-      message: 'Please specify at least 1 request'
+      message: 'please specify at least 1 request'
+    }
+  }
+
+  if (!event.graphqlRequestSender) {
+    console.log('event.graphqlRequestSender missing')
+    return {
+      status: STATUS_FAILED,
+      message: 'missing graphqlRequestSender'
     }
   }
 
@@ -123,7 +111,8 @@ exports.handler = async event => {
     requestItems[0].transaction_id // safe after testing
   )
 
-  let isRequestEqual = compareRequestItems(initiallyStoredRequest, requestItems)
+  // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
+  let isRequestEqual = compareRequests(initiallyStoredRequest, requestItems)
 
   if (!isRequestEqual) {
     return {
@@ -132,41 +121,17 @@ exports.handler = async event => {
     }
   }
 
-  let rules = await getRules(
-    rulesToQuery,
-    queryTable,
-    ddb,
-    process.env.RULE_INSTANCES_TABLE_NAME,
-    RULE_INSTANCES_TABLE_RANGE_KEY
-  )
-
-  let requestWithRulesApplied = applyRules(
-    requestItems,
-    rules,
-    RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME,
-    RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME,
-  )
-
-  // test itemsUnderTestArray for equality with itemsStandardArray (use sortBy first)
-  let isWithRulesEqual = compareRequestRuleItems(requestItems, requestWithRulesApplied)
-
-  if (!isWithRulesEqual) {
-    return {
-      status: STATUS_FAILED,
-      message: 'required items missing'
-    }
-  }
-
   let approvalTimestampProperty =
     (currentAccountRole === 'creditor')
     ? 'creditor_approval_time'
     : 'debitor_approval_time'
 
-    let updated = await updateRequest(
+  let updated = await updateRequest(
     sequelize,
     requestItems[0].transaction_id,
     approvalTimestampProperty
   )
+
   let approvedRequest = updated[1]
 
   // sequelize.close().then(() => console.log('postgres connection closed')) // leave open for warm lambdas
