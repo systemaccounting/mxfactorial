@@ -15,8 +15,8 @@ describe('RequestsModel', () => {
   const testmodel = {
     id: {
       type: type.INTEGER,
-      primaryKey: true,
-      autoIncrement: true
+      primaryKey: 1,
+      autoIncrement: 1
     },
     name: type.STRING,
     price: type.STRING,
@@ -36,7 +36,7 @@ describe('RequestsModel', () => {
 
     expect(mockModel.define.mock.calls[0][0]).toBe(testtable)
     expect(mockModel.define.mock.calls[0][1]).toEqual(testmodel)
-    expect(mockModel.define.mock.calls[0][2].timestamps).toBe(false)
+    expect(mockModel.define.mock.calls[0][2].timestamps).toBe(0)
     expect(mockModel.define.mock.calls[0][2].hooks).toBeTruthy()
     expect(mockModel.define.mock.calls[0][2].hooks.beforeCreate).toBeTruthy()
   })
@@ -66,6 +66,7 @@ describe('RequestsModel', () => {
     const debitorApproverColumnName = 'debitor_approval_time'
     mockModel.define.mock.calls[0][2].hooks.beforeCreate(testinstancedebitor, testmodeloptsdebitor)
     expect(testinstancedebitor.set.mock.calls[0][0]).toBe(debitorApproverColumnName)
+    // test for new Date() after converting to string
     expect(testinstancedebitor.set.mock.calls[0][1].getTime().toString()).toMatch(/\d{13}/)
   })
 })
