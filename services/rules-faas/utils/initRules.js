@@ -73,6 +73,7 @@ accountItems.forEach(item => {
   salesTaxValue += price * quantity * 0.09;
 });
 
+
 if (salesTaxValue > 0) {
   accountItems.push({
     author: accountItems[0].author,
@@ -81,7 +82,9 @@ if (salesTaxValue > 0) {
     price: salesTaxValue.toFixed(3),
     quantity: 1,
     creditor: 'StateOfCalifornia',
-    debitor: accountItems[0].debitor
+    creditor_approval_time: new Date().toISOString(),
+    debitor: accountItems[0].debitor,
+    transaction_id: accountItems[0].transaction_id
   });
 };
 console.log('Applied rules: ', JSON.stringify(accountItems));
