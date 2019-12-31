@@ -1,17 +1,15 @@
-const invokeLambda = (service, args, graphqlRequestSender) => {
+const invokeLambda = (service, items, graphqlRequestSender) => {
   const params = {
     FunctionName: process.env.REQUEST_CREATE_LAMBDA_ARN,
-    Payload: JSON.stringify({
-      items: args.items,
-      graphqlRequestSender
-    })
+    Payload: JSON.stringify({ items, graphqlRequestSender })
   }
   return service
     .invoke(params)
     .promise()
     .then(data => {
       let response = JSON.parse(data.Payload)
-      return response.data
+      // console.log(data)
+      return response
     })
     .catch(err => {
       console.log(err.message)
