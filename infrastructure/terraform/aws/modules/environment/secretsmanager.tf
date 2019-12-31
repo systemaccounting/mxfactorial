@@ -170,3 +170,14 @@ resource "aws_secretsmanager_secret_version" "request_create_lambda_arn" {
   secret_id     = aws_secretsmanager_secret.request_create_lambda_arn.id
   secret_string = aws_lambda_function.request_create.arn
 }
+
+resource "aws_secretsmanager_secret" "request_approve_lambda_arn" {
+  name                    = "${var.environment}/REQUEST_APPROVE_LAMBDA_ARN"
+  recovery_window_in_days = 0
+  description             = "cognito jsonwebkey url in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "request_approve_lambda_arn" {
+  secret_id     = aws_secretsmanager_secret.request_approve_lambda_arn.id
+  secret_string = aws_lambda_function.request_approve.arn
+}
