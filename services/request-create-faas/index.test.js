@@ -42,7 +42,6 @@ jest.mock('./src/compareRequests', () => {
   }
 )
 jest.mock('./src/storeRequests', () => {
-  console.log('called')
   return jest.fn().mockImplementation(
     () => jest.requireActual('./tests/utils/testData').itemsStandardArray
   )
@@ -52,11 +51,18 @@ jest.mock('./src/sendNotification')
 describe('transact function handler', () => {
   // test position avoids multiple mockImplementationOnce for compareRequests
   it('"required items missing" returned from rule test failure', async () => {
-    let result =     await handler({
+    let result = await handler({
       items: itemsStandardArray,
       graphqlRequestSender: testGraphqlRequestSender
     })
     expect(result.message).toBe('required items missing')
+  })
+
+  it('returns "missing graphqlRequestSender" error', async () => {
+    let result = await handler({
+      items: itemsStandardArray,
+    })
+    expect(result.message).toBe('missing graphqlRequestSender')
   })
 
   test('returns failed status from empty event', async () => {
