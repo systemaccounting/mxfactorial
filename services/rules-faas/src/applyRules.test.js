@@ -14,13 +14,21 @@ describe('applyRules', () => {
   test('rules applied to transactions', () => {
     let ruleIdParam = 'ruleId'
     let itemsParam = 'items'
+    // avoid testing unpredictable approval time
+    let itemsWithoutApprovalTime = itemsStandardArray.map(
+      // https://stackoverflow.com/a/46839399
+      ({ creditor_approval_time, ...rest }) => rest
+    )
     let result = applyRules(
       itemsUnderTestArray,
       testRuleInstances,
       ruleIdParam,
       itemsParam
     )
-    expect(result).toEqual(itemsStandardArray)
+    let resultWithOutCreditorApprovalTime = result.map(
+      ({ creditor_approval_time, ...rest }) => rest
+    )
+    expect(resultWithOutCreditorApprovalTime).toEqual(itemsWithoutApprovalTime)
   })
 
   test('getRules returns list of rules', async () => {
