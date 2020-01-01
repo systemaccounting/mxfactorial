@@ -1,5 +1,5 @@
 const fetchRules = `
-  query fetchRules($transactions: [TransactionInputType]) {
+  query fetchRules($transactions: [TransactionInput]) {
     rules(transactions: $transactions) {
       uuid
       name

@@ -1,5 +1,5 @@
 const fetchRules = `
-  query rules($input: [TransactionInputType]!) {
+  query rules($input: [TransactionInput]!) {
     rules(transactions: $input) {
         name
         price
