@@ -1,7 +1,7 @@
 import gql from 'graphql-tag'
 
 export const createTransaction = gql`
-  mutation createRequest($items: [RequestCreateInputType]!) {
+  mutation createRequest($items: [RequestCreateInput]!) {
     createRequest(items: $items) {
       author
       debitor
