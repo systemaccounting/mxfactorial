@@ -2,9 +2,10 @@ const express = require('express')
 const cors = require('cors')
 const body_parser = require('body-parser-graphql')
 const graphqlHTTP = require('express-graphql')
-const { GraphQLSchema, GraphQLObjectType, GraphQLString } = require('graphql')
+const { makeExecutableSchema } = require('graphql-tools')
 
-const schema = require('./graphql/schema')
+const typeDefs = require('./graphql/types')
+const resolvers = require('./graphql/resolvers')
 
 // middleware wrapper required to access and export
 // context object in case lambda requires context.succeed()
@@ -15,7 +16,7 @@ const appWrapper = (event, context) => {
   app.use(
     '/',
     graphqlHTTP({
-      schema,
+      schema: makeExecutableSchema({typeDefs, resolvers}),
       graphiql: true,
       context: event
     })
