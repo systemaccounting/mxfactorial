@@ -52,7 +52,7 @@
   }
 }
 
-// rules by transaction_id
+// requests by transaction_id
 {
   requestsByID(transactionID: "dd4b5630-2878-11ea-a508-13a6cdc2f860") {
     id
@@ -78,7 +78,7 @@
   }
 }
 
-// rules by account
+// requests by account
 {
   requestsByAccount(account: "JoeSmith") {
     id
@@ -105,7 +105,7 @@
 }
 
 // rules
-query rules($input: [TransactionInputType]!) {
+query rules($input: [TransactionInput]!) {
   rules(transactions: $input) {
       name
       price
@@ -132,7 +132,7 @@ query rules($input: [TransactionInputType]!) {
 
 // ruleInstances
 
-query ruleInstances($input: [String]!) {
+query ruleInstances($input: [String]) {
   ruleInstances(keySchema: $input) {
     key_schema
     rule_instance_id
@@ -147,7 +147,7 @@ query ruleInstances($input: [String]!) {
 
 
 // createRequest
-mutation createRequest($input: [RequestCreateInputType]!) {
+mutation createRequest($input: [RequestCreateInput]!) {
   createRequest(items: $input) {
     author
     debitor
@@ -186,7 +186,7 @@ mutation createRequest($input: [RequestCreateInputType]!) {
 }
 
 // approveRequest
-mutation approveRequest($input: [RequestApproveInputType]!) {
+mutation approveRequest($input: [RequestApproveInput]!) {
   approveRequest(items: $input) {
     author
     debitor
@@ -209,26 +209,26 @@ mutation approveRequest($input: [RequestApproveInputType]!) {
         "debitor": "Person1",
         "debitor_approval_time": null,
         "creditor": "JoeSmith",
-        "creditor_approval_time": "2019-12-28 07:53:57.625 +00:00",
+        "creditor_approval_time": "2020-01-01 06:06:41.061 +00:00",
         "name": "Milk",
         "price": "3",
         "quantity": "2",
         "rule_instance_id": null,
-        "transaction_id": "332a2bc0-2947-11ea-b250-213202435096",
-        "id": "2464"
+        "transaction_id": "e046ef60-2c5c-11ea-beb1-2fef3f0dee6c",
+        "id": "2714"
       },
       {
         "author": "JoeSmith",
         "debitor": "Person1",
         "debitor_approval_time": null,
         "creditor": "StateOfCalifornia",
-        "creditor_approval_time": null,
+        "creditor_approval_time": "2020-01-01 06:06:39.860 +00:00",
         "name": "9% state sales tax",
         "price": "0.540",
         "quantity": "1",
         "rule_instance_id": "8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d",
-        "transaction_id": "332a2bc0-2947-11ea-b250-213202435096",
-        "id": "2465"
+        "transaction_id": "e046ef60-2c5c-11ea-beb1-2fef3f0dee6c",
+        "id": "2715"
       }
     ]
 }
