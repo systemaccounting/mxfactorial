@@ -1,8 +1,13 @@
 // node.js app
-const CreateRequestResolver = (service, args, graphqlRequestSender) => {
-  if (!args) {
-    console.log('Empty object received by resolver')
-    return 'Please specify at least 1 transaction'
+const CreateRequestResolver = (
+  service,
+  handlerFn,
+  args,
+  graphqlRequestSender
+  ) => {
+  if (!args.items) {
+    console.log('empty object received by resolver')
+    return 'please specify at least 1 transaction'
   }
   const params = {
     FunctionName: process.env.REQUEST_CREATE_LAMBDA_ARN,
@@ -11,21 +16,17 @@ const CreateRequestResolver = (service, args, graphqlRequestSender) => {
       graphqlRequestSender
     })
   }
-  return service
-    .invoke(params)
-    .promise()
-    .then(data => {
-      let response = JSON.parse(data.Payload)
-      return response.data
-    })
-    .catch(err => {
-      console.log(err.message)
-      throw new Error(err.message)
-    })
+  return handlerFn(service.invoke(params).promise())
 }
 
 // go app
-const GetRequestResolver = (service, args, graphqlRequestSender) => {
+// handlerFn() in resolvers/index.js
+const GetRequestResolver = (
+  service,
+  handlerFn,
+  args,
+  graphqlRequestSender
+  ) => {
   if (!args.account) {
     console.log('account not passed in query, using:', graphqlRequestSender)
     args.account = graphqlRequestSender // temporary
@@ -38,22 +39,17 @@ const GetRequestResolver = (service, args, graphqlRequestSender) => {
       graphqlRequestSender
     })
   }
-  return service
-    .invoke(params)
-    .promise()
-    .then(data => {
-      let parseStringToJson = JSON.parse(data.Payload)
-      let parseJsonToJsObject = JSON.parse(parseStringToJson) // parse 2x for go
-      return parseJsonToJsObject
-    })
-    .catch(err => {
-      console.error(err, err.stack)
-    })
+  return handlerFn(service.invoke(params).promise())
 }
 
 // node.js app
-const ApproveRequestResolver = (service, args, graphqlRequestSender) => {
-  if (!args) {
+const ApproveRequestResolver = (
+  service,
+  handlerFn,
+  args,
+  graphqlRequestSender
+  ) => {
+  if (!args.items) {
     console.log('empty object received by resolver')
     return 'please specify at least 1 request'
   }
@@ -64,17 +60,7 @@ const ApproveRequestResolver = (service, args, graphqlRequestSender) => {
       graphqlRequestSender
     })
   }
-  return service
-    .invoke(params)
-    .promise()
-    .then(data => {
-      let response = JSON.parse(data.Payload)
-      return response.data
-    })
-    .catch(err => {
-      console.log(err)
-      throw new Error(err)
-    })
+  return handlerFn(service.invoke(params).promise())
 }
 
 module.exports = {

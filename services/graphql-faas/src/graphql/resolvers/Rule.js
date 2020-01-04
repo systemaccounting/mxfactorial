@@ -1,8 +1,3 @@
-const AWS = require('aws-sdk')
-
-const lambda = new AWS.Lambda()
-const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
-
 const getRules = async (
   rulesToQuery,
   queryFunc,
@@ -43,10 +38,10 @@ const queryTable = (service, table, rangeKey, rangeVal) => {
     })
 }
 
-const GetRuleTransactionsResolver = async args => {
+const GetRuleTransactionsResolver = async (service, args) => {
   if (!args.transactions) {
-    console.log(`Empty object received by resolver`)
-    return `Please specify at least 1 transaction`
+    console.log('empty object received by resolver')
+    return 'please specify at least 1 transaction'
   }
 
   const params = {
@@ -54,12 +49,12 @@ const GetRuleTransactionsResolver = async args => {
     Payload: JSON.stringify({ items: args.transactions })
   }
 
-  const rulesResponse = await lambda.invoke(params).promise()
+  const rulesResponse = await service.invoke(params).promise()
   console.log('Rules response: ', rulesResponse.Payload)
   return JSON.parse(rulesResponse.Payload)
 }
 
-const GetRuleInstanceResolver = args => {
+const GetRuleInstanceResolver = (service, args, getRulesFn, queryTableFn) => {
 
   // keySchema examples for rules:
   // 1. creditor:Person2|name:petrol (any sale of petrol with Person2 as creditor)
@@ -69,16 +64,18 @@ const GetRuleInstanceResolver = args => {
   // todo: convert multi-service constants to env vars set in terraform
   const RULE_INSTANCES_TABLE_RANGE_KEY = 'key_schema'
 
-  return getRules(
+  return getRulesFn(
     rulesToQuery,
-    queryTable,
-    ddb,
+    queryTableFn,
+    service,
     process.env.RULE_INSTANCES_TABLE_NAME,
     RULE_INSTANCES_TABLE_RANGE_KEY
   )
 }
 
 module.exports = {
+  getRules,
+  queryTable,
   GetRuleTransactionsResolver,
   GetRuleInstanceResolver
 }

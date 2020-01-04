@@ -1,5 +1,11 @@
 // go app
-const GetTransactionsResolver = (service, args, graphqlRequestSender) => {
+// handlerFn() in resolvers/index.js
+const GetTransactionsResolver = (
+  service,
+  handlerFn,
+  args,
+  graphqlRequestSender
+  ) => {
   if (!args.account) {
     console.log('account not passed in query, using:', graphqlRequestSender)
     args.account = graphqlRequestSender // temporary
@@ -12,17 +18,7 @@ const GetTransactionsResolver = (service, args, graphqlRequestSender) => {
       graphqlRequestSender
     })
   }
-  return service
-    .invoke(params)
-    .promise()
-    .then(data => {
-      let parseStringToJson = JSON.parse(data.Payload)
-      let parseJsonToJsObject = JSON.parse(parseStringToJson) // 2x parse
-      return parseJsonToJsObject
-    })
-    .catch(err => {
-      console.error(err, err.stack)
-    })
+  return handlerFn(service.invoke(params).promise())
 }
 
 module.exports = GetTransactionsResolver
