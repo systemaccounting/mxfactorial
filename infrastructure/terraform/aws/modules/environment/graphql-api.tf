@@ -59,7 +59,7 @@ resource "aws_api_gateway_deployment" "environment" {
     "aws_api_gateway_integration.lambda_root",
   ]
 
-  stage_description = "deploy-001"
+  stage_description = "deploy-002"
   rest_api_id       = aws_api_gateway_rest_api.graphql.id
   stage_name        = var.environment
 
