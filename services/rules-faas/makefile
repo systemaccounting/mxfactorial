@@ -6,7 +6,7 @@ RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 ENV_VARS := AWS_REGION RULE_INSTANCE_TABLE_NAME SECRET \
-CLIENT_ID POOL_ID GRAPHQL_API
+CLIENT_ID POOL_ID GRAPHQL_API NINE_PERCENT_CA_SALES_TAX
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -71,12 +71,12 @@ $(ENV_VARS):
 .PHONY: test test-env-arg test-unit
 test: test-env-arg test-unit
 
-.PHONY: test-unit test-env-arg install
-test-unit: test-env-arg install
+.PHONY: test-unit test-env-arg get-secrets install
+test-unit: test-env-arg get-secrets install
 		yarn test
 
-.PHONY: test-integration get-secrets
-test-integration: get-secrets
+.PHONY: test-integration get-secrets deploy
+test-integration: get-secrets deploy
 		@yarn install; \
 		yarn test:integration
 
@@ -99,8 +99,8 @@ layer:
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg init-rules install-prod zip
-deploy: test-env-arg init-rules install-prod zip
+.PHONY: deploy test-env-arg install-prod zip
+deploy: test-env-arg install-prod zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
@@ -109,8 +109,8 @@ deploy: test-env-arg init-rules install-prod zip
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-untested test-env-arg init-rules install-prod zip
-deploy-untested: test-env-arg init-rules install-prod zip
+.PHONY: deploy-untested test-env-arg install-prod zip
+deploy-untested: test-env-arg install-prod zip
 ifeq ($(ENV), prod)
 		$(error no untested deployments to prod)
 endif
@@ -159,9 +159,11 @@ publish-layer: deploy-layer
 			--output=text | sed 's/"//g'); \
 #		echo "***Published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
-.PHONY: init-rules get-secrets
-init-rules: get-secrets
-		@yarn install && yarn init:rules
+# deprecated. rule init'd from terraform:
+# infrastructure/terraform/aws/modules/environment/dynamodb.tf
+# .PHONY: init-rules get-secrets
+# init-rules: get-secrets
+# 		@yarn install && yarn init:rules
 
 ###################### warm up ######################
 

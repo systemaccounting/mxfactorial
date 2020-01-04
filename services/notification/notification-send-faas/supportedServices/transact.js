@@ -10,16 +10,14 @@ const dedupeTransactionNotificationRecipients = (
 }
 
 const idAndTimestampNotifications = (
-  idService,
   timeService,
   account,
   message
   ) => {
-  let uuid = idService()
   let currentTime = timeService.now()
   let humanTimestamp = new Date(currentTime/1000).toUTCString()
   return {
-    uuid,
+    uuid: message[0].transaction_id, // set notification uuid to transaction_id
     timestamp: currentTime,
     human_timestamp: humanTimestamp,
     account,
@@ -50,7 +48,6 @@ const accountsReceivingTransactionNotifications = (
 }
 
 const transactionNotificationsToSend = (
-  idService,
   timeService,
   recipientList,
   transactionList,
@@ -59,7 +56,6 @@ const transactionNotificationsToSend = (
   let toSend = []
   for (account of recipientList) {
     let accountSpecificNotification = idAndTimeStampFunc(
-      idService,
       timeService,
       account,
       transactionList

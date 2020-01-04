@@ -7,7 +7,7 @@ beforeAll(async () => {
   await page.waitForSelector(SELECTORS.HOME)
 })
 
-describe('request performace', () => {
+describe('request performance', () => {
   // lambda cold start test result before relocating rules outside vpc: 17921 ms
   // lambda cold start test result after relocating rules outside vpc: 6013 ms
   // warm lambda test result: 2199 ms

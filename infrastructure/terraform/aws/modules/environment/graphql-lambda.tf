@@ -1,35 +1,45 @@
-data "aws_s3_bucket_object" "mxfactorial_graphql_server" {
+data "aws_s3_bucket_object" "graphql" {
   bucket = "mxfactorial-artifacts-${var.environment}"
   key    = "graphql-src.zip"
 }
 
-resource "aws_lambda_function" "mxfactorial_graphql_server" {
-  function_name     = "mxfactorial-graphql-server-${var.environment}"
-  description       = "GraphQL server published on API Gateway"
-  s3_bucket         = data.aws_s3_bucket_object.mxfactorial_graphql_server.bucket
-  s3_key            = data.aws_s3_bucket_object.mxfactorial_graphql_server.key
-  s3_object_version = data.aws_s3_bucket_object.mxfactorial_graphql_server.version_id
+resource "aws_lambda_function" "graphql" {
+  function_name     = "graphql-${var.environment}"
+  description       = "graphql on api gateway"
+  s3_bucket         = data.aws_s3_bucket_object.graphql.bucket
+  s3_key            = data.aws_s3_bucket_object.graphql.key
+  s3_object_version = data.aws_s3_bucket_object.graphql.version_id
   handler           = "index.handler"
-  layers            = [data.aws_lambda_layer_version.mxfactorial_graphql_server.arn]
+  layers            = [data.aws_lambda_layer_version.graphql.arn]
   runtime           = "nodejs10.x"
   timeout           = 30
-  role              = aws_iam_role.mxfactorial_graphql_lambda_role.arn
+  role              = aws_iam_role.graphql_role.arn
 
   environment {
     variables = {
-      RULES_FAAS_ARN      = aws_lambda_function.rules_faas.arn
-      TRANSACT_LAMBDA_ARN = aws_lambda_function.transact_service_lambda.arn
-      MEASURE_LAMBDA_ARN  = aws_lambda_function.measure_service_lambda.arn
+      RULES_FAAS_ARN               = aws_lambda_function.rules_faas.arn
+      REQUEST_CREATE_LAMBDA_ARN    = aws_lambda_function.request_create.arn
+      REQUEST_APPROVE_LAMBDA_ARN   = aws_lambda_function.request_approve.arn
+      REQUEST_QUERY_LAMBDA_ARN     = aws_lambda_function.request_query.arn
+      TRANSACTION_QUERY_LAMBDA_ARN = aws_lambda_function.transaction_query.arn
+      JWKS_URL = join("", [
+        "https://cognito-idp.",
+        data.aws_region.current.name,
+        ".amazonaws.com/",
+        aws_cognito_user_pool.pool.id,
+        "/.well-known/jwks.json"
+      ])
+      RULE_INSTANCES_TABLE_NAME = aws_dynamodb_table.rule_instances.name
     }
   }
 }
 
-resource "aws_cloudwatch_log_group" "mxfactorial_graphql_server" {
-  name              = "/aws/lambda/${aws_lambda_function.mxfactorial_graphql_server.function_name}"
+resource "aws_cloudwatch_log_group" "graphql" {
+  name              = "/aws/lambda/${aws_lambda_function.graphql.function_name}"
   retention_in_days = 30
 }
 
-data "aws_lambda_layer_version" "mxfactorial_graphql_server" {
+data "aws_lambda_layer_version" "graphql" {
   layer_name = "graphql-node-deps-${var.environment}"
 }
 
@@ -38,8 +48,8 @@ data "aws_s3_bucket_object" "graphql_layer" {
   key    = "graphql-layer.zip"
 }
 
-resource "aws_iam_role" "mxfactorial_graphql_lambda_role" {
-  name = "mxfactorial-graphql-lambda-${var.environment}"
+resource "aws_iam_role" "graphql_role" {
+  name = "graphql-${var.environment}"
 
   assume_role_policy = <<EOF
 {
@@ -58,14 +68,14 @@ resource "aws_iam_role" "mxfactorial_graphql_lambda_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "mxfactorial_graphql_lambda_policy" {
-  name = "mxfactorial-graphql-lambda-${var.environment}"
-  role = aws_iam_role.mxfactorial_graphql_lambda_role.id
+resource "aws_iam_role_policy" "graphql_policy" {
+  name = "graphql-${var.environment}"
+  role = aws_iam_role.graphql_role.id
 
-  policy = data.aws_iam_policy_document.mxfactorial_graphql_lambda_policy.json
+  policy = data.aws_iam_policy_document.graphql_policy.json
 }
 
-data "aws_iam_policy_document" "mxfactorial_graphql_lambda_policy" {
+data "aws_iam_policy_document" "graphql_policy" {
   version = "2012-10-17"
 
   statement {
@@ -75,8 +85,10 @@ data "aws_iam_policy_document" "mxfactorial_graphql_lambda_policy" {
     ]
     resources = [
       aws_lambda_function.rules_faas.arn,
-      aws_lambda_function.transact_service_lambda.arn,
-      aws_lambda_function.measure_service_lambda.arn
+      aws_lambda_function.request_create.arn,
+      aws_lambda_function.request_approve.arn,
+      aws_lambda_function.request_query.arn,
+      aws_lambda_function.transaction_query.arn
     ]
   }
 
@@ -91,9 +103,26 @@ data "aws_iam_policy_document" "mxfactorial_graphql_lambda_policy" {
       "*",
     ]
   }
+  statement {
+    sid = "GraphQLLambdaDynamoDbPolicy${title(var.environment)}"
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:BatchWriteItem",
+      "dynamodb:ConditionCheck",
+      "dynamodb:GetItem",
+      "dynamodb:GetRecords",
+      "dynamodb:Query",
+      "dynamodb:Scan"
+    ]
+    resources = [
+      aws_dynamodb_table.rule_instances.arn,
+      # if indexes added later:
+      # "${aws_dynamodb_table.rule_instances.arn}/index/*"
+    ]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "rds_access_for_lambda" {
-  role       = aws_iam_role.mxfactorial_graphql_lambda_role.name
+  role       = aws_iam_role.graphql_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }

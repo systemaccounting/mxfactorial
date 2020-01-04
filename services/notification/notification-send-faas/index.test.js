@@ -1,7 +1,6 @@
 const { handler } = require('./index')
 
 const AWS = require('aws-sdk')
-const uuid = require('uuid/v1')
 const microtime = require('microtime')
 
 const {
@@ -90,7 +89,6 @@ afterEach(() => {
 })
 
 afterAll(() => {
-  jest.unmock('uuid/v1')
   jest.unmock('microtime')
   jest.unmock('aws-sdk')
   jest.unmock('sequelize')
@@ -114,7 +112,6 @@ describe('lambda function', () => {
     await handler(snsEvent)
     expect(transactionNotificationsToSend)
     .toHaveBeenCalledWith(
-      uuid,
       microtime,
       dedupedRecipientList,
       pendingNotifications,

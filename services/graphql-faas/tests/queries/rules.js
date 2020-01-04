@@ -1,13 +1,29 @@
 const fetchRules = `
-  query fetchRules($transactions: [TransactionInputType]) {
-    rules(transactions: $transactions) {
-      uuid
+  query fetchRules($items: [TransactionInput]!) {
+    rules(transactions: $items) {
       name
       price
       quantity
+      author
+      debitor
+      creditor
       rule_instance_id
     }
   }
 `
 
-module.exports = { fetchRules }
+const fetchRuleInstances = `
+  query fetchRuleInstances($input: [String]) {
+    ruleInstances(keySchema: $input) {
+      key_schema
+      rule_instance_id
+      description
+      rule
+    }
+  }
+`
+
+module.exports = {
+  fetchRules,
+  fetchRuleInstances
+}

@@ -1,36 +1,20 @@
-const createTransaction = `
-  mutation CreateTransaction($items: [TransactionInputType]) {
-    createTransaction(items: $items) {
-      name
-      quantity
-      price
-      author
-      debitor
-      creditor
-      creditor_approval_time
-      debitor_approval_time
-    }
-  }
-`
-
 const fetchTransactions = `
-  query FetchTransactions($user: String) {
-    transactions(user: $user) {
+  query FetchTransactions($account: String) {
+    transactionsByAccount(account: $account) {
       id
-      name
-      quantity
-      price
-      author
       debitor
+      debitor_approval_time
       creditor
       creditor_approval_time
-      debitor_approval_time
+      name
+      price
+      quantity
+      rule_instance_id
+      transaction_id
+      author
       expiration_time
     }
   }
 `
 
-module.exports = {
-  fetchTransactions,
-  createTransaction
-}
+module.exports = fetchTransactions

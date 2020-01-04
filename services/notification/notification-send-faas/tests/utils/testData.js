@@ -48,28 +48,28 @@ const testMessage = "[{\"id\":984,\"name\":\"eggs\",\"price\":\"3.00\",\"quantit
 
 const pendingReceivedNotifications = [
   {
-    uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8c',
+    uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
     timestamp: 1570139563495635,
     human_timestamp: "Thu, 03 Oct 2019 21:52:43 GMT",
     account: 'testdebitor1',
     message: testMessage
   },
   {
-    uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d',
+    uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
     timestamp: 1570139563495636,
     human_timestamp: "Thu, 03 Oct 2019 21:52:44 GMT",
     account: 'testdebitor2',
     message: testMessage
   },
   {
-    uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8e',
+    uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
     timestamp: 1570139563495637,
     human_timestamp: "Thu, 03 Oct 2019 21:52:45 GMT",
     account: 'testdebitor3',
     message: testMessage
   },
   {
-    uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8f',
+    uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
     timestamp: 1570139563495638,
     human_timestamp: "Thu, 03 Oct 2019 21:52:46 GMT",
     account: 'testdebitor4',
@@ -81,7 +81,7 @@ const batchWriteNotifications = [
   {
     PutRequest: {
       Item: {
-        uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8c',
+        uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
         timestamp: 1570139563495635,
         human_timestamp: "Thu, 03 Oct 2019 21:52:43 GMT",
         account: 'testdebitor1',
@@ -92,7 +92,7 @@ const batchWriteNotifications = [
   {
     PutRequest: {
       Item: {
-        uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d',
+        uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
         timestamp: 1570139563495636,
         human_timestamp: "Thu, 03 Oct 2019 21:52:44 GMT",
         account: 'testdebitor2',
@@ -103,7 +103,7 @@ const batchWriteNotifications = [
   {
     PutRequest: {
       Item: {
-        uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8e',
+        uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
         timestamp: 1570139563495637,
         human_timestamp: "Thu, 03 Oct 2019 21:52:45 GMT",
         account: 'testdebitor3',
@@ -114,7 +114,7 @@ const batchWriteNotifications = [
   {
     PutRequest: {
       Item: {
-        uuid: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8f',
+        uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
         timestamp: 1570139563495638,
         human_timestamp: "Thu, 03 Oct 2019 21:52:46 GMT",
         account: 'testdebitor4',
@@ -126,21 +126,21 @@ const batchWriteNotifications = [
 
 const notificationsToSend = [
   {
-    uuid: '8f93fd21-e60b-11e9-a7a9-2b4645cb9b8c',
+    uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
     timestamp: 1570139563495685,
     human_timestamp: 'Thu, 03 Oct 2019 21:52:43 GMT',
     account: 'testcreditor1',
     message: testMessage
   },
   {
-    uuid: '8f93fd22-e60b-11e9-a7a9-2b4645cb9b8c',
+    uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
     timestamp: 1570139563495694,
     human_timestamp: 'Thu, 03 Oct 2019 21:52:43 GMT',
     account: 'testcreditor2',
     message: testMessage
   },
   {
-    uuid: '8f93fd23-e60b-11e9-a7a9-2b4645cb9b8c',
+    uuid: 'a61ee640-ed45-11e9-9d76-e5821046273b',
     timestamp: 1570139563495700,
     human_timestamp: 'Thu, 03 Oct 2019 21:52:43 GMT',
     account: 'testdebitor1',

@@ -164,6 +164,7 @@ class Transaction extends React.Component {
       // Resolve only the last request promise
       if (promise === this.fetchRulesRequest) {
         const rules = data.rules.filter(item => item.rule_instance_id)
+        rules.map(item => item.uuid = v4()) // add key prop
         this.setState({ rules, isFetchingRules: false })
       }
     })
@@ -224,7 +225,7 @@ class Transaction extends React.Component {
               editable={false}
             />
           </div>
-        ))}
+          ))}
       </div>
     )
   }

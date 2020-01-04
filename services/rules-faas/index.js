@@ -17,7 +17,7 @@ const rulesToQuery = [ anyItemKeySchema ]
 // todo: convert multi-service constants to env vars set in terraform
 const RULE_INSTANCES_TABLE_RANGE_KEY = 'key_schema'
 const RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME = 'ruleId'
-const RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME = 'transactionItems'
+const RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME = 'items'
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 
@@ -36,7 +36,7 @@ exports.handler = async event => {
   )
 
   let transactionsWithRulesApplied = applyRules(
-    event.transactions,
+    event.items,
     rules,
     RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME,
     RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME,

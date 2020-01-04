@@ -1,9 +1,8 @@
 import gql from 'graphql-tag'
 
 const fetchRules = gql`
-  query fetchRules($transactions: [TransactionInputType]) {
+  query fetchRules($transactions: [TransactionInput]!) {
     rules(transactions: $transactions) {
-      uuid
       name
       price
       quantity

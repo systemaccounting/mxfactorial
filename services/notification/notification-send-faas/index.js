@@ -1,5 +1,4 @@
 const AWS = require('aws-sdk')
-const uuid = require('uuid/v1')
 const microtime = require('microtime')
 const Sequelize = require('sequelize') // added as dev dep since published in lambda layer
 
@@ -64,7 +63,6 @@ exports.handler = async event => {
     )
 
     notificationsToSend = transactionNotificationsToSend(
-      uuid,
       microtime,
       accountsReceivingNotification,
       transactionList,
@@ -139,5 +137,4 @@ exports.handler = async event => {
       console.log('0 notifcation websockets for account: ', account)
     }
   }
-  
 }

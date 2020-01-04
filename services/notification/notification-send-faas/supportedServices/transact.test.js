@@ -12,14 +12,6 @@ const {
   dedupedRecipientList
 } = require('../tests/utils/testData')
 
-const mockId = jest.fn()
-  .mockImplementationOnce(() => '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd21-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd22-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd23-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd24-e60b-11e9-a7a9-2b4645cb9b8c')
-  .mockImplementationOnce(() => '8f93fd25-e60b-11e9-a7a9-2b4645cb9b8c')
-
 const mockTime = {
   now: jest.fn()
     .mockImplementationOnce(() => 1570139563495635)
@@ -41,11 +33,10 @@ describe('transact notification service', () => {
     expect(result).toEqual(expected)
   })
 
-  test('id and timestamp added to received notifications', () => {
+  test('uuid and timestamp added to received notifications', () => {
     let expected = pendingReceivedNotifications[0]
     let TEST_RECIPIENT = 'testdebitor1'
     let result = idAndTimestampNotifications(
-      mockId,
       mockTime,
       TEST_RECIPIENT,
       pendingNotifications
@@ -66,7 +57,6 @@ describe('transact notification service', () => {
 
   test('transactionNotificationsToSend prepares 3 notifications', () => {
     let result = transactionNotificationsToSend(
-      mockId,
       mockTime,
       dedupedRecipientList,
       pendingNotifications,

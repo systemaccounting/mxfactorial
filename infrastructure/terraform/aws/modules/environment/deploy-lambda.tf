@@ -131,14 +131,14 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 
   lambda_function {
-    id                  = aws_lambda_function.mxfactorial_graphql_server.function_name
+    id                  = aws_lambda_function.graphql.function_name
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.mxfactorial_graphql_server.key
+    filter_prefix       = data.aws_s3_bucket_object.graphql.key
   }
 
   lambda_function {
-    id                  = data.aws_lambda_layer_version.mxfactorial_graphql_server.layer_name
+    id                  = data.aws_lambda_layer_version.graphql.layer_name
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
     filter_prefix       = data.aws_s3_bucket_object.graphql_layer.key
@@ -149,27 +149,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
     filter_prefix       = data.aws_s3_bucket_object.rules_faas.key
-  }
-
-  lambda_function {
-    id                  = aws_lambda_function.transact_service_lambda.function_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.transact_service_lambda.key
-  }
-
-  lambda_function {
-    id                  = data.aws_lambda_layer_version.transact_service_lambda.layer_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.transact_layer.key
-  }
-
-  lambda_function {
-    id                  = aws_lambda_function.measure_service_lambda.function_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.measure_service_lambda.key
   }
 
   lambda_function {
@@ -212,5 +191,47 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
     filter_prefix       = data.aws_s3_bucket_object.migrate_lambda_layer.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.transaction_query.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.transaction_query.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.request_query.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.request_query.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.request_create.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.request_create.key
+  }
+
+  lambda_function {
+    id                  = data.aws_lambda_layer_version.request_create.layer_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.request_create_layer.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.request_approve.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.request_approve.key
+  }
+
+  lambda_function {
+    id                  = data.aws_lambda_layer_version.request_approve.layer_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.request_approve_layer.key
   }
 }

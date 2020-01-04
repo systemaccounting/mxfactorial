@@ -21,6 +21,6 @@ jobs:
       - name: install dependencies and execute unit tests
         run: make test-unit ENV=dev
         working-directory: services/rules-faas
-      - name: deploy
-        run: make deploy ENV=dev
+      - name: deploy and execute integraton tests
+        run: make test-integration ENV=dev
         working-directory: services/rules-faas

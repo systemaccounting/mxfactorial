@@ -148,3 +148,47 @@ resource "aws_secretsmanager_secret_version" "rds_transaction_teardown_lambda" {
   secret_id     = aws_secretsmanager_secret.rds_transaction_teardown_lambda.id
   secret_string = aws_lambda_function.integration_test_data_teardown_lambda.function_name
 }
+
+resource "aws_secretsmanager_secret" "cognito_jsonwebkey_url" {
+  name                    = "${var.environment}/JWKS_URL"
+  recovery_window_in_days = 0
+  description             = "cognito jsonwebkey url in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "cognito_jsonwebkey_url" {
+  secret_id     = aws_secretsmanager_secret.cognito_jsonwebkey_url.id
+  secret_string = aws_lambda_function.graphql.environment[0].variables.JWKS_URL
+}
+
+resource "aws_secretsmanager_secret" "request_create_lambda_arn" {
+  name                    = "${var.environment}/REQUEST_CREATE_LAMBDA_ARN"
+  recovery_window_in_days = 0
+  description             = "cognito jsonwebkey url in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "request_create_lambda_arn" {
+  secret_id     = aws_secretsmanager_secret.request_create_lambda_arn.id
+  secret_string = aws_lambda_function.request_create.arn
+}
+
+resource "aws_secretsmanager_secret" "request_approve_lambda_arn" {
+  name                    = "${var.environment}/REQUEST_APPROVE_LAMBDA_ARN"
+  recovery_window_in_days = 0
+  description             = "cognito jsonwebkey url in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "request_approve_lambda_arn" {
+  secret_id     = aws_secretsmanager_secret.request_approve_lambda_arn.id
+  secret_string = aws_lambda_function.request_approve.arn
+}
+
+resource "aws_secretsmanager_secret" "nine_percent_ca_sales_tax" {
+  name                    = "${var.environment}/NINE_PERCENT_CA_SALES_TAX"
+  recovery_window_in_days = 0
+  description             = "nine percent ca sales tax in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "nine_percent_ca_sales_tax" {
+  secret_id     = aws_secretsmanager_secret.nine_percent_ca_sales_tax.id
+  secret_string = base64encode(local.nine_percent_ca_sales_tax_rule)
+}

@@ -1,0 +1,21 @@
+{
+  "name": "request-approve-faas",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "scripts": {
+    "test": "jest --detectOpenHandles --verbose --silent",
+    "test:integration": "env-cmd jest --detectOpenHandles --runInBand --silent --verbose --testRegex='.*\\.integ\\.[tj]sx?'"
+  },
+  "dependencies": {
+    "lodash": "^4.17.13",
+    "pg": "^7.12.1",
+    "pg-hstore": "^2.3.3",
+    "sequelize": "^5.15.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.555.0",
+    "env-cmd": "^10.0.1",
+    "jest": "^24.5.0"
+  }
+}

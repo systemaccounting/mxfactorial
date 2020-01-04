@@ -8,8 +8,7 @@
     "test:integration": "env-cmd jest --detectOpenHandles --runInBand --verbose --silent --testRegex='.*\\.integ\\.[tj]sx?'"
   },
   "dependencies": {
-    "microtime": "^3.0.0",
-    "uuid": "^3.3.3"
+    "microtime": "^3.0.0"
   },
   "devDependencies": {
     "aws-sdk": "^2.542.0",

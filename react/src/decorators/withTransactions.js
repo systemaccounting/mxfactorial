@@ -14,7 +14,8 @@ function sortByArrpovalTime(a, b) {
 }
 
 // https://www.apollographql.com/docs/react/api/react-apollo/#render-prop-function
-export function renderProps({ data: { transactions, loading, refetch } }) {
+export function renderProps({ data: { requestsByAccount, loading, refetch } }) {
+  let transactions = requestsByAccount
   return {
     transactions: transactions ? transactions.sort(sortByArrpovalTime) : [],
     refetchTransactions: refetch,
@@ -23,6 +24,6 @@ export function renderProps({ data: { transactions, loading, refetch } }) {
 }
 
 export default graphql(fetchTransactions, {
-  options: props => ({ variables: { user: props.user.username } }),
+  options: props => ({ variables: { account: props.user.username } }),
   props: renderProps
 })

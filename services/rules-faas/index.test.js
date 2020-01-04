@@ -1,3 +1,4 @@
+const AWS = require('aws-sdk')
 const { handler } = require('./index')
 const {
   applyRules,
@@ -5,21 +6,33 @@ const {
 } = require('./src/applyRules')
 
 const {
-  itemsUnderTestArray,
-  itemsStandardArray,
+  fakerAccountWithSevenRandomDigits,
+  createRequestData,
   testRuleInstances
 } = require('./tests/utils/testData')
 
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
+
+const taxExcluded = [ debitRequest[0] ]
 
 afterEach(() => {
   jest.clearAllMocks()
 })
 
+jest.mock('aws-sdk')
+
 jest.mock('./src/applyRules', () => {
   return {
-    applyRules: jest.fn().mockImplementation(
-      () => jest.requireActual('./tests/utils/testData')
-      .itemsStandardArray
+    applyRules: jest.fn(
+      () => ({})
     ),
     getRules: jest.fn().mockImplementation(
       () => jest.requireActual('./tests/utils/testData')
@@ -31,6 +44,16 @@ jest.mock('./src/applyRules', () => {
 
 describe('rules function handler', () => {
 
+  test('calls DocumentClient with config', async () => {
+    let expected = {
+      region: process.env.AWS_REGION
+    }
+    await handler({ transactions: taxExcluded })
+    await expect(AWS.DynamoDB.DocumentClient)
+      .toHaveBeenCalledWith(expected)
+    AWS.DynamoDB.DocumentClient.mockClear()
+  })
+
   it('calls getRules with args', async () => {
     let testRulesToQuery = ["name:"]
     let testQueryFunc = {}
@@ -38,7 +61,7 @@ describe('rules function handler', () => {
     let testTable = 'testtable'
     process.env.RULE_INSTANCES_TABLE_NAME = testTable
     let testRangeKey = 'key_schema'
-    await handler({ transactions: itemsUnderTestArray })
+    await handler({ transactions: taxExcluded })
     expect(getRules.mock.calls[0][0]).toEqual(testRulesToQuery)
     expect(getRules.mock.calls[0][1]).toEqual(testQueryFunc)
     // https://github.com/facebook/jest/issues/2982
@@ -49,10 +72,10 @@ describe('rules function handler', () => {
 
   it('calls applyRules with args', async () => {
     let ruleIdParam = 'ruleId'
-    let itemsParam = 'transactionItems'
-    await handler({ transactions: itemsStandardArray })
+    let itemsParam = 'items'
+    await handler({ items: debitRequest })
     expect(applyRules).toHaveBeenCalledWith(
-      itemsStandardArray,
+      debitRequest,
       testRuleInstances,
       ruleIdParam,
       itemsParam
@@ -60,7 +83,7 @@ describe('rules function handler', () => {
   })
 
   it('returns rule-modified transactions', async () => {
-    let result = await handler({ transactions: itemsUnderTestArray })
-    expect(result).toEqual(itemsStandardArray)
+    let result = await handler({ items: taxExcluded })
+    expect(result).toEqual({})
   })
 })

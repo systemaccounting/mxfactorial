@@ -1,181 +1,234 @@
+// Graphiql queries
 
-// 2019-07-13 branch: api-authentication
-Postman query
-POST
-Content-Type: application/graphql
-Body:raw
+// transactions by id
 {
-  transactions(transactionId: "50", user: "Mary") {
+  transactionsByID(transactionID: "c9edee00-261a-11ea-862f-a9b6f84183ae") {
     id
     debitor
+    debitor_profile_latlng
+    debitor_transaction_latlng
+    debitor_approval_time
+    debitor_device
     creditor
+    creditor_profile_latlng
+    creditor_transaction_latlng
+    creditor_approval_time
+    creditor_device
     name
     price
     quantity
+    unit_of_measurement
+    units_measured
+    rule_instance_id
+    transaction_id
+    author
+    expiration_time
   }
 }
 
+// transactions by account
+{
+  transactionsByAccount(account: "JoeSmith") {
+    id
+    debitor
+    debitor_profile_latlng
+    debitor_transaction_latlng
+    debitor_approval_time
+    debitor_device
+    creditor
+    creditor_profile_latlng
+    creditor_transaction_latlng
+    creditor_approval_time
+    creditor_device
+    name
+    price
+    quantity
+    unit_of_measurement
+    units_measured
+    rule_instance_id
+    transaction_id
+    author
+    expiration_time
+  }
+}
 
-// 2019-04-15
+// requests by transaction_id
+{
+  requestsByID(transactionID: "dd4b5630-2878-11ea-a508-13a6cdc2f860") {
+    id
+    debitor
+    debitor_profile_latlng
+    debitor_transaction_latlng
+    debitor_approval_time
+    debitor_device
+    creditor
+    creditor_profile_latlng
+    creditor_transaction_latlng
+    creditor_approval_time
+    creditor_device
+    name
+    price
+    quantity
+    unit_of_measurement
+    units_measured
+    rule_instance_id
+    transaction_id
+    author
+    expiration_time
+  }
+}
 
-mutation createTransaction($items: [TransactionCreateType]!) {
-  createTransaction(items: $items) {
-    uuid
+// requests by account
+{
+  requestsByAccount(account: "JoeSmith") {
+    id
+    debitor
+    debitor_profile_latlng
+    debitor_transaction_latlng
+    debitor_approval_time
+    debitor_device
+    creditor
+    creditor_profile_latlng
+    creditor_transaction_latlng
+    creditor_approval_time
+    creditor_device
+    name
+    price
+    quantity
+    unit_of_measurement
+    units_measured
+    rule_instance_id
+    transaction_id
+    author
+    expiration_time
+  }
+}
+
+// rules
+query rules($input: [TransactionInput]!) {
+  rules(transactions: $input) {
+      name
+      price
+      quantity
+      author
+      debitor
+      creditor
+      rule_instance_id
+  }
+}
+
+{
+  "input": [
+    {
+      "name": "milk",
+      "price": "3.00",
+      "quantity": "2",
+      "debitor": "Person1",
+      "creditor": "Person2",
+      "author": "Person2"
+    }
+  ]
+}
+
+// ruleInstances
+
+query ruleInstances($input: [String]) {
+  ruleInstances(keySchema: $input) {
+    key_schema
+    rule_instance_id
+    description
+    rule
+  }
+}
+
+{
+  "input": ["name:"]
+}
+
+
+// createRequest
+mutation createRequest($input: [RequestCreateInput]!) {
+  createRequest(items: $input) {
+    author
+    debitor
+    debitor_approval_time
+    creditor
+    creditor_approval_time
     name
     price
     quantity
     rule_instance_id
+    transaction_id
+    id
   }
 }
 
-// iterable input
 {
-  "items": [
+  "input": [
     {
+      "author": "JoeSmith",
+      "creditor": "JoeSmith",
+      "debitor": "Person1",
       "name": "Milk",
       "price": "3",
       "quantity": "2"
     },
     {
+      "author": "JoeSmith",
+      "debitor": "Person1",
+      "creditor": "StateOfCalifornia",
       "name": "9% state sales tax",
       "price": "0.540",
-      "quantity": "1"
+      "quantity": "1",
+      "rule_instance_id": "8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d"
     }
 	]
 }
 
-// Graphiql Mutation
-mutation createTransaction($input: TransactionCreateType!) {
-  createTransaction(input: $input) {
-    id
+// approveRequest
+mutation approveRequest($input: [RequestApproveInput]!) {
+  approveRequest(items: $input) {
+    author
     debitor
-    creditor
-    name
-    price
-    quantity
-  }
-}
-
-// Graphiql Mutation Query Variables
-{
-  "input": {
-  	"debitor": "John",
-  	"debitor_profile_latlng": "51.2244, -12.12221",
-  	"debitor_transaction_latlng": "00.0000, -00.00000",
-  	"debitor_approval_time": "2018-10-26T21:32:52",
-  	"debitor_device": "Mozilla/5.0 (Windows; U; Win98; en-US; rv:0.9.2) Gecko/20010725 Netscape6/6.1",
-  	"creditor": "Mary",
-  	"creditor_profile_latlng": "11.1111, -11.11111",
-  	"creditor_transaction_latlng": "22.222, -22.22222",
-  	"creditor_approval_time": "2018-09-30T04:05:32.505Z",
-  	"creditor_device": "iPhone 8 Plus",
-  	"name": "Milk",
-  	"price": "3",
-  	"quantity": "2",
-  	"unit_of_measurement": "gallons",
-  	"units_measured": "1",
-  	"rule_instance_id": "94aaa930-c46a-11e8-bb14-dbb770b4bd9c",
-  	"transaction_id": "857a4ae0-c467-11e8-b1ae-3be7f4f4e50a",
-  	"debit_approver": "John",
-  	"credit_approver": "Mary",
-  	"author": "John",
-  	"expiration_time": "2019-09-30T04:17:19.340Z"
-  }
-}
-
-// Graphiql Query
-{
-  transactions(transactionId: "1") {
-    id
-    debitor
-    debitor_profile_latlng
-    debitor_transaction_latlng
     debitor_approval_time
-    debitor_device
     creditor
-    creditor_profile_latlng
-    creditor_transaction_latlng
     creditor_approval_time
-    creditor_device
     name
     price
     quantity
-    unit_of_measurement
-    units_measured
     rule_instance_id
     transaction_id
-    debit_approver
-    credit_approver
-    author
-    expiration_time
-  }
-}
-
-
-// Postman Mutation
-POST
-Content-Type: application/graphql
-Body:raw
-mutation createTransaction {
-  createTransaction(input: {
-    debitor: "John",
-    debitor_profile_latlng: "51.2244, -12.12221",
-    debitor_transaction_latlng: "00.0000, -00.00000",
-    debitor_approval_time: "2018-10-26T21:32:52",
-    debitor_device: "Mozilla/5.0 (Windows; U; Win98; en-US; rv:0.9.2) Gecko/20010725 Netscape6/6.1",
-    creditor: "Mary",
-    creditor_profile_latlng: "11.1111, -11.11111",
-    creditor_transaction_latlng: "22.222, -22.22222",
-    creditor_approval_time: "2018-09-30T04:05:32.505Z",
-    creditor_device: "iPhone 8 Plus",
-    name: "Milk",
-    price: "3",
-    quantity: "2",
-    unit_of_measurement: "gallons",
-    units_measured: "1",
-    rule_instance_id: "94aaa930-c46a-11e8-bb14-dbb770b4bd9c",
-    transaction_id: "857a4ae0-c467-11e8-b1ae-3be7f4f4e50a",
-    debit_approver: "John",
-    credit_approver: "Mary",
-    author: "John",
-    expiration_time: "2019-09-30T04:17:19.340Z"
-  }) {
     id
-    debitor
-    creditor
-    name
-    price
-    quantity
   }
 }
 
-// Postman Query
-POST
-Content-Type: application/graphql
-Body:raw
 {
-  transactions(transactionId: "1") {
-    id
-    debitor
-    debitor_profile_latlng
-    debitor_transaction_latlng
-    debitor_approval_time
-    debitor_device
-    creditor
-    creditor_profile_latlng
-    creditor_transaction_latlng
-    creditor_approval_time
-    creditor_device
-    name
-    price
-    quantity
-    unit_of_measurement
-    units_measured
-    rule_instance_id
-    transaction_id
-    debit_approver
-    credit_approver
-    author
-    expiration_time
-  }
+  "input": [
+      {
+        "author": "JoeSmith",
+        "debitor": "Person1",
+        "debitor_approval_time": null,
+        "creditor": "JoeSmith",
+        "creditor_approval_time": "2020-01-01 06:06:41.061 +00:00",
+        "name": "Milk",
+        "price": "3",
+        "quantity": "2",
+        "rule_instance_id": null,
+        "transaction_id": "e046ef60-2c5c-11ea-beb1-2fef3f0dee6c",
+        "id": "2714"
+      },
+      {
+        "author": "JoeSmith",
+        "debitor": "Person1",
+        "debitor_approval_time": null,
+        "creditor": "StateOfCalifornia",
+        "creditor_approval_time": "2020-01-01 06:06:39.860 +00:00",
+        "name": "9% state sales tax",
+        "price": "0.540",
+        "quantity": "1",
+        "rule_instance_id": "8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d",
+        "transaction_id": "e046ef60-2c5c-11ea-beb1-2fef3f0dee6c",
+        "id": "2715"
+      }
+    ]
 }
