@@ -71,8 +71,8 @@ $(ENV_VARS):
 .PHONY: test test-env-arg test-unit
 test: test-env-arg test-unit
 
-.PHONY: test-unit test-env-arg install
-test-unit: test-env-arg install
+.PHONY: test-unit test-env-arg get-secrets install
+test-unit: test-env-arg get-secrets install
 		yarn test
 
 .PHONY: test-integration get-secrets deploy
