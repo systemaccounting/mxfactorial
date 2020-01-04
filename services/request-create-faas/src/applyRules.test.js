@@ -5,28 +5,43 @@ const {
 } = require('./applyRules')
 
 const {
-  itemsUnderTestArray,
-  itemsStandardArray,
+  fakerAccountWithSevenRandomDigits,
+  createRequestData,
   testRuleInstances
 } = require('../tests/utils/testData')
+
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
+
 
 describe('applyRules', () => {
   test('rules applied to requests', () => {
     let ruleIdParam = 'ruleId'
     let itemsParam = 'items'
     // avoid testing unpredictable approval time
-    let itemsWithoutApprovalTime = itemsStandardArray.map(
+    let itemsWithoutApprovalTime = debitRequest.map(
       // https://stackoverflow.com/a/46839399
       ({ creditor_approval_time, ...rest }) => rest
     )
+    let taxExcluded = [ debitRequest[0] ]
     let result = applyRules(
-      itemsUnderTestArray,
+      taxExcluded,
       testRuleInstances,
       ruleIdParam,
       itemsParam
     )
     let resultWithOutCreditorApprovalTime = result.map(
-      ({ creditor_approval_time, ...rest }) => rest
+      ({
+        creditor_approval_time,
+        ...rest
+      }) => rest
     )
     expect(resultWithOutCreditorApprovalTime).toEqual(itemsWithoutApprovalTime)
   })

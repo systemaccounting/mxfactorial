@@ -1,7 +1,18 @@
 const sendNotification = require('./sendNotification')
 const {
-  itemsUnderTestArray
+  fakerAccountWithSevenRandomDigits,
+  createRequestData,
 } = require('../tests/utils/testData')
+
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
 
 const publish = jest.fn().mockImplementation(() => {
   return {
@@ -23,10 +34,10 @@ describe('sendNotifcation', () => {
   test('params', async () => {
     let arn = 'arn'
     let expected = {
-      Message: JSON.stringify(itemsUnderTestArray),
+      Message: JSON.stringify(debitRequest),
       TopicArn: arn
     }
-    await sendNotification(sns, arn, itemsUnderTestArray)
+    await sendNotification(sns, arn, debitRequest)
     expect(publish).toHaveBeenCalledWith(expected)
   })
 })
