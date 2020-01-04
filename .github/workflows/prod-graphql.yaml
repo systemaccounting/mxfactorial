@@ -19,11 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: install dependencies
-        run: make install
+        run: make install-prod
         working-directory: services/graphql-faas
-      - name: create archive for deployment
-        run: make zip
-        working-directory: services/graphql-faas
-      - name: deploy to prod for integration testing
+      - name: deploy to prod
         run: make deploy ENV=prod
         working-directory: services/graphql-faas
