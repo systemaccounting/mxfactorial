@@ -33,7 +33,7 @@ class HomeScreen extends Component {
       query: fetchRules,
       addTypename: false,
       variables: {
-        transactions
+        transactions: transactions.map(({uuid, ...rest}) => rest)
       }
     })
   }
