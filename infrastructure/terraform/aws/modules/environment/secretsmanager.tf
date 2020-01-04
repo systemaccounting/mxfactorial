@@ -181,3 +181,14 @@ resource "aws_secretsmanager_secret_version" "request_approve_lambda_arn" {
   secret_id     = aws_secretsmanager_secret.request_approve_lambda_arn.id
   secret_string = aws_lambda_function.request_approve.arn
 }
+
+resource "aws_secretsmanager_secret" "nine_percent_ca_sales_tax" {
+  name                    = "${var.environment}/NINE_PERCENT_CA_SALES_TAX"
+  recovery_window_in_days = 0
+  description             = "nine percent ca sales tax in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "nine_percent_ca_sales_tax" {
+  secret_id     = aws_secretsmanager_secret.nine_percent_ca_sales_tax.id
+  secret_string = base64encode(local.nine_percent_ca_sales_tax_rule)
+}
