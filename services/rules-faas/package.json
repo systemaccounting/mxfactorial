@@ -4,9 +4,8 @@
   "main": "index.js",
   "license": "UNLICENSED",
   "scripts": {
-    "test": "jest --detectOpenHandles --verbose --silent",
-    "test:integration": "env-cmd jest --detectOpenHandles --runInBand --silent --verbose --testRegex='.*\\.integ\\.[tj]sx?'",
-    "init:rules": "env-cmd node ./utils/initRules.js"
+    "test": "env-cmd jest --detectOpenHandles --verbose --silent",
+    "test:integration": "env-cmd jest --detectOpenHandles --runInBand --silent --verbose --testRegex='.*\\.integ\\.[tj]sx?'"
   },
   "dependencies": {},
   "devDependencies": {
