@@ -10,13 +10,12 @@ const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
 const {
   invokeLambda,
   deleteFromPgTable,
-  queryDynamaDbTable,
-  deleteMultipleNotifications
+  tearDownNotifications
 } = require('./utils/integrationTestHelpers')
 
 const {
-  TEST_ACCOUNTS,
-  itemsStandardArray,
+  fakerAccountWithSevenRandomDigits,
+  createRequestData
 } = require('./utils/testData')
 
 const {
@@ -33,8 +32,15 @@ const {
 // process.env.REQUEST_CREATE_LAMBDA_ARN
 // process.env.REQUEST_APPROVE_LAMBDA_ARN
 
-// https://stackoverflow.com/questions/14249506/how-can-i-wait-in-node-js-javascript-l-need-to-pause-for-a-period-of-time#comment88208673_41957152
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
 
 const transactionsTable = tableModel(
   connection,
@@ -50,53 +56,32 @@ afterAll(async () => {
   connection.close().then(() => console.log('postgres connection closed'))
 })
 
-let request // used for testing and teardown
+let requests = [] // used for testing and teardown
 beforeEach(async() => {
   let response = await invokeLambda(
     lambda,
     process.env.REQUEST_CREATE_LAMBDA_ARN,
-    itemsStandardArray,
-    TEST_ACCOUNTS[1]
+    debitRequest,
+    TEST_CREDITOR
   )
-   // !!! save transactions for teardown in each test
-   request = response.data
+  // !!! save transactions for teardown in each test
+  requests.push(...response.data)
 })
 
 afterEach(async() => {
   // delete test transaction requests added in postgres
-  await deleteFromPgTable(
-    transactionsTable,
-    'transaction_id',
-    request[0].transaction_id
-  )
-
+  for (let req of requests) {
+    await deleteFromPgTable(
+      transactionsTable,
+      'transaction_id',
+      req.transaction_id
+    )
+  }
+  let transactionIDs = requests.map(i => i.transaction_id)
+  let uniqueIDs = [ ...new Set(transactionIDs)]
   // delete test notifications added in dynamodb
-  let notificationsToDelete
-  attemptloop: // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/label
-  for (let attempt = 1; attempt < 5; attempt++) { // retry delayed notifications delivered by sns
-    notificationsToDelete = await queryDynamaDbTable(
-      ddb,
-      process.env.NOTIFICATIONS_TABLE_NAME,
-      'uuid',
-      request[0].transaction_id
-    )
-    if (notificationsToDelete.length !== 6) { // notifications not in dynamodb yet
-      await sleep(5000) // wait 5 seconds
-      continue attemptloop // start over
-    } else {
-      break attemptloop
-    }
-  }
-  if (notificationsToDelete.length !== 6) { // log failure if attempts fail
-    console.log('failed to find and delete notifications from test')
-  } else {
-    await deleteMultipleNotifications( // delete notifications
-      ddb,
-      process.env.NOTIFICATIONS_TABLE_NAME,
-      notificationsToDelete
-    )
-  }
-  request = []
+  await tearDownNotifications(ddb, uniqueIDs, 6)
+  requests = []
 })
 
 describe('approve request service', () => {
@@ -104,11 +89,47 @@ describe('approve request service', () => {
     let response = await invokeLambda(
       lambda,
       process.env.REQUEST_APPROVE_LAMBDA_ARN,
-      request,
-      TEST_ACCOUNTS[0]
+      requests,
+      TEST_DEBITOR
     )
     expect(response.data[0].debitor_approval_time).toBeTruthy()
     expect(response.data[1].debitor_approval_time).toBeTruthy()
   })
+
+  // todo: approve credit request
+
+  // it('sets debitor_approval_time if author === debitor', async () => {
+  //   let response = await creditorGraphQLClient.request(createRequest, {
+  //     items: debitRequest
+  //   })
+  //   response.createRequest.forEach(item => {
+  //     if (item.author === item.debitor) {
+  //       expect(item.creditor_approval_time).toBeNull()
+  //       expect(item.debitor_approval_time).not.toBeNull()
+  //     }
+  //   })
+  // })
+
+  // it('sets creditor_approval_time if author === creditor', async () => {
+  //   let response = await creditorGraphQLClient.request(createRequest, {
+  //     items: creditRequest
+  //   })
+  //   response.createRequest.forEach(item => {
+  //     if (item.author === item.creditor) {
+  //       expect(item.creditor_approval_time).not.toBeNull()
+  //       expect(item.debitor_approval_time).toBeNull()
+  //     }
+  //   })
+  // })
+
+  // // todo: test creditor != cognito account
+  // it('returns debit and credit requests matching authenticated account', async () => {
+  //   let response = await creditorGraphQLClient.request(requestsByAccount, {
+  //     accpunt: TEST_DEBITOR
+  //   })
+  //   response.transactions.forEach(item => {
+  //     expect([item.debitor, item.creditor, item.author]).toContain(TEST_DEBITOR)
+  //   })
+  // })
 })
 
