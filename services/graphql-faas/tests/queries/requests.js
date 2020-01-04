@@ -1,6 +1,6 @@
-const fetchTransactions = `
-  query FetchTransactions($account: String) {
-    transactionsByAccount(account: $account) {
+const requestsByAccount = `
+  query RequestsByAccount($account: String) {
+    transactions(account: $account) {
       id
       debitor
       debitor_approval_time
@@ -9,7 +9,6 @@ const fetchTransactions = `
       name
       price
       quantity
-      rule_instance_id
       transaction_id
       author
       expiration_time
@@ -17,4 +16,4 @@ const fetchTransactions = `
   }
 `
 
-module.exports = fetchTransactions
+module.exports = requestsByAccount
