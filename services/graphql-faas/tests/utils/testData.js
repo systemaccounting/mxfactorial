@@ -29,7 +29,7 @@ function createRequestData (debitor, creditor, debitOrCredit) {
     {
       name: '9% state sales tax',
       price: '0.540',
-      quantity: 1,
+      quantity: '1',
       author,
       debitor,
       creditor: 'StateOfCalifornia',
