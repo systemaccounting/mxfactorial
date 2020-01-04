@@ -2,7 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const body_parser = require('body-parser-graphql')
 const graphqlHTTP = require('express-graphql')
-const { makeExecutableSchema } = require('graphql-tools')
+const graphqlTools = require('graphql-tools')
 
 const typeDefs = require('./graphql/types')
 const resolvers = require('./graphql/resolvers')
@@ -16,7 +16,8 @@ const appWrapper = (event, context) => {
   app.use(
     '/',
     graphqlHTTP({
-      schema: makeExecutableSchema({typeDefs, resolvers}),
+      schema: graphqlTools
+        .makeExecutableSchema({typeDefs, resolvers}),
       graphiql: true,
       context: event
     })
