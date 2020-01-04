@@ -6,13 +6,26 @@ const {
 } = require('./Rule')
 
 const {
-  itemsUnderTestArray
+  fakerAccountWithSevenRandomDigits,
+  createRequestData
 } = require('../../../tests/utils/testData')
 
 const testlambdaarn = 'testlambdaarn'
 process.env.RULES_FAAS_ARN = testlambdaarn
 const testtablename = 'testtablename'
 process.env.RULE_INSTANCES_TABLE_NAME = testtablename
+
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
+
+const taxExcluded = [ debitRequest[0] ]
 
 beforeEach(() => {
   jest.clearAllMocks()
@@ -137,10 +150,10 @@ describe('rule resolvers', () => {
   })
 
   it('GetRuleTransactionsResolver service called with args', () => {
-    const testargs = { transactions: itemsUnderTestArray }
+    const testargs = { transactions: taxExcluded }
     const expected = {
       FunctionName: testlambdaarn,
-      Payload: JSON.stringify({ items: itemsUnderTestArray })
+      Payload: JSON.stringify({ items: taxExcluded })
     }
     GetRuleTransactionsResolver(
       mockLambdaService,
@@ -175,7 +188,7 @@ describe('rule resolvers', () => {
           })
         )
       }
-      const testargs = { transactions: itemsUnderTestArray }
+      const testargs = { transactions: taxExcluded }
       const result = await GetRuleTransactionsResolver(
         mockLambdaWithReturn,
         testargs

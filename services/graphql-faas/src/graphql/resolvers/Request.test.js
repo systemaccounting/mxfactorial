@@ -5,7 +5,8 @@ const {
 } = require('./Request')
 
 const {
-  debitRequest
+  fakerAccountWithSevenRandomDigits,
+  createRequestData
 } = require('../../../tests/utils/testData')
 
 const testcreatelambda = 'testcreatelambda'
@@ -14,6 +15,17 @@ const testquerylambda = 'testquerylambda'
 process.env.REQUEST_QUERY_LAMBDA_ARN = testquerylambda
 const testapprovelambda = 'testapprovelambda'
 process.env.REQUEST_APPROVE_LAMBDA_ARN = testapprovelambda
+
+
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
 
 beforeEach(() => {
   jest.clearAllMocks()

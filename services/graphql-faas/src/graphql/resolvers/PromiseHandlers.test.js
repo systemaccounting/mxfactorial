@@ -4,8 +4,19 @@ const {
 } = require('./PromiseHandlers')
 
 const {
-  debitRequest
+  fakerAccountWithSevenRandomDigits,
+  createRequestData
 } = require('../../../tests/utils/testData')
+
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
 
 describe('resolvers and handlers', () => {
   it('goLambdaPromiseHandler calls JSON.parse twice', async () => {
