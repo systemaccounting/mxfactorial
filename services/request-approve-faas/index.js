@@ -71,9 +71,11 @@ exports.handler = async event => {
   for (let i = 0; i < requestItems.length; i++) {
     // uniform transaction_id
     if (requestItems[i].transaction_id !== initialItemTransactionID) {
+      const mixedMsg = 'mixed transaction ids detected'
+      console.log(mixedMsg, JSON.stringify(requestItems[i]))
       return {
         status: STATUS_FAILED,
-        message: 'mixed transaction ids detected'
+        message: mixedMsg
       }
     }
     // involve graphqlRequestSender
@@ -83,24 +85,32 @@ exports.handler = async event => {
         && requestItems[i].debitor !== graphqlRequestSender
         && requestItems[i].author !== graphqlRequestSender
         ) {
+          const unAuthdMsg = 'unauthenticated account detected in items'
+          console.log(unAuthdMsg, JSON.stringify(requestItems[i]))
           return {
             status: STATUS_FAILED,
-            message: 'unauthenticated account detected in items'
+            message: unAuthdMsg
           }
       }
       if (currentAccountRole === 'creditor') {
         if (requestItems[i].creditor_approval_time) {
+          const prevCreditMsg = 'previously approved credit request item detected'
+          console.log(prevCreditMsg, JSON.stringify(requestItems[i]))
           return {
             status: STATUS_FAILED,
-            message: 'previously approved credit request item detected'
+            message: prevCreditMsg
           }
         }
       }
-      // otherwise, test debitor approval
-      if (requestItems[i].debitor_approval_time) {
-        return {
-          status: STATUS_FAILED,
-          message: 'previously approved debit request item detected'
+      if (currentAccountRole === 'debitor') {
+        // otherwise, test debitor approval
+        if (requestItems[i].debitor_approval_time) {
+          const prevDebitMsg = 'previously approved debit request item detected'
+          console.log(prevDebitMsg, JSON.stringify(requestItems[i]))
+          return {
+            status: STATUS_FAILED,
+            message: prevDebitMsg
+          }
         }
       }
     }
