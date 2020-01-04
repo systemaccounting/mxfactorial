@@ -19,7 +19,7 @@ export const createTransaction = gql`
 `
 
 export const fetchTransactions = gql`
-  query FetchTransactions($account: String) {
+  query requestsByAccount($account: String) {
     requestsByAccount(account: $account) {
       id
       name

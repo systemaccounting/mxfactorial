@@ -39,7 +39,7 @@ const sortedArray = [input[1], input[0], input[2]]
 
 describe('withTransactions', () => {
   it('sorts transactions by approval time', () => {
-    const props = renderProps({ data: { transactions: input } })
+    const props = renderProps({ data: { requestsByAccount: input } })
     expect(props.transactions).toEqual(sortedArray)
   })
 })

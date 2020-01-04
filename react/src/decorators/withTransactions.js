@@ -24,6 +24,6 @@ export function renderProps({ data: { requestsByAccount, loading, refetch } }) {
 }
 
 export default graphql(fetchTransactions, {
-  options: props => ({ variables: { user: props.user.username } }),
+  options: props => ({ variables: { account: props.user.username } }),
   props: renderProps
 })
