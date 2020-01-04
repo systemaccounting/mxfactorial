@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "license": "UNLICENSED",
   "scripts": {
-    "test": "env-cmd jest --detectOpenHandles --silent",
+    "test": "env-cmd jest --silent",
+    "test:integration": "env-cmd jest --detectOpenHandles --runInBand --silent --verbose --testRegex='.*\\.integ\\.[tj]sx?'",
     "warmup": "env-cmd node ./tests/utils/warmUp.js"
   },
   "keywords": [],

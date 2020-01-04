@@ -5,7 +5,8 @@ ARTIFACT_BUCKET = mxfactorial-artifacts
 RUNTIME = node
 REGION = us-east-1
 ENV_VARS := AWS_REGION POOL_ID CLIENT_ID GRAPHQL_API \
-SECRET RDS_TRANSACTION_TEARDOWN_LAMBDA JWKS_URL
+SECRET RDS_TRANSACTION_TEARDOWN_LAMBDA JWKS_URL POOL_NAME \
+NOTIFICATIONS_TABLE_NAME NINE_PERCENT_CA_SALES_TAX
 
 .PHONY: test-env-arg
 test-env-arg:
@@ -75,18 +76,17 @@ $(ENV_VARS):
 
 ###################### build and test ######################
 
-.PHONY: test install zip deploy test-integration
-test: install zip deploy test-integration
+.PHONY: test test-unit deploy test-integration
+test: test-unit deploy test-integration
 
-# .PHONY: test-unit
-# test-unit: test-env-arg
+.PHONY: test-unit get-secrets install
+test-unit: get-secrets install
+		yarn test
 
 # todo: separate unit from integration tests to avoid deployment before unit tests
-.PHONY: test-integration get-secrets
-test-integration: get-secrets
-		@$(MAKE) -C .. ENV=$(ENV) warm-up
-		yarn install
-		yarn test
+.PHONY: test-integration get-secrets install
+test-integration: get-secrets install
+		yarn test:integration
 
 .PHONY: zip clean-artifact
 zip: clean-artifact
@@ -110,8 +110,8 @@ layer: install-prod clean-layer
 ###################### deploy ######################
 
 # todo: separate unit from integration tests to avoid deployment before unit tests
-.PHONY: deploy test-env-arg
-deploy: test-env-arg # lambda layer NOT deployed. use deploy-all
+.PHONY: deploy test-env-arg zip
+deploy: test-env-arg zip # lambda layer NOT deployed. use deploy-all
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
