@@ -10,16 +10,32 @@ jest.mock('sequelize', () => jest.fn())
 jest.mock('aws-sdk')
 
 const {
-  itemsStandardArray,
-  itemsUnderTestArray,
-  debitorStandardArray,
-  testRuleInstances,
-  testedItemsIntendedForStorage,
-  testNotification,
-  TEST_ACCOUNTS
+  fakerAccountWithSevenRandomDigits,
+  createRequestData,
 } = require('./tests/utils/testData')
 
+const STATUS_SUCCESS = 'success'
 const STATUS_FAILED = 'failed'
+
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
+const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
+const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
+const debitRequest = createRequestData(
+  TEST_DEBITOR,
+  TEST_CREDITOR,
+  'debit'
+)
+const accountsSwitchedDebitRequest = createRequestData(
+  TEST_CREDITOR,
+  TEST_DEBITOR,
+  'debit'
+)
+
+const testNotification =  {
+  service: 'TRANSACT',
+  message: {}
+}
 
 jest.mock('./src/compareRequests', () => {
     return jest.fn()
@@ -32,7 +48,7 @@ jest.mock('./src/updateRequest', () => {
   return jest.fn().mockImplementation(
     () => ([
       0, // mocking sequelize response
-      jest.requireActual('./tests/utils/testData').itemsStandardArray
+      {}
     ])
   )
 })
@@ -102,34 +118,34 @@ describe('transact function handler', () => {
 
   it('returns "missing graphqlRequestSender" error', async () => {
     const result = await require('./index').handler({
-      items: itemsStandardArray,
+      items: debitRequest,
     })
     expect(result.message).toBe('missing graphqlRequestSender')
   })
 
   test('return "mixed transaction ids detected" error message', async () => {
     const mixedTransactions = [
-      ...itemsUnderTestArray,
+      debitRequest[0],
       {
         name: 'Milk',
         price: '3',
         quantity: '2',
-        author: TEST_ACCOUNTS[1],
-        debitor: TEST_ACCOUNTS[0],
-        creditor: TEST_ACCOUNTS[1],
+        author: TEST_CREDITOR,
+        debitor: TEST_DEBITOR,
+        creditor: TEST_CREDITOR,
         transaction_id: '2c5ea4c0-4067-11e9-8bad-9b1deb4d3b7d'
       }
     ]
     const result = await require('./index').handler({
       items: mixedTransactions,
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      graphqlRequestSender: TEST_CREDITOR
     })
     expect(result.message).toBe('mixed transaction ids detected')
   })
 
   test('return "unauthenticated account detected in items" error message', async () => {
     const result = await require('./index').handler({
-      items: itemsStandardArray,
+      items: debitRequest,
       graphqlRequestSender: 'accountNotIncludedInRequestedTransactions'
     })
     expect(result.message).toBe('unauthenticated account detected in items')
@@ -137,37 +153,37 @@ describe('transact function handler', () => {
 
   test('return "previously approved credit request item detected" error message', async () => {
     const result = await require('./index').handler({
-      items: itemsStandardArray.map(
+      items: debitRequest.map(
         item => ({ ...item, creditor_approval_time: '2019-12-31 03:30:11.108271+00' })
       ),
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      graphqlRequestSender: TEST_CREDITOR
     })
     expect(result.message).toBe('previously approved credit request item detected')
   })
 
   test('return "previously approved debit request item detected" error message', async () => {
     const result = await require('./index').handler({
-      items: itemsStandardArray.map(
+      items: debitRequest.map(
         item => ({ ...item, debitor_approval_time: '2019-12-31 03:30:11.108271+00' })
       ),
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      graphqlRequestSender: TEST_DEBITOR
     })
     expect(result.message).toBe('previously approved debit request item detected')
   })
 
   test('getRequest called with args', async () => {
     await require('./index').handler({
-      items: itemsStandardArray,
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      items: debitRequest,
+      graphqlRequestSender: TEST_CREDITOR
     })
-    expect(getRequest).toHaveBeenCalledWith({}, itemsStandardArray[0].transaction_id)
+    expect(getRequest).toHaveBeenCalledWith({}, debitRequest[0].transaction_id)
   })
 
   test('return "0 matching requests found" error', async () => {
     compareRequests.mockReturnValue(false)
     const result = await require('./index').handler({
-      items: itemsStandardArray,
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      items: debitRequest,
+      graphqlRequestSender: TEST_CREDITOR
     })
     expect(result.message).toBe('0 matching requests found')
   })
@@ -175,12 +191,12 @@ describe('transact function handler', () => {
   test('calls updateRequest with creditor_approval_time', async () => {
     compareRequests.mockReturnValue(true)
     await require('./index').handler({
-      items: itemsStandardArray,
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      items: debitRequest,
+      graphqlRequestSender: TEST_CREDITOR
     })
     expect(updateRequest).toHaveBeenCalledWith(
       {},
-      itemsStandardArray[0].transaction_id,
+      debitRequest[0].transaction_id,
       'creditor_approval_time'
     )
   })
@@ -188,12 +204,12 @@ describe('transact function handler', () => {
   test('calls updateRequest with debitor_approval_time', async () => {
     compareRequests.mockReturnValue(true)
     await require('./index').handler({
-      items: debitorStandardArray,
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      items: accountsSwitchedDebitRequest,
+      graphqlRequestSender: TEST_CREDITOR
     })
     expect(updateRequest).toHaveBeenCalledWith(
       {},
-      debitorStandardArray[0].transaction_id,
+      accountsSwitchedDebitRequest[0].transaction_id,
       'debitor_approval_time'
     )
   })
@@ -201,20 +217,28 @@ describe('transact function handler', () => {
   test('sendNotification called with args', async () => {
     let testService = {}
     await require('./index').handler({
-      items: debitorStandardArray,
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      items: accountsSwitchedDebitRequest,
+      graphqlRequestSender: TEST_CREDITOR
     })
+    const expected = {
+      service: 'TRANSACT',
+      message: {}
+    }
     // expect(sendNotification.mock.calls[0][0]).toBe(testService)
     expect(sendNotification.mock.calls[0][1]).toBe(testsnsarn)
-    expect(sendNotification.mock.calls[0][2]).toEqual(testNotification)
+    expect(sendNotification.mock.calls[0][2]).toEqual(expected)
   })
 
   test('returns approved transaction request', async () => {
     const result = await require('./index').handler({
-      items: itemsStandardArray,
-      graphqlRequestSender: TEST_ACCOUNTS[1]
+      items: debitRequest,
+      graphqlRequestSender: TEST_CREDITOR
     })
+    const expected = {
+      status: STATUS_SUCCESS,
+      data: {}
+    }
     // expect(sendNotification.mock.calls[0][0]).toBe(testService)
-    expect(result.data).toEqual(itemsStandardArray)
+    expect(result).toEqual(expected)
   })
 })
