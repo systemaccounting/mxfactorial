@@ -1,44 +1,53 @@
-const randomSevenDigitInt = () => {
-  return Math.floor(Math.random() * (9999999 - 1000000)) + 1000000
+const fakerAccountWithSevenRandomDigits = () => {
+  const num = Math.floor(Math.random() * (9999999 - 1000000)) + 1000000
+  return 'Faker' + num.toString()
 }
 
-const TEST_ACCOUNT = `Faker${randomSevenDigitInt()}`
+// set test values in modules to avoid failure from
+// teardown of shared values in unfinished parallel tests
 
-const itemsUnderTestArray = [
-  {
-    name: 'Milk',
-    price: '3',
-    quantity: '2',
-    author: 'Joe Smith',
-    debitor: 'Joe Smith',
-    creditor: 'Mary',
-    transaction_id: '662bc1a0-ed24-11e9-90ac-fd8810fc35b7'
+// https://nodejs.org/en/knowledge/javascript-conventions/what-is-the-arguments-object/#arguments-object-in-arrow-function
+function createRequestData (debitor, creditor, debitOrCredit) {
+
+  if (arguments.length !== 3) {
+    throw Error('debitor, credtior and request type required')
   }
-]
-
-const itemsStandardArray = [
-  {
-    name: 'Milk',
-    price: '3',
-    quantity: '2',
-    author: 'Joe Smith',
-    debitor: 'Joe Smith',
-    creditor: 'Mary',
-    transaction_id: '662bc1a0-ed24-11e9-90ac-fd8810fc35b7'
-  },
-  {
-    name: '9% state sales tax',
-    quantity: 1,
-    price: '0.540',
-    author: 'Joe Smith',
-    debitor: 'Joe Smith',
-    creditor: 'StateOfCalifornia',
-    transaction_id: '662bc1a0-ed24-11e9-90ac-fd8810fc35b7',
-    rule_instance_id: "8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d"
+  if (debitOrCredit !== 'credit' && debitOrCredit !== 'debit') {
+    throw Error('trailing debit or credit arg required')
   }
-]
 
-const testRule = `let TAX_TRANSACTION_NAME = '9% state sales tax'; let accountItems = items.filter(item => {   return item.name !== TAX_TRANSACTION_NAME; }); let salesTaxValue = 0; accountItems.forEach(item => {   let quantity = item.quantity || 1;   let price = item.price || 0;   salesTaxValue += price * quantity * 0.09; }); if (salesTaxValue > 0) {   accountItems.push({     author: accountItems[0].author,     rule_instance_id: ruleId,     name: TAX_TRANSACTION_NAME,     price: salesTaxValue.toFixed(3),     quantity: 1,     creditor: 'StateOfCalifornia',     creditor_approval_time: 'new Date().toISOString()',     debitor: accountItems[0].debitor,     transaction_id: accountItems[0].transaction_id   }); }; console.log('Applied rules: ', JSON.stringify(accountItems)); return accountItems;`
+  const author = (debitOrCredit === 'debit') ? creditor : debitor
+  return [
+    {
+      name: 'Milk',
+      price: '3',
+      quantity: '2',
+      author,
+      debitor,
+      creditor
+    },
+    {
+      name: '9% state sales tax',
+      price: '0.540',
+      quantity: 1,
+      author,
+      debitor,
+      creditor: 'StateOfCalifornia',
+      rule_instance_id: "8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d"
+    }
+  ]
+}
+
+if(!process.env.NINE_PERCENT_CA_SALES_TAX) {
+  console.error('make get-secrets ENV=dev to retrieve NINE_PERCENT_CA_SALES_TAX env var. exiting')
+  process.exit(1)
+}
+
+const testRuleBuff = Buffer.from(
+  process.env.NINE_PERCENT_CA_SALES_TAX,
+  'base64'
+)
+const testRule = testRuleBuff.toString('ascii')
 
 const testRuleInstances = [
   {
@@ -49,8 +58,7 @@ const testRuleInstances = [
 ]
 
 module.exports = {
-  itemsUnderTestArray,
-  itemsStandardArray,
-  testRuleInstances,
-  TEST_ACCOUNT
+  fakerAccountWithSevenRandomDigits,
+  createRequestData,
+  testRuleInstances
 }
