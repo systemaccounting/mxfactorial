@@ -1,5 +1,5 @@
 {
-  "name": "transact-faas",
+  "name": "request-approve-faas",
   "version": "1.0.0",
   "main": "index.js",
   "license": "UNLICENSED",
@@ -16,7 +16,6 @@
   "devDependencies": {
     "aws-sdk": "^2.555.0",
     "env-cmd": "^10.0.1",
-    "jest": "^24.5.0",
-    "uuid": "^3.3.3"
+    "jest": "^24.5.0"
   }
 }
