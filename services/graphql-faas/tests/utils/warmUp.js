@@ -2,7 +2,7 @@ const AWS = require('aws-sdk')
 const { GraphQLClient } = require('graphql-request')
 const { createTransaction } = require('../queries/transactions')
 const {
-  TEST_ACCOUNT
+  fakerAccountWithSevenRandomDigits
 } = require('./testData')
 
 const {
@@ -14,6 +14,8 @@ const {
 const cognitoIdsp = new AWS.CognitoIdentityServiceProvider({
   region: process.env.AWS_REGION
 })
+
+const TEST_ACCOUNT = fakerAccountWithSevenRandomDigits()
 
 ;(async () => {
   await createAccount(
