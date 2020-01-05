@@ -18,9 +18,28 @@ export const createTransaction = gql`
   }
 `
 
-export const fetchTransactions = gql`
+export const fetchRequests = gql`
   query requestsByAccount($account: String) {
     requestsByAccount(account: $account) {
+      id
+      name
+      quantity
+      price
+      author
+      debitor
+      creditor
+      creditor_approval_time
+      debitor_approval_time
+      expiration_time
+      transaction_id
+      rule_instance_id
+    }
+  }
+`
+
+export const fetchRequestById = gql`
+  query requestsByID($transactionId: String) {
+    requestsByID(transactionID: $transactionId) {
       id
       name
       quantity
