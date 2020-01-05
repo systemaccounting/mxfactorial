@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { graphql } from 'react-apollo'
 import { fetchRules } from 'queries/rules'
-import { createTransaction } from 'queries/transactions'
+import { createTransaction } from 'queries/requests'
 
 import AccountHeader from './components/AccountHeader'
 import Transaction from './components/Transaction/index'
@@ -33,7 +33,7 @@ class HomeScreen extends Component {
       query: fetchRules,
       addTypename: false,
       variables: {
-        transactions: transactions.map(({uuid, ...rest}) => rest)
+        transactions: transactions.map(({ uuid, ...rest }) => rest)
       }
     })
   }

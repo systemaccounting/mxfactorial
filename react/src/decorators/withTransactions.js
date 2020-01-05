@@ -1,5 +1,5 @@
 import { graphql } from 'react-apollo'
-import { fetchTransactions } from 'queries/transactions'
+import { fetchTransactions } from 'queries/requests'
 
 function sortByArrpovalTime(a, b) {
   const approvalTimeA = a.creditor_approval_time || a.debitor_approval_time
