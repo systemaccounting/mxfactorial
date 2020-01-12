@@ -51,13 +51,9 @@ class RequestDetailScreen extends React.Component {
     this.setState({ isApproveModalOpen })
 
   get total() {
-    const { request, isCredit } = this.state
-    if (!request) {
-      return null
-    }
+    const { requestTotal, isCredit } = this.props
 
-    const total = request.price * request.quantity
-    const localized = total.toLocaleString()
+    const localized = requestTotal.toLocaleString()
     return isCredit ? `- ${localized}` : localized
   }
 
@@ -67,7 +63,15 @@ class RequestDetailScreen extends React.Component {
 
   get requestInfo() {
     const { request, isCredit } = this.state
-    if (!request) {
+    const {
+      isRequestLoading,
+      contraAgent,
+      requestTime,
+      transactionId,
+      ruleInstanceId,
+      requestItems
+    } = this.props
+    if (isRequestLoading) {
       return null
     }
     const expirationDate = dateString(
@@ -84,7 +88,7 @@ class RequestDetailScreen extends React.Component {
               fontWeight="bold"
               data-id="requestingAccountIndicator"
             >
-              {isCredit ? request.debitor : request.creditor}
+              {contraAgent}
             </Text>
           </Paper>
           <Paper>
@@ -100,9 +104,7 @@ class RequestDetailScreen extends React.Component {
           <Paper>
             <P fontWeight="bold">Time of request</P>
             <P data-id="requestTimeIndicator" textAlign="right">
-              {fromNow(
-                request.creditor_approval_time || request.debitor_approval_time
-              )}
+              {fromNow(requestTime)}
             </P>
           </Paper>
           <Paper>
@@ -125,14 +127,16 @@ class RequestDetailScreen extends React.Component {
           </Button>
         </div>
         <div className={s.cart} data-id="transaction-items">
-          <Paper data-id="transactionItemIndicator">
-            <P textAlign="center" fontWeight="bold" variant="medium">
-              {parseInt(request.quantity, 10)} x {request.price}
-            </P>
-            <P textAlign="center" fontWeight="bold" variant="medium">
-              {request.name}
-            </P>
-          </Paper>
+          {requestItems.map(item => (
+            <Paper data-id="transactionItemIndicator" key={item.id}>
+              <P textAlign="center" fontWeight="bold" variant="medium">
+                {parseInt(item.quantity, 10)} x {item.price}
+              </P>
+              <P textAlign="center" fontWeight="bold" variant="medium">
+                {item.name}
+              </P>
+            </Paper>
+          ))}
         </div>
         <div data-id="transaction-ids">
           <p className={s.label}>Transaction ID</p>
@@ -142,7 +146,7 @@ class RequestDetailScreen extends React.Component {
               fontWeight="bold"
               data-id="transactionIdIndicator"
             >
-              {request.transaction_id}
+              {transactionId}
             </Small>
           </Paper>
           <p className={s.label}>Rule Instance ID</p>
@@ -152,7 +156,7 @@ class RequestDetailScreen extends React.Component {
               fontWeight="bold"
               data-id="ruleInstanceIdsIndicator"
             >
-              {request.rule_instance_id}
+              {ruleInstanceId}
             </Small>
           </Paper>
           <p className={s.label}>Pre-transaction balance</p>
@@ -163,7 +167,7 @@ class RequestDetailScreen extends React.Component {
               fontWeight="bold"
               data-id="preTransactionBalanceIndicator"
             >
-              {this.transactionBalance.toLocaleString()}
+              {/*{this.transactionBalance.toLocaleString()}*/}
             </Text>
           </Paper>
         </div>
