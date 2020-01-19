@@ -58,12 +58,8 @@ class RequestDetailScreen extends React.Component {
     return isCredit ? `- ${localized}` : localized
   }
 
-  get transactionBalance() {
-    return 1000
-  }
-
   get requestInfo() {
-    const { request, isCredit } = this.state
+    const { request } = this.state
     const {
       isRequestLoading,
       contraAgent,

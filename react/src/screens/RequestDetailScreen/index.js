@@ -1,6 +1,5 @@
 import { compose } from 'ramda'
 import { graphql } from 'react-apollo'
-import { fromNow } from 'utils/date'
 
 import withApi from 'decorators/withApi'
 import withUser from 'decorators/withUser'
@@ -37,8 +36,6 @@ const withTransaction = graphql(fetchRequestById, {
       ruleInstanceId: data.requestsByID
         ? data.requestsByID.find(item => item.rule_instance_id).rule_instance_id
         : 0
-      // isCreditor: ownProps.
-      // requestInitiator: data.req
     }
   }
 })
