@@ -29,7 +29,7 @@ const withTransaction = graphql(fetchRequestById, {
       isCredit,
       requestTotal,
       transactionId: request.transaction_id,
-      contraAgent: isCredit ? request.debitor : request.creditor,
+      requestingAccount: isCredit ? request.debitor : request.creditor,
       requestTime:
         request.creditor_approval_time || request.debitor_approval_time,
       requestItems: data.requestsByID || [],

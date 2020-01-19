@@ -22,28 +22,6 @@ class RequestDetailScreen extends React.Component {
     isApprovalSuccessFul: false
   }
 
-  componentDidMount() {
-    this.handleFetchRequest()
-  }
-
-  handleFetchRequest = () => {
-    const { fetchRequest, user } = this.props
-    const { match } = this.props
-    return fetchRequest(match.params.uuid)
-      .then(request => {
-        this.setState({
-          request,
-          isCredit: request.creditor === user.username
-        })
-      })
-      .catch(error => this.setErrors(error, 'Request not found'))
-  }
-
-  setErrors = (error, message) =>
-    this.setState(state => ({
-      errors: [...state.errors, { message, error }]
-    }))
-
   handleApprovalSuccess = () => this.setState({ isApprovalSuccessFul: true })
 
   showApproveModal = () => this.setState({ isApproveModalOpen: true })
@@ -62,7 +40,7 @@ class RequestDetailScreen extends React.Component {
     const { request } = this.state
     const {
       isRequestLoading,
-      contraAgent,
+      requestingAccount,
       requestTime,
       transactionId,
       ruleInstanceId,
@@ -86,7 +64,7 @@ class RequestDetailScreen extends React.Component {
               fontWeight="bold"
               data-id="requestingAccountIndicator"
             >
-              {contraAgent}
+              {requestingAccount}
             </Text>
           </Paper>
           <Paper>
@@ -205,20 +183,22 @@ class RequestDetailScreen extends React.Component {
 }
 
 RequestDetailScreen.propTypes = {
+  requestingAccount: PropTypes.string,
   requestTotal: PropTypes.number,
   isRequestLoading: PropTypes.bool,
   transactionId: PropTypes.string,
   ruleInstanceId: PropTypes.string,
   requestItems: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.number,
-      quantity: PropTypes.number,
-      price: PropTypes.number
+      id: PropTypes.string,
+      quantity: PropTypes.string,
+      price: PropTypes.string
     })
   )
 }
 
 RequestDetailScreen.defaultProps = {
+  requestingAccount: '',
   transactionId: '',
   ruleInstanceId: '',
   isRequestLoading: true,
