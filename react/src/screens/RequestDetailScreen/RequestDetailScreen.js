@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 
 import { dateString } from 'utils/date'
 import Paper from 'components/Paper'
@@ -71,6 +72,7 @@ class RequestDetailScreen extends React.Component {
       ruleInstanceId,
       requestItems
     } = this.props
+
     if (isRequestLoading) {
       return null
     }
@@ -204,6 +206,28 @@ class RequestDetailScreen extends React.Component {
       </>
     )
   }
+}
+
+RequestDetailScreen.propTypes = {
+  requestTotal: PropTypes.number,
+  isRequestLoading: PropTypes.bool,
+  transactionId: PropTypes.string,
+  ruleInstanceId: PropTypes.string,
+  requestItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      quantity: PropTypes.number,
+      price: PropTypes.number
+    })
+  )
+}
+
+RequestDetailScreen.defaultProps = {
+  transactionId: '',
+  ruleInstanceId: '',
+  isRequestLoading: true,
+  requestItems: [],
+  requestTotal: 0
 }
 
 export default RequestDetailScreen

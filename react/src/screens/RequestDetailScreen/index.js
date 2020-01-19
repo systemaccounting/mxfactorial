@@ -24,10 +24,9 @@ const withTransaction = graphql(fetchRequestById, {
           0
         )
       : 0
-    console.log(data)
 
     return {
-      isRequestsLoading: data.loading,
+      isRequestLoading: data.loading,
       isCredit,
       requestTotal,
       transactionId: request.transaction_id,
