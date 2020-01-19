@@ -6,6 +6,7 @@ beforeAll(async () => {
   await page.waitForSelector(SELECTORS.activeButton)
   const link = await page.$(SELECTORS.requestItem)
   await link.click()
+  await page.waitForSelector(SELECTORS.requestingAccountIndicator)
 })
 
 const getApproveModalStatus = async () =>
@@ -30,6 +31,7 @@ it('2 - password error', async () => {
   await page.waitForSelector(SELECTORS.activeButton)
   const link = await page.$(SELECTORS.requestItem)
   await link.click()
+  await page.waitForSelector(SELECTORS.requestingAccountIndicator)
 
   const transactBtn = await page.$(SELECTORS.transactButton)
   await transactBtn.click()
