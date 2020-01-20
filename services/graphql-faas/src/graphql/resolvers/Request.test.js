@@ -1,6 +1,7 @@
 const {
   CreateRequestResolver,
-  GetRequestResolver,
+  GetRequestByTransactionIDResolver,
+  GetRequestByAccountResolver,
   ApproveRequestResolver
 } = require('./Request')
 
@@ -11,8 +12,12 @@ const {
 
 const testcreatelambda = 'testcreatelambda'
 process.env.REQUEST_CREATE_LAMBDA_ARN = testcreatelambda
-const testquerylambda = 'testquerylambda'
-process.env.REQUEST_QUERY_LAMBDA_ARN = testquerylambda
+const testquerybyidlambdaarn = 'testquerybyidlambdaarn'
+process
+  .env.REQUEST_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN = testquerybyidlambdaarn
+const testquerybyaccountlambdaarn = 'testquerybyaccountlambdaarn'
+process
+  .env.REQUEST_QUERY_BY_ACCOUNT_LAMBDA_ARN = testquerybyaccountlambdaarn
 const testapprovelambda = 'testapprovelambda'
 process.env.REQUEST_APPROVE_LAMBDA_ARN = testapprovelambda
 
@@ -90,7 +95,7 @@ describe('Request resolvers', () => {
       expect(result).toBe('please specify at least 1 transaction')
   })
 
-  it('GetRequestResolver calls service with args', () => {
+  it('GetRequestByTransactionIDResolver calls service with args', () => {
     const testaccount = 'testaccount'
     const testransactionid = 'testtransactionid'
     const testargs = {
@@ -100,14 +105,14 @@ describe('Request resolvers', () => {
     }
     const testgraphqlsender = 'testgraphqlsender'
     const expected = {
-      FunctionName: testquerylambda,
+      FunctionName: testquerybyidlambdaarn,
       Payload: JSON.stringify({
         transaction_id: testargs.transactionID,
         account: testargs.account,
         graphqlRequestSender: testgraphqlsender
       })
     }
-    GetRequestResolver(
+    GetRequestByTransactionIDResolver(
       mockLambdaService,
       mockHandlerFn,
       testargs,
@@ -117,10 +122,10 @@ describe('Request resolvers', () => {
       .toHaveBeenCalledWith(expected)
   })
 
-  it('GetRequestResolver calls service handler with args', () => {
+  it('GetRequestByTransactionIDResolver calls service handler with args', () => {
     const testargs = { items: debitRequest }
     const testgraphqlsender = 'testgraphqlsender'
-    GetRequestResolver(
+    GetRequestByTransactionIDResolver(
       mockLambdaService,
       mockHandlerFn,
       testargs,
@@ -131,7 +136,8 @@ describe('Request resolvers', () => {
   })
 
   it(
-    'GetRequestResolver sets account property with graphqlRequestSender value',
+    'GetRequestByTransactionIDResolver sets account ' +
+    'property with graphqlRequestSender value',
     () => {
       const testransactionid = 'testtransactionid'
       const testargs = {
@@ -141,14 +147,80 @@ describe('Request resolvers', () => {
       }
     const testgraphqlsender = 'testgraphqlsender'
     const expected = {
-      FunctionName: testquerylambda,
+      FunctionName: testquerybyidlambdaarn,
       Payload: JSON.stringify({
         transaction_id: testargs.transactionID,
         account: testgraphqlsender,
         graphqlRequestSender: testgraphqlsender
       })
     }
-    GetRequestResolver(
+    GetRequestByTransactionIDResolver(
+      mockLambdaService,
+      mockHandlerFn,
+      testargs,
+      testgraphqlsender
+    )
+    expect(mockLambdaService.invoke)
+      .toHaveBeenCalledWith(expected)
+  })
+
+  it('GetRequestByAccountResolver calls service with args', () => {
+    const testaccount = 'testaccount'
+    const testransactionid = 'testtransactionid'
+    const testargs = {
+      transactionID: testransactionid,
+      account: testaccount,
+      items: debitRequest
+    }
+    const testgraphqlsender = 'testgraphqlsender'
+    const expected = {
+      FunctionName: testquerybyaccountlambdaarn,
+      Payload: JSON.stringify({
+        account: testargs.account,
+        graphqlRequestSender: testgraphqlsender
+      })
+    }
+    GetRequestByAccountResolver(
+      mockLambdaService,
+      mockHandlerFn,
+      testargs,
+      testgraphqlsender
+    )
+    expect(mockLambdaService.invoke)
+      .toHaveBeenCalledWith(expected)
+  })
+
+  it('GetRequestByAccountResolver calls service handler with args', () => {
+    const testargs = { items: debitRequest }
+    const testgraphqlsender = 'testgraphqlsender'
+    GetRequestByAccountResolver(
+      mockLambdaService,
+      mockHandlerFn,
+      testargs,
+      testgraphqlsender
+    )
+    expect(mockHandlerFn)
+      .toHaveBeenCalledWith({})
+  })
+
+  it(
+    'GetRequestByAccountResolver sets account property with graphqlRequestSender value',
+    () => {
+      const testransactionid = 'testtransactionid'
+      const testargs = {
+        // account: testaccount,
+        items: debitRequest
+      }
+    const testgraphqlsender = 'testgraphqlsender'
+    const expected = {
+      FunctionName: testquerybyaccountlambdaarn,
+      Payload: JSON.stringify({
+        transaction_id: testargs.transactionID,
+        account: testgraphqlsender,
+        graphqlRequestSender: testgraphqlsender
+      })
+    }
+    GetRequestByAccountResolver(
       mockLambdaService,
       mockHandlerFn,
       testargs,
