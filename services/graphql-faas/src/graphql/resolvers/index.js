@@ -2,11 +2,15 @@ const AWS = require('aws-sdk')
 
 const {
   CreateRequestResolver,
-  GetRequestResolver,
+  GetRequestByTransactionIDResolver,
+  GetRequestByAccountResolver,
   ApproveRequestResolver
 } = require('./Request')
 
-const GetTransactionsResolver = require('./Transaction')
+const {
+  GetTransactionsByIDResolver,
+  GetTransactionsByAccountResolver
+} = require('./Transaction')
 
 const {
   getRules,
@@ -28,7 +32,7 @@ const ddb = new AWS.DynamoDB.DocumentClient({
 module.exports = {
   Query: {
     transactionsByID: (parentValue, args, ctx) => {
-      return GetTransactionsResolver(
+      return GetTransactionsByIDResolver(
         lambda,
         goLambdaPromiseHandler,
         args,
@@ -36,7 +40,7 @@ module.exports = {
       )
     },
     transactionsByAccount: (parentValue, args, ctx) => {
-      return GetTransactionsResolver(
+      return GetTransactionsByAccountResolver(
         lambda,
         goLambdaPromiseHandler,
         args,
@@ -44,7 +48,7 @@ module.exports = {
       )
     },
     requestsByID: (parentValue, args, ctx) => {
-      return GetRequestResolver(
+      return GetRequestByTransactionIDResolver(
         lambda,
         goLambdaPromiseHandler,
         args,
@@ -52,7 +56,7 @@ module.exports = {
       )
     },
     requestsByAccount: (parentValue, args, ctx) => {
-      return GetRequestResolver(
+      return GetRequestByAccountResolver(
         lambda,
         goLambdaPromiseHandler,
         args,
