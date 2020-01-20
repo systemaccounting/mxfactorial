@@ -2,11 +2,15 @@ const AWS = require('aws-sdk')
 
 const {
   CreateRequestResolver,
-  GetRequestResolver,
+  GetRequestByTransactionIDResolver,
+  GetRequestByAccountResolver,
   ApproveRequestResolver
 } = require('./Request')
 
-const GetTransactionsResolver = require('./Transaction')
+const {
+  GetTransactionsByIDResolver,
+  GetTransactionsByAccountResolver
+} = require('./Transaction')
 
 const {
   getRules,
@@ -87,14 +91,14 @@ describe('resolvers and handlers', () => {
       .toHaveLength(1)
   })
 
-  it('GetTransactionsResolver called by transactionsByID', () => {
+  it('GetTransactionsByIDResolver called by transactionsByID', () => {
     const transactionsByID = require('./index').Query.transactionsByID
     const testlambda = {}
     const testsender = 'testsender'
     const testargs = {}
     const testctx = { graphqlRequestSender: testsender }
     transactionsByID(null, testargs, testctx)
-    expect(GetTransactionsResolver).toHaveBeenCalledWith(
+    expect(GetTransactionsByIDResolver).toHaveBeenCalledWith(
       testlambda,
       goLambdaPromiseHandler,
       testargs,
@@ -102,14 +106,17 @@ describe('resolvers and handlers', () => {
     )
   })
 
-  it('GetTransactionsResolver called by transactionsByAccount', () => {
-    const transactionsByAccount = require('./index').Query.transactionsByAccount
+  it(
+    'GetTransactionsByAccountResolver called by transactionsByAccount'
+    , () => {
+    const transactionsByAccount = require('./index')
+      .Query.transactionsByAccount
     const testlambda = {}
     const testsender = 'testsender'
     const testargs = {}
     const testctx = { graphqlRequestSender: testsender }
     transactionsByAccount(null, testargs, testctx)
-    expect(GetTransactionsResolver).toHaveBeenCalledWith(
+    expect(GetTransactionsByAccountResolver).toHaveBeenCalledWith(
       testlambda,
       goLambdaPromiseHandler,
       testargs,
@@ -117,14 +124,31 @@ describe('resolvers and handlers', () => {
     )
   })
 
-  it('GetRequestResolver called by requestsByAccount', () => {
+  it(
+    'GetRequestByTransactionIDResolver called by requestsByID',
+    () => {
+    const requestsByID = require('./index').Query.requestsByID
+    const testlambda = {}
+    const testsender = 'testsender'
+    const testargs = {}
+    const testctx = { graphqlRequestSender: testsender }
+    requestsByID(null, testargs, testctx)
+    expect(GetRequestByTransactionIDResolver).toHaveBeenCalledWith(
+      testlambda,
+      goLambdaPromiseHandler,
+      testargs,
+      testsender
+    )
+  })
+
+  it('GetRequestByAccountResolver called by requestsByAccount', () => {
     const requestsByAccount = require('./index').Query.requestsByAccount
     const testlambda = {}
     const testsender = 'testsender'
     const testargs = {}
     const testctx = { graphqlRequestSender: testsender }
     requestsByAccount(null, testargs, testctx)
-    expect(GetRequestResolver).toHaveBeenCalledWith(
+    expect(GetRequestByAccountResolver).toHaveBeenCalledWith(
       testlambda,
       goLambdaPromiseHandler,
       testargs,

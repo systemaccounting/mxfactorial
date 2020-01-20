@@ -58,3 +58,6 @@ infrastructure/aws-cdk/**/*.d.ts
 
 # ipython
 .ipynb_checkpoints
+
+# go
+**/vendor

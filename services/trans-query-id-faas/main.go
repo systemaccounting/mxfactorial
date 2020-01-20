@@ -12,7 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type lambdaEvent struct {
+type event struct {
 	TransactionID        string `json:"transaction_id"`
 	Account              string `json:"account"`
 	GraphQLRequestSender string `json:"graphqlRequestSender"`
@@ -59,23 +59,55 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ns.String)
 }
 
-func handleRequest(db *sql.DB, e lambdaEvent) (string, error) {
-	// if account available in event, get transactions
-	// where they're either creditor, debitor or author
-	if len(e.TransactionID) == 0 {
-		q := `
-		SELECT * FROM transactions
-		WHERE (creditor=$1 OR debitor=$1 OR author=$1)
-		AND (creditor_approval_time IS NOT NULL AND debitor_approval_time IS NOT NULL)
-		ORDER BY id DESC LIMIT $2;`
-		return getLastNTransactions(db, q, e.Account, 20)
+func getTransactionsByID(db *sql.DB, queryString string, recordID string) (string, error) {
+
+	rows, err := db.Query(queryString, recordID)
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	q := "SELECT * FROM transactions WHERE transaction_id=$1;"
-	return getTransactionsByID(db, q, e.TransactionID)
+	transactions := make([]*transaction, 0)
+
+	defer rows.Close()
+
+	for rows.Next() {
+		item := new(transaction)
+		err := rows.Scan(
+			&item.TableID, &item.Name, &item.Price, &item.Quantity,
+			&item.UnitOfMeasurement, &item.UnitsMeasured, &item.RuleInstanceID,
+			&item.TransactionID, &item.Author, &item.ExpirationTime, &item.Debitor,
+			&item.Creditor, &item.DebitorProfileLatLng, &item.CreditorProfileLatlng, &item.DebitorTransactionLatLng,
+			&item.CreditorTransactionLatLng, &item.DebitorApprovalTime, &item.CreditorApprovalTime, &item.DebitorDevice,
+			&item.CreditorDevice, &item.DebitApprover, &item.CreditApprover, &item.CreditorRejectionTime,
+			&item.DebitorRejectionTime, &item.CreatedAt)
+		transactions = append(transactions, item)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// log.Println(&item.TableID, )
+	}
+
+	err = rows.Err()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer db.Close()
+
+	transactionsJSON, err := json.Marshal(transactions)
+
+	if err != nil {
+		log.Fatal("Cannot encode to JSON", err)
+	}
+
+	jsonString := string(transactionsJSON)
+	fmt.Println(jsonString)
+	return jsonString, nil
 }
 
-func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
+func handleLambdaEvent(ctx context.Context, e event) (string, error) {
 	db, err := sql.Open(
 		"postgres",
 		fmt.Sprintf(
@@ -85,11 +117,11 @@ func handleLambdaEvent(ctx context.Context, event lambdaEvent) (string, error) {
 			os.Getenv("PGUSER"),
 			os.Getenv("PGPASSWORD"),
 			os.Getenv("PGDATABASE")))
-
 	if err != nil {
 		log.Panic(err)
 	}
-	return handleRequest(db, event)
+	q := "SELECT * FROM transactions WHERE transaction_id=$1;"
+	return getTransactionsByID(db, q, e.TransactionID)
 }
 
 func main() {

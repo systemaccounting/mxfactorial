@@ -194,20 +194,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 
   lambda_function {
-    id                  = aws_lambda_function.transaction_query.function_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.transaction_query.key
-  }
-
-  lambda_function {
-    id                  = aws_lambda_function.request_query.function_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.request_query.key
-  }
-
-  lambda_function {
     id                  = aws_lambda_function.request_create.function_name
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
@@ -233,5 +219,33 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
     filter_prefix       = data.aws_s3_bucket_object.request_approve_layer.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.req_query_trans_id.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.req_query_trans_id.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.req_query_account.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.req_query_account.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.trans_query_id.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.trans_query_id.key
+  }
+
+  lambda_function {
+    id                  = aws_lambda_function.trans_query_account.function_name
+    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
+    events              = local.lambda_invoke_events
+    filter_prefix       = data.aws_s3_bucket_object.trans_query_account.key
   }
 }

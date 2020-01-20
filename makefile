@@ -13,8 +13,10 @@ endif
 .PHONY: deploy test-env-arg
 deploy: test-env-arg
 	@$(MAKE) -C services/graphql-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/transaction-query-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/request-query-faas ENV=$(ENV) $(CMD)
+	@$(MAKE) -C services/trans-query-account-faas ENV=$(ENV) $(CMD)
+	@$(MAKE) -C services/trans-query-id-faas ENV=$(ENV) $(CMD)
+	@$(MAKE) -C services/req-query-trans-id-faas ENV=$(ENV) $(CMD)
+	@$(MAKE) -C services/req-query-account-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/request-create-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/request-approve-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/notification/notification-clear-faas ENV=$(ENV) $(CMD)

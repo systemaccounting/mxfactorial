@@ -1,5 +1,5 @@
 DIR := ${CURDIR}
-APP_NAME = transaction-query
+APP_NAME = req-query-account
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 BINARY_NAME = index.handler
@@ -12,50 +12,42 @@ endif
 
 ###################### clean ######################
 
-.PHONY: clean-artifact
 clean-artifact:
 		rm -f $(APP_NAME)-src.zip
 
-.PHONY: clean-binary
 clean-binary:
 		rm -f $(BINARY_NAME)
 
-.PHONY: clean clean-binary clean-artifact
-clean: clean-binary clean-artifact
+clean-vendor:
+		rm -rf vendor
+
+clean: clean-binary clean-artifact clean-vendor
 
 ###################### dependencies ######################
 
-.PHONY: install
 install:
-		go get -t
+		go mod vendor
 
 ###################### build ######################
 
-.PHONY: compile
 compile:
-		GOOS=linux go build -o $(BINARY_NAME) *.go
+		GOOS=linux go build -o $(BINARY_NAME) main.go
 
-.PHONY: zip
 zip:
 		zip $(APP_NAME)-src.zip ./$(BINARY_NAME)
 
-.PHONY: build clean install compile zip
 build: clean install compile zip
 
 # aliases build target
-.PHONY: dev build
 dev: build
 
 # aliases build target
-.PHONY: src build
 src: build
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg build deploy-only
 deploy: test-env-arg build deploy-only
 
-.PHONY: deploy-only test-env-arg
 deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -65,11 +57,9 @@ deploy-only: test-env-arg
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-all deploy
 deploy-all: deploy
 
 # avoid aliasing deploy
-.PHONY: initial-deploy test-env-arg clean install compile zip
 initial-deploy: test-env-arg clean install compile zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -81,7 +71,6 @@ initial-deploy: test-env-arg clean install compile zip
 
 ###################### warm up ######################
 
-.PHONY: warm-up test-env-arg
 warm-up: test-env-arg
 		@aws lambda invoke \
 			--region $(REGION) \
