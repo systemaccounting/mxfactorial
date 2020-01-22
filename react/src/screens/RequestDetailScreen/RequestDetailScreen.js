@@ -41,6 +41,7 @@ class RequestDetailScreen extends React.Component {
     const {
       isRequestLoading,
       requestingAccount,
+      expirationTime,
       requestTime,
       transactionId,
       ruleInstanceIds,
@@ -51,7 +52,7 @@ class RequestDetailScreen extends React.Component {
       return null
     }
     const expirationDate = dateString(
-      request ? request.expiration_time : null,
+      expirationTime,
       'dddd, MMMM D, YYYY \n @hh:mm:ss A ZZ UTC'
     )
     return (
@@ -83,12 +84,14 @@ class RequestDetailScreen extends React.Component {
               {fromNow(requestTime)}
             </P>
           </Paper>
-          <Paper>
-            <P fontWeight="bold">Time of expiration</P>
-            <P data-id="expirationTimeIndicator" textAlign="right">
-              {expirationDate}
-            </P>
-          </Paper>
+          {expirationDate && (
+            <Paper>
+              <P fontWeight="bold">Time of expiration</P>
+              <P data-id="expirationTimeIndicator" textAlign="right">
+                {expirationDate}
+              </P>
+            </Paper>
+          )}
         </div>
         <div className={s.actions} data-id="request-actions">
           <Button
@@ -187,6 +190,8 @@ class RequestDetailScreen extends React.Component {
 }
 
 RequestDetailScreen.propTypes = {
+  requestTime: PropTypes.string,
+  expirationTime: PropTypes.string,
   requestingAccount: PropTypes.string,
   requestTotal: PropTypes.number,
   isRequestLoading: PropTypes.bool,
@@ -202,6 +207,8 @@ RequestDetailScreen.propTypes = {
 }
 
 RequestDetailScreen.defaultProps = {
+  requestTime: '',
+  expirationTime: '',
   requestingAccount: '',
   transactionId: '',
   ruleInstanceIds: [],

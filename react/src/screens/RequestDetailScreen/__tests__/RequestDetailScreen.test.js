@@ -2,6 +2,7 @@ import React from 'react'
 import { shallow, mount } from 'enzyme'
 import RequestDetailScreen from '../RequestDetailScreen'
 import { promiseToResolve, promiseToReject } from 'utils/testing'
+import { dateString } from 'utils/date'
 import Modal from 'components/Modal'
 import ApproveModal from '../components/ApproveModal'
 import SuccessModal from '../components/SuccessModal'
@@ -84,6 +85,7 @@ describe('<RequestDetailScreen />', () => {
       requestingAccount: 'Person1',
       requestTotal: 4.36,
       requestTime: '2020-01-05 17:22:25.764 +00:00',
+      expirationTime: '2021-01-05 17:22:25.764 +00:00',
       requestItems: [
         {
           id: '3135',
@@ -94,6 +96,7 @@ describe('<RequestDetailScreen />', () => {
           debitor: 'JoeSmith',
           creditor: 'Person1',
           creditor_approval_time: '2020-01-05 17:22:25.764 +00:00',
+          expiration_time: '2021-01-05 17:22:25.764 +00:00',
           transaction_id: 'f06ed7f0-2fdf-11ea-bd38-bf40aeec34f6'
         },
         {
@@ -105,6 +108,7 @@ describe('<RequestDetailScreen />', () => {
           debitor: 'JoeSmith',
           creditor: 'StateOfCalifornia',
           creditor_approval_time: '2020-01-05 17:22:24.544 +00:00',
+          expiration_time: '2021-01-05 17:22:25.764 +00:00',
           transaction_id: 'f06ed7f0-2fdf-11ea-bd38-bf40aeec34f6',
           rule_instance_id: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d'
         }
@@ -130,6 +134,9 @@ describe('<RequestDetailScreen />', () => {
     const ruleIds = wrapper.find({
       'data-id': 'ruleInstanceIdsIndicator'
     })
+    const expirationTime = wrapper.find({
+      'data-id': 'expirationTimeIndicator'
+    })
 
     expect(requestingAccount.html()).toMatch(mockProps.requestingAccount)
     expect(sumTransaction.html()).toMatch(mockProps.requestTotal.toString())
@@ -141,5 +148,11 @@ describe('<RequestDetailScreen />', () => {
     requestItems.forEach((item, idx) => {
       expect(item.html()).toMatch(mockProps.requestItems[idx].name)
     })
+    expect(expirationTime.html()).toMatch(
+      dateString(
+        '2021-01-05 17:22:25.764 +00:00',
+        'dddd, MMMM D, YYYY \n @hh:mm:ss A ZZ UTC'
+      )
+    )
   })
 })
