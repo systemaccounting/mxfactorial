@@ -15,11 +15,16 @@ import s from './RequestDetailScreen.module.css'
 
 class RequestDetailScreen extends React.Component {
   state = {
+    balance: 0,
     request: null,
     isCredit: false,
     errors: [],
     isApproveModalOpen: false,
     isApprovalSuccessFul: false
+  }
+
+  componentDidMount() {
+    this.handleFetchBalance()
   }
 
   handleApprovalSuccess = () => this.setState({ isApprovalSuccessFul: true })
@@ -28,6 +33,14 @@ class RequestDetailScreen extends React.Component {
 
   toggleApproveModal = isApproveModalOpen =>
     this.setState({ isApproveModalOpen })
+
+  handleFetchBalance = async () => {
+    const { fetchBalance } = this.props
+    if (fetchBalance) {
+      const balance = await fetchBalance()
+      this.setState({ balance })
+    }
+  }
 
   get total() {
     const { requestTotal, isCredit } = this.props
@@ -150,7 +163,7 @@ class RequestDetailScreen extends React.Component {
               fontWeight="bold"
               data-id="preTransactionBalanceIndicator"
             >
-              {/*{this.transactionBalance.toLocaleString()}*/}
+              {this.state.balance.toLocaleString()}
             </Text>
           </Paper>
         </div>
