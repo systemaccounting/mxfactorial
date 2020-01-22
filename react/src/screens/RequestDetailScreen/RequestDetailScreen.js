@@ -43,7 +43,7 @@ class RequestDetailScreen extends React.Component {
       requestingAccount,
       requestTime,
       transactionId,
-      ruleInstanceId,
+      ruleInstanceIds,
       requestItems
     } = this.props
 
@@ -125,16 +125,20 @@ class RequestDetailScreen extends React.Component {
               {transactionId}
             </Small>
           </Paper>
-          <p className={s.label}>Rule Instance ID</p>
-          <Paper>
-            <Small
-              textAlign="center"
-              fontWeight="bold"
-              data-id="ruleInstanceIdsIndicator"
-            >
-              {ruleInstanceId}
-            </Small>
-          </Paper>
+          {ruleInstanceIds.length && (
+            <p className={s.label}>Rule Instance IDs</p>
+          )}
+          {ruleInstanceIds.map(id => (
+            <Paper key={id}>
+              <Small
+                textAlign="center"
+                fontWeight="bold"
+                data-id="ruleInstanceIdsIndicator"
+              >
+                {id}
+              </Small>
+            </Paper>
+          ))}
           <p className={s.label}>Pre-transaction balance</p>
           <Paper>
             <Text
@@ -187,7 +191,7 @@ RequestDetailScreen.propTypes = {
   requestTotal: PropTypes.number,
   isRequestLoading: PropTypes.bool,
   transactionId: PropTypes.string,
-  ruleInstanceId: PropTypes.string,
+  ruleInstanceIds: PropTypes.arrayOf(PropTypes.string),
   requestItems: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string,
@@ -200,7 +204,7 @@ RequestDetailScreen.propTypes = {
 RequestDetailScreen.defaultProps = {
   requestingAccount: '',
   transactionId: '',
-  ruleInstanceId: '',
+  ruleInstanceIds: [],
   isRequestLoading: true,
   requestItems: [],
   requestTotal: 0

@@ -31,9 +31,11 @@ export function renderProps({ data, ownProps }) {
     requestTime:
       request.creditor_approval_time || request.debitor_approval_time,
     requestItems: data.requestsByID || [],
-    ruleInstanceId: data.requestsByID
-      ? data.requestsByID.find(item => item.rule_instance_id).rule_instance_id
-      : ''
+    ruleInstanceIds: data.requestsByID
+      ? data.requestsByID
+          .filter(item => item.rule_instance_id)
+          .map(item => item.rule_instance_id)
+      : []
   }
 }
 

@@ -48,7 +48,9 @@ describe('Request detail screen render props', () => {
     expect(props.requestingAccount).toBe('Person1')
     expect(props.requestTotal).toBe(4.36)
     expect(props.transactionId).toBe('f06ed7f0-2fdf-11ea-bd38-bf40aeec34f6')
-    expect(props.ruleInstanceId).toBe('8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d')
+    expect(props.ruleInstanceIds).toEqual([
+      '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d'
+    ])
     expect(props.requestTime).toBe('2020-01-05 17:22:25.764 +00:00')
     expect(props.requestItems).toBe(mockData.requestsByID)
   })

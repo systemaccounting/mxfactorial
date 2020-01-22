@@ -80,7 +80,7 @@ describe('<RequestDetailScreen />', () => {
     const mockProps = {
       isRequestLoading: false,
       transactionId: 'f06ed7f0-2fdf-11ea-bd38-bf40aeec34f6',
-      ruleInstanceId: '8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d',
+      ruleInstanceIds: ['8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d'],
       requestingAccount: 'Person1',
       requestTotal: 4.36,
       requestTime: '2020-01-05 17:22:25.764 +00:00',
@@ -127,7 +127,7 @@ describe('<RequestDetailScreen />', () => {
     const transactionId = wrapper.find({
       'data-id': 'transactionIdIndicator'
     })
-    const ruleId = wrapper.find({
+    const ruleIds = wrapper.find({
       'data-id': 'ruleInstanceIdsIndicator'
     })
 
@@ -135,7 +135,9 @@ describe('<RequestDetailScreen />', () => {
     expect(sumTransaction.html()).toMatch(mockProps.requestTotal.toString())
     expect(requestTime.html()).toMatch(fromNow(mockProps.requestTime))
     expect(transactionId.html()).toMatch(mockProps.transactionId)
-    expect(ruleId.html()).toMatch(mockProps.ruleInstanceId)
+    ruleIds.forEach((item, idx) => {
+      expect(item.html()).toMatch(mockProps.ruleInstanceIds[idx])
+    })
     requestItems.forEach((item, idx) => {
       expect(item.html()).toMatch(mockProps.requestItems[idx].name)
     })
