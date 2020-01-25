@@ -1,0 +1,48 @@
+{
+	"info": {
+		"_postman_id": "af8b2e67-b53b-4a12-89d7-c355fd884bc9",
+		"name": "graphql",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "requestsByAccount",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{ID_TOKEN}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query requestsByAccount($input: String) {\n    requestsByAccount(account: $input) {\n        id\n        debitor\n        debitor_profile_latlng\n        debitor_transaction_latlng\n        debitor_approval_time\n        debitor_device\n        creditor\n        creditor_profile_latlng\n        creditor_transaction_latlng\n        creditor_approval_time\n        creditor_device\n        name\n        price\n        quantity\n        unit_of_measurement\n        units_measured\n        rule_instance_id\n        transaction_id\n        author\n        expiration_time\n    }\n}",
+						"variables": "{\n\t\"input\": \"JoeSmith\"\n}"
+					}
+				},
+				"url": {
+					"raw": "https://dev-api.mxfactorial.io/",
+					"protocol": "https",
+					"host": [
+						"dev-api",
+						"mxfactorial",
+						"io"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
