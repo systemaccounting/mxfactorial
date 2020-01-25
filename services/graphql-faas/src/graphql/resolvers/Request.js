@@ -21,7 +21,7 @@ const CreateRequestResolver = (
 
 // go app
 // handlerFn() in resolvers/index.js
-const GetRequestResolver = (
+const GetRequestByTransactionIDResolver = (
   service,
   handlerFn,
   args,
@@ -32,9 +32,31 @@ const GetRequestResolver = (
     args.account = graphqlRequestSender // temporary
   }
   let params = {
-    FunctionName: process.env.REQUEST_QUERY_LAMBDA_ARN,
+    FunctionName: process.env.REQUEST_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN,
     Payload: JSON.stringify({
       transaction_id: args.transactionID,
+      account: args.account,
+      graphqlRequestSender
+    })
+  }
+  return handlerFn(service.invoke(params).promise())
+}
+
+// go app
+// handlerFn() in resolvers/index.js
+const GetRequestByAccountResolver = (
+  service,
+  handlerFn,
+  args,
+  graphqlRequestSender
+  ) => {
+  if (!args.account) {
+    console.log('account not passed in query, using:', graphqlRequestSender)
+    args.account = graphqlRequestSender // temporary
+  }
+  let params = {
+    FunctionName: process.env.REQUEST_QUERY_BY_ACCOUNT_LAMBDA_ARN,
+    Payload: JSON.stringify({
       account: args.account,
       graphqlRequestSender
     })
@@ -65,6 +87,7 @@ const ApproveRequestResolver = (
 
 module.exports = {
   CreateRequestResolver,
-  GetRequestResolver,
+  GetRequestByTransactionIDResolver,
+  GetRequestByAccountResolver,
   ApproveRequestResolver
 }

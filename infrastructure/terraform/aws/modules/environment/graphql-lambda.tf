@@ -17,11 +17,13 @@ resource "aws_lambda_function" "graphql" {
 
   environment {
     variables = {
-      RULES_FAAS_ARN               = aws_lambda_function.rules_faas.arn
-      REQUEST_CREATE_LAMBDA_ARN    = aws_lambda_function.request_create.arn
-      REQUEST_APPROVE_LAMBDA_ARN   = aws_lambda_function.request_approve.arn
-      REQUEST_QUERY_LAMBDA_ARN     = aws_lambda_function.request_query.arn
-      TRANSACTION_QUERY_LAMBDA_ARN = aws_lambda_function.transaction_query.arn
+      RULES_FAAS_ARN                                 = aws_lambda_function.rules_faas.arn
+      REQUEST_CREATE_LAMBDA_ARN                      = aws_lambda_function.request_create.arn
+      REQUEST_APPROVE_LAMBDA_ARN                     = aws_lambda_function.request_approve.arn
+      REQUEST_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN     = aws_lambda_function.req_query_trans_id.arn
+      REQUEST_QUERY_BY_ACCOUNT_LAMBDA_ARN            = aws_lambda_function.req_query_account.arn
+      TRANSACTION_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN = aws_lambda_function.trans_query_id.arn
+      TRANSACTION_QUERY_BY_ACCOUNT_LAMBDA_ARN        = aws_lambda_function.trans_query_account.arn
       JWKS_URL = join("", [
         "https://cognito-idp.",
         data.aws_region.current.name,
@@ -87,8 +89,10 @@ data "aws_iam_policy_document" "graphql_policy" {
       aws_lambda_function.rules_faas.arn,
       aws_lambda_function.request_create.arn,
       aws_lambda_function.request_approve.arn,
-      aws_lambda_function.request_query.arn,
-      aws_lambda_function.transaction_query.arn
+      aws_lambda_function.req_query_trans_id.arn,
+      aws_lambda_function.req_query_account.arn,
+      aws_lambda_function.trans_query_id.arn,
+      aws_lambda_function.trans_query_account.arn
     ]
   }
 
