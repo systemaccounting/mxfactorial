@@ -59,9 +59,9 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ns.String)
 }
 
-func getLastNTransactions(db *sql.DB, queryString string, account string, limit int) (string, error) {
+func getLastNTransactions(db *sql.DB, query string, account string, limit int) (string, error) {
 
-	rows, err := db.Query(queryString, account, limit)
+	rows, err := db.Query(query, account, limit)
 
 	if err != nil {
 		log.Fatal(err)

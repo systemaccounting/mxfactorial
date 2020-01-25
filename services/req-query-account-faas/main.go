@@ -59,9 +59,9 @@ func (ns *NullString) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ns.String)
 }
 
-func (e event) getLastNRequests(db *sql.DB, q string, limit int) (string, error) {
+func (e event) getLastNRequests(db *sql.DB, query string, account string, limit int) (string, error) {
 
-	rows, err := db.Query(q, limit, e.Account)
+	rows, err := db.Query(query, account, limit)
 
 	if err != nil {
 		log.Fatal(err)
@@ -125,7 +125,7 @@ func handleLambdaEvent(ctx context.Context, e event) (string, error) {
 	WHERE creditor=$1 OR debitor=$1 OR author=$1
 	AND (creditor_approval_time IS NULL OR debitor_approval_time IS NULL)
 	ORDER BY id DESC LIMIT $2;`
-	return e.getLastNRequests(db, q, 20)
+	return e.getLastNRequests(db, q, e.Account, 20)
 }
 
 func main() {
