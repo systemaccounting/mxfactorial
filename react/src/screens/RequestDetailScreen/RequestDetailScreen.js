@@ -50,7 +50,6 @@ class RequestDetailScreen extends React.Component {
   }
 
   get requestInfo() {
-    const { request } = this.state
     const {
       isRequestLoading,
       requestingAccount,
