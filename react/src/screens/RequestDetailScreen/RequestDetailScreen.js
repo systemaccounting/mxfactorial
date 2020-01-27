@@ -96,14 +96,16 @@ class RequestDetailScreen extends React.Component {
               {fromNow(requestTime)}
             </P>
           </Paper>
-          {expirationDate && (
-            <Paper>
-              <P fontWeight="bold">Time of expiration</P>
-              <P data-id="expirationTimeIndicator" textAlign="right">
-                {expirationDate}
-              </P>
-            </Paper>
-          )}
+          <Paper>
+            <P fontWeight="bold">Time of expiration</P>
+            <P
+              data-id="expirationTimeIndicator"
+              textAlign="right"
+              disabled={!expirationDate}
+            >
+              {expirationDate || 'none'}
+            </P>
+          </Paper>
         </div>
         <div className={s.actions} data-id="request-actions">
           <Button
