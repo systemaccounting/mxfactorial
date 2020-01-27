@@ -46,7 +46,7 @@ class RequestDetailScreen extends React.Component {
     const { requestTotal, isCredit } = this.props
 
     const localized = requestTotal.toLocaleString()
-    return isCredit ? `- ${localized}` : localized
+    return isCredit ? localized : `- ${localized}`
   }
 
   get requestInfo() {

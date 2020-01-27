@@ -27,7 +27,7 @@ export function renderProps({ data, ownProps }) {
     isCredit,
     requestTotal,
     transactionId: request.transaction_id,
-    requestingAccount: isCredit ? request.debitor : request.creditor,
+    requestingAccount: isCredit ? request.creditor : request.debitor,
     expirationTime: request.expiration_time,
     requestTime:
       request.creditor_approval_time || request.debitor_approval_time,
