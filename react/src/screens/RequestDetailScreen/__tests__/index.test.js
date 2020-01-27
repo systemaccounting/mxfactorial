@@ -45,7 +45,7 @@ describe('Request detail screen render props', () => {
     const props = renderProps({ data: mockData, ownProps: mockOwnProps })
     expect(props.isRequestLoading).toBe(mockData.loading)
     expect(props.isCredit).toBe(false)
-    expect(props.requestingAccount).toBe('JoeSmith')
+    expect(props.requestingAccount).toBe('Person1')
     expect(props.requestTotal).toBe(4.36)
     expect(props.transactionId).toBe('f06ed7f0-2fdf-11ea-bd38-bf40aeec34f6')
     expect(props.ruleInstanceIds).toEqual([
