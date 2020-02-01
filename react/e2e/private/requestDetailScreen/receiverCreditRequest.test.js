@@ -8,18 +8,16 @@ const {
   TEST_ACCOUNTS
 } = require('../../constants')
 
-
-beforeAll(async () => {
-  jest.setTimeout(30000)
-  await page.goto(HOME_URL)
-  await page.waitForSelector(SELECTORS.HOME)
-})
-
-afterAll(async () => {
-  await page.reload()
-})
-
 describe('transaction request', () => {
+  beforeAll(async () => {
+    jest.setTimeout(30000)
+    await page.goto(HOME_URL)
+    await page.waitForSelector(SELECTORS.HOME)
+  })
+
+  afterAll(async () => {
+    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
+  })
 
   it('displays stored request', async () => {
     const browser2 = await puppeteer.launch()
@@ -33,7 +31,7 @@ describe('transaction request', () => {
     await login(page, TEST_ACCOUNTS[2], process.env.JEST_SECRET)
     await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
-    // select credit type transaction where 
+    // select credit type transaction where
     // receiver will see a negative number
     await page.click(SELECTORS.creditButton)
 
@@ -77,19 +75,28 @@ describe('transaction request', () => {
     // request transacton
     await page.click(SELECTORS.requestCreditTransactionBtn)
     await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
-    
+
     await page2.reload()
     await page2.waitForSelector(SELECTORS.requestItem)
     const requestItemElement = await page2.$(SELECTORS.requestItem)
     await requestItemElement.click()
     await page2.waitForSelector(SELECTORS.requestingAccountIndicator)
-    const requestingAccountValue = await page2.$eval(SELECTORS.requestingAccountIndicator, e => e.innerText)
+    const requestingAccountValue = await page2.$eval(
+      SELECTORS.requestingAccountIndicator,
+      e => e.innerText
+    )
     expect(requestingAccountValue).toBe(TEST_ACCOUNTS[2])
-    
-    const requestTotalValue = await page2.$eval(SELECTORS.sumTransactionItemIndicator, e => e.innerText)
+
+    const requestTotalValue = await page2.$eval(
+      SELECTORS.sumTransactionItemIndicator,
+      e => e.innerText
+    )
     expect(requestTotalValue).toBe('- ' + expectedPriceWithTaxAsString)
 
-    const requestRuleInstanceID = await page2.$eval(SELECTORS.ruleInstanceIdsIndicator, e => e.innerText)
+    const requestRuleInstanceID = await page2.$eval(
+      SELECTORS.ruleInstanceIdsIndicator,
+      e => e.innerText
+    )
     expect(requestRuleInstanceID).toBe('8f93fd20-e60b-11e9-a7a9-2b4645cb9b8d')
 
     await page2.close()

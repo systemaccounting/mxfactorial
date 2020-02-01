@@ -25,7 +25,7 @@ export function renderProps({ data, ownProps }) {
   return {
     isRequestLoading: data.loading,
     isCredit,
-    requestTotal,
+    requestTotal: requestTotal.toFixed(3),
     transactionId: request.transaction_id,
     requestingAccount: isCredit ? request.debitor : request.creditor,
     expirationTime: request.expiration_time,
