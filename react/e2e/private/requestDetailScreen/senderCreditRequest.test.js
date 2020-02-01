@@ -8,18 +8,16 @@ const {
   TEST_ACCOUNTS
 } = require('../../constants')
 
-
-beforeAll(async () => {
-  jest.setTimeout(30000)
-  await page.goto(HOME_URL)
-  await page.waitForSelector(SELECTORS.HOME)
-})
-
-afterAll(async () => {
-  await page.reload()
-})
-
 describe('transaction request', () => {
+  beforeAll(async () => {
+    jest.setTimeout(30000)
+    await page.goto(HOME_URL)
+    await page.waitForSelector(SELECTORS.HOME)
+  })
+
+  afterAll(async () => {
+    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
+  })
 
   it('displays stored request', async () => {
     await login(page, TEST_ACCOUNTS[2], process.env.JEST_SECRET)
@@ -78,7 +76,7 @@ describe('transaction request', () => {
       e => e.innerText
     )
     expect(contraAccountValue).toBe(TEST_ACCOUNTS[1])
-    
+
     const requestTotalValue = await page.$eval(
       SELECTORS.sumTransactionItemIndicator,
       e => e.innerText
