@@ -1,5 +1,5 @@
 import { graphql } from 'react-apollo'
-import { fetchTransactions } from 'queries/transactions'
+import { fetchRequests } from 'queries/requests'
 
 function sortByArrpovalTime(a, b) {
   const approvalTimeA = a.creditor_approval_time || a.debitor_approval_time
@@ -23,7 +23,7 @@ export function renderProps({ data: { requestsByAccount, loading, refetch } }) {
   }
 }
 
-export default graphql(fetchTransactions, {
+export default graphql(fetchRequests, {
   options: props => ({ variables: { account: props.user.username } }),
   props: renderProps
 })

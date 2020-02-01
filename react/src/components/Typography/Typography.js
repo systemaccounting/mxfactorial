@@ -3,6 +3,8 @@ import styled from 'styled-components'
 export const textAlign = ({ textAlign }) =>
   textAlign && `text-align: ${textAlign}`
 
+export const disabled = ({ disabled = false }) => disabled && `color: #929292`
+
 export const sizeVariant = ({ variant }) => {
   const styleName = 'font-size'
   switch (variant) {
@@ -36,6 +38,7 @@ export const Base = styled.div`
   color: #666;
   ${textAlign};
   ${fontWeightVariant};
+  ${disabled};
 `
 
 const SmallBase = Base.withComponent('small')
