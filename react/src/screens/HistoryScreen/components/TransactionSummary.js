@@ -6,9 +6,19 @@ import { fromNow, maxDate } from 'utils/date'
 import { formatCurrency } from 'utils/currency'
 
 function TransactionSummary({ transaction, isCredit }) {
-  const { cr_time, db_time, debitor, creditor, price, quantity } = transaction
+  const {
+    creditor_approval_time,
+    debitor_approval_time,
+    debitor,
+    creditor,
+    price,
+    quantity
+  } = transaction
   const partner = isCredit ? debitor : creditor
-  const transactionTime = maxDate([cr_time, db_time])
+  const transactionTime = maxDate([
+    creditor_approval_time,
+    debitor_approval_time
+  ])
   const total = price * quantity
   const amount = isCredit ? total * -1 : total
 
@@ -27,7 +37,7 @@ function TransactionSummary({ transaction, isCredit }) {
 
 TransactionSummary.propTypes = {
   transaction: T.shape({
-    timeuuid: T.string.isRequired
+    id: T.string.isRequired
   }).isRequired,
   isCredit: T.bool
 }
