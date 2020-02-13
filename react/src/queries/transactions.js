@@ -1,6 +1,6 @@
 import gql from 'graphql-tag'
 
-export const fetchRequests = gql`
+export const fetchTransactions = gql`
   query transactionsByAccount($account: String) {
     transactionsByAccount(account: $account) {
       id
