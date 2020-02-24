@@ -18,3 +18,22 @@ export const fetchTransactions = gql`
     }
   }
 `
+
+export const fetchTransactionsById = gql`
+  query transactionsByID($transactionId: String) {
+    transactionsByID(transactionID: $transactionId) {
+      id
+      name
+      quantity
+      price
+      author
+      debitor
+      creditor
+      creditor_approval_time
+      debitor_approval_time
+      expiration_time
+      transaction_id
+      rule_instance_id
+    }
+  }
+`
