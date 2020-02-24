@@ -5,6 +5,7 @@ import TransactionSummary from '../components/TransactionSummary'
 import { formatCurrency } from 'utils/currency'
 
 const transaction = {
+  id: '1234',
   timeuuid: '1234',
   debitor: 'JoeSmith',
   creditor: 'Mary',
@@ -12,8 +13,8 @@ const transaction = {
   price: '3000.00',
   quantity: '2.00',
   transaction_id: '12345',
-  cr_time: '2018-10-26T21:32:52',
-  db_time: '2018-08-26T21:32:52'
+  creditor_approval_time: '2018-10-26T21:32:52',
+  debitor_approval_time: '2018-08-26T21:32:52'
 }
 
 const selectors = {
@@ -41,7 +42,10 @@ describe('<TransactionSummary />', () => {
   it('contains transaction time', () => {
     const wrapper = shallow(<TransactionSummary {...props} />)
     const timeEl = wrapper.find(selectors.transactionTime)
-    const transactionTime = maxDate([transaction.cr_time, transaction.db_time])
+    const transactionTime = maxDate([
+      transaction.creditor_approval_time,
+      transaction.debitor_approval_time
+    ])
     expect(timeEl.exists()).toBeTruthy()
     expect(timeEl.text()).toEqual(fromNow(transactionTime))
   })
