@@ -55,3 +55,30 @@ export const fetchRequestById = gql`
     }
   }
 `
+
+export const approveRequest = gql`
+  mutation approveRequest($items: [RequestApproveInput]!) {
+    approveRequest(items: $items) {
+      transaction_id
+      id
+      author
+      debitor
+      debitor_profile_latlng
+      debitor_transaction_latlng
+      debitor_approval_time
+      debitor_device
+      creditor
+      creditor_profile_latlng
+      creditor_transaction_latlng
+      creditor_approval_time
+      creditor_device
+      name
+      price
+      quantity
+      unit_of_measurement
+      units_measured
+      rule_instance_id
+      expiration_time
+    }
+  }
+`

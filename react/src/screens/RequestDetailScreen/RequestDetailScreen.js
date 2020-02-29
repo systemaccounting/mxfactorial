@@ -27,7 +27,9 @@ class RequestDetailScreen extends React.Component {
     this.handleFetchBalance()
   }
 
-  handleApprovalSuccess = () => this.setState({ isApprovalSuccessFul: true })
+  handleApprovalSuccess = () => {
+    this.setState({ isApprovalSuccessFul: true })
+  }
 
   showApproveModal = () => this.setState({ isApproveModalOpen: true })
 

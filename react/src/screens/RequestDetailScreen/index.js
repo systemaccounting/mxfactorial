@@ -4,7 +4,7 @@ import { graphql } from 'react-apollo'
 import withApi from 'decorators/withApi'
 import withUser from 'decorators/withUser'
 
-import { fetchRequestById } from 'queries/requests'
+import { fetchRequestById, approveRequest } from 'queries/requests'
 import RequestDetailScreen from './RequestDetailScreen'
 
 export function renderProps({ data, ownProps }) {
@@ -45,4 +45,24 @@ const withTransaction = graphql(fetchRequestById, {
   props: renderProps
 })
 
-export default compose(withApi, withUser, withTransaction)(RequestDetailScreen)
+const withApproveRequest = graphql(approveRequest, {
+  props: ({ ownProps, mutate }) => ({
+    approveRequest() {
+      return mutate({
+        variables: {
+          items: ownProps.requestItems.map(item => {
+            const { __typename, ...itemProps } = item
+            return itemProps
+          })
+        }
+      })
+    }
+  })
+})
+
+export default compose(
+  withApi,
+  withUser,
+  withTransaction,
+  withApproveRequest
+)(RequestDetailScreen)
