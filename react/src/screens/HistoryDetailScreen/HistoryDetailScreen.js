@@ -58,18 +58,20 @@ class HistoryDetailScreen extends Component {
   }
 
   get items() {
-    const { transaction } = this.state
+    const { transactionItems } = this.props
     return (
       <div className={s.items}>
-        <Paper data-id="transactionItemIndicator">
-          <P textAlign="center" fontWeight="bold" variant="medium">
-            {parseInt(transaction.quantity, 10)} x {}
-            {formatCurrency(transaction.price)}
-          </P>
-          <P textAlign="center" fontWeight="bold" variant="medium">
-            {transaction.name}
-          </P>
-        </Paper>
+        {transactionItems.map(item => (
+          <Paper key={item.id} data-id="transactionItemIndicator">
+            <P textAlign="center" fontWeight="bold" variant="medium">
+              {parseInt(item.quantity, 10)} x {}
+              {formatCurrency(item.price)}
+            </P>
+            <P textAlign="center" fontWeight="bold" variant="medium">
+              {item.name}
+            </P>
+          </Paper>
+        ))}
       </div>
     )
   }

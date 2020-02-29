@@ -11,12 +11,12 @@ export function renderProps({ data, ownProps }) {
   const { username } = ownProps.user
   // find non-rule generated request
   const request =
-    data.requestsByID && data.requestsByID.length
-      ? data.requestsByID.find(item => !item.rule_instance_id)
+    data.transactionsByID && data.transactionsByID.length
+      ? data.transactionsByID.find(item => !item.rule_instance_id)
       : {}
   const isCredit = request.creditor === username
-  const requestTotal = data.requestsByID
-    ? data.requestsByID.reduce(
+  const requestTotal = data.transactionsByID
+    ? data.transactionsByID.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0
       )
@@ -31,9 +31,9 @@ export function renderProps({ data, ownProps }) {
     expirationTime: request.expiration_time,
     requestTime:
       request.creditor_approval_time || request.debitor_approval_time,
-    requestItems: data.requestsByID || [],
-    ruleInstanceIds: data.requestsByID
-      ? data.requestsByID
+    transactionItems: data.transactionsByID || [],
+    ruleInstanceIds: data.transactionsByID
+      ? data.transactionsByID
           .filter(item => item.rule_instance_id)
           .map(item => item.rule_instance_id)
       : []
