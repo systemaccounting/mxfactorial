@@ -3,6 +3,7 @@ import { graphql } from 'react-apollo'
 
 import withApi from 'decorators/withApi'
 import withUser from 'decorators/withUser'
+import { testPassword } from 'lib/user'
 
 import { fetchRequestById, approveRequest } from 'queries/requests'
 import RequestDetailScreen from './RequestDetailScreen'
@@ -47,7 +48,13 @@ const withTransaction = graphql(fetchRequestById, {
 
 const withApproveRequest = graphql(approveRequest, {
   props: ({ ownProps, mutate }) => ({
-    approveRequest() {
+    approveRequest(password) {
+      if (!testPassword(password)) {
+        return Promise.reject({
+          error: 'PASSWORD_ERROR',
+          message: 'Wrong password.'
+        })
+      }
       return mutate({
         variables: {
           items: ownProps.requestItems.map(item => {
