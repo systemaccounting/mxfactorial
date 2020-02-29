@@ -3,14 +3,14 @@ const { SELECTORS, HISTORY_URL } = require('../../constants')
 // prior art: https://stackoverflow.com/questions/354044/what-is-the-best-u-s-currency-regex
 const balanceRegex = /^\$?-?\s?([1-9]{1}[0-9]{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^-?\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^\(\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))\)$/
 
-beforeAll(async () => {
-  jest.setTimeout(30000)
-  await page.goto(HISTORY_URL)
-  const link = await page.waitForSelector('[data-id="historyItemIndicator"]')
-  await link.click()
-})
-
 describe('historyDetailScreen inventory', () => {
+  beforeAll(async () => {
+    jest.setTimeout(30000)
+    await page.goto(HISTORY_URL)
+    const link = await page.waitForSelector('[data-id="historyItemIndicator"]')
+    await link.click()
+  })
+
   it('displays back button', async () => {
     const backButton = await page.$$eval(
       SELECTORS.backButton,
@@ -52,11 +52,12 @@ describe('historyDetailScreen inventory', () => {
   })
 
   it('contains transactionItemIndicator', async () => {
+    await page.waitForSelector(SELECTORS.transactionItemIndicator)
     const transactionItemIndicator = await page.$$eval(
       SELECTORS.transactionItemIndicator,
       list => list.length
     )
-    expect(transactionItemIndicator).toEqual(1)
+    expect(transactionItemIndicator).toBeGreaterThanOrEqual(1)
   })
 
   it('contains transactionIdIndicator', async () => {
