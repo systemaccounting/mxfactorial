@@ -41,20 +41,14 @@ class HistoryDetailScreen extends Component {
   }
 
   get total() {
-    const { transaction, isCredit } = this.state
-    const total = transaction.price * transaction.quantity
-    const value = isCredit ? total * -1 : total
+    const { transactionTotal, isCredit } = this.props
+    const value = isCredit ? transactionTotal * -1 : transactionTotal
     return formatCurrency(value)
   }
 
   get transactionTime() {
-    const {
-      transaction: { cr_time, db_time }
-    } = this.state
-    return dateString(
-      maxDate([cr_time, db_time]),
-      'dddd, MMMM D, YYYY @ h:mm A [GMT]Z'
-    )
+    const { transactionTime } = this.props
+    return dateString(transactionTime, 'dddd, MMMM D, YYYY @ h:mm A [GMT]Z')
   }
 
   get items() {
@@ -77,8 +71,8 @@ class HistoryDetailScreen extends Component {
   }
 
   get content() {
-    const { transaction, isCredit } = this.state
-    if (!transaction) {
+    const { transactionAccount, transactionId, ruleInstanceIds } = this.props
+    if (!transactionAccount) {
       return null
     }
     return (
@@ -90,7 +84,7 @@ class HistoryDetailScreen extends Component {
             fontWeight="bold"
             data-id="contraAccountIndicator"
           >
-            {isCredit ? transaction.debitor : transaction.creditor}
+            {transactionAccount}
           </Text>
         </Paper>
         <Paper>
@@ -122,21 +116,23 @@ class HistoryDetailScreen extends Component {
             fontWeight="bold"
             data-id="transactionIdIndicator"
           >
-            {transaction.transaction_id}
+            {transactionId}
           </Small>
         </Paper>
         <p className={s.label} data-id="ruleInstanceIdsLabel">
           {labels.ruleInstanceIdsLabel}
         </p>
-        <Paper>
-          <Small
-            textAlign="center"
-            fontWeight="bold"
-            data-id="ruleInstanceIdsIndicator"
-          >
-            {transaction.rule_instance_id}
-          </Small>
-        </Paper>
+        {ruleInstanceIds.map(rule => (
+          <Paper key={rule}>
+            <Small
+              textAlign="center"
+              fontWeight="bold"
+              data-id="ruleInstanceIdsIndicator"
+            >
+              {rule}
+            </Small>
+          </Paper>
+        ))}
         <p className={s.label} data-id="preTransactionBalanceLabel">
           {labels.preTransactionBalanceLabel}
         </p>
