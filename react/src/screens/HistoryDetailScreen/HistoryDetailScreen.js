@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import Paper from 'components/Paper'
 import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
-import { dateString, maxDate } from 'utils/date'
+import { dateString } from 'utils/date'
 import { formatCurrency } from 'utils/currency'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 

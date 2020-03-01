@@ -34,7 +34,7 @@ const SuccessModal = () => (
     <Flex>
       <ButtonLink data-id="newButton" to={`/account`} text="New" />
       <Spacer w={10} />
-      <ButtonLink data-id="okButton" to={`/requests`} text="OK" />
+      <ButtonLink data-id="okButton" to={`/history`} text="OK" />
     </Flex>
   </SuccessModalStyled>
 )
