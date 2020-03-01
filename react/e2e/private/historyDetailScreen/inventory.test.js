@@ -28,6 +28,7 @@ describe('historyDetailScreen inventory', () => {
   })
 
   it('displays contraAccountIndicator', async () => {
+    await page.waitForSelector(SELECTORS.contraAccountIndicator)
     const contraAccountIndicator = await page.$$eval(
       SELECTORS.contraAccountIndicator,
       list => list.length
@@ -52,7 +53,6 @@ describe('historyDetailScreen inventory', () => {
   })
 
   it('contains transactionItemIndicator', async () => {
-    await page.waitForSelector(SELECTORS.transactionItemIndicator)
     const transactionItemIndicator = await page.$$eval(
       SELECTORS.transactionItemIndicator,
       list => list.length

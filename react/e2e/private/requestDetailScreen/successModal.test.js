@@ -21,6 +21,7 @@ describe('Request detail screen success modal', () => {
     expect(await getApproveModalStatus()).toEqual('true')
     const passwordInput = await page.$(SELECTORS.modalPasswordInput)
     await passwordInput.type(process.env.JEST_SECRET)
+    await page.waitForSelector(SELECTORS.okButton)
     const okButton = await page.$(SELECTORS.okButton)
     await okButton.click()
 
