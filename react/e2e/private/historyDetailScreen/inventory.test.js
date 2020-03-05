@@ -76,45 +76,11 @@ describe('historyDetailScreen inventory', () => {
     expect(ruleInstanceIdsIndicator).toEqual(1)
   })
 
-  it('contains preTransactionBalanceIndicator', async () => {
-    const preTransactionBalanceIndicator = await page.$$eval(
-      SELECTORS.preTransactionBalanceIndicator,
-      list => list.length
-    )
-    expect(preTransactionBalanceIndicator).toEqual(1)
-  })
-
-  it('contains postTransactionBalanceIndicator', async () => {
-    const postTransactionBalanceIndicator = await page.$$eval(
-      SELECTORS.postTransactionBalanceIndicator,
-      list => list.length
-    )
-    expect(postTransactionBalanceIndicator).toEqual(1)
-  })
-
   it('contains disputeTransactionButton', async () => {
     const disputeTransactionButton = await page.$$eval(
       SELECTORS.disputeTransactionButton,
       list => list.length
     )
     expect(disputeTransactionButton).toEqual(1)
-  })
-
-  it('preTransactionBalanceIndicator displays commas and decimals', async () => {
-    const element = await page.$(SELECTORS.preTransactionBalanceIndicator)
-    const preTransactionBalance = await page.evaluate(
-      element => element.textContent,
-      element
-    )
-    expect(preTransactionBalance).toMatch(balanceRegex)
-  })
-
-  it('postTransactionBalanceIndicator displays commas and decimals', async () => {
-    const element = await page.$(SELECTORS.postTransactionBalanceIndicator)
-    const postTransactionBalance = await page.evaluate(
-      element => element.textContent,
-      element
-    )
-    expect(postTransactionBalance).toMatch(balanceRegex)
   })
 })

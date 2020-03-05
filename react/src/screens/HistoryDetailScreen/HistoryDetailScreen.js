@@ -133,32 +133,6 @@ class HistoryDetailScreen extends Component {
             </Small>
           </Paper>
         ))}
-        <p className={s.label} data-id="preTransactionBalanceLabel">
-          {labels.preTransactionBalanceLabel}
-        </p>
-        <Paper>
-          <Text
-            textAlign="right"
-            variant="medium"
-            fontWeight="bold"
-            data-id="preTransactionBalanceIndicator"
-          >
-            {formatCurrency(1000)}
-          </Text>
-        </Paper>
-        <p className={s.label} data-id="postTransactionBalanceLabel">
-          {labels.postTransactionBalanceLabel}
-        </p>
-        <Paper>
-          <Text
-            textAlign="right"
-            variant="medium"
-            fontWeight="bold"
-            data-id="postTransactionBalanceIndicator"
-          >
-            {formatCurrency(976)}
-          </Text>
-        </Paper>
         {this.actions}
       </div>
     )

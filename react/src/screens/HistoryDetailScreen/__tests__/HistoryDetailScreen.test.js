@@ -104,21 +104,7 @@ describe('<HistoryDetailScreen />', () => {
       .find(selectors.ruleInstanceIdsLabel)
       .render()
       .text()
-    const preTransactionBalanceLabel = wrapper
-      .find(selectors.preTransactionBalanceLabel)
-      .render()
-      .text()
-    const postTransactionBalanceLabel = wrapper
-      .find(selectors.postTransactionBalanceLabel)
-      .render()
-      .text()
     expect(transactionIdLabel).toEqual(labels.transactionIdLabel)
     expect(ruleInstanceIdsLabel).toEqual(labels.ruleInstanceIdsLabel)
-    expect(preTransactionBalanceLabel).toEqual(
-      labels.preTransactionBalanceLabel
-    )
-    expect(postTransactionBalanceLabel).toEqual(
-      labels.postTransactionBalanceLabel
-    )
   })
 })
