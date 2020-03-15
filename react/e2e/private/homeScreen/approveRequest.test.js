@@ -13,6 +13,10 @@ describe('Approve request', () => {
     await page.waitForSelector(SELECTORS.HOME)
   })
 
+  afterAll(async () => {
+    await login(page, TEST_ACCOUNTS[0], process.env.JEST_SECRET)
+  })
+
   it('debitor_approval_time added to debit request record', async () => {
     const requestId = await sendRequest(
       TEST_ACCOUNTS[0],
