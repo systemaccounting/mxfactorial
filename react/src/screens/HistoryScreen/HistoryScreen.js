@@ -60,20 +60,20 @@ class HistoryScreen extends Component {
   }
 
   get historyList() {
-    const { user, transactions } = this.props
-    const { history } = this.state
-    if (!history.length) {
+    const { groupedTransactions = [] } = this.props
+    if (!groupedTransactions.length) {
       return null
     }
-    return transactions.map(historyItem => {
-      const { creditor } = historyItem
-      const isCredit = creditor === user.username
+    return groupedTransactions.map(historyItem => {
       return (
         <Link
-          key={historyItem.id}
+          key={historyItem.transaction_id}
           to={`/history/${historyItem.transaction_id}`}
         >
-          <TransactionSummary transaction={historyItem} isCredit={isCredit} />
+          <TransactionSummary
+            transaction={historyItem}
+            isCredit={historyItem.isCredit}
+          />
         </Link>
       )
     })
