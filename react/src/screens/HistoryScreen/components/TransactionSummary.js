@@ -23,7 +23,10 @@ function TransactionSummary({ transaction, isCredit }) {
   const amount = isCredit ? total * -1 : total
 
   return (
-    <Paper data-id="historyItemIndicator">
+    <Paper
+      data-id="historyItemIndicator"
+      data-transaction-id={transaction.transaction_id}
+    >
       <Small>
         <span data-id="transactionTime">{fromNow(transactionTime)}</span>, {}
         <span data-id="transactionPartner">{partner}</span>
