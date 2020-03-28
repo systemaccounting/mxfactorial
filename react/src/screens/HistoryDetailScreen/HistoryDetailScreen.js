@@ -4,6 +4,7 @@ import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
 import { dateString } from 'utils/date'
 import { formatCurrency } from 'utils/currency'
+import DisputeIcon from 'icons/DisputeIcon'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 
 import { labels } from './constants'
@@ -143,9 +144,9 @@ class HistoryDetailScreen extends Component {
       <div className={s.actions}>
         <Button
           onClick={this.disputeTransaction}
-          icon="balance-scale"
           data-id="disputeTransactionButton"
         >
+          <DisputeIcon />
           Report
         </Button>
       </div>
