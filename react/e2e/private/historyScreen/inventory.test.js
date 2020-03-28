@@ -15,7 +15,7 @@ describe('historyScreen inventory', () => {
     expect(currentAccountBalanceIndicator).toEqual(1)
   })
 
-  it('displays 20 most recent historyItemIndicator in descending time', async () => {
+  it('displays no more than 20 history items', async () => {
     const historyItemsLength = await page.$$eval(
       SELECTORS.historyItemIndicator,
       list => list.length
