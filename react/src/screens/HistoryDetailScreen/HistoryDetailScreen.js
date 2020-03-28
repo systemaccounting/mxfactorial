@@ -36,10 +36,7 @@ class HistoryDetailScreen extends Component {
     }
   }
 
-  disputeTransaction = () => {
-    const { transaction } = this.state
-    console.info('Dispute transaction: ', transaction)
-  }
+  disputeTransaction = () => {}
 
   get total() {
     const { transactionTotal, isCredit } = this.props
