@@ -27,7 +27,9 @@ class RequestDetailScreen extends React.Component {
     this.handleFetchBalance()
   }
 
-  handleApprovalSuccess = () => this.setState({ isApprovalSuccessFul: true })
+  handleApprovalSuccess = () => {
+    this.setState({ isApprovalSuccessFul: true })
+  }
 
   showApproveModal = () => this.setState({ isApproveModalOpen: true })
 
@@ -207,7 +209,7 @@ RequestDetailScreen.propTypes = {
   requestTime: PropTypes.string,
   expirationTime: PropTypes.string,
   requestingAccount: PropTypes.string,
-  requestTotal: PropTypes.number,
+  requestTotal: PropTypes.string,
   isRequestLoading: PropTypes.bool,
   transactionId: PropTypes.string,
   ruleInstanceIds: PropTypes.arrayOf(PropTypes.string),

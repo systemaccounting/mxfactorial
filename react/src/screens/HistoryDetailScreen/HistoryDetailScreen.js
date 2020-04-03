@@ -2,8 +2,9 @@ import React, { Component } from 'react'
 import Paper from 'components/Paper'
 import Button from 'components/Button'
 import { Text, Small, P } from 'components/Typography'
-import { dateString, maxDate } from 'utils/date'
+import { dateString } from 'utils/date'
 import { formatCurrency } from 'utils/currency'
+import DisputeIcon from 'icons/DisputeIcon'
 import HistoryDetailHeader from './components/HistoryDetailHeader'
 
 import { labels } from './constants'
@@ -35,48 +36,41 @@ class HistoryDetailScreen extends Component {
     }
   }
 
-  disputeTransaction = () => {
-    const { transaction } = this.state
-    console.info('Dispute transaction: ', transaction)
-  }
+  disputeTransaction = () => {}
 
   get total() {
-    const { transaction, isCredit } = this.state
-    const total = transaction.price * transaction.quantity
-    const value = isCredit ? total * -1 : total
+    const { transactionTotal, isCredit } = this.props
+    const value = isCredit ? transactionTotal * -1 : transactionTotal
     return formatCurrency(value)
   }
 
   get transactionTime() {
-    const {
-      transaction: { cr_time, db_time }
-    } = this.state
-    return dateString(
-      maxDate([cr_time, db_time]),
-      'dddd, MMMM D, YYYY @ h:mm A [GMT]Z'
-    )
+    const { transactionTime } = this.props
+    return dateString(transactionTime, 'dddd, MMMM D, YYYY @ h:mm A [GMT]Z')
   }
 
   get items() {
-    const { transaction } = this.state
+    const { transactionItems } = this.props
     return (
       <div className={s.items}>
-        <Paper data-id="transactionItemIndicator">
-          <P textAlign="center" fontWeight="bold" variant="medium">
-            {parseInt(transaction.quantity, 10)} x {}
-            {formatCurrency(transaction.price)}
-          </P>
-          <P textAlign="center" fontWeight="bold" variant="medium">
-            {transaction.name}
-          </P>
-        </Paper>
+        {transactionItems.map(item => (
+          <Paper key={item.id} data-id="transactionItemIndicator">
+            <P textAlign="center" fontWeight="bold" variant="medium">
+              {parseInt(item.quantity, 10)} x {}
+              {formatCurrency(item.price)}
+            </P>
+            <P textAlign="center" fontWeight="bold" variant="medium">
+              {item.name}
+            </P>
+          </Paper>
+        ))}
       </div>
     )
   }
 
   get content() {
-    const { transaction, isCredit } = this.state
-    if (!transaction) {
+    const { transactionAccount, transactionId, ruleInstanceIds } = this.props
+    if (!transactionAccount) {
       return null
     }
     return (
@@ -88,7 +82,7 @@ class HistoryDetailScreen extends Component {
             fontWeight="bold"
             data-id="contraAccountIndicator"
           >
-            {isCredit ? transaction.debitor : transaction.creditor}
+            {transactionAccount}
           </Text>
         </Paper>
         <Paper>
@@ -120,47 +114,23 @@ class HistoryDetailScreen extends Component {
             fontWeight="bold"
             data-id="transactionIdIndicator"
           >
-            {transaction.transaction_id}
+            {transactionId}
           </Small>
         </Paper>
         <p className={s.label} data-id="ruleInstanceIdsLabel">
           {labels.ruleInstanceIdsLabel}
         </p>
-        <Paper>
-          <Small
-            textAlign="center"
-            fontWeight="bold"
-            data-id="ruleInstanceIdsIndicator"
-          >
-            {transaction.rule_instance_id}
-          </Small>
-        </Paper>
-        <p className={s.label} data-id="preTransactionBalanceLabel">
-          {labels.preTransactionBalanceLabel}
-        </p>
-        <Paper>
-          <Text
-            textAlign="right"
-            variant="medium"
-            fontWeight="bold"
-            data-id="preTransactionBalanceIndicator"
-          >
-            {formatCurrency(1000)}
-          </Text>
-        </Paper>
-        <p className={s.label} data-id="postTransactionBalanceLabel">
-          {labels.postTransactionBalanceLabel}
-        </p>
-        <Paper>
-          <Text
-            textAlign="right"
-            variant="medium"
-            fontWeight="bold"
-            data-id="postTransactionBalanceIndicator"
-          >
-            {formatCurrency(976)}
-          </Text>
-        </Paper>
+        {ruleInstanceIds.map(rule => (
+          <Paper key={rule}>
+            <Small
+              textAlign="center"
+              fontWeight="bold"
+              data-id="ruleInstanceIdsIndicator"
+            >
+              {rule}
+            </Small>
+          </Paper>
+        ))}
         {this.actions}
       </div>
     )
@@ -171,9 +141,9 @@ class HistoryDetailScreen extends Component {
       <div className={s.actions}>
         <Button
           onClick={this.disputeTransaction}
-          icon="balance-scale"
           data-id="disputeTransactionButton"
         >
+          <DisputeIcon />
           Report
         </Button>
       </div>

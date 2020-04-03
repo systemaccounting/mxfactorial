@@ -1,3 +1,7 @@
+const { login } = require('../../utils/auth')
+
+const { SELECTORS, REQUEST_URL } = require('../../constants')
+
 const transactionAddButtonSelector = 'button[data-id="transaction"]'
 const transactionAddNameSelector = 'input[name="transaction-add-name"]'
 const transactionAddPriceSelector = 'input[name="transaction-add-price"]'
@@ -62,7 +66,55 @@ const bread = {
   quantity: '10'
 }
 
+const sendRequest = async (sender, receiver, type = 'credit') => {
+  await login(page, sender, process.env.JEST_SECRET)
+
+  // await page.waitForSelector(SELECTORS.HOME)
+  await page.type(SELECTORS.recipient, receiver)
+
+  const requestTypeBtn = await page.$(
+    type === 'credit' ? SELECTORS.creditButton : SELECTORS.debitButton
+  )
+  await requestTypeBtn.click()
+
+  await addTransaction(page, milk)
+  await addTransaction(page, honey)
+  await addTransaction(page, bread)
+  await getTotal()
+
+  // request transacton
+  await page.click(
+    type === 'credit'
+      ? SELECTORS.requestCreditTransactionBtn
+      : SELECTORS.requestDebitTransactionBtn
+  )
+  await page.waitForSelector(SELECTORS.requestItem)
+  const requestItems = await page.$(SELECTORS.requestItem)
+  // get the most recent request id
+  const requestId = await page.evaluate(
+    el => el.getAttribute('data-request-id'),
+    requestItems
+  )
+  return requestId
+}
+
+const approveRequest = async (receiver, requestId) => {
+  await login(page, receiver, process.env.JEST_SECRET)
+  await page.goto(`${REQUEST_URL}/${requestId}`)
+  await page.waitForSelector(SELECTORS.requestingAccountIndicator)
+  await page.click(SELECTORS.transactButton)
+  await page.waitForSelector(SELECTORS.approveModal)
+  await page.type(SELECTORS.modalPasswordInput, process.env.JEST_SECRET)
+  await page.waitFor(1000)
+  await page.click(SELECTORS.okButton)
+  await page.waitForSelector(SELECTORS.successModal)
+  await page.waitForSelector(SELECTORS.okButton)
+  await page.click(SELECTORS.okButton)
+}
+
 module.exports = {
+  sendRequest,
+  approveRequest,
   addTransaction,
   getTotal,
   milk,

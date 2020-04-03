@@ -3,14 +3,14 @@ const { SELECTORS, HISTORY_URL } = require('../../constants')
 // prior art: https://stackoverflow.com/questions/354044/what-is-the-best-u-s-currency-regex
 const balanceRegex = /^\$?-?\s?([1-9]{1}[0-9]{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^-?\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))$|^\(\$?([1-9]{1}\d{0,2}(,\d{3})*(\.\d{0,2})?|[1-9]{1}\d{0,}(\.\d{0,2})?|0(\.\d{0,2})?|(\.\d{1,2}))\)$/
 
-beforeAll(async () => {
-  jest.setTimeout(30000)
-  await page.goto(HISTORY_URL)
-  const link = await page.waitForSelector('[data-id="historyItemIndicator"]')
-  await link.click()
-})
-
 describe('historyDetailScreen inventory', () => {
+  beforeAll(async () => {
+    jest.setTimeout(30000)
+    await page.goto(HISTORY_URL)
+    const link = await page.waitForSelector('[data-id="historyItemIndicator"]')
+    await link.click()
+  })
+
   it('displays back button', async () => {
     const backButton = await page.$$eval(
       SELECTORS.backButton,
@@ -28,6 +28,7 @@ describe('historyDetailScreen inventory', () => {
   })
 
   it('displays contraAccountIndicator', async () => {
+    await page.waitForSelector(SELECTORS.contraAccountIndicator)
     const contraAccountIndicator = await page.$$eval(
       SELECTORS.contraAccountIndicator,
       list => list.length
@@ -56,7 +57,7 @@ describe('historyDetailScreen inventory', () => {
       SELECTORS.transactionItemIndicator,
       list => list.length
     )
-    expect(transactionItemIndicator).toEqual(1)
+    expect(transactionItemIndicator).toBeGreaterThanOrEqual(1)
   })
 
   it('contains transactionIdIndicator', async () => {
@@ -75,45 +76,11 @@ describe('historyDetailScreen inventory', () => {
     expect(ruleInstanceIdsIndicator).toEqual(1)
   })
 
-  it('contains preTransactionBalanceIndicator', async () => {
-    const preTransactionBalanceIndicator = await page.$$eval(
-      SELECTORS.preTransactionBalanceIndicator,
-      list => list.length
-    )
-    expect(preTransactionBalanceIndicator).toEqual(1)
-  })
-
-  it('contains postTransactionBalanceIndicator', async () => {
-    const postTransactionBalanceIndicator = await page.$$eval(
-      SELECTORS.postTransactionBalanceIndicator,
-      list => list.length
-    )
-    expect(postTransactionBalanceIndicator).toEqual(1)
-  })
-
   it('contains disputeTransactionButton', async () => {
     const disputeTransactionButton = await page.$$eval(
       SELECTORS.disputeTransactionButton,
       list => list.length
     )
     expect(disputeTransactionButton).toEqual(1)
-  })
-
-  it('preTransactionBalanceIndicator displays commas and decimals', async () => {
-    const element = await page.$(SELECTORS.preTransactionBalanceIndicator)
-    const preTransactionBalance = await page.evaluate(
-      element => element.textContent,
-      element
-    )
-    expect(preTransactionBalance).toMatch(balanceRegex)
-  })
-
-  it('postTransactionBalanceIndicator displays commas and decimals', async () => {
-    const element = await page.$(SELECTORS.postTransactionBalanceIndicator)
-    const postTransactionBalance = await page.evaluate(
-      element => element.textContent,
-      element
-    )
-    expect(postTransactionBalance).toMatch(balanceRegex)
   })
 })

@@ -18,7 +18,7 @@ const mockRequests = [
 ]
 
 const fetchHistory = promiseToResolve(mockRequests)
-const fetchBalance = promiseToResolve(1000)
+const fetchBalance = () => promiseToResolve(1000)
 const user = { username: 'some user' }
 
 const props = {
@@ -46,6 +46,8 @@ describe('<HistoryScreen />', () => {
     await wrapper.update()
     const instance = await wrapper.instance()
     await instance.componentDidMount()
-    expect(wrapper.state('balance')).toEqual(1000)
+    setTimeout(() => {
+      expect(wrapper.state('balance')).toEqual(1000)
+    })
   })
 })

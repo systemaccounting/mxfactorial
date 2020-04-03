@@ -1,4 +1,4 @@
-import { renderProps } from '../withTransactions'
+import { renderProps } from '../withRequests'
 
 const input = [
   {
