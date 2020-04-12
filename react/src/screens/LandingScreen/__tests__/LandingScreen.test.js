@@ -47,25 +47,21 @@ describe('<Landing Screen />', () => {
     expect(wrapper.state('errors')).toEqual(error)
   })
 
-  it('handles account creation', () => {
+  it('handles account creation', async () => {
     const data = {
       account: 'x',
       password: 'x'
     }
-    const createAccountMock = promiseToResolve(data)
-    const replaceMock = jest.fn()
-    const wrapper = shallow(
-      <LandingScreen
-        history={{ replace: replaceMock }}
-        signUp={createAccountMock}
-      />
-    )
+    const createAccountMock = jest.fn(params => Promise.resolve(params))
+    const wrapper = shallow(<LandingScreen signUp={createAccountMock} />)
 
     const instance = wrapper.instance()
 
-    instance
-      .handleSignUp([data])
-      .then(() => expect(replaceMock).toHaveBeenCalled())
+    await instance.handleSignUp(data)
+    expect(createAccountMock).toHaveBeenCalledWith(
+      { username: data.account, password: data.password },
+      {}
+    )
   })
 
   it('errors on account creation', async () => {
@@ -84,7 +80,6 @@ describe('<Landing Screen />', () => {
     )
 
     const instance = wrapper.instance()
-    const spy = jest.spyOn(instance, 'showErrors')
     await instance.handleSignUp(data)
     expect(wrapper.state('errors')).toEqual(error)
   })
