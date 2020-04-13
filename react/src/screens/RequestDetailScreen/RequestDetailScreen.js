@@ -209,7 +209,7 @@ RequestDetailScreen.propTypes = {
   requestTime: PropTypes.string,
   expirationTime: PropTypes.string,
   requestingAccount: PropTypes.string,
-  requestTotal: PropTypes.string,
+  requestTotal: PropTypes.number,
   isRequestLoading: PropTypes.bool,
   transactionId: PropTypes.string,
   ruleInstanceIds: PropTypes.arrayOf(PropTypes.string),
