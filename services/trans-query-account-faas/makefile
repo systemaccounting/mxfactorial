@@ -4,7 +4,6 @@ ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 BINARY_NAME = index.handler
 
-.PHONY: test-env-arg
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)

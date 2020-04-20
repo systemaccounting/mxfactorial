@@ -3,7 +3,6 @@ APP_NAME = delete-faker
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 
-.PHONY: test-env-arg
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
@@ -11,26 +10,21 @@ endif
 
 ###################### clean ######################
 
-.PHONY: clean
 clean:
 		rm -f $(APP_NAME)-src.zip
 
 ###################### build ######################
 
-.PHONY: zip clean
 zip: clean
 		zip -r $(APP_NAME)-src.zip index.js
 
 # aliases zip target
-.PHONY: src zip
 src: zip
 
 ###################### deploy ######################
 
-.PHONY: deploy zip deloy-only
 deploy: zip deloy-only
 
-.PHONY: deploy-only test-env-arg
 deploy-only: test-env-arg
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -40,10 +34,8 @@ deploy-only: test-env-arg
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed from s3 ETag: $$ETAG"
 
-.PHONY: deploy-all deploy
 deploy-all: deploy
 
-.PHONY: initial-deploy test-env-arg zip
 initial-deploy: test-env-arg zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \

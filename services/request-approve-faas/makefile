@@ -8,7 +8,6 @@ PGDATABASE PGUSER PGPASSWORD PGHOST PGPORT \
 REQUEST_CREATE_LAMBDA_ARN REQUEST_APPROVE_LAMBDA_ARN \
 NOTIFICATIONS_TABLE_NAME
 
-.PHONY: test-env-arg
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
@@ -16,41 +15,32 @@ endif
 
 ###################### clean ######################
 
-.PHONY: clean-deps
 clean-deps:
 		rm -rf node_modules
 
-.PHONY: clean-env
 clean-env:
 		rm -f .env
 
-.PHONY: clean-layer
 clean-artifact:
 		rm -f $(APP_NAME)-layer.zip
 
-.PHONY: clean-src
 clean-src:
 		rm -f $(APP_NAME)-src.zip
 
-.PHONY: clean-artifact clean-layer clean-src
 clean-artifact:  clean-layer clean-src
 
-.PHONY: clean clean-deps clean-env clean-artifact
 clean: clean-deps clean-env clean-artifact
 
 ###################### dependencies ######################
 
-.PHONY: install clean-deps
 install: clean-deps
 		yarn install
 
-.PHONY: install-prod clean-deps
 install-prod: clean-deps
 		yarn install --prod
 
 ###################### secrets ######################
 
-.PHONY: get-secrets retrieve-each-secret
 get-secrets: retrieve-each-secret
 	@if [ ! -s $(DIR)/.env ]; then \
 		rm $(DIR)/.env; \
@@ -59,7 +49,6 @@ get-secrets: retrieve-each-secret
 		echo 'env vars retrieved'; \
 	fi
 
-.PHONY: retrieve-each-secret test-env-arg clean-env $(ENV_VARS)
 retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
@@ -76,32 +65,25 @@ $(ENV_VARS):
 
 ###################### build and test ######################
 
-.PHONY: test test-env-arg test-unit
 test: test-env-arg test-unit
 
-.PHONY: test-unit test-env-arg install
 test-unit: test-env-arg install
 		yarn test
 
-.PHONY: test-integration deploy get-secrets
 test-integration: deploy get-secrets
 		@yarn install; \
 		yarn test:integration
 
 # aliases test target which creates tested artifact
-.PHONY: src test
 src: test
 
  # aliases test target to create development environment
-.PHONY: dev test
 dev: test
 
-.PHONY: zip clean-artifact
 zip: clean-artifact
 		zip -r $(APP_NAME)-src.zip index.js package.json src/* \
 			--exclude "*.test.*"
 
-.PHONY: layer install-prod
 layer: install-prod
 		mkdir nodejs
 		cp -r node_modules nodejs/node_modules
@@ -110,7 +92,6 @@ layer: install-prod
 
 ###################### deploy ######################
 
-.PHONY: deploy zip
 deploy: zip # lambda layer NOT deployed. use deploy-all
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -120,7 +101,6 @@ deploy: zip # lambda layer NOT deployed. use deploy-all
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-untested test-env-arg clean install zip
 deploy-untested: test-env-arg clean install zip # lambda layer NOT deployed. use deploy-all
 ifeq ($(ENV), prod)
 		$(error no untested deployments to prod)
@@ -133,7 +113,6 @@ endif
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-layer test-env-arg layer
 deploy-layer: test-env-arg layer
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -143,10 +122,8 @@ deploy-layer: test-env-arg layer
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-all deploy-layer deploy
 deploy-all: deploy-layer deploy # layer and source
 
-.PHONY: initial-deploy test-env-arg publish-layer zip
 initial-deploy: test-env-arg publish-layer zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -158,7 +135,6 @@ initial-deploy: test-env-arg publish-layer zip
 
 ###################### create resource ######################
 
-.PHONY: publish-layer test-env-arg deploy-layer
 publish-layer: test-env-arg deploy-layer
 		@LAYER_VERSION=$$(aws lambda publish-layer-version \
 			--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
@@ -171,7 +147,6 @@ publish-layer: test-env-arg deploy-layer
 
 ###################### warm up ######################
 
-.PHONY: warm-up test-env-arg
 warm-up: test-env-arg
 		@aws lambda invoke \
 			--region $(REGION) \

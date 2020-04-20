@@ -4,13 +4,11 @@
 
 CMD = initial-deploy
 
-.PHONY: test-env-arg
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
-.PHONY: deploy test-env-arg
 deploy: test-env-arg
 	@$(MAKE) -C services/graphql-faas ENV=$(ENV) $(CMD)
 	@$(MAKE) -C services/trans-query-account-faas ENV=$(ENV) $(CMD)

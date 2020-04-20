@@ -8,7 +8,6 @@ WSS_CLIENT_URL
 TEST_ACCOUNTS = TEST_ACCOUNT_01 TEST_ACCOUNT_02 TEST_ACCOUNT_03
 MANUAL_ACCOUNTS = JoeSmith Person1 Person2
 
-.PHONY: test-env-arg
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
@@ -16,30 +15,24 @@ endif
 
 ###################### clean ######################
 
-.PHONY: clean-deps
 clean-deps:
 		rm -rf node_modules
 
-.PHONY: clean-env
 clean-env:
 		rm -f .env
 
-.PHONY: clean-artifact
 clean-artifact:
 		rm -rf build
 
-.PHONY: clean clean-deps clean-env clean-artifact
 clean: clean-deps clean-env clean-artifact
 
 ###################### dependencies ######################
 
-.PHONY: install clean-deps
 install: clean-deps
 		yarn install
 
 ###################### secrets ######################
 
-.PHONY: get-secrets retrieve-each-secret
 get-secrets: retrieve-each-secret
 	@if [ ! -s $(DIR)/.env ]; then \
 		rm $(DIR)/.env; \
@@ -48,7 +41,6 @@ get-secrets: retrieve-each-secret
 		echo 'env vars retrieved'; \
 	fi
 
-.PHONY: retrieve-each-secret test-env-arg clean-env $(ENV_VARS)
 retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
@@ -77,40 +69,32 @@ $(ENV_VARS):
 
 ###################### start ######################
 
-.PHONY: start get-secrets install
 start: get-secrets install
 		yarn start:env
 
 ###################### build and test ######################
 
-.PHONY: test-env-arg test test-unit test-e2e
 test: test-env-arg install test-unit test-e2e
 
-.PHONY: test-unit
 test-unit:
 		yarn test
 
-.PHONY: test-e2e test-env-arg get-secrets warm-up
 test-e2e: test-env-arg get-secrets warm-up
 		yarn test:e2e-public; \
 		yarn test:e2e-private
 
-.PHONY: e2e-now
 e2e-now:
 		yarn test:e2e-public; \
 		yarn test:e2e-private
 
-.PHONY: build clean-env test-env-arg get-secrets
 build: clean-env test-env-arg get-secrets
 		yarn build:env
 
 # create development environment
-.PHONY: dev build
 dev: build
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg
 deploy: test-env-arg
 		@CACHE_ID=$$(aws cloudfront list-distributions --output text \
 			--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`mxfactorial-react-'$(ENV)'`][].Id'); \
@@ -127,7 +111,6 @@ ifeq ($(ENV), prod)
 		--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
 endif
 
-.PHONY: deploy-untested
 deploy-untested:
 ifeq ($(ENV), prod)
 		$(error no untested deployments to prod)
@@ -140,12 +123,10 @@ endif
 		aws cloudfront create-invalidation --distribution-id $$CACHE_ID \
 			--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
 
-.PHONY: deploy-all deploy-layer deploy
 deploy-all: deploy-layer deploy
 
 ###################### create e2e test and manual accounts ######################
 
-.PHONY: create-accounts test-env-arg get-secrets
 create-accounts: test-env-arg get-secrets
 		@[ -f .env ] && . .env; \
 		for account in $(TEST_ACCOUNTS); do \
@@ -163,7 +144,6 @@ create-accounts: test-env-arg get-secrets
 				--password password; \
 		done
 
-.PHONY: delete-accounts test-env-arg get-secrets
 delete-accounts: test-env-arg get-secrets
 		@[ -f .env ] && . .env; \
 		for account in $(TEST_ACCOUNTS); do \
@@ -182,6 +162,5 @@ delete-accounts: test-env-arg get-secrets
 
 ###################### warm up services ######################
 
-.PHONY: warm-up test-env-arg $(SERVICES_DIRS)
 warm-up: test-env-arg $(SERVICES_DIRS)
 		@$(MAKE) -C ../services ENV=$(ENV) warm-up

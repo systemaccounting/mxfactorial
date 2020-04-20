@@ -8,7 +8,6 @@ REGION = us-east-1
 ENV_VARS := AWS_REGION RULE_INSTANCE_TABLE_NAME SECRET \
 CLIENT_ID POOL_ID GRAPHQL_API NINE_PERCENT_CA_SALES_TAX
 
-.PHONY: test-env-arg
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
@@ -16,34 +15,27 @@ endif
 
 ###################### clean ######################
 
-.PHONY: clean-deps
 clean-deps:
 		rm -rf node_modules
 
-.PHONY: clean-env
 clean-env:
 		rm -f .env
 
-.PHONY: clean-artifact
 clean-artifact:
 		rm -f $(APP_NAME)-src.zip
 
-.PHONY: clean clean-deps clean-env clean-artifact
 clean: clean-deps clean-env clean-artifact
 
 ###################### dependencies ######################
 
-.PHONY: install clean-deps
 install: clean-deps
 		yarn install
 
-.PHONY: install-prod clean-deps
 install-prod: clean-deps
 		yarn install --prod
 
 ###################### secrets ######################
 
-.PHONY: get-secrets retrieve-each-secret
 get-secrets: retrieve-each-secret
 	@if [ ! -s $(DIR)/.env ]; then \
 		rm $(DIR)/.env; \
@@ -52,7 +44,6 @@ get-secrets: retrieve-each-secret
 		echo 'env vars retrieved'; \
 	fi
 
-.PHONY: retrieve-each-secret test-env-arg clean-env $(ENV_VARS)
 retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
@@ -68,38 +59,30 @@ $(ENV_VARS):
 
 ###################### build and test ######################
 
-.PHONY: test test-env-arg test-unit
 test: test-env-arg test-unit
 
-.PHONY: test-unit test-env-arg get-secrets install
 test-unit: test-env-arg get-secrets install
 		yarn test
 
-.PHONY: test-integration get-secrets deploy
 test-integration: get-secrets deploy
 		@yarn install; \
 		yarn test:integration
 
 # aliases test target which creates tested artifact
-.PHONY: src test
 src: test
 
  # aliases test target to create development environment
-.PHONY: dev test
 dev: test
 
-.PHONY: zip clean-artifact
 zip: clean-artifact
 		zip -r $(APP_NAME)-src.zip index.js package.json src/* \
 			 --exclude "*.test.*"
 
-.PHONY: layer
 layer:
 		@echo "$(APP_NAME)-$(APP_TYPE) has few deps. not building layer"
 
 ###################### deploy ######################
 
-.PHONY: deploy test-env-arg install-prod zip
 deploy: test-env-arg install-prod zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -109,7 +92,6 @@ deploy: test-env-arg install-prod zip
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-untested test-env-arg install-prod zip
 deploy-untested: test-env-arg install-prod zip
 ifeq ($(ENV), prod)
 		$(error no untested deployments to prod)
@@ -122,7 +104,6 @@ endif
 			--output=text | sed 's/"//g'); \
 		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-layer test-env-arg layer
 deploy-layer: test-env-arg layer
 #		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -132,10 +113,8 @@ deploy-layer: test-env-arg layer
 			--output=text | sed 's/"//g'); \
 #		echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
 
-.PHONY: deploy-all deploy
 deploy-all: deploy # no layer currently
 
-.PHONY: initial-deploy test-env-arg zip
 initial-deploy: test-env-arg zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
@@ -148,7 +127,6 @@ initial-deploy: test-env-arg zip
 
 ###################### create resource ######################
 
-.PHONY: publish-layer deploy-layer
 publish-layer: deploy-layer
 #		@LAYER_VERSION=$$(aws lambda publish-layer-version \
 			--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
@@ -161,13 +139,11 @@ publish-layer: deploy-layer
 
 # deprecated. rule init'd from terraform:
 # infrastructure/terraform/aws/modules/environment/dynamodb.tf
-# .PHONY: init-rules get-secrets
-# init-rules: get-secrets
+# # init-rules: get-secrets
 # 		@yarn install && yarn init:rules
 
 ###################### warm up ######################
 
-.PHONY: warm-up test-env-arg
 warm-up: test-env-arg
 		@aws lambda invoke \
 			--region $(REGION) \
