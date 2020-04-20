@@ -27,7 +27,7 @@ clean-artifact:
 clean-src:
 		rm -f $(APP_NAME)-src.zip
 
-clean-artifact:  clean-layer clean-src
+clean-artifact: clean-src
 
 clean: clean-deps clean-env clean-artifact
 
