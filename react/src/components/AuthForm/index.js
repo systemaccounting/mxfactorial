@@ -1,8 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
-import { validate } from 'jsonschema'
-import * as R from 'ramda'
+import { Form, Field } from 'react-final-form'
 
 import { noop } from 'utils'
 import Input from './Input'
@@ -31,6 +30,8 @@ export const ClearButtonWrapper = styled.div`
   justify-content: flex-start;
 `
 
+const required = value => (value ? undefined : 'Required')
+
 class AuthForm extends React.Component {
   static propTypes = {
     schema: PropTypes.object.isRequired,
@@ -42,6 +43,7 @@ class AuthForm extends React.Component {
     submitOnEnter: PropTypes.bool,
     disabled: PropTypes.bool,
     theme: PropTypes.string,
+    onSubmitSignIn: PropTypes.func,
     namePrefix: PropTypes.string
   }
 
@@ -52,138 +54,38 @@ class AuthForm extends React.Component {
     onSubmit: null,
     clearButton: () => <div />,
     onClear: () => {},
-    onInputBlur: () => {},
+    onSubmitSignIn: () => {},
     namePrefix: null
   }
 
-  validationSchema = null
-  inputs = null
+  inputs = []
 
   constructor(props) {
     super(props)
     const { properties } = props.schema
-    const { values } = props
     this.inputs = properties
       ? Object.keys(properties).map(key => {
-          const { inputType, value, placeholder } = properties[key]
+          const {
+            inputType,
+            value,
+            placeholder,
+            required = false
+          } = properties[key]
           return {
             type: inputType,
             name: key,
             value,
-            placeholder
+            placeholder,
+            required
           }
         })
       : []
-
-    const currentValues = R.pipe(
-      R.keys,
-      R.map(key => ({ [key]: properties[key].value })),
-      R.mergeAll
-    )(properties)
-
-    this.state = {
-      values: R.merge(currentValues)(values),
-      isValid: false,
-      isClear: true,
-      focused: false
-    }
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { values } = nextProps
-    const { focused } = prevState
-    return values && !focused ? { values } : null
-  }
-
-  clearValues = () =>
-    this.setState(
-      {
-        values: R.pipe(
-          R.keys,
-          R.map(key => ({ [key]: '' })),
-          R.mergeAll
-        )(this.props.schema.properties),
-        isClear: true
-      },
-      () => this.validateInputs()
-    )
-
-  updateValue = key => e => {
-    const newValue = e.target.value
-    this.setState(
-      state => ({
-        isClear: false,
-        values: { ...state.values, [key]: newValue }
-      }),
-      () => this.validateInputs()
-    )
-  }
-
-  validateInputs = () => {
-    const { values, isValid } = this.state
-    const result = validate(
-      R.pipe(R.reject(R.isEmpty))(values),
-      this.props.schema
-    )
-    this.handleValuesUpdate()
-    if (isValid !== result.valid) {
-      this.setState({ isValid: result.valid })
-    }
-  }
-
-  handleValuesUpdate = () => {
-    const { onValuesUpdate } = this.props
-    const { values } = this.state
-    onValuesUpdate(values)
-  }
-
-  handleSubmitSignIn = () => {
-    const { onSubmitSignIn } = this.props
-    const { isValid, values } = this.state
-    this.clearValues()
-    if (isValid) {
-      onSubmitSignIn(values)
-    }
-  }
-
-  handleSubmitCreateAccount = async () => {
+  handleSubmitCreateAccount = async values => {
     const { onSubmitCreateAccount, onSubmitSignIn } = this.props
-    const { isValid, values } = this.state
-    this.clearValues()
-    if (isValid) {
-      await onSubmitCreateAccount(values)
-      await onSubmitSignIn(values)
-    }
-  }
-
-  handleFocus = () => this.setState({ focused: true })
-
-  handleBlur = () => {
-    this.setState({ focused: false })
-    this.props.onInputBlur()
-  }
-
-  handleClear = () => {
-    const { isClear } = this.state
-    const {
-      schema: { properties },
-      onValuesUpdate,
-      onClear
-    } = this.props
-    this.setState(
-      {
-        isClear: true,
-        values: R.pipe(
-          R.keys,
-          R.map(key => ({ [key]: '' })),
-          R.mergeAll
-        )(properties)
-      },
-      () => {
-        onValuesUpdate(this.state.values)
-        onClear(isClear)
-      }
-    )
+    await onSubmitCreateAccount(values)
+    await onSubmitSignIn(values)
   }
 
   renderInputs = () => {
@@ -195,73 +97,81 @@ class AuthForm extends React.Component {
         key: `input-key-${data.name}`,
         name: `${prefix}${data.name}`,
         placeholder: data.placeholder,
-        value: this.state.values[data.name],
-        onChange: this.updateValue(data.name),
-        onFocus: this.handleFocus,
-        onBlur: this.handleBlur,
-        onKeyPress: this.keyDown
+        validate: data.required ? required : null,
+        onFocus: this.handleFocus
       }
+
       switch (data.type) {
         case 'text':
-          return <Input {...props} />
         case 'password':
-          return <Input {...props} type="password" />
+          return (
+            <Field key={data.name} type={data.type} {...props}>
+              {inputProps => <Input {...inputProps.input} />}
+            </Field>
+          )
         case 'date':
-          return <DateInput {...props} type="date" />
+          return (
+            <Field key={data.name} type={data.type} {...props}>
+              {inputProps => <DateInput {...inputProps.input} type="date" />}
+            </Field>
+          )
         default:
           return null
       }
     })
   }
-  render() {
-    const { isValid } = this.state
-    const {
-      disabled,
-      theme,
-      schema,
-      onSubmitSignIn,
-      onSubmitCreateAccount,
-      clearButton: ClearButton
-    } = this.props
+
+  renderForm = ({ handleSubmit, valid, reset, values }) => {
+    const { theme, schema, clearButton: ClearButton } = this.props
+
     return (
-      <FormWrapper
-        onSubmit={e => {
-          this.handleSubmitSignIn()
-          e.preventDefault()
-        }}
-      >
+      // Reset form on submit
+      <form onSubmit={handleSubmit}>
         <FormContainer>
           <ClearButtonWrapper>
-            <ClearButton
-              data-id={`${schema.id}-clear`}
-              onClick={this.handleClear}
-            />
+            <ClearButton data-id={`${schema.id}-clear`} onClick={reset} />
           </ClearButtonWrapper>
           {this.renderInputs()}
-          {!disabled && onSubmitSignIn && onSubmitCreateAccount ? (
-            <React.Fragment>
-              <Button
-                data-id="signInButton"
-                theme={theme}
-                disabled={!isValid}
-                onClick={this.handleSubmitSignIn}
-                type="submit"
-              >
-                Sign In
-              </Button>
-              <Button
-                data-id="createAccountButton"
-                theme="createAccount"
-                disabled={!isValid}
-                type="button"
-                onClick={this.handleSubmitCreateAccount}
-              >
-                Create
-              </Button>
-            </React.Fragment>
-          ) : null}
+          <Button
+            data-id="signInButton"
+            theme={theme}
+            disabled={!valid}
+            type="submit"
+          >
+            Sign In
+          </Button>
+          <Button
+            data-id="createAccountButton"
+            theme="createAccount"
+            disabled={!valid}
+            type="button"
+            onClick={() => this.handleSubmitCreateAccount(values).then(reset)}
+          >
+            Create
+          </Button>
         </FormContainer>
-      </FormWrapper>
+      </form>
+    )
+  }
+
+  render() {
+    const { schema, onSubmitSignIn, namePrefix } = this.props
+
+    // Extract initial values from schema property
+    const initialValues = schema.properties
+      ? Object.keys(schema.properties).reduce((result, key) => {
+          result[namePrefix ? `${namePrefix}-${key}` : key] =
+            schema.properties[key].value
+          return result
+        }, {})
+      : {}
+
+    return (
+      <Form
+        initialValues={initialValues}
+        onSubmit={onSubmitSignIn}
+        render={this.renderForm}
+      />
     )
   }
 }
