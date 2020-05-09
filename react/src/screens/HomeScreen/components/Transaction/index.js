@@ -1,6 +1,6 @@
 import React from 'react'
 import cx from 'classnames'
-import { Form as FinalForm, Field } from 'react-final-form'
+import { Form as FinalForm } from 'react-final-form'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
 
@@ -204,7 +204,7 @@ class Transaction extends React.Component {
     }))
   }
 
-  onSubmit = values => console.info(values)
+  onSubmit = () => this.requestTransactions()
 
   get rules() {
     const { rules } = this.state
@@ -243,10 +243,10 @@ class Transaction extends React.Component {
     )([...transactions, draftTransaction, ...rules])
   }
 
-  renderForm = () => {
+  renderForm = ({ handleSubmit }) => {
     const { type, recipient, hideForm, transactions } = this.state
     return (
-      <div ref={this.transactionWrapperRef}>
+      <form onSubmit={handleSubmit} ref={this.transactionWrapperRef}>
         <Input
           type="text"
           name="recipient"
@@ -303,14 +303,14 @@ class Transaction extends React.Component {
             <Button
               data-id={type}
               theme={type === 'credit' ? 'info' : 'success'}
-              onClick={this.requestTransactions}
+              type="submit"
             >
               {type === 'credit' ? 'Request' : 'Transact'}
             </Button>
           </div>
         </div>
         {this.rules}
-      </div>
+      </form>
     )
   }
 
