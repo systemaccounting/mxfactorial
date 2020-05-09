@@ -19,7 +19,7 @@ const RemoveButtonStyled = styled.button`
 `
 
 const RemoveButton = props => (
-  <RemoveButtonStyled {...props}>
+  <RemoveButtonStyled {...props} type="button">
     <RemoveIcon width={12} height={12} />
   </RemoveButtonStyled>
 )

@@ -10,6 +10,7 @@ const TypeSwitch = ({ onSwitch, active }) => (
     <React.Fragment>
       <Button
         name="debit"
+        type="button"
         data-active={active === 'debit'}
         inactive={active !== 'debit'}
         onClick={onSwitch('debit')}
@@ -18,6 +19,7 @@ const TypeSwitch = ({ onSwitch, active }) => (
       </Button>
       <Button
         name="credit"
+        type="button"
         data-active={active === 'credit'}
         inactive={active !== 'credit'}
         onClick={onSwitch('credit')}
