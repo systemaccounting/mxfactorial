@@ -1,10 +1,8 @@
 import React from 'react'
 import { Form, Field } from 'react-final-form'
-import styled from 'styled-components'
 import AuthForm from '../index'
-import { shallow, mount } from 'enzyme'
+import { shallow } from 'enzyme'
 import Input from '../Input'
-import DateInput from '../DateInput'
 
 const formData = {
   id: 'login',
@@ -115,7 +113,7 @@ describe('<AuthForm />', () => {
     ).toHaveLength(1)
   })
 
-  xit('handles sign in input change and update', () => {
+  it('handles sign in input change and update', () => {
     const onSubmitSignInMock = jest.fn()
     const filledForm = {
       ...formData,

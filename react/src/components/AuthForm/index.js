@@ -82,6 +82,8 @@ class AuthForm extends React.Component {
       : []
   }
 
+  onSubmit = values => this.props.onSubmitSignIn(values)
+
   handleSubmitCreateAccount = async values => {
     const { onSubmitCreateAccount, onSubmitSignIn } = this.props
     await onSubmitCreateAccount(values)
@@ -169,7 +171,7 @@ class AuthForm extends React.Component {
     return (
       <Form
         initialValues={initialValues}
-        onSubmit={onSubmitSignIn}
+        onSubmit={this.onSubmit}
         render={this.renderForm}
       />
     )
