@@ -1,5 +1,6 @@
 import React from 'react'
 import cx from 'classnames'
+import { Form as FinalForm, Field } from 'react-final-form'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
 
@@ -93,22 +94,16 @@ class Transaction extends React.Component {
   }
 
   handleDeleteTransaction = uuid => () => {
-    this.setState(
-      state => {
-        const newTransactions = state.transactions.filter(
-          transaction => transaction.uuid !== uuid
-        )
-        const allTransactions = [...newTransactions, state.draftTransaction]
-        return {
-          rules: recalculateRules(allTransactions, state.rules),
-          transactions: newTransactions
-        }
-      },
-      R.pipe(
-        this.handleFormVisibility,
-        this.fetchRules
+    this.setState(state => {
+      const newTransactions = state.transactions.filter(
+        transaction => transaction.uuid !== uuid
       )
-    )
+      const allTransactions = [...newTransactions, state.draftTransaction]
+      return {
+        rules: recalculateRules(allTransactions, state.rules),
+        transactions: newTransactions
+      }
+    }, R.pipe(this.handleFormVisibility, this.fetchRules))
   }
 
   handleInputBlur = () => {
@@ -164,7 +159,7 @@ class Transaction extends React.Component {
       // Resolve only the last request promise
       if (promise === this.fetchRulesRequest) {
         const rules = data.rules.filter(item => item.rule_instance_id)
-        rules.map(item => item.uuid = v4()) // add key prop
+        rules.map(item => (item.uuid = v4())) // add key prop
         this.setState({ rules, isFetchingRules: false })
       }
     })
@@ -209,6 +204,8 @@ class Transaction extends React.Component {
     }))
   }
 
+  onSubmit = values => console.info(values)
+
   get rules() {
     const { rules } = this.state
     if (!rules) {
@@ -225,7 +222,7 @@ class Transaction extends React.Component {
               editable={false}
             />
           </div>
-          ))}
+        ))}
       </div>
     )
   }
@@ -246,7 +243,7 @@ class Transaction extends React.Component {
     )([...transactions, draftTransaction, ...rules])
   }
 
-  render() {
+  renderForm = () => {
     const { type, recipient, hideForm, transactions } = this.state
     return (
       <div ref={this.transactionWrapperRef}>
@@ -315,6 +312,10 @@ class Transaction extends React.Component {
         {this.rules}
       </div>
     )
+  }
+
+  render() {
+    return <FinalForm onSubmit={this.onSubmit} render={this.renderForm} />
   }
 }
 

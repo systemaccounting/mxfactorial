@@ -157,7 +157,7 @@ class AuthForm extends React.Component {
   }
 
   render() {
-    const { schema, onSubmitSignIn, namePrefix } = this.props
+    const { schema, namePrefix } = this.props
 
     // Extract initial values from schema property
     const initialValues = schema.properties
