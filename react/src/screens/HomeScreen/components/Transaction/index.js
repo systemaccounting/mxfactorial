@@ -237,7 +237,8 @@ class Transaction extends React.Component {
   }
 
   render() {
-    const { type, recipient, hideForm, transactions } = this.state
+    const { values } = this.props
+    const { recipient, hideForm, transactions } = this.state
     return (
       <form
         onSubmit={this.requestTransactions}
@@ -302,11 +303,11 @@ class Transaction extends React.Component {
               </Button>
             )}
             <Button
-              data-id={type}
-              theme={type === 'credit' ? 'info' : 'success'}
+              data-id={values.type}
+              theme={values.type === 'credit' ? 'info' : 'success'}
               type="submit"
             >
-              {type === 'credit' ? 'Request' : 'Transact'}
+              {values.type === 'credit' ? 'Request' : 'Transact'}
             </Button>
           </div>
         </div>
