@@ -2,6 +2,8 @@ import React from 'react'
 import cx from 'classnames'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
+import { Field } from 'react-final-form'
+import { OnChange } from 'react-final-form-listeners'
 
 import TransactionItem from './TransactionItem'
 import Form from 'components/Form'
@@ -10,7 +12,7 @@ import LabelWithValue from 'components/LabelWithValue'
 import AddIcon from 'icons/AddIcon'
 
 import Button from 'components/Button'
-import TypeSwitch from './TypeSwitch'
+import { TypeSwitchField } from './TypeSwitch'
 
 import transactionSchema from './transactionSchema'
 import RemoveButton from './RemoveButton'
@@ -49,14 +51,6 @@ class Transaction extends React.Component {
         block: 'end'
       })
     }
-  }
-
-  handleSwitchType = type => () => {
-    const { recipient } = this.state
-    const { username } = this.props
-    this.setState({ type }, () =>
-      this.updateTransactions(type, username, recipient)
-    )
   }
 
   handleAddTransaction = data => {
@@ -110,10 +104,7 @@ class Transaction extends React.Component {
   }
 
   handleRecipientChange = e => {
-    const { type } = this.state
-    const { username } = this.state
-    this.setState({ recipient: e.target.value })
-    this.updateTransactions(type, username, e.target.value)
+    this.setState({ recipient: e.target.value }, this.updateTransactions)
   }
 
   handleFormClear = isClear => {
@@ -166,7 +157,7 @@ class Transaction extends React.Component {
 
   requestTransactions = e => {
     const { form } = this.props
-    const { type, rules, transactions, draftTransaction } = this.state
+    const { rules, transactions, draftTransaction } = this.state
     const transactionItems = [...transactions, draftTransaction, ...rules].map(
       item => {
         // omit __typename to avoid GraphQL errors & client-side uuid
@@ -175,14 +166,15 @@ class Transaction extends React.Component {
       }
     )
     // TODO: remove when migration to final-form is done
-    form.change('type', type)
     form.change('items', transactionItems)
     return this.props.handleSubmit(e)
   }
 
-  updateTransactions = (type, username, recipient) => {
-    const debitor = type === 'credit' ? recipient : username
-    const creditor = type === 'debit' ? recipient : username
+  updateTransactions = () => {
+    const { recipient } = this.state
+    const { values, username } = this.props
+    const debitor = values.type === 'credit' ? recipient : username
+    const creditor = values.type === 'debit' ? recipient : username
     this.setState(prevState => ({
       draftTransaction: {
         ...prevState.draftTransaction,
@@ -265,7 +257,12 @@ class Transaction extends React.Component {
             value={this.total.toFixed(3)}
           />
         </div>
-        <TypeSwitch onSwitch={this.handleSwitchType} active={this.state.type} />
+        <Field name="type" component={TypeSwitchField} />
+        <OnChange name="type">
+          {() => {
+            this.updateTransactions()
+          }}
+        </OnChange>
         <div data-id="user-generated-items">
           {transactions.map((transaction, index) => (
             <React.Fragment key={`transaction-${index}`}>
@@ -317,6 +314,10 @@ class Transaction extends React.Component {
       </form>
     )
   }
+}
+
+Transaction.defaultProps = {
+  values: { type: 'credit', items: [] }
 }
 
 export default Transaction

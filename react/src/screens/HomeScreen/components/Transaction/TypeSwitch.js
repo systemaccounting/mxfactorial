@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import ButtonGroup from 'components/ButtonGroup'
 import Button from 'components/Button'
@@ -29,5 +29,10 @@ const TypeSwitch = ({ onSwitch, active }) => (
     </React.Fragment>
   </ButtonGroup>
 )
+
+export const TypeSwitchField = ({ input }) => {
+  const onChange = useCallback(type => () => input.onChange(type), [input])
+  return <TypeSwitch active={input.value} onSwitch={onChange} />
+}
 
 export default TypeSwitch

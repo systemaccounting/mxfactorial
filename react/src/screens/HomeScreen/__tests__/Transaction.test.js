@@ -1,5 +1,6 @@
 import React from 'react'
 import { shallow } from 'enzyme'
+import { Form as FinalForm, Field } from 'react-final-form'
 
 import Form from 'components/Form'
 import Button from 'components/Button'
@@ -16,9 +17,9 @@ describe('<Transaction />', () => {
     expect(wrapper.exists()).toBeTruthy()
   })
 
-  it('renders typeSwitch', () => {
+  it('renders type field', () => {
     const wrapper = shallow(<Transaction />)
-    expect(wrapper.find('TypeSwitch')).toHaveLength(1)
+    expect(wrapper.find(Field).find({ name: 'type' })).toHaveLength(1)
   })
 
   it('switches transaction type', () => {})
@@ -118,15 +119,6 @@ describe('<Transaction />', () => {
       quantity: 1
     })
     expect(instance.total).toEqual(220)
-  })
-
-  it('handles switch type', () => {
-    const wrapper = shallow(<Transaction />)
-    const instance = wrapper.instance()
-    expect(wrapper.state('type')).toEqual('credit')
-    instance.handleSwitchType('debit')()
-    wrapper.update()
-    expect(wrapper.state('type')).toEqual('debit')
   })
 
   it('handles draft transaction', () => {
@@ -307,7 +299,8 @@ describe('<Transaction />', () => {
       expect(transaction.creditor_approval_time).toBeUndefined()
     })
 
-    instance.updateTransactions('debit', USERNAME, RECIPIENT)
+    wrapper.setProps({ values: { type: 'debit' } })
+    instance.updateTransactions()
     wrapper.state('transactions').forEach(transaction => {
       expect(transaction.creditor).toEqual(RECIPIENT)
       expect(transaction.debitor).toEqual(USERNAME)
@@ -315,7 +308,8 @@ describe('<Transaction />', () => {
       expect(transaction.creditor_approval_time).toBeUndefined()
     })
 
-    instance.updateTransactions('credit', USERNAME, RECIPIENT)
+    wrapper.setProps({ values: { type: 'credit' } })
+    instance.updateTransactions()
     wrapper.state('transactions').forEach(transaction => {
       expect(transaction.debitor).toEqual(RECIPIENT)
       expect(transaction.creditor).toEqual(USERNAME)

@@ -56,6 +56,7 @@ class HomeScreen extends Component {
           component={Transaction}
           username={user.username}
           fetchTransactions={this.props.fetchTransactions}
+          initialValues={{ type: 'credit', items: [] }}
           onSubmit={this.onRequestTransactions}
           fetchRules={this.fetchRules}
         />
