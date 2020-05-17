@@ -74,7 +74,7 @@ describe('<Transaction />', () => {
     wrapper.setState({ transactions: [transaction] })
     expect(wrapper.find(Button).find({ ['data-id']: 'credit' })).toHaveLength(1)
     expect(wrapper.find(Button).find({ ['data-id']: 'debit' })).toHaveLength(0)
-    wrapper.setState({ type: 'debit' })
+    wrapper.setProps({ values: { type: 'debit' } })
     expect(wrapper.find(Button).find({ ['data-id']: 'credit' })).toHaveLength(0)
     expect(wrapper.find(Button).find({ ['data-id']: 'debit' })).toHaveLength(1)
   })
