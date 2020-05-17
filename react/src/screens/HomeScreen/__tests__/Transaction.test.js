@@ -18,7 +18,7 @@ describe('<Transaction />', () => {
 
   it('renders typeSwitch', () => {
     const wrapper = shallow(<Transaction />)
-    expect(wrapper.dive().find('TypeSwitch')).toHaveLength(1)
+    expect(wrapper.find('TypeSwitch')).toHaveLength(1)
   })
 
   it('switches transaction type', () => {})
@@ -41,7 +41,7 @@ describe('<Transaction />', () => {
     ]
     wrapper.setState({ transactions })
     wrapper.update()
-    expect(wrapper.dive().find('TransactionItem')).toHaveLength(2)
+    expect(wrapper.find('TransactionItem')).toHaveLength(2)
   })
 
   it('handles add transaction item', () => {
@@ -69,57 +69,26 @@ describe('<Transaction />', () => {
     }
     const wrapper = shallow(<Transaction />)
 
-    expect(
-      wrapper
-        .dive()
-        .find(Button)
-        .find({ ['data-id']: 'credit' })
-    ).toHaveLength(1)
+    expect(wrapper.find(Button).find({ ['data-id']: 'credit' })).toHaveLength(1)
     wrapper.setState({ transactions: [transaction] })
-    expect(
-      wrapper
-        .dive()
-        .find(Button)
-        .find({ ['data-id']: 'credit' })
-    ).toHaveLength(1)
-    expect(
-      wrapper
-        .dive()
-        .find(Button)
-        .find({ ['data-id']: 'debit' })
-    ).toHaveLength(0)
+    expect(wrapper.find(Button).find({ ['data-id']: 'credit' })).toHaveLength(1)
+    expect(wrapper.find(Button).find({ ['data-id']: 'debit' })).toHaveLength(0)
     wrapper.setState({ type: 'debit' })
-    expect(
-      wrapper
-        .dive()
-        .find(Button)
-        .find({ ['data-id']: 'credit' })
-    ).toHaveLength(0)
-    expect(
-      wrapper
-        .dive()
-        .find(Button)
-        .find({ ['data-id']: 'debit' })
-    ).toHaveLength(1)
+    expect(wrapper.find(Button).find({ ['data-id']: 'credit' })).toHaveLength(0)
+    expect(wrapper.find(Button).find({ ['data-id']: 'debit' })).toHaveLength(1)
   })
 
   it('shows and hides form', () => {
     const wrapper = shallow(<Transaction />)
     expect(
-      wrapper
-        .dive()
-        .find(Button)
-        .find({ ['data-id']: 'hide-show-form' })
+      wrapper.find(Button).find({ ['data-id']: 'hide-show-form' })
     ).toHaveLength(0)
-    expect(wrapper.dive().find('Form')).toHaveLength(1)
+    expect(wrapper.find('Form')).toHaveLength(1)
     wrapper.setState({ hideForm: true })
     wrapper.update()
-    expect(wrapper.dive().find('Form')).toHaveLength(0)
+    expect(wrapper.find('Form')).toHaveLength(0)
     expect(
-      wrapper
-        .dive()
-        .find(Button)
-        .find({ ['data-id']: 'hide-show-form' })
+      wrapper.find(Button).find({ ['data-id']: 'hide-show-form' })
     ).toHaveLength(1)
   })
 

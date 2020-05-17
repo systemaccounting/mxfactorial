@@ -1,6 +1,5 @@
 import React from 'react'
 import cx from 'classnames'
-import { Form as FinalForm } from 'react-final-form'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
 
@@ -165,7 +164,8 @@ class Transaction extends React.Component {
     })
   }
 
-  requestTransactions = () => {
+  requestTransactions = e => {
+    const { form } = this.props
     const { type, rules, transactions, draftTransaction } = this.state
     const transactionItems = [...transactions, draftTransaction, ...rules].map(
       item => {
@@ -174,7 +174,10 @@ class Transaction extends React.Component {
         return { ...itemProps }
       }
     )
-    return this.props.onRequestTransactions(type, transactionItems)
+    // TODO: remove when migration to final-form is done
+    form.change('type', type)
+    form.change('items', transactionItems)
+    return this.props.handleSubmit(e)
   }
 
   updateTransactions = (type, username, recipient) => {
@@ -203,8 +206,6 @@ class Transaction extends React.Component {
       })
     }))
   }
-
-  onSubmit = () => this.requestTransactions()
 
   get rules() {
     const { rules } = this.state
@@ -243,10 +244,14 @@ class Transaction extends React.Component {
     )([...transactions, draftTransaction, ...rules])
   }
 
-  renderForm = ({ handleSubmit }) => {
+  render() {
+    const { handleSubmit } = this.props
     const { type, recipient, hideForm, transactions } = this.state
     return (
-      <form onSubmit={handleSubmit} ref={this.transactionWrapperRef}>
+      <form
+        onSubmit={this.requestTransactions}
+        ref={this.transactionWrapperRef}
+      >
         <Input
           type="text"
           name="recipient"
@@ -312,10 +317,6 @@ class Transaction extends React.Component {
         {this.rules}
       </form>
     )
-  }
-
-  render() {
-    return <FinalForm onSubmit={this.onSubmit} render={this.renderForm} />
   }
 }
 

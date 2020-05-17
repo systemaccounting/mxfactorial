@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { graphql } from 'react-apollo'
 import { fetchRules } from 'queries/rules'
+import { Form } from 'react-final-form'
 import { createTransaction } from 'queries/requests'
 
 import AccountHeader from './components/AccountHeader'
@@ -38,7 +39,7 @@ class HomeScreen extends Component {
     })
   }
 
-  onRequestTransactions = async (type, items) => {
+  onRequestTransactions = async ({ type, items }) => {
     const { history, refetchTransactions } = this.props
     await this.props.createTransaction(items)
     await refetchTransactions()
@@ -51,10 +52,11 @@ class HomeScreen extends Component {
     return (
       <div data-id="homeScreen">
         <AccountHeader title={user.username} balance={this.state.balance} />
-        <Transaction
+        <Form
+          component={Transaction}
           username={user.username}
           fetchTransactions={this.props.fetchTransactions}
-          onRequestTransactions={this.onRequestTransactions}
+          onSubmit={this.onRequestTransactions}
           fetchRules={this.fetchRules}
         />
       </div>
