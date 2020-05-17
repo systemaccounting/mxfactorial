@@ -245,7 +245,6 @@ class Transaction extends React.Component {
   }
 
   render() {
-    const { handleSubmit } = this.props
     const { type, recipient, hideForm, transactions } = this.state
     return (
       <form
