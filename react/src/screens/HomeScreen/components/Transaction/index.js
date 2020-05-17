@@ -21,7 +21,6 @@ import { recalculateRules } from './utils'
 
 class Transaction extends React.Component {
   state = {
-    type: 'credit',
     transactions: [],
     draftTransaction: null,
     rules: [],
@@ -54,8 +53,8 @@ class Transaction extends React.Component {
   }
 
   handleAddTransaction = data => {
-    const { recipient, type } = this.state
-    const { username } = this.props
+    const { recipient } = this.state
+    const { username, values } = this.props
     const uuid = v4()
     this.setState(
       state => ({
@@ -66,8 +65,8 @@ class Transaction extends React.Component {
             uuid,
             ...data,
             author: username,
-            debitor: type === 'credit' ? recipient : username,
-            creditor: type === 'debit' ? recipient : username
+            debitor: values.type === 'credit' ? recipient : username,
+            creditor: values.type === 'debit' ? recipient : username
           }
         ]
       }),
@@ -125,14 +124,14 @@ class Transaction extends React.Component {
     }))
 
   handleDraftTransaction = draftTransaction => {
-    const { recipient, type } = this.state
-    const { username } = this.props
+    const { recipient } = this.state
+    const { username, values } = this.props
     this.setState({
       draftTransaction: {
         ...draftTransaction,
         author: username,
-        debitor: type === 'credit' ? recipient : username,
-        creditor: type === 'debit' ? recipient : username
+        debitor: values.type === 'credit' ? recipient : username,
+        creditor: values.type === 'debit' ? recipient : username
       }
     })
   }
