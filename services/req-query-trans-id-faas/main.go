@@ -12,6 +12,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	q = "SELECT * FROM transactions WHERE transaction_id=$1;"
+)
+
 type event struct {
 	TransactionID        string `json:"transaction_id"`
 	Account              string `json:"account"`
@@ -120,7 +124,7 @@ func handleLambdaEvent(ctx context.Context, e event) (string, error) {
 	if err != nil {
 		log.Panic(err)
 	}
-	q := "SELECT * FROM transactions WHERE transaction_id=$1;"
+
 	return e.getRequestsByID(db, q)
 }
 
