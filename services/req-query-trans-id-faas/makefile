@@ -49,7 +49,7 @@ src: build
 
 deploy: test-env-arg build deploy-only
 
-deploy-only: test-env-arg
+deploy-only: test-env-arg test
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
