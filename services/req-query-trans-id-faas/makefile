@@ -28,6 +28,8 @@ install:
 		go mod vendor
 
 ###################### build ######################
+test:
+		go test
 
 compile:
 		GOOS=linux go build -o $(BINARY_NAME) main.go
@@ -35,7 +37,7 @@ compile:
 zip:
 		zip $(APP_NAME)-src.zip ./$(BINARY_NAME)
 
-build: clean install compile zip
+build: clean install test compile zip
 
 # aliases build target
 dev: build
@@ -59,7 +61,7 @@ deploy-only: test-env-arg
 deploy-all: deploy
 
 # avoid aliasing deploy
-initial-deploy: test-env-arg clean install compile zip
+initial-deploy: test-env-arg clean install test compile zip
 		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-src.zip \
