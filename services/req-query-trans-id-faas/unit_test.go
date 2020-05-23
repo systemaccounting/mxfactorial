@@ -14,13 +14,12 @@ import (
 
 var t1 transaction = transaction{}
 var t2 transaction = transaction{}
+var evt1 event = event{TransactionID: "test_tx1"}
+var evt2 event = event{TransactionID: "test_tx23"}
 
 func Test_GetRequestByID_Found(t *testing.T) {
 	db := setupTest()
-	evt1 := event{
-		TransactionID: "tx1",
-	}
-
+	
 	expected1, _ := json.Marshal([]transaction{t1, t2})
 	res1, _ := evt1.getRequestsByID(db, q)
 
@@ -29,9 +28,6 @@ func Test_GetRequestByID_Found(t *testing.T) {
 
 func Test_GetRequestByID_EmptyResult(t *testing.T) {
 	db := setupTest()
-	evt2 := event{
-		TransactionID: "tx23",
-	}
 
 	expected2, _ := json.Marshal([]transaction{})
 	res2, _ := evt2.getRequestsByID(db, q)
@@ -45,13 +41,9 @@ func setEnvironment() {
 	os.Create("test.db")
 }
 
-//func cleanAll() {
-//	os.Exec("rm -f", "./test.db")
-//}
-
 func setData() {
 	var txId NullString
-	txId.String = "tx1"
+	txId.String = "test_tx1"
 	txId.Valid = true
 
 	var creditor NullString
@@ -128,7 +120,6 @@ func setupTest() *sql.DB {
 		log.Println("Open:", err)
 	}
 	setupDb(db)
-	//defer clearAll()
 
 	return db
 }

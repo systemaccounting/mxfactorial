@@ -111,7 +111,7 @@ func (e event) getRequestsByID(db *sql.DB, q string) (string, error) {
 	return jsonString, nil
 }
 
-func handleLambdaEvent(ctx context.Context, e event) (string, error) {
+func dbConn() *sql.DB {
 	db, err := sql.Open(
 		"postgres",
 		fmt.Sprintf(
@@ -124,7 +124,11 @@ func handleLambdaEvent(ctx context.Context, e event) (string, error) {
 	if err != nil {
 		log.Panic(err)
 	}
+	return db
+}
 
+func handleLambdaEvent(ctx context.Context, e event) (string, error) {
+	db := dbConn()
 	return e.getRequestsByID(db, q)
 }
 
