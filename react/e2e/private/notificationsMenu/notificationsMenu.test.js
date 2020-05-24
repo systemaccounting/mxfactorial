@@ -54,9 +54,6 @@ describe('Notifications menu', () => {
     await page.waitForSelector(SELECTORS.HOME)
     await page.type(SELECTORS.recipient, TEST_ACCOUNTS[1])
 
-    // select credit type transaction
-    await page.click(SELECTORS.debitButton)
-
     // create request
     await addTransaction(page, {
       name: 'milk',
@@ -64,6 +61,10 @@ describe('Notifications menu', () => {
       quantity: '2'
     })
     await getTotal()
+
+    // select credit type transaction
+    await page.click(SELECTORS.debitButton)
+
     // request transacton
     await page.click(SELECTORS.requestDebitTransactionBtn)
     await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
@@ -76,9 +77,11 @@ describe('Notifications menu', () => {
     )
 
     await page2.close()
+    const expectedCounter =
+      beforeCounter < 20 ? beforeCounter + 1 : beforeCounter
 
     // Notifications counter incremented
-    expect(beforeCounter + 1).toBe(afterCounter)
+    expect(expectedCounter).toBe(afterCounter)
   })
 
   it('should decrease notifications counter on clear button click', async () => {
