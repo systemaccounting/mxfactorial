@@ -55,8 +55,8 @@ resource "aws_api_gateway_integration" "lambda_root" {
 
 resource "aws_api_gateway_deployment" "environment" {
   depends_on = [
-    "aws_api_gateway_integration.lambda",
-    "aws_api_gateway_integration.lambda_root",
+    aws_api_gateway_integration.lambda,
+    aws_api_gateway_integration.lambda_root,
   ]
 
   stage_description = "deploy-002"
@@ -159,7 +159,7 @@ resource "aws_api_gateway_integration" "resource_options_integration" {
 }
 
 resource "aws_api_gateway_integration_response" "resource_options_integration_response" {
-  depends_on  = ["aws_api_gateway_integration.resource_options_integration"]
+  depends_on  = [aws_api_gateway_integration.resource_options_integration]
   rest_api_id = aws_api_gateway_rest_api.graphql.id
   resource_id = aws_api_gateway_rest_api.graphql.root_resource_id
   http_method = aws_api_gateway_method.resource_options.http_method
@@ -173,7 +173,7 @@ resource "aws_api_gateway_integration_response" "resource_options_integration_re
 }
 
 resource "aws_api_gateway_method_response" "resource_options_200" {
-  depends_on  = ["aws_api_gateway_method.resource_options"]
+  depends_on  = [aws_api_gateway_method.resource_options]
   rest_api_id = aws_api_gateway_rest_api.graphql.id
   resource_id = aws_api_gateway_rest_api.graphql.root_resource_id
   http_method = "OPTIONS"

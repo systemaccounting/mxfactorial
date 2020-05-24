@@ -23,7 +23,7 @@ resource "aws_route53_record" "client_fqdn_ipv6" {
 }
 
 resource "aws_route53_record" "api_fqdn" {
-  zone_id = "${data.aws_route53_zone.mxfactorial_io.zone_id}"
+  zone_id = data.aws_route53_zone.mxfactorial_io.zone_id
 
   name = local.api_url
   type = "A"

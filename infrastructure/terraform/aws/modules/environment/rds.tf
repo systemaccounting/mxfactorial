@@ -1,5 +1,6 @@
 resource "aws_db_instance" "postgres" {
   identifier                          = "mxfactorial-postgres-${var.environment}"
+  snapshot_identifier                 = var.db_snapshot_id
   allocated_storage                   = 20
   storage_type                        = "gp2"
   engine                              = "postgres"
@@ -21,7 +22,6 @@ resource "aws_db_instance" "postgres" {
   publicly_accessible                 = true
 }
 
-
 resource "random_password" "pguser" {
   length  = 8
   special = false
@@ -31,7 +31,6 @@ resource "random_password" "pgpassword" {
   length  = 8
   special = false
 }
-
 
 locals {
   POSTGRES_VARS = {
