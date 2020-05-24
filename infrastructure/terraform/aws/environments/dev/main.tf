@@ -43,8 +43,7 @@ module "dev" {
   environment = var.environment
 
   ############### Shared in Lambda and RDS ###############
-  db_master_username = var.db_master_username
-  db_master_password = var.db_master_password
+  db_snapshot_id = "dev-2020-05-24"
 
   ############### API Gateway ###############
   certificate_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, var.environment)
