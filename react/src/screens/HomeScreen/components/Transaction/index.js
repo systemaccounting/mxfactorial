@@ -2,12 +2,11 @@ import React from 'react'
 import cx from 'classnames'
 import { v4 } from 'uuid'
 import * as R from 'ramda'
-import { Field } from 'react-final-form'
-import { OnChange } from 'react-final-form-listeners'
+import { Field, FormSpy } from 'react-final-form'
 
 import TransactionItem from './TransactionItem'
 import Form from 'components/Form'
-import Input from 'components/Form/Input'
+import { InputField } from 'components/Form/Input'
 import LabelWithValue from 'components/LabelWithValue'
 import AddIcon from 'icons/AddIcon'
 
@@ -25,7 +24,6 @@ class Transaction extends React.Component {
     draftTransaction: null,
     rules: [],
     transactionHistory: [],
-    recipient: '',
     hideForm: false
   }
 
@@ -53,7 +51,6 @@ class Transaction extends React.Component {
   }
 
   handleAddTransaction = data => {
-    const { recipient } = this.state
     const { username, values } = this.props
     const uuid = v4()
     this.setState(
@@ -65,8 +62,8 @@ class Transaction extends React.Component {
             uuid,
             ...data,
             author: username,
-            debitor: values.type === 'credit' ? recipient : username,
-            creditor: values.type === 'debit' ? recipient : username
+            debitor: values.type === 'credit' ? values.recipient : username,
+            creditor: values.type === 'debit' ? values.recipient : username
           }
         ]
       }),
@@ -102,10 +99,6 @@ class Transaction extends React.Component {
     this.fetchRules()
   }
 
-  handleRecipientChange = e => {
-    this.setState({ recipient: e.target.value }, this.updateTransactions)
-  }
-
   handleFormClear = isClear => {
     this.setState(state => {
       const allTransactions = [...state.transactions, state.draftTransaction]
@@ -124,14 +117,13 @@ class Transaction extends React.Component {
     }))
 
   handleDraftTransaction = draftTransaction => {
-    const { recipient } = this.state
     const { username, values } = this.props
     this.setState({
       draftTransaction: {
         ...draftTransaction,
         author: username,
-        debitor: values.type === 'credit' ? recipient : username,
-        creditor: values.type === 'debit' ? recipient : username
+        debitor: values.type === 'credit' ? values.recipient : username,
+        creditor: values.type === 'debit' ? values.recipient : username
       }
     })
   }
@@ -170,10 +162,9 @@ class Transaction extends React.Component {
   }
 
   updateTransactions = () => {
-    const { recipient } = this.state
     const { values, username } = this.props
-    const debitor = values.type === 'credit' ? recipient : username
-    const creditor = values.type === 'debit' ? recipient : username
+    const debitor = values.type === 'credit' ? values.recipient : username
+    const creditor = values.type === 'debit' ? values.recipient : username
     this.setState(prevState => ({
       draftTransaction: {
         ...prevState.draftTransaction,
@@ -237,18 +228,18 @@ class Transaction extends React.Component {
 
   render() {
     const { values } = this.props
-    const { recipient, hideForm, transactions } = this.state
+    const { hideForm, transactions } = this.state
     return (
       <form
         onSubmit={this.requestTransactions}
         ref={this.transactionWrapperRef}
       >
-        <Input
-          type="text"
+        <FormSpy onChange={this.updateTransactions} />
+        <Field
           name="recipient"
-          value={recipient}
-          onChange={this.handleRecipientChange}
+          type="text"
           placeholder="Recipient"
+          component={InputField}
         />
         <div className={cx({ updated: !this.state.isFetchingRules })}>
           <LabelWithValue
@@ -258,11 +249,6 @@ class Transaction extends React.Component {
           />
         </div>
         <Field name="type" component={TypeSwitchField} />
-        <OnChange name="type">
-          {() => {
-            this.updateTransactions()
-          }}
-        </OnChange>
         <div data-id="user-generated-items">
           {transactions.map((transaction, index) => (
             <React.Fragment key={`transaction-${index}`}>

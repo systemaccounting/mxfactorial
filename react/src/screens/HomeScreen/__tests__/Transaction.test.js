@@ -174,15 +174,6 @@ describe('<Transaction />', () => {
     expect(wrapper.state('hideForm')).toEqual(false)
   })
 
-  it('handles recipient change', () => {
-    const wrapper = shallow(<Transaction />)
-    expect(wrapper.state('recipient')).toEqual('')
-    const instance = wrapper.instance()
-    instance.handleRecipientChange({ target: { value: 'John Doe' } })
-    wrapper.update()
-    expect(wrapper.state('recipient')).toEqual('John Doe')
-  })
-
   it('handles scroll', () => {
     const wrapper = shallow(<Transaction />)
     const scrollIntoViewMock = jest.fn()
@@ -258,7 +249,10 @@ describe('<Transaction />', () => {
   })
 
   it('updates transactions correctly', async () => {
-    const wrapper = shallow(<Transaction username={USERNAME} />)
+    const initialValues = { type: 'credit', recipient: RECIPIENT }
+    const wrapper = shallow(
+      <Transaction username={USERNAME} values={initialValues} />
+    )
     const transactions = [
       {
         uuid: '1234',
@@ -279,7 +273,7 @@ describe('<Transaction />', () => {
         debitor: RECIPIENT
       }
     ]
-    wrapper.setState({ transactions, recipient: RECIPIENT })
+    wrapper.setState({ transactions })
     wrapper.update()
     const instance = wrapper.instance()
 
@@ -299,7 +293,7 @@ describe('<Transaction />', () => {
       expect(transaction.creditor_approval_time).toBeUndefined()
     })
 
-    wrapper.setProps({ values: { type: 'debit' } })
+    wrapper.setProps({ values: { ...initialValues, type: 'debit' } })
     instance.updateTransactions()
     wrapper.state('transactions').forEach(transaction => {
       expect(transaction.creditor).toEqual(RECIPIENT)
@@ -308,7 +302,7 @@ describe('<Transaction />', () => {
       expect(transaction.creditor_approval_time).toBeUndefined()
     })
 
-    wrapper.setProps({ values: { type: 'credit' } })
+    wrapper.setProps({ values: { ...initialValues, type: 'credit' } })
     instance.updateTransactions()
     wrapper.state('transactions').forEach(transaction => {
       expect(transaction.debitor).toEqual(RECIPIENT)
