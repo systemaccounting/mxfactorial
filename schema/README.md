@@ -18,6 +18,7 @@
 
 ## data migration
 
+1. list and copy table ddls to avoid risk of migration tools omitting column default values
 1. list and copy functions on source db
     ```sql
     select n.nspname as function_schema,
@@ -69,7 +70,13 @@
         tablename,
         indexname;
     ```
-1. add schema to target db
+1. copy source db schema to target db
+1. add column defaults omitted by migration tool. single example:
+    ```sql
+    alter table transactions 
+    alter "createdAt"
+    set default CURRENT_TIMESTAMP; 
+    ```
 1. migrate data
 1. duplicate functions from source to target db. single [example](https://github.com/systemaccounting/mxfactorial/blob/478fc3360434bb2c7e4bd02fb09d6d3d764824c3/schema/migrate-faas/migrations/1575600291930_websockets.js#L16-L27):
     ```sql
