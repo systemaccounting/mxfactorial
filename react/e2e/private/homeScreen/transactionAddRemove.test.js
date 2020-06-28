@@ -61,6 +61,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
 
     // delete milk
     await deleteButton.click()
+    await page.waitFor(500)
     expect(await getTotal()).toEqual(65.4)
     await page.waitFor(500)
     expect(await getInputByValue('milk')).toEqual(0)

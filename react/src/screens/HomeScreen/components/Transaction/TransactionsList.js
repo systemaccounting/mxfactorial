@@ -43,26 +43,23 @@ export default function TransactonsList({
   return (
     <>
       {fields.map((field, idx) => {
-        const isLast = idx === fields.length - 1
+        const isDraft = idx === fields.length - 1
 
         const handleRemoveTransaction = () => {
           const { name, price, quantity } = fields.value[idx]
           const isEmpty = name === '' && price === '' && quantity === ''
 
-          if (fields.length > 1 && isEmpty) {
-            fields.remove(idx)
-          }
-
-          if (isLast && !isEmpty) {
+          if (isDraft && !isEmpty) {
             fields.update(idx, {
               ...EMPTY_TRANSACTION,
               author,
               debitor,
               creditor
             })
+          } else if (fields.length > 1) {
+            fields.remove(idx)
+            onRemoveTransaction()
           }
-
-          onRemoveTransaction()
         }
 
         return (
@@ -74,7 +71,7 @@ export default function TransactonsList({
             <div data-id="user-item">
               <Field
                 name={`${field}.name`}
-                data-id={isLast ? 'transaction-add-name' : ''}
+                data-id={isDraft ? 'transaction-add-name' : ''}
                 component={InputField}
                 placeholder="Item"
                 onBlur={onInputBlur}
@@ -82,7 +79,7 @@ export default function TransactonsList({
               />
               <Field
                 name={`${field}.price`}
-                data-id={isLast ? 'transaction-add-price' : ''}
+                data-id={isDraft ? 'transaction-add-price' : ''}
                 component={InputField}
                 placeholder="Price"
                 onBlur={onInputBlur}
@@ -90,11 +87,10 @@ export default function TransactonsList({
               />
               <Field
                 name={`${field}.quantity`}
-                data-id={isLast ? 'transaction-add-quantity' : ''}
+                data-id={isDraft ? 'transaction-add-quantity' : ''}
                 component={InputField}
                 placeholder="Quantity"
                 onBlur={onInputBlur}
-                validate={required}
               />
             </div>
           </React.Fragment>
