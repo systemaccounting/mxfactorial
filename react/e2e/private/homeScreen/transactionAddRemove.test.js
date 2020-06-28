@@ -82,7 +82,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('clear draft transaction and check result', async () => {
-    const deleteButton = await page.$(SELECTORS.transactionClear)
+    const deleteButton = await page.$(SELECTORS.transactionDelete)
 
     // delete bread
     await deleteButton.click()
@@ -115,7 +115,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('delele honey again', async () => {
-    const deleteButton2 = await page.$(SELECTORS.transactionClear)
+    const deleteButton2 = await page.$(SELECTORS.transactionDelete)
     // delete honey
     await deleteButton2.click()
     expect(await getTotal()).toEqual(0)
@@ -125,7 +125,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
   it('default quantity=1 for user-generated items', async () => {
     await addTransaction(page, { name: 'test', price: '1' }, true) // draft
     expect(await getTotal()).toEqual(1.09)
-    const deleteButton = await page.$(SELECTORS.transactionClear)
+    const deleteButton = await page.$(SELECTORS.transactionDelete)
     // delete draft transaction
     await deleteButton.click()
   })

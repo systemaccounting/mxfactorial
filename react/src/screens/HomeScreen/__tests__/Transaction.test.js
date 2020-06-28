@@ -1,6 +1,7 @@
 import React from 'react'
 import { shallow } from 'enzyme'
 import { Form as FinalForm, Field } from 'react-final-form'
+import { FieldArray } from 'react-final-form-arrays'
 
 import Form from 'components/Form'
 import Button from 'components/Button'
@@ -25,7 +26,6 @@ describe('<Transaction />', () => {
   it('switches transaction type', () => {})
 
   it('renders transaction items', () => {
-    const wrapper = shallow(<Transaction />)
     const transactions = [
       {
         uuid: '1234',
@@ -40,9 +40,12 @@ describe('<Transaction />', () => {
         quantity: 2
       }
     ]
-    wrapper.setState({ transactions })
-    wrapper.update()
-    expect(wrapper.find('TransactionItem')).toHaveLength(2)
+    const wrapper = shallow(<Transaction />)
+    wrapper.setProps({ values: { items: transactions } })
+    console.log(wrapper.debug())
+    expect(wrapper.find(FieldArray).find('[data-id="user-item"]')).toHaveLength(
+      2
+    )
   })
 
   it('handles add transaction item', () => {
