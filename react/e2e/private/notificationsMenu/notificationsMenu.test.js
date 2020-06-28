@@ -42,7 +42,7 @@ describe('Notifications menu', () => {
     const page2 = await browser.newPage()
     await login(page2, TEST_ACCOUNTS[1], process.env.JEST_SECRET)
 
-    await page2.waitForSelector(SELECTORS.notificationsCounter)
+    await page2.waitFor(3000)
     const counterEl = await page2.$(SELECTORS.notificationsCounter)
     const beforeCounter = await page2.evaluate(
       element => (element ? parseInt(element.textContent, 10) : 0),

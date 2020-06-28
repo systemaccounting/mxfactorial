@@ -75,7 +75,6 @@ export default function TransactonsList({
                 component={InputField}
                 placeholder="Item"
                 onBlur={onInputBlur}
-                validate={required}
               />
               <Field
                 name={`${field}.price`}
@@ -83,7 +82,6 @@ export default function TransactonsList({
                 component={InputField}
                 placeholder="Price"
                 onBlur={onInputBlur}
-                validate={required}
               />
               <Field
                 name={`${field}.quantity`}
