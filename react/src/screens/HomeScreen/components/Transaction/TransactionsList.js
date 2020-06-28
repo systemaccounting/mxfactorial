@@ -37,7 +37,7 @@ export default function TransactonsList({
       creditor
     })
 
-    onAddTransaction()
+    setTimeout(onAddTransaction)
   }
 
   return (
