@@ -38,10 +38,10 @@ const SELECTORS = {
   currentAccountBalanceIndicator: '[data-id="currentAccountBalanceIndicator"]',
   creditButton: 'button[name="credit"]',
   debitButton: 'button[name="debit"]',
-  transactionClear: 'button[data-id="transaction-clear"]',
-  transactionAddName: 'input[name="transaction-add-name"]',
-  transactionAddPrice: 'input[name="transaction-add-price"]',
-  transactionAddQuantity: 'input[name="transaction-add-quantity"]',
+  transactionClear: 'button[name="delete-transaction"]',
+  transactionAddName: 'input[data-id="transaction-add-name"]',
+  transactionAddPrice: 'input[data-id="transaction-add-price"]',
+  transactionAddQuantity: 'input[data-id="transaction-add-quantity"]',
   transactionDelete: 'button[name="delete-transaction"]',
   transactionFormToggle: 'button[data-id="hide-show-form"]',
   totalLabel: '[name="total-label"]',
@@ -85,7 +85,6 @@ const SELECTORS = {
   passwordInput: '[name="password"]',
   appVersionLabel: '[data-id="appVersion"]'
 }
-
 
 module.exports = {
   SELECTORS,

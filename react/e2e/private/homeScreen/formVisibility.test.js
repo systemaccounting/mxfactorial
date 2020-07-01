@@ -17,21 +17,12 @@ describe('form visibility after transaction deletion', () => {
   })
 
   it('clear form (honey)', async () => {
-    const clearBtn = await page.$(SELECTORS.transactionClear)
-    await clearBtn.click()
+    const [_, clearBtn2] = await page.$$(SELECTORS.transactionClear)
+    await clearBtn2.click()
     expect(await getInputByValue('honey')).toEqual(0) // honey is cleared
 
     const toggleButton = await page.$$(SELECTORS.transactionFormToggle)
     expect(toggleButton).toHaveLength(0)
-  })
-
-  it('hide form', async () => {
-    const clearBtn = await page.$(SELECTORS.transactionClear)
-    await clearBtn.click()
-
-    // Toggle button only appears if transaction form is hidden.
-    const toggleButton = await page.$$(SELECTORS.transactionFormToggle)
-    expect(toggleButton).toHaveLength(1)
   })
 
   it('remove milk', async () => {

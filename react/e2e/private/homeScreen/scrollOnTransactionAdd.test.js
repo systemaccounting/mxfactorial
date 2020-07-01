@@ -11,18 +11,22 @@ beforeAll(async () => {
 
 describe('scroll home screen on add item', () => {
   it('selecting add-item button scrolls window down', async () => {
-    const draftTransaction = await page.$('[data-id="draft-transaction"]')
+    let draftTransaction
 
     await addTransaction(page)
+    draftTransaction = await page.$('[data-id="draft-item"]')
     expect(await draftTransaction.isIntersectingViewport()).toBe(true)
 
     await addTransaction(page)
+    draftTransaction = await page.$('[data-id="draft-item"]')
     expect(await draftTransaction.isIntersectingViewport()).toBe(true)
 
     await addTransaction(page)
+    draftTransaction = await page.$('[data-id="draft-item"]')
     expect(await draftTransaction.isIntersectingViewport()).toBe(true)
 
     await addTransaction(page)
+    draftTransaction = await page.$('[data-id="draft-item"]')
     expect(await draftTransaction.isIntersectingViewport()).toBe(true)
   })
 })

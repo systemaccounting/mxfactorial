@@ -77,8 +77,7 @@ describe('Notifications menu', () => {
     )
 
     await page2.close()
-    const expectedCounter =
-      beforeCounter < 20 ? beforeCounter + 1 : beforeCounter
+    const expectedCounter = beforeCounter + 1
 
     // Notifications counter incremented
     expect(expectedCounter).toBe(afterCounter)

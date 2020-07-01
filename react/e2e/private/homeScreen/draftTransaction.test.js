@@ -43,8 +43,8 @@ describe('transaction add remove (milk, honey, bread)', () => {
   })
 
   it('draft transaction gets cleared and form remains', async () => {
-    const clearButton = await page.$(SELECTORS.transactionClear)
-    await clearButton.click()
+    const [_, clearButton2] = await page.$$(SELECTORS.transactionClear)
+    await clearButton2.click()
 
     total = milk.price * milk.quantity
     expect(await getTotal()).toBeGreaterThanOrEqual(total)

@@ -68,7 +68,7 @@ export default function TransactonsList({
               name="delete-transaction"
               onClick={handleRemoveTransaction}
             />
-            <div data-id="user-item">
+            <div data-id={isDraft ? 'draft-item' : 'user-item'}>
               <Field
                 name={`${field}.name`}
                 data-id={isDraft ? 'transaction-add-name' : ''}
