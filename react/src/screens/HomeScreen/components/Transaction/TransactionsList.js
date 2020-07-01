@@ -18,8 +18,6 @@ const EMPTY_TRANSACTION = {
   creditor: ''
 }
 
-const required = value => (value ? undefined : 'Required')
-
 export default function TransactonsList({
   fields,
   author,
