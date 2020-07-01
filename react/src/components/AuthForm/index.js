@@ -94,6 +94,7 @@ class AuthForm extends React.Component {
     const { disabled, namePrefix } = this.props
     const prefix = namePrefix ? `${namePrefix}-` : ''
     return this.inputs.map(data => {
+      console.log(data.placeholder)
       const props = {
         disabled: disabled,
         key: `input-key-${data.name}`,
@@ -108,13 +109,15 @@ class AuthForm extends React.Component {
         case 'password':
           return (
             <Field key={data.name} type={data.type} {...props}>
-              {inputProps => <Input {...inputProps.input} />}
+              {({ input, ...props }) => <Input {...input} {...props} />}
             </Field>
           )
         case 'date':
           return (
             <Field key={data.name} type={data.type} {...props}>
-              {inputProps => <DateInput {...inputProps.input} type="date" />}
+              {({ input, ...props }) => (
+                <DateInput {...props} {...input} type="date" />
+              )}
             </Field>
           )
         default:
