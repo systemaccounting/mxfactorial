@@ -94,7 +94,6 @@ class AuthForm extends React.Component {
     const { disabled, namePrefix } = this.props
     const prefix = namePrefix ? `${namePrefix}-` : ''
     return this.inputs.map(data => {
-      console.log(data.placeholder)
       const props = {
         disabled: disabled,
         key: `input-key-${data.name}`,
