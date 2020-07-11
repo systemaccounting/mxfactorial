@@ -40,13 +40,17 @@ this project is intended to exploit the software engineering community's familia
 * supporters preferring to contribute financial resources may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page. to contribute engineering resources, download & install [node.js](https://nodejs.org/en/download/)  
 * if you're not familiar with node.js, or don't know how to code, begin the [freecodecamp.com](https://www.freecodecamp.com/) curriculum  
 
-details as of 11/25/2019:
+details as of 07/10/2020:
 - client: [mxfactorial.io](https://mxfactorial.io/)
 - api: [api.mxfactorial.io](https://api.mxfactorial.io/)
 - [data model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
 - [wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
 - [public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
 - service inventory: `./makefile`
+- access `./mxfactorial.ipynb` jupyter notebook locally:
+    ```
+    docker run --rm -p 8888:8888 -v $PWD:/home/jovyan/work jupyter/datascience-notebook
+    ```
 
 roadmap:
 * set up managed application & persistence layer
