@@ -5,7 +5,7 @@
 
 [![builds](https://img.shields.io/badge/workflows-building-brightgreen.svg)](https://github.com/systemaccounting/mxfactorial/actions) [![env](https://img.shields.io/badge/ENV-PROD-brightgreen.svg)](https://mxfactorial.io/) [![contribute](https://img.shields.io/badge/contribute-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
 
-*systemaccounting optimizes the flow of capital by expiditing the discovery of economic oppotunity through physics and data science. dashboarding real-time business performance within an equally-accessible space spanned by a metric not only maximizes capital's throughput between investors and entrepreneurs, it also transparently benchmarks lending rates between borrowers and lenders. in addition to eliminating interest rate manipulation by central commitees, systemaccounting also solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. by recording transactions as conserved quantites, user equity remains separate and protected from the liability produced by government-chartered lending firms - [@mxfactorial](https://twitter.com/mxfactorial)*
+*systemaccounting optimizes the flow of capital by expiditing the discovery of economic oppotunity through physics and data science. dashboarding real-time business performance within an equally-accessible space spanned by a metric not only maximizes capital's throughput between investors and entrepreneurs, it also transparently benchmarks lending rates between borrowers and lenders. in addition to eliminating interest rate manipulation by central commitees, systemaccounting solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. by recording transactions as conserved quantites, user equity remains separate and protected from the liability produced by government-chartered lending firms - [@mxfactorial](https://twitter.com/mxfactorial)*
 
 public demonstration of the following use cases through a systemaccounting function:
 * expressing mathematical concepts as [data structures](https://github.com/systemaccounting/mxfactorial/blob/develop/mxfactorial.ipynb)
@@ -34,7 +34,7 @@ public demonstration of the following use cases through a systemaccounting funct
 * enabling transaction automation through user-generated, open-source [Transaction Rule Scripts](https://github.com/systemaccounting/mxfactorial/issues/3) written in plain JavaScript **(input)**
 * maintaining publicly-accessible static and streaming endpoints servicing third-party visualization and [optimization](https://en.wikipedia.org/wiki/Combinatorial_optimization) **(output)**
 
-this project is intended to exploit the software engineering community's familiarity with data science to rapidly develop their capacity to describe an economy using mathemtical physics. software engineers may be expediently converted to phd-level experts because they come equipped with the technology to expediently test, adopt, and communicate the subject to others. adding to the project's **[list of features](https://github.com/systemaccounting/mxfactorial/issues?q=is%3Aissue+is%3Apublic+sort%3Acreated-asc)** is designed to foster enough interaction between engineers and the data model that a movement to eliminate nothing but [public ignorance](https://en.wikipedia.org/wiki/Pareto_efficiency) becomes generally accepted as possible *only* when it's precipitated by activism pursued—not in the streets where slogans, bottles, and rocks are blindly hurled at others who are equally frustrated with their economy, but on knowledge's frontier where science and technology are used as tools to empower mankind's movement in the cloud  
+this project intends to exploit the software engineering community's familiarity with data science to rapidly develop their capacity to describe an economy using mathemtical physics. software engineers may be expediently converted to phd-level experts because they come equipped with the technology to test, adopt, and communicate the subject to others. adding to the project's **[list of features](https://github.com/systemaccounting/mxfactorial/issues?q=is%3Aissue+is%3Apublic+sort%3Acreated-asc)** is designed to foster enough interaction between engineers and the data model that a movement to eliminate nothing but [public ignorance](https://en.wikipedia.org/wiki/Pareto_efficiency) becomes generally accepted as possible *only* when it's precipitated by activism pursued—not in the streets where slogans, bottles, and rocks are blindly hurled at others who are equally frustrated with their economy, but on knowledge's frontier where science and technology are used as tools to empower mankind's movement in the cloud  
 
 # contribute
 * supporters preferring to contribute financial resources may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page. to contribute engineering resources, download & install [node.js](https://nodejs.org/en/download/)  
@@ -49,7 +49,11 @@ details as of 07/10/2020:
 - service inventory: `./makefile`
 - access `./mxfactorial.ipynb` jupyter notebook locally:
     ```
-    docker run --rm -p 8888:8888 -v $PWD:/home/jovyan/work jupyter/datascience-notebook
+    docker run \
+      --rm \
+      -p 8888:8888 \
+      -v $PWD/mxfactorial.ipynb:/home/jovyan/work/mxfactorial.ipynb \
+      jupyter/datascience-notebook
     ```
 
 roadmap:
