@@ -52,7 +52,7 @@ details as of 07/10/2020:
     docker run \
       --rm \
       -p 8888:8888 \
-      -v $PWD/mxfactorial.ipynb:/home/jovyan/work/mxfactorial.ipynb \
+      -v $PWD/mxfactorial.ipynb:/home/jovyan/mxfactorial.ipynb \
       jupyter/datascience-notebook
     ```
 
