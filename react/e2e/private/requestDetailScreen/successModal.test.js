@@ -23,6 +23,7 @@ describe('Request detail screen success modal', () => {
     await passwordInput.type(process.env.JEST_SECRET)
     await page.waitForSelector(SELECTORS.okButton)
     const okButton = await page.$(SELECTORS.okButton)
+    await page.waitFor(1000)
     await okButton.click()
 
     await page.waitForSelector(SELECTORS.successModal)

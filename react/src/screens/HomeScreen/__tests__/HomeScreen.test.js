@@ -1,7 +1,10 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
+import { act } from '@testing-library/react'
 import { promiseToResolve, promiseToReject } from 'utils/testing'
+import { fetchRules } from 'queries/rules'
 import { HomeScreen } from '../HomeScreen'
+import Transaction from '../components/Transaction'
 
 const user = {
   username: 'john doe'
@@ -26,7 +29,7 @@ describe('<HomeScreen />', () => {
     const wrapper = shallow(<HomeScreen {...props} />)
     const instance = wrapper.instance()
 
-    instance.getBalance().then(user => {
+    instance.getBalance().then(() => {
       expect(wrapper.state('balance')).toEqual(1000)
     })
   })
@@ -38,8 +41,106 @@ describe('<HomeScreen />', () => {
     )
     const instance = wrapper.instance()
 
-    instance.getBalance().then(user => {
+    instance.getBalance().then(() => {
       expect(wrapper.state('error')).toEqual('no balance')
     })
+  })
+
+  it('fetches rules on item input blur', () => {
+    const client = {
+      query: jest.fn(() => Promise.resolve({ data: { rules: [] } }))
+    }
+    const initialValues = {
+      recipient: 'Person1',
+      type: 'credit',
+      items: [
+        {
+          name: 'Milk',
+          price: '3',
+          quantity: '3',
+          author: user.username,
+          debitor: 'Person1',
+          creditor: user.username
+        },
+        {
+          name: 'Honey',
+          price: '3',
+          quantity: '3',
+          author: user.username,
+          debitor: 'Person1',
+          creditor: user.username
+        }
+      ]
+    }
+    const wrapper = mount(
+      <HomeScreen {...props} initialValues={initialValues} client={client} />
+    )
+    wrapper.find('input[name="items[0].name"]').simulate('blur')
+    expect(client.query).toHaveBeenCalledWith({
+      query: fetchRules,
+      addTypename: false,
+      variables: {
+        transactions: initialValues.items
+      }
+    })
+  })
+
+  it('submits from correctly', async () => {
+    const initialValues = {
+      recipient: 'Person1',
+      type: 'credit',
+      items: [
+        {
+          name: 'Milk',
+          price: '3',
+          quantity: '3',
+          author: user.username,
+          debitor: 'Person1',
+          creditor: user.username
+        },
+        {
+          name: 'Honey',
+          price: '3',
+          quantity: '3',
+          author: user.username,
+          debitor: 'Person1',
+          creditor: user.username
+        }
+      ]
+    }
+    const rules = [
+      {
+        uuid: 'rule1',
+        name: '9% state sales tax',
+        price: 1,
+        quantity: 1
+      },
+      {
+        uuid: 'rule2',
+        name: 'another tax',
+        price: 1,
+        quantity: 1
+      }
+    ]
+    const createTransaction = jest.fn()
+    const wrapper = mount(
+      <HomeScreen
+        {...props}
+        createTransaction={createTransaction}
+        initialValues={initialValues}
+      />
+    )
+    const form = wrapper.find('form')
+    const transaction = wrapper.find(Transaction)
+    transaction.setState({
+      rules
+    })
+    await act(async () => {
+      form.simulate('submit')
+    })
+    expect(createTransaction).toBeCalledWith([
+      ...initialValues.items,
+      ...rules.map(({ uuid, ...rest }) => rest)
+    ])
   })
 })

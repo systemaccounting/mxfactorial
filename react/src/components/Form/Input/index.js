@@ -1,3 +1,4 @@
+import React from 'react'
 import styled from 'styled-components'
 import is from 'styled-is'
 
@@ -23,5 +24,9 @@ const Input = styled.input`
     color: red;
   `};
 `
+
+export function InputField({ input, ...props }) {
+  return <Input {...input} {...props} />
+}
 
 export default Input

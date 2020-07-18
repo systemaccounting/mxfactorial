@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 
 import ButtonGroup from 'components/ButtonGroup'
 import Button from 'components/Button'
@@ -10,6 +10,7 @@ const TypeSwitch = ({ onSwitch, active }) => (
     <React.Fragment>
       <Button
         name="debit"
+        type="button"
         data-active={active === 'debit'}
         inactive={active !== 'debit'}
         onClick={onSwitch('debit')}
@@ -18,6 +19,7 @@ const TypeSwitch = ({ onSwitch, active }) => (
       </Button>
       <Button
         name="credit"
+        type="button"
         data-active={active === 'credit'}
         inactive={active !== 'credit'}
         onClick={onSwitch('credit')}
@@ -27,5 +29,10 @@ const TypeSwitch = ({ onSwitch, active }) => (
     </React.Fragment>
   </ButtonGroup>
 )
+
+export const TypeSwitchField = ({ input }) => {
+  const onChange = useCallback(type => () => input.onChange(type), [input])
+  return <TypeSwitch active={input.value} onSwitch={onChange} />
+}
 
 export default TypeSwitch

@@ -1,6 +1,6 @@
 const { SELECTORS, HOME_URL, TEST_ACCOUNTS } = require('../../constants')
 const { login } = require('../../utils/auth')
-const { addTransaction, getTotal, milk } = require('../homeScreen/utils')
+const { addTransaction, getTotal } = require('../homeScreen/utils')
 
 describe('Notifications menu', () => {
   beforeAll(async () => {
@@ -42,7 +42,9 @@ describe('Notifications menu', () => {
     const page2 = await browser.newPage()
     await login(page2, TEST_ACCOUNTS[1], process.env.JEST_SECRET)
 
-    await page2.waitForSelector(SELECTORS.notificationsCounter)
+    await page2.waitForSelector(SELECTORS.notificationsCounter, {
+      timeout: 3000
+    })
     const counterEl = await page2.$(SELECTORS.notificationsCounter)
     const beforeCounter = await page2.evaluate(
       element => (element ? parseInt(element.textContent, 10) : 0),
@@ -64,6 +66,7 @@ describe('Notifications menu', () => {
       quantity: '2'
     })
     await getTotal()
+
     // request transacton
     await page.click(SELECTORS.requestDebitTransactionBtn)
     await page.waitForSelector(SELECTORS.activeButton, { timeout: 30000 })
@@ -76,9 +79,10 @@ describe('Notifications menu', () => {
     )
 
     await page2.close()
+    const expectedCounter = beforeCounter + 1
 
     // Notifications counter incremented
-    expect(beforeCounter + 1).toBe(afterCounter)
+    expect(expectedCounter).toBe(afterCounter)
   })
 
   it('should decrease notifications counter on clear button click', async () => {

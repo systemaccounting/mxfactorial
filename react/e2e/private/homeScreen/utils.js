@@ -2,10 +2,11 @@ const { login } = require('../../utils/auth')
 
 const { SELECTORS, REQUEST_URL } = require('../../constants')
 
-const transactionAddButtonSelector = 'button[data-id="transaction"]'
-const transactionAddNameSelector = 'input[name="transaction-add-name"]'
-const transactionAddPriceSelector = 'input[name="transaction-add-price"]'
-const transactionAddQuantitySelector = 'input[name="transaction-add-quantity"]'
+const transactionAddButtonSelector = 'button[data-id="transaction-add"]'
+const transactionAddNameSelector = 'input[data-id="transaction-add-name"]'
+const transactionAddPriceSelector = 'input[data-id="transaction-add-price"]'
+const transactionAddQuantitySelector =
+  'input[data-id="transaction-add-quantity"]'
 
 const addTransaction = async (
   page,

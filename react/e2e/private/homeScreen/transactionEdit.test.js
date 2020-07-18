@@ -45,7 +45,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getInputByValue('bread')).toEqual(1)
 
     const milkPriceInput = await page.$(
-      `input[name="price"][value="${milk.price}"]`
+      `input[name="items[0].price"][value="${milk.price}"]`
     )
 
     await milkPriceInput.click({ clickCount: 3 })
@@ -64,7 +64,7 @@ describe('transaction add remove (milk, honey, bread)', () => {
     expect(await getInputByValue('bread')).toEqual(1)
 
     const milkPriceInput = await page.$(
-      `input[name="price"][value="${honey.price}"]`
+      `input[name="items[1].price"][value="${honey.price}"]`
     )
 
     await milkPriceInput.click({ clickCount: 3 })
