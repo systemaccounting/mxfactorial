@@ -1,5 +1,6 @@
 import React from 'react'
 import { shallow, mount } from 'enzyme'
+import { act } from '@testing-library/react'
 import { promiseToResolve, promiseToReject } from 'utils/testing'
 import { HomeScreen } from '../HomeScreen'
 
@@ -26,7 +27,7 @@ describe('<HomeScreen />', () => {
     const wrapper = shallow(<HomeScreen {...props} />)
     const instance = wrapper.instance()
 
-    instance.getBalance().then(user => {
+    instance.getBalance().then(() => {
       expect(wrapper.state('balance')).toEqual(1000)
     })
   })
@@ -38,8 +39,46 @@ describe('<HomeScreen />', () => {
     )
     const instance = wrapper.instance()
 
-    instance.getBalance().then(user => {
+    instance.getBalance().then(() => {
       expect(wrapper.state('error')).toEqual('no balance')
     })
+  })
+
+  it('submits from correctly', async () => {
+    const initialValues = {
+      recipient: 'Person1',
+      type: 'credit',
+      items: [
+        {
+          name: 'Milk',
+          price: '3',
+          quantity: '3',
+          author: user.username,
+          debitor: 'Person1',
+          creditor: user.username
+        },
+        {
+          name: 'Honey',
+          price: '3',
+          quantity: '3',
+          author: user.username,
+          debitor: 'Person1',
+          creditor: user.username
+        }
+      ]
+    }
+    const createTransaction = jest.fn()
+    const wrapper = mount(
+      <HomeScreen
+        {...props}
+        createTransaction={createTransaction}
+        initialValues={initialValues}
+      />
+    )
+    const form = wrapper.find('form')
+    await act(async () => {
+      form.simulate('submit')
+    })
+    expect(createTransaction).toBeCalledWith([...initialValues.items])
   })
 })

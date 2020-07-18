@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@rebass/grid": "^6.0.0-4",
+    "@testing-library/react": "^10.4.7",
     "apollo-boost": "^0.1.22",
     "aws-amplify": "^1.1.29",
     "axios": "^0.18.0",
