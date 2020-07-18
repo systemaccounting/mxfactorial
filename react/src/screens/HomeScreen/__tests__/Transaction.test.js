@@ -135,4 +135,30 @@ describe('<Transaction />', () => {
     )
     expect(Object.keys(wrapper.state('transactionHistory')[0])).toHaveLength(23)
   })
+
+  it('clears rules state on transactions remove', () => {
+    const transactions = [
+      {
+        uuid: '1234',
+        name: 'x',
+        price: 10,
+        quantity: 10
+      }
+    ]
+    const wrapper = shallow(
+      <Transaction
+        fetchTransactions={fetchTransactions}
+        values={{ items: transactions }}
+      />
+    )
+    wrapper.setState({
+      rules: [
+        { uuid: '1', name: '9% state sales tax' },
+        { uuid: '2', name: 'another tax' }
+      ]
+    })
+    wrapper.instance().handleRemoveTransaction()
+    wrapper.update()
+    expect(wrapper.state('rules')).toEqual([])
+  })
 })

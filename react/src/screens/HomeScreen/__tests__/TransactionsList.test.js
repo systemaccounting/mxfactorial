@@ -45,4 +45,37 @@ describe('<TransactionsList />', () => {
       .simulate('click')
     expect(mockFields.remove).toHaveBeenCalledWith(idxToDelete)
   })
+
+  it('handles clear draft transaction', () => {
+    const idxToDelete = 0
+    const mockTransactions = [
+      {
+        uuid: '1234',
+        name: 'x',
+        price: 100,
+        quantity: 2
+      }
+    ]
+    const mockFields = {
+      forEach: noop,
+      map: iterator => mockTransactions.map(iterator),
+      value: mockTransactions,
+      length: mockTransactions.length,
+      update: jest.fn()
+    }
+    const wrapper = shallow(<TransactionsList fields={mockFields} />)
+    wrapper
+      .find({ name: 'delete-transaction' })
+      .at(idxToDelete)
+      .simulate('click')
+
+    expect(mockFields.update).toHaveBeenCalledWith(idxToDelete, {
+      author: '',
+      name: '',
+      price: '',
+      debitor: '',
+      creditor: '',
+      quantity: ''
+    })
+  })
 })

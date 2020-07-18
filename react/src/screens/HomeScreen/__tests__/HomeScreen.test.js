@@ -4,6 +4,7 @@ import { act } from '@testing-library/react'
 import { promiseToResolve, promiseToReject } from 'utils/testing'
 import { fetchRules } from 'queries/rules'
 import { HomeScreen } from '../HomeScreen'
+import Transaction from '../components/Transaction'
 
 const user = {
   username: 'john doe'
@@ -107,6 +108,20 @@ describe('<HomeScreen />', () => {
         }
       ]
     }
+    const rules = [
+      {
+        uuid: 'rule1',
+        name: '9% state sales tax',
+        price: 1,
+        quantity: 1
+      },
+      {
+        uuid: 'rule2',
+        name: 'another tax',
+        price: 1,
+        quantity: 1
+      }
+    ]
     const createTransaction = jest.fn()
     const wrapper = mount(
       <HomeScreen
@@ -116,9 +131,16 @@ describe('<HomeScreen />', () => {
       />
     )
     const form = wrapper.find('form')
+    const transaction = wrapper.find(Transaction)
+    transaction.setState({
+      rules
+    })
     await act(async () => {
       form.simulate('submit')
     })
-    expect(createTransaction).toBeCalledWith([...initialValues.items])
+    expect(createTransaction).toBeCalledWith([
+      ...initialValues.items,
+      ...rules.map(({ uuid, ...rest }) => rest)
+    ])
   })
 })
