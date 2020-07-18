@@ -3,14 +3,10 @@ import { shallow } from 'enzyme'
 import { Field } from 'react-final-form'
 import { FieldArray } from 'react-final-form-arrays'
 
-import Form from 'components/Form'
 import Button from 'components/Button'
 import Transaction from '../components/Transaction'
 
 import { fetchTransactions } from 'mock/api'
-
-const USERNAME = 'JoeSmith'
-const RECIPIENT = 'Mary'
 
 describe('<Transaction />', () => {
   it('renders', () => {
