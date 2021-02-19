@@ -61,3 +61,6 @@ infrastructure/aws-cdk/**/*.d.ts
 
 # go
 **/vendor
+
+# lambda
+tst.sh
