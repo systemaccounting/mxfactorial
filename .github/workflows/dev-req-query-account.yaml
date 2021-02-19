@@ -26,7 +26,7 @@ jobs:
           make install
         working-directory: services/req-query-account-faas
       - name: measure coverage
-        run: make test-coverage
+        run: make test-cover
         working-directory: services/req-query-account-faas
       - name: unit tests
         run: make test-unit
