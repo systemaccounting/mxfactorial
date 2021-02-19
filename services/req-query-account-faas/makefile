@@ -89,7 +89,7 @@ test-unit:
 	go test -v ./...
 
 test-integration:
-	$(MAKE) -s test-env-arg
+	@$(MAKE) -s test-env-arg
 	@PGHOST=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
 			--secret-id $(PGHOST_KEY) \
@@ -117,7 +117,7 @@ test-integration:
 			go test -v --tags=integration ./cmd
 
 test-local:
-	$(MAKE) -s test-env-arg
+	@$(MAKE) -s test-env-arg
 	PGHOST=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
 			--secret-id $(PGHOST_KEY) \
@@ -146,12 +146,12 @@ test-local:
 ###################### deploy ######################
 
 deploy:
-	$(MAKE) -s test-env-arg
+	@$(MAKE) -s test-env-arg
 	$(MAKE) build
 	$(MAKE) deploy-only
 
 deploy-only:
-	@$(MAKE) -s test-env-arg
+	@@$(MAKE) -s test-env-arg
 	@ETAG=$$(aws s3api put-object \
 		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 		--key=$(APP_NAME)-src.zip \
@@ -165,7 +165,7 @@ deploy-all:
 
 # avoid aliasing deploy
 initial-deploy:
-	$(MAKE) -s test-env-arg
+	@$(MAKE) -s test-env-arg
 	$(MAKE) clean
 	$(MAKE) install
 	$(MAKE) compile
@@ -181,7 +181,7 @@ initial-deploy:
 ###################### warm up ######################
 
 warm-up:
-	$(MAKE) -s test-env-arg
+	@$(MAKE) -s test-env-arg
 	@aws lambda invoke \
 		--region $(REGION) \
 		--invocation-type RequestResponse \
