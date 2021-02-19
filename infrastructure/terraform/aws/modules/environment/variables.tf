@@ -14,3 +14,7 @@ variable "certificate_arn" {
 variable "db_snapshot_id" {
   type = string
 }
+
+variable "req_query_return_limit" {
+  type = number
+}

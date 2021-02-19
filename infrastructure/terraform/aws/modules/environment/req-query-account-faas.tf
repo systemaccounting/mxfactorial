@@ -15,7 +15,9 @@ resource "aws_lambda_function" "req_query_account" {
   role              = aws_iam_role.req_query_account_role.arn
 
   environment {
-    variables = local.POSTGRES_VARS
+    variables = merge(local.POSTGRES_VARS, {
+      RETURN_RECORD_LIMIT = var.req_query_return_limit
+    })
   }
 }
 

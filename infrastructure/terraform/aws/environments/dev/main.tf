@@ -39,16 +39,19 @@ data "terraform_remote_state" "aws-us-east-1" {
 module "dev" {
   source = "../../modules/environment"
 
-  ############### Shared ###############
+  ############### shared ###############
   environment = var.environment
 
-  ############### Shared in Lambda and RDS ###############
+  ############### lambda ###############
+  req_query_return_limit = 20
+
+  ############### shared in lambda and rds ###############
   db_snapshot_id = "dev-2020-05-24"
 
-  ############### API Gateway ###############
+  ############### api gateway ###############
   certificate_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, var.environment)
 
-  ############### Cloudfront ###############
+  ############### cloudfront ###############
   ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, var.environment)
 }
 
