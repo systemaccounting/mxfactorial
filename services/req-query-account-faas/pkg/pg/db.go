@@ -71,8 +71,8 @@ func (db *DB) Unmarshal(
 		err := rows.Scan(
 			&item.TableID,
 			&item.Name,
-			&item.Quantity,
 			&item.Price,
+			&item.Quantity,
 			&item.UnitOfMeasurement,
 			&item.UnitsMeasured,
 			&item.RuleInstanceID,
