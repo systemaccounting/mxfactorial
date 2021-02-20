@@ -101,37 +101,91 @@ func TestE2EMatchingValues(t *testing.T) {
 		*/
 
 		if got.TableID != IDsToRemove[i] {
-			t.Errorf("got id %v, want %v", got.TableID, IDsToRemove[i])
+			t.Errorf(
+				"got id %v, want %v",
+				got.TableID,
+				IDsToRemove[i],
+			)
 		}
 		if got.Name != want.Name {
-			t.Errorf("got name %v, want %v on record id %v", got.Name, want.Name, got.TableID)
+			t.Errorf(
+				"got name %v, want %v on record id %v",
+				got.Name,
+				want.Name,
+				got.TableID,
+			)
 		}
 		if got.Price != want.Price {
-			t.Errorf("got price %v, want %v on record id %v", got.Price, want.Price, got.TableID)
+			t.Errorf(
+				"got price %v, want %v on record id %v",
+				got.Price,
+				want.Price,
+				got.TableID,
+			)
 		}
 		if got.Quantity != want.Quantity {
-			t.Errorf("got quantity %v, want %v on record id %v", got.Quantity, want.Quantity, got.TableID)
+			t.Errorf(
+				"got quantity %v, want %v on record id %v",
+				got.Quantity,
+				want.Quantity,
+				got.TableID,
+			)
 		}
 		if got.RuleInstanceID != want.RuleInstanceID {
-			t.Errorf("got rule id %v, want %v on record id %v", got.RuleInstanceID, want.RuleInstanceID, got.TableID)
+			t.Errorf(
+				"got rule id %v, want %v on record id %v",
+				got.RuleInstanceID,
+				want.RuleInstanceID,
+				got.TableID,
+			)
 		}
 		if got.TransactionID != want.TransactionID {
-			t.Errorf("got transaction id %v, want %v on record id %v", got.TransactionID, want.TransactionID, got.TableID)
+			t.Errorf(
+				"got transaction id %v, want %v on record id %v",
+				got.TransactionID,
+				want.TransactionID,
+				got.TableID,
+			)
 		}
 		if got.Author != want.Author {
-			t.Errorf("got author %v, want %v on record id %v", got.Author, want.Author, got.TableID)
+			t.Errorf(
+				"got author %v, want %v on record id %v",
+				got.Author,
+				want.Author,
+				got.TableID,
+			)
 		}
 		if got.Debitor != want.Debitor {
-			t.Errorf("got debitor %v, want %v on record id %v", got.Debitor, want.Debitor, got.TableID)
+			t.Errorf(
+				"got debitor %v, want %v on record id %v",
+				got.Debitor,
+				want.Debitor,
+				got.TableID,
+			)
 		}
 		if got.Creditor != want.Creditor {
-			t.Errorf("got creditor %v, want %v on record id %v", got.Creditor, want.Creditor, got.TableID)
+			t.Errorf(
+				"got creditor %v, want %v on record id %v",
+				got.Creditor,
+				want.Creditor,
+				got.TableID,
+			)
 		}
 		if got.DebitorApprovalTime != want.DebitorApprovalTime {
-			t.Errorf("got debitor approval time %v, want %v on record id %v", got.DebitorApprovalTime, want.DebitorApprovalTime, got.TableID)
+			t.Errorf(
+				"got debitor approval time %v, want %v on record id %v",
+				got.DebitorApprovalTime,
+				want.DebitorApprovalTime,
+				got.TableID,
+			)
 		}
 		if got.CreditorApprovalTime != want.CreditorApprovalTime {
-			t.Errorf("got creditor approval time %v, want %v on record id %v", got.CreditorApprovalTime, want.CreditorApprovalTime, got.TableID)
+			t.Errorf(
+				"got creditor approval time %v, want %v on record id %v",
+				got.CreditorApprovalTime,
+				want.CreditorApprovalTime,
+				got.TableID,
+			)
 		}
 	}
 
