@@ -25,6 +25,12 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           make install
         working-directory: services/req-query-account-faas
+      - name: measure coverage
+        run: make test-cover
+        working-directory: services/req-query-account-faas
+      - name: unit tests
+        run: make test-unit
+        working-directory: services/req-query-account-faas
       - name: compile
         run: make compile
         working-directory: services/req-query-account-faas
@@ -33,4 +39,7 @@ jobs:
         working-directory: services/req-query-account-faas
       - name: deloy to dev
         run: make deploy-only ENV=dev
+        working-directory: services/req-query-account-faas
+      - name: integration tests
+        run: make test-integration ENV=dev
         working-directory: services/req-query-account-faas
