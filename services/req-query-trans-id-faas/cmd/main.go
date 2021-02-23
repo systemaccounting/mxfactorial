@@ -54,6 +54,7 @@ func lambdaFn(
 		log.Printf("unmarshal error: %v", err)
 		return "", err
 	}
+
 	return t.Marshal()
 }
 
