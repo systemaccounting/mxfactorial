@@ -25,6 +25,12 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           make install
         working-directory: services/trans-query-id-faas
+      - name: measure coverage
+        run: make test-cover
+        working-directory: services/trans-query-id-faas
+      - name: unit tests
+        run: make test-unit
+        working-directory: services/trans-query-id-faas
       - name: compile
         run: make compile
         working-directory: services/trans-query-id-faas
@@ -33,4 +39,7 @@ jobs:
         working-directory: services/trans-query-id-faas
       - name: deloy to dev
         run: make deploy-only ENV=dev
+        working-directory: services/trans-query-id-faas
+      - name: integration tests
+        run: make test-integration ENV=dev
         working-directory: services/trans-query-id-faas
