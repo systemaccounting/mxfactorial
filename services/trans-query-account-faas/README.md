@@ -31,5 +31,5 @@ trans-query-account-faas
 
 push commit OR `make deploy ENV=dev` to manually deploy to dev env
 
-### prod config
+### config
 see `infrastructure/terraform/aws/modules/environment/trans-query-account-faas.tf` lambda environment variables
