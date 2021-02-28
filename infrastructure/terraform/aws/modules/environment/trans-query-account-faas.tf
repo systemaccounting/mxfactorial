@@ -15,7 +15,9 @@ resource "aws_lambda_function" "trans_query_account" {
   role              = aws_iam_role.trans_query_account_role.arn
 
   environment {
-    variables = local.POSTGRES_VARS
+    variables = merge(local.POSTGRES_VARS, {
+      RECORD_RETURN_LIMIT = var.trans_query_return_limit
+    })
   }
 }
 

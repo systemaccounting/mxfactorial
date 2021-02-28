@@ -43,7 +43,8 @@ module "prod" {
   environment = var.environment
 
   ############### shared in lambda and rds ###############
-  req_query_return_limit = 20
+  req_query_return_limit   = 20
+  trans_query_return_limit = 20
 
   ############### shared in lambda and rds ###############
   db_snapshot_id = null
