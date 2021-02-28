@@ -18,3 +18,7 @@ variable "db_snapshot_id" {
 variable "req_query_return_limit" {
   type = number
 }
+
+variable "trans_query_return_limit" {
+  type = number
+}
