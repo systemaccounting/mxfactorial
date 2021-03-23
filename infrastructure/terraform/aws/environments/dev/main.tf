@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 0.12.4"
+  required_version = "~> 0.14.8"
 
   backend "remote" {
     hostname     = "app.terraform.io"
@@ -12,16 +12,13 @@ terraform {
 }
 
 provider "aws" {
-  region  = "us-east-1"
-  version = "~> 2.19.0"
+  region = "us-east-1"
 
   # use regions where only cloud9 available
   # https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/
 }
 
-provider "archive" {
-  version = "~> 1.2.2"
-}
+provider "archive" {}
 
 data "terraform_remote_state" "aws-us-east-1" {
   backend = "remote"
@@ -47,7 +44,14 @@ module "dev" {
   trans_query_return_limit = 20
 
   ############### shared in lambda and rds ###############
-  db_snapshot_id = "dev-2020-05-24"
+  # db_snapshot_id = "dev-2020-05-24"
+  db_snapshot_id = null
+
+  ############### rds ###############
+  rds_db_version                  = "13.1"
+  rds_allow_major_version_upgrade = true
+  rds_instance_class              = "db.t3.micro"
+  rds_parameter_group             = "default.postgres13"
 
   ############### api gateway ###############
   certificate_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, var.environment)

@@ -22,3 +22,13 @@ variable "req_query_return_limit" {
 variable "trans_query_return_limit" {
   type = number
 }
+
+variable "rds_db_version" {}
+
+variable "rds_allow_major_version_upgrade" {
+  type = bool
+}
+
+variable "rds_instance_class" {}
+
+variable "rds_parameter_group" {}

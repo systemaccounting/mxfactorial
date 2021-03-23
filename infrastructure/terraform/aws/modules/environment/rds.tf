@@ -4,13 +4,13 @@ resource "aws_db_instance" "postgres" {
   allocated_storage                   = 20
   storage_type                        = "gp2"
   engine                              = "postgres"
-  engine_version                      = "11.8"
-  instance_class                      = "db.t2.micro"
+  engine_version                      = var.rds_db_version
+  instance_class                      = var.rds_instance_class
   name                                = "mxfactorial"
   username                            = "u${random_password.pguser.result}"
   password                            = random_password.pgpassword.result
   port                                = 5432
-  parameter_group_name                = "default.postgres11"
+  parameter_group_name                = var.rds_parameter_group
   backup_retention_period             = 0
   backup_window                       = "07:09-07:39"
   db_subnet_group_name                = aws_db_subnet_group.default.name
@@ -20,6 +20,7 @@ resource "aws_db_instance" "postgres" {
   skip_final_snapshot                 = true
   vpc_security_group_ids              = [aws_security_group.postgres.id]
   publicly_accessible                 = true
+  allow_major_version_upgrade         = var.rds_allow_major_version_upgrade
 }
 
 resource "random_password" "pguser" {
