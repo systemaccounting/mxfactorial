@@ -121,20 +121,13 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
   lambda_function {
     # name of function to deploy
-    id = aws_lambda_function.clone_tool_lambda.function_name
+    id = aws_lambda_function.graphql.function_name
     # name of lambda performing deployment
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     # s3 event triggering deployment
     events = local.lambda_invoke_events
     # s3 object triggering deployment
-    filter_prefix = data.aws_s3_bucket_object.clone_tool_lambda.key
-  }
-
-  lambda_function {
-    id                  = aws_lambda_function.graphql.function_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.graphql.key
+    filter_prefix = data.aws_s3_bucket_object.graphql.key
   }
 
   lambda_function {
@@ -177,20 +170,6 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
     lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
     events              = local.lambda_invoke_events
     filter_prefix       = data.aws_s3_bucket_object.deploy_lambda.key
-  }
-
-  lambda_function {
-    id                  = aws_lambda_function.migrate_lambda.function_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.migrate_lambda.key
-  }
-
-  lambda_function {
-    id                  = data.aws_lambda_layer_version.migrate_lambda.layer_name
-    lambda_function_arn = aws_lambda_permission.allow_deploy_lambda_invoke_from_s3.function_name
-    events              = local.lambda_invoke_events
-    filter_prefix       = data.aws_s3_bucket_object.migrate_lambda_layer.key
   }
 
   lambda_function {
