@@ -8,10 +8,6 @@ CREATE TABLE industry (
   index_item_description character varying(255) not null unique
 );
 
--- industry seed data
-insert into industry(sector, index, index_item_description)
-values(54, 541219, 'Accounting services (except CPAs)');
-
 -- todo: import from https://www.bls.gov/soc/
 -- example data: https://www.bls.gov/soc/2018/soc_structure_2018.pdf
 -- app inserts when user cannot find match
@@ -22,10 +18,6 @@ CREATE TABLE occupation (
   broad_group character varying(255),
   detailed_occupation character varying(255) not null unique
 );
-
--- occupation seed data
-insert into occupation(major_group, minor_group, broad_group, detailed_occupation)
-values('13-2000', '13-2010', '13-2011', 'Accountants and Auditors');
 
 -- account_profile records are versioned rather than
 -- deleted to support historical transaction records
