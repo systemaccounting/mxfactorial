@@ -15,6 +15,10 @@ resource "aws_lambda_function" "go_migrate_faas" {
   runtime = "provided"
   timeout = 60
   role    = aws_iam_role.go_migrate_faas.arn
+
+  environment {
+    variables = local.POSTGRES_VARS
+  }
 }
 
 resource "aws_cloudwatch_log_group" "go_migrate_faas" {
@@ -42,7 +46,7 @@ resource "aws_iam_role" "go_migrate_faas" {
 EOF
 }
 
-# Policy for Lambda to create logs and access rds
+# allow function to create logs and access rds
 resource "aws_iam_role_policy" "go_migrate_faas_policy" {
   name = "go-migrate-faas-policy-${var.environment}"
   role = aws_iam_role.go_migrate_faas.id

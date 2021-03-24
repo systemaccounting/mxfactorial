@@ -1,0 +1,29 @@
+name: dev-go-migrate
+
+on:
+  push:
+    paths:
+    - 'schema/go-migrate-faas/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  build:
+    name: go-migrate-faas
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: create zip for deployment
+        run: make build
+        working-directory: schema/go-migrate-faas
+      - name: zip
+        run: make zip
+        working-directory: schema/go-migrate-faas
+      - name: deploy
+        run: make deploy-only ENV=dev
+        working-directory: schema/go-migrate-faas
