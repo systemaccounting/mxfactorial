@@ -9,25 +9,29 @@ POSTGRES_VOLUME_MOUNT_PATH=$(PWD)/postgres-data
 CONTAINER_POSTGRES_STORAGE_PATH=/bitnami/postgresql
 DOCKER_IMAGE=bitnami/postgresql
 IMAGE_VERSION=latest
-MIGRATION_PATH=$(CURDIR)/migrations
 DATABASE_TYPE=postgres
 POSTGRESQL_HOST=localhost
 POSTGRESQL_PORT=$(CONTAINER_PORT)
-POSTGRESQL_CONNECTION=$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable
+test-dir-arg:
+ifndef DIR
+	$(error trailing DIR assignment missing, e.g. make up DIR=migrations)
+endif
+POSTGRESQL_CONNECTION=$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=schema_version_$(DIR)
+MIGRATIONS_DIR=$(CURDIR)/$(DIR)
 
 # migration lambda vars
 test-env-arg:
 ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 MIGRATION_LAMBDA_NAME=go-migrate-faas-$(ENV)
 REGION=us-east-1
 MIGRATION_BRANCH=199/db-item-transaction
-MIGRATION_COMMAND=down
+MIGRATION_COMMAND=up
 MIGRATION_COUNT=all
 # MIGRATION_VERSION only relevant to force command
 MIGRATION_VERSION=7
-MIGRATION_EVENT='{"branch":"$(MIGRATION_BRANCH)","command":"$(MIGRATION_COMMAND)","count":"$(MIGRATION_COUNT)","version":"$(MIGRATION_VERSION)"}'
+MIGRATION_EVENT='{"branch":"$(MIGRATION_BRANCH)","command":"$(MIGRATION_COMMAND)","count":"$(MIGRATION_COUNT)","version":"$(MIGRATION_VERSION)","directory":"$(DIR)"}'
 
 # postgres docker
 run:
@@ -66,32 +70,39 @@ ifndef VERSION
 endif
 
 init:
-	migrate create -ext sql -dir $(MIGRATION_PATH) -seq init_schema
+	migrate create -ext sql -dir $(MIGRATIONS_DIR) -seq init_schema
 
 create:
+	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-name-arg
-	migrate -verbose create -ext sql -dir $(MIGRATION_PATH) -seq $(NAME)
+	migrate -verbose create -ext sql -dir $(MIGRATIONS_DIR) -seq $(NAME)
 
 up:
+	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-count-arg
-	migrate -verbose -path $(MIGRATION_PATH) -database "$(POSTGRESQL_CONNECTION)" up $(COUNT)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" up $(COUNT)
 
 down:
+	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-count-arg
-	migrate -verbose -path $(MIGRATION_PATH) -database "$(POSTGRESQL_CONNECTION)" down $(COUNT)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" down $(COUNT)
 
 up-all:
-	migrate -verbose -path $(MIGRATION_PATH) -database "$(POSTGRESQL_CONNECTION)" up
+	@$(MAKE) -s test-dir-arg
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" up
 
 down-all:
-	yes | migrate -verbose -path $(MIGRATION_PATH) -database "$(POSTGRESQL_CONNECTION)" down
+	@$(MAKE) -s test-dir-arg
+	yes | migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" down
 
 drop:
-	migrate -verbose -path $(MIGRATION_PATH) -database "$(POSTGRESQL_CONNECTION)" drop -f
+	@$(MAKE) -s test-dir-arg
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" drop -f
 
 force:
+	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-version-arg
-	migrate -verbose -path $(MIGRATION_PATH) -database "$(POSTGRESQL_CONNECTION)" force $(VERSION)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" force $(VERSION)
 
 test:
 	$(MAKE) up-all
@@ -111,6 +122,7 @@ clear:
 
 # lambda
 deploy-migrations:
+	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-env-arg
 	@aws lambda invoke \
 		--region $(REGION) \

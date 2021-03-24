@@ -6,8 +6,6 @@ handler () {
     LAMBDA_TMP_DIR='/tmp'
     REPO_DIR="$LAMBDA_TMP_DIR/mxfactorial"
     LOG_FILE="$REPO_DIR/invoke.log"
-    MIGRATION_DIR="$REPO_DIR/schema/migrations"
-    POSTGRESQL_CONNECTION=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=disable
 
     # parse migration event values
     EVENT_DATA=$1
@@ -15,9 +13,14 @@ handler () {
     DIRECTION=$(echo $EVENT_DATA | jq -r ".command")
     COUNT=$(echo $EVENT_DATA | jq -r ".count")
     VERSION=$(echo $EVENT_DATA | jq -r ".version")
+    DIRECTORY=$(echo $EVENT_DATA | jq -r ".directory")
+
+    # set event dependent migration values
+    MIGRATIONS_DIR="$REPO_DIR/schema/$DIRECTORY"
+    POSTGRESQL_CONNECTION="postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=disable&x-migrations-table=schema_version_${DIRECTORY}"
 
     # build go migrate command
-    CMD="$(pwd)/migrate.linux-amd64 -verbose -path $MIGRATION_DIR -database $POSTGRESQL_CONNECTION"
+    CMD="$(pwd)/migrate.linux-amd64 -verbose -path ${MIGRATIONS_DIR} -database \"${POSTGRESQL_CONNECTION}\""
     FORCE_CMD="${CMD} force"
     DROP_CMD="${CMD} drop -f"
 
@@ -99,7 +102,7 @@ handler () {
     echo -e "\ncommit sha: $(cd $REPO_DIR && git rev-parse --short HEAD)"
 
     # log cloned directory contents
-    echo -e "\nmigrations found in $MIGRATION_DIR:\n$(ls $MIGRATION_DIR)\n"
+    echo -e "\nmigrations found in $MIGRATIONS_DIR:\n$(ls $MIGRATIONS_DIR)\n"
 
     # run
     eval "$CMD &> $LOG_FILE"

@@ -11,18 +11,10 @@ MIGRATE_BINARY_ARTIFACT=$(MIGRATE_BINARY_NAME).zip
 DATABASE ?= postgres mysql redshift cassandra spanner cockroachdb clickhouse mongodb sqlserver firebird neo4j pgx
 DATABASE_TEST ?= $(DATABASE) sqlite sqlcipher
 VERSION ?= $(shell git describe --tags 2>/dev/null | cut -c 2-)
-
 test-env-arg:
 ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
-INVOKE_LOGFILE=./invoke.log
-MIGRATION_BRANCH=199/db-item-transaction
-MIGRATION_COMMAND=up
-MIGRATION_COUNT=all
-# MIGRATION_VERSION only relevant to force command
-MIGRATION_VERSION=7
-MIGRATION_EVENT='{"branch":"$(MIGRATION_BRANCH)","command":"$(MIGRATION_COMMAND)","count":"$(MIGRATION_COUNT)","version":"$(MIGRATION_VERSION)"}'
 
 ###################### clean ######################
 
@@ -96,15 +88,5 @@ deploy-only:
 		$(MAKE) update-function ENV=$(ENV)
 
 deploy-all: deploy
-
-# lambda
-deploy-migrations:
-	@$(MAKE) -s test-env-arg
-	@aws lambda invoke \
-		--region $(REGION) \
-		--invocation-type RequestResponse \
-		--function-name $(LAMBDA_NAME)-$(ENV) \
-		--payload "$$(echo $(MIGRATION_EVENT) | base64)" \
-		$(INVOKE_LOGFILE)
 
 initial-deploy: test-env-arg deploy
