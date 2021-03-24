@@ -12,26 +12,60 @@ IMAGE_VERSION=latest
 DATABASE_TYPE=postgres
 POSTGRESQL_HOST=localhost
 POSTGRESQL_PORT=$(CONTAINER_PORT)
+
+# arg tests
 test-dir-arg:
 ifndef DIR
 	$(error trailing DIR assignment missing, e.g. make up DIR=migrations)
 endif
-POSTGRESQL_CONNECTION=$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=schema_version_$(DIR)
-MIGRATIONS_DIR=$(CURDIR)/$(DIR)
 
-# migration lambda vars
 test-env-arg:
 ifndef ENV
 	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
+
+test-name-arg:
+ifndef NAME
+	$(error trailing NAME assignment missing, e.g. make create NAME=rule)
+endif
+
+test-cmd-arg:
+ifndef CMD
+	$(error trailing CMD assignment missing, e.g. make deploy-migrations CMD=up)
+endif
+
+test-count-arg:
+ifndef COUNT
+	$(error trailing COUNT assignment missing, e.g. make up COUNT=3, OR make up COUNT=all)
+endif
+
+test-cmd-count-arg:
+ifeq ($(CMD),$(filter $(CMD),up down))
+	@$(MAKE) -s test-count-arg
+endif
+
+test-version-arg:
+ifndef VERSION
+	$(error trailing VERSION assignment missing, e.g. make force VERSION=7)
+endif
+
+test-force-version-arg:
+ifeq ($(CMD),force)
+	@$(MAKE) -s test-version-arg
+endif
+
+test-branch-arg:
+ifndef BRANCH
+	$(error trailing BRANCH assignment missing, e.g. BRANCH=your-branch-name)
+endif
+
+# postgres
+POSTGRESQL_CONNECTION=$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=schema_version_$(DIR)
+MIGRATIONS_DIR=$(CURDIR)/$(DIR)
+
+# migration lambda vars
 MIGRATION_LAMBDA_NAME=go-migrate-faas-$(ENV)
 REGION=us-east-1
-MIGRATION_BRANCH=199/db-item-transaction
-MIGRATION_COMMAND=up
-MIGRATION_COUNT=all
-# MIGRATION_VERSION only relevant to force command
-MIGRATION_VERSION=7
-MIGRATION_EVENT='{"branch":"$(MIGRATION_BRANCH)","command":"$(MIGRATION_COMMAND)","count":"$(MIGRATION_COUNT)","version":"$(MIGRATION_VERSION)","directory":"$(DIR)"}'
 
 # postgres docker
 run:
@@ -53,23 +87,8 @@ clean:
 	rm -rf $(POSTGRES_VOLUME_MOUNT_PATH)
 
 # go migrate
-test-name-arg:
-ifndef NAME
-	$(error trailing NAME assignment missing, e.g. make create NAME=rule)
-endif
-
-test-count-arg:
-ifndef COUNT
-	$(info trailing COUNT assignment missing, defaulting to COUNT=1)
-COUNT=1
-endif
-
-test-version-arg:
-ifndef VERSION
-	$(info trailing VERSION assignment missing, defaulting to VERSION=1)
-endif
-
 init:
+	@$(MAKE) -s test-dir-arg
 	migrate create -ext sql -dir $(MIGRATIONS_DIR) -seq init_schema
 
 create:
@@ -123,10 +142,14 @@ clear:
 # lambda
 deploy-migrations:
 	@$(MAKE) -s test-dir-arg
+	@$(MAKE) -s test-branch-arg
+	@$(MAKE) -s test-cmd-arg
+	@$(MAKE) -s test-cmd-count-arg
+	@$(MAKE) -s test-force-version-arg
 	@$(MAKE) -s test-env-arg
 	@aws lambda invoke \
 		--region $(REGION) \
 		--invocation-type RequestResponse \
 		--function-name $(MIGRATION_LAMBDA_NAME) \
-		--payload "$$(echo $(MIGRATION_EVENT) | base64)" \
+		--payload "$$(echo '{"branch":"$(BRANCH)","command":"$(CMD)","count":"$(COUNT)","version":"$(VERSION)","directory":"$(DIR)"}' | base64)" \
 		invoke.log
