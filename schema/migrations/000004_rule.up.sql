@@ -45,13 +45,13 @@ CREATE TABLE rule_instance (
   region_name character varying(255),
   state_name character varying(255),
   postal_code character varying(255),
-  latlng character varying(255),
+  latlng point,
   email_address character varying(255),
-  telephone_country_code character varying(255),
-  telephone_area_code character varying(255),
-  telephone_number character varying(255),
-  occupation character varying(255),
-  industry character varying(255),
+  telephone_country_code int,
+  telephone_area_code int,
+  telephone_number int,
+  occupation_id int,
+  industry_id int,
   -- ***
   disabled_time timestamptz,
   removed_time timestamptz,
@@ -61,7 +61,13 @@ CREATE TABLE rule_instance (
       REFERENCES rule(name),
   CONSTRAINT fk_account_name
     FOREIGN KEY(account_name)
-      REFERENCES account(name)
+      REFERENCES account(name),
+  CONSTRAINT fk_occupation_id
+    FOREIGN KEY(occupation_id)
+      REFERENCES occupation(id),
+  CONSTRAINT fk_industry_id
+    FOREIGN KEY(industry_id)
+      REFERENCES industry(id)
   -- CONSTRAINT fk_item_id -- todo
   --   FOREIGN KEY(item_id)
   --     REFERENCES item(id)

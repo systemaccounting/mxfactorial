@@ -4,12 +4,22 @@
 
 convenient local development with [postgres in docker](https://hub.docker.com/r/bitnami/postgresql) and [go migrate](https://github.com/golang-migrate/migrate)
 
+### migration directories
+1. `./migrations` stores schema
+1. `./seed` stores seed data common to dev and prod dbs
+1. `./testseed` stores seed data for dev db only
+
 ### tl;dr start local development
 1. `brew install golang-migrate`
 1. `make run` to start postgres in docker
 1. `make up-all DIR=migrations` to add all migrations from `./migrations` and record schema version in `schema_versions_migrations` table
 1. `make up-all DIR=seed` to add all migrations from `./seed` and record schema version in `schema_versions_seed` table
 1. `make up-all DIR=testseed` to add all migrations from `./testseed` and record schema version in `schema_versions_testseed` table
+
+### work fast
+1. add changes
+1. `make redev` to add all from `migrations`, `seed` and `testseed` directories
+1. `make devtest` to up & down test `migrations`, `seed` and `testseed` directories
 
 ### postgres docker commands
 1. `make run` starts a local postgres docker container with `./postgres-data` created and mounted

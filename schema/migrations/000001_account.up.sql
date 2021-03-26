@@ -10,7 +10,6 @@ CREATE TABLE account (
 CREATE TABLE subaccount (
   name character varying(255) NOT NULL PRIMARY KEY,
   created_by character varying(255) NOT NULL,
-  created_at timestamptz NOT NULL,
   CONSTRAINT fk_name
     FOREIGN KEY(name)
       REFERENCES account(name),
@@ -19,16 +18,17 @@ CREATE TABLE subaccount (
       REFERENCES account(name)
 );
 
--- subaccount names cannot duplicate account names
--- eg "joe" account vs "joe" subaccount
--- so subaccount shares account namespace
+-- subaccount shares namespace with account but
+-- storing subaccounts in different table to
+-- avoid is_subaccount & is_not_subaccount functions,
+-- forgetting is_subaccount constraint checks, etc
 -- subaccount created on account trigger
 CREATE OR REPLACE FUNCTION add_subaccount()
 	RETURNS trigger AS
 $$
 BEGIN
-		INSERT INTO subaccount(name, created_by, created_at)
-		VALUES (NEW.name, NEW.created_by, NEW.created_at);
+		INSERT INTO subaccount(name, created_by)
+		VALUES (NEW.name, NEW.created_by);
 	RETURN NULL;
 END;
 $$
