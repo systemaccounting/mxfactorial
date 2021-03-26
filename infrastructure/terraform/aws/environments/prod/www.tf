@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "www_mxfactorial_react" {
   version = "2012-10-17"
 
   statement {
-    sid = "CloudFrontGetWWWBucketObjects${title(var.environment)}"
+    sid = "CloudFrontGetWWWBucketObjects${title(local.ENV)}"
     principals {
       type        = "AWS"
       identifiers = [aws_cloudfront_origin_access_identity.www_s3_react_distribution.iam_arn]
@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "www_mxfactorial_react" {
   }
 
   statement {
-    sid       = "CloudFrontListWWWBucketObjects${title(var.environment)}"
+    sid       = "CloudFrontListWWWBucketObjects${title(local.ENV)}"
     actions   = ["s3:ListBucket"]
     resources = [aws_s3_bucket.www_mxfactorial_react.arn]
     principals {

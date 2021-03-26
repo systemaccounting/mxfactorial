@@ -1,5 +1,5 @@
 resource "aws_db_instance" "postgres" {
-  identifier                          = "mxfactorial-postgres-${var.environment}"
+  identifier                          = var.rds_instance_name
   snapshot_identifier                 = var.db_snapshot_id
   allocated_storage                   = 20
   storage_type                        = "gp2"

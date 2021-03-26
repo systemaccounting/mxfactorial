@@ -69,19 +69,23 @@ deploy: zip deploy-only
 
 put-object:
 	@$(MAKE) -s test-env-arg
-	aws s3api put-object \
+	@ETAG=$$(aws s3api put-object \
 		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 		--key=$(ARTIFACT_NAME) \
 		--body=$(DIR)/$(ARTIFACT_NAME) \
-		--region=$(REGION)
+		--region=$(REGION) \
+		--output=text | sed 's/"//g'); \
+	echo "***pushed $(ARTIFACT_NAME) artifact with ETag: $$ETAG"
 
 update-function:
 	@$(MAKE) -s test-env-arg
-	aws lambda update-function-code \
+	@MOD=$$(aws lambda update-function-code \
 		--function-name=$(LAMBDA_NAME)-$(ENV) \
 		--s3-key=$(ARTIFACT_NAME) \
 		--s3-bucket=$(ARTIFACT_BUCKET)-$(ENV) \
-		--region=$(REGION)
+		--region=$(REGION) \
+		--query 'LastModified' | xargs);\
+	echo "***$(LAMBDA_NAME)-$(ENV) lambda deployed @ $$MOD"
 
 deploy-only:
 		$(MAKE) put-object ENV=$(ENV)

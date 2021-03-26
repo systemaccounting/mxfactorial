@@ -32,12 +32,17 @@ data "terraform_remote_state" "aws-us-east-1" {
   }
 }
 
+locals {
+  APP = "mxfactorial"
+  ENV = "prod"
+}
+
 # IMPORTANT: first build lambda artifacts using `cd infrastructure/terraform && sh build.sh $ENV`
 module "prod" {
   source = "../../modules/environment"
 
   ############### shared ###############
-  environment = var.environment
+  environment = local.ENV
 
   ############### shared in lambda and rds ###############
   req_query_return_limit   = 20
@@ -51,11 +56,12 @@ module "prod" {
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t2.micro"
   rds_parameter_group             = "default.postgres11"
+  rds_instance_name               = "${local.APP}-postgres-${local.ENV}"
 
   ############### api gateway ###############
-  certificate_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, var.environment)
+  certificate_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, local.ENV)
 
   ############### cloudfront ###############
-  ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, var.environment)
+  ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, local.ENV)
 }
 
