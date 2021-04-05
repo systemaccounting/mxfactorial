@@ -18,9 +18,18 @@ jobs:
       CI: true
     steps:
       - uses: actions/checkout@v1
-      - name: install dependencies and execute unit tests
-        run: make test-unit ENV=dev
+      - name: install prod and dev dependencies
+        run: make install
         working-directory: services/rules-faas
-      - name: deploy and execute integraton tests
+      - name: unit tests
+        run: make test-unit
+        working-directory: services/rules-faas
+      - name: deploy to dev
+        run: make deploy ENV=dev
+        working-directory: services/rules-faas
+      - name: build .env file from secrets manager
+        run: make get-secrets ENV=dev
+        working-directory: services/rules-faas
+      - name: integration tests
         run: make test-integration ENV=dev
         working-directory: services/rules-faas
