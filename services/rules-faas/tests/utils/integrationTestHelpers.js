@@ -1,4 +1,3 @@
-
 const createAccount = (service, clientId, account, secret) => {
   let params = {
     ClientId: clientId,
@@ -55,8 +54,18 @@ const getToken = async (service, clientId, account, secret) => {
     .catch(err => err)
 }
 
+async function invokeLambda (service, items) {
+  const params = {
+    FunctionName: process.env.RULE_LAMBDA_ARN,
+    Payload: JSON.stringify(items)
+  };
+  const { Payload } = await service.invoke(params).promise();
+  return JSON.parse(Payload)
+}
+
 module.exports = {
   createAccount,
   deleteAccount,
-  getToken
+  getToken,
+  invokeLambda,
 }
