@@ -1,45 +1,81 @@
-const AWS = require('aws-sdk')
+const pool = require('./src/db');
+const addRuleItems = require('./src/addRuleItems');
+const getRulesPerItemAccount = require('./src/db/getRulesPerItemAccount');
+const applyItemRules = require('./src/applyItemRules');
+const applyApproverRules = require('./src/applyApproverRules');
+const getItemApproverNames = require('./src/db/getItemApproverNames');
+const getRulesPerApprover = require('./src/db/getRulesPerApprover');
+const createApprover = require('./src/model/approver');
+const addApproversAndRules = require('./src/addApproversAndRules');
+const labelApprovedItems = require('./src/labelApprovedItems');
+const testDebitorFirstValues = require('./src/testDebitorFirstValues');
 
-const {
-  applyRules,
-  getRules,
-  queryTable
-} = require('./src/applyRules')
-
-// env var inventory (avoid assigning to const):
-// RULE_INSTANCES_TABLE_NAME
-
-// keySchema examples for rules:
-// 1. creditor:Person2|name:petrol (any sale of petrol with Person2 as creditor)
-// 2. name: (any transaction)
-const anyItemKeySchema = 'name:' // applies to all transactions
-const rulesToQuery = [ anyItemKeySchema ]
-// todo: convert multi-service constants to env vars set in terraform
-const RULE_INSTANCES_TABLE_RANGE_KEY = 'key_schema'
-const RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME = 'ruleId'
-const RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME = 'items'
-
-const ddb = new AWS.DynamoDB.DocumentClient({ region: process.env.AWS_REGION })
-
+// todo: handle errors
 exports.handler = async event => {
-  console.log(event)
+  // console.log(event);
   if (!Object.keys(event).length) {
-    console.log('warming up...')
-    return
+    console.log('warming up...');
+    return null;
   }
-  let rules = await getRules(
-    rulesToQuery,
-    queryTable,
-    ddb,
-    process.env.RULE_INSTANCES_TABLE_NAME,
-    RULE_INSTANCES_TABLE_RANGE_KEY
-  )
 
-  let transactionsWithRulesApplied = applyRules(
-    event.items,
-    rules,
-    RULE_INSTANCE_ID_FUNCTION_PARAMETER_NAME,
-    RULE_INSTANCE_TRANSACTIONS_ITEMS_FUNCTION_PARAMETER_NAME,
-  )
-  return transactionsWithRulesApplied
+  // todo: quality test transactionItems
+
+  // user wants DEBITOR or CREDITOR processed first
+  let transactionSequence;
+  try {
+    transactionSequence = testDebitorFirstValues(event);
+  } catch(e) {
+    // Error: inconsistent debitor_first values
+    return e.toString();
+  }
+
+  // get a db
+  const db = await pool.getClient();
+
+  // get item rules from db, then create items from rules
+  let addedItems;
+  try {
+    addedItems = await addRuleItems(
+      transactionSequence,
+      db,
+      event,
+      getRulesPerItemAccount,
+      applyItemRules,
+    );
+  } catch(e) {
+    await db.end();
+    return e.toString();
+  };
+
+  // combine rule added items to items received in event
+  const ruleAppliedItems = [...addedItems, ...event];
+
+  // get approvers & rules from db, then apply to items
+  let ruleAppliedApprovers;
+  try {
+    ruleAppliedApprovers = await addApproversAndRules(
+      transactionSequence,
+      db,
+      ruleAppliedItems,
+      getItemApproverNames,
+      createApprover,
+      getRulesPerApprover,
+      applyApproverRules,
+    );
+  } catch(e) {
+    await db.end();
+    // Error: approvers not found
+    return e.toString();
+  };
+
+  // let db go
+  await db.end();
+
+  // label rule approved transaction items
+  const labelAsApproved = labelApprovedItems(
+    ruleAppliedItems,
+    transactionSequence,
+  );
+
+  return labelAsApproved;
 }
