@@ -170,3 +170,15 @@ resource "aws_secretsmanager_secret_version" "request_approve_lambda_arn" {
   secret_id     = aws_secretsmanager_secret.request_approve_lambda_arn.id
   secret_string = aws_lambda_function.request_approve.arn
 }
+
+resource "aws_secretsmanager_secret" "rule_lambda_arn" {
+  name                    = "${var.environment}/RULE_LAMBDA_ARN"
+  recovery_window_in_days = 0
+  description             = "rule lambda arn in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "rule_lambda_arn" {
+  secret_id     = aws_secretsmanager_secret.rule_lambda_arn.id
+  secret_string = aws_lambda_function.rules_faas.arn
+}
+
