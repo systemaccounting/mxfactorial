@@ -127,17 +127,6 @@ resource "aws_secretsmanager_secret_version" "postgres_user" {
   secret_string = local.POSTGRES_VARS.PGUSER
 }
 
-resource "aws_secretsmanager_secret" "rule_instance_table_name" {
-  name                    = "${var.environment}/RULE_INSTANCE_TABLE_NAME"
-  recovery_window_in_days = 0
-  description             = "rule instance table name in ${var.environment}"
-}
-
-resource "aws_secretsmanager_secret_version" "rule_instance_table_name" {
-  secret_id     = aws_secretsmanager_secret.rule_instance_table_name.id
-  secret_string = aws_dynamodb_table.rule_instances.name
-}
-
 resource "aws_secretsmanager_secret" "rds_transaction_teardown_lambda" {
   name                    = "${var.environment}/RDS_TRANSACTION_TEARDOWN_LAMBDA"
   recovery_window_in_days = 0
@@ -180,15 +169,4 @@ resource "aws_secretsmanager_secret" "request_approve_lambda_arn" {
 resource "aws_secretsmanager_secret_version" "request_approve_lambda_arn" {
   secret_id     = aws_secretsmanager_secret.request_approve_lambda_arn.id
   secret_string = aws_lambda_function.request_approve.arn
-}
-
-resource "aws_secretsmanager_secret" "nine_percent_ca_sales_tax" {
-  name                    = "${var.environment}/NINE_PERCENT_CA_SALES_TAX"
-  recovery_window_in_days = 0
-  description             = "nine percent ca sales tax in ${var.environment}"
-}
-
-resource "aws_secretsmanager_secret_version" "nine_percent_ca_sales_tax" {
-  secret_id     = aws_secretsmanager_secret.nine_percent_ca_sales_tax.id
-  secret_string = base64encode(local.nine_percent_ca_sales_tax_rule)
 }

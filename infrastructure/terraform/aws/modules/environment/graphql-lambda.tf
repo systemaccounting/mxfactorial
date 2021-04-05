@@ -31,7 +31,6 @@ resource "aws_lambda_function" "graphql" {
         aws_cognito_user_pool.pool.id,
         "/.well-known/jwks.json"
       ])
-      RULE_INSTANCES_TABLE_NAME = aws_dynamodb_table.rule_instances.name
     }
   }
 }
@@ -105,23 +104,6 @@ data "aws_iam_policy_document" "graphql_policy" {
     ]
     resources = [
       "*",
-    ]
-  }
-  statement {
-    sid = "GraphQLLambdaDynamoDbPolicy${title(var.environment)}"
-    actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:ConditionCheck",
-      "dynamodb:GetItem",
-      "dynamodb:GetRecords",
-      "dynamodb:Query",
-      "dynamodb:Scan"
-    ]
-    resources = [
-      aws_dynamodb_table.rule_instances.arn,
-      # if indexes added later:
-      # "${aws_dynamodb_table.rule_instances.arn}/index/*"
     ]
   }
 }

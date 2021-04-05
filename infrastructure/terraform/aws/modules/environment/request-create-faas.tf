@@ -18,8 +18,7 @@ resource "aws_lambda_function" "request_create" {
   environment {
     variables = merge(
       {
-        NOTIFY_TOPIC_ARN          = aws_sns_topic.notifications.arn,
-        RULE_INSTANCES_TABLE_NAME = aws_dynamodb_table.rule_instances.name
+        NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
       },
       local.POSTGRES_VARS
     )
@@ -104,25 +103,6 @@ data "aws_iam_policy_document" "request_create_policy" {
       aws_sns_topic.notifications.arn,
     ]
   }
-
-  statement {
-    sid = "RequestCreateLambdaDynamoDbPolicy${title(var.environment)}"
-    actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:ConditionCheck",
-      "dynamodb:GetItem",
-      "dynamodb:GetRecords",
-      "dynamodb:Query",
-      "dynamodb:Scan"
-    ]
-    resources = [
-      aws_dynamodb_table.rule_instances.arn,
-      # if indexes added later:
-      # "${aws_dynamodb_table.rule_instances.arn}/index/*"
-    ]
-  }
-
 }
 
 resource "aws_iam_role_policy_attachment" "rds_access_for_request_create_lambda" {
