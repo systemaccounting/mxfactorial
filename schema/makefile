@@ -118,6 +118,11 @@ drop:
 	@$(MAKE) -s test-dir-arg
 	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" drop -f
 
+drop-all:
+	migrate -verbose -path ./migrations -database "$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=schema_version_migrations" drop -f
+	migrate -verbose -path ./seed -database "$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=schema_version_seed" drop -f
+	migrate -verbose -path ./testseed -database "$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=schema_version_testseed" drop -f
+
 force:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-version-arg
@@ -146,6 +151,8 @@ devtest:
 	yes | migrate -verbose -path ./migrations -database "$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=schema_version_migrations" down
 
 # lambda
+
+# e.g. make deploy-migrations ENV=dev DIR=migrations BRANCH=199/db-item-transaction CMD=up COUNT=all
 deploy-migrations:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-branch-arg
@@ -159,3 +166,76 @@ deploy-migrations:
 		--function-name $(MIGRATION_LAMBDA_NAME) \
 		--payload "$$(echo '{"branch":"$(BRANCH)","command":"$(CMD)","count":"$(COUNT)","version":"$(VERSION)","directory":"$(DIR)"}' | base64)" \
 		invoke.log
+
+# e.g. make deploy-all-testdb-up ENV=dev BRANCH=199/db-item-transaction
+deploy-all-testdb-up:
+	$(eval CMD := up)
+	$(eval COUNT := all)
+	$(eval DIR := migrations)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+	$(eval CMD := up)
+	$(eval COUNT := all)
+	$(eval DIR := seed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+	$(eval CMD := up)
+	$(eval COUNT := all)
+	$(eval DIR := testseed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+
+# e.g. make deploy-all-testdb-down ENV=dev BRANCH=199/db-item-transaction
+deploy-all-testdb-down:
+	$(eval CMD := down)
+	$(eval COUNT := all)
+	$(eval DIR := testseed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+	$(eval CMD := down)
+	$(eval COUNT := all)
+	$(eval DIR := seed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+	$(eval CMD := down)
+	$(eval COUNT := all)
+	$(eval DIR := migrations)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+
+# e.g. make deploy-all-testdb-drop ENV=dev BRANCH=199/db-item-transaction
+deploy-all-testdb-drop:
+	$(eval CMD := drop)
+	$(eval DIR := testseed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD)
+	$(eval CMD := drop)
+	$(eval DIR := seed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD)
+	$(eval CMD := drop)
+	$(eval DIR := migrations)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD)
+
+# e.g. make deploy-all-prod-up ENV=dev BRANCH=master
+deploy-all-prod-up:
+	$(eval CMD := up)
+	$(eval COUNT := all)
+	$(eval DIR := migrations)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+	$(eval CMD := up)
+	$(eval COUNT := all)
+	$(eval DIR := seed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+
+# e.g. make deploy-all-prod-down ENV=dev BRANCH=master
+deploy-all-prod-down:
+	$(eval CMD := down)
+	$(eval COUNT := all)
+	$(eval DIR := seed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+	$(eval CMD := down)
+	$(eval COUNT := all)
+	$(eval DIR := migrations)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD) COUNT=$(COUNT)
+
+# e.g. make deploy-all-prod-drop ENV=dev BRANCH=master
+deploy-all-prod-drop:
+	$(eval CMD := drop)
+	$(eval DIR := seed)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD)
+	$(eval CMD := drop)
+	$(eval DIR := migrations)
+	$(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=$(CMD)
