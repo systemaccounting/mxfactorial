@@ -99,6 +99,7 @@ handler () {
     rm -rf $REPO_DIR
 
     # clone
+    echo "git clone --depth 1 --single-branch --branch $BRANCH $REPO $REPO_DIR"
     git clone --depth 1 --single-branch --branch $BRANCH $REPO $REPO_DIR
 
     # log commit SHA
