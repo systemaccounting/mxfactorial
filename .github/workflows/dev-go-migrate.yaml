@@ -19,11 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: create zip for deployment
-        run: make build
-        working-directory: schema/go-migrate-faas
-      - name: zip
         run: make zip
         working-directory: schema/go-migrate-faas
+      - name: zip
+        run: make put-object ENV=dev
+        working-directory: schema/go-migrate-faas
       - name: deploy
-        run: make deploy-only ENV=dev
+        run: make update-function ENV=dev
         working-directory: schema/go-migrate-faas
