@@ -11,7 +11,10 @@ resource "aws_lambda_function" "go_migrate_faas" {
   s3_object_version = data.aws_s3_bucket_object.go_migrate_faas.version_id
   handler           = "index.handler"
   # https://github.com/gkrizek/bash-lambda-layer
-  layers  = ["arn:aws:lambda:${data.aws_region.current.name}:744348701589:layer:bash:8"]
+  layers = [
+    "arn:aws:lambda:${data.aws_region.current.name}:744348701589:layer:bash:8",
+    data.aws_lambda_layer_version.go_migrate_faas.arn
+  ]
   runtime = "provided"
   timeout = 60
   role    = aws_iam_role.go_migrate_faas.arn
@@ -19,6 +22,15 @@ resource "aws_lambda_function" "go_migrate_faas" {
   environment {
     variables = local.POSTGRES_VARS
   }
+}
+
+data "aws_lambda_layer_version" "go_migrate_faas" {
+  layer_name = "go-migrate-provided-deps-${var.environment}"
+}
+
+data "aws_s3_bucket_object" "go_migrate_faas_layer" {
+  bucket = "mxfactorial-artifacts-${var.environment}"
+  key    = "go-migrate-layer.zip"
 }
 
 resource "aws_cloudwatch_log_group" "go_migrate_faas" {
