@@ -22,19 +22,19 @@ CREATE TABLE account_profile (
   id SERIAL PRIMARY KEY,
   account_name character varying(255) not null,
   description TEXT,
-  first_name character varying(255) CHECK (first_name = lower(first_name)),
-  middle_name character varying(255) CHECK (middle_name = lower(middle_name)),
-  last_name character varying(255) CHECK (last_name = lower(last_name)),
-  country_name character varying(255) CHECK (country_name = lower(country_name)),
-  street_number character varying(255) CHECK (street_number = lower(street_number)), -- in case of '72f' street number
-  street_name character varying(255) CHECK (street_name = lower(street_name)),
-  floor_number character varying(255) CHECK (floor_number = lower(floor_number)), -- in case of 'b' floor
-  unit_number character varying(255) CHECK (unit_number = lower(unit_number)), -- in case of '14d' unit number
-  city_name character varying(255) CHECK (city_name = lower(city_name)),
-  county_name character varying(255) CHECK (county_name = lower(county_name)),
-  region_name character varying(255) CHECK (region_name = lower(region_name)),
-  state_name character varying(255) CHECK (state_name = lower(state_name)),
-  postal_code character varying(255) CHECK (postal_code = lower(postal_code)),
+  first_name character varying(255),
+  middle_name character varying(255),
+  last_name character varying(255),
+  country_name character varying(255),
+  street_number character varying(255), -- in case of '72f' street number
+  street_name character varying(255),
+  floor_number character varying(255), -- in case of 'b' floor
+  unit_number character varying(255), -- in case of '14d' unit number
+  city_name character varying(255),
+  county_name character varying(255),
+  region_name character varying(255),
+  state_name character varying(255),
+  postal_code character varying(255),
   latlng point,
   email_address character varying(255),
   telephone_country_code int,
