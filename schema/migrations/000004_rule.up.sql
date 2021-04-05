@@ -4,7 +4,7 @@
 -- then, insert rule name in rule table
 CREATE TABLE rule (
   name character varying(255) PRIMARY KEY,
-  variable_names text[] not null,
+  variable_names text[],
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -22,12 +22,16 @@ CREATE TABLE rule (
 -- 6. app returns transactions with rules applied
 CREATE TABLE rule_instance (
   id SERIAL PRIMARY KEY,
+  rule_type character varying(255) not null,
   rule_name character varying(255) not null,
-  variable_values text[] not null,
+  rule_instance_name character varying(255) not null,
+  variable_values text[],
+  -- *** copied from approver ***
+  account_role text NOT NULL, -- todo: switch to enum after above noted go-migrate feature deployed
   -- *** copied from transaction_item ***
-  item_id character varying(255) NOT NULL, -- todo: switch to int after item inserts added in code
-  price numeric NOT NULL CHECK (price > 0),
-  quantity numeric NOT NULL CHECK (quantity > 0),
+  item_id character varying(255), -- todo: switch to int after item inserts added in code
+  price numeric CHECK (price > 0),
+  quantity numeric CHECK (quantity > 0),
   unit_of_measurement character varying(255),
   units_measured numeric,
   -- *** copied from account_profile ***
