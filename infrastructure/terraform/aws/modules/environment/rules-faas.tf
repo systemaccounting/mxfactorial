@@ -11,14 +11,16 @@ resource "aws_lambda_function" "rules_faas" {
   s3_key            = data.aws_s3_bucket_object.rules_faas.key
   s3_object_version = data.aws_s3_bucket_object.rules_faas.version_id
   handler           = "index.handler"
-  runtime           = "nodejs10.x"
+  runtime           = "nodejs14.x"
   timeout           = 30
   role              = aws_iam_role.rules_faas_role.arn
 
   environment {
-    variables = {
-      RULE_INSTANCES_TABLE_NAME = aws_dynamodb_table.rule_instances.name
-    }
+    variables = merge(local.POSTGRES_VARS, {
+      PG_MAX_CONNECTIONS = 20
+      PG_IDLE_TIMEOUT    = 10000
+      PG_CONN_TIMEOUT    = 500
+    })
   }
 }
 
@@ -67,22 +69,9 @@ data "aws_iam_policy_document" "rules_faas_policy" {
     ]
     resources = ["*"]
   }
+}
 
-  statement {
-    sid = "RulesLambdaDynamoDbPolicy${title(var.environment)}"
-    actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:BatchWriteItem",
-      "dynamodb:ConditionCheck",
-      "dynamodb:GetItem",
-      "dynamodb:GetRecords",
-      "dynamodb:Query",
-      "dynamodb:Scan"
-    ]
-    resources = [
-      aws_dynamodb_table.rule_instances.arn,
-      # if indexes added later:
-      # "${aws_dynamodb_table.rule_instances.arn}/index/*"
-    ]
-  }
+resource "aws_iam_role_policy_attachment" "rules_lambda_rds_access" {
+  role       = aws_iam_role.rules_faas_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }
