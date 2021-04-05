@@ -1,89 +1,90 @@
-const AWS = require('aws-sdk')
-const { handler } = require('./index')
+const { testItems } = require('./tests/utils/testData');
 const {
-  applyRules,
-  getRules
-} = require('./src/applyRules')
+  INCONSISTENT_SEQUENCE_ERROR,
+} = require('./src/constants');
 
-const {
-  fakerAccountWithSevenRandomDigits,
-  createRequestData,
-  testRuleInstances
-} = require('./tests/utils/testData')
+const mockTestDebitorFirstValues = jest.fn().mockImplementationOnce(() => {throw new Error()});
+jest.mock('./src/testDebitorFirstValues', () => mockTestDebitorFirstValues);
 
-// set test values in modules to avoid failure from
-// teardown of shared values in unfinished parallel tests
-const TEST_DEBITOR = fakerAccountWithSevenRandomDigits()
-const TEST_CREDITOR = fakerAccountWithSevenRandomDigits()
-const debitRequest = createRequestData(
-  TEST_DEBITOR,
-  TEST_CREDITOR,
-  'debit'
-)
+const mockDbEnd = jest.fn();
+const mockDbClient = jest.fn(() => ({ end: mockDbEnd }));
+jest.mock('./src/db/index', () => ({ getClient: mockDbClient}));
 
-const taxExcluded = [ debitRequest[0] ]
+const mockAddRuleItems= jest.fn()
+  .mockImplementationOnce(() => {throw new Error()})
+  .mockImplementation(() => ([]));
+jest.mock('./src/addRuleItems', () => mockAddRuleItems);
 
-afterEach(() => {
-  jest.clearAllMocks()
-})
+const mockAddApproversAndRules= jest.fn()
+  .mockImplementationOnce(() => {throw new Error()})
+  .mockImplementation(() => ([]));
+jest.mock('./src/addApproversAndRules', () => mockAddApproversAndRules);
 
-jest.mock('aws-sdk')
+jest.mock('./src/db/getItemApproverNames', () => jest.fn());
 
-jest.mock('./src/applyRules', () => {
-  return {
-    applyRules: jest.fn(
-      () => ({})
-    ),
-    getRules: jest.fn().mockImplementation(
-      () => jest.requireActual('./tests/utils/testData')
-      .testRuleInstances
-    ),
-    queryTable: {}
-  }
-})
+const mockLabelApprovedItems = jest.fn(() => ([]));
+jest.mock('./src/labelApprovedItems', () => mockLabelApprovedItems);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 describe('rules function handler', () => {
+  test('returns null on empty event', async () => {
+    const got = await require('./index').handler([]);
+    expect(got).toBe(null);
+  });
 
-  test('calls DocumentClient with config', async () => {
-    let expected = {
-      region: process.env.AWS_REGION
-    }
-    await handler({ transactions: taxExcluded })
-    await expect(AWS.DynamoDB.DocumentClient)
-      .toHaveBeenCalledWith(expected)
-    AWS.DynamoDB.DocumentClient.mockClear()
-  })
+  test('returns error when testDebitorFirstValues throws', async () => {
+    const got = await require('./index').handler(testItems);
+    expect(got).toBe('Error');
+  });
 
-  it('calls getRules with args', async () => {
-    let testRulesToQuery = ["name:"]
-    let testQueryFunc = {}
-    let testService = {}
-    let testTable = 'testtable'
-    process.env.RULE_INSTANCES_TABLE_NAME = testTable
-    let testRangeKey = 'key_schema'
-    await handler({ transactions: taxExcluded })
-    expect(getRules.mock.calls[0][0]).toEqual(testRulesToQuery)
-    expect(getRules.mock.calls[0][1]).toEqual(testQueryFunc)
-    // https://github.com/facebook/jest/issues/2982
-    // expect(getRules.mock.calls[0][2]).toBe(testService)
-    expect(getRules.mock.calls[0][3]).toBe(testTable)
-    expect(getRules.mock.calls[0][4]).toBe(testRangeKey)
-  })
+  test('returns error when addRuleItems throws and ends db session', async () => {
+    const got = await require('./index').handler(testItems);
+    expect(got).toBe('Error');
+    expect(mockDbEnd).toHaveBeenCalled();
+  });
 
-  it('calls applyRules with args', async () => {
-    let ruleIdParam = 'ruleId'
-    let itemsParam = 'items'
-    await handler({ items: debitRequest })
-    expect(applyRules).toHaveBeenCalledWith(
-      debitRequest,
-      testRuleInstances,
-      ruleIdParam,
-      itemsParam
-    )
-  })
+  test('returns error when mockAddApproversAndRules throws and ends db session', async () => {
+    const got = await require('./index').handler(testItems);
+    expect(got).toBe('Error');
+    expect(mockDbEnd).toHaveBeenCalled();
+  });
 
-  it('returns rule-modified transactions', async () => {
-    let result = await handler({ items: taxExcluded })
-    expect(result).toEqual({})
-  })
-})
+  test('calls testDebitorFirstValues with args', async () => {
+    await require('./index').handler(testItems);
+    expect(mockTestDebitorFirstValues)
+      .toHaveBeenCalledWith(testItems);
+  });
+
+  test('calls getClient on pool instance', async () => {
+    await require('./index').handler(testItems);
+    expect(mockDbClient)
+      .toHaveBeenCalled();
+  });
+
+  test('calls addRuleItems with args', async () => {
+    await require('./index').handler(testItems);
+    expect(mockAddRuleItems.mock.calls[0][2])
+      .toEqual(testItems);
+    expect(mockAddRuleItems.mock.calls[0].length)
+      .toBe(5);
+  });
+
+  test('calls end on db client', async () => {
+    await require('./index').handler(testItems);
+    expect(mockDbEnd).toHaveBeenCalled();
+  });
+
+  test('calls labelApprovedItems with args', async () => {
+    await require('./index').handler(testItems);
+    expect(mockLabelApprovedItems.mock.calls[0][0]).toEqual(testItems);
+    expect(mockLabelApprovedItems.mock.calls[0].length).toBe(2);
+  });
+
+  test('returns labelApprovedItems', async () => {
+    const got = await require('./index').handler(testItems);
+    expect(got).toEqual([]);
+  });
+});
