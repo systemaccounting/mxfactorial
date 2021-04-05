@@ -20,7 +20,7 @@ handler () {
     POSTGRESQL_CONNECTION="postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=disable&x-migrations-table=schema_version_${DIRECTORY}"
 
     # build go migrate command
-    CMD="$(pwd)/migrate.linux-amd64 -verbose -path ${MIGRATIONS_DIR} -database \"${POSTGRESQL_CONNECTION}\""
+    CMD="migrate.linux-amd64 -verbose -path ${MIGRATIONS_DIR} -database \"${POSTGRESQL_CONNECTION}\""
     FORCE_CMD="${CMD} force"
     DROP_CMD="${CMD} drop -f"
 
@@ -47,14 +47,17 @@ handler () {
       fi
     fi
 
-    # if count not a number, then must be 'all'
-    if ! [[ "$COUNT" =~ ^[0-9]+$ ]]
+    if [[ "$DIRECTION" != 'drop' ]]
     then
-      if [[ "$COUNT" != 'all' ]]
+      # if count not a number, then must be 'all'
+      if ! [[ "$COUNT" =~ ^[0-9]+$ ]]
       then
-        ERROR_DIRECTION="error: count neither a number or 'all'"
-        echo "${ERROR_DIRECTION}"
-        echo "${ERROR_DIRECTION}" >&2; exit 1
+        if [[ "$COUNT" != 'all' ]]
+        then
+          ERROR_DIRECTION="error: count neither a number or 'all'"
+          echo "${ERROR_DIRECTION}"
+          echo "${ERROR_DIRECTION}" >&2; exit 1
+        fi
       fi
     fi
 
