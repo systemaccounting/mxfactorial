@@ -5,19 +5,20 @@
 
 deploys pushed migrations in `/mxfactorial/schema/$DESIRED_MIGRATION_DIRECTORY` to postgres rds through lambda
 
-### build
-1. `make build` to:
-    1. clone go migrate repo
-    1. build go migrate binary for lambda
-1. `make zip`to zip `migrate.linux-amd64` and `index.sh`
+### prepare for terraform
+1. `make initial-deploy ENV=dev` to store lambda layer and function code in s3
+1. `terraform apply`
 
-### deploy code
-1. `make deploy-only ENV=dev` to:
-    1. put `go-migrate-src.zip` in `mxfactorial-artifacts-dev` bucket
-    1. update `go-migrate-faas-dev` lambda code from new artifact in bucket
+### build & deploy
+1. `make build-layer` to build lambda layer storing `psql` and `go-migrate` dependencies as `go-migrate-layer.zip`
+1. put lambda layer in s3 with `make put-layer ENV=dev`
+1. publish layer in s3 with `make publish-layer ENV=dev`
+1. `make zip` to zip `index.sh` as `go-migrate-src.zip`
+1. put zip in s3 with `make put-object ENV=dev`
+1. update function from zip in s3 with `make update-function ENV=dev`
 
-### build & deploy code
-1. `make deploy ENV=dev`
+### build & deploy FAST
+1. `make deploy-all ENV=dev` to build and deploy lambda layer and function code
 
 ### deploy migrations
 1. see `/mxfactorial/schema/README.md`
