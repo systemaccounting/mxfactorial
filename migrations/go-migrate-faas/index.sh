@@ -16,7 +16,7 @@ handler () {
     DIRECTORY=$(echo $EVENT_DATA | jq -r ".directory")
 
     # set event dependent migration values
-    MIGRATIONS_DIR="$REPO_DIR/schema/$DIRECTORY"
+    MIGRATIONS_DIR="$REPO_DIR/migrations/$DIRECTORY"
     POSTGRESQL_CONNECTION="postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=disable&x-migrations-table=schema_version_${DIRECTORY}"
 
     # build go migrate command

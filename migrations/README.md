@@ -7,19 +7,17 @@
 1. creating test and prod databases in postgres rds through lambda maintained in `./go-migrate-faas`
 
 ### migration directories
-1. `./migrations` stores schema
+1. `./schema`
 1. `./seed` stores seed data common to dev and prod dbs
-1. `./testseed` stores seed data for development db only
+1. `./testseed` stores seed data for testing dbs only
 
-create a test database by deploying all directories
-create a production database by deploying the `./migrations` and `./seed` directories only
+prod db = `./schema` + `./seed`
+test db = `./schema` + `./seed` + `./testseed`
 
 ### tl;dr start local development
 1. `brew install golang-migrate`
 1. `make run` to start postgres in docker
-1. `make up-all DIR=migrations` to add all migrations from `./migrations` and record schema version in `schema_versions_migrations` table
-1. `make up-all DIR=seed` to add all migrations from `./seed` and record schema version in `schema_versions_seed` table
-1. `make up-all DIR=testseed` to add all migrations from `./testseed` and record schema version in `schema_versions_testseed` table
+1. `make redev` to apply all migrations from the `./schema`, `./seed` and `./testseed` directories
 
 ### work fast
 1. add changes to migration directories
@@ -33,12 +31,22 @@ create a production database by deploying the `./migrations` and `./seed` direct
 
 ### local development
 1. complete tl;dr start local development section above
-1. `make create NAME=rule DIR=migrations` to create up and down rule sql files in `./migrations`
+1. `make create NAME=rule DIR=schema` to create up and down rule sql files in `./schema`
 1. add statements in new up and down rule sql files
-1. `make up DIR=migrations COUNT=1` to apply next remaining sql in `./migrations`
-1. `make down DIR=migrations COUNT=1` to remove last applied sql in `./migrations`
-1. `make down-all DIR=migrations` to remove all applied sqls in `./migrations`
-1. `make drop DIR=migrations` to clear database
+1. `make updir DIR=schema COUNT=1` to apply next remaining sql in `./schema`
+1. `make downdir DIR=schema COUNT=1` to remove last applied sql in `./schema`
+1. `make downdirall DIR=schema` to remove all applied sqls in `./schema`
+1. `make dropdir DIR=schema` to clear database
+
+### other commands
+1. `make updir DIR=schema COUNT=all` adds all migrations from the `./schema` directory and records the schema version in the `migration_schema_versions` table
+1. `make updir DIR=seed COUNT=all` adds all migrations from the `./seed` directory and records the schema version in the `migration_seed_versions` table
+1. `make updir DIR=testseed COUNT=all` adds all migrations from the `./testseed` directory, and records the schema version in the `migration_testseed_versions` table
+1. `make downdir DIR=schema COUNT=1` down migrates a single version from the `./schema` directory
+1. `make downdirall DIR=schema` down migrates all versions in the `./schema` directory
+1. `make updirall DIR=schema` up migrates all versions in the `./schema` directory
+1. `make dropdir DIR=schema` drops everything in `./schema` from the db
+1. `make force DIR=schema VERSION=3` forces schema version 3 in the `./schema` directory
 
 ### deploy single migration versions from lambda to postgres rds
 1. deploy single migration versions with `make deploy-migrations ENV=dev DIR=seed BRANCH=199/db-item-transaction CMD=down COUNT=all`, inline variable definitions:
@@ -54,17 +62,17 @@ create a production database by deploying the `./migrations` and `./seed` direct
 ### create a TEST database in postgres rds from lambda
 1. provision a terraform stack, e.g. `infrastructure/terraform/aws/environments/dev`
 1. set the `MIGRATION_LAMBDA_NAME` variable in `schema/makefile`
-1. `make deploy-all-testdb-up ENV=dev BRANCH=199/db-item-transaction` deploys all migration directories
-1. `make deploy-all-testdb-down ENV=dev BRANCH=199/db-item-transaction` removes all migrations
-1. `make deploy-all-testdb-drop ENV=dev BRANCH=199/db-item-transaction` drops all migrations
+1. `make lambda-up DB=test ENV=dev BRANCH=199/db-item-transaction` deploys all migration directories
+1. `make lambda-down DB=test ENV=dev BRANCH=199/db-item-transaction` removes all migrations
+1. `make lambda-drop DB=test ENV=dev BRANCH=199/db-item-transaction` drops all migrations
 
 \* ***includes** `./testseed` migrations*
 
 ### create a PROD database in postgres rds from lambda
 1. provision a terraform stack, e.g. `infrastructure/terraform/aws/environments/prod`
 1. set the `MIGRATION_LAMBDA_NAME` variable in `schema/makefile`
-1. `make deploy-all-prod-up ENV=dev BRANCH=199/db-item-transaction` deploys all migration directories
-1. `make deploy-all-prod-down ENV=dev BRANCH=199/db-item-transaction` removes all migrations
-1. `make deploy-all-prod-drop ENV=dev BRANCH=199/db-item-transaction` drops all migrations
+1. `make lambda-up DB=prod ENV=dev BRANCH=199/db-item-transaction` up migrates all versions from checked in `./schema` and `./seed` migration directories
+1. `make lambda-down DB=test ENV=dev BRANCH=199/db-item-transaction` deploys all down migrations from the checked in `./schema` and `./seed` directories
+1. `make lambda-drop DB=test ENV=dev BRANCH=199/db-item-transaction` deploys the drop of all migrations checked into the `./schema` and `./seed` directories
 
 \* ***excludes** `./testseed` migrations*
