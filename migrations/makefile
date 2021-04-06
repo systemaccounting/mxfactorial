@@ -74,7 +74,7 @@ devtest:
 	$(MAKE) redev
 	$(MAKE) down DB=test
 
-go migrate
+# go migrate
 init:
 	@$(MAKE) -s test-dir-arg
 	migrate create -ext sql -dir $(MIGRATIONS_DIR) -seq init_schema
