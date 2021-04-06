@@ -11,8 +11,8 @@
 1. `./seed` stores seed data common to dev and prod dbs
 1. `./testseed` stores seed data for testing dbs only
 
-prod db = `./schema` + `./seed`
-test db = `./schema` + `./seed` + `./testseed`
+prod db = `./schema` + `./seed`  
+test db = `./schema` + `./seed` + `./testseed`  
 
 ### tl;dr start local development
 1. `brew install golang-migrate`
@@ -71,8 +71,8 @@ test db = `./schema` + `./seed` + `./testseed`
 ### create a PROD database in postgres rds from lambda
 1. provision a terraform stack, e.g. `infrastructure/terraform/aws/environments/prod`
 1. set the `MIGRATION_LAMBDA_NAME` variable in `mirations/makefile`
-1. `make lambda-up-all DB=prod ENV=dev BRANCH=199/db-item-transaction` up migrates all versions from checked in `./schema` and `./seed` migration directories
-1. `make lambda-down-all DB=test ENV=dev BRANCH=199/db-item-transaction` deploys all down migrations from the checked in `./schema` and `./seed` directories
-1. `make lambda-drop-all DB=test ENV=dev BRANCH=199/db-item-transaction` deploys the drop of all migrations checked into the `./schema` and `./seed` directories
+1. `make lambda-up-all DB=prod ENV=prod BRANCH=199/db-item-transaction` up migrates all versions from checked in `./schema` and `./seed` migration directories
+1. `make lambda-down-all DB=prod ENV=prod BRANCH=199/db-item-transaction` deploys all down migrations from the checked in `./schema` and `./seed` directories
+1. `make lambda-drop-all DB=prod ENV=prod BRANCH=199/db-item-transaction` deploys the drop of all migrations checked into the `./schema` and `./seed` directories
 
-\* ***excludes** `./testseed` migrations*
+\* ***excludes** `./testseed` migrations*, can still deploy DB=prod to ENV=dev if preferred
