@@ -24,7 +24,7 @@ handler () {
     FORCE_CMD="${CMD} force"
     DROP_CMD="${CMD} drop -f"
 
-    # test for go migrate possible values
+    # test event for go migrate possible values
     if [[ "$DIRECTION" != 'up' ]] \
     && [[ "$DIRECTION" != 'down' ]] \
     && [[ "$DIRECTION" != 'force' ]] \
