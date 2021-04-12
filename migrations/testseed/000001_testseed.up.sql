@@ -20,7 +20,7 @@ insert into account_profile (account_name, description, first_name, middle_name,
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('MiriamLevy', 'Amateur Astronomer', 'Miriam', 'Colt', 'Levy', 'United States of America', '6903', 'Brodie Ln', null, null, 'Austin', 'Travis County', null, 'Texas', '78745', '(30.2140419,-97.8297857)', 'miriam@address.xz', 1, 512, 5555555, 8, 8);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('AzizKhan', 'Chess player', 'Aziz', 'Abdul', 'Khan', 'United States of America', '180', 'River St', null, null, 'Danville', 'Travis County', null, 'Virginia', '24540', '(36.5898155,-79.3844719)', 'aziz@address.xz', 1, 434, 5555555, 9, 9);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('IgorPetrov', 'Classical pianist', 'Igor', 'Sergei', 'Petrov', 'United States of America', '1220', 'Fulton Ave', null, null, 'Uniondale', 'Nassau County', null, 'New York', '11553', '(40.713235,-73.606191)', 'igor@address.xz', 1, 516, 5555555, 10, 10);
--- -- subaccounts
+-- subaccounts
 insert into account (name, created_by) values ('CPA', 'JohnSmith');
 insert into account (name, created_by) values ('SunflowerFarms', 'IrisLynn');
 insert into account (name, created_by) values ('GoldMiners', 'DanLee');
@@ -31,7 +31,7 @@ insert into account (name, created_by) values ('TimeCo', 'JacobWebb');
 insert into account (name, created_by) values ('GroceryCo', 'MiriamLevy');
 insert into account (name, created_by) values ('Skyways', 'AzizKhan');
 insert into account (name, created_by) values ('CloudBiz', 'IgorPetrov');
--- -- subaccount profiles
+-- subaccount profiles
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('CPA', 'Certified Public Accountant', null, null, null, 'United States of America', '1050', 'W Main St', null, null, 'Merced', 'Merced County', null, 'California', '95340', '(37.3058494,-120.4930238)', 'cpa@address.xz', 1, 209, 5555555, null, 1);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('SunflowerFarms', 'Sunflower seed producers', null, null, null, 'United States of America', '1545', 'South Meridian Avenue', null, null, 'Wichita', 'Sedgwick County', null, 'Kansas', '67213', '(37.666594,-97.3711619)', 'sunflowers@address.xz', 1, 316, 5555555, null, 2);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('GoldMiners', 'Gold miners', null, null, null, 'United States of America', '223', '6th street', null, null, 'Staples', 'Todd County', null, 'Minnesota', '56479', '(46.3527661,-94.7922353)', 'gold@address.xz', 1, 218, 5555555, null, 3);
@@ -59,18 +59,128 @@ insert into account_owner (owner_account, owned_subaccount) values ('AzizKhan', 
 insert into account_owner (owner_account, owned_subaccount) values ('IgorPetrov', 'GroceryCo');
 insert into account_owner (owner_account, owned_subaccount) values ('IgorPetrov', 'CloudBiz');
 
--- transaction_item rule_instance
+-- transaction_item NinePercentSalesTax rule_instance
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('transaction_item', 'multiplyItemValue', 'NinePercentSalesTax', 'creditor', 'GroceryCo', '{ "GroceryCo", "StateOfCalifornia", "9% state sales tax", "0.09" }');
 
--- GroceryCo debitors
+-- GroceryCo ApproveDebitStateOfCalifornia rule_instance
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveItemOnAccount', 'ApproveDebitStateOfCalifornia', 'debitor', 'IgorPetrov', '{ "GroceryCo", "StateOfCalifornia", "debitor", "IgorPetrov" }');
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveItemOnAccount', 'ApproveDebitStateOfCalifornia', 'debitor', 'MiriamLevy', '{ "GroceryCo", "StateOfCalifornia", "debitor", "MiriamLevy" }');
 
--- StateOfCalifornia creditors
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCredit', 'creditor', 'BenRoss', '{ "StateOfCalifornia", "creditor", "BenRoss" }');
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCredit', 'creditor', 'JacobWebb', '{ "StateOfCalifornia", "creditor", "JacobWebb" }');
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCredit', 'creditor', 'MiriamLevy', '{ "StateOfCalifornia", "creditor", "MiriamLevy" }');
+-- StateOfCalifornia ApproveAllCaliforniaCredit rule_instance
+insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCaliforniaCredit', 'creditor', 'BenRoss', '{ "StateOfCalifornia", "creditor", "BenRoss" }');
+insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCaliforniaCredit', 'creditor', 'JacobWebb', '{ "StateOfCalifornia", "creditor", "JacobWebb" }');
+insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCaliforniaCredit', 'creditor', 'MiriamLevy', '{ "StateOfCalifornia", "creditor", "MiriamLevy" }');
 
--- GroceryCo creditors
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCredit', 'creditor', 'MiriamLevy', '{ "GroceryCo", "creditor", "MiriamLevy" }');
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllCredit', 'creditor', 'IgorPetrov', '{ "GroceryCo", "creditor", "IgorPetrov" }');
+-- GroceryCo ApproveAllGroceryCoCredit rule_instance
+insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllGroceryCoCredit', 'creditor', 'MiriamLevy', '{ "GroceryCo", "creditor", "MiriamLevy" }');
+insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveAnyCreditItem', 'ApproveAllGroceryCoCredit', 'creditor', 'IgorPetrov', '{ "GroceryCo", "creditor", "IgorPetrov" }');
+
+-- GroceryCo rule applied debit request pending approval from JacobWeb
+with insert_transaction as (
+	insert into transaction (author, author_role) values ('GroceryCo', 'creditor') returning id
+),
+item_tax_rule_instance as (
+	SELECT id FROM rule_instance WHERE rule_instance_name='NinePercentSalesTax' AND account_name = 'GroceryCo'
+),
+milk as (
+	insert into transaction_item (transaction_id, rule_instance_id, item_id, price, quantity, debitor, creditor, debitor_approval_time, creditor_approval_time) values ((select id from insert_transaction), null, 'milk', 2.000, 1, 'JacobWebb', 'GroceryCo', null, CURRENT_TIMESTAMP) returning id
+),
+tax_milk as (
+	insert into transaction_item (transaction_id, rule_instance_id, item_id, price, quantity, debitor, creditor, debitor_approval_time, creditor_approval_time) values ((select id from insert_transaction), (select id from item_tax_rule_instance), '9% state sales tax', 0.180, 1, 'GroceryCo', 'StateOfCalifornia', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) returning id
+),
+bread as (
+	insert into transaction_item (transaction_id, rule_instance_id, item_id, price, quantity, debitor, creditor, debitor_approval_time, creditor_approval_time) values ((select id from insert_transaction), null, 'bread', 2.000, 2, 'JacobWebb', 'GroceryCo', null, CURRENT_TIMESTAMP) returning id
+),
+tax_bread as (
+	insert into transaction_item (transaction_id, rule_instance_id, item_id, price, quantity, debitor, creditor, debitor_approval_time, creditor_approval_time) values ((select id from insert_transaction), (select id from item_tax_rule_instance), '9% state sales tax', 0.180, 2, 'GroceryCo', 'StateOfCalifornia', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) returning id
+),
+eggs as (
+	insert into transaction_item (transaction_id, rule_instance_id, item_id, price, quantity, debitor, creditor, debitor_approval_time, creditor_approval_time) values ((select id from insert_transaction), null, 'eggs', 3.000, 1, 'JacobWebb', 'GroceryCo', null, CURRENT_TIMESTAMP) returning id
+),
+tax_eggs as (
+	insert into transaction_item (transaction_id, rule_instance_id, item_id, price, quantity, debitor, creditor, debitor_approval_time, creditor_approval_time) values ((select id from insert_transaction), (select id from item_tax_rule_instance), '9% state sales tax', 0.270, 1, 'GroceryCo', 'StateOfCalifornia', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) returning id
+),
+appr_igor_debitor_rule_instance as (
+	SELECT * FROM rule_instance WHERE rule_instance_name='ApproveDebitStateOfCalifornia' AND account_name = 'IgorPetrov'
+),
+appr_miriam_debitor_rule_instance as (
+	SELECT * FROM rule_instance WHERE rule_instance_name='ApproveDebitStateOfCalifornia' AND account_name = 'MiriamLevy'
+),
+appr_ben_creditor_rule_instance as (
+	SELECT * FROM rule_instance WHERE rule_instance_name='ApproveAllCaliforniaCredit' AND account_name = 'BenRoss'
+),
+appr_jacob_creditor_rule_instance as (
+	SELECT * FROM rule_instance WHERE rule_instance_name='ApproveAllCaliforniaCredit' AND account_name = 'JacobWebb'
+),
+appr_miriam_creditor_rule_instance as (
+	SELECT * FROM rule_instance WHERE rule_instance_name='ApproveAllCaliforniaCredit' AND account_name = 'MiriamLevy'
+)
+insert into approver (rule_instance_id, transaction_id, transaction_item_id, account_name, account_role, approval_time) values(
+(select id from appr_igor_debitor_rule_instance), (select id from insert_transaction), (select id from milk), (select account_name from appr_igor_debitor_rule_instance), (select account_role from appr_igor_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_debitor_rule_instance), (select id from insert_transaction), (select id from milk), (select account_name from appr_miriam_debitor_rule_instance), (select account_role from appr_miriam_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_ben_creditor_rule_instance), (select id from insert_transaction), (select id from milk), (select account_name from appr_ben_creditor_rule_instance), (select account_role from appr_ben_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_jacob_creditor_rule_instance), (select id from insert_transaction), (select id from milk), (select account_name from appr_jacob_creditor_rule_instance), (select account_role from appr_jacob_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_creditor_rule_instance), (select id from insert_transaction), (select id from milk), (select account_name from appr_miriam_creditor_rule_instance), (select account_role from appr_miriam_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_igor_debitor_rule_instance), (select id from insert_transaction), (select id from tax_milk), (select account_name from appr_igor_debitor_rule_instance), (select account_role from appr_igor_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_debitor_rule_instance), (select id from insert_transaction), (select id from tax_milk), (select account_name from appr_miriam_debitor_rule_instance), (select account_role from appr_miriam_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_ben_creditor_rule_instance), (select id from insert_transaction), (select id from tax_milk), (select account_name from appr_ben_creditor_rule_instance), (select account_role from appr_ben_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_jacob_creditor_rule_instance), (select id from insert_transaction), (select id from tax_milk), (select account_name from appr_jacob_creditor_rule_instance), (select account_role from appr_jacob_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_creditor_rule_instance), (select id from insert_transaction), (select id from tax_milk), (select account_name from appr_miriam_creditor_rule_instance), (select account_role from appr_miriam_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_igor_debitor_rule_instance), (select id from insert_transaction), (select id from bread), (select account_name from appr_igor_debitor_rule_instance), (select account_role from appr_igor_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_debitor_rule_instance), (select id from insert_transaction), (select id from bread), (select account_name from appr_miriam_debitor_rule_instance), (select account_role from appr_miriam_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_ben_creditor_rule_instance), (select id from insert_transaction), (select id from bread), (select account_name from appr_ben_creditor_rule_instance), (select account_role from appr_ben_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_jacob_creditor_rule_instance), (select id from insert_transaction), (select id from bread), (select account_name from appr_jacob_creditor_rule_instance), (select account_role from appr_jacob_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_creditor_rule_instance), (select id from insert_transaction), (select id from bread), (select account_name from appr_miriam_creditor_rule_instance), (select account_role from appr_miriam_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_igor_debitor_rule_instance), (select id from insert_transaction), (select id from tax_bread), (select account_name from appr_igor_debitor_rule_instance), (select account_role from appr_igor_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_debitor_rule_instance), (select id from insert_transaction), (select id from tax_bread), (select account_name from appr_miriam_debitor_rule_instance), (select account_role from appr_miriam_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_ben_creditor_rule_instance), (select id from insert_transaction), (select id from tax_bread), (select account_name from appr_ben_creditor_rule_instance), (select account_role from appr_ben_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_jacob_creditor_rule_instance), (select id from insert_transaction), (select id from tax_bread), (select account_name from appr_jacob_creditor_rule_instance), (select account_role from appr_jacob_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_creditor_rule_instance), (select id from insert_transaction), (select id from tax_bread), (select account_name from appr_miriam_creditor_rule_instance), (select account_role from appr_miriam_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_igor_debitor_rule_instance), (select id from insert_transaction), (select id from eggs), (select account_name from appr_igor_debitor_rule_instance), (select account_role from appr_igor_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_debitor_rule_instance), (select id from insert_transaction), (select id from eggs), (select account_name from appr_miriam_debitor_rule_instance), (select account_role from appr_miriam_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_ben_creditor_rule_instance), (select id from insert_transaction), (select id from eggs), (select account_name from appr_ben_creditor_rule_instance), (select account_role from appr_ben_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_jacob_creditor_rule_instance), (select id from insert_transaction), (select id from eggs), (select account_name from appr_jacob_creditor_rule_instance), (select account_role from appr_jacob_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_creditor_rule_instance), (select id from insert_transaction), (select id from eggs), (select account_name from appr_miriam_creditor_rule_instance), (select account_role from appr_miriam_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_igor_debitor_rule_instance), (select id from insert_transaction), (select id from tax_eggs), (select account_name from appr_igor_debitor_rule_instance), (select account_role from appr_igor_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_debitor_rule_instance), (select id from insert_transaction), (select id from tax_eggs), (select account_name from appr_miriam_debitor_rule_instance), (select account_role from appr_miriam_debitor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_ben_creditor_rule_instance), (select id from insert_transaction), (select id from tax_eggs), (select account_name from appr_ben_creditor_rule_instance), (select account_role from appr_ben_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_jacob_creditor_rule_instance), (select id from insert_transaction), (select id from tax_eggs), (select account_name from appr_jacob_creditor_rule_instance), (select account_role from appr_jacob_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+(select id from appr_miriam_creditor_rule_instance), (select id from insert_transaction), (select id from tax_eggs), (select account_name from appr_miriam_creditor_rule_instance), (select account_role from appr_miriam_creditor_rule_instance), CURRENT_TIMESTAMP
+),(
+null, (select id from insert_transaction), (select id from milk), 'JacobWebb', 'debitor', null
+),(
+null, (select id from insert_transaction), (select id from bread), 'JacobWebb', 'debitor', null
+),(
+null, (select id from insert_transaction), (select id from eggs), 'JacobWebb', 'debitor', null
+);
+
+---
