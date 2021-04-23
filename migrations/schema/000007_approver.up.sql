@@ -2,8 +2,13 @@
 -- todo: add enum after https://github.com/golang-migrate/migrate/pull/477
 -- CREATE TYPE debitor_or_creditor AS ENUM ('debitor', 'creditor');
 
--- items receive approval_time values only
--- on approval from all item approvers
+
+-- per item approver preferred to per transaction:
+-- per item rejection enables approvers to
+-- signal how transactions can be improved
+
+-- transaction_item labeled as approved
+-- only after timestamps added by approvers
 CREATE TABLE approver (
   id SERIAL PRIMARY KEY,
   rule_instance_id int,
