@@ -52,7 +52,7 @@ const input = {
   debitor_first: null,
   rule_instance_id: 1,
   unit_of_measurement: '',
-  units_measurement: '',
+  units_measured: 0,
   debitor: 'GroceryCo',
   creditor: 'StateOfCalifornia',
   debitor_profile_id: 0,
@@ -73,7 +73,7 @@ const input = {
       account_role: 'debitor',
       device_id: null,
       device_latlng: null,
-      approval_time: 'CURRENT_TIMESTAMP',
+      approval_time: 'NOW()',
       rejection_time: null,
       expiration_time: null
     },
@@ -86,7 +86,7 @@ const input = {
       account_role: 'debitor',
       device_id: null,
       device_latlng: null,
-      approval_time: 'CURRENT_TIMESTAMP',
+      approval_time: 'NOW()',
       rejection_time: null,
       expiration_time: null
     },
@@ -99,7 +99,7 @@ const input = {
       account_role: 'creditor',
       device_id: null,
       device_latlng: null,
-      approval_time: 'CURRENT_TIMESTAMP',
+      approval_time: 'NOW()',
       rejection_time: null,
       expiration_time: null
     },
@@ -112,7 +112,7 @@ const input = {
       account_role: 'creditor',
       device_id: null,
       device_latlng: null,
-      approval_time: 'CURRENT_TIMESTAMP',
+      approval_time: 'NOW()',
       rejection_time: null,
       expiration_time: null
     },
@@ -125,7 +125,7 @@ const input = {
       account_role: 'creditor',
       device_id: null,
       device_latlng: null,
-      approval_time: 'CURRENT_TIMESTAMP',
+      approval_time: 'NOW()',
       rejection_time: null,
       expiration_time: null
     }

@@ -16,7 +16,7 @@ module.exports = {
   CASES,
   ACCOUNT_ROLE_ERROR_MSG: "debitor or creditor value expected, received: ",
   NO_MATCHING_ROLE_ERROR_MSG: "not a debitor or creditor: ",
-  CURRENT_TIMESTAMP: "CURRENT_TIMESTAMP",
+  CURRENT_TIMESTAMP: "NOW()",
   TRANSACTION_ITEM: "transaction_item",
   APPROVER: "approver",
   APPROVERS: "approvers",

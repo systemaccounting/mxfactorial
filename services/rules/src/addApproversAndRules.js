@@ -53,7 +53,7 @@ module.exports = async function(
           rulesPerApprover,
           item,
         );
-
+        // todo: label item approval only
         item[APPROVERS].push(rulesAppliedApprover);
       };
     };

@@ -1,4 +1,7 @@
-const { testItems } = require('./tests/utils/testData');
+const {
+  testIntraTransaction,
+  testItems,
+} = require('./tests/utils/testData');
 const {
   INCONSISTENT_SEQUENCE_ERROR,
 } = require('./src/constants');
@@ -83,8 +86,8 @@ describe('rules function handler', () => {
     expect(mockLabelApprovedItems.mock.calls[0].length).toBe(2);
   });
 
-  test('returns labelApprovedItems', async () => {
+  test('returns labelApprovedItems in IntraTransaction object', async () => {
     const got = await require('./index').handler(testItems);
-    expect(got).toEqual([]);
+    expect(got).toEqual(testIntraTransaction);
   });
 });

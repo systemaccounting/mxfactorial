@@ -35,7 +35,7 @@ module.exports = function(
     debitor_first: debitorFirst,
     rule_instance_id: ruleInstanceId,
     unit_of_measurement: unitOfMeasurement,
-    units_measurement: unitsMeasured,
+    units_measured: unitsMeasured,
     debitor: debitor,
     creditor: creditor,
     debitor_profile_id: debitorProfileId,

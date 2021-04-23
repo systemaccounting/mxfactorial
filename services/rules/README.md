@@ -25,7 +25,7 @@
 1. follow steps in `schema/README.md` to start postgres in docker
 1. `make install` to install prod + dev deps
 1. set desired values in `TEST_EVENT` makefile variable
-1. `make run-local` to locally test lambda handler against postgres in docker
+1. `make run` to locally test lambda handler against postgres in docker
 
 ### deploy to lambda
 1. `make install-prod` to install prod only deps

@@ -6,6 +6,8 @@ const applyApproverRules = require('./src/applyApproverRules');
 const getItemApproverNames = require('./src/db/getItemApproverNames');
 const getRulesPerApprover = require('./src/db/getRulesPerApprover');
 const createApprover = require('./src/model/approver');
+const createTransaction = require('./src/model/transaction');
+const createIntraTransaction = require('./src/model/intraTransaction');
 const addApproversAndRules = require('./src/addApproversAndRules');
 const labelApprovedItems = require('./src/labelApprovedItems');
 const testDebitorFirstValues = require('./src/testDebitorFirstValues');
@@ -72,10 +74,39 @@ exports.handler = async event => {
   await db.end();
 
   // label rule approved transaction items
-  const labelAsApproved = labelApprovedItems(
+  const labeledApproved = labelApprovedItems(
     ruleAppliedItems,
     transactionSequence,
   );
 
-  return labelAsApproved;
+  // wrap in transaction
+  // todo: unit test
+  let sumValue = 0;
+  for (let i = 0; i < labeledApproved.length; i++) {
+    const itemPrice = parseFloat(labeledApproved[i].price)
+    const itemQuantity = parseFloat(labeledApproved[i].quantity)
+    const itemValue = itemPrice * itemQuantity
+    sumValue += itemValue
+  };
+
+  const transaction = createTransaction(
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    sumValue.toFixed(3).toString(),
+    labeledApproved,
+  )
+
+  // wrap in IntraTransaction declared in
+  // services/gopkg/types/transaction.go
+  // todo: unit test
+  const intraTransaction = createIntraTransaction(
+    null,
+    transaction,
+  )
+  return intraTransaction;
 }

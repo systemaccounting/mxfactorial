@@ -1,12 +1,13 @@
-DIR := ${CURDIR}
 APP_NAME = rules
-APP_TYPE = faas
 ARTIFACT_NAME = $(APP_NAME)-src.zip
-LAMBDA_NAME = rules-faas
+LAMBDA_NAME = $(APP_NAME)-$(ENV)
 LAMBDA_INVOKE_LOG = invoke.log
 RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
+TEST_DATA_FILE=trItemsNoAppr.json
+TEST_DATA_DIR=../gopkg/testdata
+TEST_EVENT=$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -15,7 +16,7 @@ PGHOST=localhost \
 PGPORT=5432 \
 PG_MAX_CONNECTIONS=20 \
 PG_IDLE_TIMEOUT=100 \
-PG_CONN_TIMEOUT=100 \
+PG_CONN_TIMEOUT=100
 
 WORKFLOW_ENV_VARS := AWS_REGION \
 SECRET \
@@ -29,12 +30,6 @@ POOL_ID \
 GRAPHQL_API \
 RULE_LAMBDA_ARN
 
-# TEST_EVENT created with:
-# console.log(JSON.stringify(JSON.stringify(
-#	createItemRequestData('JohnSmith','GroceryCo','creditor')
-# )));
-TEST_EVENT=[{\"id\":0,\"transaction_id\":123,\"item_id\":\"milk\",\"price\":2,\"quantity\":1,\"debitor_first\":null,\"rule_instance_id\":\"\",\"unit_of_measurement\":\"\",\"units_measurement\":\"\",\"debitor\":\"JohnSmith\",\"creditor\":\"GroceryCo\",\"debitor_profile_id\":0,\"creditor_profile_id\":0,\"debitor_approval_time\":\"\",\"creditor_approval_time\":\"\",\"debitor_expiration_time\":\"\",\"creditor_expiration_time\":\"\",\"debitor_rejection_time\":\"\",\"creditor_rejection_time\":\"\"},{\"id\":1,\"transaction_id\":123,\"item_id\":\"bread\",\"price\":3,\"quantity\":2,\"debitor_first\":null,\"rule_instance_id\":\"\",\"unit_of_measurement\":\"\",\"units_measurement\":\"\",\"debitor\":\"JohnSmith\",\"creditor\":\"GroceryCo\",\"debitor_profile_id\":0,\"creditor_profile_id\":0,\"debitor_approval_time\":\"\",\"creditor_approval_time\":\"\",\"debitor_expiration_time\":\"\",\"creditor_expiration_time\":\"\",\"debitor_rejection_time\":\"\",\"creditor_rejection_time\":\"\"}]
-
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
@@ -42,11 +37,17 @@ endif
 
 ###################### run ######################
 
-run-local:
-	@$(DOCKER_ENV_VARS) node -e "require(\"./index\").handler($(TEST_EVENT)).then(x => console.log(x))"
+run:
+	@$(DOCKER_ENV_VARS) node -p \
+	"require(\"./index\") \
+	.handler($$(cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))) \
+	.then(x => console.log(x.transaction.transaction_items))"
 
-run-local-noprint:
-	@$(DOCKER_ENV_VARS) node -e "require(\"./index\").handler($(TEST_EVENT))"
+run-approvers:
+	@$(DOCKER_ENV_VARS) node -p \
+	"require(\"./index\") \
+	.handler($$(cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))) \
+	.then(x => x.transaction.transaction_items.map(y => console.log(y.approvers)))"
 
 ###################### clean ######################
 
@@ -85,8 +86,8 @@ install-prod:
 
 get-secrets:
 	@$(MAKE) -s retrieve-each-secret
-	@if [ ! -s $(DIR)/.env ]; then \
-		rm $(DIR)/.env; \
+	@if [ ! -s $(CURDIR)/.env ]; then \
+		rm $(CURDIR)/.env; \
 		echo 'no env vars required'; \
 	else \
 		echo 'env vars retrieved'; \
@@ -95,14 +96,14 @@ get-secrets:
 retrieve-each-secret: test-env-arg clean-env $(WORKFLOW_ENV_VARS)
 $(WORKFLOW_ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
-		echo AWS_REGION=$(REGION) >> $(DIR)/.env; \
+		echo AWS_REGION=$(REGION) >> $(CURDIR)/.env; \
 	else \
 		ENV_VAR=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-		echo $@=$$ENV_VAR >> $(DIR)/.env; \
+		echo $@=$$ENV_VAR >> $(CURDIR)/.env; \
 	fi
 
 ###################### build and test ######################
@@ -144,9 +145,12 @@ zip-only:
 		--exclude "*.test.*"
 
 layer:
-	@echo "$(APP_NAME)-$(APP_TYPE) has few deps. not building layer"
+	@echo "$(LAMBDA_NAME) has few deps. not building layer"
 
 ###################### deploy ######################
+
+now:
+	$(MAKE) deploy ENV=$(ENV)
 
 deploy:
 	@$(MAKE) -s test-env-arg
@@ -160,7 +164,7 @@ put-object:
 	@ETAG=$$(aws s3api put-object \
 		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 		--key=$(ARTIFACT_NAME) \
-		--body=$(DIR)/$(ARTIFACT_NAME) \
+		--body=$(CURDIR)/$(ARTIFACT_NAME) \
 		--region=$(REGION) \
 		--output=text | xargs); \
 	echo "***Deployed $(ENV)/$(ARTIFACT_NAME) from s3 ETag: $$ETAG"
@@ -168,12 +172,12 @@ put-object:
 update-function:
 	@$(MAKE) -s test-env-arg
 	@MOD=$$(aws lambda update-function-code \
-		--function-name=$(LAMBDA_NAME)-$(ENV) \
+		--function-name=$(LAMBDA_NAME) \
 		--s3-key=$(ARTIFACT_NAME) \
 		--s3-bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 		--region=$(REGION) \
 		--query 'LastModified' | xargs);\
-	echo "***$(LAMBDA_NAME)-$(ENV) lambda deployed @ $$MOD"
+	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
 
 deploy-untested:
 	@$(MAKE) -s test-env-arg
@@ -184,7 +188,7 @@ endif
 	@ETAG=$$(aws s3api put-object \
 		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 		--key=$(ARTIFACT_NAME) \
-		--body=$(DIR)/$(ARTIFACT_NAME) \
+		--body=$(CURDIR)/$(ARTIFACT_NAME) \
 		--region=$(REGION) \
 		--output=text | xargs); \
 	echo "***Deployed $(ENV)/$(ARTIFACT_NAME) from s3 ETag: $$ETAG"
@@ -193,7 +197,7 @@ deploy-layer: test-env-arg layer
 #		@ETAG=$$(aws s3api put-object \
 			--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 			--key=$(APP_NAME)-layer.zip \
-			--body=$(DIR)/$(ARTIFACT_NAME) \
+			--body=$(CURDIR)/$(ARTIFACT_NAME) \
 			--region=$(REGION) \
 			--output=text | xargs); \
 #		echo "***Deployed $(ENV)/$(ARTIFACT_NAME) from s3 ETag: $$ETAG"
@@ -225,17 +229,16 @@ warm-up:
 	@aws lambda invoke \
 		--region $(REGION) \
 		--invocation-type RequestResponse \
-		--function-name $(LAMBDA_NAME)-$(ENV) \
+		--function-name $(LAMBDA_NAME) \
 		--payload '{}' \
 		$(LAMBDA_INVOKE_LOG)
 
 invoke:
 	@$(MAKE) -s test-env-arg
-	@ENCODED_JSON=$$(echo "$(TEST_EVENT)" | base64); \
-	aws lambda invoke \
+	@aws lambda invoke \
 		--region $(REGION) \
 		--invocation-type RequestResponse \
-		--function-name $(LAMBDA_NAME)-$(ENV) \
-		--payload $$ENCODED_JSON \
+		--function-name $(LAMBDA_NAME) \
+		--payload $$(cat $(TEST_EVENT) | base64) \
 		$(LAMBDA_INVOKE_LOG)
 	@cat $(LAMBDA_INVOKE_LOG)

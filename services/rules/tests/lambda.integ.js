@@ -1,8 +1,6 @@
 const AWS = require('aws-sdk');
-const {
-  testItems,
-  testApprovedItems,
-} = require('./utils/testData');
+const req = require('./utils/testRequest.json');
+const res = require('./utils/testResponse.json');
 const { invokeLambda } = require('./utils/integrationTestHelpers');
 
 const lambda = new AWS.Lambda({
@@ -13,7 +11,7 @@ const lambda = new AWS.Lambda({
 // todo: increase coverage
 describe('lambda integration', () => {
   test('returns rule added transaction items & approvers', async () => {
-    const got = await invokeLambda(lambda, testItems);
-    expect(got).toEqual(testApprovedItems);
+    const got = await invokeLambda(lambda, req);
+    expect(got).toEqual(res);
   });
 });

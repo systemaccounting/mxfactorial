@@ -11,7 +11,7 @@ describe('transactionItem', () => {
       'debitor_first',
       'rule_instance_id',
       'unit_of_measurement',
-      'units_measurement',
+      'units_measured',
       'debitor',
       'creditor',
       'debitor_profile_id',
