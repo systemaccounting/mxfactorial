@@ -29,3 +29,6 @@ deploy: test-env-arg
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/deploy-lambda ENV=$(ENV) $(CMD)
 	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/rds ENV=$(ENV) $(CMD)
 	@$(MAKE) -C infrastructure/cloudformation/s3-event-faas ENV=$(ENV) $(CMD)
+
+init:
+	go mod init github.com/systemaccounting/mxfactorial
