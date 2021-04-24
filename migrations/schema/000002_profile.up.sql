@@ -56,3 +56,25 @@ CREATE TABLE account_profile (
 );
 
 CREATE INDEX idx_current_account_profile ON account_profile(account_name) WHERE removal_time IS NULL;
+
+-- function adds removal timestamp to previous
+-- profile before user adds a profile
+CREATE OR REPLACE FUNCTION remove_account_profile()
+	RETURNS trigger AS
+$$
+BEGIN
+		UPDATE account_profile
+    SET removal_time = NOW()
+		WHERE removal_time IS NULL
+    AND account_name = NEW.account_name;
+	RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- trigger calls remove_account_profile()
+-- on each insert to account_profile table
+CREATE TRIGGER remove_account_profile
+BEFORE INSERT ON account_profile
+FOR EACH ROW
+EXECUTE PROCEDURE remove_account_profile();
