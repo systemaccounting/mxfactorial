@@ -357,31 +357,30 @@ resource "aws_iam_role_policy" "cognito_account_auto_confirm_lambda_policy" {
   name = "cognito-account-auto-confirm-lambda-policy-${var.environment}"
   role = aws_iam_role.cognito_account_auto_confirm_lambda_role.id
 
-  policy = data.aws_iam_policy_document.cognito_account_auto_confirm_lambda_policy.json
-}
-
-data "aws_iam_policy_document" "cognito_account_auto_confirm_lambda_policy" {
-  version = "2012-10-17"
-
-  statement {
-    sid = "CognitoAccountAutoConfirmLambdaLoggingPolicy${var.environment}"
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
+  # jsonencode avoids https://github.com/hashicorp/terraform-provider-aws/issues/438
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "logs:PutLogEvents",
+          "logs:CreateLogStream",
+          "logs:CreateLogGroup",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+        Sid      = "CognitoAccountAutoConfirmLambdaLoggingPolicy${title(var.environment)}"
+      },
+      {
+        Action = [
+          "cognito-idp:*"
+        ]
+        Effect   = "Allow"
+        Resource = "${aws_cognito_user_pool.pool.arn}"
+        Sid      = "CognitoAccountAutoConfirmLambdaCognitoAccessPolicy${title(var.environment)}"
+      },
     ]
-    resources = ["*"]
-  }
-
-  statement {
-    sid = "CognitoAccountAutoConfirmLambdaCognitoAccessPolicy${var.environment}"
-    actions = [
-      "cognito-idp:*"
-    ]
-    resources = [
-      aws_cognito_user_pool.pool.arn
-    ]
-  }
+  })
 }
 
 ########## Permit Cognito invocation of auto confirm account Lambda ##########
