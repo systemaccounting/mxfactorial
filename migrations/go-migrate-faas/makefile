@@ -1,4 +1,3 @@
-DIR := ${CURDIR}
 APP_NAME = go-migrate
 ARTIFACT_NAME = $(APP_NAME)-src.zip
 LAMBDA_NAME = $(APP_NAME)-faas
@@ -41,8 +40,8 @@ build-layer:
 ###################### secrets ######################
 
 get-secrets: retrieve-each-secret
-	@if [ ! -s $(DIR)/.env ]; then \
-		rm $(DIR)/.env; \
+	@if [ ! -s $(CURDIR)/.env ]; then \
+		rm $(CURDIR)/.env; \
 		echo 'no env vars required'; \
 	else \
 		echo 'env vars retrieved'; \
@@ -51,7 +50,7 @@ get-secrets: retrieve-each-secret
 retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
-		echo AWS_REGION=$(REGION) >> $(DIR)/.env; \
+		echo AWS_REGION=$(REGION) >> $(CURDIR)/.env; \
 	else \
 		ENV_VAR=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
@@ -59,7 +58,7 @@ $(ENV_VARS):
 			--query 'SecretString' \
 			--output text); \
 			echo $@=$$ENV_VAR \
-			>> $(DIR)/.env; \
+			>> $(CURDIR)/.env; \
 	fi
 
 ###################### build ######################
@@ -100,7 +99,7 @@ put-object:
 	@ETAG=$$(aws s3api put-object \
 		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 		--key=$(ARTIFACT_NAME) \
-		--body=$(DIR)/$(ARTIFACT_NAME) \
+		--body=$(CURDIR)/$(ARTIFACT_NAME) \
 		--region=$(REGION) \
 		--output=text | sed 's/"//g'); \
 	echo "***pushed $(ARTIFACT_NAME) artifact with ETag: $$ETAG"
@@ -125,7 +124,7 @@ put-layer:
 	@ETAG=$$(aws s3api put-object \
 		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
 		--key=$(APP_NAME)-layer.zip \
-		--body=$(DIR)/$(APP_NAME)-layer.zip \
+		--body=$(CURDIR)/$(APP_NAME)-layer.zip \
 		--region=$(REGION) \
 		--output=text | sed 's/"//g'); \
 	echo "***Deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"

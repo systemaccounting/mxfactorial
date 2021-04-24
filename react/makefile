@@ -1,4 +1,3 @@
-DIR := ${CURDIR}
 APP_NAME = react
 APP_TYPE = client
 ARTIFACT_BUCKET = mxfactorial-artifacts
@@ -34,8 +33,8 @@ install: clean-deps
 ###################### secrets ######################
 
 get-secrets: retrieve-each-secret
-	@if [ ! -s $(DIR)/.env ]; then \
-		rm $(DIR)/.env; \
+	@if [ ! -s $(CURDIR)/.env ]; then \
+		rm $(CURDIR)/.env; \
 		echo 'no env vars required'; \
 	else \
 		echo 'env vars retrieved'; \
@@ -44,12 +43,12 @@ get-secrets: retrieve-each-secret
 retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
-		echo REACT_APP_AWS_REGION=$(REGION) >> $(DIR)/.env; \
+		echo REACT_APP_AWS_REGION=$(REGION) >> $(CURDIR)/.env; \
 	elif [ $@ = ENV ]; then \
-		echo JEST_ENV=$(ENV) >> $(DIR)/.env; \
+		echo JEST_ENV=$(ENV) >> $(CURDIR)/.env; \
 	elif [ $@ = ACCOUNT ]; then \
 		for account in $(TEST_ACCOUNTS); do \
-			echo $$account=1 >> $(DIR)/.env; \
+			echo $$account=1 >> $(CURDIR)/.env; \
 		done; \
 	elif [ $@ = SECRET ]; then \
 		SECRET=$$(aws secretsmanager get-secret-value \
@@ -57,14 +56,14 @@ $(ENV_VARS):
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-		echo JEST_$@=$$SECRET >> $(DIR)/.env; \
+		echo JEST_$@=$$SECRET >> $(CURDIR)/.env; \
 	else \
 		ENV_VAR=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-		echo REACT_APP_$@=$$ENV_VAR >> $(DIR)/.env; \
+		echo REACT_APP_$@=$$ENV_VAR >> $(CURDIR)/.env; \
 	fi
 
 ###################### start ######################
