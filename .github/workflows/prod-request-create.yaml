@@ -3,13 +3,13 @@ name: prod-request-create
 on:
   push:
     paths:
-    - 'services/request-create-faas/**'
+    - 'services/request-create/**'
     branches:
-    - 'master'
+      - 'master'
 
 jobs:
-  deploy:
-    name: deploy request-create-faas to prod
+  build:
+    name: request-create in prod
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -19,8 +19,18 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: install dependencies
-        working-directory: services/request-create-faas
-        run: make install-prod ENV=prod
+        run: |
+          export GOPATH=$(go env GOPATH)
+          export GOBIN=$(go env GOPATH)/bin
+          export PATH=$PATH:$(go env GOPATH)/bin
+          make install
+        working-directory: services/request-create
+      - name: compile
+        run: make compile
+        working-directory: services/request-create
+      - name: zip
+        run: make zip
+        working-directory: services/request-create
       - name: deploy to prod
-        working-directory: services/request-create-faas
-        run: make deploy ENV=prod
+        run: make deploy-only ENV=prod
+        working-directory: services/request-create

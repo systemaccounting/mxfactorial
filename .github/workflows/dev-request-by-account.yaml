@@ -1,15 +1,15 @@
-name: dev-request-create
+name: dev-request-by-account
 
 on:
   push:
     paths:
-    - 'services/request-create/**'
+    - 'services/request-by-account/**'
     branches-ignore:
     - 'master'
 
 jobs:
-  test:
-    name: request-create in dev
+  build:
+    name: request-by-account in dev
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -24,22 +24,22 @@ jobs:
           export GOBIN=$(go env GOPATH)/bin
           export PATH=$PATH:$(go env GOPATH)/bin
           make install
-        working-directory: services/request-create
+        working-directory: services/request-by-account
       # - name: measure coverage
       #   run: make test-cover
-      #   working-directory: services/request-create
+      #   working-directory: services/request-by-account
       # - name: unit tests
       #   run: make test-unit
-      #   working-directory: services/request-create
+      #   working-directory: services/request-by-account
       - name: compile
         run: make compile
-        working-directory: services/request-create
+        working-directory: services/request-by-account
       - name: zip
         run: make zip
-        working-directory: services/request-create
+        working-directory: services/request-by-account
       - name: deploy to dev
         run: make deploy-only ENV=dev
-        working-directory: services/request-create
+        working-directory: services/request-by-account
       # - name: integration tests
       #   run: make test-integration ENV=dev
-      #   working-directory: services/request-create
+      #   working-directory: services/request-by-account
