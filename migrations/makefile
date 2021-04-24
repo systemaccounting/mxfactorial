@@ -130,7 +130,7 @@ deploy-migrations:
 		--payload "$$(echo '{"branch":"$(BRANCH)","command":"$(CMD)","count":"$(COUNT)","version":"$(VERSION)","directory":"$(DIR)"}' | base64)" \
 		invoke.log
 
-# make lambda-up DB=test ENV=dev BRANCH=199/db-item-transaction
+# make lambda-up-all DB=test ENV=dev BRANCH=199/db-item-transaction
 lambda-up-all:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
@@ -138,7 +138,7 @@ lambda-up-all:
 	@$(MAKE) -s test-branch-arg
 	$(foreach DIR,$($(DB)_up), $(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=up COUNT=all;)
 
-# make lambda-down DB=test ENV=dev BRANCH=199/db-item-transaction
+# make lambda-down-all DB=test ENV=dev BRANCH=199/db-item-transaction
 lambda-down-all:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
@@ -146,7 +146,7 @@ lambda-down-all:
 	@$(MAKE) -s test-branch-arg
 	$(foreach DIR,$($(DB)_down), $(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=down COUNT=all;)
 
-# make lambda-drop DB=test ENV=dev BRANCH=199/db-item-transaction
+# make lambda-drop-all DB=test ENV=dev BRANCH=199/db-item-transaction
 lambda-drop-all:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val

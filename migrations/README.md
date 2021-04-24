@@ -2,6 +2,10 @@
   <img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png">
 </p>
 
+todo:
+1. add `/.github/workflows/dev-migrations.yaml`
+1. add `make run && make devtest` in workflow
+
 ### expedites
 1. local development with [postgres in docker](https://hub.docker.com/r/bitnami/postgresql) and [go migrate](https://github.com/golang-migrate/migrate)
 1. creating test and prod databases in postgres rds through lambda maintained in `./go-migrate-faas`
@@ -21,7 +25,7 @@ test db = `./schema` + `./seed` + `./testseed`
 
 ### work fast
 1. add changes to migration directories
-1. `make redev` to add all from `migrations`, `seed` and `testseed` directories
+1. `make redev` to drop and then up migrate all from `migrations`, `seed` and `testseed` directories
 1. `make devtest` to up & down test `migrations`, `seed` and `testseed` directories
 
 ### postgres docker commands
