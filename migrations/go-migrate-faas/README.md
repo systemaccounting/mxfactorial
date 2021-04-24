@@ -3,7 +3,7 @@
 </p>
 
 
-deploys pushed migrations in `/mxfactorial/schema/$DESIRED_MIGRATION_DIRECTORY` to postgres rds through lambda
+deploys pushed migrations in `/mxfactorial/migrations/$DESIRED_MIGRATION_DIRECTORY` to postgres rds through lambda
 
 ### prepare for terraform
 1. `make initial-deploy ENV=dev` to store lambda layer and function code in s3
@@ -21,7 +21,7 @@ deploys pushed migrations in `/mxfactorial/schema/$DESIRED_MIGRATION_DIRECTORY` 
 1. `make deploy-all ENV=dev` to build and deploy lambda layer and function code
 
 ### deploy migrations
-1. see `/mxfactorial/schema/README.md`
+1. see `/mxfactorial/migrations/README.md`
 
 ### clean
 1. `make clean`
