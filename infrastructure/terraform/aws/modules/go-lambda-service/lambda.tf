@@ -30,7 +30,7 @@ resource "aws_cloudwatch_log_group" "default" {
 }
 
 resource "aws_iam_role" "default" {
-  name = "${var.service_name}-${var.env}"
+  name = "${var.service_name}-${var.env}-lambda"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

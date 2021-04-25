@@ -75,7 +75,7 @@ resource "aws_api_gateway_deployment" "go_graphql" {
 }
 
 resource "aws_lambda_permission" "api_to_go_graphql_lambda" {
-  statement_id  = "AllowAPIGatewayInvoke${title(var.environment)}"
+  statement_id  = "AllowAPIGLambdaInvoke${title(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.go_graphql.function_name
   principal     = "apigateway.amazonaws.com"
