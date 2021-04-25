@@ -18,7 +18,6 @@ resource "aws_lambda_function" "graphql" {
   environment {
     variables = {
       RULES_FAAS_ARN                                 = aws_lambda_function.rules.arn
-      REQUEST_APPROVE_LAMBDA_ARN                     = aws_lambda_function.request_approve.arn
       REQUEST_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN     = aws_lambda_function.req_query_trans_id.arn
       REQUEST_QUERY_BY_ACCOUNT_LAMBDA_ARN            = aws_lambda_function.req_query_account.arn
       TRANSACTION_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN = aws_lambda_function.trans_query_id.arn
@@ -86,7 +85,7 @@ data "aws_iam_policy_document" "graphql_policy" {
     resources = [
       aws_lambda_function.rules.arn,
       # aws_lambda_function.request_create.arn,
-      aws_lambda_function.request_approve.arn,
+      # aws_lambda_function.request_approve.arn,
       aws_lambda_function.req_query_trans_id.arn,
       aws_lambda_function.req_query_account.arn,
       aws_lambda_function.trans_query_id.arn,

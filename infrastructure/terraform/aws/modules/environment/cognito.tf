@@ -2,7 +2,7 @@ resource "aws_cognito_user_pool" "pool" {
   name = "mxfactorial-${var.environment}"
 
   lambda_config {
-    pre_sign_up = aws_lambda_function.cognito_account_auto_confirm.arn
+    pre_sign_up = module.auto_confirm.lambda_arn
   }
 
   password_policy {
@@ -310,87 +310,6 @@ resource "aws_cognito_user_pool_client" "client" {
   ]
 }
 
-data "aws_s3_bucket_object" "cognito_account_auto_confirm" {
-  bucket = "mxfactorial-artifacts-${var.environment}"
-  key    = "auto-confirm-src.zip"
-}
-
-########## Create an auto-approve Lambda function for Cognito ##########
-resource "aws_lambda_function" "cognito_account_auto_confirm" {
-  function_name     = "cognito-account-auto-confirm-${var.environment}"
-  description       = "Auto confirms new Cognito accounts in ${var.environment}"
-  s3_bucket         = data.aws_s3_bucket_object.cognito_account_auto_confirm.bucket
-  s3_key            = data.aws_s3_bucket_object.cognito_account_auto_confirm.key
-  s3_object_version = data.aws_s3_bucket_object.cognito_account_auto_confirm.version_id
-  role              = aws_iam_role.cognito_account_auto_confirm_lambda_role.arn
-  handler           = "index.handler"
-  runtime           = "nodejs10.x"
-}
-
-resource "aws_cloudwatch_log_group" "cognito_account_auto_confirm" {
-  name              = "/aws/lambda/${aws_lambda_function.cognito_account_auto_confirm.function_name}"
-  retention_in_days = 30
-}
-
-########## Create Cognito acount auto-approve Lambda function role and policy ##########
-resource "aws_iam_role" "cognito_account_auto_confirm_lambda_role" {
-  name = "cognito-account-auto-confirm-lambda-role-${var.environment}"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "lambda.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-}
-
-resource "aws_iam_role_policy" "cognito_account_auto_confirm_lambda_policy" {
-  name = "cognito-account-auto-confirm-lambda-policy-${var.environment}"
-  role = aws_iam_role.cognito_account_auto_confirm_lambda_role.id
-
-  # jsonencode avoids https://github.com/hashicorp/terraform-provider-aws/issues/438
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "logs:PutLogEvents",
-          "logs:CreateLogStream",
-          "logs:CreateLogGroup",
-        ]
-        Effect   = "Allow"
-        Resource = "*"
-        Sid      = "CognitoAccountAutoConfirmLambdaLoggingPolicy${title(var.environment)}"
-      },
-      {
-        Action = [
-          "cognito-idp:*"
-        ]
-        Effect   = "Allow"
-        Resource = "${aws_cognito_user_pool.pool.arn}"
-        Sid      = "CognitoAccountAutoConfirmLambdaCognitoAccessPolicy${title(var.environment)}"
-      },
-    ]
-  })
-}
-
-########## Permit Cognito invocation of auto confirm account Lambda ##########
-resource "aws_lambda_permission" "allow_cognito" {
-  statement_id  = "AllowExecutionFromCognito${title(var.environment)}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.cognito_account_auto_confirm.function_name
-  principal     = "cognito-idp.amazonaws.com"
-}
-
 data "aws_s3_bucket_object" "delete_faker_cognito_accounts_lambda" {
   bucket = "mxfactorial-artifacts-${var.environment}"
   key    = "delete-faker-src.zip"
@@ -403,7 +322,7 @@ resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
   s3_bucket         = data.aws_s3_bucket_object.delete_faker_cognito_accounts_lambda.bucket
   s3_key            = data.aws_s3_bucket_object.delete_faker_cognito_accounts_lambda.key
   s3_object_version = data.aws_s3_bucket_object.delete_faker_cognito_accounts_lambda.version_id
-  role              = aws_iam_role.cognito_account_auto_confirm_lambda_role.arn
+  role              = aws_iam_role.delete_faker_cognito_accounts_lambda_role.arn
   handler           = "index.handler"
   runtime           = "nodejs10.x"
   timeout           = 10
@@ -459,6 +378,15 @@ data "aws_iam_policy_document" "delete_faker_cognito_accounts_lambda_policy" {
       "logs:PutLogEvents"
     ]
     resources = ["*"]
+  }
+  statement {
+    sid = "DeleteFakerLambdaCognitoAccessPermission${var.environment}"
+    actions = [
+      "cognito-idp:*"
+    ]
+    resources = [
+      aws_cognito_user_pool.pool.arn
+    ]
   }
 }
 
