@@ -1,5 +1,5 @@
 CMD_DIR = $(CURDIR)/cmd
-APP_NAME = transaction-by-account
+APP_NAME = transactions-by-account
 ARTIFACT_NAME=$(APP_NAME)-src.zip
 ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
 REGION = us-east-1

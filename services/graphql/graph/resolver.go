@@ -23,9 +23,9 @@ var ruleLambdaArn string = os.Getenv("RULE_LAMBDA_ARN")
 var reqCreateLambdaArn string = os.Getenv("REQUEST_CREATE_LAMBDA_ARN")
 var reqApproveLambdaArn string = os.Getenv("REQUEST_APPROVE_LAMBDA_ARN")
 var reqByIDLambdaArn string = os.Getenv("REQUEST_BY_ID_LAMBDA_ARN")
-var reqByAccountLambdaArn string = os.Getenv("REQUEST_BY_ACCOUNT_LAMBDA_ARN")
+var reqsByAccountLambdaArn string = os.Getenv("REQUESTS_BY_ACCOUNT_LAMBDA_ARN")
 var transByIDLambdaArn string = os.Getenv("TRANSACTION_BY_ID_LAMBDA_ARN")
-var transByAccountLambdaArn string = os.Getenv("TRANSACTION_BY_ACCOUNT_LAMBDA_ARN")
+var transByAccountLambdaArn string = os.Getenv("TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN")
 
 type Resolver struct {
 	Lambda struct {
@@ -331,7 +331,7 @@ func (r *Resolver) InvokeRequestByAccount(
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(reqByAccountLambdaArn, payload)
+	result, err := r.InvokeLambda(reqsByAccountLambdaArn, payload)
 	if err != nil {
 		log.Print(err.Error())
 		return nil, err

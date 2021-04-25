@@ -1,5 +1,5 @@
 CMD_DIR = $(CURDIR)/cmd
-APP_NAME = request-by-account
+APP_NAME = requests-by-account
 ARTIFACT_NAME=$(APP_NAME)-src.zip
 ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
 REGION = us-east-1
@@ -14,7 +14,6 @@ RETURN_RECORD_LIMIT=20
 TEST_ACCOUNT=JacobWebb
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","account_name":"$(TEST_ACCOUNT)"}'
-REGION=us-east-1
 TEST_SENDER_ACCOUNT=Person1
 LAMBDA_FUNCTION_NAME=$(APP_NAME)-$(ENV)
 
