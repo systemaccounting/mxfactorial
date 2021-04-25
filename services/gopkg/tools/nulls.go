@@ -1,6 +1,8 @@
 package tools
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 // prior art https://stackoverflow.com/a/40268372
 func NewNullString(s string) sql.NullString {

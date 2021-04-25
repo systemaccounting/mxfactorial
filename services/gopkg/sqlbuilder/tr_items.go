@@ -5,13 +5,6 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func nullSQLTime(t *string) interface{} {
-	if *t == "" {
-		return sqlb.Raw("NULL")
-	}
-	return sqlb.Raw(*t)
-}
-
 func InsertTrItemsSQL(trID int32, trItems []*types.TransactionItem) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("transaction_item")
@@ -47,10 +40,10 @@ func InsertTrItemsSQL(trID int32, trItems []*types.TransactionItem) (string, []i
 			v.Creditor,
 			v.DebitorProfileID,
 			v.CreditorProfileID,
-			nullSQLTime(v.DebitorApprovalTime),
-			nullSQLTime(v.CreditorApprovalTime),
-			nullSQLTime(v.DebitorExpirationTime),
-			nullSQLTime(v.CreditorExpirationTime),
+			NullSQLFromStrPtr(v.DebitorApprovalTime),
+			NullSQLFromStrPtr(v.CreditorApprovalTime),
+			NullSQLFromStrPtr(v.DebitorExpirationTime),
+			NullSQLFromStrPtr(v.CreditorExpirationTime),
 		)
 	}
 	// format with ib arg only to avoid
