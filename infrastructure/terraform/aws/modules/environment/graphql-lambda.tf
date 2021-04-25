@@ -17,11 +17,7 @@ resource "aws_lambda_function" "graphql" {
 
   environment {
     variables = {
-      RULES_FAAS_ARN                                 = aws_lambda_function.rules.arn
-      REQUEST_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN     = aws_lambda_function.req_query_trans_id.arn
-      REQUEST_QUERY_BY_ACCOUNT_LAMBDA_ARN            = aws_lambda_function.req_query_account.arn
-      TRANSACTION_QUERY_BY_TRANSACTION_ID_LAMBDA_ARN = aws_lambda_function.trans_query_id.arn
-      TRANSACTION_QUERY_BY_ACCOUNT_LAMBDA_ARN        = aws_lambda_function.trans_query_account.arn
+      RULES_FAAS_ARN = aws_lambda_function.rules.arn
       JWKS_URL = join("", [
         "https://cognito-idp.",
         data.aws_region.current.name,
@@ -76,22 +72,6 @@ resource "aws_iam_role_policy" "graphql_policy" {
 
 data "aws_iam_policy_document" "graphql_policy" {
   version = "2012-10-17"
-
-  statement {
-    sid = "GraphQLInvokeLambdaPolicy${title(var.environment)}"
-    actions = [
-      "lambda:InvokeFunction"
-    ]
-    resources = [
-      aws_lambda_function.rules.arn,
-      # aws_lambda_function.request_create.arn,
-      # aws_lambda_function.request_approve.arn,
-      aws_lambda_function.req_query_trans_id.arn,
-      aws_lambda_function.req_query_account.arn,
-      aws_lambda_function.trans_query_id.arn,
-      aws_lambda_function.trans_query_account.arn
-    ]
-  }
 
   statement {
     sid = "GraphQLLoggingPolicy${title(var.environment)}"
