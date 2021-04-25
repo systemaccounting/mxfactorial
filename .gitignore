@@ -8,9 +8,6 @@
 **/*lock.info
 **/.terraform/
 
-## liquibase
-**/liquibase.properties
-
 ## react
 
 # testing
