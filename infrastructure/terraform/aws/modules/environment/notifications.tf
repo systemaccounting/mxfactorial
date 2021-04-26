@@ -21,8 +21,10 @@ resource "aws_apigatewayv2_stage" "notifications" {
   description   = "wss api stage in ${var.environment}"
   deployment_id = aws_apigatewayv2_deployment.notifications.id
   default_route_settings {
-    data_trace_enabled = true
-    logging_level      = "ERROR"
+    throttling_rate_limit  = 10000
+    throttling_burst_limit = 5000
+    data_trace_enabled     = true
+    logging_level          = "ERROR"
   }
 }
 
