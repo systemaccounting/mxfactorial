@@ -8,6 +8,14 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/jackc/pgx/v4"
+	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
+	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+)
+
+const (
+	connectRouteKey    string = "$connect"
+	disconnectRouteKey string = "$disconnect"
 )
 
 var pgConn string = fmt.Sprintf(
@@ -20,23 +28,73 @@ var pgConn string = fmt.Sprintf(
 
 func lambdaFn(
 	ctx context.Context,
-	e events.APIGatewayWebsocketProxyRequestContext,
-	// c lpg.Connector,
-) (string, error) {
+	e events.APIGatewayWebsocketProxyRequest,
+	c lpg.Connector,
+) (events.APIGatewayProxyResponse, error) {
 
-	log.Print(e)
+	// values required to insert and delete on connect and disconnect routes
+	routeKey := e.RequestContext.RouteKey
+	connectionID := e.RequestContext.ConnectionID
+	account := "JohnSmith" // todo: remove temp hardcode after adding jwt
+	connectedAt := e.RequestContext.ConnectedAt
+
+	// set success response
+	success := events.APIGatewayProxyResponse{StatusCode: 200}
+
 	// connect to postgres
-	// db, err := c.Connect(ctx, pgConn)
-	// if err != nil {
-	// 	log.Printf("connect error: %v", err)
-	// 	return "", err
-	// }
-	// defer db.Close(context.Background())
+	db, err := c.Connect(ctx, pgConn)
+	if err != nil {
+		log.Printf("connect error: %v", err)
+		return events.APIGatewayProxyResponse{}, err
+	}
+	defer db.Close(context.Background())
 
-	// send string or error response to client
-	return "", nil
+	// insert websocket connection in db on connect
+	if routeKey == connectRouteKey {
+		insSQL, insArgs := sqlb.InsertWebsocketConnectionSQL(
+			connectionID,
+			account,
+			connectedAt,
+		)
+		_, err := db.Exec(context.Background(), insSQL, insArgs...)
+		if err != nil {
+			log.Printf("wss conn insert error: %v", err)
+			return events.APIGatewayProxyResponse{}, err
+		}
+		return success, nil
+	}
+
+	// delete websocket connection in db on disconnect
+	if routeKey == disconnectRouteKey {
+		delSQL, delArgs := sqlb.DeleteWebsocketConnectionSQL(connectionID)
+		_, err := db.Exec(context.Background(), delSQL, delArgs...)
+		if err != nil {
+			log.Printf("wss conn delete error: %v", err)
+			return events.APIGatewayProxyResponse{}, err
+		}
+		return success, nil
+	}
+
+	// return route not found to alert
+	// misconfigured route integrations
+	ErrRouteNotFound := fmt.Sprintf("route not found: %v", routeKey)
+	log.Print(ErrRouteNotFound)
+
+	return events.APIGatewayProxyResponse{
+		StatusCode: 404,
+		Body:       ErrRouteNotFound,
+	}, nil
+}
+
+// wraps lambdaFn accepting db interface for testability
+func handleEvent(
+	ctx context.Context,
+	e events.APIGatewayWebsocketProxyRequest,
+) (events.APIGatewayProxyResponse, error) {
+	c := lpg.NewConnector(pgx.Connect)
+	return lambdaFn(ctx, e, c)
 }
 
 func main() {
-	lambda.Start(lambdaFn)
+	lambda.Start(handleEvent)
 }
