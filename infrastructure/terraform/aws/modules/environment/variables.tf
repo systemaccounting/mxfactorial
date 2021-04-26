@@ -1,36 +1,12 @@
-variable "environment" {
-  type = string
-}
-
-variable "ssl_arn" {
-  type = string
-}
-
-variable "certificate_arn" {
-  type        = string
-  description = "Certificate ARN"
-}
-
-variable "db_snapshot_id" {
-  type = string
-}
-
-variable "req_query_return_limit" {
-  type = number
-}
-
-variable "trans_query_return_limit" {
-  type = number
-}
-
+variable "environment" {}
+variable "ssl_arn" {}
+variable "certificate_arn" {}
+variable "db_snapshot_id" {}
 variable "rds_db_version" {}
-
-variable "rds_allow_major_version_upgrade" {
-  type = bool
-}
-
+variable "rds_allow_major_version_upgrade" {}
 variable "rds_instance_class" {}
-
 variable "rds_parameter_group" {}
-
 variable "rds_instance_name" {}
+variable "notifications_return_limit" {}
+variable "requests_by_account_return_limit" {}
+variable "transactions_by_account_return_limit" {}

@@ -46,8 +46,9 @@ module "dev" {
   environment = local.ENV
 
   ############### lambda ###############
-  req_query_return_limit   = 20
-  trans_query_return_limit = 20
+  requests_by_account_return_limit     = 20
+  transactions_by_account_return_limit = 20
+  notifications_return_limit           = 20
 
   ############### shared in lambda and rds ###############
   # db_snapshot_id = "dev-2020-05-24"

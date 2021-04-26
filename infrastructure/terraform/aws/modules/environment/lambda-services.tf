@@ -8,10 +8,12 @@ module "request_create" {
   env_vars = merge(local.POSTGRES_VARS, {
     RULE_LAMBDA_ARN = aws_lambda_function.rules.arn
   })
+  attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
+  create_secret        = true // suppports local testing
 }
 
-resource "aws_iam_policy" "request_create_lambda" {
-  name        = "request-create-lambda-added-${var.environment}"
+resource "aws_iam_policy" "invoke_rules" {
+  name        = "allow-rules-invoke-${var.environment}"
   description = "added perms for request-create lambda"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -28,18 +30,14 @@ resource "aws_iam_policy" "request_create_lambda" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "default" {
-  role       = module.request_create.lambda_role_name
-  policy_arn = aws_iam_policy.request_create_lambda.arn
-}
-
 ##########################
 
 module "request_approve" {
-  source       = "../go-lambda-service"
-  service_name = "request-approve"
-  env          = var.environment
-  env_vars     = merge(local.POSTGRES_VARS, {})
+  source        = "../go-lambda-service"
+  service_name  = "request-approve"
+  env           = var.environment
+  env_vars      = merge(local.POSTGRES_VARS, {})
+  create_secret = true
 }
 
 module "requests_by_account" {
@@ -47,15 +45,17 @@ module "requests_by_account" {
   service_name = "requests-by-account"
   env          = var.environment
   env_vars = merge(local.POSTGRES_VARS, {
-    RETURN_RECORD_LIMIT = 20
+    RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
   })
+  create_secret = true
 }
 
 module "request_by_id" {
-  source       = "../go-lambda-service"
-  service_name = "request-by-id"
-  env          = var.environment
-  env_vars     = merge(local.POSTGRES_VARS, {})
+  source        = "../go-lambda-service"
+  service_name  = "request-by-id"
+  env           = var.environment
+  env_vars      = merge(local.POSTGRES_VARS, {})
+  create_secret = true
 }
 
 module "transactions_by_account" {
@@ -63,29 +63,78 @@ module "transactions_by_account" {
   service_name = "transactions-by-account"
   env          = var.environment
   env_vars = merge(local.POSTGRES_VARS, {
-    RETURN_RECORD_LIMIT = 20
+    RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
   })
+  create_secret = true
 }
 
 module "transaction_by_id" {
-  source       = "../go-lambda-service"
-  service_name = "transaction-by-id"
-  env          = var.environment
-  env_vars     = merge(local.POSTGRES_VARS, {})
+  source        = "../go-lambda-service"
+  service_name  = "transaction-by-id"
+  env           = var.environment
+  env_vars      = merge(local.POSTGRES_VARS, {})
+  create_secret = true
 }
-
-##########################
 
 module "auto_confirm" {
-  source       = "../go-lambda-service"
-  service_name = "auto-confirm"
-  env          = var.environment
-  env_vars     = merge(local.POSTGRES_VARS, {})
+  source            = "../go-lambda-service"
+  service_name      = "auto-confirm"
+  env               = var.environment
+  env_vars          = merge(local.POSTGRES_VARS, {})
+  invoke_principals = ["cognito-idp.amazonaws.com"]
 }
 
-resource "aws_lambda_permission" "auto_confirm" {
-  statement_id  = "AllowExecutionFromCognito${title(var.environment)}"
-  action        = "lambda:InvokeFunction"
-  function_name = split(":", module.auto_confirm.lambda_arn)[6]
-  principal     = "cognito-idp.amazonaws.com"
+module "wss_connect" {
+  source            = "../go-lambda-service"
+  service_name      = "wss-connect"
+  env               = var.environment
+  env_vars          = merge(local.POSTGRES_VARS, {})
+  invoke_principals = ["apigateway.amazonaws.com"]
+}
+
+// invoked by request-create or
+// request-approve through sns
+module "notifications_send" {
+  source       = "../go-lambda-service"
+  service_name = "notifications-send"
+  env          = var.environment
+  env_vars = merge(local.POSTGRES_VARS, {
+    NOTIFICATIONS_TABLE_NAME = aws_dynamodb_table.notifications.id
+    APIGW_CONNECTIONS_URI    = local.APIGW_CONNECTIONS_URI
+  })
+  invoke_principals    = ["sns.amazonaws.com"]
+  attached_policy_arns = [aws_iam_policy.wss.arn]
+}
+
+resource "aws_sns_topic_subscription" "notifications_send" {
+  topic_arn = aws_sns_topic.notifications.arn
+  protocol  = "lambda"
+  endpoint  = module.notifications_send.lambda_arn
+}
+
+module "notifications_get" {
+  source       = "../go-lambda-service"
+  service_name = "notifications-get"
+  env          = var.environment
+  env_vars = merge(local.POSTGRES_VARS, {
+    NOTIFICATIONS_RETURN_LIMIT = var.notifications_return_limit
+    NOTIFICATIONS_TABLE_NAME   = aws_dynamodb_table.notifications.id
+    APIGW_CONNECTIONS_URI      = local.APIGW_CONNECTIONS_URI
+    POOL_NAME                  = aws_cognito_user_pool.pool.name
+  })
+  invoke_principals    = ["apigateway.amazonaws.com"]
+  attached_policy_arns = [aws_iam_policy.wss.arn]
+}
+
+module "notifications_clear" {
+  source       = "../go-lambda-service"
+  service_name = "notifications-clear"
+  env          = var.environment
+  env_vars = merge(local.POSTGRES_VARS, {
+    NOTIFICATIONS_TABLE_NAME = aws_dynamodb_table.notifications.id
+    APIGW_CONNECTIONS_URI    = local.APIGW_CONNECTIONS_URI
+    POOL_NAME                = aws_cognito_user_pool.pool.name
+  })
+  invoke_principals    = ["apigateway.amazonaws.com"]
+  attached_policy_arns = [aws_iam_policy.wss.arn]
 }
