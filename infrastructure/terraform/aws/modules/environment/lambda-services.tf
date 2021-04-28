@@ -6,9 +6,11 @@ module "request_create" {
   service_name = "request-create"
   env          = var.environment
   env_vars = merge(local.POSTGRES_VARS, {
-    RULE_LAMBDA_ARN = aws_lambda_function.rules.arn
+    RULE_LAMBDA_ARN  = aws_lambda_function.rules.arn,
+    NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
   })
   attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
+  invoke_principals    = ["sns.amazonaws.com"]
   create_secret        = true // suppports local testing
 }
 
@@ -99,8 +101,7 @@ module "notifications_send" {
   service_name = "notifications-send"
   env          = var.environment
   env_vars = merge(local.POSTGRES_VARS, {
-    NOTIFICATIONS_TABLE_NAME = aws_dynamodb_table.notifications.id
-    APIGW_CONNECTIONS_URI    = local.APIGW_CONNECTIONS_URI
+    APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
   })
   invoke_principals    = ["sns.amazonaws.com"]
   attached_policy_arns = [aws_iam_policy.wss.arn]
@@ -118,7 +119,6 @@ module "notifications_get" {
   env          = var.environment
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFICATIONS_RETURN_LIMIT = var.notifications_return_limit
-    NOTIFICATIONS_TABLE_NAME   = aws_dynamodb_table.notifications.id
     APIGW_CONNECTIONS_URI      = local.APIGW_CONNECTIONS_URI
     POOL_NAME                  = aws_cognito_user_pool.pool.name
   })
@@ -131,9 +131,8 @@ module "notifications_clear" {
   service_name = "notifications-clear"
   env          = var.environment
   env_vars = merge(local.POSTGRES_VARS, {
-    NOTIFICATIONS_TABLE_NAME = aws_dynamodb_table.notifications.id
-    APIGW_CONNECTIONS_URI    = local.APIGW_CONNECTIONS_URI
-    POOL_NAME                = aws_cognito_user_pool.pool.name
+    APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
+    POOL_NAME             = aws_cognito_user_pool.pool.name
   })
   invoke_principals    = ["apigateway.amazonaws.com"]
   attached_policy_arns = [aws_iam_policy.wss.arn]

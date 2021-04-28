@@ -21,3 +21,18 @@ CREATE TABLE transaction (
     FOREIGN KEY(author)
       REFERENCES account(name)
 );
+
+CREATE TABLE transaction_notification (
+  id SERIAL PRIMARY KEY,
+  transaction_id int not null,
+  account_name character varying(255) not null,
+  account_role character varying(255) not null,
+  message jsonb not null,
+  created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_transaction_id
+    FOREIGN KEY(transaction_id)
+      REFERENCES transaction(id),
+  CONSTRAINT fk_account_name
+    FOREIGN KEY(account_name)
+      REFERENCES account(name)
+);

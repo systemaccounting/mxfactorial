@@ -130,17 +130,6 @@ resource "aws_iam_policy" "wss" {
         Effect   = "Allow"
         Resource = "*"
       },
-      {
-        Sid = "AllowNotificationDDBAccess${title(var.environment)}"
-        Action = [
-          "dynamodb:*",
-        ]
-        Effect = "Allow"
-        Resource = [
-          aws_dynamodb_table.notifications.arn,
-          "${aws_dynamodb_table.notifications.arn}/*",
-        ],
-      },
     ]
   })
 }
