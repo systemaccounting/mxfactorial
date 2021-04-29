@@ -11,7 +11,7 @@ func InsertWebsocketConnectionSQL(
 	ib.InsertInto("websocket")
 	ib.Cols(
 		"connection_id",
-		"account",
+		"account_name",
 		"epoch_created_at",
 	)
 	ib.Values(
@@ -29,4 +29,14 @@ func DeleteWebsocketConnectionSQL(connectionID string) (string, []interface{}) {
 		db.Equal("connection_id", connectionID),
 	)
 	return db.Build()
+}
+
+func SelectWebsocketByAccountsSQL(accounts []interface{}) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select("*")
+	sb.From("websocket").
+		Where(
+			sb.In("account_name", accounts...),
+		)
+	return sb.Build()
 }

@@ -2,11 +2,11 @@ CREATE TABLE websocket (
   id SERIAL PRIMARY KEY,
   -- https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-websocket-api-mapping-template-reference.html
   connection_id character varying(255) not null UNIQUE,
-  account character varying(255) not null,
+  account_name character varying(255) not null,
   epoch_created_at bigint NOT NULL, -- e.g. 1547557733712, also supplied by apigateway
   created_at timestamptz, -- converted from epoch
-  CONSTRAINT fk_account
-      FOREIGN KEY (account)
+  CONSTRAINT fk_account_name
+      FOREIGN KEY (account_name)
         REFERENCES account(name)
 );
 
