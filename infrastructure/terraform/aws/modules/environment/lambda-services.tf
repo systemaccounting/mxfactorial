@@ -10,7 +10,6 @@ module "request_create" {
     NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
   })
   attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
-  invoke_principals    = ["sns.amazonaws.com"]
   create_secret        = true // suppports local testing
 }
 
@@ -27,6 +26,14 @@ resource "aws_iam_policy" "invoke_rules" {
         ]
         Effect   = "Allow"
         Resource = aws_lambda_function.rules.arn
+      },
+      {
+        Sid = "SNSPublish"
+        Action = [
+          "sns:Publish",
+        ]
+        Effect   = "Allow"
+        Resource = aws_sns_topic.notifications.arn
       },
     ]
   })
