@@ -6,6 +6,12 @@ REGION=us-east-1
 BINARY_NAME=index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
+TEST_DATA_PATH=../gopkg/testdata/requestNotification.json
+ENV_FILE=$(CURDIR)/.env
+ENV_VARS=AWS_REGION \
+NOTIFY_TOPIC_ARN \
+APIGW_CONNECTIONS_URI \
+
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -22,6 +28,14 @@ run:
 	@$(DOCKER_ENV_VARS) go run ./cmd/main.go
 
 
+publish:
+	$(MAKE) -s test-env-file
+	eval $$(cat $(ENV_FILE)); aws sns publish \
+		--region $(REGION) \
+		--topic-arn $$NOTIFY_TOPIC_ARN \
+		--message "$$(cat $(TEST_DATA_PATH))"
+
+
 ###################### clean ######################
 
 clean:
@@ -33,6 +47,9 @@ clean-artifact:
 
 clean-binary:
 		rm -f $(BINARY_NAME)
+
+clean-env:
+	rm -f .env
 
 ###################### dependencies ######################
 
@@ -100,6 +117,35 @@ now:
 	$(MAKE) compile
 	$(MAKE) zip
 	$(MAKE) deploy-only ENV=dev
+
+###################### secrets ######################
+
+test-env-file:
+ifeq (,$(wildcard $(ENV_FILE)))
+	$(error no .env file, run 'make get-secrets ENV=dev')
+endif
+
+get-secrets:
+	@$(MAKE) -s retrieve-each-secret
+	@if [ ! -s $(ENV_FILE) ]; then \
+		rm $(ENV_FILE); \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
+
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	@if [ $@ = AWS_REGION ]; then \
+		echo AWS_REGION=$(REGION) >> $(ENV_FILE); \
+	else \
+		ENV_VAR=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+		echo $@=$$ENV_VAR >> $(ENV_FILE); \
+	fi
 
 ###################### warm up ######################
 

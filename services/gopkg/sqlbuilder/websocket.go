@@ -31,6 +31,15 @@ func DeleteWebsocketConnectionSQL(connectionID string) (string, []interface{}) {
 	return db.Build()
 }
 
+func DeleteWebsocketsByConnectionIDSQL(IDs []interface{}) (string, []interface{}) {
+	db := sqlb.PostgreSQL.NewDeleteBuilder()
+	db.DeleteFrom("websocket")
+	db.Where(
+		db.In("connection_id", IDs...),
+	)
+	return db.Build()
+}
+
 func SelectWebsocketByAccountsSQL(accounts []interface{}) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select("*")

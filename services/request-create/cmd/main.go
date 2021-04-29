@@ -9,6 +9,10 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	lam "github.com/systemaccounting/mxfactorial/services/gopkg/lambdasdk"
@@ -20,6 +24,7 @@ import (
 var (
 	awsRegion      string = os.Getenv("AWS_REGION")
 	rulesLambdaArn        = os.Getenv("RULE_LAMBDA_ARN")
+	notifyTopicArn        = os.Getenv("NOTIFY_TOPIC_ARN")
 	pgHost                = os.Getenv("PGHOST")
 	pgPort                = os.Getenv("PGPORT")
 	pgUser                = os.Getenv("PGUSER")
@@ -32,6 +37,13 @@ var (
 		pgUser,
 		pgPassword,
 		pgDatabase)
+	snsMsgAttributeName          = "SERVICE"
+	snsMsgAttributeValue         = "TRANSACT"
+	snsMsgAttributeValueDataType = "String"
+	snsMsgAttributeArg           = &sns.MessageAttributeValue{
+		DataType:    &snsMsgAttributeValueDataType,
+		StringValue: &snsMsgAttributeValue,
+	}
 )
 
 type preTestItem struct {
@@ -262,17 +274,94 @@ func lambdaFn(
 		return "", errors.New("move inserts into a single sql transaction")
 	}
 
-	// create transaction for response to client
-	intraTr := tools.CreateIntraTransaction(
-		e.AuthAccount,
-		tr,
-		trItems,
+	// dedupe role approvers to send only 1 notification
+	// per approver role: someone shopping at their own store
+	// receives 1 debitor and 1 creditor approval
+	var uniqueRoleApprovers []*types.Approver
+	for i, v := range approversInserted {
+		if isRoleApproverUnique(*v, uniqueRoleApprovers) {
+			uniqueRoleApprovers = append(uniqueRoleApprovers, v)
+		}
+	}
+
+	// add transaction items to returning transaction
+	tr.TransactionItems = trItems
+	pgMsg, err := json.Marshal(tr)
+	if err != nil {
+		return "", err
+	}
+	jsonb := pgtype.JSONB{}
+	jsonb.Set(pgMsg)
+
+	// create transaction_notification per role approver
+	var notifications []*types.TransactionNotification
+	for _, v := range uniqueRoleApprovers {
+		n := &types.TransactionNotification{
+			TransactionID: v.TransactionID,
+			AccountName:   v.AccountName,
+			AccountRole:   v.AccountRole,
+			Message:       &jsonb,
+		}
+		notifications = append(notifications, n)
+	}
+
+	// create insert transaction_notification sql returning ids
+
+	insNotifSQL, insNotifArgs := sqlb.InsertTransactionNotificationSQL(
+		notifications,
 	)
 
-	// todo: send notifications to approvers
+	// insert notifications per unique role_approver
+	notifIDRows, err := db.Query(context.Background(), insNotifSQL, insNotifArgs...)
+	if err != nil {
+		return "", err
+	}
+
+	// unmarshal notification ids
+	notifIDs, err := lpg.UnmarshalIDs(notifIDRows)
+	if err != nil {
+		return "", err
+	}
+
+	snsMsgBytes, err := json.Marshal(notifIDs)
+	if err != nil {
+		return "", err
+	}
+	snsMsg := string(snsMsgBytes)
+
+	snsMsgAttributes := make(map[string]*sns.MessageAttributeValue)
+	snsMsgAttributes[snsMsgAttributeName] = snsMsgAttributeArg
+
+	snsInput := &sns.PublishInput{
+		Message:           aws.String(snsMsg),
+		TopicArn:          aws.String(notifyTopicArn),
+		MessageAttributes: snsMsgAttributes,
+	}
+
+	sess := session.Must(session.NewSession())
+
+	// create sns client from session
+	svc := sns.New(sess)
+	// send notification ids to send message service
+	_, err = svc.Publish(snsInput)
+	if err != nil {
+		return "", err
+	}
+
+	// create request to send as client response
+	intraTr := tools.CreateIntraTransaction(e.AuthAccount, tr)
 
 	// send string or error response to client
 	return tools.MarshalIntraTransaction(&intraTr)
+}
+
+func isRoleApproverUnique(a types.Approver, l []*types.Approver) bool {
+	for _, v := range l {
+		if *v.AccountName == *a.AccountName && *v.AccountRole == *a.AccountRole {
+			return false
+		}
+	}
+	return true
 }
 
 func isStringUnique(s string, l []string) bool {

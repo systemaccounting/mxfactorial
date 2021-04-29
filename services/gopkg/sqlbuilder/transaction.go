@@ -87,3 +87,12 @@ func SelectTransNotifsByIDsSQL(IDs []interface{}) (string, []interface{}) {
 		)
 	return sb.Build()
 }
+
+func DeleteTransNotificationsByIDSQL(IDs []interface{}) (string, []interface{}) {
+	db := sqlb.PostgreSQL.NewDeleteBuilder()
+	db.DeleteFrom("transaction_notification")
+	db.Where(
+		db.In("id", IDs...),
+	)
+	return db.Build()
+}
