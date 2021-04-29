@@ -120,7 +120,7 @@ resource "aws_iam_policy" "wss" {
           "execute-api:Invoke",
         ]
         Effect   = "Allow"
-        Resource = aws_apigatewayv2_api.notifications.execution_arn
+        Resource = "${aws_apigatewayv2_api.notifications.execution_arn}/${var.environment}/*"
       },
       {
         Sid = "ListCognitoUserPools${title(var.environment)}"
