@@ -278,7 +278,7 @@ func lambdaFn(
 	// per approver role: someone shopping at their own store
 	// receives 1 debitor and 1 creditor approval
 	var uniqueRoleApprovers []*types.Approver
-	for i, v := range approversInserted {
+	for _, v := range approversInserted {
 		if isRoleApproverUnique(*v, uniqueRoleApprovers) {
 			uniqueRoleApprovers = append(uniqueRoleApprovers, v)
 		}
