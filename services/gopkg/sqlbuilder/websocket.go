@@ -4,7 +4,7 @@ import sqlb "github.com/huandu/go-sqlbuilder"
 
 func InsertWebsocketConnectionSQL(
 	connectionID,
-	account string,
+	accountName string,
 	epochCreatedAt int64,
 ) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
@@ -16,7 +16,7 @@ func InsertWebsocketConnectionSQL(
 	)
 	ib.Values(
 		connectionID,
-		account,
+		accountName,
 		epochCreatedAt,
 	)
 	return ib.Build()

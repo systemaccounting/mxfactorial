@@ -56,3 +56,34 @@ func UpdateTransactionByIDSQL(trID *int32, equilTime string) (string, []interfac
 	retID := sqlb.Buildf("%v returning *", ub)
 	return sqlb.WithFlavor(retID, sqlb.PostgreSQL).Build()
 }
+
+func InsertTransactionNotificationSQL(n []*types.TransactionNotification) (string, []interface{}) {
+	ib := sqlb.NewInsertBuilder()
+	ib.InsertInto("transaction_notification")
+	ib.Cols(
+		"transaction_id",
+		"account_name",
+		"account_role",
+		"message",
+	)
+	for _, v := range n {
+		ib.Values(
+			*v.TransactionID,
+			*v.AccountName,
+			*v.AccountRole,
+			*v.Message,
+		)
+	}
+	retID := sqlb.Buildf("%v returning id", ib)
+	return sqlb.WithFlavor(retID, sqlb.PostgreSQL).Build()
+}
+
+func SelectTransNotifsByIDsSQL(IDs []interface{}) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select("*")
+	sb.From("transaction_notification").
+		Where(
+			sb.In("id", IDs...),
+		)
+	return sb.Build()
+}

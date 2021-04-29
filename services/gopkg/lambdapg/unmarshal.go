@@ -287,3 +287,82 @@ func nullTimeToString(t null.Time) *string {
 	f := pgTime.Format("2006-01-02T15:04:05.000000Z")
 	return &f
 }
+
+// UnmarshalTransactionNotifications ...
+func UnmarshalTransactionNotifications(
+	rows pgx.Rows,
+) ([]*types.TransactionNotification, error) {
+	var transNotifs []*types.TransactionNotification
+	defer rows.Close()
+	for rows.Next() {
+		var ID *int32
+		var transactionID *int32
+		var accountName *string
+		var accountRole *string
+		var message *pgtype.JSONB
+		var createdAt *time.Time
+		err := rows.Scan(
+			&ID,
+			&transactionID,
+			&accountName,
+			&accountRole,
+			&message,
+			&createdAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		n := types.TransactionNotification{
+			ID:            ID,
+			TransactionID: transactionID,
+			AccountName:   accountName,
+			AccountRole:   accountRole,
+			Message:       message,
+			CreatedAt:     createdAt,
+		}
+		transNotifs = append(transNotifs, &n)
+	}
+	err := rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return transNotifs, nil
+}
+
+// UnmarshalWebsockets ...
+func UnmarshalWebsockets(
+	rows pgx.Rows,
+) ([]*types.Websocket, error) {
+	var wss []*types.Websocket
+	defer rows.Close()
+	for rows.Next() {
+		var ID *int32
+		var connectionID *string
+		var accountName *string
+		var epochCreatedAt *int64
+		var createdAt *time.Time
+		err := rows.Scan(
+			&ID,
+			&connectionID,
+			&accountName,
+			&epochCreatedAt,
+			&createdAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		w := types.Websocket{
+			ID:             ID,
+			ConnectionID:   connectionID,
+			AccountName:    accountName,
+			EpochCreatedAt: epochCreatedAt,
+			CreatedAt:      createdAt,
+		}
+		wss = append(wss, &w)
+	}
+	err := rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return wss, nil
+}
