@@ -124,12 +124,11 @@ func lambdaFn(
 		return "", err
 	}
 
+	// add transaction items to returning transaction
+	tr.TransactionItems = trItems
+
 	// create transaction for response to client
-	intraTr := tools.CreateIntraTransaction(
-		e.AuthAccount,
-		tr,
-		trItems,
-	)
+	intraTr := tools.CreateIntraTransaction(e.AuthAccount, tr)
 
 	// send string or error response to client
 	return tools.MarshalIntraTransaction(&intraTr)

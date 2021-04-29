@@ -372,11 +372,13 @@ func lambdaFn(
 		postApprovalTransaction = updTr
 	}
 
+	// add transaction items to post approval transaction
+	postApprovalTransaction.TransactionItems = allTrItemsInTransaction
+
 	// create transaction for response to client
 	intraTr := tools.CreateIntraTransaction(
 		e.AuthAccount,
 		postApprovalTransaction,
-		allTrItemsInTransaction,
 	)
 	// todo: send notifications to approvers
 
