@@ -1,7 +1,7 @@
 package types
 
 type AccountProfile struct {
-	ID                   *int32  `json:"id"`
+	ID                   *ID     `json:"id"`
 	AccountName          *string `json:"account_name"`
 	Description          *string `json:"description"`
 	FirstName            *string `json:"first_name"`

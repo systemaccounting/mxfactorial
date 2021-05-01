@@ -9,32 +9,32 @@ import (
 
 // Transaction is an envelope for TransactionItems
 type Transaction struct {
-	ID                 *int32              `json:"id,omitempty"`
-	RuleInstanceID     *int32              `json:"rule_instance_id,omitempty"`
-	Author             *string             `json:"author"`
-	AuthorDeviceID     *string             `json:"author_device_id,omitempty"`
-	AuthorDeviceLatlng *string             `json:"author_device_latlng,omitempty"` // pg point type
-	AuthorRole         *string             `json:"author_role"`
-	EquilibriumTime    *string             `json:"equilibrium_time"`
-	SumValue           decimal.NullDecimal `json:"sum_value"`
-	TransactionItems   []*TransactionItem  `json:"transaction_items"`
+	ID                 *ID                `json:"id,omitempty"`
+	RuleInstanceID     *ID                `json:"rule_instance_id,omitempty"`
+	Author             *string            `json:"author"`
+	AuthorDeviceID     *string            `json:"author_device_id,omitempty"`
+	AuthorDeviceLatlng *string            `json:"author_device_latlng,omitempty"` // pg point type
+	AuthorRole         *string            `json:"author_role"`
+	EquilibriumTime    *string            `json:"equilibrium_time"`
+	SumValue           *string            `json:"sum_value"`
+	TransactionItems   []*TransactionItem `json:"transaction_items"`
 }
 
 // TransactionItem transacts goods and services
 type TransactionItem struct {
-	ID                     *int32              `json:"id,omitempty"`
-	TransactionID          *int32              `json:"transaction_id,omitempty"`
+	ID                     *ID                 `json:"id,omitempty"`
+	TransactionID          *ID                 `json:"transaction_id,omitempty"`
 	ItemID                 *string             `json:"item_id"`
 	Price                  decimal.Decimal     `json:"price"`
 	Quantity               decimal.Decimal     `json:"quantity"`
 	DebitorFirst           *bool               `json:"debitor_first,omitempty"`
-	RuleInstanceID         *int32              `json:"rule_instance_id"`
+	RuleInstanceID         *ID                 `json:"rule_instance_id"`
 	UnitOfMeasurement      *string             `json:"unit_of_measurement"`
 	UnitsMeasured          decimal.NullDecimal `json:"units_measured"`
 	Debitor                *string             `json:"debitor"`
 	Creditor               *string             `json:"creditor"`
-	DebitorProfileID       *int32              `json:"debitor_profile_id,omitempty"`
-	CreditorProfileID      *int32              `json:"creditor_profile_id,omitempty"`
+	DebitorProfileID       *ID                 `json:"debitor_profile_id,omitempty"`
+	CreditorProfileID      *ID                 `json:"creditor_profile_id,omitempty"`
 	DebitorApprovalTime    *string             `json:"debitor_approval_time,omitempty"`
 	CreditorApprovalTime   *string             `json:"creditor_approval_time,omitempty"`
 	DebitorRejectionTime   *string             `json:"debitor_rejection_time,omitempty"`
@@ -45,8 +45,8 @@ type TransactionItem struct {
 }
 
 type TransactionNotification struct {
-	ID            *int32        `json:"id"`
-	TransactionID *int32        `json:"transaction_id"`
+	ID            *ID           `json:"id"`
+	TransactionID *ID           `json:"transaction_id"`
 	AccountName   *string       `json:"account_name"`
 	AccountRole   *string       `json:"account_role"`
 	Message       *pgtype.JSONB `json:"message"`
@@ -55,10 +55,10 @@ type TransactionNotification struct {
 
 // Approver approves a transaction item
 type Approver struct {
-	ID                *int32  `json:"id,omitempty"`
-	RuleInstanceID    *int32  `json:"rule_instance_id,omitempty"`
-	TransactionID     *int32  `json:"transaction_id,omitempty"`
-	TransactionItemID *int32  `json:"transaction_item_id,omitempty"`
+	ID                *ID     `json:"id,omitempty"`
+	RuleInstanceID    *ID     `json:"rule_instance_id,omitempty"`
+	TransactionID     *ID     `json:"transaction_id,omitempty"`
+	TransactionItemID *ID     `json:"transaction_item_id,omitempty"`
 	AccountName       *string `json:"account_name"`
 	AccountRole       *string `json:"account_role"`
 	DeviceID          *string `json:"device_id,omitempty"`
@@ -80,15 +80,20 @@ type IntraTransaction struct {
 	Transaction *Transaction `json:"transaction"`
 }
 
+type IntraTransactions struct {
+	IntraEvent
+	Transaction []*Transaction `json:"transactions"`
+}
+
 type RequestApprove struct {
 	IntraEvent
-	ID          *int32  `json:"id"`
+	ID          *ID     `json:"id"`
 	AccountName *string `json:"account_name"`
 	AccountRole *string `json:"account_role"`
 }
 
 type AccountProfileID struct {
-	ID          *int32  `json:"id"`
+	ID          *ID     `json:"id"`
 	AccountName *string `json:"account_name"`
 }
 
@@ -99,5 +104,5 @@ type QueryByAccount struct {
 
 type QueryByID struct {
 	IntraEvent
-	ID *int32 `json:"id"`
+	ID *ID `json:"id"`
 }
