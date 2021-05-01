@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
@@ -90,10 +91,7 @@ func lambdaFn(
 		}
 	}
 
-	// get pending notification ...
-	log.Print("get pending notifications...")
-	// create select transaction_notifications by id sql
-
+	// create select notifications sql
 	limit, err := strconv.Atoi(notificationsReturnLimit)
 	if err != nil {
 		log.Printf("string to int conversion fail %v", err)
@@ -122,16 +120,25 @@ func lambdaFn(
 		log.Printf("unmarshal err: %v", err)
 	}
 
+	// create api gateway session
 	sess := session.Must(session.NewSession())
 
+	// create api gateway service with custom endpoint
 	svc := apigw.New(
 		sess,
 		aws.NewConfig().WithRegion(awsRegion).WithEndpoint(apiGWConnectionsURI),
 	)
 
+	// store connection id in interface slice
+	// for sqlbuilder package in case of error
 	var websocketsToDeleteOnErr = []interface{}{connectionID}
+
+	// 1. create notification payload
+	// 2. store notifications for delete after delivery
+	var notificationPayload []*pgtype.JSONB
 	var notificationsToDelete []interface{}
 	for _, v := range transNotifs {
+		notificationPayload = append(notificationPayload, v.Message)
 		notificationsToDelete = append(notificationsToDelete, v.ID)
 	}
 
@@ -142,17 +149,20 @@ func lambdaFn(
 		log.Print(err)
 	}
 
-	payload, err := json.Marshal(transNotifs)
+	// create payload from notifications slice
+	payload, err := json.Marshal(notificationPayload)
 	if err != nil {
 		log.Printf("transaction list marshal fail %v", err)
 		return events.APIGatewayProxyResponse{}, nil
 	}
 
+	// create input to api gateway websocket endpoint
 	input := &apigw.PostToConnectionInput{
 		ConnectionId: &connectionID,
 		Data:         payload,
 	}
 
+	// send notifications to websocket connection
 	_, err = svc.PostToConnection(input)
 	if err != nil {
 		errMsg := err.Error()
@@ -169,7 +179,7 @@ func lambdaFn(
 			delWssSQL, delWssArgs := sqlb.DeleteWebsocketsByConnectionIDSQL(
 				websocketsToDeleteOnErr,
 			)
-			// delete websocket
+			// delete current websocket
 			_, err = db.Exec(
 				context.Background(),
 				delWssSQL,
@@ -185,6 +195,7 @@ func lambdaFn(
 		delTransNotifsSQL, delTransNotifsArgs := sqlb.DeleteTransNotificationsByIDSQL(
 			notificationsToDelete,
 		)
+		// delete delivered notifications
 		_, err = db.Exec(
 			context.Background(),
 			delTransNotifsSQL,
@@ -195,7 +206,7 @@ func lambdaFn(
 		}
 	}
 
-	// send string or error response to client
+	// 200 to api gateway
 	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
 }
 
