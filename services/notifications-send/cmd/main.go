@@ -248,9 +248,9 @@ func isStringUnique(s string, l []interface{}) bool {
 	return true
 }
 
-func isIntUnique(i int32, l []interface{}) bool {
+func isIntUnique(i types.ID, l []interface{}) bool {
 	for _, v := range l {
-		if v.(int32) == i {
+		if v.(types.ID) == i {
 			return false
 		}
 	}
