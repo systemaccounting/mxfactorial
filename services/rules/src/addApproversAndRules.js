@@ -29,10 +29,10 @@ module.exports = async function(
 
       for (let i = 0; i < approverNames.length; i++) {
         const approverObject = createObjFn(
-          null, // id
-          null, // ruleInstanceId
-          null, // transactionId,
-          null, // transactionItemId
+          "", // id
+          "", // ruleInstanceId
+          "", // transactionId,
+          "", // transactionItemId
           approverNames[i],
           role,
           null, // deviceId

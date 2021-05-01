@@ -150,7 +150,7 @@ layer:
 ###################### deploy ######################
 
 now:
-	$(MAKE) deploy ENV=$(ENV)
+	$(MAKE) deploy ENV=dev
 
 deploy:
 	@$(MAKE) -s test-env-arg

@@ -17,10 +17,10 @@ describe('approveAnyCreditItem', () => {
     const testapprovername = 'MiriamLevy';
 
     const want = {
-      id: 0,
-      rule_instance_id: 1,
-      transaction_id: 3,
-      transaction_item_id: 2,
+      id: "0",
+      rule_instance_id: "1",
+      transaction_id: "3",
+      transaction_item_id: "2",
       account_name: testapprovername,
       account_role: CREDITOR,
       device_id: null,
@@ -42,7 +42,7 @@ describe('approveAnyCreditItem', () => {
     );
 
     const got = approveAnyCreditItem(
-      1,
+      "1",
       null, // ruleInstanceName not used
       null, // ruleInstanceRole not used
       testapprovername,
@@ -62,10 +62,10 @@ describe('approveAnyCreditItem', () => {
     const testotherapprover = 'other';
 
     const want = {
-      id: 0,
-      rule_instance_id: 1,
-      transaction_id: 2,
-      transaction_item_id: 3,
+      id: "0",
+      rule_instance_id: "1",
+      transaction_id: "2",
+      transaction_item_id: "3",
       account_name: testotherapprover,
       account_role: CREDITOR,
       device_id: null,
@@ -87,7 +87,7 @@ describe('approveAnyCreditItem', () => {
     );
 
     const got = approveAnyCreditItem(
-      1,
+      "1",
       null, // ruleInstanceName not used
       null, // ruleInstanceRole not used
       testapprovername,

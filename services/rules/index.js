@@ -90,8 +90,8 @@ exports.handler = async event => {
   };
 
   const transaction = createTransaction(
-    null,
-    null,
+    "",
+    "",
     null,
     null,
     null,

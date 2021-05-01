@@ -1,6 +1,10 @@
 const {
   CURRENT_TIMESTAMP,
 } = require('../constants');
+const {
+  stringIfNull,
+  stringIfNumber,
+} = require('./shared');
 
 module.exports = (
   ruleInstanceId,
@@ -19,6 +23,10 @@ module.exports = (
       return approver;
     };
 
+    const ruleInstID = stringIfNumber(stringIfNull(ruleInstanceId))
+    const trID = stringIfNumber(stringIfNull(transactionItem.transaction_id))
+    const trItemID = stringIfNumber(stringIfNull(transactionItem.id))
+
     let postRuleApprover = Object.assign({}, approver);
     if (
       postRuleApprover.account_role == APPROVER_ROLE
@@ -26,9 +34,9 @@ module.exports = (
       ) {
       // בסדר
       postRuleApprover.approval_time = CURRENT_TIMESTAMP;
-      postRuleApprover.rule_instance_id = ruleInstanceId;
-      postRuleApprover.transaction_id = transactionItem.transaction_id;
-      postRuleApprover.transaction_item_id = transactionItem.id;
+      postRuleApprover.rule_instance_id = ruleInstID;
+      postRuleApprover.transaction_id = trID;
+      postRuleApprover.transaction_item_id = trItemID;
     }
     return postRuleApprover;
   };

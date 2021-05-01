@@ -22,8 +22,8 @@ const fakerAccountWithSevenRandomDigits = () => {
 // );
 
 const testEmptyTransaction = createTransaction(
-  null,
-  null,
+  "",
+  "",
   null,
   null,
   null,
@@ -50,8 +50,8 @@ function createItemRequestData (debitor, creditor, debitOrCredit) {
 
   const testItemData = [
     [
-      2,
-      3,
+      "2",
+      "3",
       "milk",
       2.000,
       1,
@@ -61,8 +61,8 @@ function createItemRequestData (debitor, creditor, debitOrCredit) {
       "",
       debitor,
       creditor,
-      0,
-      0,
+      "",
+      "",
       "",
       "",
       "",
@@ -71,8 +71,8 @@ function createItemRequestData (debitor, creditor, debitOrCredit) {
       "",
     ],
     [
-      1,
-      1,
+      "1",
+      "1",
       "bread",
       3.000,
       2,
@@ -82,8 +82,8 @@ function createItemRequestData (debitor, creditor, debitOrCredit) {
       "",
       debitor,
       creditor,
-      0,
-      0,
+      "",
+      "",
       "",
       "",
       "",
@@ -113,10 +113,10 @@ function createTestApprover (approverName, debitOrCredit) {
   };
 
   const testApproverData = [
-    0,
-    1,
-    2,
-    3,
+    "0",
+    "1",
+    "2",
+    "3",
     approverName,
     debitOrCredit,
     null,
@@ -131,8 +131,8 @@ function createTestApprover (approverName, debitOrCredit) {
 
 const testItems = [
   {
-    id: 0,
-    transaction_id: 123,
+    id: "0",
+    transaction_id: "123",
     item_id: 'milk',
     price: 2,
     quantity: 1,
@@ -142,8 +142,8 @@ const testItems = [
     units_measured: 0,
     debitor: 'JohnSmith',
     creditor: 'GroceryCo',
-    debitor_profile_id: 0,
-    creditor_profile_id: 0,
+    debitor_profile_id: "",
+    creditor_profile_id: "",
     debitor_approval_time: '',
     creditor_approval_time: null,
     debitor_expiration_time: '',
@@ -152,8 +152,8 @@ const testItems = [
     creditor_rejection_time: ''
   },
   {
-    id: 1,
-    transaction_id: 123,
+    id: "1",
+    transaction_id: "123",
     item_id: 'bread',
     price: 3,
     quantity: 2,
@@ -163,8 +163,8 @@ const testItems = [
     units_measured: 0,
     debitor: 'JohnSmith',
     creditor: 'GroceryCo',
-    debitor_profile_id: 0,
-    creditor_profile_id: 0,
+    debitor_profile_id: "",
+    creditor_profile_id: "",
     debitor_approval_time: '',
     creditor_approval_time: null,
     debitor_expiration_time: '',

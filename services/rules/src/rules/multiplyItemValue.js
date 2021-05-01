@@ -1,4 +1,8 @@
 const getTransactionItem = require('../model/transactionItem');
+const {
+  stringIfNull,
+  stringIfNumber,
+} = require('./shared');
 
 module.exports = function(
   ruleInstanceId,
@@ -21,20 +25,23 @@ module.exports = function(
     const repeatedUnitOfMeasurement = transactionItem.unit_of_measurement;
     const repeatedUnitsMeasured = transactionItem.units_measured;
 
+    // standard types
+    const ruleInstID = stringIfNumber(stringIfNull(ruleInstanceId))
+
     const addedItem = getTransactionItem(
-      null,
-      null,
+      "",
+      "",
       ITEM_NAME,
       addedItemValue.toFixed(3).toString(),
       addedItemQuantity.toFixed(3).toString(),
       repeatedTransactionSequence,
-      ruleInstanceId,
+      ruleInstID,
       repeatedUnitOfMeasurement,
       repeatedUnitsMeasured,
       DEBITOR,
       CREDITOR,
-      0,
-      0,
+      "",
+      "",
       "",
       "",
       "",
