@@ -3,6 +3,7 @@ package tools
 import (
 	"strconv"
 
+	"github.com/shopspring/decimal"
 	"gopkg.in/guregu/null.v4"
 )
 
@@ -46,4 +47,11 @@ func NullTimeToString(t null.Time) *string {
 	}
 	f := pgTime.Format("2006-01-02T15:04:05.000000Z")
 	return &f
+}
+
+func NullDecimalToString(n decimal.NullDecimal) string {
+	if n.Valid {
+		return n.Decimal.String()
+	}
+	return ""
 }

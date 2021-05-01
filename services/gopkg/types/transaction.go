@@ -1,9 +1,6 @@
 package types
 
 import (
-	"time"
-
-	"github.com/jackc/pgtype"
 	"github.com/shopspring/decimal"
 )
 
@@ -42,15 +39,6 @@ type TransactionItem struct {
 	DebitorExpirationTime  *string             `json:"debitor_expiration_time,omitempty"`
 	CreditorExpirationTime *string             `json:"creditor_expiration_time,omitempty"`
 	Approvers              []*Approver         `json:"approvers,omitempty"`
-}
-
-type TransactionNotification struct {
-	ID            *ID           `json:"id"`
-	TransactionID *ID           `json:"transaction_id"`
-	AccountName   *string       `json:"account_name"`
-	AccountRole   *string       `json:"account_role"`
-	Message       *pgtype.JSONB `json:"message"`
-	CreatedAt     *time.Time    `json:"created_at"`
 }
 
 // Approver approves a transaction item
