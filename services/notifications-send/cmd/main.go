@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -192,13 +193,13 @@ func lambdaFn(
 
 				// add connection id to delete list if
 				// 410 status code in error, and connection id is unique
-				if re.MatchString(errMsg) && isStringUnique(*w.ConnectionID, websocketsToDelete) {
+				if re.MatchString(errMsg) && tools.IsStringUnique(*w.ConnectionID, websocketsToDelete) {
 					websocketsToDelete = append(websocketsToDelete, *w.ConnectionID)
 				}
 			} else {
 				// add transaction_notification id to delete list if
 				// unique after delivering to multiple websockets
-				if isIntUnique(*r.Notification.ID, notificationsToDelete) {
+				if tools.IsIntUnique(*r.Notification.ID, notificationsToDelete) {
 					notificationsToDelete = append(notificationsToDelete, *r.Notification.ID)
 				}
 			}
@@ -237,24 +238,6 @@ func lambdaFn(
 			log.Printf("delete websockets err: %v", err)
 		}
 	}
-}
-
-func isStringUnique(s string, l []interface{}) bool {
-	for _, v := range l {
-		if v.(string) == s {
-			return false
-		}
-	}
-	return true
-}
-
-func isIntUnique(i types.ID, l []interface{}) bool {
-	for _, v := range l {
-		if v.(types.ID) == i {
-			return false
-		}
-	}
-	return true
 }
 
 // wraps lambdaFn accepting interfaces for testability

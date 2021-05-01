@@ -101,8 +101,7 @@ module "wss_connect" {
   invoke_principals = ["apigateway.amazonaws.com"]
 }
 
-// invoked by request-create or
-// request-approve through sns
+// invoked by request-create or request-approve through sns
 module "notifications_send" {
   source       = "../go-lambda-service"
   service_name = "notifications-send"
@@ -120,6 +119,7 @@ resource "aws_sns_topic_subscription" "notifications_send" {
   endpoint  = module.notifications_send.lambda_arn
 }
 
+// invoked by getnotifications through wss
 module "notifications_get" {
   source       = "../go-lambda-service"
   service_name = "notifications-get"
@@ -133,6 +133,7 @@ module "notifications_get" {
   attached_policy_arns = [aws_iam_policy.wss.arn]
 }
 
+// invoked by clearnotifications through wss
 module "notifications_clear" {
   source       = "../go-lambda-service"
   service_name = "notifications-clear"

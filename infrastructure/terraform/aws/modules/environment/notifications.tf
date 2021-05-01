@@ -96,7 +96,7 @@ resource "aws_apigatewayv2_integration_response" "default" {
   integration_id           = aws_apigatewayv2_integration.default.id
   integration_response_key = aws_apigatewayv2_route.default.route_key
   response_templates = {
-    "404" = "\"only getnotification and clearnotification actions available\""
+    "404" = "\"only getnotifications and clearnotifications actions available\""
   }
   template_selection_expression = "404"
 }
