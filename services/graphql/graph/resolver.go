@@ -41,9 +41,14 @@ type IntraEvent struct {
 	Transaction *model.Transaction `json:"transaction`
 }
 
-type GraphQLResponse struct {
+type TransactionResponse struct {
 	AuthAccount *string            `json:"auth_account"`
 	Transaction *model.Transaction `json:"transaction"`
+}
+
+type MultipleTransactionResponse struct {
+	AuthAccount  *string              `json:"auth_account"`
+	Transactions []*model.Transaction `json:"transactions"`
 }
 
 func UnquoteBytes(b []byte) ([]byte, error) {
@@ -149,10 +154,10 @@ func CreateIntraTransactionClientEvent(authAcct *string, trItems []*model.Transa
 
 type QueryByIDEvent struct {
 	AuthAccount *string `json:"auth_account"`
-	ID          *int    `json:"id"`
+	ID          *string `json:"id"`
 }
 
-func CreateQueryByIDEvent(authAcct *string, ID *int) *QueryByIDEvent {
+func CreateQueryByIDEvent(authAcct *string, ID *string) *QueryByIDEvent {
 	return &QueryByIDEvent{
 		AuthAccount: authAcct,
 		ID:          ID,
@@ -173,13 +178,13 @@ func CreateQueryByAccountEvent(authAcct *string, accountName *string) *QueryByAc
 
 type RequestApproveEvent struct {
 	AuthAccount *string `json:"auth_account"`
-	ID          *int    `json:"id"`
+	ID          *string `json:"id"`
 	AccountName *string `json:"account_name"`
 	AccountRole *string `json:"account_role"`
 }
 
 func CreateRequestApproveEvent(
-	transactionID *int,
+	transactionID,
 	accountName,
 	accountRole,
 	authAccount *string,
@@ -197,6 +202,8 @@ func (r *Resolver) InvokeRequestCreate(
 	authAccount string,
 ) (*model.Transaction, error) {
 
+	funcName := "request create"
+
 	requestEvent := CreateIntraTransactionClientEvent(
 		&authAccount,
 		transactionItems,
@@ -204,29 +211,31 @@ func (r *Resolver) InvokeRequestCreate(
 
 	payload, err := json.Marshal(requestEvent)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v marshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	result, err := r.InvokeLambda(reqCreateLambdaArn, payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
+
+	log.Print(string(result.Payload))
 
 	// todo: test string(result.Payload) for {"errorMessage":"...","errorType":"errorString"}
 
 	unquoted, err := UnquoteBytes(result.Payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unquote: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	var resp GraphQLResponse
+	var resp TransactionResponse
 
 	err = json.Unmarshal(unquoted, &resp)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
@@ -234,11 +243,13 @@ func (r *Resolver) InvokeRequestCreate(
 }
 
 func (r *Resolver) InvokeRequestApprove(
-	transactionID int,
+	transactionID,
 	accountName,
 	accountRole,
 	authAccount string,
 ) (*model.Transaction, error) {
+
+	funcName := "request approve"
 
 	approvalEvent := CreateRequestApproveEvent(
 		&transactionID,
@@ -249,27 +260,27 @@ func (r *Resolver) InvokeRequestApprove(
 
 	payload, err := json.Marshal(approvalEvent)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v marshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	result, err := r.InvokeLambda(reqApproveLambdaArn, payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	unquoted, err := UnquoteBytes(result.Payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	var resp GraphQLResponse
+	var resp TransactionResponse
 
 	err = json.Unmarshal(unquoted, &resp)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
@@ -277,9 +288,11 @@ func (r *Resolver) InvokeRequestApprove(
 }
 
 func (r *Resolver) InvokeRequestByID(
-	transactionID int,
+	transactionID,
 	authAccount string,
 ) (*model.Transaction, error) {
+
+	funcName := "request by id"
 
 	queryByIDEvent := CreateQueryByIDEvent(
 		&authAccount,
@@ -288,37 +301,39 @@ func (r *Resolver) InvokeRequestByID(
 
 	payload, err := json.Marshal(queryByIDEvent)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v marshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	result, err := r.InvokeLambda(reqByIDLambdaArn, payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	unquoted, err := UnquoteBytes(result.Payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	var resp GraphQLResponse
+	var resp TransactionResponse
 
 	err = json.Unmarshal(unquoted, &resp)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	return resp.Transaction, nil
 }
 
-func (r *Resolver) InvokeRequestByAccount(
+func (r *Resolver) InvokeRequestsByAccount(
 	accountName,
 	authAccount string,
-) (*model.Transaction, error) {
+) ([]*model.Transaction, error) {
+
+	funcName := "requests by acount"
 
 	queryByAccountEvent := CreateQueryByAccountEvent(
 		&authAccount,
@@ -327,37 +342,41 @@ func (r *Resolver) InvokeRequestByAccount(
 
 	payload, err := json.Marshal(queryByAccountEvent)
 	if err != nil {
+		log.Printf("invoke %v marshal: %v", funcName, err.Error())
 		log.Print(err.Error())
 		return nil, err
 	}
 
 	result, err := r.InvokeLambda(reqsByAccountLambdaArn, payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	unquoted, err := UnquoteBytes(result.Payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	var resp GraphQLResponse
+	var resp MultipleTransactionResponse
 
 	err = json.Unmarshal(unquoted, &resp)
 	if err != nil {
+		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
 		log.Print(err.Error())
 		return nil, err
 	}
 
-	return resp.Transaction, nil
+	return resp.Transactions, nil
 }
 
 func (r *Resolver) InvokeTransactionByID(
-	transactionID int,
+	transactionID,
 	authAccount string,
 ) (*model.Transaction, error) {
+
+	funcName := "transaction by id"
 
 	queryByIDEvent := CreateQueryByIDEvent(
 		&authAccount,
@@ -366,37 +385,39 @@ func (r *Resolver) InvokeTransactionByID(
 
 	payload, err := json.Marshal(queryByIDEvent)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	result, err := r.InvokeLambda(transByIDLambdaArn, payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	unquoted, err := UnquoteBytes(result.Payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	var resp GraphQLResponse
+	var resp TransactionResponse
 
 	err = json.Unmarshal(unquoted, &resp)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	return resp.Transaction, nil
 }
 
-func (r *Resolver) InvokeTransactionByAccount(
+func (r *Resolver) InvokeTransactionsByAccount(
 	accountName,
 	authAccount string,
-) (*model.Transaction, error) {
+) ([]*model.Transaction, error) {
+
+	funcName := "transactions by account"
 
 	queryByAccountEvent := CreateQueryByAccountEvent(
 		&authAccount,
@@ -405,29 +426,29 @@ func (r *Resolver) InvokeTransactionByAccount(
 
 	payload, err := json.Marshal(queryByAccountEvent)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v marshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	result, err := r.InvokeLambda(transByAccountLambdaArn, payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	unquoted, err := UnquoteBytes(result.Payload)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	var resp GraphQLResponse
+	var resp MultipleTransactionResponse
 
 	err = json.Unmarshal(unquoted, &resp)
 	if err != nil {
-		log.Print(err.Error())
+		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	return resp.Transaction, nil
+	return resp.Transactions, nil
 }

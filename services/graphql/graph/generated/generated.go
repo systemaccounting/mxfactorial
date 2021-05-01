@@ -58,15 +58,15 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ApproveRequest func(childComplexity int, transactionID int, accountName string, accountRole string, authAccount string) int
+		ApproveRequest func(childComplexity int, transactionID string, accountName string, accountRole string, authAccount string) int
 		CreateRequest  func(childComplexity int, transactionItems []*model.TransactionItemInput, authAccount string) int
 	}
 
 	Query struct {
-		RequestByID           func(childComplexity int, transactionID int, authAccount string) int
+		RequestByID           func(childComplexity int, transactionID string, authAccount string) int
 		RequestsByAccount     func(childComplexity int, accountName string, authAccount string) int
 		Rules                 func(childComplexity int, transactionItems []*model.TransactionItemInput) int
-		TransactionByID       func(childComplexity int, transactionID int, authAccount string) int
+		TransactionByID       func(childComplexity int, transactionID string, authAccount string) int
 		TransactionsByAccount func(childComplexity int, accountName string, authAccount string) int
 	}
 
@@ -108,14 +108,14 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateRequest(ctx context.Context, transactionItems []*model.TransactionItemInput, authAccount string) (*model.Transaction, error)
-	ApproveRequest(ctx context.Context, transactionID int, accountName string, accountRole string, authAccount string) (*model.Transaction, error)
+	ApproveRequest(ctx context.Context, transactionID string, accountName string, accountRole string, authAccount string) (*model.Transaction, error)
 }
 type QueryResolver interface {
 	Rules(ctx context.Context, transactionItems []*model.TransactionItemInput) (*model.Transaction, error)
-	RequestByID(ctx context.Context, transactionID int, authAccount string) (*model.Transaction, error)
-	RequestsByAccount(ctx context.Context, accountName string, authAccount string) (*model.Transaction, error)
-	TransactionByID(ctx context.Context, transactionID int, authAccount string) (*model.Transaction, error)
-	TransactionsByAccount(ctx context.Context, accountName string, authAccount string) (*model.Transaction, error)
+	RequestByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error)
+	RequestsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error)
+	TransactionByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error)
+	TransactionsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error)
 }
 
 type executableSchema struct {
@@ -220,7 +220,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.ApproveRequest(childComplexity, args["transaction_id"].(int), args["account_name"].(string), args["account_role"].(string), args["auth_account"].(string)), true
+		return e.complexity.Mutation.ApproveRequest(childComplexity, args["transaction_id"].(string), args["account_name"].(string), args["account_role"].(string), args["auth_account"].(string)), true
 
 	case "Mutation.createRequest":
 		if e.complexity.Mutation.CreateRequest == nil {
@@ -244,7 +244,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.RequestByID(childComplexity, args["transaction_id"].(int), args["auth_account"].(string)), true
+		return e.complexity.Query.RequestByID(childComplexity, args["transaction_id"].(string), args["auth_account"].(string)), true
 
 	case "Query.requestsByAccount":
 		if e.complexity.Query.RequestsByAccount == nil {
@@ -280,7 +280,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.TransactionByID(childComplexity, args["transaction_id"].(int), args["auth_account"].(string)), true
+		return e.complexity.Query.TransactionByID(childComplexity, args["transaction_id"].(string), args["auth_account"].(string)), true
 
 	case "Query.transactionsByAccount":
 		if e.complexity.Query.TransactionsByAccount == nil {
@@ -562,8 +562,8 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "graph/schema.graphqls", Input: `type Transaction {
-  id: Int
-  rule_instance_id: Int
+  id: ID
+  rule_instance_id: String
   author: String
   author_device_id: Float
   author_device_latlng: Float
@@ -574,8 +574,8 @@ var sources = []*ast.Source{
 }
 
 input TransactionInput {
-  id: Int
-  rule_instance_id: Int
+  id: ID
+  rule_instance_id: String
   author: String
   author_device_id: Float
   author_device_latlng: Float
@@ -583,19 +583,19 @@ input TransactionInput {
 }
 
 interface ITransactionItem {
-  id: Int
-  transaction_id: Int
+  id: ID
+  transaction_id: String
   item_id: String
   price: String
   quantity: String
   debitor_first: Boolean
-  rule_instance_id: Int
+  rule_instance_id: String
   unit_of_measurement: String
   units_measured: String
   debitor: String
   creditor: String
-  debitor_profile_id: Int
-  creditor_profile_id: Int
+  debitor_profile_id: String
+  creditor_profile_id: String
   debitor_approval_time: String
   creditor_approval_time: String
   debitor_expiration_time: String
@@ -605,19 +605,19 @@ interface ITransactionItem {
 }
 
 type TransactionItem implements ITransactionItem {
-  id: Int
-  transaction_id: Int
+  id: ID
+  transaction_id: String
   item_id: String
   price: String
   quantity: String
   debitor_first: Boolean
-  rule_instance_id: Int
+  rule_instance_id: String
   unit_of_measurement: String
   units_measured: String
   debitor: String
   creditor: String
-  debitor_profile_id: Int
-  creditor_profile_id: Int
+  debitor_profile_id: String
+  creditor_profile_id: String
   debitor_approval_time: String
   creditor_approval_time: String
   debitor_expiration_time: String
@@ -628,9 +628,9 @@ type TransactionItem implements ITransactionItem {
 }
 
 type Approver {
-  id: Int
-  rule_instance_id: Int
-  transaction_id: Int
+  id: ID
+  rule_instance_id: String
+  transaction_id: String
   transaction_item_id: String
   account_name: String
   account_role: String
@@ -642,19 +642,19 @@ type Approver {
 }
 
 input TransactionItemInput {
-  id: Int
-  transaction_id: Int
+  id: ID
+  transaction_id: String
   item_id: String
   price: String
   quantity: String
   debitor_first: Boolean
-  rule_instance_id: Int
+  rule_instance_id: String
   unit_of_measurement: String
   units_measured: String
   debitor: String
   creditor: String
-  debitor_profile_id: Int
-  creditor_profile_id: Int
+  debitor_profile_id: String
+  creditor_profile_id: String
   debitor_approval_time: String
   creditor_approval_time: String
   debitor_expiration_time: String
@@ -665,15 +665,15 @@ input TransactionItemInput {
 
 type Query {
   rules(transaction_items: [TransactionItemInput!]): Transaction
-  requestByID(transaction_id: Int!, auth_account: String!): Transaction
-  requestsByAccount(account_name: String!, auth_account: String!): Transaction
-  transactionByID(transaction_id: Int!, auth_account: String!): Transaction
-  transactionsByAccount(account_name: String!, auth_account: String!): Transaction
+  requestByID(transaction_id: String!, auth_account: String!): Transaction
+  requestsByAccount(account_name: String!, auth_account: String!): [Transaction]
+  transactionByID(transaction_id: String!, auth_account: String!): Transaction
+  transactionsByAccount(account_name: String!, auth_account: String!): [Transaction]
 }
 
 type Mutation {
   createRequest(transaction_items: [TransactionItemInput!], auth_account: String!): Transaction
-  approveRequest(transaction_id: Int!, account_name: String!, account_role: String!, auth_account: String!): Transaction
+  approveRequest(transaction_id: String!, account_name: String!, account_role: String!, auth_account: String!): Transaction
 }
 
 schema {
@@ -690,10 +690,10 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_approveRequest_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
+	var arg0 string
 	if tmp, ok := rawArgs["transaction_id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transaction_id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -771,10 +771,10 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_requestByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
+	var arg0 string
 	if tmp, ok := rawArgs["transaction_id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transaction_id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -834,10 +834,10 @@ func (ec *executionContext) field_Query_rules_args(ctx context.Context, rawArgs 
 func (ec *executionContext) field_Query_transactionByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 int
+	var arg0 string
 	if tmp, ok := rawArgs["transaction_id"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transaction_id"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -944,9 +944,9 @@ func (ec *executionContext) _Approver_id(ctx context.Context, field graphql.Coll
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Approver_rule_instance_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
@@ -976,9 +976,9 @@ func (ec *executionContext) _Approver_rule_instance_id(ctx context.Context, fiel
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Approver_transaction_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
@@ -1008,9 +1008,9 @@ func (ec *executionContext) _Approver_transaction_id(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Approver_transaction_item_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
@@ -1333,7 +1333,7 @@ func (ec *executionContext) _Mutation_approveRequest(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().ApproveRequest(rctx, args["transaction_id"].(int), args["account_name"].(string), args["account_role"].(string), args["auth_account"].(string))
+		return ec.resolvers.Mutation().ApproveRequest(rctx, args["transaction_id"].(string), args["account_name"].(string), args["account_role"].(string), args["auth_account"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1411,7 +1411,7 @@ func (ec *executionContext) _Query_requestByID(ctx context.Context, field graphq
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().RequestByID(rctx, args["transaction_id"].(int), args["auth_account"].(string))
+		return ec.resolvers.Query().RequestByID(rctx, args["transaction_id"].(string), args["auth_account"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1459,9 +1459,9 @@ func (ec *executionContext) _Query_requestsByAccount(ctx context.Context, field 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Transaction)
+	res := resTmp.([]*model.Transaction)
 	fc.Result = res
-	return ec.marshalOTransaction2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐTransaction(ctx, field.Selections, res)
+	return ec.marshalOTransaction2ᚕᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐTransaction(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_transactionByID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1489,7 +1489,7 @@ func (ec *executionContext) _Query_transactionByID(ctx context.Context, field gr
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().TransactionByID(rctx, args["transaction_id"].(int), args["auth_account"].(string))
+		return ec.resolvers.Query().TransactionByID(rctx, args["transaction_id"].(string), args["auth_account"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1537,9 +1537,9 @@ func (ec *executionContext) _Query_transactionsByAccount(ctx context.Context, fi
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*model.Transaction)
+	res := resTmp.([]*model.Transaction)
 	fc.Result = res
-	return ec.marshalOTransaction2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐTransaction(ctx, field.Selections, res)
+	return ec.marshalOTransaction2ᚕᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐTransaction(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -1640,9 +1640,9 @@ func (ec *executionContext) _Transaction_id(ctx context.Context, field graphql.C
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_rule_instance_id(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
@@ -1672,9 +1672,9 @@ func (ec *executionContext) _Transaction_rule_instance_id(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Transaction_author(ctx context.Context, field graphql.CollectedField, obj *model.Transaction) (ret graphql.Marshaler) {
@@ -1931,9 +1931,9 @@ func (ec *executionContext) _TransactionItem_id(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionItem_transaction_id(ctx context.Context, field graphql.CollectedField, obj *model.TransactionItem) (ret graphql.Marshaler) {
@@ -1963,9 +1963,9 @@ func (ec *executionContext) _TransactionItem_transaction_id(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionItem_item_id(ctx context.Context, field graphql.CollectedField, obj *model.TransactionItem) (ret graphql.Marshaler) {
@@ -2123,9 +2123,9 @@ func (ec *executionContext) _TransactionItem_rule_instance_id(ctx context.Contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionItem_unit_of_measurement(ctx context.Context, field graphql.CollectedField, obj *model.TransactionItem) (ret graphql.Marshaler) {
@@ -2283,9 +2283,9 @@ func (ec *executionContext) _TransactionItem_debitor_profile_id(ctx context.Cont
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionItem_creditor_profile_id(ctx context.Context, field graphql.CollectedField, obj *model.TransactionItem) (ret graphql.Marshaler) {
@@ -2315,9 +2315,9 @@ func (ec *executionContext) _TransactionItem_creditor_profile_id(ctx context.Con
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _TransactionItem_debitor_approval_time(ctx context.Context, field graphql.CollectedField, obj *model.TransactionItem) (ret graphql.Marshaler) {
@@ -3641,7 +3641,7 @@ func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3649,7 +3649,7 @@ func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rule_instance_id"))
-			it.RuleInstanceID, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.RuleInstanceID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3701,7 +3701,7 @@ func (ec *executionContext) unmarshalInputTransactionItemInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.ID, err = ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3709,7 +3709,7 @@ func (ec *executionContext) unmarshalInputTransactionItemInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("transaction_id"))
-			it.TransactionID, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.TransactionID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3749,7 +3749,7 @@ func (ec *executionContext) unmarshalInputTransactionItemInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rule_instance_id"))
-			it.RuleInstanceID, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.RuleInstanceID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3789,7 +3789,7 @@ func (ec *executionContext) unmarshalInputTransactionItemInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("debitor_profile_id"))
-			it.DebitorProfileID, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.DebitorProfileID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3797,7 +3797,7 @@ func (ec *executionContext) unmarshalInputTransactionItemInput(ctx context.Conte
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("creditor_profile_id"))
-			it.CreditorProfileID, err = ec.unmarshalOInt2ᚖint(ctx, v)
+			it.CreditorProfileID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4403,21 +4403,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4800,19 +4785,19 @@ func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel as
 	return graphql.MarshalFloat(*v)
 }
 
-func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := graphql.UnmarshalInt(v)
+	res, err := graphql.UnmarshalID(v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalInt(*v)
+	return graphql.MarshalID(*v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -4837,6 +4822,46 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return graphql.MarshalString(*v)
+}
+
+func (ec *executionContext) marshalOTransaction2ᚕᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐTransaction(ctx context.Context, sel ast.SelectionSet, v []*model.Transaction) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOTransaction2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐTransaction(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalOTransaction2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐTransaction(ctx context.Context, sel ast.SelectionSet, v *model.Transaction) graphql.Marshaler {

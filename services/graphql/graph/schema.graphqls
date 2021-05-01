@@ -1,6 +1,6 @@
 type Transaction {
-  id: Int
-  rule_instance_id: Int
+  id: ID
+  rule_instance_id: String
   author: String
   author_device_id: Float
   author_device_latlng: Float
@@ -11,8 +11,8 @@ type Transaction {
 }
 
 input TransactionInput {
-  id: Int
-  rule_instance_id: Int
+  id: ID
+  rule_instance_id: String
   author: String
   author_device_id: Float
   author_device_latlng: Float
@@ -20,19 +20,19 @@ input TransactionInput {
 }
 
 interface ITransactionItem {
-  id: Int
-  transaction_id: Int
+  id: ID
+  transaction_id: String
   item_id: String
   price: String
   quantity: String
   debitor_first: Boolean
-  rule_instance_id: Int
+  rule_instance_id: String
   unit_of_measurement: String
   units_measured: String
   debitor: String
   creditor: String
-  debitor_profile_id: Int
-  creditor_profile_id: Int
+  debitor_profile_id: String
+  creditor_profile_id: String
   debitor_approval_time: String
   creditor_approval_time: String
   debitor_expiration_time: String
@@ -42,19 +42,19 @@ interface ITransactionItem {
 }
 
 type TransactionItem implements ITransactionItem {
-  id: Int
-  transaction_id: Int
+  id: ID
+  transaction_id: String
   item_id: String
   price: String
   quantity: String
   debitor_first: Boolean
-  rule_instance_id: Int
+  rule_instance_id: String
   unit_of_measurement: String
   units_measured: String
   debitor: String
   creditor: String
-  debitor_profile_id: Int
-  creditor_profile_id: Int
+  debitor_profile_id: String
+  creditor_profile_id: String
   debitor_approval_time: String
   creditor_approval_time: String
   debitor_expiration_time: String
@@ -65,9 +65,9 @@ type TransactionItem implements ITransactionItem {
 }
 
 type Approver {
-  id: Int
-  rule_instance_id: Int
-  transaction_id: Int
+  id: ID
+  rule_instance_id: String
+  transaction_id: String
   transaction_item_id: String
   account_name: String
   account_role: String
@@ -79,19 +79,19 @@ type Approver {
 }
 
 input TransactionItemInput {
-  id: Int
-  transaction_id: Int
+  id: ID
+  transaction_id: String
   item_id: String
   price: String
   quantity: String
   debitor_first: Boolean
-  rule_instance_id: Int
+  rule_instance_id: String
   unit_of_measurement: String
   units_measured: String
   debitor: String
   creditor: String
-  debitor_profile_id: Int
-  creditor_profile_id: Int
+  debitor_profile_id: String
+  creditor_profile_id: String
   debitor_approval_time: String
   creditor_approval_time: String
   debitor_expiration_time: String
@@ -102,15 +102,15 @@ input TransactionItemInput {
 
 type Query {
   rules(transaction_items: [TransactionItemInput!]): Transaction
-  requestByID(transaction_id: Int!, auth_account: String!): Transaction
-  requestsByAccount(account_name: String!, auth_account: String!): Transaction
-  transactionByID(transaction_id: Int!, auth_account: String!): Transaction
-  transactionsByAccount(account_name: String!, auth_account: String!): Transaction
+  requestByID(transaction_id: String!, auth_account: String!): Transaction
+  requestsByAccount(account_name: String!, auth_account: String!): [Transaction]
+  transactionByID(transaction_id: String!, auth_account: String!): Transaction
+  transactionsByAccount(account_name: String!, auth_account: String!): [Transaction]
 }
 
 type Mutation {
   createRequest(transaction_items: [TransactionItemInput!], auth_account: String!): Transaction
-  approveRequest(transaction_id: Int!, account_name: String!, account_role: String!, auth_account: String!): Transaction
+  approveRequest(transaction_id: String!, account_name: String!, account_role: String!, auth_account: String!): Transaction
 }
 
 schema {

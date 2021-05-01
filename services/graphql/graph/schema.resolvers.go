@@ -5,26 +5,32 @@ package graph
 
 import (
 	"context"
+	"log"
 
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/generated"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
 )
 
 func (r *mutationResolver) CreateRequest(ctx context.Context, transactionItems []*model.TransactionItemInput, authAccount string) (*model.Transaction, error) {
+	funcName := "create request resolver"
 	err := r.CreateLambdaSession()
 	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	tr, err := r.InvokeRequestCreate(transactionItems, authAccount)
 	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	return tr, nil
 }
 
-func (r *mutationResolver) ApproveRequest(ctx context.Context, transactionID int, accountName string, accountRole string, authAccount string) (*model.Transaction, error) {
+func (r *mutationResolver) ApproveRequest(ctx context.Context, transactionID string, accountName string, accountRole string, authAccount string) (*model.Transaction, error) {
+	funcName := "approve request resolver"
 	err := r.CreateLambdaSession()
 	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	tr, err := r.InvokeRequestApprove(
@@ -34,69 +40,85 @@ func (r *mutationResolver) ApproveRequest(ctx context.Context, transactionID int
 		authAccount,
 	)
 	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	return tr, nil
 }
 
 func (r *queryResolver) Rules(ctx context.Context, transactionItems []*model.TransactionItemInput) (*model.Transaction, error) {
+	funcName := "rules resolver"
 	err := r.CreateLambdaSession()
 	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	tr, err := r.InvokeRules(transactionItems)
 	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	return tr, nil
 }
 
-func (r *queryResolver) RequestByID(ctx context.Context, transactionID int, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) RequestByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
+	funcName := "request by id resolver"
 	err := r.CreateLambdaSession()
 	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	tr, err := r.InvokeRequestByID(transactionID, authAccount)
 	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	return tr, nil
 }
 
-func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName string, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
+	funcName := "requests by account"
 	err := r.CreateLambdaSession()
 	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
 	}
-	tr, err := r.InvokeRequestByAccount(accountName, authAccount)
+	trs, err := r.InvokeRequestsByAccount(accountName, authAccount)
 	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
 		return nil, err
 	}
-	return tr, nil
+	return trs, nil
 }
 
-func (r *queryResolver) TransactionByID(ctx context.Context, transactionID int, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) TransactionByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
+	funcName := "transaction by id"
 	err := r.CreateLambdaSession()
 	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	tr, err := r.InvokeTransactionByID(transactionID, authAccount)
 	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
 		return nil, err
 	}
 	return tr, nil
 }
 
-func (r *queryResolver) TransactionsByAccount(ctx context.Context, accountName string, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) TransactionsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
+	funcName := "transactions by account"
 	err := r.CreateLambdaSession()
 	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
 	}
-	tr, err := r.InvokeTransactionByAccount(accountName, authAccount)
+	trs, err := r.InvokeTransactionsByAccount(accountName, authAccount)
 	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
 		return nil, err
 	}
-	return tr, nil
+	return trs, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

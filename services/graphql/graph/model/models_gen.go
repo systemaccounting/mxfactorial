@@ -7,9 +7,9 @@ type ITransactionItem interface {
 }
 
 type Approver struct {
-	ID                *int    `json:"id"`
-	RuleInstanceID    *int    `json:"rule_instance_id"`
-	TransactionID     *int    `json:"transaction_id"`
+	ID                *string `json:"id"`
+	RuleInstanceID    *string `json:"rule_instance_id"`
+	TransactionID     *string `json:"transaction_id"`
 	TransactionItemID *string `json:"transaction_item_id"`
 	AccountName       *string `json:"account_name"`
 	AccountRole       *string `json:"account_role"`
@@ -21,8 +21,8 @@ type Approver struct {
 }
 
 type Transaction struct {
-	ID                 *int               `json:"id"`
-	RuleInstanceID     *int               `json:"rule_instance_id"`
+	ID                 *string            `json:"id"`
+	RuleInstanceID     *string            `json:"rule_instance_id"`
 	Author             *string            `json:"author"`
 	AuthorDeviceID     *float64           `json:"author_device_id"`
 	AuthorDeviceLatlng *float64           `json:"author_device_latlng"`
@@ -33,8 +33,8 @@ type Transaction struct {
 }
 
 type TransactionInput struct {
-	ID                 *int     `json:"id"`
-	RuleInstanceID     *int     `json:"rule_instance_id"`
+	ID                 *string  `json:"id"`
+	RuleInstanceID     *string  `json:"rule_instance_id"`
 	Author             *string  `json:"author"`
 	AuthorDeviceID     *float64 `json:"author_device_id"`
 	AuthorDeviceLatlng *float64 `json:"author_device_latlng"`
@@ -42,19 +42,19 @@ type TransactionInput struct {
 }
 
 type TransactionItem struct {
-	ID                     *int        `json:"id"`
-	TransactionID          *int        `json:"transaction_id"`
+	ID                     *string     `json:"id"`
+	TransactionID          *string     `json:"transaction_id"`
 	ItemID                 *string     `json:"item_id"`
 	Price                  *string     `json:"price"`
 	Quantity               *string     `json:"quantity"`
 	DebitorFirst           *bool       `json:"debitor_first"`
-	RuleInstanceID         *int        `json:"rule_instance_id"`
+	RuleInstanceID         *string     `json:"rule_instance_id"`
 	UnitOfMeasurement      *string     `json:"unit_of_measurement"`
 	UnitsMeasured          *string     `json:"units_measured"`
 	Debitor                *string     `json:"debitor"`
 	Creditor               *string     `json:"creditor"`
-	DebitorProfileID       *int        `json:"debitor_profile_id"`
-	CreditorProfileID      *int        `json:"creditor_profile_id"`
+	DebitorProfileID       *string     `json:"debitor_profile_id"`
+	CreditorProfileID      *string     `json:"creditor_profile_id"`
 	DebitorApprovalTime    *string     `json:"debitor_approval_time"`
 	CreditorApprovalTime   *string     `json:"creditor_approval_time"`
 	DebitorExpirationTime  *string     `json:"debitor_expiration_time"`
@@ -67,19 +67,19 @@ type TransactionItem struct {
 func (TransactionItem) IsITransactionItem() {}
 
 type TransactionItemInput struct {
-	ID                     *int    `json:"id"`
-	TransactionID          *int    `json:"transaction_id"`
+	ID                     *string `json:"id"`
+	TransactionID          *string `json:"transaction_id"`
 	ItemID                 *string `json:"item_id"`
 	Price                  *string `json:"price"`
 	Quantity               *string `json:"quantity"`
 	DebitorFirst           *bool   `json:"debitor_first"`
-	RuleInstanceID         *int    `json:"rule_instance_id"`
+	RuleInstanceID         *string `json:"rule_instance_id"`
 	UnitOfMeasurement      *string `json:"unit_of_measurement"`
 	UnitsMeasured          *string `json:"units_measured"`
 	Debitor                *string `json:"debitor"`
 	Creditor               *string `json:"creditor"`
-	DebitorProfileID       *int    `json:"debitor_profile_id"`
-	CreditorProfileID      *int    `json:"creditor_profile_id"`
+	DebitorProfileID       *string `json:"debitor_profile_id"`
+	CreditorProfileID      *string `json:"creditor_profile_id"`
 	DebitorApprovalTime    *string `json:"debitor_approval_time"`
 	CreditorApprovalTime   *string `json:"creditor_approval_time"`
 	DebitorExpirationTime  *string `json:"debitor_expiration_time"`
