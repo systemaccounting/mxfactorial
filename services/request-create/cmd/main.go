@@ -51,7 +51,7 @@ type preTestItem struct {
 	Price                  string
 	Quantity               string
 	DebitorFirst           bool
-	RuleInstanceID         int32
+	RuleInstanceID         string
 	UnitOfMeasurement      string
 	UnitsMeasured          string
 	Debitor                string
@@ -196,7 +196,7 @@ func lambdaFn(
 
 	// convert profile id list to map for convenient
 	// addition of profile ids to transaction items
-	profileIDs := make(map[string]int32)
+	profileIDs := make(map[string]types.ID)
 	for _, v := range profileIDList {
 		profileIDs[*v.AccountName] = *v.ID
 	}
@@ -215,6 +215,7 @@ func lambdaFn(
 	// returned from transaction insert
 	tr, err := lpg.UnmarshalTransaction(trRow)
 	if err != nil {
+		log.Printf("unmarshal transaction error: %v", err)
 		return "", err
 	}
 
@@ -231,6 +232,7 @@ func lambdaFn(
 		inTrItemArgs...,
 	)
 	if err != nil {
+		log.Printf("query transaction items error: %v", err)
 		return "", err
 	}
 
@@ -238,6 +240,7 @@ func lambdaFn(
 	// returned from transaction item insert
 	trItems, err := lpg.UnmarshalTrItems(trItemRows)
 	if err != nil {
+		log.Printf("unmarshal transaction items error: %v", err)
 		return "", err
 	}
 
@@ -256,12 +259,14 @@ func lambdaFn(
 		// insert approvers per transaction item id
 		apprvRows, err := db.Query(context.Background(), aprvsSQL, aprvsArgs...)
 		if err != nil {
+			log.Printf("query approvers error: %v", err)
 			return "", err
 		}
 
 		// unmarshal approvers returned from insert
 		apprv, err := lpg.UnmarshalApprovers(apprvRows)
 		if err != nil {
+			log.Printf("unmarshal approvers error: %v", err)
 			return "", err
 		}
 
@@ -314,17 +319,20 @@ func lambdaFn(
 	// insert notifications per unique role_approver
 	notifIDRows, err := db.Query(context.Background(), insNotifSQL, insNotifArgs...)
 	if err != nil {
+		log.Printf("query notification id error: %v", err)
 		return "", err
 	}
 
 	// unmarshal notification ids
 	notifIDs, err := lpg.UnmarshalIDs(notifIDRows)
 	if err != nil {
+		log.Printf("unmarshal ids error: %v", err)
 		return "", err
 	}
 
 	snsMsgBytes, err := json.Marshal(notifIDs)
 	if err != nil {
+		log.Printf("json marshal error: %v", err)
 		return "", err
 	}
 	snsMsg := string(snsMsgBytes)
@@ -345,6 +353,7 @@ func lambdaFn(
 	// send notification ids to send message service
 	_, err = svc.Publish(snsInput)
 	if err != nil {
+		log.Printf("sns publish error: %v", err)
 		return "", err
 	}
 
@@ -380,18 +389,18 @@ func nilString(s *string) string {
 	return *s
 }
 
+func nilCustomID(i *types.ID) string {
+	if i == nil {
+		return ""
+	}
+	return string(*i)
+}
+
 func nilBool(b *bool) bool {
 	if b == nil {
 		return false
 	}
 	return *b
-}
-
-func nilInt32(i *int32) int32 {
-	if i == nil {
-		return 0
-	}
-	return *i
 }
 
 func testPrep(items []*types.TransactionItem) []preTestItem {
@@ -402,7 +411,7 @@ func testPrep(items []*types.TransactionItem) []preTestItem {
 		st.Price = u.Price.String()
 		st.Quantity = u.Quantity.String()
 		st.DebitorFirst = nilBool(u.DebitorFirst)
-		st.RuleInstanceID = nilInt32(u.RuleInstanceID)
+		st.RuleInstanceID = nilCustomID(u.RuleInstanceID)
 		st.UnitOfMeasurement = nilString(u.UnitOfMeasurement)
 
 		var unitsMeasured string

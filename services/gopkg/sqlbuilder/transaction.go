@@ -5,8 +5,10 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func InsertTransactionSQL(t types.Transaction) (string, []interface{}) {
-	ib := sqlb.NewInsertBuilder()
+func InsertTransactionSQL(
+	t types.Transaction,
+) (string, []interface{}) {
+	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("transaction")
 	ib.Cols(
 		"rule_instance_id",
@@ -32,7 +34,7 @@ func InsertTransactionSQL(t types.Transaction) (string, []interface{}) {
 	return sqlb.WithFlavor(retID, sqlb.PostgreSQL).Build()
 }
 
-func SelectTransactionByIDSQL(trID *int32) (string, []interface{}) {
+func SelectTransactionByIDSQL(trID *types.ID) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select("*")
 	sb.From("transaction").
@@ -42,7 +44,17 @@ func SelectTransactionByIDSQL(trID *int32) (string, []interface{}) {
 	return sb.Build()
 }
 
-func UpdateTransactionByIDSQL(trID *int32, equilTime string) (string, []interface{}) {
+func SelectTransactionsByIDsSQL(IDs []interface{}) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select("*")
+	sb.From("transaction").
+		Where(
+			sb.In("id", IDs...),
+		)
+	return sb.Build()
+}
+
+func UpdateTransactionByIDSQL(trID *types.ID, equilTime string) (string, []interface{}) {
 	ub := sqlb.PostgreSQL.NewUpdateBuilder()
 	ub.Update("transaction").
 		Set(

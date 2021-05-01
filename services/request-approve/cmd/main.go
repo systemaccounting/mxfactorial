@@ -255,7 +255,7 @@ func lambdaFn(
 	}
 
 	// count transaction item id occurrence across approvers
-	trItemIDOccurrence := make(map[int32]int)
+	trItemIDOccurrence := make(map[types.ID]int)
 	for _, v := range allApproversPerAffectedTrItem {
 		trItemIDOccurrence[*v.TransactionItemID] += 1
 	}
@@ -400,15 +400,6 @@ func convertPGTimeToGo(pgt *string) (*time.Time, error) {
 		return nil, err
 	}
 	return &t, nil
-}
-
-func isUnique(i int32, l []int32) bool {
-	for _, v := range l {
-		if i == v {
-			return false
-		}
-	}
-	return true
 }
 
 // wraps lambdaFn accepting interfaces for testability

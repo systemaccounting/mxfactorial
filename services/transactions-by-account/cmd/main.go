@@ -95,43 +95,44 @@ func lambdaFn(
 		return "", err
 	}
 
-	var trID int32
-	// consistency test, defensive
-	for i, v := range trItems {
-		if i == 0 {
-			trID = *v.TransactionID
-			continue
+	var trIDs []interface{}
+	for _, v := range trItems {
+		if tools.IsCustomIDUnique(*v.TransactionID, trIDs) {
+			trIDs = append(trIDs, *v.TransactionID)
 		}
-		if *v.TransactionID == trID {
-			continue
-		}
-		var errMsg string = "mixed transaction ids found in transaction items"
-		log.Print(errMsg)
-		return "", errors.New(errMsg)
 	}
 
 	// create sql to get current transaction
-	trSQL, trArgs := sqlb.SelectTransactionByIDSQL(
-		&trID,
+	trsSQL, trsArgs := sqlb.SelectTransactionsByIDsSQL(
+		trIDs,
 	)
 
-	// get transaction
-	trRow := db.QueryRow(context.Background(), trSQL, trArgs...)
-
-	// unmarshal transaction
-	tr, err := lpg.UnmarshalTransaction(trRow)
+	// get transactions
+	trRows, err := db.Query(context.Background(), trsSQL, trsArgs...)
 	if err != nil {
 		return "", err
 	}
 
-	// add transaction items to returning transaction
-	tr.TransactionItems = trItems
+	// unmarshal transactions
+	trs, err := lpg.UnmarshalTransactions(trRows)
+	if err != nil {
+		return "", err
+	}
 
-	// create transaction for response to client
-	intraTr := tools.CreateIntraTransaction(e.AuthAccount, tr)
+	// add transaction items to each transaction
+	for _, v := range trs {
+		for _, w := range trItems {
+			if *w.TransactionID == *v.ID {
+				v.TransactionItems = append(v.TransactionItems, w)
+			}
+		}
+	}
+
+	// create for response to client
+	intraTrs := tools.CreateIntraTransactions(e.AuthAccount, trs)
 
 	// send string or error response to client
-	return tools.MarshalIntraTransaction(&intraTr)
+	return tools.MarshalIntraTransactions(&intraTrs)
 }
 
 // wraps lambdaFn accepting db interface for testability

@@ -15,7 +15,7 @@ TEST_ACCOUNT=JohnSmith
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","account_name":"$(TEST_ACCOUNT)"}'
 TEST_SENDER_ACCOUNT=$(TEST_ACCOUNT)
-LAMBDA_FUNCTION_NAME=$(APP_NAME)-$(ENV)
+LAMBDA_NAME=$(APP_NAME)-$(ENV)
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -119,7 +119,7 @@ test-integration:
 			--output text) \
 		TEST_SENDER_ACCOUNT=$(TEST_SENDER_ACCOUNT) \
 		AWS_REGION=$(REGION) \
-		LAMBDA_FUNCTION_NAME=$(LAMBDA_FUNCTION_NAME) \
+		LAMBDA_NAME=$(LAMBDA_NAME) \
 			go test -v --tags=integration ./cmd
 
 test-local:

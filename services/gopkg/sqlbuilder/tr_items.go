@@ -5,7 +5,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func InsertTrItemsSQL(trID int32, trItems []*types.TransactionItem) (string, []interface{}) {
+func InsertTrItemsSQL(trID types.ID, trItems []*types.TransactionItem) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("transaction_item")
 	ib.Cols(
@@ -52,7 +52,7 @@ func InsertTrItemsSQL(trID int32, trItems []*types.TransactionItem) (string, []i
 	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
 }
 
-func SelectTrItemsByTrIDSQL(trID *int32) (string, []interface{}) {
+func SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select("*")
 	sb.From("transaction_item").

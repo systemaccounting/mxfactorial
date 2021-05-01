@@ -20,7 +20,7 @@ var buildFInsApprover string = "%v returning" + " " + strings.Join([]string{
 	"expiration_time",
 }, ", ")
 
-func InsertApproversSQL(trID, trItID int32, approvers []*types.Approver) (string, []interface{}) {
+func InsertApproversSQL(trID, trItID types.ID, approvers []*types.Approver) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("approver")
 	ib.Cols(
@@ -52,7 +52,7 @@ func InsertApproversSQL(trID, trItID int32, approvers []*types.Approver) (string
 	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
 }
 
-func UpdateApproversSQL(account, role *string, trID *int32) (string, []interface{}) {
+func UpdateApproversSQL(account, role *string, trID *types.ID) (string, []interface{}) {
 	ub := sqlb.PostgreSQL.NewUpdateBuilder()
 	ub.Update("approver").
 		Set(
@@ -95,7 +95,7 @@ func SelectApproversByTrItemIDsSQL(
 func SelectApproversByTrIDSQL(
 	account,
 	role *string,
-	trID *int32,
+	trID *types.ID,
 ) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select(

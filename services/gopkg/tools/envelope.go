@@ -13,3 +13,15 @@ func CreateIntraTransaction(
 	}
 	return intraTr
 }
+
+// CreateIntraTransaction ...
+func CreateIntraTransactions(
+	authAccount string,
+	trs []*types.Transaction,
+) types.IntraTransactions {
+	intraTr := types.IntraTransactions{
+		types.IntraEvent{AuthAccount: authAccount},
+		trs,
+	}
+	return intraTr
+}

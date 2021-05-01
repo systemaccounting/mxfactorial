@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	"github.com/shopspring/decimal"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 	"gopkg.in/guregu/null.v4"
 )
@@ -29,7 +30,7 @@ func UnmarshalAccountProfileIDs(
 	var profileIDs []*types.AccountProfileID
 	defer rows.Close()
 	for rows.Next() {
-		var ID *int32
+		var ID *types.ID
 		var accountName *string
 		err := rows.Scan(
 			&ID,
@@ -57,8 +58,8 @@ func UnmarshalTransaction(
 ) (*types.Transaction, error) {
 	// scanning into variables first to avoid:
 	// can't scan into dest[3]: cannot scan null into *string
-	var ID *int32
-	var ruleInstanceID *int32
+	var ID *types.ID
+	var ruleInstanceID *types.ID
 	var author *string
 	var authorDeviceID *string
 	var authorDeviceLatlng pgtype.Point
@@ -81,10 +82,18 @@ func UnmarshalTransaction(
 	if err != nil {
 		return nil, err
 	}
+
+	// conversions to app layer
 	geoPoint, err := geoPointToStringPtr(authorDeviceLatlng)
 	if err != nil {
 		return nil, err
 	}
+
+	sumVal, err := sumValue.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+	sumValStr := string(sumVal)
 
 	t := types.Transaction{
 		ID:                 ID,
@@ -93,10 +102,71 @@ func UnmarshalTransaction(
 		AuthorDeviceID:     authorDeviceID,
 		AuthorDeviceLatlng: geoPoint,
 		AuthorRole:         authorRole,
-		EquilibriumTime:    nullTimeToString(equilibriumTime),
-		SumValue:           sumValue,
+		EquilibriumTime:    tools.NullTimeToString(equilibriumTime),
+		SumValue:           &sumValStr,
 	}
 	return &t, nil
+}
+
+// UnmarshalTransactions ...
+func UnmarshalTransactions(
+	rows pgx.Rows,
+) ([]*types.Transaction, error) {
+	var transactions []*types.Transaction
+	defer rows.Close()
+	for rows.Next() {
+		var ID *types.ID
+		var ruleInstanceID *types.ID
+		var author *string
+		var authorDeviceID *string
+		var authorDeviceLatlng pgtype.Point
+		var authorRole *string
+		var equilibriumTime null.Time
+		var sumValue decimal.NullDecimal
+		var createdAt time.Time
+		err := rows.Scan(
+			&ID,
+			&ruleInstanceID,
+			&author,
+			&authorDeviceID,
+			&authorDeviceLatlng,
+			&authorRole,
+			&equilibriumTime,
+			&sumValue,
+			&createdAt, // not using
+		)
+		if err != nil {
+			return nil, err
+		}
+		// conversions to app layer
+		geoPoint, err := geoPointToStringPtr(authorDeviceLatlng)
+		if err != nil {
+			return nil, err
+		}
+
+		sumVal, err := sumValue.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		sumValStr := string(sumVal)
+
+		t := &types.Transaction{
+			ID:                 ID,
+			RuleInstanceID:     ruleInstanceID,
+			Author:             author,
+			AuthorDeviceID:     authorDeviceID,
+			AuthorDeviceLatlng: geoPoint,
+			AuthorRole:         authorRole,
+			EquilibriumTime:    tools.NullTimeToString(equilibriumTime),
+			SumValue:           &sumValStr,
+		}
+		transactions = append(transactions, t)
+	}
+	err := rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return transactions, nil
 }
 
 func geoPointToStringPtr(gp pgtype.Point) (*string, error) {
@@ -145,19 +215,19 @@ func UnmarshalTrItems(
 	var trItems []*types.TransactionItem
 	defer rows.Close()
 	for rows.Next() {
-		var ID *int32
-		var transactionID *int32
+		var ID *types.ID
+		var transactionID *types.ID
 		var itemID *string
 		var price decimal.Decimal
 		var quantity decimal.Decimal
 		var debitorFirst *bool
-		var ruleInstanceID *int32
+		var ruleInstanceID *types.ID
 		var unitOfMeasurement *string
 		var unitsMeasured decimal.NullDecimal
 		var debitor *string
 		var creditor *string
-		var debitorProfileID *int32
-		var creditorProfileID *int32
+		var debitorProfileID *types.ID
+		var creditorProfileID *types.ID
 		var debitorApprovalTime null.Time
 		var creditorApprovalTime null.Time
 		var debitorRejectionTime null.Time
@@ -203,12 +273,12 @@ func UnmarshalTrItems(
 			Creditor:               creditor,
 			DebitorProfileID:       debitorProfileID,
 			CreditorProfileID:      creditorProfileID,
-			DebitorApprovalTime:    nullTimeToString(debitorApprovalTime),
-			CreditorApprovalTime:   nullTimeToString(creditorApprovalTime),
-			DebitorRejectionTime:   nullTimeToString(debitorRejectionTime),
-			CreditorRejectionTime:  nullTimeToString(creditorRejectionTime),
-			DebitorExpirationTime:  nullTimeToString(debitorExpirationTime),
-			CreditorExpirationTime: nullTimeToString(creditorExpirationTime),
+			DebitorApprovalTime:    tools.NullTimeToString(debitorApprovalTime),
+			CreditorApprovalTime:   tools.NullTimeToString(creditorApprovalTime),
+			DebitorRejectionTime:   tools.NullTimeToString(debitorRejectionTime),
+			CreditorRejectionTime:  tools.NullTimeToString(creditorRejectionTime),
+			DebitorExpirationTime:  tools.NullTimeToString(debitorExpirationTime),
+			CreditorExpirationTime: tools.NullTimeToString(creditorExpirationTime),
 		}
 		trItems = append(trItems, &i)
 	}
@@ -226,10 +296,10 @@ func UnmarshalApprovers(
 	var approvers []*types.Approver
 	defer rows.Close()
 	for rows.Next() {
-		var ID *int32
-		var ruleInstanceID *int32
-		var transactionID *int32
-		var trItemID *int32
+		var ID *types.ID
+		var ruleInstanceID *types.ID
+		var transactionID *types.ID
+		var trItemID *types.ID
 		var accountName *string
 		var accountRole *string
 		var deviceID *string
@@ -266,9 +336,8 @@ func UnmarshalApprovers(
 			AccountRole:       accountRole,
 			DeviceID:          deviceID,
 			DeviceLatlng:      geoPoint,
-			ApprovalTime:      nullTimeToString(approvalTime),
-			// RejectionTime:     nullTimeToString(rejectionTime),
-			ExpirationTime: nullTimeToString(expirationTime),
+			ApprovalTime:      tools.NullTimeToString(approvalTime),
+			ExpirationTime:    tools.NullTimeToString(expirationTime),
 		}
 		approvers = append(approvers, &a)
 	}
@@ -279,15 +348,6 @@ func UnmarshalApprovers(
 	return approvers, nil
 }
 
-func nullTimeToString(t null.Time) *string {
-	pgTime := t.ValueOrZero()
-	if pgTime.IsZero() {
-		return nil
-	}
-	f := pgTime.Format("2006-01-02T15:04:05.000000Z")
-	return &f
-}
-
 // UnmarshalTransactionNotifications ...
 func UnmarshalTransactionNotifications(
 	rows pgx.Rows,
@@ -295,8 +355,8 @@ func UnmarshalTransactionNotifications(
 	var transNotifs []*types.TransactionNotification
 	defer rows.Close()
 	for rows.Next() {
-		var ID *int32
-		var transactionID *int32
+		var ID *types.ID
+		var transactionID *types.ID
 		var accountName *string
 		var accountRole *string
 		var message *pgtype.JSONB
@@ -336,7 +396,7 @@ func UnmarshalWebsockets(
 	var wss []*types.Websocket
 	defer rows.Close()
 	for rows.Next() {
-		var ID *int32
+		var ID *types.ID
 		var connectionID *string
 		var accountName *string
 		var epochCreatedAt *int64

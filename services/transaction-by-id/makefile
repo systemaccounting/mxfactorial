@@ -13,9 +13,9 @@ PGPORT=5432
 TEST_ACCOUNT=JohnSmith
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_TRANSACTION_ID=2
-TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","id":$(TEST_TRANSACTION_ID)}'
+TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","id":"$(TEST_TRANSACTION_ID)"}'
 TEST_SENDER_ACCOUNT=$(TEST_ACCOUNT)
-LAMBDA_FUNCTION_NAME=$(APP_NAME)-$(ENV)
+LAMBDA_NAME=$(APP_NAME)-$(ENV)
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -119,7 +119,7 @@ test-integration:
 		TEST_SENDER_ACCOUNT=$(TEST_SENDER_ACCOUNT) \
 		TEST_TRANSACTION_ID=$(TEST_TRANSACTION_ID) \
 		AWS_REGION=$(REGION) \
-		LAMBDA_FUNCTION_NAME=$(LAMBDA_FUNCTION_NAME) \
+		LAMBDA_NAME=$(LAMBDA_NAME) \
 			go test -v --tags=integration $(CMD_DIR)
 
 test-local:
@@ -202,6 +202,6 @@ warm-up:
 	@aws lambda invoke \
 		--region $(REGION) \
 		--invocation-type RequestResponse \
-		--function-name $(LAMBDA_FUNCTION_NAME) \
+		--function-name $(LAMBDA_NAME) \
 		--payload '{}' \
 		invoke.log
