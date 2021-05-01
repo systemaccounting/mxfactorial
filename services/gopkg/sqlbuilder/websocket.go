@@ -49,3 +49,13 @@ func SelectWebsocketByAccountsSQL(accounts []interface{}) (string, []interface{}
 		)
 	return sb.Build()
 }
+
+func SelectWebsocketByConnectionIDSQL(connID string) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select("*")
+	sb.From("websocket").
+		Where(
+			sb.Equal("connection_id", connID),
+		)
+	return sb.Build()
+}

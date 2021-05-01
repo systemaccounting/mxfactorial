@@ -2,41 +2,231 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
+	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
+	"github.com/jackc/pgx/v4"
+	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
+	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 )
 
-var pgConn string = fmt.Sprintf(
-	"host=%s port=%s user=%s password=%s dbname=%s",
-	os.Getenv("PGHOST"),
-	os.Getenv("PGPORT"),
-	os.Getenv("PGUSER"),
-	os.Getenv("PGPASSWORD"),
-	os.Getenv("PGDATABASE"))
+var (
+	pgConn string = fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s",
+		os.Getenv("PGHOST"),
+		os.Getenv("PGPORT"),
+		os.Getenv("PGUSER"),
+		os.Getenv("PGPASSWORD"),
+		os.Getenv("PGDATABASE"))
+	notificationsReturnLimit string = os.Getenv("NOTIFICATIONS_RETURN_LIMIT")
+	awsRegion                string = os.Getenv("AWS_REGION")
+	apiGWConnectionsURI             = os.Getenv("APIGW_CONNECTIONS_URI")
+)
+
+type Body struct {
+	Action *string `json:"action"`
+	Token  *string `json:"token"`
+}
 
 func lambdaFn(
 	ctx context.Context,
-	e events.APIGatewayWebsocketProxyRequestContext,
-	// c lpg.Connector,
-) (string, error) {
+	e events.APIGatewayWebsocketProxyRequest,
+	c lpg.Connector,
+) (events.APIGatewayProxyResponse, error) {
 
-	log.Print(e)
+	// unmarshal body from apigw request
+	var b Body
+	err := json.Unmarshal([]byte(e.Body), &b)
+	if err != nil {
+		return events.APIGatewayProxyResponse{}, nil
+	}
+
+	connectionID := e.RequestContext.ConnectionID
+	accountName := *b.Token
+	connectedAt := int64(e.RequestContext.ConnectedAt)
+
 	// connect to postgres
-	// db, err := c.Connect(ctx, pgConn)
-	// if err != nil {
-	// 	log.Printf("connect error: %v", err)
-	// 	return "", err
-	// }
-	// defer db.Close(context.Background())
+	db, err := c.Connect(ctx, pgConn)
+	if err != nil {
+		log.Printf("connect error: %v", err)
+		return events.APIGatewayProxyResponse{}, err
+	}
+	defer db.Close(context.Background())
+
+	// create select websockets by conn id sql
+	connIDSQL, connIDArgs := sqlb.SelectWebsocketByConnectionIDSQL(
+		connectionID, // e.RequestContext.ConnectionID
+	)
+
+	// query websockets for current id
+	row := db.QueryRow(context.Background(), connIDSQL, connIDArgs...)
+
+	// add current websocket to db if ErrNoRows
+	_, err = lpg.UnmarshalWebsocket(row)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			insErr := insertCurrentWebsocket(
+				db,
+				connectionID,
+				accountName,
+				connectedAt,
+			)
+			if insErr != nil {
+				log.Printf("websocket insert %v", err)
+				return events.APIGatewayProxyResponse{}, err
+			}
+		} else {
+			log.Printf("unmarshal websocket %v", err)
+			return events.APIGatewayProxyResponse{}, nil
+		}
+	}
+
+	// get pending notification ...
+	log.Print("get pending notifications...")
+	// create select transaction_notifications by id sql
+
+	limit, err := strconv.Atoi(notificationsReturnLimit)
+	if err != nil {
+		log.Printf("string to int conversion fail %v", err)
+		return events.APIGatewayProxyResponse{}, nil
+	}
+	selNotifSQL, selNotifArgs := sqlb.SelectTransNotifsByAccountSQL(
+		accountName,
+		limit,
+	)
+
+	// get transaction_notifications
+	transNotifsRows, err := db.Query(
+		context.Background(),
+		selNotifSQL,
+		selNotifArgs...,
+	)
+	if err != nil {
+		log.Printf("query err: %v", err)
+	}
+
+	// unmarshal transaction_notifications
+	transNotifs, err := lpg.UnmarshalTransactionNotifications(
+		transNotifsRows,
+	)
+	if err != nil {
+		log.Printf("unmarshal err: %v", err)
+	}
+
+	sess := session.Must(session.NewSession())
+
+	svc := apigw.New(
+		sess,
+		aws.NewConfig().WithRegion(awsRegion).WithEndpoint(apiGWConnectionsURI),
+	)
+
+	var websocketsToDeleteOnErr = []interface{}{connectionID}
+	var notificationsToDelete []interface{}
+	for _, v := range transNotifs {
+		notificationsToDelete = append(notificationsToDelete, v.ID)
+	}
+
+	// temp solution to https://github.com/aws/aws-sdk-go/issues/3477
+	// delete websocket from postgres after matching 410 status code in apigw error
+	re, err := regexp.Compile("410")
+	if err != nil {
+		log.Print(err)
+	}
+
+	payload, err := json.Marshal(transNotifs)
+	if err != nil {
+		log.Printf("transaction list marshal fail %v", err)
+		return events.APIGatewayProxyResponse{}, nil
+	}
+
+	input := &apigw.PostToConnectionInput{
+		ConnectionId: &connectionID,
+		Data:         payload,
+	}
+
+	_, err = svc.PostToConnection(input)
+	if err != nil {
+		errMsg := err.Error()
+
+		// print error if not 410 from api gateway
+		if !re.MatchString(errMsg) {
+			log.Print(errMsg)
+		}
+
+		// queue connection id to delete if
+		// 410 status code in error, and connection id is unique
+		if re.MatchString(errMsg) {
+			// create delete websockets by connection ids sql
+			delWssSQL, delWssArgs := sqlb.DeleteWebsocketsByConnectionIDSQL(
+				websocketsToDeleteOnErr,
+			)
+			// delete websocket
+			_, err = db.Exec(
+				context.Background(),
+				delWssSQL,
+				delWssArgs...,
+			)
+			if err != nil {
+				log.Printf("delete websockets err: %v", err)
+			}
+			log.Printf("lost websococket on %v", connectionID)
+		}
+	} else {
+		// create delete transaction_notifications by id sql
+		delTransNotifsSQL, delTransNotifsArgs := sqlb.DeleteTransNotificationsByIDSQL(
+			notificationsToDelete,
+		)
+		_, err = db.Exec(
+			context.Background(),
+			delTransNotifsSQL,
+			delTransNotifsArgs...,
+		)
+		if err != nil {
+			log.Printf("delete notifications err: %v", err)
+		}
+	}
 
 	// send string or error response to client
-	return "", nil
+	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
+}
+
+func insertCurrentWebsocket(
+	db lpg.SQLDB,
+	connID,
+	accountName string,
+	connectedAt int64,
+) error {
+	insSQL, insArgs := sqlb.InsertWebsocketConnectionSQL(
+		connID,
+		accountName,
+		connectedAt,
+	)
+	_, err := db.Exec(context.Background(), insSQL, insArgs...)
+	if err != nil {
+		log.Printf("wss conn insert error: %v", err)
+		return err
+	}
+	return nil
+}
+
+// wraps lambdaFn accepting db interface for testability
+func handleEvent(
+	ctx context.Context,
+	e events.APIGatewayWebsocketProxyRequest,
+) (events.APIGatewayProxyResponse, error) {
+	c := lpg.NewConnector(pgx.Connect)
+	return lambdaFn(ctx, e, c)
 }
 
 func main() {
-	lambda.Start(lambdaFn)
+	lambda.Start(handleEvent)
 }

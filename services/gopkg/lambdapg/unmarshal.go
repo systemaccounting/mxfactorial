@@ -426,3 +426,33 @@ func UnmarshalWebsockets(
 	}
 	return wss, nil
 }
+
+func UnmarshalWebsocket(
+	row pgx.Row,
+) (*types.Websocket, error) {
+	// scanning into variables first to avoid:
+	// can't scan into dest[3]: cannot scan null into *string
+	var ID *types.ID
+	var connectionID *string
+	var accountName *string
+	var epochCreatedAt *int64
+	var createdAt *time.Time
+	err := row.Scan(
+		&ID,
+		&connectionID,
+		&accountName,
+		&epochCreatedAt,
+		&createdAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	w := &types.Websocket{
+		ID:             ID,
+		ConnectionID:   connectionID,
+		AccountName:    accountName,
+		EpochCreatedAt: epochCreatedAt,
+		CreatedAt:      createdAt,
+	}
+	return w, nil
+}
