@@ -14,10 +14,10 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
-	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 var (
@@ -62,6 +62,8 @@ func lambdaFn(
 		return events.APIGatewayProxyResponse{}, err
 	}
 	defer db.Close(context.Background())
+
+	// add wesocket to table if not stored
 
 	// create select websockets by conn id sql
 	connIDSQL, connIDArgs := sqlb.SelectWebsocketByConnectionIDSQL(
@@ -135,11 +137,13 @@ func lambdaFn(
 
 	// 1. create notification payload
 	// 2. store notifications for delete after delivery
-	var notificationPayload []*pgtype.JSONB
-	var notificationsToDelete []interface{}
+	var notificationsToSend types.PendingNotifications
 	for _, v := range transNotifs {
-		notificationPayload = append(notificationPayload, v.Message)
-		notificationsToDelete = append(notificationsToDelete, v.ID)
+		msg := &types.Message{
+			NotificationID: v.ID,
+			Message:        *v.Message,
+		}
+		notificationsToSend.Pending = append(notificationsToSend.Pending, msg)
 	}
 
 	// temp solution to https://github.com/aws/aws-sdk-go/issues/3477
@@ -150,7 +154,7 @@ func lambdaFn(
 	}
 
 	// create payload from notifications slice
-	payload, err := json.Marshal(notificationPayload)
+	payload, err := json.Marshal(notificationsToSend)
 	if err != nil {
 		log.Printf("transaction list marshal fail %v", err)
 		return events.APIGatewayProxyResponse{}, nil
@@ -189,20 +193,6 @@ func lambdaFn(
 				log.Printf("delete websockets err: %v", err)
 			}
 			log.Printf("lost websococket on %v", connectionID)
-		}
-	} else {
-		// create delete transaction_notifications by id sql
-		delTransNotifsSQL, delTransNotifsArgs := sqlb.DeleteTransNotificationsByIDSQL(
-			notificationsToDelete,
-		)
-		// delete delivered notifications
-		_, err = db.Exec(
-			context.Background(),
-			delTransNotifsSQL,
-			delTransNotifsArgs...,
-		)
-		if err != nil {
-			log.Printf("delete notifications err: %v", err)
 		}
 	}
 

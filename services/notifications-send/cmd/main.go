@@ -160,7 +160,6 @@ func lambdaFn(
 	)
 
 	var websocketsToDelete []interface{} // sqlbuilder pkg want interface slice
-	var notificationsToDelete []interface{}
 
 	// temp solution to https://github.com/aws/aws-sdk-go/issues/3477
 	// delete websocket from postgres after matching 410 status code in apigw error
@@ -172,9 +171,20 @@ func lambdaFn(
 	for _, r := range recipientsWithWebsockets {
 		for _, w := range r.Websockets {
 
-			payload, err := r.Notification.Message.MarshalJSON()
+			// create notification payload message
+			msg := &types.PendingNotifications{
+				Pending: []*types.Message{
+					{
+						NotificationID: r.Notification.ID,
+						Message:        *r.Notification.Message,
+					},
+				},
+			}
+
+			// create payload from notifications slice
+			payload, err := json.Marshal(msg)
 			if err != nil {
-				log.Print(err)
+				log.Printf("noticiation payload marshal fail %v", err)
 			}
 
 			input := &apigw.PostToConnectionInput{
@@ -196,31 +206,8 @@ func lambdaFn(
 				if re.MatchString(errMsg) && tools.IsStringUnique(*w.ConnectionID, websocketsToDelete) {
 					websocketsToDelete = append(websocketsToDelete, *w.ConnectionID)
 				}
-			} else {
-				// add transaction_notification id to delete list if
-				// unique after delivering to multiple websockets
-				if tools.IsIntUnique(*r.Notification.ID, notificationsToDelete) {
-					notificationsToDelete = append(notificationsToDelete, *r.Notification.ID)
-				}
 			}
 		}
-	}
-
-	// delete delivered notifications
-	if len(notificationsToDelete) > 0 {
-		// create delete transaction_notifications by id sql
-		delTransNotifsSQL, delTransNotifsArgs := sqlb.DeleteTransNotificationsByIDSQL(
-			notificationsToDelete,
-		)
-		_, err = db.Exec(
-			context.Background(),
-			delTransNotifsSQL,
-			delTransNotifsArgs...,
-		)
-		if err != nil {
-			log.Printf("delete notifications err: %v", err)
-		}
-
 	}
 
 	// delete stale websockets

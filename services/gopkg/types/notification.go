@@ -23,3 +23,16 @@ type TransactionNotificationEvent struct {
 	NotificationEvent
 	TransactionNotification
 }
+
+type Message struct {
+	NotificationID *ID          `json:"notification_id"`
+	Message        pgtype.JSONB `json:"message"`
+}
+
+type PendingNotifications struct {
+	Pending []*Message `json:"pending"`
+}
+
+type ClearedNotifications struct {
+	Cleared []*ID `json:"cleared"`
+}
