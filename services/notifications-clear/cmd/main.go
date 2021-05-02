@@ -63,7 +63,7 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
-	// add wesocket to table if not stored
+	// add websocket to table if not stored
 
 	// create select websockets by conn id sql
 	connIDSQL, connIDArgs := sqlb.SelectWebsocketByConnectionIDSQL(
