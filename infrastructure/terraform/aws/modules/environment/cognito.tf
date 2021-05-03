@@ -1,3 +1,7 @@
+locals {
+  COGNITO_JWKS_URI = "https://cognito-idp.${data.aws_region.current.name}.amazonaws.com/${aws_cognito_user_pool.pool.id}/.well-known/jwks.json"
+}
+
 resource "aws_cognito_user_pool" "pool" {
   name = "mxfactorial-${var.environment}"
 
@@ -411,4 +415,15 @@ resource "aws_lambda_permission" "delete_faker_accounts_daily" {
   function_name = aws_lambda_function.delete_faker_cognito_accounts_lambda.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.delete_faker_accounts_rule.arn
+}
+
+resource "aws_secretsmanager_secret" "cognito_jwks_uri" {
+  name                    = "${var.environment}/COGNITO_JWKS_URI"
+  recovery_window_in_days = 0
+  description             = "cognito jsonwebkey uri in ${var.environment}"
+}
+
+resource "aws_secretsmanager_secret_version" "cognito_jwks_uri" {
+  secret_id     = aws_secretsmanager_secret.cognito_jwks_uri.id
+  secret_string = local.COGNITO_JWKS_URI
 }

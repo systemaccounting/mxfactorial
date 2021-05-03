@@ -127,7 +127,7 @@ module "notifications_get" {
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFICATIONS_RETURN_LIMIT = var.notifications_return_limit
     APIGW_CONNECTIONS_URI      = local.APIGW_CONNECTIONS_URI
-    POOL_NAME                  = aws_cognito_user_pool.pool.name
+    COGNITO_JWKS_URI           = local.COGNITO_JWKS_URI
   })
   invoke_principals    = ["apigateway.amazonaws.com"]
   attached_policy_arns = [aws_iam_policy.wss.arn]
@@ -140,7 +140,7 @@ module "notifications_clear" {
   env          = var.environment
   env_vars = merge(local.POSTGRES_VARS, {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
-    POOL_NAME             = aws_cognito_user_pool.pool.name
+    COGNITO_JWKS_URI      = local.COGNITO_JWKS_URI
   })
   invoke_principals    = ["apigateway.amazonaws.com"]
   attached_policy_arns = [aws_iam_policy.wss.arn]
