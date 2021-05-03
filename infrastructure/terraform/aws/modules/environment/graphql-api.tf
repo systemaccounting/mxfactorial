@@ -14,7 +14,7 @@ resource "aws_api_gateway_authorizer" "api_authorizer" {
   type            = "COGNITO_USER_POOLS"
   rest_api_id     = aws_api_gateway_rest_api.graphql.id
   provider_arns   = [aws_cognito_user_pool.pool.arn]
-  identity_source = "method.request.header.Authorization"
+  identity_source = "method.request.header.${var.apigw_authorization_header_key}"
 }
 
 resource "aws_api_gateway_method" "proxy" {
@@ -127,16 +127,16 @@ data "aws_iam_policy_document" "api_gateway_cloudwatch_policy" {
   }
 }
 
-resource "aws_api_gateway_domain_name" "graphql" {
-  domain_name     = local.api_url
-  certificate_arn = var.certificate_arn
-}
+# resource "aws_api_gateway_domain_name" "graphql" {
+#   domain_name     = local.api_url
+#   certificate_arn = var.certificate_arn
+# }
 
-resource "aws_api_gateway_base_path_mapping" "graphql" {
-  api_id      = aws_api_gateway_rest_api.graphql.id
-  stage_name  = aws_api_gateway_deployment.environment.stage_name
-  domain_name = aws_api_gateway_domain_name.graphql.domain_name
-}
+# resource "aws_api_gateway_base_path_mapping" "graphql" {
+#   api_id      = aws_api_gateway_rest_api.graphql.id
+#   stage_name  = aws_api_gateway_deployment.environment.stage_name
+#   domain_name = aws_api_gateway_domain_name.graphql.domain_name
+# }
 
 resource "aws_api_gateway_method" "resource_options" {
   rest_api_id   = aws_api_gateway_rest_api.graphql.id
