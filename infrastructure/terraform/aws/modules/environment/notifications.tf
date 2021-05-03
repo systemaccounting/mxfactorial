@@ -1,7 +1,7 @@
 locals {
   // https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-how-to-call-websocket-api.html
   APIGW_CONNECTIONS_URI = "https://${aws_apigatewayv2_api.notifications.id}.execute-api.${data.aws_region.current.name}.amazonaws.com/${var.environment}"
-  WEBSOCKET_CLIENT_URI  = aws_apigatewayv2_api.notifications.api_endpoint
+  WEBSOCKET_CLIENT_URI  = "${aws_apigatewayv2_api.notifications.api_endpoint}/${var.environment}/"
 }
 
 resource "aws_sns_topic" "notifications" {
