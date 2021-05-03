@@ -31,7 +31,7 @@ func lambdaFn(
 	ma *gorillamux.GorillaMuxAdapter) (events.APIGatewayProxyResponse, error) {
 	r.Handle(queryRoute, server)
 	r.Handle(rootRoute, playground.Handler(playgroundTitle, queryRoute))
-	resp, err := ma.Proxy(e)
+	resp, err := ma.ProxyWithContext(ctx, e)
 	if err != nil {
 		log.Println(err)
 	}
