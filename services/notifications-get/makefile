@@ -6,6 +6,7 @@ REGION=us-east-1
 BINARY_NAME=index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
+ENV_VARS=COGNITO_JWKS_URI
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -20,7 +21,6 @@ endif
 
 run:
 	@$(DOCKER_ENV_VARS) go run ./cmd/main.go
-
 
 ###################### clean ######################
 

@@ -14,9 +14,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
 	"github.com/jackc/pgx/v4"
+	"github.com/lestrrat-go/jwx/jwk"
+	cjwt "github.com/systemaccounting/mxfactorial/services/gopkg/cognitojwt"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/websocket"
 )
 
 var (
@@ -29,12 +32,23 @@ var (
 		os.Getenv("PGDATABASE"))
 	awsRegion           string = os.Getenv("AWS_REGION")
 	apiGWConnectionsURI        = os.Getenv("APIGW_CONNECTIONS_URI")
+	cognitoJWKSURI             = os.Getenv("COGNITO_JWKS_URI")
+	jwkSet              jwk.Set
 )
 
 type Body struct {
-	Action          *string     `json:"action"`
-	Token           *string     `json:"token"`
+	Action          *string `json:"action"`
+	Account         *string `json:"account"` // tmp jwt override
+	*cjwt.Token     `json:"token"`
 	NotificationIDs []*types.ID `json:"notification_ids"`
+}
+
+func init() {
+	var err error
+	jwkSet, err = cjwt.FetchJWKSet(context.Background(), cognitoJWKSURI)
+	if err != nil {
+		log.Fatalf("json web token key fetch error %v", err)
+	}
 }
 
 func lambdaFn(
@@ -51,9 +65,22 @@ func lambdaFn(
 	}
 
 	connectionID := e.RequestContext.ConnectionID
-	accountName := *b.Token
-	connectedAt := int64(e.RequestContext.ConnectedAt)
 	notificationIDsToClear := b.NotificationIDs
+
+	// auth account with cognito
+	var accountName string
+	if b.Account != nil {
+		// override with tmp account property during development
+		accountName = *b.Account
+	} else {
+		// or use cognito auth
+		var err error
+		accountName, err = b.GetAuthAccount(jwkSet)
+		if err != nil {
+			log.Printf("cognito auth failure: %v", err)
+			return events.APIGatewayProxyResponse{}, err
+		}
+	}
 
 	// connect to postgres
 	db, err := c.Connect(ctx, pgConn)
@@ -63,34 +90,15 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
-	// add websocket to table if not stored
-
-	// create select websockets by conn id sql
-	connIDSQL, connIDArgs := sqlb.SelectWebsocketByConnectionIDSQL(
-		connectionID, // e.RequestContext.ConnectionID
+	// update websocket with account name
+	err = websocket.AddAccountToCurrentWebsocket(
+		db,
+		accountName,
+		connectionID,
 	)
-
-	// query websockets for current id
-	row := db.QueryRow(context.Background(), connIDSQL, connIDArgs...)
-
-	// add current websocket to db if ErrNoRows
-	_, err = lpg.UnmarshalWebsocket(row)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			insErr := insertCurrentWebsocket(
-				db,
-				connectionID,
-				accountName,
-				connectedAt,
-			)
-			if insErr != nil {
-				log.Printf("websocket insert %v", err)
-				return events.APIGatewayProxyResponse{}, err
-			}
-		} else {
-			log.Printf("unmarshal websocket %v", err)
-			return events.APIGatewayProxyResponse{}, nil
-		}
+		log.Printf("websocket update failure: %v", err)
+		return events.APIGatewayProxyResponse{}, err
 	}
 
 	// add ids to interface slice for sql pkg
@@ -182,25 +190,6 @@ func lambdaFn(
 
 	// 200 to api gateway
 	return events.APIGatewayProxyResponse{StatusCode: 200}, nil
-}
-
-func insertCurrentWebsocket(
-	db lpg.SQLDB,
-	connID,
-	accountName string,
-	connectedAt int64,
-) error {
-	insSQL, insArgs := sqlb.InsertWebsocketConnectionSQL(
-		connID,
-		accountName,
-		connectedAt,
-	)
-	_, err := db.Exec(context.Background(), insSQL, insArgs...)
-	if err != nil {
-		log.Printf("wss conn insert error: %v", err)
-		return err
-	}
-	return nil
 }
 
 // wraps lambdaFn accepting db interface for testability

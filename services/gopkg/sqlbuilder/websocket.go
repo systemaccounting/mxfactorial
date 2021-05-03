@@ -1,22 +1,21 @@
 package sqlbuilder
 
-import sqlb "github.com/huandu/go-sqlbuilder"
+import (
+	sqlb "github.com/huandu/go-sqlbuilder"
+)
 
 func InsertWebsocketConnectionSQL(
-	connectionID,
-	accountName string,
+	connectionID string,
 	epochCreatedAt int64,
 ) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("websocket")
 	ib.Cols(
 		"connection_id",
-		"account_name",
 		"epoch_created_at",
 	)
 	ib.Values(
 		connectionID,
-		accountName,
 		epochCreatedAt,
 	)
 	return ib.Build()
@@ -58,4 +57,16 @@ func SelectWebsocketByConnectionIDSQL(connID string) (string, []interface{}) {
 			sb.Equal("connection_id", connID),
 		)
 	return sb.Build()
+}
+
+func UpdateWebsocketByConnIDSQL(accountName, connectionID string) (string, []interface{}) {
+	ub := sqlb.PostgreSQL.NewUpdateBuilder()
+	ub.Update("websocket").
+		Set(
+			ub.Assign("account_name", accountName),
+		).
+		Where(
+			ub.Equal("connection_id", connectionID),
+		)
+	return ub.Build()
 }
