@@ -35,7 +35,6 @@ func lambdaFn(
 	// values required to insert and delete on connect and disconnect routes
 	routeKey := e.RequestContext.RouteKey
 	connectionID := e.RequestContext.ConnectionID
-	accountName := "JacobWebb" // todo: remove temp hardcode after adding jwt
 	connectedAt := e.RequestContext.ConnectedAt
 
 	// set success response
@@ -53,7 +52,6 @@ func lambdaFn(
 	if routeKey == connectRouteKey {
 		insSQL, insArgs := sqlb.InsertWebsocketConnectionSQL(
 			connectionID,
-			accountName,
 			connectedAt,
 		)
 		_, err := db.Exec(context.Background(), insSQL, insArgs...)
