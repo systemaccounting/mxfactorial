@@ -62,7 +62,10 @@ module "dev" {
   rds_instance_name               = local.APP_ENV
 
   ############### api gateway ###############
-  certificate_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, local.ENV)
+  enable_api_auth                = false // change graphql_deployment_version when switching
+  graphql_deployment_version     = 10    // change value to deploy api
+  apigw_authorization_header_key = "Authorization"
+  certificate_arn                = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, local.ENV)
 
   ############### cloudfront ###############
   ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, local.ENV)

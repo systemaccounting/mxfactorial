@@ -13,21 +13,21 @@ resource "aws_api_gateway_resource" "go_graphql_proxy" {
   path_part   = "{proxy+}"
 }
 
-# resource "aws_api_gateway_authorizer" "api_authorizer" {
-#   name            = "cognito-pool-api-authorizer-${var.environment}"
-#   type            = "COGNITO_USER_POOLS"
-#   rest_api_id     = aws_api_gateway_rest_api.go_graphql.id
-#   provider_arns   = [aws_cognito_user_pool.pool.arn]
-#   identity_source = "method.request.header.Authorization"
-# }
+resource "aws_api_gateway_authorizer" "go_graphql" {
+  count           = var.enable_api_auth ? 1 : 0
+  name            = "cognito-graphql-api-authorizer-${var.environment}"
+  type            = "COGNITO_USER_POOLS"
+  rest_api_id     = aws_api_gateway_rest_api.go_graphql.id
+  provider_arns   = [aws_cognito_user_pool.pool.arn]
+  identity_source = "method.request.header.${var.apigw_authorization_header_key}"
+}
 
 resource "aws_api_gateway_method" "go_graphql_proxy" {
   rest_api_id   = aws_api_gateway_rest_api.go_graphql.id
   resource_id   = aws_api_gateway_resource.go_graphql_proxy.id
   http_method   = "ANY"
-  authorization = "NONE"
-  # authorization = "COGNITO_USER_POOLS"
-  # authorizer_id = aws_api_gateway_authorizer.api_authorizer.id
+  authorization = var.enable_api_auth ? "COGNITO_USER_POOLS" : "NONE"
+  authorizer_id = var.enable_api_auth ? element(concat(aws_api_gateway_authorizer.go_graphql.*.id, tolist([])), 0) : null
 }
 
 resource "aws_api_gateway_integration" "go_graphql_lambda" {
@@ -44,9 +44,8 @@ resource "aws_api_gateway_method" "go_graphql_proxy_root" {
   rest_api_id   = aws_api_gateway_rest_api.go_graphql.id
   resource_id   = aws_api_gateway_rest_api.go_graphql.root_resource_id
   http_method   = "ANY"
-  authorization = "NONE"
-  # authorization = "COGNITO_USER_POOLS"
-  # authorizer_id = aws_api_gateway_authorizer.api_authorizer.id
+  authorization = var.enable_api_auth ? "COGNITO_USER_POOLS" : "NONE"
+  authorizer_id = var.enable_api_auth ? element(concat(aws_api_gateway_authorizer.go_graphql.*.id, tolist([])), 0) : null
 }
 
 resource "aws_api_gateway_integration" "go_graphql_lambda_root" {
@@ -65,7 +64,7 @@ resource "aws_api_gateway_deployment" "go_graphql" {
     aws_api_gateway_integration.go_graphql_lambda_root,
   ]
 
-  stage_description = "deploy-002"
+  stage_description = "deploy-00${var.graphql_deployment_version}"
   rest_api_id       = aws_api_gateway_rest_api.go_graphql.id
   stage_name        = var.environment
 
@@ -133,16 +132,16 @@ data "aws_iam_policy_document" "go_graphql_api_gateway_cloudwatch_policy" {
   }
 }
 
-# resource "aws_api_gateway_domain_name" "go_graphql" {
-#   domain_name     = local.api_url
-#   certificate_arn = var.certificate_arn
-# }
+resource "aws_api_gateway_domain_name" "go_graphql" {
+  domain_name     = local.api_url
+  certificate_arn = var.certificate_arn
+}
 
-# resource "aws_api_gateway_base_path_mapping" "go_graphql" {
-#   api_id      = aws_api_gateway_rest_api.go_graphql.id
-#   stage_name  = aws_api_gateway_deployment.go_graphql.stage_name
-#   domain_name = aws_api_gateway_domain_name.go_graphql.domain_name
-# }
+resource "aws_api_gateway_base_path_mapping" "go_graphql" {
+  api_id      = aws_api_gateway_rest_api.go_graphql.id
+  stage_name  = aws_api_gateway_deployment.go_graphql.stage_name
+  domain_name = aws_api_gateway_domain_name.go_graphql.domain_name
+}
 
 resource "aws_api_gateway_method" "go_graphql_resource_options" {
   rest_api_id   = aws_api_gateway_rest_api.go_graphql.id

@@ -43,11 +43,11 @@ output "s3_react_distribution_hosted_zone_id" {
 }
 
 output "cloudfront_domain_name" {
-  value = aws_api_gateway_domain_name.graphql.cloudfront_domain_name
+  value = aws_api_gateway_domain_name.go_graphql.cloudfront_domain_name
 }
 
 output "cloudfront_zone_id" {
-  value = aws_api_gateway_domain_name.graphql.cloudfront_zone_id
+  value = aws_api_gateway_domain_name.go_graphql.cloudfront_zone_id
 }
 
 output "postgres_address" {
