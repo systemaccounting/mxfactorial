@@ -74,7 +74,6 @@ func (r *Resolver) CreateLambdaSession() error {
 	// from https://docs.aws.amazon.com/sdk-for-go/api/aws/session/#pkg-overview
 	// Sessions should be cached when possible, because creating a new Session will load all configuration values from the environment, and config files each time the Session is created.
 	if r.Lambda.Sess == nil {
-		log.Print("creating lambda session")
 		if len(awsRegion) == 0 {
 			return errors.New("AWS_REGION not set")
 		}

@@ -5,15 +5,26 @@ package graph
 
 import (
 	"context"
+	"fmt"
 	"log"
 
+	"github.com/pkg/errors"
+	"github.com/systemaccounting/mxfactorial/services/graphql/auth"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/generated"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
 )
 
 func (r *mutationResolver) CreateRequest(ctx context.Context, transactionItems []*model.TransactionItemInput, authAccount string) (*model.Transaction, error) {
 	funcName := "create request resolver"
-	err := r.CreateLambdaSession()
+
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		var errFmtMsg string = fmt.Sprintf("cognito auth %v: %v", funcName, err.Error())
+		log.Print(errFmtMsg)
+		return nil, errors.New(errFmtMsg)
+	}
+
+	err = r.CreateLambdaSession()
 	if err != nil {
 		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
@@ -28,7 +39,15 @@ func (r *mutationResolver) CreateRequest(ctx context.Context, transactionItems [
 
 func (r *mutationResolver) ApproveRequest(ctx context.Context, transactionID string, accountName string, accountRole string, authAccount string) (*model.Transaction, error) {
 	funcName := "approve request resolver"
-	err := r.CreateLambdaSession()
+
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		var errFmtMsg string = fmt.Sprintf("cognito auth %v: %v", funcName, err.Error())
+		log.Print(errFmtMsg)
+		return nil, errors.New(errFmtMsg)
+	}
+
+	err = r.CreateLambdaSession()
 	if err != nil {
 		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
@@ -63,7 +82,15 @@ func (r *queryResolver) Rules(ctx context.Context, transactionItems []*model.Tra
 
 func (r *queryResolver) RequestByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
 	funcName := "request by id resolver"
-	err := r.CreateLambdaSession()
+
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		var errFmtMsg string = fmt.Sprintf("cognito auth %v: %v", funcName, err.Error())
+		log.Print(errFmtMsg)
+		return nil, errors.New(errFmtMsg)
+	}
+
+	err = r.CreateLambdaSession()
 	if err != nil {
 		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
@@ -78,7 +105,15 @@ func (r *queryResolver) RequestByID(ctx context.Context, transactionID string, a
 
 func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
 	funcName := "requests by account"
-	err := r.CreateLambdaSession()
+
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		var errFmtMsg string = fmt.Sprintf("cognito auth %v: %v", funcName, err.Error())
+		log.Print(errFmtMsg)
+		return nil, errors.New(errFmtMsg)
+	}
+
+	err = r.CreateLambdaSession()
 	if err != nil {
 		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
@@ -93,7 +128,15 @@ func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName strin
 
 func (r *queryResolver) TransactionByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
 	funcName := "transaction by id"
-	err := r.CreateLambdaSession()
+
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		var errFmtMsg string = fmt.Sprintf("cognito auth %v: %v", funcName, err.Error())
+		log.Print(errFmtMsg)
+		return nil, errors.New(errFmtMsg)
+	}
+
+	err = r.CreateLambdaSession()
 	if err != nil {
 		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
@@ -108,7 +151,15 @@ func (r *queryResolver) TransactionByID(ctx context.Context, transactionID strin
 
 func (r *queryResolver) TransactionsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
 	funcName := "transactions by account"
-	err := r.CreateLambdaSession()
+
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		var errFmtMsg string = fmt.Sprintf("cognito auth %v: %v", funcName, err.Error())
+		log.Print(errFmtMsg)
+		return nil, errors.New(errFmtMsg)
+	}
+
+	err = r.CreateLambdaSession()
 	if err != nil {
 		log.Printf("create lambda session %v: %v", funcName, err.Error())
 		return nil, err
