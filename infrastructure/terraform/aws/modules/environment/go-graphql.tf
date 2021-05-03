@@ -26,6 +26,7 @@ resource "aws_lambda_function" "go_graphql" {
       REQUESTS_BY_ACCOUNT_LAMBDA_ARN     = module.requests_by_account.lambda_arn,
       TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN = module.transactions_by_account.lambda_arn
       TRANSACTION_BY_ID_LAMBDA_ARN       = module.transaction_by_id.lambda_arn
+      ENABLE_API_AUTH                    = var.enable_api_auth
     }
   }
 }
