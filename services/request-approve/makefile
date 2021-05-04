@@ -8,6 +8,8 @@ BINARY_NAME=index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
 LAMBDA_INVOKE_LOG=invoke.log
+ENV_VARS := AWS_REGION \
+NOTIFY_TOPIC_ARN
 
 TEST_ACCOUNT=JacobWebb
 TEST_ROLE=debitor
@@ -27,8 +29,10 @@ ifndef ENV
 endif
 
 run:
+	@$(MAKE) -s test-env-file
 	@$(DOCKER_ENV_VARS) \
 		TEST_EVENT=$(TEST_EVENT) \
+		eval $$(cat $(ENV_FILE)) \
 		go run $(CMD_DIR)
 
 ###################### dependencies ######################
@@ -63,6 +67,38 @@ clean-binary:
 clean:
 	$(MAKE) clean-binary
 	$(MAKE) clean-artifact
+
+###################### secrets ######################
+
+clean-env:
+	rm -f $(ENV_FILE)
+
+test-env-file:
+ifeq (,$(wildcard $(ENV_FILE)))
+	$(error no .env file, run 'make get-secrets ENV=dev')
+endif
+
+get-secrets:
+	@$(MAKE) -s retrieve-each-secret
+	@if [ ! -s $(ENV_FILE) ]; then \
+		rm $(ENV_FILE); \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
+
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	@if [ $@ = AWS_REGION ]; then \
+		echo AWS_REGION=$(REGION) >> $(ENV_FILE); \
+	else \
+		ENV_VAR=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+		echo $@=$$ENV_VAR >> $(ENV_FILE); \
+	fi
 
 
 ###################### deploy ######################

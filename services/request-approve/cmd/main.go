@@ -12,18 +12,20 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/notify"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 var (
-	pgHost     string = os.Getenv("PGHOST")
-	pgPort            = os.Getenv("PGPORT")
-	pgUser            = os.Getenv("PGUSER")
-	pgPassword        = os.Getenv("PGPASSWORD")
-	pgDatabase        = os.Getenv("PGDATABASE")
-	pgConn            = fmt.Sprintf(
+	notifyTopicArn        = os.Getenv("NOTIFY_TOPIC_ARN")
+	pgHost         string = os.Getenv("PGHOST")
+	pgPort                = os.Getenv("PGPORT")
+	pgUser                = os.Getenv("PGUSER")
+	pgPassword            = os.Getenv("PGPASSWORD")
+	pgDatabase            = os.Getenv("PGDATABASE")
+	pgConn                = fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s",
 		pgHost,
 		pgPort,
@@ -58,10 +60,9 @@ func lambdaFn(
 		e.ID,
 	)
 
-	// create sql to get current approvers
+	// create sql to get all approvers
 	preApprSQL, preApprArgs := sqlb.SelectApproversByTrIDSQL(
-		e.AccountName,
-		e.AccountRole,
+		*e.AccountName,
 		e.ID,
 	)
 
@@ -375,12 +376,22 @@ func lambdaFn(
 	// add transaction items to post approval transaction
 	postApprovalTransaction.TransactionItems = allTrItemsInTransaction
 
+	// notify role approvers
+	err = notify.NotifyTransactionRoleApprovers(
+		db,
+		&notifyTopicArn,
+		preApprovers,
+		postApprovalTransaction,
+	)
+	if err != nil {
+		log.Print("notify transaction role approvers ", err)
+	}
+
 	// create transaction for response to client
 	intraTr := tools.CreateIntraTransaction(
 		e.AuthAccount,
 		postApprovalTransaction,
 	)
-	// todo: send notifications to approvers
 
 	// send string or error response to client
 	return tools.MarshalIntraTransaction(&intraTr)
