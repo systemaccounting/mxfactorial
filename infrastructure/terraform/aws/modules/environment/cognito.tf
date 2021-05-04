@@ -10,11 +10,12 @@ resource "aws_cognito_user_pool" "pool" {
   }
 
   password_policy {
-    minimum_length    = 6
-    require_lowercase = false
-    require_numbers   = false
-    require_symbols   = false
-    require_uppercase = false
+    temporary_password_validity_days = 7
+    minimum_length                   = 6
+    require_lowercase                = false
+    require_numbers                  = false
+    require_symbols                  = false
+    require_uppercase                = false
   }
 
   schema {
@@ -312,109 +313,6 @@ resource "aws_cognito_user_pool_client" "client" {
     "custom:occupation",
     "custom:emailAddress",
   ]
-}
-
-data "aws_s3_bucket_object" "delete_faker_cognito_accounts_lambda" {
-  bucket = "mxfactorial-artifacts-${var.environment}"
-  key    = "delete-faker-src.zip"
-}
-
-########## Create a function to delete e2e Faker accounts in Cognito ##########
-resource "aws_lambda_function" "delete_faker_cognito_accounts_lambda" {
-  function_name     = "delete-faker-cognito-accounts-lambda-${var.environment}"
-  description       = "Deletes Faker accounts created during e2e testing"
-  s3_bucket         = data.aws_s3_bucket_object.delete_faker_cognito_accounts_lambda.bucket
-  s3_key            = data.aws_s3_bucket_object.delete_faker_cognito_accounts_lambda.key
-  s3_object_version = data.aws_s3_bucket_object.delete_faker_cognito_accounts_lambda.version_id
-  role              = aws_iam_role.delete_faker_cognito_accounts_lambda_role.arn
-  handler           = "index.handler"
-  runtime           = "nodejs10.x"
-  timeout           = 10
-
-  environment {
-    variables = {
-      COGNITO_POOL_ID = aws_cognito_user_pool.pool.id
-    }
-  }
-}
-
-resource "aws_cloudwatch_log_group" "delete_faker_cognito_accounts_lambda" {
-  name              = "/aws/lambda/${aws_lambda_function.delete_faker_cognito_accounts_lambda.function_name}"
-  retention_in_days = 30
-}
-
-########## Create delete Faker account Lambda function role and policy ##########
-resource "aws_iam_role" "delete_faker_cognito_accounts_lambda_role" {
-  name = "delete-faker-cognito-accounts-lambda-role-${var.environment}"
-
-  assume_role_policy = data.aws_iam_policy_document.delete_faker_cognito_accounts_lambda_role.json
-}
-
-data "aws_iam_policy_document" "delete_faker_cognito_accounts_lambda_role" {
-  version = "2012-10-17"
-  statement {
-    sid = "DeleteFakerCognitoAccountsLambdaRole${title(var.environment)}"
-    actions = [
-      "sts:AssumeRole"
-    ]
-    principals {
-      type        = "Service"
-      identifiers = ["lambda.amazonaws.com"]
-    }
-    effect = "Allow"
-  }
-}
-
-resource "aws_iam_role_policy" "delete_faker_cognito_accounts_lambda_policy" {
-  name = "cognito_account-auto-confirm-lambda-policy-${var.environment}"
-  role = aws_iam_role.delete_faker_cognito_accounts_lambda_role.id
-
-  policy = data.aws_iam_policy_document.delete_faker_cognito_accounts_lambda_policy.json
-}
-
-data "aws_iam_policy_document" "delete_faker_cognito_accounts_lambda_policy" {
-  version = "2012-10-17"
-  statement {
-    sid = "DeleteFakerCognitoAccountLambdaLoggingPolicy${title(var.environment)}"
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-    resources = ["*"]
-  }
-  statement {
-    sid = "DeleteFakerLambdaCognitoAccessPermission${var.environment}"
-    actions = [
-      "cognito-idp:*"
-    ]
-    resources = [
-      aws_cognito_user_pool.pool.arn
-    ]
-  }
-}
-
-########## CloudWatch Event Rule to execute delete Faker account Lambda function daily ##########
-resource "aws_cloudwatch_event_rule" "delete_faker_accounts_rule" {
-  name                = "delete-faker-accounts-daily-${var.environment}"
-  description         = "Delete Faker accounts created in Cognito from e2e tests"
-  schedule_expression = "rate(1 day)"
-}
-
-########## Bind daily CloudWatch Event to delete Faker account Lambda ##########
-resource "aws_cloudwatch_event_target" "delete_faker_lambda" {
-  rule      = aws_cloudwatch_event_rule.delete_faker_accounts_rule.name
-  target_id = "send_to_delete_faker_lambda_${var.environment}"
-  arn       = aws_lambda_function.delete_faker_cognito_accounts_lambda.arn
-}
-
-########## Permit daily CloudWatch Event invocation of delete Faker account Lambda ##########
-resource "aws_lambda_permission" "delete_faker_accounts_daily" {
-  statement_id  = "AllowExecutionFromCloudWatch${title(var.environment)}"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.delete_faker_cognito_accounts_lambda.function_name
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.delete_faker_accounts_rule.arn
 }
 
 resource "aws_secretsmanager_secret" "cognito_jwks_uri" {
