@@ -15,7 +15,7 @@ PGPORT=5432
 
 test-env-arg:
 ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
 run:
@@ -29,10 +29,10 @@ clean:
 	$(MAKE) clean-artifact
 
 clean-artifact:
-		rm -f $(APP_NAME)-src.zip
+	rm -f $(APP_NAME)-src.zip
 
 clean-binary:
-		rm -f $(BINARY_NAME)
+	rm -f $(BINARY_NAME)
 
 ###################### dependencies ######################
 

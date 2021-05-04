@@ -32,7 +32,7 @@ RULE_LAMBDA_ARN
 
 test-env-arg:
 ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
 ###################### run ######################
@@ -119,18 +119,9 @@ test:
 test-unit:
 	$(DOCKER_ENV_VARS) yarn test
 
-t:
-	$(DOCKER_ENV_VARS) yarn test:integration
-
 test-integration:
 	@yarn install; \
 	yarn test:integration
-
-# aliases test target which creates tested artifact
-src: test
-
- # aliases test target to create development environment
-dev: test
 
 zip:
 	$(MAKE) install-prod

@@ -25,7 +25,7 @@ PGPORT=5432
 
 test-env-arg:
 ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
 run:
@@ -63,12 +63,6 @@ build:
 	$(MAKE) install
 	$(MAKE) compile
 	$(MAKE) zip
-
-# aliases build target
-dev: build
-
-# aliases build target
-src: build
 
 ###################### test ######################
 
