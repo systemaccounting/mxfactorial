@@ -103,8 +103,8 @@ func lambdaFn(
 
 	// cte not retuning pgx.ErrNoRows when empty so test here
 	if len(trItems) == 0 {
-		var errMsg string = "0 pending transaction items found"
-		return "", errors.New(errMsg)
+		log.Print("0 transaction items found. exiting")
+		return "", errors.New("transaction not found")
 	}
 
 	// create sql to get current transaction

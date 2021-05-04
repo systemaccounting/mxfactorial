@@ -88,9 +88,8 @@ func lambdaFn(
 	trItems, err := lpg.UnmarshalTrItems(rows)
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			var errMsg string = "0 transaction items found"
-			log.Print(errMsg)
-			return "", errors.New(errMsg)
+			log.Print("0 transaction items found. exiting")
+			return "", errors.New("0 requests found")
 		}
 		log.Print(err)
 		return "", err
