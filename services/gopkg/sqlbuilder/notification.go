@@ -56,3 +56,12 @@ func SelectTransNotifsByAccountSQL(accountName string, limit int) (string, []int
 	sb.Limit(limit)
 	return sb.Build()
 }
+
+func DeleteTransNotificationsByTransIDSQL(trID types.ID) (string, []interface{}) {
+	db := sqlb.PostgreSQL.NewDeleteBuilder()
+	db.DeleteFrom("transaction_notification")
+	db.Where(
+		db.Equal("transaction_id", trID),
+	)
+	return db.Build()
+}
