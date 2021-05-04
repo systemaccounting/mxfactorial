@@ -93,8 +93,7 @@ func SelectApproversByTrItemIDsSQL(
 }
 
 func SelectApproversByTrIDSQL(
-	account,
-	role *string,
+	account string,
 	trID *types.ID,
 ) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
@@ -112,7 +111,6 @@ func SelectApproversByTrIDSQL(
 	)
 	sb.From("approver").
 		Where(
-			sb.Equal("account_role", *role),
 			sb.Equal("transaction_id", *trID),
 		)
 	return sb.Build()
