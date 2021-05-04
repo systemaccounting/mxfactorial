@@ -42,11 +42,14 @@ resource "aws_iam_policy" "invoke_rules" {
 ##########################
 
 module "request_approve" {
-  source        = "../go-lambda-service"
-  service_name  = "request-approve"
-  env           = var.environment
-  env_vars      = merge(local.POSTGRES_VARS, {})
-  create_secret = true
+  source       = "../go-lambda-service"
+  service_name = "request-approve"
+  env          = var.environment
+  env_vars = merge(local.POSTGRES_VARS, {
+    NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
+  })
+  create_secret        = true
+  attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
 }
 
 module "requests_by_account" {
