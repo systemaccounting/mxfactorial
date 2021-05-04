@@ -1,5 +1,7 @@
 APP_NAME = delete-faker
-ARTIFACT_BUCKET = mxfactorial-artifacts
+ARTIFACT_NAME=$(APP_NAME)-src.zip
+ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
+LAMBDA_NAME=$(APP_NAME)-$(ENV)
 REGION = us-east-1
 
 test-env-arg:
@@ -10,33 +12,44 @@ endif
 ###################### clean ######################
 
 clean:
-	rm -f $(APP_NAME)-src.zip
+	rm -f $(ARTIFACT_NAME)
 
 ###################### build ######################
 
-zip: clean
-	zip -r $(APP_NAME)-src.zip index.js
+zip:
+	zip -r $(ARTIFACT_NAME) index.js
 
 ###################### deploy ######################
 
-deploy: zip deloy-only
+deploy:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) clean
+	$(MAKE) zip
+	$(MAKE) put-object ENV=$(ENV)
+	$(MAKE) update-function ENV=$(ENV)
 
-deploy-only: test-env-arg
+initial-deploy:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) clean
+	$(MAKE) zip
+	$(MAKE) put-object ENV=$(ENV)
+
+put-object:
+	@$(MAKE) -s test-env-arg
 	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
-		--key=$(APP_NAME)-src.zip \
-		--body=$(CURDIR)/$(APP_NAME)-src.zip \
+		--bucket=$(AARTIFACT_BUCKET) \
+		--key=$(ARTIFACT_NAME) \
+		--body=$(CURDIR)/$(ARTIFACT_NAME) \
 		--region=$(REGION) \
 		--output=text | xargs); \
-	echo "***Deployed from s3 ETag: $$ETAG"
+	echo "***Deployed $(ENV)/$(ARTIFACT_NAME) from s3 ETag: $$ETAG"
 
-deploy-all: deploy
-
-initial-deploy: test-env-arg zip
-	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
-		--key=$(APP_NAME)-src.zip \
-		--body=$(CURDIR)/$(APP_NAME)-src.zip \
+update-function:
+	@$(MAKE) -s test-env-arg
+	@MOD=$$(aws lambda update-function-code \
+		--function-name=$(LAMBDA_NAME) \
+		--s3-key=$(ARTIFACT_NAME) \
+		--s3-bucket=$(ARTIFACT_BUCKET) \
 		--region=$(REGION) \
-		--output=text | xargs); \
-	echo "***Deployed $(ENV)/$(APP_NAME)-src.zip from s3 ETag: $$ETAG"
+		--query 'LastModified' | xargs);\
+	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
