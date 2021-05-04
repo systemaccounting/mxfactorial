@@ -1,31 +1,29 @@
-DIR := ${CURDIR}
-SUBDIRS := $(wildcard */.)
-
 test-env-arg:
 ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
-warm-up: $(SUBDIRS) test-env-arg
-		@for dir in $(SUBDIRS); do \
-			if [ -f $$dir/makefile ]; then \
-				echo $$dir; \
-				$(MAKE) -C $$dir ENV=$(ENV) warm-up; \
-			fi \
-		done
+DIRS=auto-confirm \
+graphql \
+notifications-clear \
+notifications-get \
+notifications-send \
+request-approve \
+request-by-id \
+request-create \
+requests-by-account \
+rules \
+transaction-by-id \
+transactions-by-account \
+wss-connect
 
-deploy: $(SUBDIRS) test-env-arg
-		@for dir in $(SUBDIRS); do \
-			if [ -f $$dir/makefile ]; then \
-				$(MAKE) -C $$dir ENV=$(ENV) deploy; \
-			fi \
-		done
+# not currently provisioned:
+# internal-tools/delete-faker-accounts
 
-deploy-all: $(SUBDIRS) test-env-arg
-		@for dir in $(SUBDIRS); do \
-			if [ -f $$dir/makefile ]; then \
-				$(MAKE) -C $$dir ENV=$(ENV) deploy-all; \
-			fi \
-		done
+initial-deploy:
+	@$(MAKE) -s test-env-arg
+	$(foreach DIR,$(DIRS), $(MAKE) -C $(DIR) initial-deploy ENV=$(ENV);)
 
-
+deploy:
+	@$(MAKE) -s test-env-arg
+	$(foreach DIR,$(DIRS), $(MAKE) -C $(DIR) deploy ENV=$(ENV);)
