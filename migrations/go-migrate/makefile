@@ -1,8 +1,8 @@
 APP_NAME = go-migrate
 ARTIFACT_NAME = $(APP_NAME)-src.zip
-LAMBDA_NAME = $(APP_NAME)
+LAMBDA_NAME = $(APP_NAME)-$(ENV)
+ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
 RUNTIME=provided
-ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
 TMP_MIGRATE_REPO_DIR=./build
 MIGRATE_BINARY_NAME=migrate.linux-amd64
@@ -97,22 +97,22 @@ deploy-only:
 put-object:
 	@$(MAKE) -s test-env-arg
 	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
+		--bucket=$(ARTIFACT_BUCKET) \
 		--key=$(ARTIFACT_NAME) \
 		--body=$(CURDIR)/$(ARTIFACT_NAME) \
 		--region=$(REGION) \
-		--output=text | sed 's/"//g'); \
+		--output=text | xargs); \
 	echo "***pushed $(ARTIFACT_NAME) artifact with ETag: $$ETAG"
 
 update-function:
 	@$(MAKE) -s test-env-arg
 	@MOD=$$(aws lambda update-function-code \
-		--function-name=$(LAMBDA_NAME)-$(ENV) \
+		--function-name=$(LAMBDA_NAME) \
 		--s3-key=$(ARTIFACT_NAME) \
-		--s3-bucket=$(ARTIFACT_BUCKET)-$(ENV) \
+		--s3-bucket=$(ARTIFACT_BUCKET) \
 		--region=$(REGION) \
 		--query 'LastModified' | xargs);\
-	echo "***$(LAMBDA_NAME)-$(ENV) lambda deployed @ $$MOD"
+	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
 
 deploy-layer:
 	@$(MAKE) -s test-env-arg
@@ -122,11 +122,11 @@ deploy-layer:
 
 put-layer:
 	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET)-$(ENV) \
+		--bucket=$(ARTIFACT_BUCKET) \
 		--key=$(APP_NAME)-layer.zip \
 		--body=$(CURDIR)/$(APP_NAME)-layer.zip \
 		--region=$(REGION) \
-		--output=text | sed 's/"//g'); \
+		--output=text | xargs); \
 	echo "***Deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"
 
 publish-layer:
@@ -134,12 +134,12 @@ publish-layer:
 	@LAYER_VERSION_ARN=$$(aws lambda publish-layer-version \
 		--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
 		--description="$(APP_NAME) dependencies in $(ENV)" \
-		--content=S3Bucket=$(ARTIFACT_BUCKET)-$(ENV),S3Key=$(APP_NAME)-layer.zip \
+		--content=S3Bucket=$(ARTIFACT_BUCKET),S3Key=$(APP_NAME)-layer.zip \
 		--region=$(REGION) \
 		--query 'LayerVersionArn' \
 		--output=text | xargs); \
 	aws lambda update-function-configuration \
-		--function-name $(LAMBDA_NAME)-$(ENV) \
+		--function-name $(LAMBDA_NAME) \
 		--region=$(REGION) \
 		--query='LastModified' \
 		--layers $$LAYER_VERSION_ARN $(BASH_LAYER_ARN); \
