@@ -1,22 +1,22 @@
 locals {
-  GO_GRAPHQL = "go-graphql"
+  GRAPHQL = "graphql"
 }
 
-data "aws_s3_bucket_object" "go_graphql" {
+data "aws_s3_bucket_object" "graphql" {
   bucket = "mxfactorial-artifacts-${var.environment}"
-  key    = "${local.GO_GRAPHQL}-src.zip"
+  key    = "${local.GRAPHQL}-src.zip"
 }
 
-resource "aws_lambda_function" "go_graphql" {
-  function_name     = "${local.GO_GRAPHQL}-${var.environment}"
-  description       = "${local.GO_GRAPHQL} on api gateway"
-  s3_bucket         = data.aws_s3_bucket_object.go_graphql.bucket
-  s3_key            = data.aws_s3_bucket_object.go_graphql.key
-  s3_object_version = data.aws_s3_bucket_object.go_graphql.version_id
+resource "aws_lambda_function" "graphql" {
+  function_name     = "${local.GRAPHQL}-${var.environment}"
+  description       = "${local.GRAPHQL} on api gateway"
+  s3_bucket         = data.aws_s3_bucket_object.graphql.bucket
+  s3_key            = data.aws_s3_bucket_object.graphql.key
+  s3_object_version = data.aws_s3_bucket_object.graphql.version_id
   handler           = "index.handler"
   runtime           = "go1.x"
   timeout           = 30
-  role              = aws_iam_role.go_graphql_role.arn
+  role              = aws_iam_role.graphql_role.arn
   environment {
     variables = {
       RULE_LAMBDA_ARN                    = aws_lambda_function.rules.arn
@@ -31,20 +31,20 @@ resource "aws_lambda_function" "go_graphql" {
   }
 }
 
-resource "aws_cloudwatch_log_group" "go_graphql" {
-  name              = "/aws/lambda/${aws_lambda_function.go_graphql.function_name}"
+resource "aws_cloudwatch_log_group" "graphql" {
+  name              = "/aws/lambda/${aws_lambda_function.graphql.function_name}"
   retention_in_days = 30
 }
 
-resource "aws_iam_role" "go_graphql_role" {
-  name               = "${local.GO_GRAPHQL}-${var.environment}"
-  assume_role_policy = data.aws_iam_policy_document.go_graphql_trust_policy.json
+resource "aws_iam_role" "graphql_role" {
+  name               = "${local.GRAPHQL}-${var.environment}"
+  assume_role_policy = data.aws_iam_policy_document.graphql_trust_policy.json
 }
 
-data "aws_iam_policy_document" "go_graphql_trust_policy" {
+data "aws_iam_policy_document" "graphql_trust_policy" {
   version = "2012-10-17"
   statement {
-    sid    = "GoGraphQLFaasTrustPolicy${title(var.environment)}"
+    sid    = "GraphQLFaasTrustPolicy${title(var.environment)}"
     effect = "Allow"
     actions = [
       "sts:AssumeRole",
@@ -56,18 +56,18 @@ data "aws_iam_policy_document" "go_graphql_trust_policy" {
   }
 }
 
-resource "aws_iam_role_policy" "go_graphql_policy" {
-  name = "${local.GO_GRAPHQL}-${var.environment}"
-  role = aws_iam_role.go_graphql_role.id
+resource "aws_iam_role_policy" "graphql_policy" {
+  name = "${local.GRAPHQL}-${var.environment}"
+  role = aws_iam_role.graphql_role.id
 
-  policy = data.aws_iam_policy_document.go_graphql_policy.json
+  policy = data.aws_iam_policy_document.graphql_policy.json
 }
 
-data "aws_iam_policy_document" "go_graphql_policy" {
+data "aws_iam_policy_document" "graphql_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "GoGraphQLInvokeLambdaPolicy${title(var.environment)}"
+    sid = "GraphQLInvokeLambdaPolicy${title(var.environment)}"
     actions = [
       "lambda:InvokeFunction"
     ]
@@ -83,7 +83,7 @@ data "aws_iam_policy_document" "go_graphql_policy" {
   }
 
   statement {
-    sid = "GoGraphQLLoggingPolicy${title(var.environment)}"
+    sid = "GraphQLLoggingPolicy${title(var.environment)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
