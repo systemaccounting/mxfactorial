@@ -1,6 +1,6 @@
 APP_NAME = go-migrate
 ARTIFACT_NAME = $(APP_NAME)-src.zip
-LAMBDA_NAME = $(APP_NAME)-faas
+LAMBDA_NAME = $(APP_NAME)
 RUNTIME=provided
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1

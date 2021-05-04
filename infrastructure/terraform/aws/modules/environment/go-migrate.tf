@@ -1,45 +1,45 @@
-data "aws_s3_bucket_object" "go_migrate_faas" {
+data "aws_s3_bucket_object" "go_migrate" {
   bucket = "mxfactorial-artifacts-${var.environment}"
   key    = "go-migrate-src.zip"
 }
 
-resource "aws_lambda_function" "go_migrate_faas" {
-  function_name     = "go-migrate-faas-${var.environment}"
+resource "aws_lambda_function" "go_migrate" {
+  function_name     = "go-migrate-${var.environment}"
   description       = "go migrate tool in ${var.environment}"
-  s3_bucket         = data.aws_s3_bucket_object.go_migrate_faas.bucket
-  s3_key            = data.aws_s3_bucket_object.go_migrate_faas.key
-  s3_object_version = data.aws_s3_bucket_object.go_migrate_faas.version_id
+  s3_bucket         = data.aws_s3_bucket_object.go_migrate.bucket
+  s3_key            = data.aws_s3_bucket_object.go_migrate.key
+  s3_object_version = data.aws_s3_bucket_object.go_migrate.version_id
   handler           = "index.handler"
   # https://github.com/gkrizek/bash-lambda-layer
   layers = [
     "arn:aws:lambda:${data.aws_region.current.name}:744348701589:layer:bash:8",
-    data.aws_lambda_layer_version.go_migrate_faas.arn
+    data.aws_lambda_layer_version.go_migrate.arn
   ]
   runtime = "provided"
   timeout = 60
-  role    = aws_iam_role.go_migrate_faas.arn
+  role    = aws_iam_role.go_migrate.arn
 
   environment {
     variables = local.POSTGRES_VARS
   }
 }
 
-data "aws_lambda_layer_version" "go_migrate_faas" {
+data "aws_lambda_layer_version" "go_migrate" {
   layer_name = "go-migrate-provided-deps-${var.environment}"
 }
 
-data "aws_s3_bucket_object" "go_migrate_faas_layer" {
+data "aws_s3_bucket_object" "go_migrate_layer" {
   bucket = "mxfactorial-artifacts-${var.environment}"
   key    = "go-migrate-layer.zip"
 }
 
-resource "aws_cloudwatch_log_group" "go_migrate_faas" {
-  name              = "/aws/lambda/${aws_lambda_function.go_migrate_faas.function_name}"
+resource "aws_cloudwatch_log_group" "go_migrate" {
+  name              = "/aws/lambda/${aws_lambda_function.go_migrate.function_name}"
   retention_in_days = 30
 }
 
-resource "aws_iam_role" "go_migrate_faas" {
-  name = "go-migrate-faas-role-${var.environment}"
+resource "aws_iam_role" "go_migrate" {
+  name = "go-migrate-role-${var.environment}"
 
   assume_role_policy = <<EOF
 {
@@ -59,14 +59,14 @@ EOF
 }
 
 # allow function to create logs and access rds
-resource "aws_iam_role_policy" "go_migrate_faas_policy" {
-  name = "go-migrate-faas-policy-${var.environment}"
-  role = aws_iam_role.go_migrate_faas.id
+resource "aws_iam_role_policy" "go_migrate_policy" {
+  name = "go-migrate-policy-${var.environment}"
+  role = aws_iam_role.go_migrate.id
 
-  policy = data.aws_iam_policy_document.go_migrate_faas_policy.json
+  policy = data.aws_iam_policy_document.go_migrate_policy.json
 }
 
-data "aws_iam_policy_document" "go_migrate_faas_policy" {
+data "aws_iam_policy_document" "go_migrate_policy" {
   version = "2012-10-17"
 
   statement {
@@ -92,9 +92,4 @@ data "aws_iam_policy_document" "go_migrate_faas_policy" {
       "*", # todo: restrict
     ]
   }
-}
-
-resource "aws_iam_role_policy_attachment" "go_migrate_faas_rds_access" {
-  role       = aws_iam_role.go_migrate_faas.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonRDSDataFullAccess"
 }

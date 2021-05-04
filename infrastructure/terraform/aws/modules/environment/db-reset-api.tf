@@ -9,13 +9,13 @@ resource "aws_sns_topic" "db_reset" {
 resource "aws_sns_topic_subscription" "sns_to_db_reset_lambda" {
   topic_arn = aws_sns_topic.db_reset.arn
   protocol  = "lambda"
-  endpoint  = aws_lambda_function.db_reset_faas.arn
+  endpoint  = aws_lambda_function.db_reset.arn
 }
 
 resource "aws_lambda_permission" "sns_to_db_reset_lambda" {
   statement_id  = "AllowASNSInvoke${title(var.environment)}"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.db_reset_faas.function_name
+  function_name = aws_lambda_function.db_reset.function_name
   principal     = "sns.amazonaws.com"
   source_arn    = aws_sns_topic.db_reset.arn
 }

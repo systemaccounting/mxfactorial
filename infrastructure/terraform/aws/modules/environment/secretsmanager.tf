@@ -138,13 +138,13 @@ resource "aws_secretsmanager_secret_version" "rule_lambda_arn" {
   secret_string = aws_lambda_function.rules.arn
 }
 
-resource "aws_secretsmanager_secret" "db_reset_faas_passphrase" {
+resource "aws_secretsmanager_secret" "db_reset_passphrase" {
   name                    = "${var.environment}/DB_RESET_PASSPHRASE"
   recovery_window_in_days = 0
   description             = "db reset passphrase in ${var.environment}"
 }
 
-resource "aws_secretsmanager_secret_version" "db_reset_faas_passphrase" {
-  secret_id     = aws_secretsmanager_secret.db_reset_faas_passphrase.id
-  secret_string = random_password.db_reset_faas.result
+resource "aws_secretsmanager_secret_version" "db_reset_passphrase" {
+  secret_id     = aws_secretsmanager_secret.db_reset_passphrase.id
+  secret_string = random_password.db_reset.result
 }
