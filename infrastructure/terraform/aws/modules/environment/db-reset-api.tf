@@ -97,10 +97,6 @@ resource "aws_api_gateway_deployment" "db_reset" {
   }
 }
 
-resource "aws_api_gateway_account" "db_reset_account" {
-  cloudwatch_role_arn = aws_iam_role.db_reset_api.arn
-}
-
 resource "aws_iam_role" "db_reset_api" {
   name               = "${local.DB_RESET}-apigw-role-${var.environment}"
   assume_role_policy = data.aws_iam_policy_document.db_reset_api_role.json
