@@ -15,7 +15,7 @@ func InsertAccountSQL(account string) (string, []interface{}) {
 	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
 }
 
-func deleteOwnerAccountSQL(account string) (string, []interface{}) {
+func DeleteOwnerAccountSQL(account string) (string, []interface{}) {
 	db := sqlb.PostgreSQL.NewDeleteBuilder()
 	db.DeleteFrom("account_owner")
 	db.Where(
@@ -24,7 +24,7 @@ func deleteOwnerAccountSQL(account string) (string, []interface{}) {
 	return db.Build()
 }
 
-func deleteAccountSQL(account string) (string, []interface{}) {
+func DeleteAccountSQL(account string) (string, []interface{}) {
 	db := sqlb.PostgreSQL.NewDeleteBuilder()
 	db.DeleteFrom("account")
 	db.Where(
