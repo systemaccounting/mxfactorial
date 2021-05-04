@@ -1,5 +1,5 @@
 CMD_DIR=$(CURDIR)
-APP_NAME=go-graphql
+APP_NAME=graphql
 ARTIFACT_NAME=$(APP_NAME)-src.zip
 ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
 REGION=us-east-1
@@ -10,7 +10,7 @@ ENTRYPOINT=server.go
 ENV_FILE=$(CURDIR)/.env
 
 ENV_VARS := AWS_REGION \
-GO_GRAPHQL_API \
+GRAPHQL_API \
 RULE_LAMBDA_ARN \
 LOCAL_ENV \
 REQUEST_CREATE_LAMBDA_ARN \
@@ -47,7 +47,7 @@ open:
 
 openapi:
 	$(MAKE) -s test-env-file
-	eval $$(cat .env); open $$GO_GRAPHQL_API
+	eval $$(cat .env); open $$GRAPHQL_API
 
 skeleton:
 	go run github.com/99designs/gqlgen init
