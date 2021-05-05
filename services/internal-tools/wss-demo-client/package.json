@@ -3,13 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "UNLICENSED",
-  "scripts": {
-    "get": "FLAG=get env-cmd node index.js",
-    "clear": "FLAG=clear env-cmd node index.js"
-  },
   "dependencies": {
-    "aws-sdk": "^2.538.0",
-    "env-cmd": "^10.0.1",
-    "ws": "^7.1.2"
+    "aws-sdk": "^2.900.0",
+    "ws": "^7.4.5"
   }
 }
