@@ -4,6 +4,7 @@ ifndef ENV
 endif
 
 DIRS=auto-confirm \
+balance-by-account \
 graphql \
 notifications-clear \
 notifications-get \
