@@ -1,5 +1,4 @@
 ENV_FILE=$(CURDIR)/.env
-ACTION=getnotifications
 TEST_ACCOUNT=JacobWebb
 TEST_PASSWORD=$(TEST_ACCOUNT)
 LOG_ID_TOKEN=false
@@ -9,19 +8,33 @@ ENV_VARS := CLIENT_ID \
 WEBSOCKET_CLIENT_URI \
 ACCOUNT \
 SECRET \
-AWS_REGION \
-LOG_ID_TOKEN
+AWS_REGION
 
 test-env-arg:
 ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
-run:
-	eval $$(cat .env) ACTION=$(ACTION) node index.js
+getnotifications:
+	eval $$(cat .env) \
+		LOG_ID_TOKEN=$(LOG_ID_TOKEN) \
+		ACTION=getnotifications \
+		node index.js
+
+clearnotifications:
+	eval $$(cat .env) \
+		LOG_ID_TOKEN=$(LOG_ID_TOKEN) \
+		ACTION=clearnotifications \
+		node index.js
 
 install:
 	yarn install
+
+clean-deps:
+	rm -rf node_modules
+
+clean:
+	$(MAKE) clean-deps
 
 ###################### secrets ######################
 
