@@ -1,7 +1,6 @@
 module.exports = {
   extends: [
-    'prettier/react',
-    'plugin:prettier/recommended'
+    "plugin:prettier/recommended"
   ],
   parser: "babel-eslint",
   parserOptions: {
