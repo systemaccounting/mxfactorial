@@ -9,9 +9,11 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jackc/pgx/v4"
+	"github.com/shopspring/decimal"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/testdata"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 var pgConn string = fmt.Sprintf(
@@ -51,8 +53,17 @@ func lambdaFn(
 	)
 
 	// create insert account sql
-	accSQL, accArgs := sqlb.InsertAccountSQL(
+	insAccSQL, insAccArgs := sqlb.InsertAccountSQL(
 		cognitoUser,
+	)
+
+	// create insert account balance sql
+	beginningBalance, _ := decimal.NewFromString("0")
+	insAccBalSQL, insAccBalArgs := sqlb.InsertAccountBalanceSQL(
+		cognitoUser,
+		beginningBalance,
+		types.ID("0"), // todo: create transaction before creating account balance, then
+		// pass transaction_item.id as arg to account balance insert
 	)
 
 	// create insert account profile sql
@@ -91,31 +102,34 @@ func lambdaFn(
 	// connect to postgres
 	db, err := c.Connect(ctx, pgConn)
 	if err != nil {
-		log.Print(err)
+		log.Printf("db connect %v", err)
 		return events.CognitoEventUserPoolsPreSignup{}, err
 	}
 	defer db.Close(context.Background())
 
 	// insert account
-	_, err = db.Exec(context.Background(), accSQL, accArgs...)
+	_, err = db.Exec(context.Background(), insAccSQL, insAccArgs...)
 	if err != nil {
-		log.Print(err)
+		log.Printf("insert account %v", err)
+		return events.CognitoEventUserPoolsPreSignup{}, err
+	}
+
+	// insert initial account balance
+	_, err = db.Exec(context.Background(), insAccBalSQL, insAccBalArgs...)
+	if err != nil {
+		log.Printf("insert account balance %v", err)
 		return events.CognitoEventUserPoolsPreSignup{}, err
 	}
 
 	// insert profile
 	_, err = db.Exec(context.Background(), profileSQL, profileArgs...)
 	if err != nil {
-		log.Print(err)
+		log.Printf("insert profile %v", err)
 		return events.CognitoEventUserPoolsPreSignup{}, err
 	}
 
 	// test for approve any credit rule
 	row := db.QueryRow(context.Background(), getRuleInstSQL, getRuleInstArgs...)
-	if err != nil {
-		log.Print(err)
-		return events.CognitoEventUserPoolsPreSignup{}, err
-	}
 
 	var r minimalRuleInstance
 	err = row.Scan(
@@ -127,7 +141,7 @@ func lambdaFn(
 		&r.VariableValues,
 	)
 	if err != nil && err != pgx.ErrNoRows {
-		log.Print(err)
+		log.Printf("select rule instance %v", err)
 		return events.CognitoEventUserPoolsPreSignup{}, err
 	}
 
@@ -140,7 +154,7 @@ func lambdaFn(
 			insRuleInstArgs...,
 		)
 		if execErr != nil {
-			log.Print(execErr)
+			log.Printf("insert rule instance %v", execErr)
 			return events.CognitoEventUserPoolsPreSignup{}, execErr
 		}
 	}
