@@ -41,6 +41,41 @@
 			"response": []
 		},
 		{
+			"name": "balance",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{ID_TOKEN}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query balance($account_name: String!, $auth_account: String!) {\n  balance(account_name: $account_name, auth_account: $auth_account)\n}",
+						"variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"account_name\": \"JacobWebb\"\n}"
+					}
+				},
+				"url": {
+					"raw": "{{GO_GRAPHQL_API_DNS_A}}/query",
+					"host": [
+						"{{GO_GRAPHQL_API_DNS_A}}"
+					],
+					"path": [
+						"query"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "createRequest",
 			"request": {
 				"method": "POST",

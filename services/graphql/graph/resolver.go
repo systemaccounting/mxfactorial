@@ -26,6 +26,7 @@ var reqByIDLambdaArn string = os.Getenv("REQUEST_BY_ID_LAMBDA_ARN")
 var reqsByAccountLambdaArn string = os.Getenv("REQUESTS_BY_ACCOUNT_LAMBDA_ARN")
 var transByIDLambdaArn string = os.Getenv("TRANSACTION_BY_ID_LAMBDA_ARN")
 var transByAccountLambdaArn string = os.Getenv("TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN")
+var balanceByAccountLmabdaArn string = os.Getenv("BALANCE_BY_ACCOUNT_LAMBDA_ARN")
 
 type Resolver struct {
 	Lambda struct {
@@ -336,7 +337,7 @@ func (r *Resolver) InvokeRequestsByAccount(
 
 	queryByAccountEvent := CreateQueryByAccountEvent(
 		&authAccount,
-		&authAccount,
+		&accountName,
 	)
 
 	payload, err := json.Marshal(queryByAccountEvent)
@@ -420,7 +421,7 @@ func (r *Resolver) InvokeTransactionsByAccount(
 
 	queryByAccountEvent := CreateQueryByAccountEvent(
 		&authAccount,
-		&authAccount,
+		&accountName,
 	)
 
 	payload, err := json.Marshal(queryByAccountEvent)
@@ -450,4 +451,39 @@ func (r *Resolver) InvokeTransactionsByAccount(
 	}
 
 	return resp.Transactions, nil
+}
+
+func (r *Resolver) InvokeBalanceByAccount(
+	accountName,
+	authAccount string,
+) (*string, error) {
+
+	funcName := "balance by account"
+
+	queryByAccountEvent := CreateQueryByAccountEvent(
+		&authAccount,
+		&accountName,
+	)
+
+	payload, err := json.Marshal(queryByAccountEvent)
+	if err != nil {
+		log.Printf("invoke %v marshal: %v", funcName, err.Error())
+		return nil, err
+	}
+
+	result, err := r.InvokeLambda(balanceByAccountLmabdaArn, payload)
+	if err != nil {
+		log.Printf("invoke %v lambda: %v", funcName, err.Error())
+		return nil, err
+	}
+
+	unquoted, err := UnquoteBytes(result.Payload)
+	if err != nil {
+		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
+		return nil, err
+	}
+
+	resp := string(unquoted)
+
+	return &resp, nil
 }

@@ -106,6 +106,7 @@ type Query {
   requestsByAccount(account_name: String!, auth_account: String!): [Transaction]
   transactionByID(transaction_id: String!, auth_account: String!): Transaction
   transactionsByAccount(account_name: String!, auth_account: String!): [Transaction]
+  balance(account_name: String!, auth_account: String!): String
 }
 
 type Mutation {

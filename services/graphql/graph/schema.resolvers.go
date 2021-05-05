@@ -5,10 +5,10 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
-	"github.com/pkg/errors"
 	"github.com/systemaccounting/mxfactorial/services/graphql/auth"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/generated"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
@@ -170,6 +170,29 @@ func (r *queryResolver) TransactionsByAccount(ctx context.Context, accountName s
 		return nil, err
 	}
 	return trs, nil
+}
+
+func (r *queryResolver) Balance(ctx context.Context, accountName string, authAccount string) (*string, error) {
+	funcName := "balance"
+
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		var errFmtMsg string = fmt.Sprintf("cognito auth %v: %v", funcName, err.Error())
+		log.Print(errFmtMsg)
+		return nil, errors.New(errFmtMsg)
+	}
+
+	err = r.CreateLambdaSession()
+	if err != nil {
+		log.Printf("create lambda session %v: %v", funcName, err.Error())
+		return nil, err
+	}
+	bal, err := r.InvokeBalanceByAccount(accountName, authAccount)
+	if err != nil {
+		log.Printf("invoke %v: %v", funcName, err.Error())
+		return nil, err
+	}
+	return bal, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
