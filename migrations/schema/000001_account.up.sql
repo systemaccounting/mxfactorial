@@ -118,8 +118,9 @@ FOR EACH ROW
 WHEN (NEW.created_by IS NULL)
 EXECUTE PROCEDURE add_account_owner();
 
-CREATE TABLE account_setting (
+CREATE TABLE account_properties (
   account_name character varying(255) not null,
+  account_balance numeric default 0,
   notification_email_address character varying(255) [] not null,
   request_sent_email boolean not null,
   transaction_sent_email boolean not null,
