@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-aws-sdk@^2.538.0:
+aws-sdk@^2.900.0:
   version "2.900.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.900.0.tgz#1d528ae45295ac5ca36ca6afa1fcdb615575b07a"
   integrity sha512-MtLsmuE5z0F3+lEdybh8j8cThIN+VK0qF8Len83gpOaK5pj4D9aJNS95Tb7xZ0/3yqGzugk/+nRv9xXQq/Fkfg==
@@ -89,7 +89,7 @@ uuid@3.3.2:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.3.2.tgz#1b4af4955eb3077c501c23872fc6513811587131"
   integrity sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==
 
-ws@^7.1.2:
+ws@^7.4.5:
   version "7.4.5"
   resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.5.tgz#a484dd851e9beb6fdb420027e3885e8ce48986c1"
   integrity sha512-xzyu3hFvomRfXKH8vOFMU3OguG6oOvhXMo3xsGy3xWExqaM2dxBbVxuD99O7m3ZUFMvvscsZDqxfgMaRr/Nr1g==
