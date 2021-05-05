@@ -45,7 +45,7 @@ react/screenshot.png
 .DS_Store
 
 # unintended
-yarn.lock
+/yarn.lock
 
 # aws-cdk
 .cdk.staging
