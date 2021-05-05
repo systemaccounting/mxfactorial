@@ -64,12 +64,6 @@ build:
 	$(MAKE) compile
 	$(MAKE) zip
 
-# aliases build target
-dev: build
-
-# aliases build target
-src: build
-
 ###################### test ######################
 
 test:

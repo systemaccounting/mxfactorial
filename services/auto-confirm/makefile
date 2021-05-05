@@ -31,7 +31,6 @@ rmuser:
 		--user-pool-id $$POOL_ID \
 		--username $(TEST_ACCOUNT)
 
-
 ###################### clean ######################
 
 clean:
@@ -65,13 +64,6 @@ build:
 	$(MAKE) install
 	$(MAKE) compile
 	$(MAKE) zip
-
-# aliases build target
-dev: build
-
-# aliases build target
-src: build
-
 
 ###################### deploy ######################
 

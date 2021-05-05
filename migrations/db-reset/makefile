@@ -22,9 +22,6 @@ zip:
 build:
 	$(MAKE) zip
 
-# aliases zip target
-src: zip
-
 ###################### deploy ######################
 
 deploy:

@@ -79,9 +79,6 @@ build:
 	unzip $(TMP_MIGRATE_REPO_DIR)/$(PSQL_LAMBDA_ARCHIVE) -d $(TMP_MIGRATE_REPO_DIR)/bin
 	(mv $(TMP_MIGRATE_REPO_DIR)/bin/*.so* $(TMP_MIGRATE_REPO_DIR)/lib)
 
-# aliases zip target
-src: zip
-
 ###################### deploy ######################
 
 deploy:
