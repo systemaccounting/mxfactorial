@@ -27,6 +27,7 @@ resource "aws_lambda_function" "graphql" {
       TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN = module.transactions_by_account.lambda_arn
       TRANSACTION_BY_ID_LAMBDA_ARN       = module.transaction_by_id.lambda_arn
       ENABLE_API_AUTH                    = var.enable_api_auth
+      BALANCE_BY_ACCOUNT_LAMBDA_ARN      = module.balance_by_account.lambda_arn
     }
   }
 }
@@ -79,6 +80,7 @@ data "aws_iam_policy_document" "graphql_policy" {
       module.requests_by_account.lambda_arn,
       module.transactions_by_account.lambda_arn,
       module.transaction_by_id.lambda_arn,
+      module.balance_by_account.lambda_arn,
     ]
   }
 
