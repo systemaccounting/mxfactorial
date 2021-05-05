@@ -52,5 +52,5 @@ const TopNavigation = ({ notifications, clearNotifications }) => {
 }
 
 export default withNotifications({
-  url: process.env.REACT_APP_WSS_CLIENT_URL
+  url: process.env.REACT_APP_WEBSOCKET_CLIENT_URI
 })(TopNavigation)

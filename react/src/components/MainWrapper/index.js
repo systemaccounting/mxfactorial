@@ -4,4 +4,3 @@ const MainWrapper = styled.div`
   width: 15rem;
 `
 export default MainWrapper
-

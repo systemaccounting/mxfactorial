@@ -14,14 +14,14 @@ const schema = {
       inputType: 'text',
       name: 'price',
       placeholder: 'Price',
-      value: '',
+      value: ''
     },
     quantity: {
       type: 'string',
       inputType: 'text',
       name: 'quantity',
       placeholder: 'Quantity',
-      value: '',
+      value: ''
     }
   }
 }
