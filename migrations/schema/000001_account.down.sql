@@ -1,4 +1,4 @@
-DROP TABLE account_properties;
+DROP TABLE account_settings;
 
 DROP TRIGGER add_account_owner ON account;
 
