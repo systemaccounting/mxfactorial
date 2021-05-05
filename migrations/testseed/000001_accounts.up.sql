@@ -61,3 +61,25 @@ insert into account_owner (owner_account, owned_subaccount) values ('MiriamLevy'
 insert into account_owner (owner_account, owned_subaccount) values ('AzizKhan', 'Skyways');
 insert into account_owner (owner_account, owned_subaccount) values ('IgorPetrov', 'GroceryCo');
 insert into account_owner (owner_account, owned_subaccount) values ('IgorPetrov', 'CloudBiz');
+
+-- account balances
+insert into account_balance (account_name, current_balance) values ('JohnSmith', 0);
+insert into account_balance (account_name, current_balance) values ('IrisLynn', 0);
+insert into account_balance (account_name, current_balance) values ('DanLee', 0);
+insert into account_balance (account_name, current_balance) values ('AaronHill', 0);
+insert into account_balance (account_name, current_balance) values ('SarahBell', 0);
+insert into account_balance (account_name, current_balance) values ('BenRoss', 0);
+insert into account_balance (account_name, current_balance) values ('JacobWebb', 0);
+insert into account_balance (account_name, current_balance) values ('MiriamLevy', 0);
+insert into account_balance (account_name, current_balance) values ('AzizKhan', 0);
+insert into account_balance (account_name, current_balance) values ('IgorPetrov', 0);
+insert into account_balance (account_name, current_balance) values ('CPA', 0);
+insert into account_balance (account_name, current_balance) values ('SunflowerFarms', 0);
+insert into account_balance (account_name, current_balance) values ('GoldMiners', 0);
+insert into account_balance (account_name, current_balance) values ('EnergyCo', 0);
+insert into account_balance (account_name, current_balance) values ('USTreasury', 0);
+insert into account_balance (account_name, current_balance) values ('StateOfCalifornia', 0);
+insert into account_balance (account_name, current_balance) values ('TimeCo', 0);
+insert into account_balance (account_name, current_balance) values ('GroceryCo', 0);
+insert into account_balance (account_name, current_balance) values ('Skyways', 0);
+insert into account_balance (account_name, current_balance) values ('CloudBiz', 0);
