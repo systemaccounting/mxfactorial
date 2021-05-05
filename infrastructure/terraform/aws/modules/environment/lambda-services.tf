@@ -88,6 +88,14 @@ module "transaction_by_id" {
   create_secret = true
 }
 
+module "balance_by_account" {
+  source        = "../go-lambda-service"
+  service_name  = "balance-by-account"
+  env           = var.environment
+  env_vars      = merge(local.POSTGRES_VARS, {})
+  create_secret = true
+}
+
 module "auto_confirm" {
   source            = "../go-lambda-service"
   service_name      = "auto-confirm"
