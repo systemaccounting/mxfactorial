@@ -53,7 +53,7 @@ func SelectCurrentAccountBalanceByAccountNameSQL(
 ) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select("current_balance")
-	sb.From("current_balance").
+	sb.From("account_balance").
 		Where(
 			sb.Equal("account_name", accountName),
 		)
