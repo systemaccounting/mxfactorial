@@ -452,3 +452,14 @@ func UnmarshalWebsocket(
 	}
 	return w, nil
 }
+
+func UnmarshalAccountBalance(
+	row pgx.Row,
+) (string, error) {
+	var AccountBalance decimal.Decimal
+	err := row.Scan(&AccountBalance)
+	if err != nil {
+		return "", err
+	}
+	return AccountBalance.StringFixed(3), nil
+}
