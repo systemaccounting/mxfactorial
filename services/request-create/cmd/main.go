@@ -15,6 +15,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/notify"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/transact"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -61,9 +62,7 @@ func lambdaFn(
 		return "", errors.New("missing auth_account. exiting")
 	}
 
-	if e.Transaction == nil ||
-		e.AuthAccount == "" ||
-		e.Transaction.Author == nil {
+	if e.Transaction == nil {
 		return "", errors.New("missing transaction. exiting")
 	}
 
@@ -165,6 +164,17 @@ func lambdaFn(
 	}
 	// close db connection when main exits
 	defer db.Close(context.Background())
+
+	// test debitor capacity
+	err = transact.TestDebitorCapacity(
+		db,
+		*e.Transaction.Author,
+		ruleTested.Transaction.TransactionItems,
+	)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
 
 	// get account profile ids with account names
 	profileIDRows, err := db.Query(
@@ -271,6 +281,11 @@ func lambdaFn(
 
 	// add transaction items to returning transaction
 	tr.TransactionItems = trItems
+
+	// change account balances if equilibrium
+	if transact.IsEquilibrium(tr) {
+		transact.ChangeAccountBalances(db, tr.TransactionItems)
+	}
 
 	// notify role approvers
 	err = notify.NotifyTransactionRoleApprovers(
