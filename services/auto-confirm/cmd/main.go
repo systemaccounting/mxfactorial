@@ -58,7 +58,7 @@ func lambdaFn(
 	)
 
 	// create insert account balance sql
-	beginningBalance, _ := decimal.NewFromString("0")
+	beginningBalance, _ := decimal.NewFromString(os.Getenv("INITIAL_ACCOUNT_BALANCE"))
 	insAccBalSQL, insAccBalArgs := sqlb.InsertAccountBalanceSQL(
 		cognitoUser,
 		beginningBalance,
