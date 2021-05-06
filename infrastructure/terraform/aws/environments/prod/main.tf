@@ -1,5 +1,5 @@
 terraform {
-  required_version = "~> 0.12.4"
+  required_version = "~> 0.15.0"
 
   backend "remote" {
     hostname     = "app.terraform.io"
@@ -12,16 +12,10 @@ terraform {
 }
 
 provider "aws" {
-  region  = "us-east-1"
-  version = "~> 2.19.0"
-
-  # use regions where only cloud9 available
-  # https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/
+  region = "us-east-1"
 }
 
-provider "archive" {
-  version = "~> 1.2.2"
-}
+provider "archive" {}
 
 data "terraform_remote_state" "aws-us-east-1" {
   backend = "remote"
@@ -45,6 +39,9 @@ module "prod" {
   ############### shared in lambda and rds ###############
   req_query_return_limit   = 20
   trans_query_return_limit = 20
+
+  ############### rds ###############
+  rds_db_version = "11.10"
 
   ############### shared in lambda and rds ###############
   db_snapshot_id = null

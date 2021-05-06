@@ -10,7 +10,7 @@ resource "aws_lambda_function" "migrate_lambda" {
   s3_key            = data.aws_s3_bucket_object.migrate_lambda.key
   s3_object_version = data.aws_s3_bucket_object.migrate_lambda.version_id
   handler           = "index.handler"
-  runtime           = "nodejs8.10"
+  runtime           = "nodejs14.x"
   role              = aws_iam_role.migrate_lambda_role.arn
 
   layers = [

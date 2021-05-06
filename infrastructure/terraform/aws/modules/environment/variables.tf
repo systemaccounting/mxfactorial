@@ -22,3 +22,6 @@ variable "req_query_return_limit" {
 variable "trans_query_return_limit" {
   type = number
 }
+
+
+variable "rds_db_version" {}
