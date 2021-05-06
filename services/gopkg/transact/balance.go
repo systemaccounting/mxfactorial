@@ -13,15 +13,15 @@ import (
 )
 
 func IsEquilibrium(t *types.Transaction) bool {
-	if len(*t.EquilibriumTime) == 0 {
+	if t.EquilibriumTime == nil {
 		return false
 	}
 TransactionItems:
 	for _, v := range t.TransactionItems {
-		if len(*v.CreditorApprovalTime) > 0 && len(*v.DebitorApprovalTime) > 0 {
+		if v.CreditorApprovalTime != nil && v.DebitorApprovalTime != nil {
 		Approvers:
 			for _, w := range v.Approvers {
-				if len(*w.ApprovalTime) > 0 {
+				if w.ApprovalTime != nil {
 					continue Approvers
 				} else {
 					return false
