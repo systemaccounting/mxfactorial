@@ -4,11 +4,13 @@
 
 todo:
 1. add `/.github/workflows/dev-migrations.yaml`
-1. add `make run && make devtest` in workflow
+1. add `make run && make testdocker` in workflow
 
 ### expedites
 1. local development with [postgres in docker](https://hub.docker.com/r/bitnami/postgresql) and [go migrate](https://github.com/golang-migrate/migrate)
-1. creating test and prod databases in postgres rds through lambda maintained in `./go-migrate-faas`
+1. creates test and prod databases in postgres rds through:
+    1. `make uprds DB=test`, OR
+    1. lambda maintained in `./go-migrate-faas`
 
 ### migration directories
 1. `./schema`
@@ -21,12 +23,12 @@ test db = `./schema` + `./seed` + `./testseed`
 ### tl;dr start local development
 1. `brew install golang-migrate`
 1. `make run` to start postgres in docker
-1. `make redev` to apply all migrations from the `./schema`, `./seed` and `./testseed` directories
+1. `make resetdocker` to apply all migrations from the `./schema`, `./seed` and `./testseed` directories
 
 ### work fast
 1. add changes to migration directories
-1. `make redev` to drop and then up migrate all from `migrations`, `seed` and `testseed` directories
-1. `make devtest` to up & down test `migrations`, `seed` and `testseed` directories
+1. `make resetdocker` to drop and then up migrate all from `migrations`, `seed` and `testseed` directories
+1. `make testdocker` to up & down test `migrations`, `seed` and `testseed` directories
 
 ### postgres docker commands
 1. `make run` starts a local postgres docker container with `./postgres-data` created and mounted
@@ -80,3 +82,9 @@ test db = `./schema` + `./seed` + `./testseed`
 1. `make lambda-drop-all DB=prod ENV=prod BRANCH=199/db-item-transaction` deploys the drop of all migrations checked into the `./schema` and `./seed` directories
 
 \* ***excludes** `./testseed` migrations*, can still deploy DB=prod to ENV=dev if preferred
+
+### direct rds migrations
+deploy migrations to prod rds through lambda, but for faster migrations in lower environment rds, use direct commands:
+1. `make get-secrets ENV=dev`
+1. `make resetrds` drops and then up migrates all sqls from `migrations`, `seed` and `testseed` directories
+1. `make testrds` tests up & down `migrations`, `seed` and `testseed` directories

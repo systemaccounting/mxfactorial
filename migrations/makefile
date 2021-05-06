@@ -13,8 +13,15 @@ DATABASE_TYPE=postgres
 POSTGRESQL_HOST=localhost
 POSTGRESQL_PORT=$(CONTAINER_PORT)
 
-# single go migrate command variables
-POSTGRESQL_CONNECTION=$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version
+ENV_FILE=$(CURDIR)/.env
+ENV_VARS=DATABASE_TYPE \
+PGUSER \
+PGPASSWORD \
+PGHOST \
+PGPORT \
+PGDATABASE
+
+DOCKER_POSTGRES=$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version
 MIGRATIONS_DIR=$(CURDIR)/$(DIR)
 
 # migration lambda vars
@@ -50,31 +57,58 @@ redocker:
 	-@$(MAKE) clean
 	$(MAKE) run
 
-# looped go migrate targets for postgres in docker
-up:
+# looped go migrate targets for docker postgres
+resetdocker:
+	$(MAKE) dropdocker DB=test
+	$(MAKE) updocker DB=test
+
+testdocker:
+	$(MAKE) resetdocker
+	$(MAKE) downdocker DB=test
+
+updocker:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
-	$(foreach DIR,$($(DB)_up), migrate -verbose -path ./$(DIR) -database "$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version" up;)
+	$(foreach DIR,$($(DB)_up), migrate -verbose -path ./$(DIR) -database "$(DOCKER_POSTGRES)" up;)
 
-down:
+downdocker:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
-	$(foreach DIR,$($(DB)_down), yes | migrate -verbose -path ./$(DIR) -database "$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version" down;)
+	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(DOCKER_POSTGRES)" down --all;)
 
-drop:
+dropdocker:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
-	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version" drop -f;)
+	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(DOCKER_POSTGRES)" drop -f;)
 
-redev:
-	$(MAKE) drop DB=test
-	$(MAKE) up DB=test
+# looped go migrate targets for rds postgres
+resetrds:
+	$(MAKE) droprds DB=test
+	$(MAKE) uprds DB=test
 
-devtest:
-	$(MAKE) redev
-	$(MAKE) down DB=test
+testrds:
+	$(MAKE) resetrds
+	$(MAKE) downrds DB=test
 
-# go migrate
+uprds:
+	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-db-arg
+	@$(MAKE) -s test-db-val
+	$(foreach DIR,$($(DB)_up), eval $$(cat $(ENV_FILE)); migrate -verbose -path ./$(DIR) -database "$$DATABASE_TYPE://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_$(DIR)_version" up;)
+
+downrds:
+	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-db-arg
+	@$(MAKE) -s test-db-val
+	$(foreach DIR,$($(DB)_down), eval $$(cat $(ENV_FILE)); migrate -verbose -path ./$(DIR) -database "$$DATABASE_TYPE://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_$(DIR)_version" down --all;)
+
+droprds:
+	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-db-arg
+	@$(MAKE) -s test-db-val
+	$(foreach DIR,$($(DB)_down), eval $$(cat $(ENV_FILE)); migrate -verbose -path ./$(DIR) -database "$$DATABASE_TYPE://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_$(DIR)_version" drop -f;)
+
+# local go migrate
 init:
 	@$(MAKE) -s test-dir-arg
 	migrate create -ext sql -dir $(MIGRATIONS_DIR) -seq init_schema
@@ -87,29 +121,29 @@ create:
 updir:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-count-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" up $(COUNT)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" up $(COUNT)
 
 downdir:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-count-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" down $(COUNT)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" down $(COUNT)
 
 updirall:
 	@$(MAKE) -s test-dir-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" up
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" up
 
 downdirall:
 	@$(MAKE) -s test-dir-arg
-	yes | migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" down
+	yes | migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" down
 
 dropdir:
 	@$(MAKE) -s test-dir-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" drop -f
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" drop -f
 
 force:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-version-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(POSTGRESQL_CONNECTION)" force $(VERSION)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" force $(VERSION)
 
 clear:
 	$(MAKE) drop
@@ -209,3 +243,36 @@ test-branch-arg:
 ifndef BRANCH
 	$(error trailing BRANCH assignment missing, e.g. BRANCH=your-branch-name)
 endif
+
+###################### secrets ######################
+
+clean-env:
+	rm -f $(ENV_FILE)
+
+test-env-file:
+ifeq (,$(wildcard $(ENV_FILE)))
+	$(error no .env file, run 'make get-secrets ENV=dev')
+endif
+
+get-secrets:
+	@$(MAKE) -s retrieve-each-secret
+	@if [ ! -s $(ENV_FILE) ]; then \
+		rm $(ENV_FILE); \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
+
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	@if [ $@ = DATABASE_TYPE ]; then \
+		echo DATABASE_TYPE=$(DATABASE_TYPE) >> $(ENV_FILE); \
+	else \
+		ENV_VAR=$$(aws secretsmanager get-secret-value \
+			--region $(REGION) \
+			--secret-id $(ENV)/$@ \
+			--query 'SecretString' \
+			--output text); \
+		echo $@=$$ENV_VAR >> $(ENV_FILE); \
+	fi
+
