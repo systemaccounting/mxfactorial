@@ -26,7 +26,7 @@ func UpdateDebitorAccountBalanceSQL(trItem *types.TransactionItem) (string, []in
 	ub := sqlb.PostgreSQL.NewUpdateBuilder()
 	ub.Update("account_balance").
 		Set(
-			ub.Assign("current_balance", trItem.Price),
+			ub.Assign("current_balance", trItem.Price.Mul(trItem.Quantity).Neg()),
 			ub.Assign("current_transaction_item_id", trItem.ID),
 		).
 		Where(
@@ -39,7 +39,7 @@ func UpdateCreditorAccountBalanceSQL(trItem *types.TransactionItem) (string, []i
 	ub := sqlb.PostgreSQL.NewUpdateBuilder()
 	ub.Update("account_balance").
 		Set(
-			ub.Assign("current_balance", trItem.Price),
+			ub.Assign("current_balance", trItem.Price.Mul(trItem.Quantity)),
 			ub.Assign("current_transaction_item_id", trItem.ID),
 		).
 		Where(

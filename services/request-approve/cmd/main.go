@@ -15,6 +15,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/notify"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/transact"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -50,6 +51,16 @@ func lambdaFn(
 		return "", errReqValsMissing
 	}
 
+	// connect to postgres
+	db, err := c.Connect(context.Background(), pgConn)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+
+	// close db connection when main exits
+	defer db.Close(context.Background())
+
 	// create sql to get current transaction
 	preTrSQL, preTrArgs := sqlb.SelectTransactionByIDSQL(
 		e.ID,
@@ -65,16 +76,6 @@ func lambdaFn(
 		*e.AccountName,
 		e.ID,
 	)
-
-	// connect to postgres
-	db, err := c.Connect(context.Background(), pgConn)
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-
-	// close db connection when main exits
-	defer db.Close(context.Background())
 
 	// get current transaction
 	preTrRow := db.QueryRow(
@@ -113,6 +114,13 @@ func lambdaFn(
 	preTrItems, err := lpg.UnmarshalTrItems(
 		preTrItemRows,
 	)
+	if err != nil {
+		log.Print(err)
+		return "", err
+	}
+
+	// test debitor capacity
+	err = transact.TestDebitorCapacity(db, *e.AccountName, preTrItems)
 	if err != nil {
 		log.Print(err)
 		return "", err
@@ -375,6 +383,11 @@ func lambdaFn(
 
 	// add transaction items to post approval transaction
 	postApprovalTransaction.TransactionItems = allTrItemsInTransaction
+
+	// change account balances if equilibrium
+	if transact.IsEquilibrium(postApprovalTransaction) {
+		transact.ChangeAccountBalances(db, postApprovalTransaction.TransactionItems)
+	}
 
 	// notify role approvers
 	err = notify.NotifyTransactionRoleApprovers(

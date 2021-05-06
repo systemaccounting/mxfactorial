@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/transact"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -45,33 +45,16 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
-	// create select current account balance sql
-	selCurrBalSQL, selCurrBalArgs := sqlb.SelectCurrentAccountBalanceByAccountNameSQL(
-		*e.AccountName,
-	)
-
-	// query
-	row := db.QueryRow(
-		ctx,
-		selCurrBalSQL,
-		selCurrBalArgs...,
-	)
+	// get balance
+	balance, err := transact.GetAccountBalance(db, *e.AccountName)
 	if err != nil {
-		log.Printf("query error: %v", err)
-		return "", err
-	}
-
-	// unmarshal current account balance
-	balance, err := lpg.UnmarshalAccountBalance(
-		row,
-	)
-	if err != nil {
-		log.Printf("unmarshal account balance %v", err)
-		return "", err
+		var errMsg string = "get account balance %v"
+		log.Printf(errMsg, err)
+		return "", fmt.Errorf(errMsg, err)
 	}
 
 	// send string or error response to client
-	return balance, nil
+	return balance.StringFixed(3), nil
 }
 
 // wraps lambdaFn accepting db interface for testability
