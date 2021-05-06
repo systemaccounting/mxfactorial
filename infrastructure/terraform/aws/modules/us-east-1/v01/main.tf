@@ -4,11 +4,11 @@ data "aws_route53_zone" "mxfactorial_io" {
 }
 
 resource "aws_acm_certificate" "client_cert" {
-  domain_name       = var.environment == "prod" ? "mxfactorial.io" : "${var.environment}.mxfactorial.io"
+  domain_name       = var.env == "prod" ? "mxfactorial.io" : "${var.env}.mxfactorial.io"
   validation_method = "DNS"
 
   tags = {
-    environment = var.environment
+    environment = var.env
   }
 
   lifecycle {
@@ -37,11 +37,11 @@ resource "aws_acm_certificate_validation" "client_cert" {
 }
 
 resource "aws_acm_certificate" "api_cert" {
-  domain_name       = var.environment == "prod" ? "api.mxfactorial.io" : "${var.environment}-api.mxfactorial.io"
+  domain_name       = var.env == "prod" ? "api.mxfactorial.io" : "${var.env}-api.mxfactorial.io"
   validation_method = "DNS"
 
   tags = {
-    environment = var.environment
+    environment = var.env
   }
 
   lifecycle {
