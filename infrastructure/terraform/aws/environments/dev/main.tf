@@ -49,6 +49,7 @@ module "dev" {
   requests_by_account_return_limit     = 20
   transactions_by_account_return_limit = 20
   notifications_return_limit           = 20
+  initial_account_balance              = 1000
 
   ############### shared in lambda and rds ###############
   # db_snapshot_id = "dev-2020-05-24"

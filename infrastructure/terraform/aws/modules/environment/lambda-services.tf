@@ -97,10 +97,12 @@ module "balance_by_account" {
 }
 
 module "auto_confirm" {
-  source            = "../go-lambda-service"
-  service_name      = "auto-confirm"
-  env               = var.environment
-  env_vars          = merge(local.POSTGRES_VARS, {})
+  source       = "../go-lambda-service"
+  service_name = "auto-confirm"
+  env          = var.environment
+  env_vars = merge(local.POSTGRES_VARS, {
+    INITIAL_ACCOUNT_BALANCE = var.initial_account_balance
+  })
   invoke_principals = ["cognito-idp.amazonaws.com"]
 }
 

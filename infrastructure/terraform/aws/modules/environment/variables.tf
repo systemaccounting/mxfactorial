@@ -13,3 +13,4 @@ variable "transactions_by_account_return_limit" {}
 variable "apigw_authorization_header_key" {}
 variable "enable_api_auth" {}
 variable "graphql_deployment_version" {}
+variable "initial_account_balance" {}
