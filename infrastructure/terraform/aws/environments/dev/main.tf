@@ -68,6 +68,9 @@ module "dev" {
   apigw_authorization_header_key = "Authorization"
   certificate_arn                = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, local.ENV)
 
+  ############### react ###############
+  react_origin_bucket_name = "${local.APP}-react-${local.ENV}"
+
   ############### cloudfront ###############
   ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, local.ENV)
 }

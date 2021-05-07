@@ -1,16 +1,7 @@
-resource "aws_s3_bucket" "mxfactorial_react" {
-  bucket = "mxfactorial-react-${var.environment}"
-
-  website {
-    index_document = "index.html"
-    error_document = "error.html"
-  }
-
-  force_destroy = true
-}
+// bucket provisioned in infrastructure/terraform/aws/environments/us-east-1
 
 resource "aws_s3_bucket_policy" "mxfactorial_react" {
-  bucket = aws_s3_bucket.mxfactorial_react.id
+  bucket = var.react_origin_bucket_name
   policy = data.aws_iam_policy_document.mxfactorial_react.json
 }
 
@@ -24,13 +15,13 @@ data "aws_iam_policy_document" "mxfactorial_react" {
       identifiers = [aws_cloudfront_origin_access_identity.s3_react_distribution.iam_arn]
     }
     actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.mxfactorial_react.arn}/*"]
+    resources = ["arn:aws:s3:::${var.react_origin_bucket_name}/*"]
   }
 
   statement {
     sid       = "CloudFrontListBucketObjects${title(var.environment)}"
     actions   = ["s3:ListBucket"]
-    resources = [aws_s3_bucket.mxfactorial_react.arn]
+    resources = ["arn:aws:s3:::${var.react_origin_bucket_name}"]
     principals {
       type        = "AWS"
       identifiers = [aws_cloudfront_origin_access_identity.s3_react_distribution.iam_arn]
