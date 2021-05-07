@@ -221,8 +221,6 @@ func (r *Resolver) InvokeRequestCreate(
 		return nil, err
 	}
 
-	log.Print(string(result.Payload))
-
 	// todo: test string(result.Payload) for {"errorMessage":"...","errorType":"errorString"}
 
 	unquoted, err := UnquoteBytes(result.Payload)
