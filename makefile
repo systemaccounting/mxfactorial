@@ -33,6 +33,16 @@ size:
 	@$(MAKE) -s test-inv-file
 	@echo "$(SIZE)"
 
+install:
+	brew install go
+	brew install node
+	brew install terraform
+	brew install awscli
+	brew install jq
+	npm install -g eslint
+	npm install -g yarn
+#	https://www.docker.com/products/docker-desktop
+
 ### arg tests
 test-env-arg:
 ifndef ENV
