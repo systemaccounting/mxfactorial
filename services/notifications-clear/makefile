@@ -6,6 +6,7 @@ REGION=us-east-1
 BINARY_NAME=index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
+DEPLOY_APP=true
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \

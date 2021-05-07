@@ -6,6 +6,7 @@ REGION=us-east-1
 BINARY_NAME=index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
+DEPLOY_APP=true
 TEST_DATA_PATH=../gopkg/testdata/requestNotification.json
 ENV_FILE=$(CURDIR)/.env
 ENV_VARS=AWS_REGION \

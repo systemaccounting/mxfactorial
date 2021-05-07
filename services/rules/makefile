@@ -2,6 +2,7 @@ APP_NAME = rules
 ARTIFACT_NAME = $(APP_NAME)-src.zip
 LAMBDA_NAME = $(APP_NAME)-$(ENV)
 LAMBDA_INVOKE_LOG = invoke.log
+DEPLOY_APP=true
 RUNTIME = node
 ARTIFACT_BUCKET = mxfactorial-artifacts
 REGION = us-east-1
@@ -192,8 +193,6 @@ deploy-layer: test-env-arg layer
 			--region=$(REGION) \
 			--output=text | xargs); \
 #		echo "***Deployed $(ENV)/$(ARTIFACT_NAME) from s3 ETag: $$ETAG"
-
-deploy-all: deploy # no layer currently
 
 initial-deploy:
 	@$(MAKE) -s test-env-arg

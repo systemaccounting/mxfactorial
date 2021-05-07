@@ -5,6 +5,7 @@ LAMBDA_NAME=$(APP_NAME)-$(ENV)
 RUNTIME=provided
 REGION = us-east-1
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
+DEPLOY_APP=true
 
 test-env-arg:
 ifndef ENV
@@ -54,13 +55,6 @@ update-function:
 		--region=$(REGION) \
 		--query 'LastModified' | xargs);\
 	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
-
-deploy-all:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) clean
-	$(MAKE) zip
-	$(MAKE) put-object ENV=$(ENV)
-	$(MAKE) update-function ENV=$(ENV)
 
 # run before deploying terraform
 initial-deploy:

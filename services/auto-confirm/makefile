@@ -7,6 +7,7 @@ BINARY_NAME = index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
 TEST_ACCOUNT=TriggerTestaccount
+DEPLOY_APP=true
 ENV_FILE=$(CURDIR)/.env
 ENV_VARS := POOL_ID \
 CLIENT_ID

@@ -8,6 +8,7 @@ TMP_MIGRATE_REPO_DIR=./build
 MIGRATE_BINARY_NAME=migrate.linux-amd64
 PSQL_LAMBDA_ARCHIVE=psql11-lambda.zip
 LAMBDA_LAYER_ARCHIVE=$(APP_NAME)-layer.zip
+DEPLOY_APP=true
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
 # from https://github.com/golang-migrate/migrate/blob/master/Makefile to avoid building for every os
 DATABASE ?= postgres mysql redshift cassandra spanner cockroachdb clickhouse mongodb sqlserver firebird neo4j pgx
@@ -81,15 +82,11 @@ build:
 
 ###################### deploy ######################
 
-deploy:
+deploy-script:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) zip
 	$(MAKE) put-object
 	$(MAKE) update-function
-
-deploy-only:
-	$(MAKE) put-object ENV=$(ENV)
-	$(MAKE) update-function ENV=$(ENV)
 
 put-object:
 	@$(MAKE) -s test-env-arg
@@ -143,7 +140,7 @@ publish-layer:
 	LAYER_VERSION=$$(echo $$LAYER_VERSION_ARN | cut -d ':' -f8); \
 	echo "***published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
-deploy-all:
+deploy:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) build-layer
 	$(MAKE) put-layer ENV=$(ENV)
