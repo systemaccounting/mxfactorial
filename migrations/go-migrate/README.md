@@ -18,7 +18,8 @@ deploys pushed migrations in `/mxfactorial/migrations/$DESIRED_MIGRATION_DIRECTO
 1. update function from zip in s3 with `make update-function ENV=dev`
 
 ### build & deploy FAST
-1. `make deploy-all ENV=dev` to build and deploy lambda layer and function code
+* `make deploy ENV=dev` to build and deploy lambda layer and function code
+* `make deploy-script ENV=dev` to zip and deploy function code only
 
 ### deploy migrations
 1. see `/mxfactorial/migrations/README.md`
