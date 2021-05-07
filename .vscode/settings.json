@@ -1,0 +1,35 @@
+{
+	"files.trimTrailingWhitespace": true,
+	"editor.insertSpaces": false,
+	"files.insertFinalNewline": false,
+	"files.trimFinalNewlines": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll.eslint": true
+	},
+	"eslint.workingDirectories": [
+		"./react",
+		"./services/rules",
+		"./services/internal-tools/delete-faker-accounts",
+		"./services/internal-tools/wss-demo-client",
+	],
+	"eslint.trace.server": "off",
+	"eslint.debug": false,
+	"eslint.lintTask.enable": false,
+	"eslint.format.enable": true,
+	"[terraform]": {
+		"editor.formatOnSave": true
+	},
+	"[go]": {
+		"editor.formatOnSave": true,
+	},
+	"[javscript]": {
+		"editor.formatOnSave": true,
+		"editor.updateImportsOnFileMove.enabled": "always",
+	},
+	"[makefile]": {
+		"editor.tabSize": 4
+	},
+	"[markdown]": {
+		"files.trimTrailingWhitespace": false
+	},
+}
