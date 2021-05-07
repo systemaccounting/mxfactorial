@@ -52,7 +52,6 @@ module "prod" {
   db_snapshot_id = null
 
   ############### rds ###############
-  rds_db_version                  = "11.10"
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t2.micro"
   rds_parameter_group             = "default.postgres11"
