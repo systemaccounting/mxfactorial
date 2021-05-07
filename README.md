@@ -50,7 +50,7 @@ private
 - [data model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
 - [wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
 - [public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
-- service inventory: `./makefile`
+- monorepo inventory: `cat inventory`
 - access `./mxfactorial.ipynb` jupyter notebook locally:
     ```
     docker run \

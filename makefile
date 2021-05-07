@@ -1,34 +1,55 @@
-# first, provision environment artifact bucket in terraform (e.g. stg):
-# infrastructure/terraform/aws/environments/us-east-1/certs-and-s3.tf
-# then `make deploy ENV=stg` to push all artifacts to new stg bucket
-
-CMD = initial-deploy
-
-test-env-arg:
-ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
-endif
-
-deploy: test-env-arg
-	@$(MAKE) -C services/graphql-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/trans-query-account-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/trans-query-id-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/req-query-trans-id-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/req-query-account-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/request-create-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/request-approve-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/notification/notification-clear-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/notification/notification-get-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/notification/notification-send-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/notification/wss-notif-connect-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C services/rules-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C schema/clone-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C schema/migrate-faas ENV=$(ENV) $(CMD)
-	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/cognito/auto-confirm ENV=$(ENV) $(CMD)
-	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/cognito/delete-faker-accounts ENV=$(ENV) $(CMD)
-	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/deploy-lambda ENV=$(ENV) $(CMD)
-	@$(MAKE) -C infrastructure/terraform/aws/modules/environment/common-bin/rds ENV=$(ENV) $(CMD)
-	@$(MAKE) -C infrastructure/cloudformation/s3-event-faas ENV=$(ENV) $(CMD)
-
 init:
 	go mod init github.com/systemaccounting/mxfactorial
+
+# first, provision environment artifact bucket in terraform (e.g. stg):
+# infrastructure/terraform/aws/environments/us-east-1/certs-and-s3.tf
+# then `make all ENV=stg` to push all artifacts to new stg bucket
+
+# approx 5 minutes
+INVENTORY_FILE=inventory
+
+PARENT_DIRS=services \
+migrations \
+react
+
+APP_DIRS=$(shell cat $(INVENTORY_FILE))
+SIZE=$(shell wc -l < "$(INVENTORY_FILE)" | xargs)
+
+all:
+	@$(MAKE) -s test-inv-file
+	@$(MAKE) -s test-env-arg
+	@$(MAKE) -s test-cmd-arg
+	@$(MAKE) -s test-cmd-val
+	@echo "deployment inventory size: $(SIZE)"
+	@$(foreach DIR,$(APP_DIRS), $(MAKE) -C $(DIR) $(CMD) ENV=$(ENV);)
+
+.PHONY: inventory
+inventory:
+	@rm -f $(INVENTORY_FILE)
+	@$(foreach DIR,$(PARENT_DIRS), grep --include=makefile -rlw '$(DIR)' -e 'DEPLOY_APP=true' | sed -e 's/\.\///' -e 's/\/makefile//' >> $(INVENTORY_FILE);)
+	@echo "project inventory size: $(SIZE)"
+
+size:
+	@$(MAKE) -s test-inv-file
+	@echo "$(SIZE)"
+
+### arg tests
+test-env-arg:
+ifndef ENV
+	$(error trailing ENV assignment missing, e.g. make all ENV=stg)
+endif
+
+test-cmd-arg:
+ifndef CMD
+	$(error trailing CMD assignment missing, e.g. make all CMD=initial-deploy)
+endif
+
+test-cmd-val:
+ifneq ($(CMD),$(filter $(CMD),deploy initial-deploy))
+	$(error trailing CMD assignment must be 'deploy' or 'initial-deploy')
+endif
+
+test-inv-file:
+ifeq (,$(wildcard $(INVENTORY_FILE)))
+	$(error no inventory file, run 'make inventory')
+endif
