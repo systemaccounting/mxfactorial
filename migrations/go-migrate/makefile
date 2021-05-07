@@ -22,12 +22,18 @@ endif
 ###################### clean ######################
 
 clean:
-	rm -f $(ARTIFACT_NAME)
-	rm -f $(LAMBDA_LAYER_ARCHIVE)
-	rm -rf $(TMP_MIGRATE_REPO_DIR)
+	$(MAKE) clean-script
+	$(MAKE) clean-layer
+	$(MAKE) clean-build-dir
 
 clean-script:
 	rm -f $(ARTIFACT_NAME)
+
+clean-layer:
+	rm -f $(LAMBDA_LAYER_ARCHIVE)
+
+clean-build-dir:
+	rm -rf $(TMP_MIGRATE_REPO_DIR)
 
 zip:
 	$(MAKE) clean-script
@@ -37,6 +43,7 @@ build-layer:
 	$(MAKE) clean
 	$(MAKE) build
 	(cd $(TMP_MIGRATE_REPO_DIR); zip -r $(LAMBDA_LAYER_ARCHIVE) bin lib; mv $(LAMBDA_LAYER_ARCHIVE) ../)
+	$(MAKE) clean-build-dir
 
 ###################### secrets ######################
 
