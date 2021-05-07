@@ -2,6 +2,8 @@ APP_NAME=react
 APP_TYPE=client
 ARTIFACT_BUCKET=mxfactorial-react-$(ENV)
 REGION=us-east-1
+CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
+DEPLOY_APP=true
 
 TEST_ACCOUNTS=TEST_ACCOUNT_01 \
 TEST_ACCOUNT_02 \
@@ -122,36 +124,38 @@ build:
 
 ###################### deploy ######################
 
+initial-deploy:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) install
+	$(MAKE) get-secrets ENV=$(ENV)
+	yarn build:env
+	$(MAKE) sync
+
 deploy:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) install
+	$(MAKE) get-secrets
+	yarn build:env
+	$(MAKE) sync
+	$(MAKE) empty-cache
+
+sync:
+	@$(MAKE) -s test-env-arg
+	aws s3 sync build/ s3://$(ARTIFACT_BUCKET) --delete
+
+empty-cache:
 	@$(MAKE) -s test-env-arg
 	@CACHE_ID=$$(aws cloudfront list-distributions --output text \
 		--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`$(ARTIFACT_BUCKET)`][].Id'); \
-	aws s3 sync build/ s3://$(ARTIFACT_BUCKET) --delete; \
 	aws configure set preview.cloudfront true; \
-	echo 'Terminating cache'; \
-	aws cloudfront create-invalidation --distribution-id $$CACHE_ID \
-		--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
+	echo 'emptying cache'; \
+	aws cloudfront create-invalidation --distribution-id $$CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 ifeq ($(ENV), prod)
 	@WWW_CACHE_ID=$$(aws cloudfront list-distributions --output text \
 	--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-$(ARTIFACT_BUCKET)`][].Id'); \
-	echo 'Terminating www cache'; \
-	aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID \
-	--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
+	echo 'emptying www cache'; \
+	aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 endif
-
-deploy-untested:
-ifeq ($(ENV), prod)
-		$(error no untested deployments to prod)
-endif
-	@CACHE_ID=$$(aws cloudfront list-distributions --output text \
-		--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`$(ARTIFACT_BUCKET)`][].Id'); \
-	aws s3 sync build/ s3://$(ARTIFACT_BUCKET) --delete; \
-	aws configure set preview.cloudfront true; \
-	echo 'Terminating cache'; \
-	aws cloudfront create-invalidation --distribution-id $$CACHE_ID \
-		--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
-
-deploy-all: deploy-layer deploy
 
 ###################### create e2e test and manual accounts ######################
 
@@ -187,3 +191,10 @@ delete-accounts: test-env-arg get-secrets
 			--username $$manual_account; \
 	done; \
 	echo 'accounts deleted'
+
+now:
+	$(MAKE) install
+	$(MAKE) clean-env
+	$(MAKE) get-secrets ENV=dev
+	yarn build:env
+	$(MAKE) deploy ENV=dev
