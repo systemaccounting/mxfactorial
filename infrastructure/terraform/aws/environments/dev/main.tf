@@ -52,7 +52,7 @@ module "dev" {
   initial_account_balance              = 1000
 
   ############### shared in lambda and rds ###############
-  # db_snapshot_id = "dev-2020-05-24"
+
   db_snapshot_id = null
 
   ############### rds ###############
@@ -63,10 +63,17 @@ module "dev" {
   rds_instance_name               = local.APP_ENV
 
   ############### api gateway ###############
-  enable_api_auth                = false // change graphql_deployment_version when switching
-  graphql_deployment_version     = 10    // change value to deploy api
+
+  // change graphql_deployment_version when switching
+  enable_api_auth = false
+
+  // change value to deploy api
+  graphql_deployment_version     = 19
   apigw_authorization_header_key = "Authorization"
   certificate_arn                = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, local.ENV)
+
+  // apigw v2
+  enable_api_auto_deploy = true
 
   ############### react ###############
   react_origin_bucket_name = "${local.APP}-react-${local.ENV}"

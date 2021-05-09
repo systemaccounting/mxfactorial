@@ -15,3 +15,4 @@ variable "enable_api_auth" {}
 variable "graphql_deployment_version" {}
 variable "initial_account_balance" {}
 variable "react_origin_bucket_name" {}
+variable "enable_api_auto_deploy" {}

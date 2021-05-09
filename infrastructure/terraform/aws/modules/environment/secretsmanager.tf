@@ -9,7 +9,7 @@ resource "aws_secretsmanager_secret" "graphql_api" {
 
 resource "aws_secretsmanager_secret_version" "graphql_api" {
   secret_id     = aws_secretsmanager_secret.graphql_api.id
-  secret_string = "https://${aws_route53_record.api_fqdn.name}"
+  secret_string = "https://${local.APIV2_URI}"
 }
 
 resource "aws_secretsmanager_secret" "pool_id" {
