@@ -2,7 +2,10 @@ variable "service_name" {}
 
 variable "env" {}
 
-variable "env_vars" { type = map(any) }
+variable "env_vars" {
+  type    = map(any)
+  default = null
+}
 
 variable "invoke_principals" {
   type        = list(string)
@@ -17,7 +20,7 @@ variable "attached_policy_arns" {
 }
 
 variable "create_secret" {
-  type = bool
-  default = false
+  type        = bool
+  default     = false
   description = "adds lambda arn in secrets manager for local testing"
 }

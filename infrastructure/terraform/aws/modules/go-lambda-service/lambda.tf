@@ -19,8 +19,9 @@ resource "aws_lambda_function" "default" {
   runtime           = "go1.x"
   timeout           = 30
   role              = aws_iam_role.default.arn
-  environment {
-    variables = var.env_vars
+  dynamic "environment" {
+    for_each = var.env_vars == null ? [] : [1]
+    content { variables = var.env_vars }
   }
 }
 
