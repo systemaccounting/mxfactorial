@@ -116,29 +116,13 @@ data "aws_iam_policy_document" "db_reset_api_role" {
 }
 
 resource "aws_iam_role_policy" "db_reset_api" {
-  name = "${local.DB_RESET}-apigw-cw-policy-${var.environment}"
-  role = aws_iam_role.db_reset_api.id
-
+  name   = "${local.DB_RESET}-apigw-cw-policy-${var.environment}"
+  role   = aws_iam_role.db_reset_api.id
   policy = data.aws_iam_policy_document.db_reset_api_policy.json
 }
 
 data "aws_iam_policy_document" "db_reset_api_policy" {
   version = "2012-10-17"
-  statement {
-    sid    = "ApiGatewayCloudwatchPolicy${title(var.environment)}"
-    effect = "Allow"
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:DescribeLogGroups",
-      "logs:DescribeLogStreams",
-      "logs:PutLogEvents",
-      "logs:GetLogEvents",
-      "logs:FilterLogEvents"
-    ]
-    resources = ["*"]
-  }
-
   statement {
     sid = "ApiGatewaySNSPolicy${title(var.environment)}"
     actions = [
