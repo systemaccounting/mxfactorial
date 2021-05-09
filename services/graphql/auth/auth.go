@@ -38,6 +38,7 @@ func GetAuthAccount(ctx context.Context, graphQLRequestAccount string) (string, 
 			log.Print("account not available from cognito:username")
 			return "", errors.New(ErrNotAuthorized)
 		}
+
 		return account, nil
 	}
 

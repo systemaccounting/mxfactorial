@@ -35,6 +35,8 @@ func lambdaFn(
 	if err != nil {
 		log.Println(err)
 	}
+	resp.Headers = make(map[string]string)
+	resp.Headers["Access-Control-Allow-Origin"] = "*"
 	return resp, err
 }
 
