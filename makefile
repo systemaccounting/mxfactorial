@@ -6,7 +6,7 @@ init:
 # then `make all ENV=stg` to push all artifacts to new stg bucket
 
 # approx 5 minutes
-INVENTORY_FILE=inventory
+INVENTORY_FILE=$(CURDIR)/inventory
 
 PARENT_DIRS=services \
 migrations \
@@ -26,12 +26,18 @@ all:
 .PHONY: inventory
 inventory:
 	@rm -f $(INVENTORY_FILE)
-	@$(foreach DIR,$(PARENT_DIRS), grep --include=makefile -rlw '$(DIR)' -e 'DEPLOY_APP=true' | sed -e 's/\.\///' -e 's/\/makefile//' >> $(INVENTORY_FILE);)
-	@echo "project inventory size: $(SIZE)"
+	@$(foreach DIR,$(PARENT_DIRS), \
+		grep --include=makefile -rlw '$(DIR)' -e 'DEPLOY_APP=true' \
+		| sed -e 's/\.\///' -e 's/\/makefile//' \
+		>> $(INVENTORY_FILE);)
+	@echo "project inventory size: $$(wc -l < "$(INVENTORY_FILE)" | xargs)"
 
 size:
 	@$(MAKE) -s test-inv-file
 	@echo "$(SIZE)"
+
+print:
+	cat $(INVENTORY_FILE)
 
 install:
 	brew install go

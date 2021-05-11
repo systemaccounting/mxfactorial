@@ -1,7 +1,9 @@
 INVENTORY_FILE=../inventory
 CURRENT_DIR=$(shell basename $(CURDIR))
-APP_DIRS=$(shell cat $(INVENTORY_FILE) | awk '/^$(CURRENT_DIR)/' | sed 's/$(CURRENT_DIR)\///')
-SIZE=$(shell echo "$(APP_DIRS)" | wc -w | xargs)
+SERVICE_DIRS=$(shell cat $(INVENTORY_FILE) | \
+	awk '/^$(CURRENT_DIR)/' | \
+	sed 's/$(CURRENT_DIR)\///')
+SIZE=$(shell echo "$(SERVICE_DIRS)" | wc -w | xargs)
 
 all:
 	@$(MAKE) -s test-inv-file
@@ -9,11 +11,17 @@ all:
 	@$(MAKE) -s test-cmd-arg
 	@$(MAKE) -s test-cmd-val
 	@echo "service deployment inventory size: $(SIZE)"
-	@$(foreach DIR,$(APP_DIRS), $(MAKE) -C $(DIR) $(CMD) ENV=$(ENV);)
+	@$(foreach DIR,$(SERVICE_DIRS), $(MAKE) -C $(DIR) $(CMD) ENV=$(ENV);)
+
+inventory:
+	$(MAKE) -C '..' inventory
 
 size:
 	@$(MAKE) -s test-inv-file
 	@echo "$(SIZE)"
+
+print:
+	@echo $(SERVICE_DIRS) | tr " " "\n"
 
 ### arg tests
 test-env-arg:
