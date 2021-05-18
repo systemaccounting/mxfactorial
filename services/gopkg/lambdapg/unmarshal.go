@@ -140,11 +140,7 @@ func UnmarshalTransactions(
 			return nil, err
 		}
 
-		sumVal, err := sumValue.MarshalJSON()
-		if err != nil {
-			return nil, err
-		}
-		sumValStr := string(sumVal)
+		sumVal := tools.NullDecimalToString(sumValue)
 
 		t := &types.Transaction{
 			ID:                 ID,
@@ -154,7 +150,7 @@ func UnmarshalTransactions(
 			AuthorDeviceLatlng: geoPoint,
 			AuthorRole:         authorRole,
 			EquilibriumTime:    tools.NullTimeToString(equilibriumTime),
-			SumValue:           &sumValStr,
+			SumValue:           &sumVal,
 		}
 		transactions = append(transactions, t)
 	}
