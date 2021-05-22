@@ -107,6 +107,44 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
+	// delete existing account, todo: move sql to builder
+	_, err = db.Exec(context.Background(),
+		"delete from account_balance where account_name = $1;",
+		cognitoUser)
+	if err != nil {
+		log.Printf("delete account_balance %v", err)
+	}
+	_, err = db.Exec(context.Background(),
+		"delete from rule_instance where account_name = $1;",
+		cognitoUser)
+	if err != nil {
+		log.Printf("delete rule_instance %v", err)
+	}
+	_, err = db.Exec(context.Background(),
+		"delete from account_profile where account_name = $1;",
+		cognitoUser)
+	if err != nil {
+		log.Printf("delete account_profile %v", err)
+	}
+	_, err = db.Exec(context.Background(),
+		"delete from account_owner where owner_account = $1;",
+		cognitoUser)
+	if err != nil {
+		log.Printf("delete account_owner %v", err)
+	}
+	_, err = db.Exec(context.Background(),
+		"delete from subaccount where name = $1;",
+		cognitoUser)
+	if err != nil {
+		log.Printf("delete subaccount %v", err)
+	}
+	_, err = db.Exec(context.Background(),
+		"delete from account where name = $1;",
+		cognitoUser)
+	if err != nil {
+		log.Printf("delete account %v", err)
+	}
+
 	// insert account
 	_, err = db.Exec(context.Background(), insAccSQL, insAccArgs...)
 	if err != nil {
