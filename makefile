@@ -45,6 +45,8 @@ install:
 	brew install terraform
 	brew install awscli
 	brew install jq
+	brew install libpq
+	brew link --force libpq
 	npm install -g eslint
 	npm install -g yarn
 #	https://www.docker.com/products/docker-desktop
