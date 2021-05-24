@@ -39,6 +39,13 @@ func lambdaFn(
 	c lpg.Connector,
 ) (events.CognitoEventUserPoolsPreSignup, error) {
 
+	if e.Request.ClientMetadata != nil {
+		if _, ok := e.Request.ClientMetadata["skip"]; ok {
+			e.Response.AutoConfirmUser = true
+			return e, nil
+		}
+	}
+
 	cognitoUser := e.CognitoEventUserPoolsHeader.UserName
 
 	// temp solution to avoid profile form filling in ui

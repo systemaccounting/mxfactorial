@@ -6,7 +6,6 @@ REGION = us-east-1
 BINARY_NAME = index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
-TEST_ACCOUNT=TriggerTestaccount
 DEPLOY_APP=true
 ENV_FILE=$(CURDIR)/.env
 ENV_VARS := POOL_ID \
@@ -17,20 +16,42 @@ ifndef ENV
 		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
+test-acc-arg:
+ifndef ACC
+		$(error trailing ACC assignment missing, e.g. make createuser ACC=testuser)
+endif
+
 signup:
-	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-env-file
+	@$(MAKE) -s test-acc-arg
 	-@$(MAKE) rmuser
 	eval $$(cat .env); aws cognito-idp sign-up \
 		--region $(REGION) \
 		--client-id $$CLIENT_ID \
-		--username $(TEST_ACCOUNT) \
-		--password $(TEST_ACCOUNT)
+		--username $(ACC) \
+		--password $(ACC)
 
 rmuser:
-	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-env-file
+	@$(MAKE) -s test-acc-arg
 	eval $$(cat .env); aws cognito-idp admin-delete-user \
 		--user-pool-id $$POOL_ID \
-		--username $(TEST_ACCOUNT)
+		--username $(ACC)
+
+createuser:
+	@$(MAKE) -s test-env-file
+	@$(MAKE) -s test-acc-arg
+	@eval $$(cat .env); aws cognito-idp admin-create-user \
+		--user-pool-id $$POOL_ID \
+		--username $(ACC) \
+		--client-metadata skip=true \
+		--query 'User.UserCreateDate'; \
+	eval $$(cat .env); aws cognito-idp admin-set-user-password \
+		--region $(REGION) \
+		--user-pool-id $$POOL_ID \
+		--username $(ACC) \
+		--password $(ACC) \
+		--permanent;
 
 ###################### clean ######################
 
