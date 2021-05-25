@@ -86,12 +86,16 @@ func lambdaFn(
 	// unmarshal query response
 	trItems, err := lpg.UnmarshalTrItems(rows)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			log.Print("0 transaction items found. exiting")
-			return "", errors.New("0 transactions found")
-		}
-		log.Print(err)
+		log.Print("UnmarshalTrItems ", err.Error())
 		return "", err
+	}
+
+	if len(trItems) == 0 {
+		// create empty response to client
+		intraTrs := tools.CreateIntraTransactions(e.AuthAccount, []*types.Transaction{})
+
+		// send string or error response to client
+		return tools.MarshalIntraTransactions(&intraTrs)
 	}
 
 	var trIDs []interface{}
@@ -109,12 +113,14 @@ func lambdaFn(
 	// get transactions
 	trRows, err := db.Query(context.Background(), trsSQL, trsArgs...)
 	if err != nil {
+		log.Print("query transactions ", err.Error())
 		return "", err
 	}
 
 	// unmarshal transactions
 	trs, err := lpg.UnmarshalTransactions(trRows)
 	if err != nil {
+		log.Print("UnmarshalTransactions ", err.Error())
 		return "", err
 	}
 
