@@ -204,7 +204,9 @@ func lambdaFn(
 	// add profile IDs to rule tested transaction items
 	profileIDsAdded := *ruleTested
 	for _, v := range profileIDsAdded.Transaction.TransactionItems {
+		v.DebitorProfileID = new(types.ID)
 		*v.DebitorProfileID = profileIDs[*v.Debitor]
+		v.CreditorProfileID = new(types.ID)
 		*v.CreditorProfileID = profileIDs[*v.Creditor]
 	}
 
