@@ -1,5 +1,5 @@
 -- transaction_item NinePercentSalesTax rule_instance
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('transaction_item', 'multiplyItemValue', 'NinePercentSalesTax', 'creditor', 'GroceryCo', '{ "GroceryCo", "StateOfCalifornia", "9% state sales tax", "0.09" }');
+insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, state_name, variable_values) values ('transaction_item', 'multiplyItemValue', 'NinePercentSalesTax', 'creditor', 'California', '{ "ANY", "StateOfCalifornia", "9% state sales tax", "0.09" }');
 
 -- GroceryCo ApproveDebitStateOfCalifornia rule_instance
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approver', 'approveItemOnAccount', 'ApproveDebitStateOfCalifornia', 'debitor', 'IgorPetrov', '{ "GroceryCo", "StateOfCalifornia", "debitor", "IgorPetrov" }');
