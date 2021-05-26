@@ -56,7 +56,7 @@ func CreateFakeProfile(accountName, firstName, lastName string) types.AccountPro
 	cityName := rd.City()
 	countyName := fmt.Sprintf("%s County", cityName)
 	region := ""
-	stateName := rd.State(rd.Large)
+	stateName := "California" // triggers California state tax rule
 	postalCode := rd.PostalCode("US")
 	latLng := fmt.Sprintf("(%v, %v)", f.Latitude, f.Longitude)
 	emailAddress := f.Email
