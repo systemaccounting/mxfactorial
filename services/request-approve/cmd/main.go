@@ -19,6 +19,17 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
+type role int
+
+const (
+	DEBITOR = iota
+	CREDITOR
+)
+
+func (r role) String() string {
+	return [...]string{"debitor", "creditor"}[r]
+}
+
 var (
 	notifyTopicArn        = os.Getenv("NOTIFY_TOPIC_ARN")
 	pgHost         string = os.Getenv("PGHOST")
@@ -49,6 +60,19 @@ func lambdaFn(
 		e.ID == nil ||
 		e.AuthAccount == "" {
 		return "", errReqValsMissing
+	}
+
+	// store transaction role as enum
+	var approverRole role
+	switch *e.AccountRole {
+	case "debitor":
+		approverRole = DEBITOR
+	case "creditor":
+		approverRole = CREDITOR
+	default:
+		var errMsg = fmt.Sprintf("approval role not found %v", *e.AccountRole)
+		log.Print(errMsg)
+		return "", errors.New(errMsg)
 	}
 
 	// connect to postgres
@@ -127,21 +151,24 @@ func lambdaFn(
 	}
 
 	// convert transaction items to list of maps for convenient value testing
-	preTrItemsMaps := make([]map[string]*string, 0)
+	preTrItemsMaps := make([]map[role]*string, 0)
 	for _, v := range preTrItems {
 		// defensive
 		if *v.Debitor == *e.AccountName &&
 			*v.Creditor == *e.AccountName {
-			var err = errors.New("same debitor and creditor in item. exiting")
+			var errMsg = fmt.Sprintf("same debitor and creditor in item. exiting %v", *e.AccountName)
+			log.Print(errMsg)
+			var err = errors.New(errMsg)
 			return "", err
 		}
 
-		m := make(map[string]*string)
+		m := make(map[role]*string)
+
 		if *v.Debitor == *e.AccountName {
-			m["debitor"] = v.DebitorApprovalTime
+			m[DEBITOR] = v.DebitorApprovalTime
 		}
 		if *v.Creditor == *e.AccountName {
-			m["creditor"] = v.CreditorApprovalTime
+			m[CREDITOR] = v.CreditorApprovalTime
 		}
 		preTrItemsMaps = append(preTrItemsMaps, m)
 	}
@@ -149,12 +176,13 @@ func lambdaFn(
 	// fail approval if 0 approval time stamps pending in transaction items
 	itemApprovalsPending := 0
 	for _, v := range preTrItemsMaps {
-		if val, ok := v[*e.AccountRole]; ok {
+		if val, ok := v[approverRole]; ok {
 			if val == nil {
 				itemApprovalsPending++
 			}
 		}
 	}
+
 	if itemApprovalsPending == 0 {
 		var err = errors.New("account not found in items. exiting")
 		return "", err
