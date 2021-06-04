@@ -26,7 +26,7 @@ CREATE TABLE rule_instance (
   rule_name character varying(255) not null,
   rule_instance_name character varying(255) not null,
   variable_values text[],
-  -- *** copied from approver ***
+  -- *** copied from approval ***
   account_role text NOT NULL, -- todo: switch to enum after above noted go-migrate feature deployed
   -- *** copied from transaction_item ***
   item_id character varying(255), -- todo: switch to int after item inserts added in code

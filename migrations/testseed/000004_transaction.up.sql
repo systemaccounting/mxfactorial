@@ -38,7 +38,7 @@ appr_jacob_creditor_rule_instance as (
 appr_miriam_creditor_rule_instance as (
 	SELECT * FROM rule_instance WHERE rule_instance_name='ApproveAllCaliforniaCredit' AND account_name = 'MiriamLevy'
 )
-insert into approver (rule_instance_id, transaction_id, transaction_item_id, account_name, account_role, approval_time) values(
+insert into approval (rule_instance_id, transaction_id, transaction_item_id, account_name, account_role, approval_time) values(
 (select id from appr_igor_debitor_rule_instance), (select id from insert_transaction), (select id from butter), (select account_name from appr_igor_debitor_rule_instance), (select account_role from appr_igor_debitor_rule_instance), NOW()
 ),(
 (select id from appr_miriam_debitor_rule_instance), (select id from insert_transaction), (select id from butter), (select account_name from appr_miriam_debitor_rule_instance), (select account_role from appr_miriam_debitor_rule_instance), NOW()

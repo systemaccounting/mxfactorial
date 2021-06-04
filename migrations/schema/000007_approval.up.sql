@@ -3,13 +3,13 @@
 -- CREATE TYPE debitor_or_creditor AS ENUM ('debitor', 'creditor');
 
 
--- per item approver preferred to per transaction:
--- per item rejection enables approvers to
+-- per item approval preferred to per transaction:
+-- per item rejection enables approvals to
 -- signal how transactions can be improved
 
 -- transaction_item labeled as approved
--- only after timestamps added by approvers
-CREATE TABLE approver (
+-- only after timestamps added by approvals
+CREATE TABLE approval (
   id SERIAL PRIMARY KEY,
   rule_instance_id int,
   transaction_id INTEGER NOT NULL,
