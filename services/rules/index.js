@@ -2,19 +2,19 @@ const pool = require('./src/db');
 const addRuleItems = require('./src/addRuleItems');
 const getRulesPerItemAccount = require('./src/db/getRulesPerItemAccount');
 const applyItemRules = require('./src/applyItemRules');
-const applyApproverRules = require('./src/applyApproverRules');
+const applyApprovalRules = require('./src/applyApprovalRules');
 const getItemApproverNames = require('./src/db/getItemApproverNames');
-const getRulesPerApprover = require('./src/db/getRulesPerApprover');
-const createApprover = require('./src/model/approver');
-const createTransaction = require('./src/model/transaction');
-const createIntraTransaction = require('./src/model/intraTransaction');
-const addApproversAndRules = require('./src/addApproversAndRules');
+const getRulesPerApproval = require('./src/db/getRulesPerApproval');
+const createApproval = require('./src/model/approval');
+const addApprovalsAndRules = require('./src/addApprovalsAndRules');
 const labelApprovedItems = require('./src/labelApprovedItems');
 const testDebitorFirstValues = require('./src/testDebitorFirstValues');
+const createResponse = require('./src/createResponse');
+const { APPROVAL_COUNT_ERROR } = require('./src/constants');
 
 // todo: handle errors
 exports.handler = async event => {
-  // console.log(event);
+  console.log(event);
   if (!Object.keys(event).length) {
     console.log('warming up...');
     return null;
@@ -28,7 +28,9 @@ exports.handler = async event => {
     transactionSequence = testDebitorFirstValues(event);
   } catch(e) {
     // Error: inconsistent debitor_first values
-    return e.toString();
+    const errMsg = "testDebitorFirstValues: " + e.message
+    console.error(errMsg)
+    return errMsg;
   }
 
   // get a db
@@ -46,28 +48,40 @@ exports.handler = async event => {
     );
   } catch(e) {
     await db.end();
-    return e.toString();
+    const errMsg = "addRuleItems: " + e.message;
+    console.error(errMsg);
+    return errMsg;
   };
+
+  if (addedItems.length == 0) {
+    console.log("rules not found")
+  }
 
   // combine rule added items to items received in event
   const ruleAppliedItems = [...addedItems, ...event];
 
-  // get approvers & rules from db, then apply to items
-  let ruleAppliedApprovers;
+  // get approvals & rules from db, then apply to items
+  let ruleAppliedApprovals;
   try {
-    ruleAppliedApprovers = await addApproversAndRules(
+    ruleAppliedApprovals = await addApprovalsAndRules(
       transactionSequence,
       db,
       ruleAppliedItems,
       getItemApproverNames,
-      createApprover,
-      getRulesPerApprover,
-      applyApproverRules,
+      createApproval,
+      getRulesPerApproval,
+      applyApprovalRules,
     );
   } catch(e) {
     await db.end();
-    // Error: approvers not found
-    return e.toString();
+    // Error: approvals not found
+    const errMsg = "addApprovalsAndRules: " + e.message
+    console.error(errMsg)
+    // return original event if 0 item and approver rules applied
+    if (addedItems.length == 0 && e.message == APPROVAL_COUNT_ERROR) {
+      return createResponse(event);
+    }
+    return errMsg;
   };
 
   // let db go
@@ -75,38 +89,17 @@ exports.handler = async event => {
 
   // label rule approved transaction items
   const labeledApproved = labelApprovedItems(
-    ruleAppliedItems,
+    ruleAppliedApprovals,
     transactionSequence,
   );
 
-  // wrap in transaction
-  // todo: unit test
-  let sumValue = 0;
-  for (let i = 0; i < labeledApproved.length; i++) {
-    const itemPrice = parseFloat(labeledApproved[i].price)
-    const itemQuantity = parseFloat(labeledApproved[i].quantity)
-    const itemValue = itemPrice * itemQuantity
-    sumValue += itemValue
-  };
+  const resp = createResponse(labeledApproved);
 
-  const transaction = createTransaction(
-    "",
-    "",
-    null,
-    null,
-    null,
-    null,
-    null,
-    sumValue.toFixed(3).toString(),
-    labeledApproved,
-  )
+  // temp logging
+  console.log(resp);
+  for (const i of resp.transaction.transaction_items) {
+    console.log(i)
+  }
 
-  // wrap in IntraTransaction declared in
-  // services/gopkg/types/transaction.go
-  // todo: unit test
-  const intraTransaction = createIntraTransaction(
-    null,
-    transaction,
-  )
-  return intraTransaction;
+  return resp;
 }

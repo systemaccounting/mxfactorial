@@ -95,8 +95,8 @@ func lambdaFn(
 		e.ID,
 	)
 
-	// create sql to get all approvers
-	preApprSQL, preApprArgs := sqlb.SelectApproversByTrIDSQL(
+	// create sql to get all approvals
+	preApprSQL, preApprArgs := sqlb.SelectApprovalsByTrIDSQL(
 		*e.AccountName,
 		e.ID,
 	)
@@ -199,8 +199,8 @@ func lambdaFn(
 		return "", err
 	}
 
-	// unmarshal transaction approvers
-	preApprovers, err := lpg.UnmarshalApprovers(
+	// unmarshal transaction approvals
+	preApprovals, err := lpg.UnmarshalApprovals(
 		preApprRows,
 	)
 	if err != nil {
@@ -209,31 +209,31 @@ func lambdaFn(
 	}
 
 	// fail approval if account not found as approver or timestamps not pending
-	approverTimeStampsPending := 0
-	for _, v := range preApprovers {
+	approvalTimeStampsPending := 0
+	for _, v := range preApprovals {
 		if *v.AccountName == *e.AccountName &&
 			*v.AccountRole == *e.AccountRole &&
 			v.ApprovalTime == nil {
-			approverTimeStampsPending++
+			approvalTimeStampsPending++
 		}
 	}
-	if approverTimeStampsPending == 0 {
+	if approvalTimeStampsPending == 0 {
 		var err = errors.New("0 timestamps pending for approver. exiting")
 		return "", err
 	}
 
 	// todo: dedupe queries
 
-	// create update approver sql returning
-	// all columns of updated approvers
-	updSQL, updArgs := sqlb.UpdateApproversSQL(
+	// create update approval sql returning
+	// all columns of updated approvals
+	updSQL, updArgs := sqlb.UpdateApprovalsSQL(
 		e.AccountName,
 		e.AccountRole,
 		e.ID,
 	)
 
-	// update approvers
-	updatedApproverRows, err := db.Query(
+	// update approvals
+	updatedApprovalRows, err := db.Query(
 		context.Background(),
 		updSQL,
 		updArgs...,
@@ -243,9 +243,9 @@ func lambdaFn(
 		return "", err
 	}
 
-	// unmarshal approvers returned from update query
-	updatedApprovers, err := lpg.UnmarshalApprovers(
-		updatedApproverRows,
+	// unmarshal approvals returned from update query
+	updatedApprovals, err := lpg.UnmarshalApprovals(
+		updatedApprovalRows,
 	)
 	if err != nil {
 		log.Print(err)
@@ -255,7 +255,7 @@ func lambdaFn(
 	// list transaction item ids affected by approvals
 	// sqlbuilder pkg wants interface args
 	var trItemIDsAffectedByApprovals []interface{}
-	for _, v := range updatedApprovers {
+	for _, v := range updatedApprovals {
 		trItemIDsAffectedByApprovals = append(
 			trItemIDsAffectedByApprovals,
 			v.TransactionItemID,
@@ -264,14 +264,14 @@ func lambdaFn(
 
 	// create sql to get approvers of transaction
 	// item IDs affected by current approval
-	getApprSQL, getApprArgs := sqlb.SelectApproversByTrItemIDsSQL(
+	getApprSQL, getApprArgs := sqlb.SelectApprovalsByTrItemIDsSQL(
 		e.AccountRole,
 		trItemIDsAffectedByApprovals,
 	)
 
-	// get all approvers of transaction items
+	// get all approvals of transaction items
 	// affected by current approval
-	approversPerTrItemRows, err := db.Query(
+	approvalsPerTrItemRows, err := db.Query(
 		context.Background(),
 		getApprSQL,
 		getApprArgs...,
@@ -281,19 +281,19 @@ func lambdaFn(
 		return "", err
 	}
 
-	// unmarshal approvers of transaction items
+	// unmarshal approvals of transaction items
 	// affected by current approval
-	allApproversPerAffectedTrItem, err := lpg.UnmarshalApprovers(
-		approversPerTrItemRows,
+	allApprovalsPerAffectedTrItem, err := lpg.UnmarshalApprovals(
+		approvalsPerTrItemRows,
 	)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
-	// count transaction item id occurrence across approvers
+	// count transaction item id occurrence across approvals
 	trItemIDOccurrence := make(map[types.ID]int)
-	for _, v := range allApproversPerAffectedTrItem {
+	for _, v := range allApprovalsPerAffectedTrItem {
 		trItemIDOccurrence[*v.TransactionItemID] += 1
 	}
 
@@ -301,7 +301,7 @@ func lambdaFn(
 	var approvedTrItemIDs []interface{}
 	for trItemID, total := range trItemIDOccurrence {
 		apprCount := 0
-		for _, v := range allApproversPerAffectedTrItem {
+		for _, v := range allApprovalsPerAffectedTrItem {
 			if *v.TransactionItemID == trItemID {
 				if len(*v.ApprovalTime) > 0 {
 					apprCount++
@@ -421,7 +421,7 @@ func lambdaFn(
 	err = notify.NotifyTransactionRoleApprovers(
 		db,
 		&notifyTopicArn,
-		preApprovers,
+		preApprovals,
 		postApprovalTransaction,
 	)
 	if err != nil {

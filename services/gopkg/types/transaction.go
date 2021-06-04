@@ -38,11 +38,11 @@ type TransactionItem struct {
 	CreditorRejectionTime  *string             `json:"creditor_rejection_time,omitempty"`
 	DebitorExpirationTime  *string             `json:"debitor_expiration_time,omitempty"`
 	CreditorExpirationTime *string             `json:"creditor_expiration_time,omitempty"`
-	Approvers              []*Approver         `json:"approvers,omitempty"`
+	Approvals              []*Approval         `json:"approvals,omitempty"`
 }
 
-// Approver approves a transaction item
-type Approver struct {
+// Approval approves a transaction item
+type Approval struct {
 	ID                *ID     `json:"id,omitempty"`
 	RuleInstanceID    *ID     `json:"rule_instance_id,omitempty"`
 	TransactionID     *ID     `json:"transaction_id,omitempty"`

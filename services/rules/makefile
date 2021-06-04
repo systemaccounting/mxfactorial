@@ -44,11 +44,11 @@ run:
 	.handler($$(cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))) \
 	.then(x => console.log(x.transaction.transaction_items))"
 
-run-approvers:
+run-approvals:
 	@$(DOCKER_ENV_VARS) node -p \
 	"require(\"./index\") \
 	.handler($$(cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))) \
-	.then(x => x.transaction.transaction_items.map(y => console.log(y.approvers)))"
+	.then(x => x.transaction.transaction_items.map(y => console.log(y.approvals)))"
 
 ###################### clean ######################
 

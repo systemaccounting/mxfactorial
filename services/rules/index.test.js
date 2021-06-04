@@ -18,10 +18,10 @@ const mockAddRuleItems= jest.fn()
   .mockImplementation(() => ([]));
 jest.mock('./src/addRuleItems', () => mockAddRuleItems);
 
-const mockAddApproversAndRules= jest.fn()
+const mockAddApprovalsAndRules= jest.fn()
   .mockImplementationOnce(() => {throw new Error()})
-  .mockImplementation(() => ([]));
-jest.mock('./src/addApproversAndRules', () => mockAddApproversAndRules);
+  .mockImplementation(() => testItems);
+jest.mock('./src/addApprovalsAndRules', () => mockAddApprovalsAndRules);
 
 jest.mock('./src/db/getItemApproverNames', () => jest.fn());
 
@@ -40,18 +40,18 @@ describe('rules function handler', () => {
 
   test('returns error when testDebitorFirstValues throws', async () => {
     const got = await require('./index').handler(testItems);
-    expect(got).toBe('Error');
+    expect(got).toBe('testDebitorFirstValues: ');
   });
 
   test('returns error when addRuleItems throws and ends db session', async () => {
     const got = await require('./index').handler(testItems);
-    expect(got).toBe('Error');
+    expect(got).toBe('addRuleItems: ');
     expect(mockDbEnd).toHaveBeenCalled();
   });
 
-  test('returns error when mockAddApproversAndRules throws and ends db session', async () => {
+  test('returns error when mockAddApprovalsAndRules throws and ends db session', async () => {
     const got = await require('./index').handler(testItems);
-    expect(got).toBe('Error');
+    expect(got).toBe('addApprovalsAndRules: ');
     expect(mockDbEnd).toHaveBeenCalled();
   });
 

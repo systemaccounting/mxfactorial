@@ -4,8 +4,8 @@ const {
   APPROVAL_TIME_SUFFIX,
   DEBITOR,
   CREDITOR,
-  APPROVERS,
-  APPROVER_COUNT_ERROR
+  APPROVALS,
+  APPROVAL_COUNT_ERROR
 } = require('./constants');
 const labelApprovedItems = require('./labelApprovedItems');
 const { testItems } = require('../tests/utils/testData');
@@ -21,8 +21,8 @@ describe('labelApprovedItems', () => {
 
   test('throws on omitted approvers', () => {
     const throwInput = Object.assign({}, input);
-    throwInput[APPROVERS] = []
-    expect(() => labelApprovedItems([throwInput], CASES)).toThrow(APPROVER_COUNT_ERROR);
+    throwInput[APPROVALS] = []
+    expect(() => labelApprovedItems([throwInput], CASES)).toThrow(APPROVAL_COUNT_ERROR);
   });
 
   test('timestamps NOT added', () => {
@@ -33,7 +33,7 @@ describe('labelApprovedItems', () => {
     const notApproved = Object.assign({}, input);
     notApproved[DEBITOR + '_' + APPROVAL_TIME_SUFFIX] = null;
     notApproved[CREDITOR + '_' + APPROVAL_TIME_SUFFIX] = null;
-    for (const appr of notApproved[APPROVERS]) {
+    for (const appr of notApproved[APPROVALS]) {
       appr.approval_time = null;
     };
 
@@ -47,26 +47,26 @@ const input = {
   id: null,
   transaction_id: null,
   item_id: '9% state sales tax',
-  price: 0.54,
-  quantity: 1,
+  price: "0.54",
+  quantity: "1",
   debitor_first: null,
-  rule_instance_id: 1,
-  unit_of_measurement: '',
-  units_measured: 0,
+  rule_instance_id: "1",
+  unit_of_measurement: null,
+  units_measured: "0",
   debitor: 'GroceryCo',
   creditor: 'StateOfCalifornia',
-  debitor_profile_id: 0,
-  creditor_profile_id: 0,
+  debitor_profile_id: "0",
+  creditor_profile_id: "0",
   debitor_approval_time: null,
   creditor_approval_time: null,
-  debitor_expiration_time: '',
-  creditor_expiration_time: '',
-  debitor_rejection_time: '',
-  creditor_rejection_time: '',
-  approvers: [
+  debitor_expiration_time: null,
+  creditor_expiration_time: null,
+  debitor_rejection_time: null,
+  creditor_rejection_time: null,
+  approvals: [
     {
       id: null,
-      rule_instance_id: 2,
+      rule_instance_id: "2",
       transaction_id: null,
       transaction_item_id: null,
       account_name: 'IgorPetrov',
@@ -79,7 +79,7 @@ const input = {
     },
     {
       id: null,
-      rule_instance_id: 3,
+      rule_instance_id: "3",
       transaction_id: null,
       transaction_item_id: null,
       account_name: 'MiriamLevy',
@@ -92,7 +92,7 @@ const input = {
     },
     {
       id: null,
-      rule_instance_id: 4,
+      rule_instance_id: "4",
       transaction_id: null,
       transaction_item_id: null,
       account_name: 'BenRoss',
@@ -105,7 +105,7 @@ const input = {
     },
     {
       id: null,
-      rule_instance_id: 5,
+      rule_instance_id: "5",
       transaction_id: null,
       transaction_item_id: null,
       account_name: 'JacobWebb',
@@ -118,7 +118,7 @@ const input = {
     },
     {
       id: null,
-      rule_instance_id: 7,
+      rule_instance_id: "7",
       transaction_id: null,
       transaction_item_id: null,
       account_name: 'MiriamLevy',

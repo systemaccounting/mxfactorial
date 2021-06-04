@@ -76,9 +76,9 @@ func lambdaFn(
 	// create client control totals
 	// to test all items stored at end
 	var clientItemCount int = len(fromClient)
-	var clientApproverCount int
+	var clientApprovalCount int
 	for _, it := range fromClient {
-		clientApproverCount += len(it.Approvers)
+		clientApprovalCount += len(it.Approvals)
 	}
 
 	// filter non-rule generated items from client
@@ -246,38 +246,38 @@ func lambdaFn(
 		return "", err
 	}
 
-	// create a var to store approvers inserted count
-	var approversInserted []*types.Approver
+	// create a var to store approvals inserted count
+	var approvalsInserted []*types.Approval
 
-	// list inserted approvers
+	// list inserted approvals
 	for i := 0; i < len(trItems); i++ {
-		// create sql to insert approvers per transaction id
-		aprvsSQL, aprvsArgs := sqlb.InsertApproversSQL(
+		// create sql to insert approvals per transaction id
+		aprvsSQL, aprvsArgs := sqlb.InsertApprovalsSQL(
 			*tr.ID,
 			*trItems[i].ID,
-			profileIDsAdded.Transaction.TransactionItems[i].Approvers,
+			profileIDsAdded.Transaction.TransactionItems[i].Approvals,
 		)
 
-		// insert approvers per transaction item id
+		// insert approvals per transaction item id
 		apprvRows, err := db.Query(context.Background(), aprvsSQL, aprvsArgs...)
 		if err != nil {
-			log.Printf("query approvers error: %v", err)
+			log.Printf("query approvals error: %v", err)
 			return "", err
 		}
 
-		// unmarshal approvers returned from insert
-		apprv, err := lpg.UnmarshalApprovers(apprvRows)
+		// unmarshal approvals returned from insert
+		apprv, err := lpg.UnmarshalApprovals(apprvRows)
 		if err != nil {
-			log.Printf("unmarshal approvers error: %v", err)
+			log.Printf("unmarshal approvals error: %v", err)
 			return "", err
 		}
 
-		// add approver insert result to list
-		approversInserted = append(approversInserted, apprv...)
+		// add approval insert result to list
+		approvalsInserted = append(approvalsInserted, apprv...)
 	}
 
 	// urge permanent solution if client items not stored
-	if len(trItems) != clientItemCount && len(approversInserted) != clientApproverCount {
+	if len(trItems) != clientItemCount && len(approvalsInserted) != clientApprovalCount {
 		return "", errors.New("move inserts into a single sql transaction")
 	}
 
@@ -293,7 +293,7 @@ func lambdaFn(
 	err = notify.NotifyTransactionRoleApprovers(
 		db,
 		&notifyTopicArn,
-		approversInserted,
+		approvalsInserted,
 		tr,
 	)
 	if err != nil {

@@ -2,7 +2,10 @@ const getTransactionItem = require('../model/transactionItem');
 const {
   stringIfNull,
   stringIfNumber,
+  numberToFixedString
 } = require('./shared');
+const { ANY } = require("./keywords");
+
 
 module.exports = function(
   ruleInstanceId,
@@ -28,27 +31,35 @@ module.exports = function(
     // standard types
     const ruleInstID = stringIfNumber(stringIfNull(ruleInstanceId))
 
+    // create vars for values affected by keywords
+    const trsDebitor = DEBITOR == ANY ? transactionItem.debitor : DEBITOR
+    const trsCreditor = CREDITOR == ANY ? transactionItem.creditor : CREDITOR
+
     const addedItem = getTransactionItem(
-      "",
-      "",
+      null,
+      null,
       ITEM_NAME,
-      addedItemValue.toFixed(3).toString(),
-      addedItemQuantity.toFixed(3).toString(),
+      numberToFixedString(addedItemValue),
+      numberToFixedString(addedItemQuantity),
       repeatedTransactionSequence,
       ruleInstID,
       repeatedUnitOfMeasurement,
       repeatedUnitsMeasured,
-      DEBITOR,
-      CREDITOR,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
+      trsDebitor,
+      trsCreditor,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     );
+
+    if (transactionItem.ruleInstanceId && transactionItem.ruleInstanceId == ruleInstanceId) {
+      return []; // avoid dupe
+    }
 
     return [addedItem]; // rules may return added.length > 1
 };

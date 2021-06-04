@@ -1,20 +1,20 @@
-const addApproversAndRules = require('./addApproversAndRules');
+const addApprovalsAndRules = require('./addApprovalsAndRules');
 const {
   CASES,
   DEBITOR,
   CREDITOR,
-  APPROVERS,
+  APPROVALS,
 } = require('./constants');
 const { testItems } = require('../tests/utils/testData');
 
-describe('addApproversAndRules', () => {
+describe('addApprovalsAndRules', () => {
   test('calls getNamesFn with args 4 times', async () => {
     const testdb = {};
     const mockGetNamesFn = jest.fn(() => Promise.resolve({}));
     const testCreateObjFn = () => {};
     const testGetRulesFn = () => {};
     const testApplyRulesFn = () => {};
-    await addApproversAndRules(
+    await addApprovalsAndRules(
       CASES,
       testdb,
       testItems,
@@ -45,7 +45,7 @@ describe('addApproversAndRules', () => {
     const mockCreateObjFn = jest.fn();
     const testGetRulesFn = () => {};
     const testApplyRulesFn = () => {};
-    await addApproversAndRules(
+    await addApprovalsAndRules(
       CASES,
       testdb,
       testItems,
@@ -76,7 +76,7 @@ describe('addApproversAndRules', () => {
     const mockCreateObjFn = jest.fn();
     const mockGetRulesFn = jest.fn();
     const testApplyRulesFn = () => {};
-    await addApproversAndRules(
+    await addApprovalsAndRules(
       CASES,
       testdb,
       testItems,
@@ -97,7 +97,7 @@ describe('addApproversAndRules', () => {
     };
   });
 
-  test('returns items with approvers', async () => {
+  test('returns items with approvals', async () => {
     const testdb = {};
     const testaccounts = [ 'GroceryCo', 'JohnSmith' ];
     const testapprover = { approver: testaccounts[0] }
@@ -110,7 +110,7 @@ describe('addApproversAndRules', () => {
     const mockCreateObjFn = jest.fn();
     const mockGetRulesFn = jest.fn();
     const mockApplyRulesFn = jest.fn(() => testapprover);
-    const got = await addApproversAndRules(
+    const got = await addApprovalsAndRules(
       CASES,
       testdb,
       testItems,
@@ -127,9 +127,9 @@ describe('addApproversAndRules', () => {
     }
     // add approvers to want
     for (const w of want) {
-      w[APPROVERS] = new Array();
+      w[APPROVALS] = new Array();
       for (let x = 0; x < 4; x++) {
-        w[APPROVERS].push(testapprover);
+        w[APPROVALS].push(testapprover);
       };
     };
     expect(got).toEqual(want);

@@ -7,7 +7,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-var buildFInsApprover string = "%v returning" + " " + strings.Join([]string{
+var buildFInsApproval string = "%v returning" + " " + strings.Join([]string{
 	"id",
 	"rule_instance_id",
 	"transaction_id",
@@ -20,9 +20,9 @@ var buildFInsApprover string = "%v returning" + " " + strings.Join([]string{
 	"expiration_time",
 }, ", ")
 
-func InsertApproversSQL(trID, trItID types.ID, approvers []*types.Approver) (string, []interface{}) {
+func InsertApprovalsSQL(trID, trItID types.ID, approvals []*types.Approval) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
-	ib.InsertInto("approver")
+	ib.InsertInto("approval")
 	ib.Cols(
 		"rule_instance_id",
 		"transaction_id",
@@ -34,7 +34,7 @@ func InsertApproversSQL(trID, trItID types.ID, approvers []*types.Approver) (str
 		"approval_time",
 		"expiration_time",
 	)
-	for _, v := range approvers {
+	for _, v := range approvals {
 		// v.RejectionTime excluded
 		ib.Values(
 			v.RuleInstanceID,
@@ -48,13 +48,13 @@ func InsertApproversSQL(trID, trItID types.ID, approvers []*types.Approver) (str
 			v.ExpirationTime,
 		)
 	}
-	ret := sqlb.Buildf(buildFInsApprover, ib)
+	ret := sqlb.Buildf(buildFInsApproval, ib)
 	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
 }
 
-func UpdateApproversSQL(account, role *string, trID *types.ID) (string, []interface{}) {
+func UpdateApprovalsSQL(account, role *string, trID *types.ID) (string, []interface{}) {
 	ub := sqlb.PostgreSQL.NewUpdateBuilder()
-	ub.Update("approver").
+	ub.Update("approval").
 		Set(
 			ub.Assign("approval_time", "NOW()"),
 		).
@@ -63,11 +63,11 @@ func UpdateApproversSQL(account, role *string, trID *types.ID) (string, []interf
 			ub.Equal("account_role", *role),
 			ub.Equal("transaction_id", *trID),
 		)
-	ret := sqlb.Buildf(buildFInsApprover, ub)
+	ret := sqlb.Buildf(buildFInsApproval, ub)
 	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
 }
 
-func SelectApproversByTrItemIDsSQL(
+func SelectApprovalsByTrItemIDsSQL(
 	role *string,
 	trItemIDs []interface{},
 ) (string, []interface{}) {
@@ -84,7 +84,7 @@ func SelectApproversByTrItemIDsSQL(
 		"approval_time",
 		"expiration_time",
 	)
-	sb.From("approver").
+	sb.From("approval").
 		Where(
 			sb.Equal("account_role", *role),
 			sb.In("transaction_item_id", trItemIDs...),
@@ -92,7 +92,7 @@ func SelectApproversByTrItemIDsSQL(
 	return sb.Build()
 }
 
-func SelectApproversByTrIDSQL(
+func SelectApprovalsByTrIDSQL(
 	account string,
 	trID *types.ID,
 ) (string, []interface{}) {
@@ -109,7 +109,7 @@ func SelectApproversByTrIDSQL(
 		"approval_time",
 		"expiration_time",
 	)
-	sb.From("approver").
+	sb.From("approval").
 		Where(
 			sb.Equal("transaction_id", *trID),
 		)

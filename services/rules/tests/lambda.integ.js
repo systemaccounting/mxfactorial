@@ -10,7 +10,7 @@ const lambda = new AWS.Lambda({
 
 // todo: increase coverage
 describe('lambda integration', () => {
-  test('returns rule added transaction items & approvers', async () => {
+  test('returns rule added transaction items & approvals', async () => {
     const got = await invokeLambda(lambda, req);
     expect(got).toEqual(res);
   });

@@ -1,3 +1,5 @@
+const FIXED_DECIMAL_PLACES= 3;
+
 function stringIfNull(v) {
   if (v == null) {
     return ""
@@ -12,7 +14,12 @@ function stringIfNumber(v) {
   return v
 }
 
+function numberToFixedString(num) {
+  return num.toFixed(FIXED_DECIMAL_PLACES).toString()
+}
+
 module.exports = {
   stringIfNull,
   stringIfNumber,
+  numberToFixedString
 }

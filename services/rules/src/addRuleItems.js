@@ -1,8 +1,3 @@
-const {
-  DEBITOR,
-  CREDITOR,
-} = require('./constants');
-
 module.exports = async function(
   sequence,
   db,

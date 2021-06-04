@@ -43,7 +43,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Approver struct {
+	Approval struct {
 		AccountName       func(childComplexity int) int
 		AccountRole       func(childComplexity int) int
 		ApprovalTime      func(childComplexity int) int
@@ -84,7 +84,7 @@ type ComplexityRoot struct {
 	}
 
 	TransactionItem struct {
-		Approvers              func(childComplexity int) int
+		Approvals              func(childComplexity int) int
 		Creditor               func(childComplexity int) int
 		CreditorApprovalTime   func(childComplexity int) int
 		CreditorExpirationTime func(childComplexity int) int
@@ -135,82 +135,82 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Approver.account_name":
-		if e.complexity.Approver.AccountName == nil {
+	case "Approval.account_name":
+		if e.complexity.Approval.AccountName == nil {
 			break
 		}
 
-		return e.complexity.Approver.AccountName(childComplexity), true
+		return e.complexity.Approval.AccountName(childComplexity), true
 
-	case "Approver.account_role":
-		if e.complexity.Approver.AccountRole == nil {
+	case "Approval.account_role":
+		if e.complexity.Approval.AccountRole == nil {
 			break
 		}
 
-		return e.complexity.Approver.AccountRole(childComplexity), true
+		return e.complexity.Approval.AccountRole(childComplexity), true
 
-	case "Approver.approval_time":
-		if e.complexity.Approver.ApprovalTime == nil {
+	case "Approval.approval_time":
+		if e.complexity.Approval.ApprovalTime == nil {
 			break
 		}
 
-		return e.complexity.Approver.ApprovalTime(childComplexity), true
+		return e.complexity.Approval.ApprovalTime(childComplexity), true
 
-	case "Approver.device_id":
-		if e.complexity.Approver.DeviceID == nil {
+	case "Approval.device_id":
+		if e.complexity.Approval.DeviceID == nil {
 			break
 		}
 
-		return e.complexity.Approver.DeviceID(childComplexity), true
+		return e.complexity.Approval.DeviceID(childComplexity), true
 
-	case "Approver.device_latlng":
-		if e.complexity.Approver.DeviceLatlng == nil {
+	case "Approval.device_latlng":
+		if e.complexity.Approval.DeviceLatlng == nil {
 			break
 		}
 
-		return e.complexity.Approver.DeviceLatlng(childComplexity), true
+		return e.complexity.Approval.DeviceLatlng(childComplexity), true
 
-	case "Approver.expiration_time":
-		if e.complexity.Approver.ExpirationTime == nil {
+	case "Approval.expiration_time":
+		if e.complexity.Approval.ExpirationTime == nil {
 			break
 		}
 
-		return e.complexity.Approver.ExpirationTime(childComplexity), true
+		return e.complexity.Approval.ExpirationTime(childComplexity), true
 
-	case "Approver.id":
-		if e.complexity.Approver.ID == nil {
+	case "Approval.id":
+		if e.complexity.Approval.ID == nil {
 			break
 		}
 
-		return e.complexity.Approver.ID(childComplexity), true
+		return e.complexity.Approval.ID(childComplexity), true
 
-	case "Approver.rejection_time":
-		if e.complexity.Approver.RejectionTime == nil {
+	case "Approval.rejection_time":
+		if e.complexity.Approval.RejectionTime == nil {
 			break
 		}
 
-		return e.complexity.Approver.RejectionTime(childComplexity), true
+		return e.complexity.Approval.RejectionTime(childComplexity), true
 
-	case "Approver.rule_instance_id":
-		if e.complexity.Approver.RuleInstanceID == nil {
+	case "Approval.rule_instance_id":
+		if e.complexity.Approval.RuleInstanceID == nil {
 			break
 		}
 
-		return e.complexity.Approver.RuleInstanceID(childComplexity), true
+		return e.complexity.Approval.RuleInstanceID(childComplexity), true
 
-	case "Approver.transaction_id":
-		if e.complexity.Approver.TransactionID == nil {
+	case "Approval.transaction_id":
+		if e.complexity.Approval.TransactionID == nil {
 			break
 		}
 
-		return e.complexity.Approver.TransactionID(childComplexity), true
+		return e.complexity.Approval.TransactionID(childComplexity), true
 
-	case "Approver.transaction_item_id":
-		if e.complexity.Approver.TransactionItemID == nil {
+	case "Approval.transaction_item_id":
+		if e.complexity.Approval.TransactionItemID == nil {
 			break
 		}
 
-		return e.complexity.Approver.TransactionItemID(childComplexity), true
+		return e.complexity.Approval.TransactionItemID(childComplexity), true
 
 	case "Mutation.approveRequest":
 		if e.complexity.Mutation.ApproveRequest == nil {
@@ -371,12 +371,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Transaction.TransactionItems(childComplexity), true
 
-	case "TransactionItem.approvers":
-		if e.complexity.TransactionItem.Approvers == nil {
+	case "TransactionItem.approvals":
+		if e.complexity.TransactionItem.Approvals == nil {
 			break
 		}
 
-		return e.complexity.TransactionItem.Approvers(childComplexity), true
+		return e.complexity.TransactionItem.Approvals(childComplexity), true
 
 	case "TransactionItem.creditor":
 		if e.complexity.TransactionItem.Creditor == nil {
@@ -638,10 +638,10 @@ type TransactionItem implements ITransactionItem {
   creditor_expiration_time: String
   debitor_rejection_time: String
   creditor_rejection_time: String
-  approvers: [Approver]
+  approvals: [Approval]
 }
 
-type Approver {
+type Approval {
   id: ID
   rule_instance_id: String
   transaction_id: String
@@ -956,7 +956,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Approver_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_id(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -964,7 +964,7 @@ func (ec *executionContext) _Approver_id(ctx context.Context, field graphql.Coll
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -988,7 +988,7 @@ func (ec *executionContext) _Approver_id(ctx context.Context, field graphql.Coll
 	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_rule_instance_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_rule_instance_id(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -996,7 +996,7 @@ func (ec *executionContext) _Approver_rule_instance_id(ctx context.Context, fiel
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1020,7 +1020,7 @@ func (ec *executionContext) _Approver_rule_instance_id(ctx context.Context, fiel
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_transaction_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_transaction_id(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1028,7 +1028,7 @@ func (ec *executionContext) _Approver_transaction_id(ctx context.Context, field 
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1052,7 +1052,7 @@ func (ec *executionContext) _Approver_transaction_id(ctx context.Context, field 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_transaction_item_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_transaction_item_id(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1060,7 +1060,7 @@ func (ec *executionContext) _Approver_transaction_item_id(ctx context.Context, f
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1084,7 +1084,7 @@ func (ec *executionContext) _Approver_transaction_item_id(ctx context.Context, f
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_account_name(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_account_name(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1092,7 +1092,7 @@ func (ec *executionContext) _Approver_account_name(ctx context.Context, field gr
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1116,7 +1116,7 @@ func (ec *executionContext) _Approver_account_name(ctx context.Context, field gr
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_account_role(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_account_role(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1124,7 +1124,7 @@ func (ec *executionContext) _Approver_account_role(ctx context.Context, field gr
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1148,7 +1148,7 @@ func (ec *executionContext) _Approver_account_role(ctx context.Context, field gr
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_device_id(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_device_id(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1156,7 +1156,7 @@ func (ec *executionContext) _Approver_device_id(ctx context.Context, field graph
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1180,7 +1180,7 @@ func (ec *executionContext) _Approver_device_id(ctx context.Context, field graph
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_device_latlng(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_device_latlng(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1188,7 +1188,7 @@ func (ec *executionContext) _Approver_device_latlng(ctx context.Context, field g
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1212,7 +1212,7 @@ func (ec *executionContext) _Approver_device_latlng(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_approval_time(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_approval_time(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1220,7 +1220,7 @@ func (ec *executionContext) _Approver_approval_time(ctx context.Context, field g
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1244,7 +1244,7 @@ func (ec *executionContext) _Approver_approval_time(ctx context.Context, field g
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_rejection_time(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_rejection_time(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1252,7 +1252,7 @@ func (ec *executionContext) _Approver_rejection_time(ctx context.Context, field 
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -1276,7 +1276,7 @@ func (ec *executionContext) _Approver_rejection_time(ctx context.Context, field 
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Approver_expiration_time(ctx context.Context, field graphql.CollectedField, obj *model.Approver) (ret graphql.Marshaler) {
+func (ec *executionContext) _Approval_expiration_time(ctx context.Context, field graphql.CollectedField, obj *model.Approval) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1284,7 +1284,7 @@ func (ec *executionContext) _Approver_expiration_time(ctx context.Context, field
 		}
 	}()
 	fc := &graphql.FieldContext{
-		Object:     "Approver",
+		Object:     "Approval",
 		Field:      field,
 		Args:       nil,
 		IsMethod:   false,
@@ -2590,7 +2590,7 @@ func (ec *executionContext) _TransactionItem_creditor_rejection_time(ctx context
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _TransactionItem_approvers(ctx context.Context, field graphql.CollectedField, obj *model.TransactionItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _TransactionItem_approvals(ctx context.Context, field graphql.CollectedField, obj *model.TransactionItem) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -2608,7 +2608,7 @@ func (ec *executionContext) _TransactionItem_approvers(ctx context.Context, fiel
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Approvers, nil
+		return obj.Approvals, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2617,9 +2617,9 @@ func (ec *executionContext) _TransactionItem_approvers(ctx context.Context, fiel
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*model.Approver)
+	res := resTmp.([]*model.Approval)
 	fc.Result = res
-	return ec.marshalOApprover2ᚕᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApprover(ctx, field.Selections, res)
+	return ec.marshalOApproval2ᚕᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApproval(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3957,39 +3957,39 @@ func (ec *executionContext) _ITransactionItem(ctx context.Context, sel ast.Selec
 
 // region    **************************** object.gotpl ****************************
 
-var approverImplementors = []string{"Approver"}
+var approvalImplementors = []string{"Approval"}
 
-func (ec *executionContext) _Approver(ctx context.Context, sel ast.SelectionSet, obj *model.Approver) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, approverImplementors)
+func (ec *executionContext) _Approval(ctx context.Context, sel ast.SelectionSet, obj *model.Approval) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, approvalImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Approver")
+			out.Values[i] = graphql.MarshalString("Approval")
 		case "id":
-			out.Values[i] = ec._Approver_id(ctx, field, obj)
+			out.Values[i] = ec._Approval_id(ctx, field, obj)
 		case "rule_instance_id":
-			out.Values[i] = ec._Approver_rule_instance_id(ctx, field, obj)
+			out.Values[i] = ec._Approval_rule_instance_id(ctx, field, obj)
 		case "transaction_id":
-			out.Values[i] = ec._Approver_transaction_id(ctx, field, obj)
+			out.Values[i] = ec._Approval_transaction_id(ctx, field, obj)
 		case "transaction_item_id":
-			out.Values[i] = ec._Approver_transaction_item_id(ctx, field, obj)
+			out.Values[i] = ec._Approval_transaction_item_id(ctx, field, obj)
 		case "account_name":
-			out.Values[i] = ec._Approver_account_name(ctx, field, obj)
+			out.Values[i] = ec._Approval_account_name(ctx, field, obj)
 		case "account_role":
-			out.Values[i] = ec._Approver_account_role(ctx, field, obj)
+			out.Values[i] = ec._Approval_account_role(ctx, field, obj)
 		case "device_id":
-			out.Values[i] = ec._Approver_device_id(ctx, field, obj)
+			out.Values[i] = ec._Approval_device_id(ctx, field, obj)
 		case "device_latlng":
-			out.Values[i] = ec._Approver_device_latlng(ctx, field, obj)
+			out.Values[i] = ec._Approval_device_latlng(ctx, field, obj)
 		case "approval_time":
-			out.Values[i] = ec._Approver_approval_time(ctx, field, obj)
+			out.Values[i] = ec._Approval_approval_time(ctx, field, obj)
 		case "rejection_time":
-			out.Values[i] = ec._Approver_rejection_time(ctx, field, obj)
+			out.Values[i] = ec._Approval_rejection_time(ctx, field, obj)
 		case "expiration_time":
-			out.Values[i] = ec._Approver_expiration_time(ctx, field, obj)
+			out.Values[i] = ec._Approval_expiration_time(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4219,8 +4219,8 @@ func (ec *executionContext) _TransactionItem(ctx context.Context, sel ast.Select
 			out.Values[i] = ec._TransactionItem_debitor_rejection_time(ctx, field, obj)
 		case "creditor_rejection_time":
 			out.Values[i] = ec._TransactionItem_creditor_rejection_time(ctx, field, obj)
-		case "approvers":
-			out.Values[i] = ec._TransactionItem_approvers(ctx, field, obj)
+		case "approvals":
+			out.Values[i] = ec._TransactionItem_approvals(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4788,7 +4788,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOApprover2ᚕᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApprover(ctx context.Context, sel ast.SelectionSet, v []*model.Approver) graphql.Marshaler {
+func (ec *executionContext) marshalOApproval2ᚕᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApproval(ctx context.Context, sel ast.SelectionSet, v []*model.Approval) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4815,7 +4815,7 @@ func (ec *executionContext) marshalOApprover2ᚕᚖgithubᚗcomᚋsystemaccounti
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOApprover2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApprover(ctx, sel, v[i])
+			ret[i] = ec.marshalOApproval2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApproval(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4828,11 +4828,11 @@ func (ec *executionContext) marshalOApprover2ᚕᚖgithubᚗcomᚋsystemaccounti
 	return ret
 }
 
-func (ec *executionContext) marshalOApprover2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApprover(ctx context.Context, sel ast.SelectionSet, v *model.Approver) graphql.Marshaler {
+func (ec *executionContext) marshalOApproval2ᚖgithubᚗcomᚋsystemaccountingᚋmxfactorialᚋservicesᚋgraphqlᚋgraphᚋmodelᚐApproval(ctx context.Context, sel ast.SelectionSet, v *model.Approval) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Approver(ctx, sel, v)
+	return ec._Approval(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

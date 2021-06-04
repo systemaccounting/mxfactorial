@@ -1,4 +1,4 @@
-const applyApproverRules = require('./applyApproverRules');
+const applyApprovalRules = require('./applyApprovalRules');
 const {
   DEBITOR,
   ID,
@@ -10,10 +10,10 @@ const {
 const { testItems } = require('../tests/utils/testData');
 const mockFn = jest.fn(() => testapprover);
 
-describe('applyApproverRules', () => {
+describe('applyApprovalRules', () => {
   test('calls approverRuleModule with args 1 time', async () => {
     testItems[0]["mock"] = mockFn; // smuggle in mock for assertion
-    applyApproverRules(
+    applyApprovalRules(
       testapprover,
       testruleinstances,
       testItems[0],
@@ -51,7 +51,7 @@ const testapprover = {
 const testruleinstances = [
   {
     id: 0,
-    rule_name: 'applyApproverRule.test',
+    rule_name: 'applyApprovalRule.test',
     account_role: DEBITOR,
     account_name: 'IgorPetrov',
     variable_values: ['test1','test2','test3'],

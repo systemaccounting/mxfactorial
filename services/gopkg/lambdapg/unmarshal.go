@@ -281,11 +281,11 @@ func UnmarshalTrItems(
 	return trItems, nil
 }
 
-// UnmarshalApprovers ...
-func UnmarshalApprovers(
+// UnmarshalApprovals ...
+func UnmarshalApprovals(
 	rows pgx.Rows,
-) ([]*types.Approver, error) {
-	var approvers []*types.Approver
+) ([]*types.Approval, error) {
+	var approvals []*types.Approval
 	defer rows.Close()
 	for rows.Next() {
 		var ID *types.ID
@@ -319,7 +319,7 @@ func UnmarshalApprovers(
 		if err != nil {
 			return nil, err
 		}
-		a := types.Approver{
+		a := types.Approval{
 			ID:                ID,
 			RuleInstanceID:    ruleInstanceID,
 			TransactionID:     transactionID,
@@ -331,13 +331,13 @@ func UnmarshalApprovers(
 			ApprovalTime:      tools.NullTimeToString(approvalTime),
 			ExpirationTime:    tools.NullTimeToString(expirationTime),
 		}
-		approvers = append(approvers, &a)
+		approvals = append(approvals, &a)
 	}
 	err := rows.Err()
 	if err != nil {
 		return nil, err
 	}
-	return approvers, nil
+	return approvals, nil
 }
 
 // UnmarshalTransactionNotifications ...

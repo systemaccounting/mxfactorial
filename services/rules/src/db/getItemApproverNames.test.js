@@ -1,6 +1,6 @@
 const {
-  APPROVER_SQL,
-  APPROVER_COUNT_ERROR,
+  APPROVAL_SQL,
+  APPROVAL_COUNT_ERROR,
 } = require('../constants');
 const getItemApproverNames = require('./getItemApproverNames');
 
@@ -10,7 +10,7 @@ describe('getItemApproverNames', () => {
     const db = jest.fn(() => Promise.resolve({ rows: ['any']}));
     const mockDB = { query: db };
     await getItemApproverNames(mockDB, testownedaccount);
-    expect(mockDB.query.mock.calls[0][0]).toBe(APPROVER_SQL);
+    expect(mockDB.query.mock.calls[0][0]).toBe(APPROVAL_SQL);
     expect(mockDB.query.mock.calls[0][1]).toEqual([testownedaccount]);
   });
 
@@ -18,7 +18,7 @@ describe('getItemApproverNames', () => {
     const testownedaccount = 'testownedaccount';
     const db = jest.fn(() => Promise.resolve({ rows: [/* empty */]}));
     const mockDB = { query: db };
-    await expect(getItemApproverNames(mockDB, testownedaccount)).rejects.toThrow(APPROVER_COUNT_ERROR);
+    await expect(getItemApproverNames(mockDB, testownedaccount)).rejects.toThrow(APPROVAL_COUNT_ERROR);
   });
 
   test('returns list of item approver names', async () => {

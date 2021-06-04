@@ -61,10 +61,10 @@ type TransactionItem implements ITransactionItem {
   creditor_expiration_time: String
   debitor_rejection_time: String
   creditor_rejection_time: String
-  approvers: [Approver]
+  approvals: [Approval]
 }
 
-type Approver {
+type Approval {
   id: ID
   rule_instance_id: String
   transaction_id: String
