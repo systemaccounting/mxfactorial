@@ -1,4 +1,4 @@
-name: prod-rules-faas
+name: prod-rules
 
 on:
   push:

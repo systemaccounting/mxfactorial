@@ -21,11 +21,11 @@ jobs:
       - name: install dependencies
         run: make install
         working-directory: react
-      - name: unit tests
-        run: |
-          make get-secrets ENV=dev
-          make test-unit
-        working-directory: react
+      # - name: unit tests
+      #   run: |
+      #     make get-secrets ENV=dev
+      #     make test-unit
+      #   working-directory: react
       # - name: integration tests
       #   run: |
       #     yarn test:e2e-public
