@@ -27,9 +27,9 @@ jobs:
       - name: deploy to dev
         run: make deploy ENV=dev
         working-directory: services/rules
-      # - name: build .env file from secrets manager
-      #   run: make get-secrets ENV=dev
-      #   working-directory: services/rules
-      # - name: integration tests
-      #   run: make test-integration ENV=dev
-      #   working-directory: services/rules
+      - name: build .env file from secrets manager
+        run: make get-secrets ENV=dev
+        working-directory: services/rules
+      - name: integration tests
+        run: make test-integration ENV=dev
+        working-directory: services/rules
