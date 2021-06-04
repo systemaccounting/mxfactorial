@@ -1,0 +1,62 @@
+{
+	"id": null,
+	"transaction_id": null,
+	"item_id": "milk",
+	"price": "2.000",
+	"quantity": "1",
+	"debitor_first": null,
+	"rule_instance_id": null,
+	"unit_of_measurement": "",
+	"units_measured": null,
+	"debitor": "JacobWebb",
+	"creditor": "GroceryCo",
+	"debitor_profile_id": null,
+	"creditor_profile_id": null,
+	"debitor_approval_time": null,
+	"creditor_approval_time": null,
+	"debitor_expiration_time": null,
+	"creditor_expiration_time": null,
+	"debitor_rejection_time": null,
+	"creditor_rejection_time": null,
+	"approvals": [
+		{
+			"id": null,
+			"rule_instance_id": null,
+			"transaction_id": null,
+			"transaction_item_id": null,
+			"account_name": "JacobWebb",
+			"account_role": "debitor",
+			"device_id": null,
+			"device_latlng": null,
+			"approval_time": null,
+			"rejection_time": null,
+			"expiration_time": null
+		},
+		{
+			"id": null,
+			"rule_instance_id": "8",
+			"transaction_id": "",
+			"transaction_item_id": "",
+			"account_name": "IgorPetrov",
+			"account_role": "creditor",
+			"device_id": null,
+			"device_latlng": null,
+			"approval_time": null,
+			"rejection_time": null,
+			"expiration_time": null
+		},
+		{
+			"id": null,
+			"rule_instance_id": "7",
+			"transaction_id": "",
+			"transaction_item_id": "",
+			"account_name": "MiriamLevy",
+			"account_role": "creditor",
+			"device_id": null,
+			"device_latlng": null,
+			"approval_time": null,
+			"rejection_time": null,
+			"expiration_time": null
+		}
+	]
+}
