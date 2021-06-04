@@ -1,0 +1,36 @@
+name: prod-request-by-id
+
+on:
+  push:
+    paths:
+    - 'services/request-by-id/**'
+    branches:
+    - 'master'
+
+jobs:
+  build:
+    name: request-by-id in prod
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: install dependencies
+        run: |
+          export GOPATH=$(go env GOPATH)
+          export GOBIN=$(go env GOPATH)/bin
+          export PATH=$PATH:$(go env GOPATH)/bin
+          make install
+        working-directory: services/request-by-id
+      - name: compile
+        run: make compile
+        working-directory: services/request-by-id
+      - name: zip
+        run: make zip
+        working-directory: services/request-by-id
+      - name: deploy to prod
+        run: make deploy-only ENV=prod
+        working-directory: services/request-by-id

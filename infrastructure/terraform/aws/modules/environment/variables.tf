@@ -1,27 +1,18 @@
-variable "environment" {
-  type = string
-}
-
-variable "ssl_arn" {
-  type = string
-}
-
-variable "certificate_arn" {
-  type        = string
-  description = "Certificate ARN"
-}
-
-variable "db_snapshot_id" {
-  type = string
-}
-
-variable "req_query_return_limit" {
-  type = number
-}
-
-variable "trans_query_return_limit" {
-  type = number
-}
-
-
+variable "env" {}
+variable "ssl_arn" {}
+variable "certificate_arn" {}
+variable "db_snapshot_id" {}
 variable "rds_db_version" {}
+variable "rds_allow_major_version_upgrade" {}
+variable "rds_instance_class" {}
+variable "rds_parameter_group" {}
+variable "rds_instance_name" {}
+variable "notifications_return_limit" {}
+variable "requests_by_account_return_limit" {}
+variable "transactions_by_account_return_limit" {}
+variable "apigw_authorization_header_key" {}
+variable "enable_api_auth" {}
+variable "graphql_deployment_version" {}
+variable "initial_account_balance" {}
+variable "client_origin_bucket_name" {}
+variable "enable_api_auto_deploy" {}

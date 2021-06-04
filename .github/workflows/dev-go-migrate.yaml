@@ -1,0 +1,29 @@
+name: dev-go-migrate
+
+on:
+  push:
+    paths:
+    - 'migrations/go-migrate/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  build:
+    name: go-migrate
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: create zip for deployment
+        run: make zip
+        working-directory: migrations/go-migrate
+      - name: zip
+        run: make put-object ENV=dev
+        working-directory: migrations/go-migrate
+      - name: deploy
+        run: make update-function ENV=dev
+        working-directory: migrations/go-migrate

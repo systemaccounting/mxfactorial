@@ -1,0 +1,1 @@
+SELECT 'add all your truncates in the first down migration';

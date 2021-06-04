@@ -1,40 +1,59 @@
-DIR := ${CURDIR}
-APP_NAME = react
-APP_TYPE = client
-ARTIFACT_BUCKET = mxfactorial-artifacts
-REGION = us-east-1
-ENV_VARS := POOL_ID CLIENT_ID GRAPHQL_API ENV SECRET ACCOUNT AWS_REGION
-TEST_ACCOUNTS = TEST_ACCOUNT_01 TEST_ACCOUNT_02 TEST_ACCOUNT_03
-MANUAL_ACCOUNTS = JoeSmith Person1 Person2
+APP_NAME=react
+APP_TYPE=client
+ARTIFACT_BUCKET=mxfactorial-react-$(ENV)
+REGION=us-east-1
+CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
+DEPLOY_APP=true
+
+TEST_ACCOUNTS=TEST_ACCOUNT_01 \
+TEST_ACCOUNT_02 \
+TEST_ACCOUNT_03
+
+MANUAL_ACCOUNTS=JoeSmith \
+Person1 \
+Person2
+
+ENV_VARS=POOL_ID \
+CLIENT_ID \
+GRAPHQL_API \
+ENV \
+SECRET \
+ACCOUNT \
+AWS_REGION \
+WEBSOCKET_CLIENT_URI
 
 test-env-arg:
 ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
 ###################### clean ######################
 
 clean-deps:
-		rm -rf node_modules
+	rm -rf node_modules
 
 clean-env:
-		rm -f .env
+	rm -f .env
 
 clean-artifact:
-		rm -rf build
+	rm -rf build
 
-clean: clean-deps clean-env clean-artifact
+clean:
+	$(MAKE) clean-deps
+	$(MAKE) clean-env
+	$(MAKE) clean-artifact
 
 ###################### dependencies ######################
 
-install: clean-deps
-		yarn install
+install:
+	$(MAKE) clean-deps
+	yarn install
 
 ###################### secrets ######################
 
 get-secrets: retrieve-each-secret
-	@if [ ! -s $(DIR)/.env ]; then \
-		rm $(DIR)/.env; \
+	@if [ ! -s $(CURDIR)/.env ]; then \
+		rm $(CURDIR)/.env; \
 		echo 'no env vars required'; \
 	else \
 		echo 'env vars retrieved'; \
@@ -43,12 +62,12 @@ get-secrets: retrieve-each-secret
 retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
 	@if [ $@ = AWS_REGION ]; then \
-		echo REACT_APP_AWS_REGION=$(REGION) >> $(DIR)/.env; \
+		echo REACT_APP_AWS_REGION=$(REGION) >> $(CURDIR)/.env; \
 	elif [ $@ = ENV ]; then \
-		echo JEST_ENV=$(ENV) >> $(DIR)/.env; \
+		echo JEST_ENV=$(ENV) >> $(CURDIR)/.env; \
 	elif [ $@ = ACCOUNT ]; then \
 		for account in $(TEST_ACCOUNTS); do \
-			echo $$account=1 >> $(DIR)/.env; \
+			echo $$account=1 >> $(CURDIR)/.env; \
 		done; \
 	elif [ $@ = SECRET ]; then \
 		SECRET=$$(aws secretsmanager get-secret-value \
@@ -56,110 +75,126 @@ $(ENV_VARS):
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-		echo JEST_$@=$$SECRET >> $(DIR)/.env; \
+		echo JEST_$@=$$SECRET >> $(CURDIR)/.env; \
 	else \
 		ENV_VAR=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \
 			--secret-id $(ENV)/$@ \
 			--query 'SecretString' \
 			--output text); \
-		echo REACT_APP_$@=$$ENV_VAR >> $(DIR)/.env; \
+		echo REACT_APP_$@=$$ENV_VAR >> $(CURDIR)/.env; \
 	fi
 
 ###################### start ######################
 
-start: get-secrets install
-		yarn start:env
+start:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) get-secrets ENV=$(ENV)
+	$(MAKE) install
+	yarn start:env
 
 ###################### build and test ######################
 
-test: test-env-arg install test-unit test-e2e
+test:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) install
+	$(MAKE) test-unit
+	$(MAKE) test-e2e
 
 test-unit:
-		yarn test
+	yarn test
 
-test-e2e: test-env-arg get-secrets warm-up
-		yarn test:e2e-public; \
-		yarn test:e2e-private
+test-e2e:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) get-secrets ENV=$(ENV)
+	$(MAKE) warm-up
+	yarn test:e2e-public; \
+	yarn test:e2e-private
 
 e2e-now:
-		yarn test:e2e-public; \
-		yarn test:e2e-private
+	yarn test:e2e-public; \
+	yarn test:e2e-private
 
-build: clean-env test-env-arg get-secrets
-		yarn build:env
-
-# create development environment
-dev: build
+.PHONY: build
+build:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) clean-env
+	$(MAKE) get-secrets ENV=$(ENV)
+	yarn build:env
 
 ###################### deploy ######################
 
-deploy: test-env-arg
-		@CACHE_ID=$$(aws cloudfront list-distributions --output text \
-			--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`mxfactorial-react-'$(ENV)'`][].Id'); \
-		aws s3 sync build/ s3://mxfactorial-react-$(ENV) --delete; \
-		aws configure set preview.cloudfront true; \
-		echo 'Terminating cache'; \
-		aws cloudfront create-invalidation --distribution-id $$CACHE_ID \
-			--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
-ifeq ($(ENV), prod)
-		@WWW_CACHE_ID=$$(aws cloudfront list-distributions --output text \
-		--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-mxfactorial-react-prod`][].Id'); \
-		echo 'Terminating www cache'; \
-		aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID \
-		--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
-endif
+initial-deploy:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) install
+	$(MAKE) get-secrets ENV=$(ENV)
+	yarn build:env
+	$(MAKE) sync
 
-deploy-untested:
-ifeq ($(ENV), prod)
-		$(error no untested deployments to prod)
-endif
-		@CACHE_ID=$$(aws cloudfront list-distributions --output text \
-			--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`mxfactorial-react-'$(ENV)'`][].Id'); \
-		aws s3 sync build/ s3://mxfactorial-react-$(ENV) --delete; \
-		aws configure set preview.cloudfront true; \
-		echo 'Terminating cache'; \
-		aws cloudfront create-invalidation --distribution-id $$CACHE_ID \
-			--paths "/*" --query 'Invalidation.{Status:Status,CreateTime:CreateTime}'
+deploy:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) install
+	$(MAKE) get-secrets
+	yarn build:env
+	$(MAKE) sync
+	$(MAKE) empty-cache
 
-deploy-all: deploy-layer deploy
+sync:
+	@$(MAKE) -s test-env-arg
+	aws s3 sync build/ s3://$(ARTIFACT_BUCKET) --delete
+
+empty-cache:
+	@$(MAKE) -s test-env-arg
+	@CACHE_ID=$$(aws cloudfront list-distributions --output text \
+		--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`$(ARTIFACT_BUCKET)`][].Id'); \
+	aws configure set preview.cloudfront true; \
+	echo 'emptying cache'; \
+	aws cloudfront create-invalidation --distribution-id $$CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
+ifeq ($(ENV), prod)
+	@WWW_CACHE_ID=$$(aws cloudfront list-distributions --output text \
+	--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-$(ARTIFACT_BUCKET)`][].Id'); \
+	echo 'emptying www cache'; \
+	aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
+endif
 
 ###################### create e2e test and manual accounts ######################
 
 create-accounts: test-env-arg get-secrets
-		@[ -f .env ] && . .env; \
-		for account in $(TEST_ACCOUNTS); do \
-			aws cognito-idp sign-up \
-				--region $(REGION) \
-				--client-id $$REACT_APP_CLIENT_ID \
-				--username $$account \
-				--password $$JEST_SECRET; \
-		done; \
-		for manual_account in $(MANUAL_ACCOUNTS); do \
-			aws cognito-idp sign-up \
-				--region $(REGION) \
-				--client-id $$REACT_APP_CLIENT_ID \
-				--username $$manual_account \
-				--password password; \
-		done
+	@[ -f .env ] && . .env; \
+	for account in $(TEST_ACCOUNTS); do \
+		aws cognito-idp sign-up \
+			--region $(REGION) \
+			--client-id $$REACT_APP_CLIENT_ID \
+			--username $$account \
+			--password $$JEST_SECRET; \
+	done; \
+	for manual_account in $(MANUAL_ACCOUNTS); do \
+		aws cognito-idp sign-up \
+			--region $(REGION) \
+			--client-id $$REACT_APP_CLIENT_ID \
+			--username $$manual_account \
+			--password password; \
+	done
 
 delete-accounts: test-env-arg get-secrets
-		@[ -f .env ] && . .env; \
-		for account in $(TEST_ACCOUNTS); do \
-			aws cognito-idp admin-delete-user \
-				--region $(REGION) \
-				--user-pool-id $$REACT_APP_POOL_ID \
-				--username $$account; \
-		done; \
-		for manual_account in $(MANUAL_ACCOUNTS); do \
-			aws cognito-idp admin-delete-user \
-				--region $(REGION) \
-				--user-pool-id $$REACT_APP_POOL_ID \
-				--username $$manual_account; \
-		done; \
-		echo 'accounts deleted'
+	@[ -f .env ] && . .env; \
+	for account in $(TEST_ACCOUNTS); do \
+		aws cognito-idp admin-delete-user \
+			--region $(REGION) \
+			--user-pool-id $$REACT_APP_POOL_ID \
+			--username $$account; \
+	done; \
+	for manual_account in $(MANUAL_ACCOUNTS); do \
+		aws cognito-idp admin-delete-user \
+			--region $(REGION) \
+			--user-pool-id $$REACT_APP_POOL_ID \
+			--username $$manual_account; \
+	done; \
+	echo 'accounts deleted'
 
-###################### warm up services ######################
-
-warm-up: test-env-arg $(SERVICES_DIRS)
-		@$(MAKE) -C ../services ENV=$(ENV) warm-up
+now:
+	$(MAKE) install
+	$(MAKE) clean-env
+	$(MAKE) get-secrets ENV=dev
+	yarn build:env
+	$(MAKE) deploy ENV=dev

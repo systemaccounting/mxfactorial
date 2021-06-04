@@ -8,9 +8,6 @@
 **/*lock.info
 **/.terraform/
 
-## liquibase
-**/liquibase.properties
-
 ## react
 
 # testing
@@ -42,13 +39,12 @@ react/screenshot.png
 
 # Editors and IDEs
 .idea
-.vscode
 
 # Misc
 .DS_Store
 
 # unintended
-yarn.lock
+/yarn.lock
 
 # aws-cdk
 .cdk.staging
@@ -64,3 +60,9 @@ infrastructure/aws-cdk/**/*.d.ts
 
 # lambda
 tst.sh
+
+# postgres docker
+**/postgres-data
+
+# go migrate
+migrate.linux-amd64

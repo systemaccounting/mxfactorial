@@ -19,7 +19,7 @@ export const ButtonBase = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 9px 9px 9px 1px rgba(92,92,95,0.2);
+  box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
   > svg {
     margin: 0 5px;
   }

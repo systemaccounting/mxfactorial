@@ -1,0 +1,28 @@
+{
+  "name": "rules-faas",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "UNLICENSED",
+  "jest": {
+    "verbose": true,
+    "testPathIgnorePatterns": [
+      "<rootDir>/src/rules/applyItemRule.test.js",
+      "<rootDir>/src/rules/applyApprovalRule.test.js",
+      "<rootDir>/tests/index.integ.js",
+      "<rootDir>/tests/graphql.integ.js"
+    ]
+  },
+  "scripts": {
+    "test": "jest --detectOpenHandles --silent",
+    "test:integration": "env-cmd jest --detectOpenHandles --runInBand --testRegex='.*\\.integ\\.[tj]sx?'"
+  },
+  "dependencies": {
+    "pg": "^8.5.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.879.0",
+    "env-cmd": "^10.0.1",
+    "graphql-request": "^1.8.2",
+    "jest": "^24.5.0"
+  }
+}

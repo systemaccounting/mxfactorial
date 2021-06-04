@@ -16,11 +16,11 @@ describe('Icons', () => {
     const wrapper = shallow(<AddIcon {...props} />)
     expect(wrapper.exists()).toBeTruthy()
   })
-  it('renders AddIcon', () => {
+  it('renders HomeIcon', () => {
     const wrapper = shallow(<HomeIcon {...props} />)
     expect(wrapper.exists()).toBeTruthy()
   })
-  it('renders AddIcon', () => {
+  it('renders SubtractIcon', () => {
     const wrapper = shallow(<SubtractIcon {...props} />)
     expect(wrapper.exists()).toBeTruthy()
   })

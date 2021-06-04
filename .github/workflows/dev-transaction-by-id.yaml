@@ -1,0 +1,45 @@
+name: dev-transaction-by-id
+
+on:
+  push:
+    paths:
+    - 'services/transaction-by-id/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  build:
+    name: transaction-by-id in dev
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v1
+      - name: install dependencies
+        run: |
+          export GOPATH=$(go env GOPATH)
+          export GOBIN=$(go env GOPATH)/bin
+          export PATH=$PATH:$(go env GOPATH)/bin
+          make install
+        working-directory: services/transaction-by-id
+      # - name: measure coverage
+      #   run: make test-cover
+      #   working-directory: services/transaction-by-id
+      # - name: unit tests
+      #   run: make test-unit
+      #   working-directory: services/transaction-by-id
+      - name: compile
+        run: make compile
+        working-directory: services/transaction-by-id
+      - name: zip
+        run: make zip
+        working-directory: services/transaction-by-id
+      - name: deploy to dev
+        run: make deploy-only ENV=dev
+        working-directory: services/transaction-by-id
+      # - name: integration tests
+      #   run: make test-integration ENV=dev
+      #   working-directory: services/transaction-by-id

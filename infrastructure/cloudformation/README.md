@@ -1,6 +1,9 @@
 <p align="center">
-  <a href="http://www.systemaccounting.org/math_identity" target="_blank"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></a>
+  <img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png">
 </p>
+
+## current stacks
+*none, websockets [converted to terraform](https://github.com/systemaccounting/mxfactorial/commit/348ae2bc6a99ae366c21b7719d6154eaa0715457)*
 
 ## example per environment cloudformation use
 
@@ -57,7 +60,3 @@ dependencies: aws cli, credentials
 1. document new `template.yaml: $STACK-$ENV` managed by cloudformation in section below  
 1. [detect drift](https://docs.aws.amazon.com/cli/latest/reference/cloudformation/detect-stack-drift.html) IF non-cloudformation change expected in stack: `STACK=notification-websockets ENV=dev; aws cloudformation detect-stack-drift --stack-name $STACK-$ENV`  
 1. [delete](https://docs.aws.amazon.com/cli/latest/reference/cloudformation/delete-stack.html) stack: `STACK=notification-websockets ENV=dev; aws cloudformation delete-stack --stack-name $STACK-$ENV`
-
-## current stacks
-1. `websockets.yaml: notification-websockets-dev`
-1. `websockets.yaml: notification-websockets-prod`
