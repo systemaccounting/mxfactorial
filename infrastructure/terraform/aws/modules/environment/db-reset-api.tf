@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_sns_topic" "db_reset" {
-  name = "${local.DB_RESET}-${var.environment}"
+  name = "${local.DB_RESET}-${var.env}"
 }
 
 resource "aws_sns_topic_subscription" "sns_to_db_reset_lambda" {
@@ -13,7 +13,7 @@ resource "aws_sns_topic_subscription" "sns_to_db_reset_lambda" {
 }
 
 resource "aws_lambda_permission" "sns_to_db_reset_lambda" {
-  statement_id  = "AllowASNSInvoke${title(var.environment)}"
+  statement_id  = "AllowASNSInvoke${title(var.env)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.db_reset.function_name
   principal     = "sns.amazonaws.com"
@@ -21,8 +21,8 @@ resource "aws_lambda_permission" "sns_to_db_reset_lambda" {
 }
 
 resource "aws_api_gateway_rest_api" "db_reset" {
-  name        = "${local.DB_RESET}-${var.environment}"
-  description = "${local.DB_RESET} api in ${var.environment}"
+  name        = "${local.DB_RESET}-${var.env}"
+  description = "${local.DB_RESET} api in ${var.env}"
 }
 
 resource "aws_api_gateway_method" "db_reset" {
@@ -90,7 +90,7 @@ resource "aws_api_gateway_deployment" "db_reset" {
   ]
   stage_description = "deploy-003"
   rest_api_id       = aws_api_gateway_rest_api.db_reset.id
-  stage_name        = var.environment
+  stage_name        = var.env
 
   lifecycle {
     create_before_destroy = true
@@ -98,14 +98,14 @@ resource "aws_api_gateway_deployment" "db_reset" {
 }
 
 resource "aws_iam_role" "db_reset_api" {
-  name               = "${local.DB_RESET}-apigw-role-${var.environment}"
+  name               = "${local.DB_RESET}-apigw-role-${var.env}"
   assume_role_policy = data.aws_iam_policy_document.db_reset_api_role.json
 }
 
 data "aws_iam_policy_document" "db_reset_api_role" {
   version = "2012-10-17"
   statement {
-    sid    = "ApiGatewayRole${var.environment}"
+    sid    = "ApiGatewayRole${var.env}"
     effect = "Allow"
     principals {
       type        = "Service"
@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "db_reset_api_role" {
 }
 
 resource "aws_iam_role_policy" "db_reset_api" {
-  name   = "${local.DB_RESET}-apigw-cw-policy-${var.environment}"
+  name   = "${local.DB_RESET}-apigw-cw-policy-${var.env}"
   role   = aws_iam_role.db_reset_api.id
   policy = data.aws_iam_policy_document.db_reset_api_policy.json
 }
@@ -124,7 +124,7 @@ resource "aws_iam_role_policy" "db_reset_api" {
 data "aws_iam_policy_document" "db_reset_api_policy" {
   version = "2012-10-17"
   statement {
-    sid = "ApiGatewaySNSPolicy${title(var.environment)}"
+    sid = "ApiGatewaySNSPolicy${title(var.env)}"
     actions = [
       "sns:Publish",
     ]

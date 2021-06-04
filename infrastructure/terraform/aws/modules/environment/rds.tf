@@ -45,7 +45,7 @@ locals {
 
 ########## Create security group for RDS ##########
 resource "aws_security_group" "postgres" {
-  name        = "db-sec-grp-${var.environment}"
+  name        = "db-sec-grp-${var.env}"
   description = "internal postgres access"
   vpc_id      = data.aws_vpc.default.id
 }
@@ -76,7 +76,7 @@ resource "aws_security_group_rule" "allow_postgres_access" {
 ########## Create clou9 instance to access RDS ##########
 # resource "aws_cloud9_environment_ec2" "default" {
 #   instance_type               = "t2.micro"
-#   name                        = "rds-connect-${var.environment}"
+#   name                        = "rds-connect-${var.env}"
 #   description                 = "connecting to rds"
 #   automatic_stop_time_minutes = 15
 #   # assign ANY 1 subnet assigned in aws_db_subnet_group.default.subnet_ids, e.g. 0
@@ -106,8 +106,8 @@ resource "aws_security_group_rule" "allow_all_outbound_rds" {
 
 ###### Cherry-pick subnets for RDS in future ######
 resource "aws_db_subnet_group" "default" {
-  description = "postgres db subnet group in ${var.environment}"
-  name        = "db-subnet-group-${var.environment}"
+  description = "postgres db subnet group in ${var.env}"
+  name        = "db-subnet-group-${var.env}"
   subnet_ids  = data.aws_subnet_ids.default.ids
 
   tags = {

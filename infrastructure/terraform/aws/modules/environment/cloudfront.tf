@@ -1,11 +1,11 @@
-resource "aws_cloudfront_distribution" "s3_react_distribution" {
-  comment = "${var.environment} domain cache"
+resource "aws_cloudfront_distribution" "s3_client_distribution" {
+  comment = "${var.env} domain cache"
 
   origin {
-    domain_name = "${var.react_origin_bucket_name}.s3.amazonaws.com"
-    origin_id   = var.react_origin_bucket_name
+    domain_name = "${var.client_origin_bucket_name}.s3.amazonaws.com"
+    origin_id   = var.client_origin_bucket_name
     s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.s3_react_distribution.cloudfront_access_identity_path
+      origin_access_identity = aws_cloudfront_origin_access_identity.s3_client_distribution.cloudfront_access_identity_path
     }
   }
 
@@ -16,7 +16,7 @@ resource "aws_cloudfront_distribution" "s3_react_distribution" {
   default_cache_behavior {
     allowed_methods        = ["HEAD", "GET"]
     cached_methods         = ["HEAD", "GET"]
-    target_origin_id       = var.react_origin_bucket_name
+    target_origin_id       = var.client_origin_bucket_name
     viewer_protocol_policy = "redirect-to-https"
     compress               = true
     min_ttl                = 0
@@ -54,6 +54,6 @@ resource "aws_cloudfront_distribution" "s3_react_distribution" {
   }
 }
 
-resource "aws_cloudfront_origin_access_identity" "s3_react_distribution" {
-  comment = "cloudfront origin access identity for s3 access in ${var.environment}"
+resource "aws_cloudfront_origin_access_identity" "s3_client_distribution" {
+  comment = "cloudfront origin access identity for s3 access in ${var.env}"
 }
