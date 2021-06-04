@@ -4,7 +4,7 @@
 module "request_create" {
   source       = "../go-lambda-service"
   service_name = "request-create"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     RULE_LAMBDA_ARN  = aws_lambda_function.rules.arn,
     NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
@@ -14,7 +14,7 @@ module "request_create" {
 }
 
 resource "aws_iam_policy" "invoke_rules" {
-  name        = "allow-rules-invoke-${var.environment}"
+  name        = "allow-rules-invoke-${var.env}"
   description = "added perms for request-create lambda"
   policy = jsonencode({
     Version = "2012-10-17"
@@ -44,7 +44,7 @@ resource "aws_iam_policy" "invoke_rules" {
 module "request_approve" {
   source       = "../go-lambda-service"
   service_name = "request-approve"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
   })
@@ -55,7 +55,7 @@ module "request_approve" {
 module "requests_by_account" {
   source       = "../go-lambda-service"
   service_name = "requests-by-account"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
   })
@@ -65,7 +65,7 @@ module "requests_by_account" {
 module "request_by_id" {
   source        = "../go-lambda-service"
   service_name  = "request-by-id"
-  env           = var.environment
+  env           = var.env
   env_vars      = merge(local.POSTGRES_VARS, {})
   create_secret = true
 }
@@ -73,7 +73,7 @@ module "request_by_id" {
 module "transactions_by_account" {
   source       = "../go-lambda-service"
   service_name = "transactions-by-account"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
   })
@@ -83,7 +83,7 @@ module "transactions_by_account" {
 module "transaction_by_id" {
   source        = "../go-lambda-service"
   service_name  = "transaction-by-id"
-  env           = var.environment
+  env           = var.env
   env_vars      = merge(local.POSTGRES_VARS, {})
   create_secret = true
 }
@@ -91,7 +91,7 @@ module "transaction_by_id" {
 module "balance_by_account" {
   source        = "../go-lambda-service"
   service_name  = "balance-by-account"
-  env           = var.environment
+  env           = var.env
   env_vars      = merge(local.POSTGRES_VARS, {})
   create_secret = true
 }
@@ -99,7 +99,7 @@ module "balance_by_account" {
 module "auto_confirm" {
   source       = "../go-lambda-service"
   service_name = "auto-confirm"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     INITIAL_ACCOUNT_BALANCE = var.initial_account_balance
   })
@@ -109,7 +109,7 @@ module "auto_confirm" {
 module "wss_connect" {
   source            = "../go-lambda-service"
   service_name      = "wss-connect"
-  env               = var.environment
+  env               = var.env
   env_vars          = merge(local.POSTGRES_VARS, {})
   invoke_principals = ["apigateway.amazonaws.com"]
 }
@@ -118,7 +118,7 @@ module "wss_connect" {
 module "notifications_send" {
   source       = "../go-lambda-service"
   service_name = "notifications-send"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
   })
@@ -136,7 +136,7 @@ resource "aws_sns_topic_subscription" "notifications_send" {
 module "notifications_get" {
   source       = "../go-lambda-service"
   service_name = "notifications-get"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFICATIONS_RETURN_LIMIT = var.notifications_return_limit
     APIGW_CONNECTIONS_URI      = local.APIGW_CONNECTIONS_URI
@@ -150,7 +150,7 @@ module "notifications_get" {
 module "notifications_clear" {
   source       = "../go-lambda-service"
   service_name = "notifications-clear"
-  env          = var.environment
+  env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
     COGNITO_JWKS_URI      = local.COGNITO_JWKS_URI

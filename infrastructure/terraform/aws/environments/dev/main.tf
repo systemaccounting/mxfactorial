@@ -43,7 +43,7 @@ module "dev" {
   source = "../../modules/environment"
 
   ############### shared ###############
-  environment = local.ENV
+  env = local.ENV
 
   ############### lambda ###############
   requests_by_account_return_limit     = 20
@@ -51,16 +51,13 @@ module "dev" {
   notifications_return_limit           = 20
   initial_account_balance              = 1000
 
-  ############### shared in lambda and rds ###############
-
-  db_snapshot_id = null
-
   ############### rds ###############
   rds_db_version                  = "13.1"
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
   rds_instance_name               = local.APP_ENV
+  db_snapshot_id                  = null
 
   ############### api gateway ###############
 
@@ -75,8 +72,8 @@ module "dev" {
   // apigw v2
   enable_api_auto_deploy = true
 
-  ############### react ###############
-  react_origin_bucket_name = "${local.APP}-react-${local.ENV}"
+  ############### client ###############
+  client_origin_bucket_name = "${local.APP}-client-${local.ENV}"
 
   ############### cloudfront ###############
   ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, local.ENV)

@@ -3,13 +3,13 @@ locals {
 }
 
 data "aws_s3_bucket_object" "rules" {
-  bucket = "mxfactorial-artifacts-${var.environment}"
+  bucket = "mxfactorial-artifacts-${var.env}"
   key    = "${local.RULES}-src.zip"
 }
 
 resource "aws_lambda_function" "rules" {
-  function_name     = "${local.RULES}-${var.environment}"
-  description       = "${local.RULES} service in ${var.environment}"
+  function_name     = "${local.RULES}-${var.env}"
+  description       = "${local.RULES} service in ${var.env}"
   s3_bucket         = data.aws_s3_bucket_object.rules.bucket
   s3_key            = data.aws_s3_bucket_object.rules.key
   s3_object_version = data.aws_s3_bucket_object.rules.version_id
@@ -33,14 +33,14 @@ resource "aws_cloudwatch_log_group" "rules" {
 }
 
 resource "aws_iam_role" "rules" {
-  name               = "${local.RULES}-role-${var.environment}"
+  name               = "${local.RULES}-role-${var.env}"
   assume_role_policy = data.aws_iam_policy_document.rules_trust_policy.json
 }
 
 data "aws_iam_policy_document" "rules_trust_policy" {
   version = "2012-10-17"
   statement {
-    sid    = "${replace(title(local.RULES), "-", "")}LambdaTrustPolicy${title(var.environment)}"
+    sid    = "${replace(title(local.RULES), "-", "")}LambdaTrustPolicy${title(var.env)}"
     effect = "Allow"
     actions = [
       "sts:AssumeRole",
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "rules_trust_policy" {
 }
 
 resource "aws_iam_role_policy" "rules_policy" {
-  name   = "${local.RULES}-policy-${var.environment}"
+  name   = "${local.RULES}-policy-${var.env}"
   role   = aws_iam_role.rules.id
   policy = data.aws_iam_policy_document.rules_policy.json
 }
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "rules_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "${replace(title(local.RULES), "-", "")}LambdaLoggingPolicy${title(var.environment)}"
+    sid = "${replace(title(local.RULES), "-", "")}LambdaLoggingPolicy${title(var.env)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",

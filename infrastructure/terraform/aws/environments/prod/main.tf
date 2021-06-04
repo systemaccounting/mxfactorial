@@ -17,7 +17,7 @@ provider "aws" {
 
 provider "archive" {}
 
-data "terraform_remote_state" "aws-us-east-1" {
+data "terraform_remote_state" "aws_us-east-1" {
   backend = "remote"
 
   config = {
@@ -30,8 +30,9 @@ data "terraform_remote_state" "aws-us-east-1" {
 }
 
 locals {
-  APP = "mxfactorial"
-  ENV = "prod"
+  APP     = "mxfactorial"
+  ENV     = "prod"
+  APP_ENV = "${local.APP}-${local.ENV}"
 }
 
 # IMPORTANT: first build lambda artifacts using `cd infrastructure/terraform && sh build.sh $ENV`
@@ -39,28 +40,38 @@ module "prod" {
   source = "../../modules/environment"
 
   ############### shared ###############
-  environment = local.ENV
+  env = local.ENV
 
-  ############### shared in lambda and rds ###############
-  req_query_return_limit   = 20
-  trans_query_return_limit = 20
-
-  ############### rds ###############
-  rds_db_version = "11.10"
-
-  ############### shared in lambda and rds ###############
-  db_snapshot_id = null
+  ############### lambda ###############
+  requests_by_account_return_limit     = 20
+  transactions_by_account_return_limit = 20
+  notifications_return_limit           = 20
+  initial_account_balance              = 1000
 
   ############### rds ###############
+  rds_db_version                  = "13.1"
   rds_allow_major_version_upgrade = true
-  rds_instance_class              = "db.t2.micro"
-  rds_parameter_group             = "default.postgres11"
-  rds_instance_name               = "${local.APP}-postgres-${local.ENV}"
+  rds_instance_class              = "db.t3.micro"
+  rds_parameter_group             = "default.postgres13"
+  rds_instance_name               = local.APP_ENV
+  db_snapshot_id                  = null
 
   ############### api gateway ###############
-  certificate_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, local.ENV)
+  // change graphql_deployment_version when switching
+  enable_api_auth = false
+
+  // change value to deploy api
+  graphql_deployment_version     = 19
+  apigw_authorization_header_key = "Authorization"
+  certificate_arn                = lookup(data.terraform_remote_state.aws_us-east-1.outputs.api_cert_map, local.ENV)
+
+  // apigw v2
+  enable_api_auto_deploy = true
+
+  ############### client ###############
+  client_origin_bucket_name = "${local.APP}-client-${local.ENV}"
 
   ############### cloudfront ###############
-  ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, local.ENV)
+  ssl_arn = lookup(data.terraform_remote_state.aws_us-east-1.outputs.client_cert_map, local.ENV)
 }
 

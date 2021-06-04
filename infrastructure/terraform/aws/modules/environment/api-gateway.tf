@@ -3,12 +3,12 @@ resource "aws_api_gateway_account" "apigw_logging" {
 }
 
 resource "aws_iam_role" "apigw_logging" {
-  name = "apigw-logging-${var.environment}"
+  name = "apigw-logging-${var.env}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "APIGwTrustPolicy${title(var.environment)}"
+        Sid    = "APIGwTrustPolicy${title(var.env)}"
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
@@ -20,13 +20,13 @@ resource "aws_iam_role" "apigw_logging" {
 }
 
 resource "aws_iam_policy" "apigw_logging" {
-  name        = "apigw-logging-${var.environment}"
-  description = "apigw logging permission in ${var.environment}"
+  name        = "apigw-logging-${var.env}"
+  description = "apigw logging permission in ${var.env}"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "LoggingPolicy${title(var.environment)}"
+        Sid = "LoggingPolicy${title(var.env)}"
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",

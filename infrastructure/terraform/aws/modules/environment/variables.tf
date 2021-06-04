@@ -1,4 +1,4 @@
-variable "environment" {}
+variable "env" {}
 variable "ssl_arn" {}
 variable "certificate_arn" {}
 variable "db_snapshot_id" {}
@@ -14,5 +14,5 @@ variable "apigw_authorization_header_key" {}
 variable "enable_api_auth" {}
 variable "graphql_deployment_version" {}
 variable "initial_account_balance" {}
-variable "react_origin_bucket_name" {}
+variable "client_origin_bucket_name" {}
 variable "enable_api_auto_deploy" {}

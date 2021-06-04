@@ -2,9 +2,9 @@
 // retrieval of application environment variables
 
 resource "aws_secretsmanager_secret" "graphql_api" {
-  name                    = "${var.environment}/GRAPHQL_API"
+  name                    = "${var.env}/GRAPHQL_API"
   recovery_window_in_days = 0
-  description             = "graphql endpoint in ${var.environment}"
+  description             = "graphql endpoint in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "graphql_api" {
@@ -13,9 +13,9 @@ resource "aws_secretsmanager_secret_version" "graphql_api" {
 }
 
 resource "aws_secretsmanager_secret" "pool_id" {
-  name                    = "${var.environment}/POOL_ID"
+  name                    = "${var.env}/POOL_ID"
   recovery_window_in_days = 0
-  description             = "cognito pool id in ${var.environment}"
+  description             = "cognito pool id in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "pool_id" {
@@ -24,9 +24,9 @@ resource "aws_secretsmanager_secret_version" "pool_id" {
 }
 
 resource "aws_secretsmanager_secret" "pool_name" {
-  name                    = "${var.environment}/POOL_NAME"
+  name                    = "${var.env}/POOL_NAME"
   recovery_window_in_days = 0
-  description             = "cognito pool id in ${var.environment}"
+  description             = "cognito pool id in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "pool_name" {
@@ -35,9 +35,9 @@ resource "aws_secretsmanager_secret_version" "pool_name" {
 }
 
 resource "aws_secretsmanager_secret" "client_id" {
-  name                    = "${var.environment}/CLIENT_ID"
+  name                    = "${var.env}/CLIENT_ID"
   recovery_window_in_days = 0
-  description             = "cognito client id in ${var.environment}"
+  description             = "cognito client id in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "client_id" {
@@ -46,9 +46,9 @@ resource "aws_secretsmanager_secret_version" "client_id" {
 }
 
 resource "aws_secretsmanager_secret" "test_account" {
-  name                    = "${var.environment}/SECRET"
+  name                    = "${var.env}/SECRET"
   recovery_window_in_days = 0
-  description             = "test account secret in ${var.environment}"
+  description             = "test account secret in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "test_account" {
@@ -62,9 +62,9 @@ resource "random_password" "test_account" {
 }
 
 resource "aws_secretsmanager_secret" "notifications_topic_arn" {
-  name                    = "${var.environment}/NOTIFY_TOPIC_ARN"
+  name                    = "${var.env}/NOTIFY_TOPIC_ARN"
   recovery_window_in_days = 0
-  description             = "notifications topic arn in ${var.environment}"
+  description             = "notifications topic arn in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "notifications_topic_arn" {
@@ -73,9 +73,9 @@ resource "aws_secretsmanager_secret_version" "notifications_topic_arn" {
 }
 
 resource "aws_secretsmanager_secret" "postgres_db_name" {
-  name                    = "${var.environment}/PGDATABASE"
+  name                    = "${var.env}/PGDATABASE"
   recovery_window_in_days = 0
-  description             = "postgres db name in ${var.environment}"
+  description             = "postgres db name in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "postgres_db_name" {
@@ -84,9 +84,9 @@ resource "aws_secretsmanager_secret_version" "postgres_db_name" {
 }
 
 resource "aws_secretsmanager_secret" "postgres_host" {
-  name                    = "${var.environment}/PGHOST"
+  name                    = "${var.env}/PGHOST"
   recovery_window_in_days = 0
-  description             = "postgres host in ${var.environment}"
+  description             = "postgres host in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "postgres_host" {
@@ -95,9 +95,9 @@ resource "aws_secretsmanager_secret_version" "postgres_host" {
 }
 
 resource "aws_secretsmanager_secret" "postgres_password" {
-  name                    = "${var.environment}/PGPASSWORD"
+  name                    = "${var.env}/PGPASSWORD"
   recovery_window_in_days = 0
-  description             = "postgres password in ${var.environment}"
+  description             = "postgres password in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "postgres_password" {
@@ -106,9 +106,9 @@ resource "aws_secretsmanager_secret_version" "postgres_password" {
 }
 
 resource "aws_secretsmanager_secret" "postgres_port" {
-  name                    = "${var.environment}/PGPORT"
+  name                    = "${var.env}/PGPORT"
   recovery_window_in_days = 0
-  description             = "postgres port in ${var.environment}"
+  description             = "postgres port in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "postgres_port" {
@@ -117,9 +117,9 @@ resource "aws_secretsmanager_secret_version" "postgres_port" {
 }
 
 resource "aws_secretsmanager_secret" "postgres_user" {
-  name                    = "${var.environment}/PGUSER"
+  name                    = "${var.env}/PGUSER"
   recovery_window_in_days = 0
-  description             = "postgres user in ${var.environment}"
+  description             = "postgres user in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "postgres_user" {
@@ -128,9 +128,9 @@ resource "aws_secretsmanager_secret_version" "postgres_user" {
 }
 
 resource "aws_secretsmanager_secret" "rule_lambda_arn" {
-  name                    = "${var.environment}/RULE_LAMBDA_ARN"
+  name                    = "${var.env}/RULE_LAMBDA_ARN"
   recovery_window_in_days = 0
-  description             = "rule lambda arn in ${var.environment}"
+  description             = "rule lambda arn in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "rule_lambda_arn" {
@@ -139,9 +139,9 @@ resource "aws_secretsmanager_secret_version" "rule_lambda_arn" {
 }
 
 resource "aws_secretsmanager_secret" "db_reset_passphrase" {
-  name                    = "${var.environment}/DB_RESET_PASSPHRASE"
+  name                    = "${var.env}/DB_RESET_PASSPHRASE"
   recovery_window_in_days = 0
-  description             = "db reset passphrase in ${var.environment}"
+  description             = "db reset passphrase in ${var.env}"
 }
 
 resource "aws_secretsmanager_secret_version" "db_reset_passphrase" {

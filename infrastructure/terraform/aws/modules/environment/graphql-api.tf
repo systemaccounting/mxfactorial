@@ -1,6 +1,6 @@
 locals {
-  APIV2_NAME = "graphql-${var.environment}"
-  APIV2_URI  = "${var.environment}-api.mxfactorial.io"
+  APIV2_NAME = "graphql-${var.env}"
+  APIV2_URI  = "${var.env == "prod" ? "" : "${var.env}-"}api.mxfactorial.io"
 }
 
 module "graphql_apigwv2" {
@@ -9,7 +9,7 @@ module "graphql_apigwv2" {
   payload_format_version   = "1.0"
   enable_api_auth          = false
   api_version              = 001
-  env                      = var.environment
+  env                      = var.env
   lambda_invoke_arn        = aws_lambda_function.graphql.invoke_arn
   enable_api_auto_deploy   = var.enable_api_auto_deploy
   cognito_client_id        = aws_cognito_user_pool_client.client.id

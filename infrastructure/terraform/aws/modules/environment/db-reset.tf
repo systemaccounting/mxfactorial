@@ -1,11 +1,11 @@
 data "aws_s3_bucket_object" "db_reset" {
-  bucket = "mxfactorial-artifacts-${var.environment}"
+  bucket = "mxfactorial-artifacts-${var.env}"
   key    = "db-reset-src.zip"
 }
 
 resource "aws_lambda_function" "db_reset" {
-  function_name     = "db-reset-${var.environment}"
-  description       = "go migrate tool in ${var.environment}"
+  function_name     = "db-reset-${var.env}"
+  description       = "go migrate tool in ${var.env}"
   s3_bucket         = data.aws_s3_bucket_object.db_reset.bucket
   s3_key            = data.aws_s3_bucket_object.db_reset.key
   s3_object_version = data.aws_s3_bucket_object.db_reset.version_id
@@ -36,14 +36,14 @@ resource "aws_cloudwatch_log_group" "db_reset" {
 }
 
 resource "aws_iam_role" "db_reset" {
-  name               = "db-reset-role-${var.environment}"
+  name               = "db-reset-role-${var.env}"
   assume_role_policy = data.aws_iam_policy_document.db_reset_trust_policy.json
 }
 
 data "aws_iam_policy_document" "db_reset_trust_policy" {
   version = "2012-10-17"
   statement {
-    sid    = "DBResetFaasTrustPolicy${title(var.environment)}"
+    sid    = "DBResetFaasTrustPolicy${title(var.env)}"
     effect = "Allow"
     actions = [
       "sts:AssumeRole",
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "db_reset_trust_policy" {
 
 # allow function to create logs and access rds
 resource "aws_iam_role_policy" "db_reset_policy" {
-  name = "db-reset-policy-${var.environment}"
+  name = "db-reset-policy-${var.env}"
   role = aws_iam_role.db_reset.id
 
   policy = data.aws_iam_policy_document.db_reset_policy.json
@@ -67,7 +67,7 @@ data "aws_iam_policy_document" "db_reset_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "DBResetFaasLoggingPolicy${title(var.environment)}"
+    sid = "DBResetFaasLoggingPolicy${title(var.env)}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "db_reset_policy" {
   }
 
   statement {
-    sid = "DBResetFaasInvokePolicy${title(var.environment)}"
+    sid = "DBResetFaasInvokePolicy${title(var.env)}"
     actions = [
       "lambda:InvokeFunction"
     ]
