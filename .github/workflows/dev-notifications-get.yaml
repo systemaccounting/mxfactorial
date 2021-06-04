@@ -1,15 +1,15 @@
-name: dev-auto-confirm
+name: dev-notifications-get
 
 on:
   push:
     paths:
-    - 'services/auto-confirm/**'
+    - 'services/notifications-get/**'
     branches-ignore:
     - 'master'
 
 jobs:
-  build:
-    name: auto-confirm
+  test:
+    name: notifications-get
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -24,13 +24,13 @@ jobs:
           export GOBIN=$(go env GOPATH)/bin
           export PATH=$PATH:$(go env GOPATH)/bin
           make install
-        working-directory: services/auto-confirm
+        working-directory: services/notifications-get
       - name: compile
         run: make compile
-        working-directory: services/auto-confirm
+        working-directory: services/notifications-get
       - name: zip
         run: make zip
-        working-directory: services/auto-confirm
+        working-directory: services/notifications-get
       - name: deploy to dev
         run: make deploy-only ENV=dev
-        working-directory: services/auto-confirm
+        working-directory: services/notifications-get
