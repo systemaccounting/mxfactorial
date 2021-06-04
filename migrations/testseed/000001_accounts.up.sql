@@ -9,6 +9,7 @@ insert into account (name, password) values ('JacobWebb', 'password');
 insert into account (name, password) values ('MiriamLevy', 'password');
 insert into account (name, password) values ('AzizKhan', 'password');
 insert into account (name, password) values ('IgorPetrov', 'password');
+insert into account (name, password) values ('GroceryStore', 'password');
 
 -- account profiles
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('JohnSmith', 'inventor', 'John', 'Wilson', 'Smith', 'United States of America', '1050', 'W Olive Ave', null, null, 'Merced', 'Merced County', null, 'California', '95348', '(37.318830, -120.486230)', 'joe@address.xz', 1, 209, 5555555, 1, 1);
@@ -21,6 +22,7 @@ insert into account_profile (account_name, description, first_name, middle_name,
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('MiriamLevy', 'Amateur astronomer', 'Miriam', 'Colt', 'Levy', 'United States of America', '6903', 'Brodie Ln', null, null, 'Austin', 'Travis County', null, 'Texas', '78745', '(30.2140419,-97.8297857)', 'miriam@address.xz', 1, 512, 5555555, 8, 8);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('AzizKhan', 'Chess player', 'Aziz', 'Abdul', 'Khan', 'United States of America', '180', 'River St', null, null, 'Danville', 'Travis County', null, 'Virginia', '24540', '(36.5898155,-79.3844719)', 'aziz@address.xz', 1, 434, 5555555, 9, 9);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('IgorPetrov', 'Classical pianist', 'Igor', 'Sergei', 'Petrov', 'United States of America', '1220', 'Fulton Ave', null, null, 'Uniondale', 'Nassau County', null, 'New York', '11553', '(40.713235,-73.606191)', 'igor@address.xz', 1, 516, 5555555, 10, 10);
+insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('GroceryStore', 'Sells groceries', 'Grocery', null, 'Store', 'United States of America', '8701', 'Lincoln Blvd', null, null, 'Los Angeles', 'Los Angeles County', null, 'California', '90045', '(33.958050,-118.418388)', 'grocerystore@address.xz', 1, 310, 5555555, 11, 11);
 
 -- subaccounts
 insert into account (name, created_by) values ('CPA', 'JohnSmith');
@@ -83,3 +85,4 @@ insert into account_balance (account_name, current_balance) values ('TimeCo', 10
 insert into account_balance (account_name, current_balance) values ('GroceryCo', 1000);
 insert into account_balance (account_name, current_balance) values ('Skyways', 1000);
 insert into account_balance (account_name, current_balance) values ('CloudBiz', 1000);
+insert into account_balance (account_name, current_balance) values ('GroceryStore', 1000);
