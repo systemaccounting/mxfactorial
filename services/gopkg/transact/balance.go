@@ -19,10 +19,10 @@ func IsEquilibrium(t *types.Transaction) bool {
 TransactionItems:
 	for _, v := range t.TransactionItems {
 		if v.CreditorApprovalTime != nil && v.DebitorApprovalTime != nil {
-		Approvers:
-			for _, w := range v.Approvers {
+		Approvals:
+			for _, w := range v.Approvals {
 				if w.ApprovalTime != nil {
-					continue Approvers
+					continue Approvals
 				} else {
 					return false
 				}

@@ -3,7 +3,7 @@
 </p>
 
 1. user sends `rule tested x 0` transaction to rule endpoint
-1. apply approver rules
+1. apply approval rules
 1. rule endpoint sends `rule tested x 1` transaction to user
 1. user sends `rule tested x 1` transaction to request endpoint
 1. request endpoint receives `rule tested x 1` transaction from user
@@ -13,8 +13,8 @@
 1. return error on equality test failure (todo: include missing items in error)
 1. create transaction
 1. create transaction_item
-1. create approvers
-1. apply approver rules
+1. create approvals
+1. apply approval rules
 1. send transaction request notifications
 1. return transaction.id to requesting user
 

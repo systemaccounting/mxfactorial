@@ -7,7 +7,7 @@
     "verbose": true,
     "testPathIgnorePatterns": [
       "<rootDir>/src/rules/applyItemRule.test.js",
-      "<rootDir>/src/rules/applyApproverRule.test.js",
+      "<rootDir>/src/rules/applyApprovalRule.test.js",
       "<rootDir>/tests/index.integ.js",
       "<rootDir>/tests/graphql.integ.js"
     ]

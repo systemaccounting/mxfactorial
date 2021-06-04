@@ -12,11 +12,11 @@ module.exports = (
   ruleInstanceRole,
   ruleInstanceAccount,
   transactionItem,
-  approver,
+  approval,
   DEBITOR,
   CREDITOR,
-  APPROVER_ROLE,
-  APPROVER_NAME,
+  APPROVAL_ROLE,
+  APPROVAL_NAME,
   ) => {
     // test rule_instance arguments
     if (CREDITOR != transactionItem.creditor
@@ -24,24 +24,24 @@ module.exports = (
       // console.error(
       //   `error: failure to match ${DEBITOR} and ${CREDITOR} in ${ruleInstanceName} rule_instance with id ${ruleInstanceId}`
       // );
-      return approver;
+      return approval;
     };
 
     const ruleInstID = stringIfNumber(stringIfNull(ruleInstanceId))
     const trID = stringIfNumber(stringIfNull(transactionItem.transaction_id))
     const trItemID = stringIfNumber(stringIfNull(transactionItem.id))
 
-    let postRuleApprover = Object.assign({}, approver);
+    let postRuleApproval = Object.assign({}, approval);
     if (
       // test before approving
-      postRuleApprover.account_role == APPROVER_ROLE
-      && postRuleApprover.account_name == APPROVER_NAME
+      postRuleApproval.account_role == APPROVAL_ROLE
+      && postRuleApproval.account_name == APPROVAL_NAME
       ) {
       // בסדר
-      postRuleApprover.approval_time = CURRENT_TIMESTAMP;
-      postRuleApprover.rule_instance_id = ruleInstID;
-      postRuleApprover.transaction_id = trID;
-      postRuleApprover.transaction_item_id = trItemID;
+      postRuleApproval.approval_time = CURRENT_TIMESTAMP;
+      postRuleApproval.rule_instance_id = ruleInstID;
+      postRuleApproval.transaction_id = trID;
+      postRuleApproval.transaction_item_id = trItemID;
     }
-    return postRuleApprover;
+    return postRuleApproval;
   };

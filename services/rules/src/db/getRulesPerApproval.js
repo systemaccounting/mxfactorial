@@ -1,6 +1,6 @@
 const {
-  RULE_INSTANCE_SQL,
-  APPROVER,
+  ACCOUNT_ROLE_TRS_SQL,
+  APPROVAL,
 } = require('../constants');
 
 module.exports = async function(
@@ -10,8 +10,8 @@ module.exports = async function(
   ) {
   // rows.length == 0 ok
   const { rows } = await db.query(
-    RULE_INSTANCE_SQL,
-    [APPROVER, roleName, approverName]
+    ACCOUNT_ROLE_TRS_SQL,
+    [APPROVAL, roleName, approverName]
   );
   // todo: handle error
   return rows;

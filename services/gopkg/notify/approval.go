@@ -22,7 +22,7 @@ var (
 func NotifyTransactionRoleApprovers(
 	db lpg.SQLDB,
 	topicArn *string,
-	approvers []*types.Approver,
+	approvals []*types.Approval,
 	transaction *types.Transaction,
 ) error {
 
@@ -35,7 +35,7 @@ func NotifyTransactionRoleApprovers(
 
 	// create transaction approval notifications
 	notifications, err := createNotificationsPerRoleApprover(
-		approvers,
+		approvals,
 		transaction,
 	)
 	if err != nil {
@@ -83,14 +83,14 @@ func NotifyTransactionRoleApprovers(
 }
 
 func createNotificationsPerRoleApprover(
-	approvers []*types.Approver,
+	approvals []*types.Approval,
 	transaction *types.Transaction,
 ) ([]*types.TransactionNotification, error) {
 	// dedupe role approvers to send only 1 notification
 	// per approver role: someone shopping at their own store
 	// receives 1 debitor and 1 creditor approval
-	var uniqueRoleApprovers []*types.Approver
-	for _, v := range approvers {
+	var uniqueRoleApprovers []*types.Approval
+	for _, v := range approvals {
 		if isRoleApproverUnique(*v, uniqueRoleApprovers) {
 			uniqueRoleApprovers = append(uniqueRoleApprovers, v)
 		}
@@ -185,7 +185,7 @@ func createSNSInput(
 	}
 }
 
-func isRoleApproverUnique(a types.Approver, l []*types.Approver) bool {
+func isRoleApproverUnique(a types.Approval, l []*types.Approval) bool {
 	for _, v := range l {
 		if *v.AccountName == *a.AccountName && *v.AccountRole == *a.AccountRole {
 			return false

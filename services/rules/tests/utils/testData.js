@@ -1,6 +1,6 @@
 const getTransactionItem = require('../../src/model/transactionItem');
 const createTransaction = require('../../src/model/transaction');
-const getApprover = require('../../src/model/approver');
+const getApproval = require('../../src/model/approval');
 const {
   DEBITOR,
   CREDITOR
@@ -22,8 +22,8 @@ const fakerAccountWithSevenRandomDigits = () => {
 // );
 
 const testEmptyTransaction = createTransaction(
-  "",
-  "",
+  null,
+  null,
   null,
   null,
   null,
@@ -56,19 +56,19 @@ function createItemRequestData (debitor, creditor, debitOrCredit) {
       2.000,
       1,
       null,
-      "",
-      "",
-      "",
+      null,
+      null,
+      null,
       debitor,
       creditor,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ],
     [
       "1",
@@ -77,19 +77,19 @@ function createItemRequestData (debitor, creditor, debitOrCredit) {
       3.000,
       2,
       null,
-      "",
-      "",
-      "",
+      null,
+      null,
+      null,
       debitor,
       creditor,
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
-      "",
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ],
   ];
 
@@ -103,7 +103,7 @@ function createItemRequestData (debitor, creditor, debitOrCredit) {
   return items;
 }
 
-function createTestApprover (approverName, debitOrCredit) {
+function createTestApproval (approverName, debitOrCredit) {
 
   if (arguments.length !== 2) {
     throw Error('debitor, credtior and request type required')
@@ -126,7 +126,7 @@ function createTestApprover (approverName, debitOrCredit) {
     null
   ];
 
-  return getApprover(...testApproverData);
+  return getApproval(...testApproverData);
 }
 
 const testItems = [
@@ -137,19 +137,19 @@ const testItems = [
     price: 2,
     quantity: 1,
     debitor_first: null,
-    rule_instance_id: '',
-    unit_of_measurement: '',
+    rule_instance_id: null,
+    unit_of_measurement: null,
     units_measured: 0,
     debitor: 'JohnSmith',
     creditor: 'GroceryCo',
-    debitor_profile_id: "",
-    creditor_profile_id: "",
-    debitor_approval_time: '',
+    debitor_profile_id: null,
+    creditor_profile_id: null,
+    debitor_approval_time: null,
     creditor_approval_time: null,
-    debitor_expiration_time: '',
-    creditor_expiration_time: '',
-    debitor_rejection_time: '',
-    creditor_rejection_time: ''
+    debitor_expiration_time: null,
+    creditor_expiration_time: null,
+    debitor_rejection_time: null,
+    creditor_rejection_time: null
   },
   {
     id: "1",
@@ -158,19 +158,19 @@ const testItems = [
     price: 3,
     quantity: 2,
     debitor_first: null,
-    rule_instance_id: '',
-    unit_of_measurement: '',
+    rule_instance_id: null,
+    unit_of_measurement: null,
     units_measured: 0,
     debitor: 'JohnSmith',
     creditor: 'GroceryCo',
-    debitor_profile_id: "",
-    creditor_profile_id: "",
-    debitor_approval_time: '',
+    debitor_profile_id: null,
+    creditor_profile_id: null,
+    debitor_approval_time: null,
     creditor_approval_time: null,
-    debitor_expiration_time: '',
-    creditor_expiration_time: '',
-    debitor_rejection_time: '',
-    creditor_rejection_time: ''
+    debitor_expiration_time: null,
+    creditor_expiration_time: null,
+    debitor_rejection_time: null,
+    creditor_rejection_time: null
   }
 ]
 
@@ -179,6 +179,6 @@ module.exports = {
   fakerAccountWithSevenRandomDigits,
   testIntraTransaction,
   createItemRequestData,
-  createTestApprover,
+  createTestApproval,
   testItems,
 }

@@ -1,7 +1,5 @@
 const {
-  DEBITOR,
-  CREDITOR,
-  APPROVERS,
+  APPROVALS,
 } = require('./constants');
 
 module.exports = async function(
@@ -15,8 +13,8 @@ module.exports = async function(
   ) {
 
   for (const preItem of transactionItems) {
-    // push approvers here:
-    preItem[APPROVERS] = new Array();
+    // push approvals here:
+    preItem[APPROVALS] = new Array();
   };
 
   for (const role of sequence) {
@@ -29,10 +27,10 @@ module.exports = async function(
 
       for (let i = 0; i < approverNames.length; i++) {
         const approverObject = createObjFn(
-          "", // id
-          "", // ruleInstanceId
-          "", // transactionId,
-          "", // transactionItemId
+          null, // id
+          null, // ruleInstanceId
+          null, // transactionId,
+          null, // transactionItemId
           approverNames[i],
           role,
           null, // deviceId
@@ -42,19 +40,19 @@ module.exports = async function(
           null, // expirationTime
         );
 
-        const rulesPerApprover = await getRulesFn(
+        const rulesPerApproval = await getRulesFn(
           db,
           role,
           approverNames[i],
         );
 
-        const rulesAppliedApprover = applyRulesFn(
+        const rulesAppliedApproval = applyRulesFn(
           approverObject,
-          rulesPerApprover,
+          rulesPerApproval,
           item,
         );
         // todo: label item approval only
-        item[APPROVERS].push(rulesAppliedApprover);
+        item[APPROVALS].push(rulesAppliedApproval);
       };
     };
   };

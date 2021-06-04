@@ -6,7 +6,7 @@ const {
 
 const {
   createItemRequestData,
-  createTestApprover,
+  createTestApproval,
 } = require('../../tests/utils/testData');
 
 describe('approveAnyCreditItem', () => {
@@ -36,7 +36,7 @@ describe('approveAnyCreditItem', () => {
       CREDITOR,
     )[0];
 
-    const testApprover = createTestApprover(
+    const testApprover = createTestApproval(
       testapprovername,
       CREDITOR,
     );
@@ -81,7 +81,7 @@ describe('approveAnyCreditItem', () => {
       CREDITOR,
     )[0];
 
-    const testApprover = createTestApprover(
+    const testApprover = createTestApproval(
       testotherapprover,
       CREDITOR,
     );

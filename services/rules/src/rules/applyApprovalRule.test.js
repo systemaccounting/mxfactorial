@@ -14,8 +14,8 @@ module.exports = function(
   transactionItem,
   approver,
   CREDITOR,
-  APPROVER_ROLE,
-  APPROVER_NAME,
+  APPROVAL_ROLE,
+  APPROVAL_NAME,
   ) {
     let copiedItem = Object.assign({}, transactionItem);
     delete(copiedItem.mock); // discard mock after smuggling
@@ -27,8 +27,8 @@ module.exports = function(
       copiedItem,
       approver,
       CREDITOR,
-      APPROVER_ROLE,
-      APPROVER_NAME,
+      APPROVAL_ROLE,
+      APPROVAL_NAME,
     );
     return {};
   };

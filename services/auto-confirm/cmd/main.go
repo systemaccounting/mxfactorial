@@ -80,7 +80,7 @@ func lambdaFn(
 
 	// create select rule instance sql
 	getRuleInstSQL, getRuleInstArgs := sqlb.SelectRuleInstanceSQL(
-		"approver",
+		"approval",
 		"approveAnyCreditItem",
 		"ApprovalAllCreditRequests",
 		"creditor",
@@ -94,7 +94,7 @@ func lambdaFn(
 
 	// create insert rule instance sql
 	insRuleInstSQL, insRuleInstArgs := sqlb.InsertRuleInstanceSQL(
-		"approver",
+		"approval",
 		"approveAnyCreditItem",
 		"ApprovalAllCreditRequests",
 		"creditor",

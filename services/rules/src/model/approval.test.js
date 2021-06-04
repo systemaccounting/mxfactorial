@@ -1,7 +1,7 @@
-const approver = require('./approver');
+const approval = require('./approval');
 
-describe('approver', () => {
-  test('returns an approver with keys & values', () => {
+describe('approval', () => {
+  test('returns an approval with keys & values', () => {
     const wantKeys = [
       'id',
       'rule_instance_id',
@@ -28,7 +28,7 @@ describe('approver', () => {
       'rejectionTimetest',
       'expirationTimetest',
     ];
-    const got = approver(...wantVals);
+    const got = approval(...wantVals);
     expect(Object.keys(got)).toEqual(wantKeys);
     expect(Object.values(got)).toEqual(wantVals);
   });

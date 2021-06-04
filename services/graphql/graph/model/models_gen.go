@@ -6,7 +6,7 @@ type ITransactionItem interface {
 	IsITransactionItem()
 }
 
-type Approver struct {
+type Approval struct {
 	ID                *string `json:"id"`
 	RuleInstanceID    *string `json:"rule_instance_id"`
 	TransactionID     *string `json:"transaction_id"`
@@ -61,7 +61,7 @@ type TransactionItem struct {
 	CreditorExpirationTime *string     `json:"creditor_expiration_time"`
 	DebitorRejectionTime   *string     `json:"debitor_rejection_time"`
 	CreditorRejectionTime  *string     `json:"creditor_rejection_time"`
-	Approvers              []*Approver `json:"approvers"`
+	Approvals              []*Approval `json:"approvals"`
 }
 
 func (TransactionItem) IsITransactionItem() {}
