@@ -119,7 +119,7 @@ deploy-layer:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) build-layer
 	$(MAKE) put-layer
-	$(MAKE) publish-layer
+	$(MAKE) update-lambda-layer:
 
 put-layer:
 	@ETAG=$$(aws s3api put-object \
@@ -130,7 +130,7 @@ put-layer:
 		--output=text | xargs); \
 	echo "***Deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"
 
-publish-layer:
+update-lambda-layer:
 	@$(MAKE) -s test-env-arg
 	@LAYER_VERSION_ARN=$$(aws lambda publish-layer-version \
 		--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
@@ -145,13 +145,25 @@ publish-layer:
 		--query='LastModified' \
 		--layers $$LAYER_VERSION_ARN $(BASH_LAYER_ARN); \
 	LAYER_VERSION=$$(echo $$LAYER_VERSION_ARN | cut -d ':' -f8); \
+	echo "***updated lambda $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
+
+publish-layer:
+	@$(MAKE) -s test-env-arg
+	@LAYER_VERSION_ARN=$$(aws lambda publish-layer-version \
+		--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
+		--description="$(APP_NAME) dependencies in $(ENV)" \
+		--content=S3Bucket=$(ARTIFACT_BUCKET),S3Key=$(APP_NAME)-layer.zip \
+		--region=$(REGION) \
+		--query 'LayerVersionArn' \
+		--output=text | xargs); \
+	LAYER_VERSION=$$(echo $$LAYER_VERSION_ARN | cut -d ':' -f8); \
 	echo "***published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
 deploy:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) build-layer
 	$(MAKE) put-layer ENV=$(ENV)
-	$(MAKE) publish-layer ENV=$(ENV)
+	$(MAKE) update-lambda-layer ENV=$(ENV)
 	$(MAKE) zip
 	$(MAKE) put-object ENV=$(ENV)
 	$(MAKE) update-function ENV=$(ENV)
@@ -161,5 +173,6 @@ initial-deploy:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) build-layer
 	$(MAKE) put-layer ENV=$(ENV)
+	$(MAKE) publish-layer ENV=$(ENV)
 	$(MAKE) zip
 	$(MAKE) put-object ENV=$(ENV)
