@@ -10,7 +10,6 @@ require (
 	github.com/awslabs/aws-lambda-go-api-proxy v0.10.0
 	github.com/bxcodec/faker/v3 v3.6.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/golang/mock v1.1.1
 	github.com/gorilla/mux v1.8.0
 	github.com/huandu/go-sqlbuilder v1.12.1
 	github.com/jackc/pgconn v1.8.1
