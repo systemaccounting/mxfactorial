@@ -40,4 +40,7 @@
 		"**/.DS_Store": true,
 		"**/node_modules": false
 	},
+	"[svelte]": {
+		"editor.defaultFormatter": "svelte.svelte-vscode"
+	}
 }
