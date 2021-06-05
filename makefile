@@ -10,7 +10,7 @@ INVENTORY_FILE=$(CURDIR)/inventory
 
 PARENT_DIRS=services \
 migrations \
-react
+client
 
 APP_DIRS=$(shell cat $(INVENTORY_FILE))
 SIZE=$(shell wc -l < "$(INVENTORY_FILE)" | xargs)
