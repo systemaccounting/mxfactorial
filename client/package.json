@@ -1,0 +1,47 @@
+{
+  "name": "mxfactorial",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
+    "start": "sirv public --single --no-clear --host $(ipconfig getifaddr en0)",
+    "validate": "svelte-check"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-common-types": "^0.2.35",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.1",
+    "@rollup/plugin-replace": "^2.4.2",
+    "@rollup/plugin-typescript": "^8.0.0",
+    "@tsconfig/svelte": "^1.0.0",
+    "@types/node": "^15.6.0",
+    "dotenv": "^9.0.2",
+    "rollup": "^2.48.0",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-livereload": "^2.0.0",
+    "rollup-plugin-node-builtins": "^2.1.2",
+    "rollup-plugin-polyfill-node": "^0.6.2",
+    "rollup-plugin-svelte": "^7.0.0",
+    "rollup-plugin-terser": "^7.0.0",
+    "sirv-cli": "^1.0.11",
+    "svelte": "^3.0.0",
+    "svelte-check": "^1.0.0",
+    "svelte-loading-spinners": "^0.1.5",
+    "svelte-preprocess": "^4.0.0",
+    "tslib": "^2.0.0",
+    "typescript": "^4.0.0"
+  },
+  "dependencies": {
+    "@aws-amplify/auth": "^4.0.0",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
+    "@urql/svelte": "^1.2.2",
+    "amazon-cognito-auth-js": "^1.3.3",
+    "crypto-js": "^4.0.0",
+    "dayjs": "^1.10.4",
+    "graphql": "^15.5.0",
+    "svelte-fa": "^2.2.0",
+    "svelte-navigator": "^3.1.5"
+  }
+}
