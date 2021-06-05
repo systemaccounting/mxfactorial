@@ -14,4 +14,4 @@ services/auto-confirm
 services/request-approve
 migrations/go-migrate
 migrations/db-reset
-react
+client
