@@ -1,0 +1,23 @@
+{
+  "extends": "@tsconfig/svelte/tsconfig.json",
+  "include": [
+    "src/**/*",
+    "src/**/*.ts",
+  ],
+  "exclude": [
+    "node_modules/*",
+    "__sapper__/*",
+    "public/*"
+  ],
+  "compilerOptions": {
+    "types": [
+      "svelte",
+      "node"
+    ],
+    "resolveJsonModule": true,
+    "lib": [
+      "DOM",
+      "es2015",
+    ]
+  },
+}
