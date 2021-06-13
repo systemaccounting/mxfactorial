@@ -10,14 +10,14 @@ a payment application intended for deployment by the united states treasury that
 systemaccounting optimizes the flow of capital by expediting the discovery of economic opportunity through physics and data science. dashboarding real-time business performance within an equally-accessible space spanned by a metric not only maximizes capital's throughput between investors and entrepreneurs, it also transparently benchmarks lending rates between borrowers and lenders. in addition to eliminating interest rate manipulation by central commitees, systemaccounting solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. by recording transactions as conserved quantites, user equity remains separate and protected from the liability produced by government-chartered lending firms
 
 ### faqs
-**q.** is this a "cyptocurrency"?
-**a.** no, and please use the word *encryption*
+**q.** is this a "cyptocurrency"?  
+**a.** no, and please use the word *encryption*  
 
-**q.** is this a "blockchain"?
-**a.** no, and please use the word *replication*
+**q.** is this a "blockchain"?  
+**a.** no, and please use the word *replication*  
 
-**q.** i dont find any words in here used by the media. what is this?
-**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this app solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary
+**q.** i dont find any words in here used by the media. what is this?  
+**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this app solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
 
 ### use cases
 public demonstration of the following use cases through a systemaccounting function:
