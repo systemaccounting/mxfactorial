@@ -19,6 +19,9 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** i dont find any words in here used by the media. what is this?  
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this app solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
 
+**q.** what is the equation?  
+**a.** *u* = transactions per second, *w<sub>i</sub>* = value conserved per transaction, *Mx!* = value visible in a combinatorial game  
+
 ### use cases
 public demonstration of the following use cases through a systemaccounting function:
 * expressing a [conservation law](https://en.wikipedia.org/wiki/Conservation_law) through a [data structure](https://github.com/systemaccounting/mxfactorial/blob/develop/mxfactorial.ipynb) disambiguates *delivered* value from *expected* value, and replaces [committees](https://www.federalreserve.gov/financial-stability.htm) with an automated [financial stability criterion](https://en.wikipedia.org/wiki/BIBO_stability)
