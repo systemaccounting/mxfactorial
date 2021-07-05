@@ -55,6 +55,7 @@
 		display: flex;
 		flex-flow: column nowrap;
 		justify-content: flex-end;
+		list-style-type: none;
 	}
 
 	li {
