@@ -1,26 +1,33 @@
 # mxfactorial
-<p align="center">
-  <a href="http://www.systemaccounting.org/math_identity" target="_blank"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></a>
-</p>
+<p align="center"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></p>
 
 [![builds](https://img.shields.io/badge/workflows-building-brightgreen.svg)](https://github.com/systemaccounting/mxfactorial/actions) [![env](https://img.shields.io/badge/ENV-PROD-brightgreen.svg)](https://mxfactorial.io/) [![contribute](https://img.shields.io/badge/contribute-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
 
-a payment application intended for deployment by the united states treasury that eliminates monetary inflation, systemic default risk, and the uncompetitive access to capital
+a payment application intended for deployment by the united states treasury that eliminates monetary inflation, systemic default risk, and the uncompetitive access to capital  
 
 systemaccounting optimizes the flow of capital by expediting the discovery of economic opportunity through physics and data science. dashboarding real-time business performance within an equally-accessible space spanned by a metric not only maximizes capital's throughput between investors and entrepreneurs, it also transparently benchmarks lending rates between borrowers and lenders. in addition to eliminating interest rate manipulation by central commitees, systemaccounting solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. by recording transactions as conserved quantites, user equity remains separate and protected from the liability produced by government-chartered lending firms
 
+### content
+[economic policy as code](https://www.youtube.com/watch?v=OlNYPkzAwwk&list=PLWTZbGMyrdcVvjbis9Dgf5UULxZLkfE6E) video series  
+
 ### faqs
-**q.** is this a "cyptocurrency"?  
+**q.** is this a "cryptocurrency"?  
 **a.** no, and please use the word *encryption*  
 
 **q.** is this a "blockchain"?  
 **a.** no, and please use the word *replication*  
 
 **q.** i dont find any words in here used by the media. what is this?  
-**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this app solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
+**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this payment application solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
 
 **q.** what is the equation?  
 **a.** *u* = transactions per second, *w<sub>i</sub>* = value conserved per transaction, *Mx!* = value visible in a combinatorial game  
+
+**q.** do you have any demos?  
+**a.** watch the *economic policy as code* video series  
+
+**q.** how to explain this project to non engineers?  
+**a.** share the *economic policy as code* video series  
 
 ### use cases
 public demonstration of the following use cases through a systemaccounting function:
