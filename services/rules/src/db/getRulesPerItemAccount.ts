@@ -1,21 +1,33 @@
 import c from "../constants";
-import type { Client, QueryResult } from "pg"
-import ACCOUNT_PROFILE_SQL from "../sql/selectAccountProfile"
+import type { QueryResult } from "pg"
+import type { IPGClient } from "../index.d"
 import STATE_NAME_TRS_SQL from "../sql/selectStateNameTrs"
 import ACCOUNT_ROLE_TRS_SQL from "../sql/selectAccountRoleTrs"
 
-export default async function (db: Client, roleName: string, accountName: string) {
-	const accountProfile: QueryResult = await db.query(
-		ACCOUNT_PROFILE_SQL, [accountName]
-	);
-	const rulesPerStateName: QueryResult = await db.query(
+export default async function (
+	client: IPGClient,
+	roleName: string,
+	stateName: string,
+	accountName: string,
+) {
+
+	const rulesPerStateName: QueryResult = await client.query(
 		STATE_NAME_TRS_SQL,
-		[c.TRANSACTION_ITEM, roleName, accountProfile.rows[0].state_name]
+		[c.TRANSACTION_ITEM, roleName, stateName]
 	);
-	const rulesPerAccountRole: QueryResult = await db.query(
+
+	const rulesPerAccountRole: QueryResult = await client.query(
 		ACCOUNT_ROLE_TRS_SQL,
 		[c.TRANSACTION_ITEM, roleName, accountName]
 	);
+
+	let rules = [
+		...rulesPerAccountRole.rows,
+		...rulesPerStateName.rows,
+	];
+
+	console.log("rules found: ", rules)
 	// todo: handle error
-	return [...rulesPerAccountRole.rows, ...rulesPerStateName.rows];
+
+	return rules
 };

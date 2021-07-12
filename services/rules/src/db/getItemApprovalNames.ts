@@ -1,18 +1,19 @@
-import c from "../constants";
-import type { Client } from "pg"
 import APPROVAL_SQL from "../sql/selectApproval"
+import type { IPGClient } from "../index.d"
 
 export default async function (
-	db: Client,
+	client: IPGClient,
 	accountName: string,
 ) {
-	const { rows } = await db.query(APPROVAL_SQL, [accountName]);
+	const { rows } = await client.query(APPROVAL_SQL, [accountName]);
 
-	// todo: handle more errors
+	// todo: handle errors
+
 	if (!rows.length) {
-		throw new Error(c.APPROVAL_COUNT_ERROR);
+		return [];
 	};
 
 	const itemApproverNames: string[] = rows.map(x => x.approver);
+
 	return itemApproverNames;
 };

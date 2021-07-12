@@ -1,10 +1,10 @@
 import c from "../constants"
-import type { IApproval, ITransactionItem, db } from "../index.d"
+import type { IApproval, ITransactionItem, IPGClient } from "../index.d"
 import emptyApproval from "../initial/approval.json"
 
 export default async function (
 	sequence: string[],
-	db: db,
+	client: IPGClient,
 	transactionItems: ITransactionItem[],
 	getNamesFn: Function,
 	getRulesFn: Function,
@@ -19,11 +19,11 @@ export default async function (
 			let approverNames: string[];
 
 			if (role == c.DEBITOR) {
-				approverNames = await getNamesFn(db, item.debitor);
+				approverNames = await getNamesFn(client, item.debitor);
 			}
 
 			if (role == c.CREDITOR) {
-				approverNames = await getNamesFn(db, item.creditor);
+				approverNames = await getNamesFn(client, item.creditor);
 			}
 
 			for (let i = 0; i < approverNames.length; i++) {
@@ -35,7 +35,7 @@ export default async function (
 				};
 
 				const rulesPerApprover = await getRulesFn(
-					db,
+					client,
 					role,
 					approverNames[i],
 				);

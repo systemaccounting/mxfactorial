@@ -1,6 +1,6 @@
 import type { ITransactionItem, IIntraTransaction } from "./index.d"
-import c from "./constants"
 import db from "./db/index"
+import getProfiles from "./profiles/getProfiles"
 import getRulesPerItemAccount from "./db/getRulesPerItemAccount"
 import getItemApprovalNames from "./db/getItemApprovalNames"
 import getRulesPerApproval from "./db/getRulesPerApproval"
@@ -12,14 +12,10 @@ import testDebitorFirstValues from "./response/testDebitorFirstValues"
 import createResponse from "./response/createResponse"
 import labelApprovedItems from "./transactionItems/labelApprovedItems";
 
-// connecting to db outside of handler
-// avoids recreating connections in lambda
-; (async () => await db.connect())();
-
 export async function handler(event: ITransactionItem[]): Promise<IIntraTransaction | string> {
 
-	// console.log(event)
-	if (!Object.keys(event).length) {
+	console.log(event)
+	if (event == null || !Object.keys(event).length) {
 		console.log('0 items received...');
 		return null;
 	}
@@ -32,7 +28,8 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 		// Error: inconsistent debitor_first values
 		const errMsg = "testDebitorFirstValues: " + e.message
 		console.log(errMsg)
-		return errMsg;
+		console.log("responding with unchanged request")
+		return createResponse(event);
 	}
 
 	// add approvals property to each transaction item received in event
@@ -41,58 +38,59 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 		approvals: new Array(),
 	}))
 
+	// get client connection from pool
+	const client = await db.connect()
+
 	// get item rules from db, then create items from rules
 	let addedItems;
 	try {
 		addedItems = await addRuleItems(
 			transactionSequence,
-			db,
+			client,
 			eventWithApprovals,
+			getProfiles,
 			getRulesPerItemAccount,
 			applyItemRules,
 		);
 	} catch (e) {
-		await db.end(); // if process.env.PG_DISCONNECT=true
+		await client.release(); // if process.env.PG_DISCONNECT=true
 		const errMsg = "addRuleItems: " + e.message;
 		console.log(errMsg);
-		return errMsg;
+		console.log("responding with unchanged request")
+		return createResponse(event);
 	};
 
-	if (addedItems.length == 0) {
-		console.log("rules not found");
-	}
-
 	// combine rule added items to items received in event
-	const ruleAppliedItems: ITransactionItem[] = [...addedItems, ...eventWithApprovals];
+	const ruleAppliedItems: ITransactionItem[] = [
+		...addedItems,
+		...eventWithApprovals,
+	];
 
 	// get approvals & rules from db, then apply to items
 	let ruleAppliedApprovals;
 	try {
 		ruleAppliedApprovals = await addApprovalsAndRules(
 			transactionSequence,
-			db,
+			client,
 			ruleAppliedItems,
 			getItemApprovalNames,
 			getRulesPerApproval,
 			applyApprovalRules,
 		);
 	} catch (e) {
-		await db.end(); // if process.env.PG_DISCONNECT=true
+		await client.release(); // if process.env.PG_DISCONNECT=true
 
 		// Error: approvals not found
 		const errMsg = "addApprovalsAndRules: " + e.message;
 		console.log(errMsg);
 
-		// return original event if 0 item and approval rules applied
-		if (addedItems.length == 0 && e.message == c.APPROVAL_COUNT_ERROR) {
-			return createResponse(event);
-		};
-
-		return errMsg;
+		// return unchanged event on error
+		console.log("responding with unchanged request")
+		return createResponse(event);
 	};
 
-	// let db go if process.env.PG_DISCONNECT=true
-	await db.end();
+	// let db pool connection go
+	await client.release();
 
 	// label rule approved transaction items
 	let labeledApproved
@@ -105,9 +103,14 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 		const errMsg = "labelApprovedItems: " + e.message;
 		console.log(errMsg);
 
-		// return original event
+		// return rule applied items on error
 		return createResponse(ruleAppliedItems);
 	}
+
+	// end pool in non lambda environment
+	if (process.env.PG_DISCONNECT) {
+		await db.end();
+	};
 
 	// debug logging
 	// console.log(resp);
@@ -115,5 +118,5 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 	// 	console.log(i);
 	// };
 
-	return createResponse(labeledApproved);
+	return createResponse(labeledApproved);;
 };
