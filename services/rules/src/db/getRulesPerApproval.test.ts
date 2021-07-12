@@ -1,8 +1,8 @@
 import c from "../constants"
 import ACCOUNT_ROLE_TRS_SQL from "../sql/selectAccountRoleTrs"
-import type { Client } from "pg"
 import getRulesPerApproval from './getRulesPerApproval';
 import emptyRuleInstance from "../initial/ruleInstance.json"
+import type { IPGClient } from "../index.d"
 
 describe('getRulesPerApproval', () => {
 	test('called with constants as query args', async () => {
@@ -12,7 +12,7 @@ describe('getRulesPerApproval', () => {
 			.mockImplementation(() => ({
 				rows: [testapprover],
 			}));
-		const client = { query: mockFn } as Client;
+		const client = { query: mockFn } as IPGClient;
 
 		await getRulesPerApproval(client, c.CREDITOR, testapprover);
 
@@ -29,7 +29,7 @@ describe('getRulesPerApproval', () => {
 			.mockImplementation(() => ({
 				rows: want,
 			}));
-		const client = { query: mockFn } as Client;
+		const client = { query: mockFn } as IPGClient;
 
 		const got = await getRulesPerApproval(client, c.CREDITOR, testapprover);
 

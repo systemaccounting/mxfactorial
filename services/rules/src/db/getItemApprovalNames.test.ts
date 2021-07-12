@@ -1,7 +1,7 @@
 import c from "../constants"
 import APPROVAL_SQL from "../sql/selectApproval"
 import getItemApprovalNames from './getItemApprovalNames'
-import type { Client } from "pg"
+import type { IPGClient } from "../index.d"
 
 describe('getItemApprovalNames', () => {
 	test('called with constants as query args', async () => {
@@ -10,24 +10,23 @@ describe('getItemApprovalNames', () => {
 			.mockImplementation(() => ({
 				rows: [{ approver: testownedaccount }]
 			}));
-		const client = { query: mockFn } as Client;
+		const client = { query: mockFn } as IPGClient;
 		await getItemApprovalNames(client, testownedaccount);
 
 		await expect(mockFn)
 			.toHaveBeenCalledWith(APPROVAL_SQL, [testownedaccount]);
 	});
 
-	test('throws on zero approval rows returned from query', async () => {
+	test('returns empty list', async () => {
 		const testownedaccount = 'testownedaccount';
 		const mockFn: any = jest.fn()
 			.mockImplementation(() => ({
-				rows: [] // empty to throw
+				rows: [] // empty return
 			}));
-		const client = { query: mockFn } as Client;
+		const client = { query: mockFn } as IPGClient;
+		const got = await getItemApprovalNames(client, testownedaccount);
 
-		await expect(
-			getItemApprovalNames(client, testownedaccount)
-		).rejects.toThrow(c.APPROVAL_COUNT_ERROR);
+		expect(got).toEqual([]);
 	});
 
 	test('returns list of item approval names', async () => {
@@ -41,7 +40,7 @@ describe('getItemApprovalNames', () => {
 					{ approver: want[2] },
 				]
 			}));
-		const client = { query: mockFn } as Client;
+		const client = { query: mockFn } as IPGClient;
 
 		const got = await getItemApprovalNames(client, testownedaccount);
 

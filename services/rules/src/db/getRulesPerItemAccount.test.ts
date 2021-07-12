@@ -1,8 +1,7 @@
 import c from "../constants"
-import ACCOUNT_PROFILE_SQL from "../sql/selectAccountProfile"
 import STATE_NAME_TRS_SQL from "../sql/selectStateNameTrs"
 import ACCOUNT_ROLE_TRS_SQL from "../sql/selectAccountRoleTrs"
-import type { Client } from "pg"
+import type { IPGClient } from "../index.d"
 import { jest } from "@jest/globals"
 
 describe('getRulesPerItemAccount', () => {
@@ -13,31 +12,41 @@ describe('getRulesPerItemAccount', () => {
 			.mockImplementation(() => ({
 				rows: [{ state_name: teststate }],
 			}));
-		const client = { query: mockFn } as Client;
+		const client = { query: mockFn } as IPGClient;
 
 		const testapprover = 'testapprover';
 		const { default: getRulesPerItemAccount } = await import("./getRulesPerItemAccount");
 
-		await getRulesPerItemAccount(client, c.CREDITOR, testapprover);
+		await getRulesPerItemAccount(
+			client,
+			c.CREDITOR,
+			teststate,
+			testapprover);
 
 		expect(mockFn)
-			.toHaveBeenNthCalledWith(1, ACCOUNT_PROFILE_SQL, [testapprover]);
+			.toHaveBeenNthCalledWith(1, STATE_NAME_TRS_SQL, [c.TRANSACTION_ITEM, c.CREDITOR, teststate]);
 		expect(mockFn)
-			.toHaveBeenNthCalledWith(2, STATE_NAME_TRS_SQL, [c.TRANSACTION_ITEM, c.CREDITOR, teststate]);
-		expect(mockFn)
-			.toHaveBeenNthCalledWith(3, ACCOUNT_ROLE_TRS_SQL, [c.TRANSACTION_ITEM, c.CREDITOR, testapprover]);
+			.toHaveBeenNthCalledWith(2, ACCOUNT_ROLE_TRS_SQL, [c.TRANSACTION_ITEM, c.CREDITOR, testapprover]);
 	});
 
 	test('returns list of item approver names', async () => {
 
 		const testapprover = 'testapprover';
+		const teststate = 'teststate';
 		const mockFn: any = jest.fn()
 			.mockImplementation(() => ({
 				rows: [testapprover],
 			}));
-		const client = { query: mockFn } as Client;
+		const client = { query: mockFn } as IPGClient;
+
 		const { default: getRulesPerItemAccount } = await import("./getRulesPerItemAccount");
-		const got = await getRulesPerItemAccount(client, c.CREDITOR, testapprover);
+
+		const got = await getRulesPerItemAccount(
+			client,
+			c.CREDITOR,
+			teststate,
+			testapprover,
+		);
 
 		expect(got).toEqual(Array(2).fill(testapprover));
 	});

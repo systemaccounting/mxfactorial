@@ -1,33 +1,28 @@
-import { Client } from 'pg';
-import type { db } from '../index.d';
+import { Pool } from 'pg';
+import type { IPGPool } from '../index.d';
 
-const client = new Client({
+const pool = new Pool({
 	user: process.env.PGUSER,
 	password: process.env.PGPASSWORD,
 	host: process.env.PGHOST,
 	database: process.env.PGDATABASE,
 	port: parseInt(process.env.PGPORT),
+	max: parseInt(process.env.PG_MAX_CONNECTIONS),
+	idleTimeoutMillis: parseInt(process.env.PG_IDLE_TIMEOUT),
 	connectionTimeoutMillis: parseInt(process.env.PG_CONN_TIMEOUT),
 });
 
 async function connect() {
-	return client.connect();
-};
-
-async function query(text: string, params: string[]) {
-	return client.query(text, params);
+	return pool.connect();
 };
 
 async function end() {
-	if (process.env.PG_DISCONNECT) {
-		return client.end();
-	};
+	return pool.end();
 };
 
-const pg: db = {
+const db: IPGPool = {
 	connect,
-	query,
 	end,
 }
 
-export default pg;
+export default db;

@@ -15,11 +15,15 @@ const testresponse: IIntraTransaction = {
 }
 
 const mockDbQuery = jest.fn().mockImplementation(() => ({ rows: [] }));
-const mockDbConnect = jest.fn();
+const mockDbRelease = jest.fn();
+const mockConnection = {
+	query: mockDbQuery,
+	release: mockDbRelease
+};
+const mockDbConnect = jest.fn().mockImplementation(() => mockConnection);
 const mockDbEnd = jest.fn();
 jest.mock('./db/index', () => ({
 	connect: mockDbConnect,
-	query: mockDbQuery,
 	end: mockDbEnd,
 }));
 
@@ -56,24 +60,34 @@ describe('rules function handler', () => {
 		expect(got).toBe(null);
 	});
 
-	test('returns error when testDebitorFirstValues throws', async () => {
+	test(
+		'returns unchanged request on testDebitorFirstValues fail',
+		async () => {
+			const { handler } = await import('./index');
+			const got = await handler(nullFirstTrItems);
+			expect(got).toEqual(testresponse);
+		});
+
+	test('calls db pool connect', async () => {
 		const { handler } = await import('./index');
-		const got = await handler(nullFirstTrItems);
-		expect(got).toBe('testDebitorFirstValues: inconsistent debitor_first values');
+		await handler(nullFirstTrItems);
+		expect(mockDbConnect).toHaveBeenCalled();
 	});
 
-	test('returns error when addRuleItems throws and ends db session', async () => {
-		const { handler } = await import('./index');
-		const got = await handler(nullFirstTrItems);
-		expect(got).toBe('addRuleItems: ' + testerror);
-		expect(mockDbEnd).toHaveBeenCalled();
-	});
+	test(
+		'returns unchanged request when addRuleItems throws and releases db client',
+		async () => {
+			const { handler } = await import('./index');
+			const got = await handler(nullFirstTrItems);
+			expect(got).toBe(testresponse);
+			expect(mockDbRelease).toHaveBeenCalled();
+		});
 
 	test('returns error when mockAddApprovalsAndRules throws and ends db session', async () => {
 		const { handler } = await import('./index');
 		const got = await handler(nullFirstTrItems);
-		expect(got).toBe('addApprovalsAndRules: ' + testerror);
-		expect(mockDbEnd).toHaveBeenCalled();
+		expect(got).toBe(testresponse);
+		expect(mockDbRelease).toHaveBeenCalled();
 	});
 
 	test('calls testDebitorFirstValues with args', async () => {
@@ -89,7 +103,7 @@ describe('rules function handler', () => {
 		expect(mockAddRuleItems.mock.calls[0][2])
 			.toEqual(nullFirstTrItems);
 		expect(mockAddRuleItems.mock.calls[0].length)
-			.toBe(5);
+			.toBe(6);
 	});
 
 	test('calls end on db client', async () => {
