@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "test:integration": "env-cmd jest --detectOpenHandles --runInBand --testRegex='.*\\.integ\\.[tj]sx?'",
-    "test:single": "env-cmd jest ./src/index.test.ts",
+    "test:single": "jest ./src/index.test.ts",
     "build": "tsc",
     "watch": "tsc -w"
   },
