@@ -1,12 +1,12 @@
 import { jest } from "@jest/globals"
 
-const mockQuery = jest.fn(() => Promise.resolve({}));
+const mockConnect = jest.fn(() => Promise.resolve({}));
 const mockEnd = jest.fn(() => Promise.resolve({}));
-const mockClient = jest.fn(() => ({
-	query: mockQuery,
+const mockPool = jest.fn(() => ({
+	connect: mockConnect,
 	end: mockEnd,
 }));
-jest.mock('pg', () => ({ Client: mockClient }));
+jest.mock('pg', () => ({ Pool: mockPool }));
 
 describe('db', () => {
 	test('pool called with args', async () => {
@@ -16,16 +16,23 @@ describe('db', () => {
 			host: 'localhost',
 			database: 'mxfactorial',
 			port: 5432,
-			connectionTimeoutMillis: 100,
+			max: 20,
+			idleTimeoutMillis: 10000,
+			connectionTimeoutMillis: 500,
 		};
 		await import('./index');
-		expect(mockClient).toHaveBeenCalledWith(want);
+		expect(mockPool).toHaveBeenCalledWith(want);
 	});
 
-	test('query method called with args', async () => {
+	test('connect method called', async () => {
 		const db = await import('./index');
-		await db.default.query("test", ["1", "2"]);
-		const got = mockQuery.mock.calls[0];
-		expect(got).toEqual(["test", ["1", "2"]]);
+		await db.default.connect();
+		expect(mockConnect).toHaveBeenCalled();
+	});
+
+	test('end method called', async () => {
+		const db = await import('./index');
+		await db.default.end();
+		expect(mockEnd).toHaveBeenCalled();
 	});
 });

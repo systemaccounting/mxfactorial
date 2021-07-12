@@ -13,12 +13,6 @@ describe('labelApprovedItems', () => {
 		expect(got).toEqual([want]);
 	});
 
-	test('throws on omitted approvals', () => {
-		const throwInput: ITransactionItem = Object.assign({}, wAppr);
-		throwInput.approvals = []
-		expect(() => labelApprovedItems([throwInput], c.SEQUENCE)).toThrow(c.APPROVAL_COUNT_ERROR);
-	});
-
 	test('timestamps NOT added', () => {
 		const want = Object.assign({}, wZeroAppr);
 		want.debitor_approval_time = null

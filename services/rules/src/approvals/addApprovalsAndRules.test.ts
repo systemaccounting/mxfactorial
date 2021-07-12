@@ -2,14 +2,14 @@ import c from "../constants";
 import addApprovalsAndRules from "./addApprovalsAndRules";
 import nullFirst from "../../../gopkg/testdata/nullFirstTrItems.json";
 import { jest } from "@jest/globals"
-import type { db } from "../index.d"
+import type { IPGClient } from "../index.d"
 
 describe('addApprovalsAndRules', () => {
 	test('calls getNamesFn with args 4 times', async () => {
 
 		const mockFn: any = jest.fn()
 			.mockImplementation(() => ({ rows: [] }));
-		const client = { query: mockFn } as db;
+		const client = { query: mockFn } as IPGClient;
 
 		const mockGetNamesFn = jest.fn(() => Promise.resolve({})) as any;
 		const testGetRulesFn = () => { };
@@ -38,7 +38,7 @@ describe('addApprovalsAndRules', () => {
 	test('calls getRulesFn with args 8 times', async () => {
 		const mockFn: any = jest.fn()
 			.mockImplementation(() => ({ rows: [] }));
-		const client = { query: mockFn } as db;
+		const client = { query: mockFn } as IPGClient;
 
 		const testaccounts = ['GroceryCo', 'JohnSmith'];
 		const mockGetNamesFn = jest.fn(() => Promise.resolve(
@@ -75,7 +75,7 @@ describe('addApprovalsAndRules', () => {
 	test('returns items with approvals', async () => {
 		const mockFn: any = jest.fn()
 			.mockImplementation(() => ({ rows: [] }));
-		const client = { query: mockFn } as db;
+		const client = { query: mockFn } as IPGClient;
 
 		const testaccounts = ['GroceryStore', 'JacobWebb'];
 		const testapproval = { approval: testaccounts[0] };
