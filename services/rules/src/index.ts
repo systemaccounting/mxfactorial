@@ -53,7 +53,7 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 			applyItemRules,
 		);
 	} catch (e) {
-		await client.release(); // if process.env.PG_DISCONNECT=true
+		await client.release();
 		const errMsg = "addRuleItems: " + e.message;
 		console.log(errMsg);
 		console.log("responding with unchanged request")
@@ -78,14 +78,14 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 			applyApprovalRules,
 		);
 	} catch (e) {
-		await client.release(); // if process.env.PG_DISCONNECT=true
+		await client.release();
 
 		// Error: approvals not found
 		const errMsg = "addApprovalsAndRules: " + e.message;
 		console.log(errMsg);
 
 		// return unchanged event on error
-		console.log("responding with unchanged request")
+		console.log("responding with unchanged request");
 		return createResponse(event);
 	};
 
@@ -93,7 +93,7 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 	await client.release();
 
 	// label rule approved transaction items
-	let labeledApproved
+	let labeledApproved;
 	try {
 		labeledApproved = labelApprovedItems(
 			ruleAppliedApprovals,
@@ -112,11 +112,5 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 		await db.end();
 	};
 
-	// debug logging
-	// console.log(resp);
-	// for (const i of resp.transaction.transaction_items) {
-	// 	console.log(i);
-	// };
-
-	return createResponse(labeledApproved);;
+	return createResponse(labeledApproved);
 };

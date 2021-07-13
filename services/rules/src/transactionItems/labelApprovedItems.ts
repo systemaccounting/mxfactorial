@@ -10,6 +10,7 @@ export default function (trItems: ITransactionItem[], sequence: string[]): ITran
 			const itemApprovers = item.approvals.filter(x => x.account_role == role);
 
 			let approved = 0;
+
 			for (const appr of itemApprovers) {
 				if (appr.approval_time == c.CURRENT_TIMESTAMP) {
 					approved++;
@@ -17,7 +18,7 @@ export default function (trItems: ITransactionItem[], sequence: string[]): ITran
 			};
 
 			// todo: report pending approvals
-			if (approved == itemApprovers.length) {
+			if (itemApprovers.length > 0 && itemApprovers.length == approved) {
 
 				if (role == c.CREDITOR) {
 					item.creditor_approval_time = c.CURRENT_TIMESTAMP;
