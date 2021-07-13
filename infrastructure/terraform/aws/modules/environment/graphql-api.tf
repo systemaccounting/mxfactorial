@@ -1,11 +1,10 @@
 locals {
-  APIV2_NAME = "graphql-${var.env}"
   APIV2_URI  = "${var.env == "prod" ? "" : "${var.env}-"}api.mxfactorial.io"
 }
 
 module "graphql_apigwv2" {
   source                   = "../apigwv2-lambda"
-  api_name                 = local.APIV2_NAME
+  api_name                 = "graphql"
   payload_format_version   = "1.0"
   enable_api_auth          = false
   api_version              = 001
