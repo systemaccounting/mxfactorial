@@ -1,10 +1,10 @@
 resource "aws_s3_bucket" "artifacts" {
-  bucket        = "mxfactorial-artifacts-${var.env}"
+  bucket        = "${var.artifacts_bucket_name_prefix}-${var.env}"
   force_destroy = true
 }
 
 resource "aws_s3_bucket" "client_origin" {
-  bucket = "mxfactorial-client-${var.env}"
+  bucket =  "${var.client_origin_bucket_name_prefix}-${var.env}"
 
   website {
     index_document = "index.html"

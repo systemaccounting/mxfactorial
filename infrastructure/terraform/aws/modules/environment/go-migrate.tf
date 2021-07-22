@@ -1,5 +1,5 @@
 data "aws_s3_bucket_object" "go_migrate" {
-  bucket = "mxfactorial-artifacts-${var.env}"
+  bucket = var.artifacts_bucket_name
   key    = "go-migrate-src.zip"
 }
 
@@ -29,7 +29,7 @@ data "aws_lambda_layer_version" "go_migrate" {
 }
 
 data "aws_s3_bucket_object" "go_migrate_layer" {
-  bucket = "mxfactorial-artifacts-${var.env}"
+  bucket = var.artifacts_bucket_name
   key    = "go-migrate-layer.zip"
 }
 

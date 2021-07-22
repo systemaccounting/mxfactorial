@@ -1,15 +1,28 @@
 // outputs stored in secrets manager for automated
 // retrieval of application environment variables
 
-resource "aws_secretsmanager_secret" "graphql_api" {
-  name                    = "${var.env}/GRAPHQL_API"
+resource "aws_secretsmanager_secret" "graphql_uri" {
+  name                    = "${var.env}/GRAPHQL_URI"
   recovery_window_in_days = 0
   description             = "graphql endpoint in ${var.env}"
 }
 
-resource "aws_secretsmanager_secret_version" "graphql_api" {
-  secret_id     = aws_secretsmanager_secret.graphql_api.id
-  secret_string = "https://${local.APIV2_URI}"
+resource "aws_secretsmanager_secret_version" "graphql_uri" {
+  secret_id     = aws_secretsmanager_secret.graphql_uri.id
+  // store apigw2 dns if no custom dns
+  secret_string = var.custom_domain_name == "" ? module.graphql_apigwv2.invoke_url : ("https://${var.env == "prod" ? "api.${var.custom_domain_name}" : "${var.env}-api.${var.custom_domain_name}"}")
+}
+
+resource "aws_secretsmanager_secret" "client_uri" {
+  name                    = "${var.env}/CLIENT_URI"
+  recovery_window_in_days = 0
+  description             = "client address in ${var.env}"
+}
+
+resource "aws_secretsmanager_secret_version" "client_uri" {
+  secret_id     = aws_secretsmanager_secret.client_uri.id
+  // store cloudfront dns if no custom dns
+  secret_string = var.custom_domain_name == "" ? "https://${aws_cloudfront_distribution.s3_client_distribution.domain_name}" : ("https://${var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}"}")
 }
 
 resource "aws_secretsmanager_secret" "pool_id" {

@@ -61,29 +61,24 @@ public demonstration of the following use cases through a systemaccounting funct
 this project intends to exploit the software engineering community's familiarity with data science to rapidly develop their capacity to describe an economy using mathemtical physics. software engineers may be expediently converted to phd-level experts because they come equipped with the technology to test, adopt, and communicate the subject to others. adding to the project's **[list of features](https://github.com/systemaccounting/mxfactorial/issues?q=is%3Aissue+is%3Apublic+sort%3Acreated-asc)** is designed to foster enough interaction between engineers and the data model that a movement to eliminate nothing but [public ignorance](https://en.wikipedia.org/wiki/Pareto_efficiency) becomes generally accepted as possible *only* when it's precipitated by activism pursued—not in the streets where slogans, bottles, and rocks are blindly hurled at others who are equally frustrated with their economy, but on knowledge's frontier where science and technology are used as tools to empower mankinds revolution in the cloud
 
 ### license
-private
+private, receiving added value is sustained & acknowledged by sending value
 
 ### contribute
-* to contribute code, negotiate rates in new or existing issues, then fork and send pull requests  
+* to contribute code, negotiate rates in new or existing issues, fork, send pull requests  
 * supporters preferring to contribute funds may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page
 
 ### environment
 - client: [mxfactorial.io](https://mxfactorial.io/)
 - api: [api.mxfactorial.io](https://api.mxfactorial.io/)
 
-### requirements
-- [wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
-- [public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
-- [data model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
-
 ### development
-- list monorepo app inventory with `cat inventory`
-- install project dependencies with `make install`
-- create artifact buckets and certs by duplicating and customizing resources in `infrastructure/terraform/aws/environments/us-east-1/certs-and-s3.tf`, then `terraform apply`
-- build and push all artifacts to s3 with `make all CMD=initial-deploy ENV=dev`
-- create infrastructure by duplicating and customizing resources in `infrastructure/terraform/aws/environments/dev`, then `terraform apply`
-- deploy migrations to new environment rds with `cd migrations && make get-secrets ENV=dev && make resetrds`
-- deploy all apps from project root with `make all CMD=deploy ENV=dev`
+1. install project dependencies listed under root `install` makefile target
+1. set s3 bucket names in root `project.json` to unused values
+1. create artifact and origin buckets by duplicating and customizing resources in `infrastructure/terraform/aws/environments/init-env`, e.g. duplicate `dev.tf` as `stg.tf`, customize, then `terraform apply`
+1. from project root, build and push all artifacts to s3 with `make all CMD=initial-deploy ENV=stg`
+1. create infrastructure by duplicating and customizing resources in `infrastructure/terraform/aws/environments/dev`, then `terraform apply`
+1. deploy migrations to new environment rds with `cd migrations && make get-secrets ENV=stg && make resetrds`
+1. deploy client with `cd client && make get-secrets ENV=stg && make deploy ENV=stg`
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:
@@ -94,6 +89,11 @@ access `./mxfactorial.ipynb` jupyter notebook locally:
     -v $PWD/mxfactorial.ipynb:/home/jovyan/mxfactorial.ipynb \
     jupyter/datascience-notebook
   ```
+
+### requirements
+- [wireframes](https://drive.google.com/folderview?id=0B9xlXsaN9dVQR1EyY3dQbnZ0aG8&usp=sharing)
+- [public drive](https://drive.google.com/drive/folders/0B9xlXsaN9dVQWkJERUxNRVZQVWc)
+- [data model](https://docs.google.com/document/d/1US0gamuV3ExzUWAnNHxdcfmUxB0tPbtxUBVRBmZKywA/edit?usp=sharing)
 
 ### roadmap
 * set up managed application & persistence layer

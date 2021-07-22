@@ -1,0 +1,4 @@
+{
+	"artifacts_bucket_name_prefix": "mxfactorial-artifacts",
+	"client_origin_bucket_name_prefix": "mxfactorial-client"
+}

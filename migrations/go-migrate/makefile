@@ -1,14 +1,15 @@
 APP_NAME = go-migrate
 ARTIFACT_NAME = $(APP_NAME)-src.zip
 LAMBDA_NAME = $(APP_NAME)-$(ENV)
-ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 RUNTIME=provided
 REGION = us-east-1
 TMP_MIGRATE_REPO_DIR=./build
 MIGRATE_BINARY_NAME=migrate.linux-amd64
 PSQL_LAMBDA_ARCHIVE=psql11-lambda.zip
 LAMBDA_LAYER_ARCHIVE=$(APP_NAME)-layer.zip
-DEPLOY_APP=true
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
 # from https://github.com/golang-migrate/migrate/blob/master/Makefile to avoid building for every os
 DATABASE ?= postgres mysql redshift cassandra spanner cockroachdb clickhouse mongodb sqlserver firebird neo4j pgx

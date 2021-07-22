@@ -1,11 +1,12 @@
 APP_NAME = db-reset
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-ARTIFACT_BUCKET=mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
 RUNTIME=provided
 REGION = us-east-1
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
-DEPLOY_APP=true
 
 test-env-arg:
 ifndef ENV

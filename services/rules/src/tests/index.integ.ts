@@ -7,7 +7,7 @@ import 'isomorphic-unfetch';
 
 const resource = '/query'
 const clientOptions: ClientOptions = {
-	url: process.env.GRAPHQL_API + resource,
+	url: process.env.GRAPHQL_URI + resource,
 	maskTypename: true
 }
 

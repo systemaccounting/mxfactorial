@@ -3,7 +3,7 @@ locals {
 }
 
 data "aws_s3_bucket_object" "rules" {
-  bucket = "mxfactorial-artifacts-${var.env}"
+  bucket = var.artifacts_bucket_name
   key    = "${local.RULES}-src.zip"
 }
 

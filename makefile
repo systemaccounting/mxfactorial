@@ -1,11 +1,3 @@
-init:
-	go mod init github.com/systemaccounting/mxfactorial
-
-# first, provision environment artifact bucket in terraform (e.g. stg):
-# infrastructure/terraform/aws/environments/us-east-1/certs-and-s3.tf
-# then `make all ENV=stg` to push all artifacts to new stg bucket
-
-# approx 5 minutes
 INVENTORY_FILE=$(CURDIR)/inventory
 
 PARENT_DIRS=services \
@@ -14,7 +6,12 @@ client
 
 APP_DIRS=$(shell cat $(INVENTORY_FILE))
 SIZE=$(shell wc -l < "$(INVENTORY_FILE)" | xargs)
+REGION=us-east-1
+ENV_FILE=$(CURDIR)/.env
+ENV_VARS=CLIENT_URI \
+GRAPHQL_URI
 
+# approx 5 minutes
 all:
 	@$(MAKE) -s test-inv-file
 	@$(MAKE) -s test-env-arg
@@ -27,8 +24,8 @@ all:
 inventory:
 	@rm -f $(INVENTORY_FILE)
 	@$(foreach DIR,$(PARENT_DIRS), \
-		grep --include=makefile -rlw '$(DIR)' -e 'DEPLOY_APP=true' \
-		| sed -e 's/\.\///' -e 's/\/makefile//' \
+		grep --include=project.json -rlw '$(DIR)' -e '"deploy": true' \
+		| sed -e 's/\.\///' -e 's/\/project.json//' \
 		>> $(INVENTORY_FILE);)
 	@echo "project inventory size: $$(wc -l < "$(INVENTORY_FILE)" | xargs)"
 
@@ -50,6 +47,38 @@ install:
 	npm install -g eslint
 	npm install -g yarn
 #	https://www.docker.com/products/docker-desktop
+
+init:
+	go mod init github.com/systemaccounting/mxfactorial
+
+
+###################### secrets ######################
+
+clean-env:
+	rm -f $(ENV_FILE)
+
+test-env-file:
+ifeq (,$(wildcard $(ENV_FILE)))
+	$(error no .env file, run 'make get-secrets ENV=dev')
+endif
+
+get-secrets:
+	@$(MAKE) -s retrieve-each-secret
+	@if [ ! -s $(ENV_FILE) ]; then \
+		rm $(ENV_FILE); \
+		echo 'no env vars required'; \
+	else \
+		echo 'env vars retrieved'; \
+	fi
+
+retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
+$(ENV_VARS):
+	ENV_VAR=$$(aws secretsmanager get-secret-value \
+		--region $(REGION) \
+		--secret-id $(ENV)/$@ \
+		--query 'SecretString' \
+		--output text); \
+	echo $@=$$ENV_VAR >> $(ENV_FILE)
 
 ### arg tests
 test-env-arg:

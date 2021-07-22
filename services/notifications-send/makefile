@@ -1,17 +1,18 @@
 APP_NAME=notifications-send
 CMD_DIR=$(CURDIR)/cmd
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION=us-east-1
 BINARY_NAME=index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
-DEPLOY_APP=true
 TEST_DATA_PATH=../gopkg/testdata/requestNotification.json
 ENV_FILE=$(CURDIR)/.env
 ENV_VARS=AWS_REGION \
 NOTIFY_TOPIC_ARN \
-APIGW_CONNECTIONS_URI \
+APIGW_CONNECTIONS_URI
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \

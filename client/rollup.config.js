@@ -89,7 +89,7 @@ export default {
 		json(),
 		replace({
 			"process.env.NODE_ENV": JSON.stringify("production"),
-            "process.env.GRAPHQL_API": JSON.stringify(process.env.GRAPHQL_API),
+            "process.env.GRAPHQL_URI": JSON.stringify(process.env.GRAPHQL_URI),
             "process.env.POOL_ID": JSON.stringify(process.env.POOL_ID),
             "process.env.CLIENT_ID": JSON.stringify(process.env.CLIENT_ID),
             "process.env.NO_AUTH": JSON.stringify(process.env.NO_AUTH),

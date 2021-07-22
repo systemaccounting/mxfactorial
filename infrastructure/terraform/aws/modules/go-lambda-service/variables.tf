@@ -24,3 +24,5 @@ variable "create_secret" {
   default     = false
   description = "adds lambda arn in secrets manager for local testing"
 }
+
+variable "artifacts_bucket_name" {}

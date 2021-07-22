@@ -1,7 +1,8 @@
 REGION=us-east-1
-DEPLOY_APP=true
+PROJECT_CONF=../project.json
+ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT_CONF))
+ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV)
 NO_AUTH=1
-ORIGIN_BUCKET=mxfactorial-client-$(ENV)
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
 BUILD_DIR=$(CURDIR)/public
 DEPS_DIR=$(CURDIR)/node_modules
@@ -10,7 +11,7 @@ ENV_FILE=$(CURDIR)/.env
 ENV_VARS=AWS_REGION \
 POOL_ID \
 CLIENT_ID \
-GRAPHQL_API \
+GRAPHQL_URI \
 NO_AUTH
 
 install:
@@ -78,15 +79,14 @@ $(ENV_VARS):
 ###################### deploy ######################
 
 initial-deploy:
+	@echo '***skipping client initial-deploy. redeploy after environment build'
+
+deploy:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) install
 	$(MAKE) get-secrets ENV=$(ENV)
 	$(MAKE) build
 	$(MAKE) sync ENV=$(ENV)
-
-deploy:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) initial-deploy ENV=$(ENV)
 	$(MAKE) empty-cache ENV=$(ENV)
 
 sync:

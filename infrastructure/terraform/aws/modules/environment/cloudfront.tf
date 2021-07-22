@@ -2,15 +2,26 @@ resource "aws_cloudfront_distribution" "s3_client_distribution" {
   comment = "${var.env} domain cache"
 
   origin {
-    domain_name = "${var.client_origin_bucket_name}.s3.amazonaws.com"
+    domain_name = "${var.client_origin_bucket_name}.s3-website-${data.aws_region.current.name}.amazonaws.com"
     origin_id   = var.client_origin_bucket_name
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.s3_client_distribution.cloudfront_access_identity_path
+
+    custom_origin_config {
+      http_port              = "80"
+      https_port             = "443"
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
+
+    custom_header {
+      name = "Referer"
+      value = random_password.referer.result
     }
   }
 
   enabled         = true
-  aliases         = [local.client_url]
+  aliases         = var.custom_domain_name == "" ? null : [
+    var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}"
+  ]
   is_ipv6_enabled = true
 
   default_cache_behavior {
@@ -49,11 +60,10 @@ resource "aws_cloudfront_distribution" "s3_client_distribution" {
 
   viewer_certificate {
     //https://github.com/terraform-providers/terraform-provider-aws/issues/2418#issuecomment-371192507
-    acm_certificate_arn = var.ssl_arn
-    ssl_support_method  = "sni-only"
-  }
-}
+    acm_certificate_arn = var.custom_domain_name == "" ? null : var.client_cert_arn
+    ssl_support_method  = var.custom_domain_name == "" ? null : "sni-only"
 
-resource "aws_cloudfront_origin_access_identity" "s3_client_distribution" {
-  comment = "cloudfront origin access identity for s3 access in ${var.env}"
+    // use default if custom_domain_name not used
+    cloudfront_default_certificate = var.custom_domain_name == "" ? true : null
+  }
 }

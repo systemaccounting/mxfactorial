@@ -1,5 +1,5 @@
 data "aws_s3_bucket_object" "db_reset" {
-  bucket = "mxfactorial-artifacts-${var.env}"
+  bucket = var.artifacts_bucket_name
   key    = "db-reset-src.zip"
 }
 
