@@ -3,7 +3,7 @@ locals {
 }
 
 data "aws_s3_bucket_object" "graphql" {
-  bucket = "mxfactorial-artifacts-${var.env}"
+  bucket = var.artifacts_bucket_name
   key    = "${local.GRAPHQL}-src.zip"
 }
 

@@ -1,5 +1,4 @@
-// modules require ${service_name}-src.zip
-// in mxfactorial-artifacts-{var.env} s3
+// modules require ${service_name}-src.zip in artifacts s3
 
 module "request_create" {
   source       = "../go-lambda-service"
@@ -9,6 +8,7 @@ module "request_create" {
     RULE_LAMBDA_ARN  = aws_lambda_function.rules.arn,
     NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
   })
+  artifacts_bucket_name = var.artifacts_bucket_name
   attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
   create_secret        = true // suppports local testing
 }
@@ -48,6 +48,7 @@ module "request_approve" {
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
   })
+  artifacts_bucket_name = var.artifacts_bucket_name
   create_secret        = true
   attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
 }
@@ -59,6 +60,7 @@ module "requests_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
   })
+  artifacts_bucket_name = var.artifacts_bucket_name
   create_secret = true
 }
 
@@ -67,6 +69,7 @@ module "request_by_id" {
   service_name  = "request-by-id"
   env           = var.env
   env_vars      = merge(local.POSTGRES_VARS, {})
+  artifacts_bucket_name = var.artifacts_bucket_name
   create_secret = true
 }
 
@@ -77,6 +80,7 @@ module "transactions_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
   })
+  artifacts_bucket_name = var.artifacts_bucket_name
   create_secret = true
 }
 
@@ -85,6 +89,7 @@ module "transaction_by_id" {
   service_name  = "transaction-by-id"
   env           = var.env
   env_vars      = merge(local.POSTGRES_VARS, {})
+  artifacts_bucket_name = var.artifacts_bucket_name
   create_secret = true
 }
 
@@ -93,6 +98,7 @@ module "balance_by_account" {
   service_name  = "balance-by-account"
   env           = var.env
   env_vars      = merge(local.POSTGRES_VARS, {})
+  artifacts_bucket_name = var.artifacts_bucket_name
   create_secret = true
 }
 
@@ -103,6 +109,7 @@ module "auto_confirm" {
   env_vars = merge(local.POSTGRES_VARS, {
     INITIAL_ACCOUNT_BALANCE = var.initial_account_balance
   })
+  artifacts_bucket_name = var.artifacts_bucket_name
   invoke_principals = ["cognito-idp.amazonaws.com"]
 }
 
@@ -111,6 +118,7 @@ module "wss_connect" {
   service_name      = "wss-connect"
   env               = var.env
   env_vars          = merge(local.POSTGRES_VARS, {})
+  artifacts_bucket_name = var.artifacts_bucket_name
   invoke_principals = ["apigateway.amazonaws.com"]
 }
 
@@ -123,6 +131,7 @@ module "notifications_send" {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
   })
   invoke_principals    = ["sns.amazonaws.com"]
+  artifacts_bucket_name = var.artifacts_bucket_name
   attached_policy_arns = [aws_iam_policy.wss.arn]
 }
 
@@ -142,6 +151,7 @@ module "notifications_get" {
     APIGW_CONNECTIONS_URI      = local.APIGW_CONNECTIONS_URI
     COGNITO_JWKS_URI           = local.COGNITO_JWKS_URI
   })
+  artifacts_bucket_name = var.artifacts_bucket_name
   invoke_principals    = ["apigateway.amazonaws.com"]
   attached_policy_arns = [aws_iam_policy.wss.arn]
 }
@@ -155,6 +165,7 @@ module "notifications_clear" {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
     COGNITO_JWKS_URI      = local.COGNITO_JWKS_URI
   })
+  artifacts_bucket_name = var.artifacts_bucket_name
   invoke_principals    = ["apigateway.amazonaws.com"]
   attached_policy_arns = [aws_iam_policy.wss.arn]
 }
