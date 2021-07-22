@@ -15,33 +15,33 @@ provider "aws" {
   region = "us-east-1"
 }
 
-data "terraform_remote_state" "aws_init_env" {
+data "terraform_remote_state" "aws_init_dev" {
   backend = "remote"
 
   config = {
     organization = "systemaccounting"
 
     workspaces = {
-      name = "aws-init-env"
+      name = "aws-init-dev"
     }
   }
 }
 
 locals {
-  APP     = "mxfactorial"
-  ENV     = "dev"
-  APP_ENV = "${local.APP}-${local.ENV}"
-  ORIGIN_PREFIX = jsondecode(file("${path.module}/../../../../../project.json")).client_origin_bucket_name_prefix
+  APP              = "mxfactorial"
+  ENV              = "dev"
+  APP_ENV          = "${local.APP}-${local.ENV}"
+  ORIGIN_PREFIX    = jsondecode(file("${path.module}/../../../../../project.json")).client_origin_bucket_name_prefix
   ARTIFACTS_PREFIX = jsondecode(file("${path.module}/../../../../../project.json")).artifacts_bucket_name_prefix
 }
 
 // IMPORTANT: first build lambda artifacts using `make all ENV=$ENV CMD=initial-deploy` from project root
 module "dev" {
-  source = "../../modules/environment"
+  source = "../../modules/environment/v001"
 
   ############### shared ###############
 
-  env = local.ENV
+  env                   = local.ENV
   artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ENV}"
   // OPTIONAL, comment or delete if unused:
   custom_domain_name = "mxfactorial.io"
@@ -72,7 +72,7 @@ module "dev" {
   apigw_authorization_header_key = "Authorization"
 
   // OPTIONAL, comment or delete api_cert_arn if custom_domain_name unused:
-  api_cert_arn = lookup(data.terraform_remote_state.aws_init_env.outputs.api_cert_map, local.ENV) // acm-certs module requires api subdomain = "${var.env}-api"
+  api_cert_arn = data.terraform_remote_state.aws_init_dev.outputs.api_cert_dev // acm-certs module requires api subdomain = "${var.env}-api"
 
   // apigw v2
   enable_api_auto_deploy = true
@@ -84,6 +84,6 @@ module "dev" {
   ############### cloudfront ###############
 
   // OPTIONAL, comment or delete client_cert_arn if custom_domain_name unused:
-  client_cert_arn = lookup(data.terraform_remote_state.aws_init_env.outputs.client_cert_map, local.ENV) // acm-certs module requires client subdomain = var.env
+  client_cert_arn = data.terraform_remote_state.aws_init_dev.outputs.client_cert_dev // acm-certs module requires client subdomain = var.env
 }
 

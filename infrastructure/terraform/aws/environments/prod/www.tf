@@ -66,7 +66,7 @@ resource "aws_cloudfront_distribution" "www_s3_client_distribution" {
 
   viewer_certificate {
     // https://github.com/terraform-providers/terraform-provider-aws/issues/2418#issuecomment-371192507
-    acm_certificate_arn = data.terraform_remote_state.aws_init_env.outputs.client_www_cert
+    acm_certificate_arn = data.terraform_remote_state.aws_init_prod.outputs.client_www_cert
     ssl_support_method  = "sni-only"
   }
 }
