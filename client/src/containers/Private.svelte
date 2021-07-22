@@ -7,7 +7,7 @@
 
 	const apiResource: string = "query";
 	const url: string =
-		atob(process.env.GRAPHQL_API).trim() + "/" + apiResource;
+		atob(process.env.GRAPHQL_URI).trim() + "/" + apiResource;
 
 	initClient({ url, maskTypename: true });
 
