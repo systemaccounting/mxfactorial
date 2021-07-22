@@ -72,13 +72,16 @@ private, receiving added value is sustained & acknowledged by sending value
 - api: [api.mxfactorial.io](https://api.mxfactorial.io/)
 
 ### development
+1. `git clone https://github.com/systemaccounting/mxfactorial`, or fork and git clone
 1. install project dependencies listed under root `install` makefile target
 1. set s3 bucket names in root `project.json` to unused values
-1. create artifact and origin buckets by duplicating and customizing resources in `infrastructure/terraform/aws/environments/init-env`, e.g. duplicate `dev.tf` as `stg.tf`, customize, then `terraform apply`
+1. add logging permissions to us-east-1 api gateway with `cd infrastructure/terraform/aws/environments/us-east-1`, comment upstream `backend "remote"` block in `main.tf`, then `terraform init && terraform apply`
+1. create artifact and origin buckets by duplicating and customizing resources in `infrastructure/terraform/aws/environments/init-dev` as new `./init-stg` directory, i.e. duplicate `main.tf` and `storage.tf` from `./init-dev` in new `./init-stg` directory, customize, then `terraform init && terraform apply`
 1. from project root, build and push all artifacts to s3 with `make all CMD=initial-deploy ENV=stg`
-1. create infrastructure by duplicating and customizing resources in `infrastructure/terraform/aws/environments/dev`, then `terraform apply`
+1. create infrastructure by duplicating and customizing resources in `infrastructure/terraform/aws/environments/dev` as new `./stg` directory, then `terraform init && terraform apply`
 1. deploy migrations to new environment rds with `cd migrations && make get-secrets ENV=stg && make resetrds`
 1. deploy client with `cd client && make get-secrets ENV=stg && make deploy ENV=stg`
+1. from project root, `make get-secrets ENV=stg` to store newly created `CLIENT_URI` and `GRAPHQL_URI` values in root `.env` file for manual testing in browser
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:
