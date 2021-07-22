@@ -1,7 +1,3 @@
-data "aws_route53_zone" "mxfactorial_io" {
-  name = "mxfactorial.io."
-}
-
 data "aws_vpc" "default" {
   default = true
 }
@@ -23,5 +19,3 @@ data "aws_route_table" "default" {
     values = ["true"]
   }
 }
-
-data "aws_region" "current" {}
