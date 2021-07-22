@@ -1,6 +1,12 @@
+data "aws_route53_zone" "default" {
+  count = var.custom_domain_name == "" ? 0 : 1
+  name = "${var.custom_domain_name}."
+}
+
 resource "aws_route53_record" "client_fqdn" {
-  zone_id = data.aws_route53_zone.mxfactorial_io.zone_id
-  name    = local.client_url
+  count = var.custom_domain_name == "" ? 0 : 1
+  zone_id = var.custom_domain_name == "" ? null : join("", data.aws_route53_zone.default.*.zone_id)
+  name    = var.custom_domain_name == "" ? null : (var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}")
   type    = "A"
 
   alias {
@@ -11,8 +17,9 @@ resource "aws_route53_record" "client_fqdn" {
 }
 
 resource "aws_route53_record" "client_fqdn_ipv6" {
-  zone_id = data.aws_route53_zone.mxfactorial_io.zone_id
-  name    = local.client_url
+  count = var.custom_domain_name == "" ? 0 : 1
+  zone_id = var.custom_domain_name == "" ? null : join("", data.aws_route53_zone.default.*.zone_id)
+  name    = var.custom_domain_name == "" ? null : (var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}")
   type    = "AAAA"
 
   alias {

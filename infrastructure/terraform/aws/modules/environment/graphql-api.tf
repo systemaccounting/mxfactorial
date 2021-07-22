@@ -1,7 +1,3 @@
-locals {
-  APIV2_URI  = "${var.env == "prod" ? "" : "${var.env}-"}api.mxfactorial.io"
-}
-
 module "graphql_apigwv2" {
   source                   = "../apigwv2-lambda"
   api_name                 = "graphql"
@@ -17,10 +13,11 @@ module "graphql_apigwv2" {
 }
 
 module "graphql_apigwv2_dns" {
+  count = var.custom_domain_name == "" ? 0 : 1
   source                = "../apigwv2-dns"
-  apigwv2_custom_domain = local.APIV2_URI
+  apigwv2_custom_domain = var.custom_domain_name == "" ? null : (var.env == "prod" ? "api.${var.custom_domain_name}" : "${var.env}-api.${var.custom_domain_name}")
   apigwv2_id            = module.graphql_apigwv2.api_id
   apigwv2_stage_id      = module.graphql_apigwv2.stage_id
-  acm_cert_arn          = var.certificate_arn
-  route53_zone_id       = data.aws_route53_zone.mxfactorial_io.zone_id
+  acm_cert_arn          = var.custom_domain_name == "" ? null : var.api_cert_arn
+  route53_zone_id       = var.custom_domain_name == "" ? null : join("", data.aws_route53_zone.default.*.zone_id)
 }
