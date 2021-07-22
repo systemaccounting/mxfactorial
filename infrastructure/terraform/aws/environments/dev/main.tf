@@ -13,21 +13,16 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
-
-  # use regions where only cloud9 available
-  # https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/
 }
 
-provider "archive" {}
-
-data "terraform_remote_state" "aws-us-east-1" {
+data "terraform_remote_state" "aws_init_env" {
   backend = "remote"
 
   config = {
     organization = "systemaccounting"
 
     workspaces = {
-      name = "aws-us-east-1"
+      name = "aws-init-env"
     }
   }
 }
@@ -36,22 +31,30 @@ locals {
   APP     = "mxfactorial"
   ENV     = "dev"
   APP_ENV = "${local.APP}-${local.ENV}"
+  ORIGIN_PREFIX = jsondecode(file("${path.module}/../../../../../project.json")).client_origin_bucket_name_prefix
+  ARTIFACTS_PREFIX = jsondecode(file("${path.module}/../../../../../project.json")).artifacts_bucket_name_prefix
 }
 
-# IMPORTANT: first build lambda artifacts using `cd infrastructure/terraform && sh build.sh $ENV`
+// IMPORTANT: first build lambda artifacts using `make all ENV=$ENV CMD=initial-deploy` from project root
 module "dev" {
   source = "../../modules/environment"
 
   ############### shared ###############
+
   env = local.ENV
+  artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ENV}"
+  // OPTIONAL, comment or delete if unused:
+  custom_domain_name = "mxfactorial.io"
 
   ############### lambda ###############
+
   requests_by_account_return_limit     = 20
   transactions_by_account_return_limit = 20
   notifications_return_limit           = 20
   initial_account_balance              = 1000
 
   ############### rds ###############
+
   rds_db_version                  = "13.1"
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
@@ -67,15 +70,20 @@ module "dev" {
   // change value to deploy api
   graphql_deployment_version     = 19
   apigw_authorization_header_key = "Authorization"
-  certificate_arn                = lookup(data.terraform_remote_state.aws-us-east-1.outputs.api_cert_map, local.ENV)
+
+  // OPTIONAL, comment or delete api_cert_arn if custom_domain_name unused:
+  api_cert_arn = lookup(data.terraform_remote_state.aws_init_env.outputs.api_cert_map, local.ENV) // acm-certs module requires api subdomain = "${var.env}-api"
 
   // apigw v2
   enable_api_auto_deploy = true
 
   ############### client ###############
-  client_origin_bucket_name = "${local.APP}-client-${local.ENV}"
+
+  client_origin_bucket_name = "${local.ORIGIN_PREFIX}-${local.ENV}"
 
   ############### cloudfront ###############
-  ssl_arn = lookup(data.terraform_remote_state.aws-us-east-1.outputs.client_cert_map, local.ENV)
+
+  // OPTIONAL, comment or delete client_cert_arn if custom_domain_name unused:
+  client_cert_arn = lookup(data.terraform_remote_state.aws_init_env.outputs.client_cert_map, local.ENV) // acm-certs module requires client subdomain = var.env
 }
 

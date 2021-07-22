@@ -1,48 +1,27 @@
-# prod only
+// prod only
+locals {
+  WWW_URI = "www.${local.CUSTOM_DOMAIN}"
+}
+
+data "aws_route53_zone" "default" {
+  name = "${local.CUSTOM_DOMAIN}." // local in main.tf
+}
+
 resource "aws_s3_bucket" "www_mxfactorial_client" {
   bucket = "www-mxfactorial-client-prod"
 
   website {
     # aws parses https prefix and bucket name when creating redirect rule
-    redirect_all_requests_to = "https://${module.prod.s3_client_distribution_domain_name}"
+    redirect_all_requests_to = "https://${local.CUSTOM_DOMAIN}"
   }
 
   force_destroy = true
 }
 
-resource "aws_s3_bucket_policy" "www_mxfactorial_client" {
-  bucket = aws_s3_bucket.www_mxfactorial_client.id
-  policy = data.aws_iam_policy_document.www_mxfactorial_client.json
-}
-
-data "aws_iam_policy_document" "www_mxfactorial_client" {
-  version = "2012-10-17"
-
-  statement {
-    sid = "CloudFrontGetWWWBucketObjects${title(local.ENV)}"
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.www_s3_client_distribution.iam_arn]
-    }
-    actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.www_mxfactorial_client.arn}/*"]
-  }
-
-  statement {
-    sid       = "CloudFrontListWWWBucketObjects${title(local.ENV)}"
-    actions   = ["s3:ListBucket"]
-    resources = [aws_s3_bucket.www_mxfactorial_client.arn]
-    principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.www_s3_client_distribution.iam_arn]
-    }
-  }
-}
-
 resource "aws_cloudfront_distribution" "www_s3_client_distribution" {
   comment = "prod www cache"
 
-  aliases = ["www.mxfactorial.io"]
+  aliases = [local.WWW_URI]
 
   origin {
     custom_origin_config {
@@ -64,7 +43,7 @@ resource "aws_cloudfront_distribution" "www_s3_client_distribution" {
     allowed_methods        = ["HEAD", "GET"]
     cached_methods         = ["HEAD", "GET"]
     target_origin_id       = aws_s3_bucket.www_mxfactorial_client.id
-    viewer_protocol_policy = "allow-all"
+    viewer_protocol_policy = "redirect-to-https"
     min_ttl                = 0
 
     default_ttl = 3600
@@ -86,12 +65,32 @@ resource "aws_cloudfront_distribution" "www_s3_client_distribution" {
   }
 
   viewer_certificate {
-    //https://github.com/terraform-providers/terraform-provider-aws/issues/2418#issuecomment-371192507
-    acm_certificate_arn = data.terraform_remote_state.aws_us-east-1.outputs.client_www_cert
+    // https://github.com/terraform-providers/terraform-provider-aws/issues/2418#issuecomment-371192507
+    acm_certificate_arn = data.terraform_remote_state.aws_init_env.outputs.client_www_cert
     ssl_support_method  = "sni-only"
   }
 }
 
-resource "aws_cloudfront_origin_access_identity" "www_s3_client_distribution" {
-  comment = "cloudfront origin access identity for www s3 access in prod"
+resource "aws_route53_record" "www_client_fqdn" {
+  zone_id = data.aws_route53_zone.default.zone_id
+  name    = local.WWW_URI
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.www_s3_client_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.www_s3_client_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "www_client_fqdn_ipv6" {
+  zone_id = data.aws_route53_zone.default.zone_id
+  name    = local.WWW_URI
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.www_s3_client_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.www_s3_client_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
 }
