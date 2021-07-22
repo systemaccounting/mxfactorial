@@ -1,7 +1,7 @@
 // modules require ${service_name}-src.zip in artifacts s3
 
 module "request_create" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "request-create"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
@@ -9,8 +9,8 @@ module "request_create" {
     NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
-  create_secret        = true // suppports local testing
+  attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
+  create_secret         = true // suppports local testing
 }
 
 resource "aws_iam_policy" "invoke_rules" {
@@ -42,97 +42,97 @@ resource "aws_iam_policy" "invoke_rules" {
 ##########################
 
 module "request_approve" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "request-approve"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret        = true
-  attached_policy_arns = [aws_iam_policy.invoke_rules.arn]
+  create_secret         = true
+  attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
 }
 
 module "requests_by_account" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "requests-by-account"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret = true
+  create_secret         = true
 }
 
 module "request_by_id" {
-  source        = "../go-lambda-service"
-  service_name  = "request-by-id"
-  env           = var.env
-  env_vars      = merge(local.POSTGRES_VARS, {})
+  source                = "../../go-lambda-service/v001"
+  service_name          = "request-by-id"
+  env                   = var.env
+  env_vars              = merge(local.POSTGRES_VARS, {})
   artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret = true
+  create_secret         = true
 }
 
 module "transactions_by_account" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "transactions-by-account"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret = true
+  create_secret         = true
 }
 
 module "transaction_by_id" {
-  source        = "../go-lambda-service"
-  service_name  = "transaction-by-id"
-  env           = var.env
-  env_vars      = merge(local.POSTGRES_VARS, {})
+  source                = "../../go-lambda-service/v001"
+  service_name          = "transaction-by-id"
+  env                   = var.env
+  env_vars              = merge(local.POSTGRES_VARS, {})
   artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret = true
+  create_secret         = true
 }
 
 module "balance_by_account" {
-  source        = "../go-lambda-service"
-  service_name  = "balance-by-account"
-  env           = var.env
-  env_vars      = merge(local.POSTGRES_VARS, {})
+  source                = "../../go-lambda-service/v001"
+  service_name          = "balance-by-account"
+  env                   = var.env
+  env_vars              = merge(local.POSTGRES_VARS, {})
   artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret = true
+  create_secret         = true
 }
 
 module "auto_confirm" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "auto-confirm"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     INITIAL_ACCOUNT_BALANCE = var.initial_account_balance
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals = ["cognito-idp.amazonaws.com"]
+  invoke_principals     = ["cognito-idp.amazonaws.com"]
 }
 
 module "wss_connect" {
-  source            = "../go-lambda-service"
-  service_name      = "wss-connect"
-  env               = var.env
-  env_vars          = merge(local.POSTGRES_VARS, {})
+  source                = "../../go-lambda-service/v001"
+  service_name          = "wss-connect"
+  env                   = var.env
+  env_vars              = merge(local.POSTGRES_VARS, {})
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals = ["apigateway.amazonaws.com"]
+  invoke_principals     = ["apigateway.amazonaws.com"]
 }
 
 // invoked by request-create or request-approve through sns
 module "notifications_send" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "notifications-send"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
   })
-  invoke_principals    = ["sns.amazonaws.com"]
+  invoke_principals     = ["sns.amazonaws.com"]
   artifacts_bucket_name = var.artifacts_bucket_name
-  attached_policy_arns = [aws_iam_policy.wss.arn]
+  attached_policy_arns  = [aws_iam_policy.wss.arn]
 }
 
 resource "aws_sns_topic_subscription" "notifications_send" {
@@ -143,7 +143,7 @@ resource "aws_sns_topic_subscription" "notifications_send" {
 
 // invoked by getnotifications through wss
 module "notifications_get" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "notifications-get"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
@@ -152,13 +152,13 @@ module "notifications_get" {
     COGNITO_JWKS_URI           = local.COGNITO_JWKS_URI
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals    = ["apigateway.amazonaws.com"]
-  attached_policy_arns = [aws_iam_policy.wss.arn]
+  invoke_principals     = ["apigateway.amazonaws.com"]
+  attached_policy_arns  = [aws_iam_policy.wss.arn]
 }
 
 // invoked by clearnotifications through wss
 module "notifications_clear" {
-  source       = "../go-lambda-service"
+  source       = "../../go-lambda-service/v001"
   service_name = "notifications-clear"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
@@ -166,6 +166,6 @@ module "notifications_clear" {
     COGNITO_JWKS_URI      = local.COGNITO_JWKS_URI
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals    = ["apigateway.amazonaws.com"]
-  attached_policy_arns = [aws_iam_policy.wss.arn]
+  invoke_principals     = ["apigateway.amazonaws.com"]
+  attached_policy_arns  = [aws_iam_policy.wss.arn]
 }
