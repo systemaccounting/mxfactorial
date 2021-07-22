@@ -1,5 +1,5 @@
 module "graphql_apigwv2" {
-  source                   = "../apigwv2-lambda"
+  source                   = "../../apigwv2-lambda/v001"
   api_name                 = "graphql"
   payload_format_version   = "1.0"
   enable_api_auth          = false
@@ -13,8 +13,8 @@ module "graphql_apigwv2" {
 }
 
 module "graphql_apigwv2_dns" {
-  count = var.custom_domain_name == "" ? 0 : 1
-  source                = "../apigwv2-dns"
+  count                 = var.custom_domain_name == "" ? 0 : 1
+  source                = "../../apigwv2-dns/v001"
   apigwv2_custom_domain = var.custom_domain_name == "" ? null : (var.env == "prod" ? "api.${var.custom_domain_name}" : "${var.env}-api.${var.custom_domain_name}")
   apigwv2_id            = module.graphql_apigwv2.api_id
   apigwv2_stage_id      = module.graphql_apigwv2.stage_id

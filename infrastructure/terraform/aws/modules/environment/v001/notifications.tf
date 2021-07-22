@@ -29,6 +29,15 @@ resource "aws_apigatewayv2_stage" "notifications" {
 }
 
 resource "aws_apigatewayv2_deployment" "notifications" {
+  // avoids BadRequestException during apply
+  depends_on = [
+    module.connect_route.integration_id,
+    module.getnotifications_route.integration_id,
+    module.clearnotifications_route.integration_id,
+    module.disconnect_route.integration_id,
+    aws_apigatewayv2_route.default,
+  ]
+
   api_id      = aws_apigatewayv2_api.notifications.id
   description = "wss notifications deployment in ${var.env}"
   triggers = {
@@ -40,7 +49,7 @@ resource "aws_apigatewayv2_deployment" "notifications" {
 }
 
 module "connect_route" {
-  source            = "../apigwv2-route"
+  source            = "../../apigwv2-route/v001"
   env               = var.env
   apiv2_id          = aws_apigatewayv2_api.notifications.id
   route_key         = "$connect"
@@ -48,7 +57,7 @@ module "connect_route" {
 }
 
 module "getnotifications_route" {
-  source            = "../apigwv2-route"
+  source            = "../../apigwv2-route/v001"
   env               = var.env
   apiv2_id          = aws_apigatewayv2_api.notifications.id
   route_key         = "getnotifications"
@@ -56,7 +65,7 @@ module "getnotifications_route" {
 }
 
 module "clearnotifications_route" {
-  source            = "../apigwv2-route"
+  source            = "../../apigwv2-route/v001"
   env               = var.env
   apiv2_id          = aws_apigatewayv2_api.notifications.id
   route_key         = "clearnotifications"
@@ -64,7 +73,7 @@ module "clearnotifications_route" {
 }
 
 module "disconnect_route" {
-  source            = "../apigwv2-route"
+  source            = "../../apigwv2-route/v001"
   env               = var.env
   apiv2_id          = aws_apigatewayv2_api.notifications.id
   route_key         = "$disconnect"
