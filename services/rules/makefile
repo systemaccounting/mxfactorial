@@ -2,7 +2,9 @@ APP_NAME=rules
 APP_DIR_NAME=$(APP_NAME)
 ARTIFACT_NAME=$(APP_NAME)-src.zip
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
-ARTIFACT_BUCKET=mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION=us-east-1
 BUILD_DIR=$(CURDIR)/dist
 COMPILE_SRC_DIR=$(BUILD_DIR)/$(APP_DIR_NAME)/src
@@ -10,7 +12,6 @@ DEPS_DIR=$(CURDIR)/node_modules
 ENV_FILE=$(CURDIR)/.env
 LAMBDA_INVOKE_LOG=$(CURDIR)/invoke.log
 ENTRYPOINT=$(COMPILE_SRC_DIR)/invoke.js
-DEPLOY_APP=true
 TEST_DATA_FILE=preRuleTrItems.json
 TEST_DATA_DIR=../gopkg/testdata
 TEST_EVENT=$(TEST_DATA_DIR)/$(TEST_DATA_FILE)
@@ -34,7 +35,7 @@ PGHOST \
 PGPORT \
 CLIENT_ID \
 POOL_ID \
-GRAPHQL_API \
+GRAPHQL_URI \
 RULE_LAMBDA_ARN
 
 run:
@@ -69,7 +70,8 @@ test:
 	@$(MAKE) install
 	@$(MAKE) compile
 	@$(MAKE) test-unit
-	@$(MAKE) deploy ENV=$(ENV)
+	@$(MAKE) deploy
+	@$(MAKE) get-secrets
 	@$(MAKE) test-integration
 
 test-unit:

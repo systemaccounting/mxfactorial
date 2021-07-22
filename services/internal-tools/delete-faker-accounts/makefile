@@ -1,6 +1,8 @@
 APP_NAME = delete-faker
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
 REGION = us-east-1
 

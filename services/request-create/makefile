@@ -1,6 +1,8 @@
 APP_NAME=request-create
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 CMD_DIR=$(CURDIR)/cmd
 BINARY_NAME = index.handler
 REGION=us-east-1
@@ -8,7 +10,6 @@ LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
 LAMBDA_INVOKE_LOG=invoke.log
 ENV_FILE=$(CURDIR)/.env
-DEPLOY_APP=true
 ENV_VARS := AWS_REGION \
 RULE_LAMBDA_ARN \
 NOTIFY_TOPIC_ARN

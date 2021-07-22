@@ -1,6 +1,8 @@
 APP_NAME=request-approve
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-ARTIFACT_BUCKET=mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 MOD_PATH=github.com/systemaccounting/mxfactorial/services/$(APP_NAME)
 CMD_DIR=$(CURDIR)/cmd
 REGION=us-east-1
@@ -8,7 +10,6 @@ BINARY_NAME=index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
 LAMBDA_INVOKE_LOG=invoke.log
-DEPLOY_APP=true
 ENV_VARS := AWS_REGION \
 NOTIFY_TOPIC_ARN
 

@@ -1,7 +1,9 @@
 CMD_DIR=$(CURDIR)/cmd
 APP_NAME = transaction-by-id
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION = us-east-1
 BINARY_NAME = index.handler
 LAMBDA_OS=linux
@@ -16,7 +18,6 @@ TEST_TRANSACTION_ID=2
 TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","id":"$(TEST_TRANSACTION_ID)"}'
 TEST_SENDER_ACCOUNT=$(TEST_ACCOUNT)
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
-DEPLOY_APP=true
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \

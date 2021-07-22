@@ -1,12 +1,13 @@
 CMD_DIR = $(CURDIR)/cmd
 APP_NAME = auto-confirm
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-ARTIFACT_BUCKET = mxfactorial-artifacts-$(ENV)
+PROJECT_CONF=../../project.json
+BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION = us-east-1
 BINARY_NAME = index.handler
 LAMBDA_OS=linux
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
-DEPLOY_APP=true
 ENV_FILE=$(CURDIR)/.env
 ENV_VARS := POOL_ID \
 CLIENT_ID
