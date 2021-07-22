@@ -1,10 +1,10 @@
 // provisioned manually
-data "aws_route53_zone" "mxfactorial_io" {
-  name = "mxfactorial.io."
+data "aws_route53_zone" "default" {
+  name = "${var.custom_domain_name}."
 }
 
 resource "aws_acm_certificate" "client_cert" {
-  domain_name       = var.env == "prod" ? "mxfactorial.io" : "${var.env}.mxfactorial.io"
+  domain_name       = var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}"
   validation_method = "DNS"
 
   tags = {
@@ -19,7 +19,7 @@ resource "aws_acm_certificate" "client_cert" {
 resource "aws_route53_record" "client_cert_validation" {
   name    = tolist(aws_acm_certificate.client_cert.domain_validation_options)[0].resource_record_name
   type    = tolist(aws_acm_certificate.client_cert.domain_validation_options)[0].resource_record_type
-  zone_id = data.aws_route53_zone.mxfactorial_io.zone_id
+  zone_id = data.aws_route53_zone.default.zone_id
 
   records = [
     tolist(aws_acm_certificate.client_cert.domain_validation_options)[0].resource_record_value,
@@ -37,7 +37,7 @@ resource "aws_acm_certificate_validation" "client_cert" {
 }
 
 resource "aws_acm_certificate" "api_cert" {
-  domain_name       = var.env == "prod" ? "api.mxfactorial.io" : "${var.env}-api.mxfactorial.io"
+  domain_name       = var.env == "prod" ? "api.${var.custom_domain_name}" : "${var.env}-api.${var.custom_domain_name}"
   validation_method = "DNS"
 
   tags = {
@@ -52,7 +52,7 @@ resource "aws_acm_certificate" "api_cert" {
 resource "aws_route53_record" "api_cert_validation" {
   name    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_name
   type    = tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_type
-  zone_id = data.aws_route53_zone.mxfactorial_io.zone_id
+  zone_id = data.aws_route53_zone.default.zone_id
 
   records = [
     tolist(aws_acm_certificate.api_cert.domain_validation_options)[0].resource_record_value,
