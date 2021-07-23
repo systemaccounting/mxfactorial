@@ -28,7 +28,7 @@ clearnotifications:
 		node index.js
 
 install:
-	yarn install
+	npm install
 
 clean-deps:
 	rm -rf node_modules

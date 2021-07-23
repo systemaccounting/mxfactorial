@@ -41,11 +41,11 @@ install:
 	brew install node
 	brew install terraform
 	brew install awscli
-	brew install jq
 	brew install libpq
 	brew link --force libpq
+	brew install golang-migrate
+	brew install jq
 	npm install -g eslint
-	npm install -g yarn
 #	https://www.docker.com/products/docker-desktop
 
 init:

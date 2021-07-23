@@ -91,21 +91,24 @@ testrds:
 	$(MAKE) downrds DB=test
 
 uprds:
-	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-env-arg
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
+	$(MAKE) get-secrets
 	$(foreach DIR,$($(DB)_up), eval $$(cat $(ENV_FILE)); migrate -verbose -path ./$(DIR) -database "$$DATABASE_TYPE://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_$(DIR)_version" up;)
 
 downrds:
-	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-env-arg
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
+	$(MAKE) get-secrets
 	$(foreach DIR,$($(DB)_down), eval $$(cat $(ENV_FILE)); migrate -verbose -path ./$(DIR) -database "$$DATABASE_TYPE://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_$(DIR)_version" down --all;)
 
 droprds:
-	$(MAKE) -s test-env-file
+	@$(MAKE) -s test-env-arg
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
+	$(MAKE) get-secrets
 	$(foreach DIR,$($(DB)_down), eval $$(cat $(ENV_FILE)); migrate -verbose -path ./$(DIR) -database "$$DATABASE_TYPE://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_$(DIR)_version" drop -f;)
 
 # local go migrate

@@ -7,7 +7,7 @@
 		"source.fixAll.eslint": true
 	},
 	"eslint.workingDirectories": [
-		"./react",
+		"./client",
 		"./services/rules",
 		"./services/internal-tools/delete-faker-accounts",
 		"./services/internal-tools/wss-demo-client",
