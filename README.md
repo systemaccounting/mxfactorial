@@ -75,12 +75,12 @@ private, receiving added value is sustained & acknowledged by sending value
 1. `git clone https://github.com/systemaccounting/mxfactorial`, or fork and git clone
 1. install project dependencies listed under root `install` makefile target
 1. set s3 bucket names in root `project.json` to unused values
-1. add logging permissions to us-east-1 api gateway with `cd infrastructure/terraform/aws/environments/us-east-1`, comment upstream `backend "remote"` block in `main.tf`, then `terraform init && terraform apply`
-1. create artifact and origin buckets by duplicating and customizing resources in `infrastructure/terraform/aws/environments/init-dev` as new `./init-stg` directory, i.e. duplicate `main.tf` and `storage.tf` from `./init-dev` in new `./init-stg` directory, customize, then `terraform init && terraform apply`
+1. add logging permissions to us-east-1 api gateway by opening `infrastructure/terraform/aws/environments/us-east-1/main.tf` and commenting the upstream `backend "remote"` block in `main.tf`, then `cd infrastructure/terraform/aws/environments/us-east-1 && terraform init && terraform apply`
+1. create artifact and origin buckets by duplicating and customizing resources in `infrastructure/terraform/aws/environments/init-dev` as new `./init-stg` directory, i.e. duplicate `main.tf` and `storage.tf` from `./init-dev` in new `./init-stg` directory, customize, then `cd infrastructure/terraform/aws/environments/init-stg && terraform init && terraform apply`
 1. from project root, build and push all artifacts to s3 with `make all CMD=initial-deploy ENV=stg`
-1. create infrastructure by duplicating and customizing resources in `infrastructure/terraform/aws/environments/dev` as new `./stg` directory, then `terraform init && terraform apply`
-1. deploy migrations to new environment rds with `cd migrations && make get-secrets ENV=stg && make resetrds`
-1. deploy client with `cd client && make get-secrets ENV=stg && make deploy ENV=stg`
+1. create infrastructure by duplicating and customizing resources in `infrastructure/terraform/aws/environments/dev` as new `./stg` directory, then `cd infrastructure/terraform/aws/environments/stg && terraform init && terraform apply`
+1. deploy migrations to new environment rds with `cd migrations && make resetrds`
+1. deploy client with `cd client && make deploy ENV=stg`
 1. from project root, `make get-secrets ENV=stg` to store newly created `CLIENT_URI` and `GRAPHQL_URI` values in root `.env` file for manual testing in browser
 
 ### notebook
