@@ -39,8 +39,8 @@ print:
 install:
 	brew install go
 	brew install node
-	brew install terraform
 	brew install awscli
+	brew install terraform
 	brew install libpq
 	brew link --force libpq
 	brew install golang-migrate
