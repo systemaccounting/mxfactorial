@@ -1,7 +1,7 @@
 # mxfactorial
 <p align="center"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></p>
 
-[![builds](https://img.shields.io/badge/workflows-building-brightgreen.svg)](https://github.com/systemaccounting/mxfactorial/actions) [![env](https://img.shields.io/badge/ENV-PROD-brightgreen.svg)](https://mxfactorial.io/) [![contribute](https://img.shields.io/badge/contribute-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement)
+[![contribute](https://img.shields.io/badge/contribute-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement) [![Discord](https://img.shields.io/discord/868565277955203122.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/TCuRQPSQgF)
 
 a payment application intended for deployment by the united states treasury that eliminates monetary inflation, systemic default risk, and the uncompetitive access to capital  
 
