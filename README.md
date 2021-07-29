@@ -81,6 +81,7 @@ private, receiving added value is sustained & acknowledged by sending value
 1. deploy migrations to new environment rds with `cd migrations && make resetrds ENV=stg`
 1. deploy client with `cd client && make deploy ENV=stg`
 1. from project root, `make get-secrets ENV=stg` to store newly created `CLIENT_URI` and `GRAPHQL_URI` values in root `.env` file for manual testing in browser
+1. OPTIONAL: `make all CMD=deploy ENV=stg` from project root to redeploy all services
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:
