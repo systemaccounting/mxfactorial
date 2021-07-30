@@ -21,7 +21,6 @@ prod db = `./schema` + `./seed`
 test db = `./schema` + `./seed` + `./testseed`  
 
 ### tl;dr start local development
-1. `brew install golang-migrate`
 1. `make run` to start postgres in docker
 1. `make resetdocker` to apply all migrations from the `./schema`, `./seed` and `./testseed` directories
 
@@ -85,6 +84,5 @@ test db = `./schema` + `./seed` + `./testseed`
 
 ### direct rds migrations
 deploy migrations to prod rds through lambda, but for faster migrations in lower environment rds, use direct commands:
-1. `make get-secrets ENV=dev`
-1. `make resetrds` drops and then up migrates all sqls from `migrations`, `seed` and `testseed` directories
-1. `make testrds` tests up & down `migrations`, `seed` and `testseed` directories
+1. `make resetrds ENV=dev` drops and then up migrates all sqls from `migrations`, `seed` and `testseed` directories
+1. `make testrds ENV=dev` tests up & down `migrations`, `seed` and `testseed` directories
