@@ -1,6 +1,6 @@
 -- stores transaction rule deployed to rule service:
 -- first, add transaction rule to app code in
--- mxfactorial/services/rules-faas
+-- mxfactorial/services/rules
 -- then, insert rule name in rule table
 CREATE TABLE rule (
   name character varying(255) PRIMARY KEY,
