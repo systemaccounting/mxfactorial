@@ -1,4 +1,5 @@
-<a href="https://www.youtube.com/watch?v=OlNYPkzAwwk&list=PLWTZbGMyrdcVvjbis9Dgf5UULxZLkfE6E"><p align="center"><img width="646" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/127420506-ca214ea5-a05b-43a3-b23d-36297ac2adca.png"></p></a>
+<a href="https://www.youtube.com/watch?v=WDCQ6xew26k&list=PLWTZbGMyrdcVDHDsOTw0qMZ41uYulDL71
+"><p align="center"><img width="646" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/127420506-ca214ea5-a05b-43a3-b23d-36297ac2adca.png"></p></a>
 
 [![contribute](https://img.shields.io/badge/contribute-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement) [![Discord](https://img.shields.io/discord/868565277955203122.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/TCuRQPSQgF)
 
@@ -7,7 +8,8 @@ a payment application intended for deployment by the united states treasury that
 systemaccounting optimizes the flow of capital by expediting the discovery of economic opportunity through physics and data science. dashboarding real-time business performance within an equally-accessible space spanned by a metric not only maximizes capital's throughput between investors and entrepreneurs, it also transparently benchmarks lending rates between borrowers and lenders. in addition to eliminating interest rate manipulation by central commitees, systemaccounting solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. by recording transactions as conserved quantites, user equity remains separate and protected from the liability produced by government-chartered lending firms
 
 ### content
-[economic policy as code](https://www.youtube.com/watch?v=OlNYPkzAwwk&list=PLWTZbGMyrdcVvjbis9Dgf5UULxZLkfE6E) video series  
+[economic policy as code](https://www.youtube.com/watch?v=WDCQ6xew26k&list=PLWTZbGMyrdcVDHDsOTw0qMZ41uYulDL71
+) video series  
 
 ### faqs
 **q.** is this a "cryptocurrency"?  
