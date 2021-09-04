@@ -17,7 +17,7 @@ var ErrAuthorNotInItems = errors.New("author not in items")
 func GetAuthorRole(tr *types.Transaction, author string) (string, error) {
 
 	// test for rule added transaction author
-	if tr.RuleInstanceID == nil && tr.Author == nil && tr.AuthorRole == nil {
+	if (tr.RuleInstanceID == nil || *tr.RuleInstanceID == "") && tr.Author == nil && tr.AuthorRole == nil {
 		return *tr.AuthorRole, nil
 	}
 
@@ -25,7 +25,7 @@ func GetAuthorRole(tr *types.Transaction, author string) (string, error) {
 	for _, v := range tr.TransactionItems {
 
 		// if v.RuleInstanceID.IsZero() {
-		if v.RuleInstanceID == nil {
+		if v.RuleInstanceID == nil || *v.RuleInstanceID == "" {
 
 			if *v.Debitor == author {
 				return DEBITOR, nil

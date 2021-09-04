@@ -84,7 +84,7 @@ func lambdaFn(
 	// filter non-rule generated items from client
 	var nonRuleClientItems []*types.TransactionItem
 	for _, v := range fromClient {
-		if v.RuleInstanceID == nil {
+		if v.RuleInstanceID == nil || *v.RuleInstanceID == "" {
 			nonRuleClientItems = append(nonRuleClientItems, v)
 		}
 	}
