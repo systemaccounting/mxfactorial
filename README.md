@@ -61,18 +61,18 @@ public demonstration of the following use cases through a systemaccounting funct
 
 this project intends to exploit the software engineering community's familiarity with data science to rapidly develop their capacity to describe an economy using mathemtical physics. software engineers may be expediently converted to phd-level experts because they come equipped with the technology to test, adopt, and communicate the subject to others. adding to the project's **[list of features](https://github.com/systemaccounting/mxfactorial/issues?q=is%3Aissue+is%3Apublic+sort%3Acreated-asc)** is designed to foster enough interaction between engineers and the data model that a movement to eliminate nothing but [public ignorance](https://en.wikipedia.org/wiki/Pareto_efficiency) becomes generally accepted as possible *only* when it's precipitated by activism pursued—not in the streets where slogans, bottles, and rocks are blindly hurled at others who are equally frustrated with their economy, but on knowledge's frontier where science and technology are used as tools to empower mankinds revolution in the cloud
 
-### license
-private, receiving added value is sustained & acknowledged by sending value
-
-### contribute
-* to contribute code, negotiate rates in new or existing issues, fork, send pull requests  
-* supporters preferring to contribute funds may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page
-
 ### environment
 - client: [mxfactorial.io](https://mxfactorial.io/)
 - api: [api.mxfactorial.io](https://api.mxfactorial.io/)
 
-### development
+### license
+private, receiving added value is sustained & acknowledged by sending value
+
+### contribute
+* to contribute code, negotiate rates in new or existing issues, fork, ***b***uild ***y***our ***o***wn ***e***nvironment, then send pull requests  
+* supporters preferring to contribute funds may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page
+
+### byoe development
 1. `git clone https://github.com/systemaccounting/mxfactorial`, or fork and git clone
 1. install project dependencies listed under root `install` makefile target
 1. set s3 bucket names in root `project.json` to unused values
