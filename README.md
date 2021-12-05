@@ -30,6 +30,9 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** how to explain this project to non engineers?  
 **a.** share the *economic policy as code* video series  
 
+**q.** why is the code public if the license is private?  
+**a.** publicly used code is a public structure
+
 ### use cases
 public demonstration of the following use cases through a systemaccounting function:
 * expressing a [conservation law](https://en.wikipedia.org/wiki/Conservation_law) through a [data structure](https://github.com/systemaccounting/mxfactorial/blob/develop/mxfactorial.ipynb) disambiguates *delivered* value from *expected* value, and replaces [committees](https://www.federalreserve.gov/financial-stability.htm) with an automated [financial stability criterion](https://en.wikipedia.org/wiki/BIBO_stability)
