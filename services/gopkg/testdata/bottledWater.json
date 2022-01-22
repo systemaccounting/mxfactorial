@@ -1,0 +1,23 @@
+[
+	{
+		"id": null,
+		"transaction_id": null,
+		"item_id": "bottled water",
+		"price": "1.000",
+		"quantity": "1",
+		"debitor_first": null,
+		"rule_instance_id": null,
+		"unit_of_measurement": null,
+		"units_measured": null,
+		"debitor": "JacobWebb",
+		"creditor": "GroceryStore",
+		"debitor_profile_id": null,
+		"creditor_profile_id": null,
+		"debitor_approval_time": null,
+		"creditor_approval_time": null,
+		"debitor_expiration_time": null,
+		"creditor_expiration_time": null,
+		"debitor_rejection_time": null,
+		"creditor_rejection_time": null
+	}
+]

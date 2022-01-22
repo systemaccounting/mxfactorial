@@ -1,5 +1,5 @@
 import type { ITransactionItem } from "./index.d"
-import test from "../../gopkg/testdata/preRuleTrItems.json"
+import test from "../../gopkg/testdata/bottledWater.json"
 import { handler } from "./index"
 
 const event: ITransactionItem[] = test;
