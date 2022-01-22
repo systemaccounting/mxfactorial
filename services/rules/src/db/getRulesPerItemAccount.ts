@@ -26,7 +26,7 @@ export default async function (
 		...rulesPerStateName.rows,
 	];
 
-	console.log("rules found: ", rules)
+	console.log(roleName + " rules found: ", rules)
 	// todo: handle error
 
 	return rules
