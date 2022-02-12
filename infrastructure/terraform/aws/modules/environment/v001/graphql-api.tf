@@ -2,7 +2,7 @@ module "graphql_apigwv2" {
   source                   = "../../apigwv2-lambda/v001"
   api_name                 = "graphql"
   payload_format_version   = "1.0"
-  enable_api_auth          = false
+  enable_api_auth          = var.enable_api_auth
   api_version              = 001
   env                      = var.env
   lambda_invoke_arn        = aws_lambda_function.graphql.invoke_arn
