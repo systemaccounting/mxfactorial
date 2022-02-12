@@ -25,11 +25,13 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 	try {
 		transactionSequence = testDebitorFirstValues(event);
 	} catch (e) {
-		// Error: inconsistent debitor_first values
-		const errMsg = "testDebitorFirstValues: " + e.message
-		console.log(errMsg)
-		console.log("responding with unchanged request")
-		return createResponse(event);
+		if (e instanceof Error) {
+			// Error: inconsistent debitor_first values
+			const errMsg = "testDebitorFirstValues: " + e.message
+			console.log(errMsg)
+			console.log("responding with unchanged request")
+			return createResponse(event);
+		}
 	}
 
 	// add approvals property to each transaction item received in event
@@ -42,7 +44,7 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 	const client = await db.connect()
 
 	// get item rules from db, then create items from rules
-	let addedItems;
+	let addedItems: ITransactionItem[];
 	try {
 		addedItems = await addRuleItems(
 			transactionSequence,
@@ -51,13 +53,15 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 			getProfiles,
 			getRulesPerItemAccount,
 			applyItemRules,
-		);
+		) as ITransactionItem[];
 	} catch (e) {
-		await client.release();
-		const errMsg = "addRuleItems: " + e.message;
-		console.log(errMsg);
-		console.log("responding with unchanged request")
-		return createResponse(event);
+		if (e instanceof Error) {
+			await client.release();
+			const errMsg = "addRuleItems: " + e.message;
+			console.log(errMsg);
+			console.log("responding with unchanged request")
+			return createResponse(event);
+		}
 	};
 
 	// combine rule added items to items received in event
@@ -80,31 +84,35 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 	} catch (e) {
 		await client.release();
 
-		// Error: approvals not found
-		const errMsg = "addApprovalsAndRules: " + e.message;
-		console.log(errMsg);
+		if (e instanceof Error) {
+			// Error: approvals not found
+			const errMsg = "addApprovalsAndRules: " + e.message;
+			console.log(errMsg);
 
-		// return unchanged event on error
-		console.log("responding with unchanged request");
-		return createResponse(event);
+			// return unchanged event on error
+			console.log("responding with unchanged request");
+			return createResponse(event);
+		}
 	};
 
 	// let db pool connection go
 	await client.release();
 
 	// label rule approved transaction items
-	let labeledApproved;
+	let labeledApproved: ITransactionItem[];
 	try {
 		labeledApproved = labelApprovedItems(
 			ruleAppliedApprovals,
 			transactionSequence,
-		);
+		) as ITransactionItem[];
 	} catch (e) {
-		const errMsg = "labelApprovedItems: " + e.message;
-		console.log(errMsg);
+		if (e instanceof Error) {
+			const errMsg = "labelApprovedItems: " + e.message;
+			console.log(errMsg);
 
-		// return rule applied items on error
-		return createResponse(ruleAppliedItems);
+			// return rule applied items on error
+			return createResponse(ruleAppliedItems);
+		};
 	}
 
 	// end pool in non lambda environment
