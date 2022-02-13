@@ -55,7 +55,7 @@ insert into account_owner (owner_account, owned_subaccount) values ('DanLee', 'G
 insert into account_owner (owner_account, owned_subaccount) values ('AaronHill', 'EnergyCo');
 insert into account_owner (owner_account, owned_subaccount) values ('SarahBell', 'USTreasury');
 insert into account_owner (owner_account, owned_subaccount) values ('BenRoss', 'StateOfCalifornia');
-insert into account_owner (owner_account, owned_subaccount) values ('JacobWebb', 'StateOfCalifornia');
+insert into account_owner (owner_account, owned_subaccount) values ('DanLee', 'StateOfCalifornia');
 insert into account_owner (owner_account, owned_subaccount) values ('MiriamLevy', 'StateOfCalifornia');
 insert into account_owner (owner_account, owned_subaccount) values ('JacobWebb', 'TimeCo');
 insert into account_owner (owner_account, owned_subaccount) values ('AzizKhan', 'TimeCo');
