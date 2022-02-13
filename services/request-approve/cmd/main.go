@@ -363,22 +363,24 @@ func lambdaFn(
 		return "", err
 	}
 	for _, v := range allTrItemsInTransaction {
-		if len(*v.DebitorApprovalTime) > 0 && len(*v.CreditorApprovalTime) > 0 {
-			// count items approved by debitor and creditor
-			measuredApprovalCount++
+		if v.DebitorApprovalTime != nil && v.CreditorApprovalTime != nil {
+			if len(*v.DebitorApprovalTime) > 0 && len(*v.CreditorApprovalTime) > 0 {
+				// count items approved by debitor and creditor
+				measuredApprovalCount++
 
-			// also search for last approval time
-			currDebTime, err := convertPGTimeToGo(v.DebitorApprovalTime)
-			if err != nil {
-				log.Print(err)
-				return "", err
+				// also search for last approval time
+				currDebTime, err := convertPGTimeToGo(v.DebitorApprovalTime)
+				if err != nil {
+					log.Print(err)
+					return "", err
+				}
+				currCredTime, err := convertPGTimeToGo(v.CreditorApprovalTime)
+				if err != nil {
+					log.Print(err)
+					return "", err
+				}
+				equilibriumTime = getLatestTime(currDebTime, currCredTime)
 			}
-			currCredTime, err := convertPGTimeToGo(v.CreditorApprovalTime)
-			if err != nil {
-				log.Print(err)
-				return "", err
-			}
-			equilibriumTime = getLatestTime(currDebTime, currCredTime)
 		}
 	}
 
