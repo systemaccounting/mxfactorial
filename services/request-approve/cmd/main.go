@@ -54,11 +54,10 @@ func lambdaFn(
 ) (string, error) {
 
 	// todo: more
-	if &e.AuthAccount == nil ||
-		&e.AccountName == nil ||
-		&e.AccountRole == nil ||
-		e.ID == nil ||
-		e.AuthAccount == "" {
+	if e.AuthAccount == "" ||
+		e.AccountName == nil ||
+		e.AccountRole == nil ||
+		e.ID == nil {
 		return "", errReqValsMissing
 	}
 
