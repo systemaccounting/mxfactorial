@@ -3,7 +3,7 @@ with insert_transaction as (
 	insert into transaction (author, author_role) values ('GroceryCo', 'creditor') returning id
 ),
 item_tax_rule_instance as (
-	SELECT id FROM rule_instance WHERE rule_instance_name='NinePercentSalesTax' AND account_name = 'GroceryCo'
+	SELECT id FROM rule_instance WHERE rule_instance_name='NinePercentSalesTax' AND state_name = 'California'
 ),
 butter as (
 	insert into transaction_item (transaction_id, rule_instance_id, item_id, price, quantity, debitor, creditor, debitor_approval_time, creditor_approval_time) values ((select id from insert_transaction), null, 'butter', 2.000, 1, 'JohnSmith', 'GroceryCo', NOW(), NOW()) returning id
