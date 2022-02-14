@@ -7,7 +7,7 @@ insert into rule_instance (rule_type, rule_name, rule_instance_name, account_rol
 
 -- StateOfCalifornia ApproveAllCaliforniaCredit rule_instance
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approval', 'approveAnyCreditItem', 'ApproveAllCaliforniaCredit', 'creditor', 'BenRoss', '{ "StateOfCalifornia", "creditor", "BenRoss" }');
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approval', 'approveAnyCreditItem', 'ApproveAllCaliforniaCredit', 'creditor', 'DanLee', '{ "StateOfCalifornia", "creditor", "JacobWebb" }');
+insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approval', 'approveAnyCreditItem', 'ApproveAllCaliforniaCredit', 'creditor', 'DanLee', '{ "StateOfCalifornia", "creditor", "DanLee" }');
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approval', 'approveAnyCreditItem', 'ApproveAllCaliforniaCredit', 'creditor', 'MiriamLevy', '{ "StateOfCalifornia", "creditor", "MiriamLevy" }');
 
 -- GroceryCo ApproveAllGroceryCoCredit rule_instance
