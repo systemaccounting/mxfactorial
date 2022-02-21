@@ -4,16 +4,16 @@ export function duplicateRequestsPerRole(
 	currAcct: string,
 	transactions: ITransaction[]
 ): ITransaction[] {
-	let perRole: ITransaction[] = [];
+	let perRole: ITransaction[] = new Array();
 	for (const tr of transactions) {
 		for (const trItem of tr.transaction_items) {
-			if (trItem.creditor == currAcct && !trItem.creditor_approval_time) {
+			if (trItem.creditor == currAcct) {
 				perRole.push(tr);
 				break;
 			}
 		}
 		for (const trItem of tr.transaction_items) {
-			if (trItem.debitor == currAcct && !trItem.debitor_approval_time) {
+			if (trItem.debitor == currAcct) {
 				perRole.push(tr);
 				break;
 			}
@@ -176,4 +176,39 @@ export function accountValuesPresent(reqItems: ITransactionItem[]): boolean {
 	});
 	let allItemsHaveRecipients: boolean = reqItems.length == debitorsWithValue.length && reqItems.length == creditorsWithValue.length;
 	return allItemsHaveRecipients;
+}
+
+export function isRequestPending(
+	currAcct: string,
+	request: ITransaction,
+): boolean {
+	for (const req of request.transaction_items) {
+		if (req.creditor == currAcct && req.creditor_approval_time) {
+			return true;
+		};
+	};
+	for (const req of request.transaction_items) {
+		if (req.debitor == currAcct && req.debitor_approval_time) {
+			return true;
+		};
+	};
+	return false;
+}
+
+export function getContraAccount(
+	currentAcct: string,
+	transaction: ITransaction
+): string {
+	for (const trItem of transaction.transaction_items) {
+		if (trItem.rule_instance_id) {
+			continue
+		}
+		if (trItem.creditor == currentAcct) {
+			return trItem.debitor
+		}
+		if (trItem.debitor == currentAcct) {
+			return trItem.creditor
+		}
+	}
+	return transaction.author
 }
