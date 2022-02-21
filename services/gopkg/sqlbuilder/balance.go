@@ -49,13 +49,13 @@ func UpdateCreditorAccountBalanceSQL(trItem *types.TransactionItem) (string, []i
 }
 
 func SelectCurrentAccountBalanceByAccountNameSQL(
-	accountName string,
+	accountName *string,
 ) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select("current_balance")
 	sb.From("account_balance").
 		Where(
-			sb.Equal("account_name", accountName),
+			sb.Equal("account_name", *accountName),
 		)
 	return sb.Build()
 }
