@@ -16,7 +16,7 @@ func IsCustomIDUnique(i types.ID, l []interface{}) bool {
 	return true
 }
 
-func IsStringUnique(s string, l []interface{}) bool {
+func IsIfaceStringUnique(s string, l []interface{}) bool {
 	for _, v := range l {
 		if v.(string) == s {
 			return false
@@ -34,6 +34,15 @@ func IsIntUnique(i types.ID, l []interface{}) bool {
 	return true
 }
 
+func IsStringUnique(s string, l []string) bool {
+	for _, v := range l {
+		if v == s {
+			return false
+		}
+	}
+	return true
+}
+
 func IsEachContraAccountUnique(trItems []*types.TransactionItem) error {
 	for _, v := range trItems {
 		if *v.Creditor == *v.Debitor {
@@ -45,15 +54,29 @@ func IsEachContraAccountUnique(trItems []*types.TransactionItem) error {
 	return nil
 }
 
+// used for sql builder
 func ListUniqueAccountsFromTrItems(trItems []*types.TransactionItem) []interface{} {
 	var uniqueAccounts []interface{}
 	for _, v := range trItems {
-		if IsStringUnique(*v.Debitor, uniqueAccounts) {
+		if IsIfaceStringUnique(*v.Debitor, uniqueAccounts) {
 			uniqueAccounts = append(uniqueAccounts, *v.Debitor)
 		}
-		if IsStringUnique(*v.Creditor, uniqueAccounts) {
+		if IsIfaceStringUnique(*v.Creditor, uniqueAccounts) {
 			uniqueAccounts = append(uniqueAccounts, *v.Creditor)
 		}
 	}
 	return uniqueAccounts
+}
+
+// used for sufficient debit balance test
+func ListUniqueDebitorAccountsFromTrItems(
+	trItems []*types.TransactionItem,
+) []string {
+	var uniqueDebitors []string
+	for _, v := range trItems {
+		if IsStringUnique(*v.Debitor, uniqueDebitors) {
+			uniqueDebitors = append(uniqueDebitors, *v.Debitor)
+		}
+	}
+	return uniqueDebitors
 }

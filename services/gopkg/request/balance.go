@@ -2,38 +2,42 @@ package request
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 
 	"github.com/shopspring/decimal"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func TestDebitorCapacity(
 	db lpg.SQLDB,
-	accountName *string,
 	trItems []*types.TransactionItem,
 ) error {
-	// measure debitor funds required by transaction items
-	required := DebitorFundsRequired(accountName, trItems)
 
-	// get debitor balance to test approval capacity
-	approverBalance, err := GetAccountBalance(db, accountName)
-	if err != nil {
-		var errMsg string = "get approver balance %v"
-		log.Printf(errMsg, err)
-		return fmt.Errorf(errMsg, err)
+	debitors := tools.ListUniqueDebitorAccountsFromTrItems(trItems)
+
+	for _, d := range debitors {
+		// measure debitor funds required by transaction items
+		required := DebitorFundsRequired(&d, trItems)
+
+		// get debitor balance to test approval capacity
+		approverBalance, err := GetAccountBalance(db, &d)
+		if err != nil {
+			var errMsg string = "get approver balance %v"
+			log.Printf(errMsg, err)
+			return fmt.Errorf(errMsg, err)
+		}
+
+		// test debitor capacity
+		err = TestDebitorBalanceGreaterThanRequiredFunds(&d, required, approverBalance)
+		if err != nil {
+			return err
+		}
 	}
 
-	// test debitor capacity
-	err = TestDebitorBalanceGreaterThanRequiredFunds(required, approverBalance)
-	if err != nil {
-		log.Print(err)
-		return err
-	}
 	return nil
 }
 
@@ -41,7 +45,7 @@ func DebitorFundsRequired(accountName *string, trItems []*types.TransactionItem)
 	var reqd decimal.Decimal = decimal.New(0, 1)
 	for _, v := range trItems {
 		if *v.Debitor == *accountName && v.DebitorApprovalTime == nil {
-			reqd.Add(v.Price.Mul(v.Quantity))
+			reqd = reqd.Add(v.Price.Mul(v.Quantity))
 		}
 	}
 	return reqd
@@ -73,16 +77,16 @@ func GetAccountBalance(db lpg.SQLDB, accountName *string) (decimal.Decimal, erro
 	return balance, nil
 }
 
-func TestDebitorBalanceGreaterThanRequiredFunds(required, currentDebitorBalance decimal.Decimal) error {
+func TestDebitorBalanceGreaterThanRequiredFunds(
+	accountName *string,
+	required decimal.Decimal,
+	currentDebitorBalance decimal.Decimal,
+) error {
 	lessThanRequired := currentDebitorBalance.LessThan(required)
-	zero := decimal.New(0, 1)
-	lessThanOrEqualToZero := currentDebitorBalance.LessThanOrEqual(zero) // defensive, anything can happen in dev
-	if lessThanOrEqualToZero {
-		return errors.New("illegal negative balance")
-	}
 	if lessThanRequired {
-		insufficient := required.Sub(currentDebitorBalance)
-		return fmt.Errorf("account requires %s more before approving", insufficient.String())
+		return fmt.Errorf(
+			"error: insufficient funds in debitor %v account", *accountName,
+		)
 	}
 	return nil
 }
