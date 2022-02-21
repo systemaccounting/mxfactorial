@@ -2,6 +2,7 @@ package testdata
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"strconv"
 	"unicode"
@@ -43,7 +44,7 @@ func CreateFakeProfile(accountName, firstName, lastName string) types.AccountPro
 	f := FakerValues{}
 	err := faker.FakeData(&f)
 	if err != nil {
-		fmt.Println(err)
+		log.Print(err)
 	}
 	testAccount := accountName
 	description := f.Description[0 : len(f.Description)-1]
