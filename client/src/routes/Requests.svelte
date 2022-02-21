@@ -7,6 +7,7 @@
 		isCreditor,
 		isRejected,
 		requestTime,
+		getContraAccount,
 	} from "../utils/transactions";
 	import { account as currentAccount } from "../stores/account";
 
@@ -38,9 +39,10 @@
 							data-id-req={req["id"]}
 						>
 							<RequestCard
-								contraAccount={$currentAccount == req["author"]
-									? $currentAccount
-									: req["author"]}
+								contraAccount={getContraAccount(
+									$currentAccount,
+									req
+								)}
 								isCurrentAccountAuthor={req["author"] ==
 									$currentAccount}
 								isCurrentAccountCreditor={isCreditor(

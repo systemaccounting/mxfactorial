@@ -8,6 +8,8 @@
 		requestTime,
 		expirationTime,
 		isCreditor,
+		isRequestPending,
+		getContraAccount,
 	} from "../utils/transactions";
 	import { fromNow } from "../utils/date";
 	import { useNavigate, useLocation } from "svelte-navigator";
@@ -71,13 +73,16 @@
 </div>
 <div class="container">
 	<div
-		data-id="requestAuthor"
-		data-id-req-author={author}
+		data-id="requestContraAccount"
+		data-id-request-contra-account={getContraAccount(
+			$currentAccount,
+			request
+		)}
 		class="container"
 		on:click={() => console.log(request)}
 	>
 		<Card minHeight="2rem">
-			<strong>{author}</strong>
+			<strong>{getContraAccount($currentAccount, request)}</strong>
 		</Card>
 	</div>
 	<div data-id="sumValue" class="container">
@@ -116,10 +121,14 @@
 		</Card>
 	</div>
 	<div class="btn-group">
-		<span on:click={handleApproveClick} data-id="approve-btn">
-			<Button disabled={false} class="approve-btn">Approve</Button>
-		</span>
-		<Button disabled={false} class="reject-btn">Reject</Button>
+		{#if isRequestPending($currentAccount, request)}
+			<Button disabled={true} class="pending-btn">Pending</Button>
+		{:else}
+			<span on:click={handleApproveClick} data-id="approve-btn">
+				<Button disabled={false} class="approve-btn">Approve</Button>
+			</span>
+			<Button disabled={false} class="reject-btn">Reject</Button>
+		{/if}
 	</div>
 	{#if !showLoading}
 		<div class="transaction-items">
@@ -186,6 +195,10 @@
 	}
 	.btn-group :global(.reject-btn) {
 		background-color: darkslateblue;
+		height: 3rem;
+	}
+	.btn-group :global(.pending-btn) {
+		background-color: #b3b3b3;
 		height: 3rem;
 	}
 	.transaction-items {

@@ -1,4 +1,4 @@
-package transact
+package request
 
 import (
 	"context"
@@ -12,32 +12,9 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func IsEquilibrium(t *types.Transaction) bool {
-	if t.EquilibriumTime == nil {
-		return false
-	}
-TransactionItems:
-	for _, v := range t.TransactionItems {
-		if v.CreditorApprovalTime != nil && v.DebitorApprovalTime != nil {
-		Approvals:
-			for _, w := range v.Approvals {
-				if w.ApprovalTime != nil {
-					continue Approvals
-				} else {
-					return false
-				}
-			}
-			continue TransactionItems
-		} else {
-			return false
-		}
-	}
-	return true
-}
-
 func TestDebitorCapacity(
 	db lpg.SQLDB,
-	accountName string,
+	accountName *string,
 	trItems []*types.TransactionItem,
 ) error {
 	// measure debitor funds required by transaction items
@@ -60,17 +37,17 @@ func TestDebitorCapacity(
 	return nil
 }
 
-func DebitorFundsRequired(accountName string, trItems []*types.TransactionItem) decimal.Decimal {
+func DebitorFundsRequired(accountName *string, trItems []*types.TransactionItem) decimal.Decimal {
 	var reqd decimal.Decimal = decimal.New(0, 1)
 	for _, v := range trItems {
-		if *v.Debitor == accountName && v.DebitorApprovalTime == nil {
+		if *v.Debitor == *accountName && v.DebitorApprovalTime == nil {
 			reqd.Add(v.Price.Mul(v.Quantity))
 		}
 	}
 	return reqd
 }
 
-func GetAccountBalance(db lpg.SQLDB, accountName string) (decimal.Decimal, error) {
+func GetAccountBalance(db lpg.SQLDB, accountName *string) (decimal.Decimal, error) {
 	// create select current account balance sql
 	selCurrBalSQL, selCurrBalArgs := sqlb.SelectCurrentAccountBalanceByAccountNameSQL(
 		accountName,

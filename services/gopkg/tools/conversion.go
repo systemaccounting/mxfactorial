@@ -1,7 +1,9 @@
 package tools
 
 import (
+	"log"
 	"strconv"
+	"time"
 
 	"github.com/shopspring/decimal"
 	"gopkg.in/guregu/null.v4"
@@ -54,4 +56,13 @@ func NullDecimalToString(n decimal.NullDecimal) string {
 		return n.Decimal.String()
 	}
 	return ""
+}
+
+func ConvertPGTimeToGo(pgTime *string) (*time.Time, error) {
+	t, err := time.Parse(time.RFC3339, *pgTime)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return &t, nil
 }

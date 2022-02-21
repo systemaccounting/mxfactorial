@@ -10,12 +10,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jackc/pgx/v4"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	lam "github.com/systemaccounting/mxfactorial/services/gopkg/lambdasdk"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/notify"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/transact"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -71,7 +70,7 @@ func lambdaFn(
 	}
 
 	// store transaction items received from client in var
-	var fromClient []*types.TransactionItem = e.Transaction.TransactionItems
+	var fromClient []*types.TransactionItem = request.RemoveUnauthorizedValues(e.Transaction.TransactionItems)
 
 	// create client control totals
 	// to test all items stored at end
@@ -89,7 +88,8 @@ func lambdaFn(
 		}
 	}
 
-	// test non-rule generated items against rule service
+	// reproduce rules service response
+	// with items sent from client
 	ruleTested, err := lam.Invoke(
 		nonRuleClientItems,
 		awsRegion,
@@ -125,37 +125,10 @@ func lambdaFn(
 		return "", err
 	}
 
-	// add author_role from items to transaction
-	e.Transaction.AuthorRole = &authorRole
-
-	// add sum_value from rule
-	e.Transaction.SumValue = ruleTested.Transaction.SumValue
-
 	// list debitors and creditors to fetch profile ids
-	var uniqueAccountsStr []string
-	for _, v := range ruleTested.Transaction.TransactionItems {
-		if isStringUnique(*v.Debitor, uniqueAccountsStr) {
-			uniqueAccountsStr = append(uniqueAccountsStr, *v.Debitor)
-		}
-		if isStringUnique(*v.Creditor, uniqueAccountsStr) {
-			uniqueAccountsStr = append(uniqueAccountsStr, *v.Creditor)
-		}
-	}
-
-	// convert accounts to interface slice for sql builder pkg
-	var uniqueAccounts []interface{}
-	for _, v := range uniqueAccountsStr {
-		uniqueAccounts = append(uniqueAccounts, v)
-	}
-
-	// create sql to get profile ids of debitors
-	// and creditors referenced in transaction items
-	getProfileIDSQL, getProfileIDArgs := sqlb.SelectProfileIDsByAccount(
-		uniqueAccounts,
+	uniqueAccounts := tools.ListUniqueAccountsFromTrItems(
+		ruleTested.Transaction.TransactionItems,
 	)
-
-	// create insert transaction sql
-	insTrSQL, insTrArgs := sqlb.InsertTransactionSQL(*e.Transaction)
 
 	// connect to postgres
 	db, err := c.Connect(context.Background(), pgConn)
@@ -166,9 +139,9 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// test debitor capacity
-	err = transact.TestDebitorCapacity(
+	err = request.TestDebitorCapacity(
 		db,
-		*e.Transaction.Author,
+		e.Transaction.Author,
 		ruleTested.Transaction.TransactionItems,
 	)
 	if err != nil {
@@ -176,19 +149,8 @@ func lambdaFn(
 		return "", err
 	}
 
-	// get account profile ids with account names
-	profileIDRows, err := db.Query(
-		context.Background(),
-		getProfileIDSQL,
-		getProfileIDArgs...,
-	)
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-
 	// unmarshal account profile ids with account names
-	profileIDList, err := lpg.UnmarshalAccountProfileIDs(profileIDRows)
+	profileIDList, err := data.GetProfileIDsByAccountList(db, uniqueAccounts)
 	if err != nil {
 		log.Print(err)
 		return "", err
@@ -196,124 +158,77 @@ func lambdaFn(
 
 	// convert profile id list to map for convenient
 	// addition of profile ids to transaction items
-	profileIDs := make(map[string]types.ID)
-	for _, v := range profileIDList {
-		profileIDs[*v.AccountName] = *v.ID
-	}
+	profileIDs := request.MapProfileIDsToAccounts(profileIDList)
 
 	// add profile IDs to rule tested transaction items
-	profileIDsAdded := *ruleTested
-	for _, v := range profileIDsAdded.Transaction.TransactionItems {
-		v.DebitorProfileID = new(types.ID)
-		*v.DebitorProfileID = profileIDs[*v.Debitor]
-		v.CreditorProfileID = new(types.ID)
-		*v.CreditorProfileID = profileIDs[*v.Creditor]
-	}
+	request.AddProfileIDsToTrItems(
+		ruleTested.Transaction.TransactionItems,
+		profileIDs,
+	)
 
-	// insert transaction returning id
-	trRow := db.QueryRow(context.Background(), insTrSQL, insTrArgs...)
-
-	// unmarshal transaction id
-	// returned from transaction insert
-	tr, err := lpg.UnmarshalTransaction(trRow)
+	// create pre approval transaction
+	preTr, err := data.CreateTransaction(
+		db,
+		nil,
+		&e.AuthAccount,
+		nil,
+		nil,
+		authorRole,
+		nil,
+		ruleTested.Transaction.SumValue,
+	)
 	if err != nil {
-		log.Printf("unmarshal transaction error: %v", err)
+		log.Print(err)
 		return "", err
 	}
 
-	// create insert transaction item sql
-	insTrItemSQL, inTrItemArgs := sqlb.InsertTrItemsSQL(
-		*tr.ID,
-		profileIDsAdded.Transaction.TransactionItems,
+	// create transaction items
+	preTrItems, err := data.CreateTransactionItems(
+		db,
+		preTr.ID,
+		ruleTested.Transaction.TransactionItems,
 	)
-
-	// insert transaction items returning ids
-	trItemRows, err := db.Query(
-		context.Background(),
-		insTrItemSQL,
-		inTrItemArgs...,
-	)
-	if err != nil {
-		log.Printf("query transaction items error: %v", err)
-		return "", err
-	}
-
-	// unmarshal transaction items
-	// returned from transaction item insert
-	trItems, err := lpg.UnmarshalTrItems(trItemRows)
 	if err != nil {
 		log.Printf("unmarshal transaction items error: %v", err)
 		return "", err
 	}
 
-	// create a var to store approvals inserted count
-	var approvalsInserted []*types.Approval
-
-	// list inserted approvals
-	for i := 0; i < len(trItems); i++ {
-		// create sql to insert approvals per transaction id
-		aprvsSQL, aprvsArgs := sqlb.InsertApprovalsSQL(
-			*tr.ID,
-			*trItems[i].ID,
-			profileIDsAdded.Transaction.TransactionItems[i].Approvals,
-		)
-
-		// insert approvals per transaction item id
-		apprvRows, err := db.Query(context.Background(), aprvsSQL, aprvsArgs...)
-		if err != nil {
-			log.Printf("query approvals error: %v", err)
-			return "", err
-		}
-
-		// unmarshal approvals returned from insert
-		apprv, err := lpg.UnmarshalApprovals(apprvRows)
-		if err != nil {
-			log.Printf("unmarshal approvals error: %v", err)
-			return "", err
-		}
-
-		// add approval insert result to list
-		approvalsInserted = append(approvalsInserted, apprv...)
+	// create approvals without manual timestamps
+	preApprovals, err := data.CreateApprovals(
+		db,
+		preTr.ID,
+		// transaction items WITH IDs and WITHOUT rule-added approvals
+		preTrItems,
+		// transaction items WITHOUT IDs and WITH rule-added approvals
+		ruleTested.Transaction.TransactionItems,
+	)
+	if err != nil {
+		log.Print(err)
+		return "", err
 	}
 
 	// urge permanent solution if client items not stored
-	if len(trItems) != clientItemCount && len(approvalsInserted) != clientApprovalCount {
+	if len(preTrItems) != clientItemCount && len(preApprovals) != clientApprovalCount {
 		return "", errors.New("move inserts into a single sql transaction")
 	}
 
-	// add transaction items to returning transaction
-	tr.TransactionItems = trItems
+	// attach pre approval transaction items to
+	// pre approval transaction
+	preTr.TransactionItems = preTrItems
 
-	// change account balances if equilibrium
-	if transact.IsEquilibrium(tr) {
-		transact.ChangeAccountBalances(db, tr.TransactionItems)
-	}
-
-	// notify role approvers
-	err = notify.NotifyTransactionRoleApprovers(
+	// 1. add requested approval
+	// 2. update approval time stamps in transaction items and transaction
+	// 3. change account balances if equilibrium
+	// 4. notify approvers
+	return request.Approve(
 		db,
+		&e.AuthAccount,
+		&e.AuthAccount,
+		authorRole,
+		preTr,
+		preApprovals,
 		&notifyTopicArn,
-		approvalsInserted,
-		tr,
 	)
-	if err != nil {
-		log.Print("notify transaction role approvers ", err)
-	}
-
-	// create request to send as client response
-	intraTr := tools.CreateIntraTransaction(e.AuthAccount, tr)
-
-	// send string or error response to client
-	return tools.MarshalIntraTransaction(&intraTr)
-}
-
-func isStringUnique(s string, l []string) bool {
-	for _, v := range l {
-		if v == s {
-			return false
-		}
-	}
-	return true
 }
 
 func nilString(s *string) string {
@@ -337,8 +252,12 @@ func nilBool(b *bool) bool {
 	return *b
 }
 
+// simplifies transaction items before testing their
+// equality between client request and rules response
 func testPrep(items []*types.TransactionItem) []preTestItem {
+
 	var reduced []preTestItem
+
 	for _, u := range items {
 		var st preTestItem
 		st.ItemID = nilString(u.ItemID)
@@ -361,8 +280,10 @@ func testPrep(items []*types.TransactionItem) []preTestItem {
 		st.Creditor = nilString(u.Creditor)
 		st.DebitorExpirationTime = nilString(u.DebitorExpirationTime)
 		st.CreditorExpirationTime = nilString(u.CreditorExpirationTime)
+
 		reduced = append(reduced, st)
 	}
+
 	return reduced
 }
 

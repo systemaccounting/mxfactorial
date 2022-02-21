@@ -7,11 +7,12 @@ func CreateIntraTransaction(
 	authAccount string,
 	tr *types.Transaction,
 ) types.IntraTransaction {
-	intraTr := types.IntraTransaction{
-		types.IntraEvent{AuthAccount: authAccount},
-		tr,
+	return types.IntraTransaction{
+		IntraEvent: types.IntraEvent{
+			AuthAccount: authAccount,
+		},
+		Transaction: tr,
 	}
-	return intraTr
 }
 
 // CreateIntraTransaction ...
@@ -19,9 +20,10 @@ func CreateIntraTransactions(
 	authAccount string,
 	trs []*types.Transaction,
 ) types.IntraTransactions {
-	intraTr := types.IntraTransactions{
-		types.IntraEvent{AuthAccount: authAccount},
-		trs,
+	return types.IntraTransactions{
+		IntraEvent: types.IntraEvent{
+			AuthAccount: authAccount,
+		},
+		Transaction: trs,
 	}
-	return intraTr
 }

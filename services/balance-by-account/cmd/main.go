@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/transact"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -33,7 +33,7 @@ func lambdaFn(
 		return "", errors.New("missing auth_account. exiting")
 	}
 
-	if &e.AccountName == nil {
+	if e.AccountName == nil {
 		return "", errors.New("missing account_name. exiting")
 	}
 
@@ -46,7 +46,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get balance
-	balance, err := transact.GetAccountBalance(db, *e.AccountName)
+	balance, err := request.GetAccountBalance(db, e.AccountName)
 	if err != nil {
 		var errMsg string = "get account balance %v"
 		log.Printf(errMsg, err)

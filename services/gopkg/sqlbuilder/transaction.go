@@ -6,7 +6,13 @@ import (
 )
 
 func InsertTransactionSQL(
-	t types.Transaction,
+	trRuleInstanceID *types.ID,
+	trAuthor *string,
+	trDeviceID *string,
+	trAuthorDeviceLatlng *string,
+	trAuthorRole types.Role,
+	trEquilibriumTime *string,
+	trSumValue *string,
 ) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("transaction")
@@ -20,13 +26,13 @@ func InsertTransactionSQL(
 		"sum_value",
 	)
 	ib.Values(
-		t.RuleInstanceID,
-		t.Author,
-		t.AuthorDeviceID,
-		t.AuthorDeviceLatlng,
-		t.AuthorRole,
-		t.EquilibriumTime,
-		t.SumValue,
+		trRuleInstanceID,
+		trAuthor,
+		trDeviceID,
+		trAuthorDeviceLatlng,
+		trAuthorRole.String(),
+		trEquilibriumTime,
+		trSumValue,
 	)
 	// format with ib arg only to avoid
 	// can't scan into dest[0]: unable to assign to *int32

@@ -6,37 +6,33 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-const (
-	DEBITOR  string = "debitor"
-	CREDITOR        = "creditor"
-)
-
 var ErrAuthorNotInItems = errors.New("author not in items")
 
 // GetAuthorRole gets author role from a transaction
-func GetAuthorRole(tr *types.Transaction, author string) (string, error) {
+func GetAuthorRole(tr *types.Transaction, author string) (types.Role, error) {
 
 	// test for rule added transaction author
-	if (tr.RuleInstanceID == nil || *tr.RuleInstanceID == "") && tr.Author == nil && tr.AuthorRole == nil {
-		return *tr.AuthorRole, nil
+	if tr.RuleInstanceID != nil && len(*tr.RuleInstanceID) > 0 {
+		var authorRole *types.Role
+		authorRole.Set(*tr.AuthorRole)
+		return *authorRole, nil
 	}
 
 	// if transaction is NOT rule generated
 	for _, v := range tr.TransactionItems {
 
-		// if v.RuleInstanceID.IsZero() {
 		if v.RuleInstanceID == nil || *v.RuleInstanceID == "" {
 
 			if *v.Debitor == author {
-				return DEBITOR, nil
+				return types.DEBITOR, nil
 			}
 
 			if *v.Creditor == author {
-				return CREDITOR, nil
+				return types.CREDITOR, nil
 			}
 
 		}
 	}
 
-	return "", ErrAuthorNotInItems
+	return 0, ErrAuthorNotInItems
 }

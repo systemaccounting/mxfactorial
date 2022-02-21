@@ -2,11 +2,11 @@
   "auth_account": "GroceryStore",
   "transaction": {
     "id": "",
-    "rule_instance_id": "",
+    "rule_instance_id": null,
     "author": "GroceryStore",
     "author_device_id": null,
     "author_device_latlng": null,
-    "author_role": null,
+    "author_role": "creditor",
     "transaction_items": [
       {
         "id": "",
