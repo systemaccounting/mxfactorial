@@ -103,7 +103,6 @@ func lambdaFn(
 	// 4. notify approvers
 	return request.Approve(
 		db,
-		e.AccountName,
 		&e.AuthAccount,
 		accountRole,
 		preTr,

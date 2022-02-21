@@ -13,7 +13,6 @@ import (
 
 func Approve(
 	db lpg.SQLDB,
-	accountName *string,
 	authAccount *string,
 	accountRole types.Role,
 	preApprovalTransaction *types.Transaction,
@@ -22,14 +21,11 @@ func Approve(
 ) (string, error) {
 
 	// test debitor capacity
-	// todo: test capacity of all debitors to avoid stale approvals
 	err := TestDebitorCapacity(
 		db,
-		accountName,
 		preApprovalTransaction.TransactionItems,
 	)
 	if err != nil {
-		log.Print(err)
 		return "", err
 	}
 
@@ -39,30 +35,27 @@ func Approve(
 		preApprovalTransaction.TransactionItems,
 	)
 	if err != nil {
-		log.Print(err)
 		return "", err
 	}
 
 	// fail approval if timestamps not pending
 	err = TestPendingRoleApproval(
-		accountName,
+		authAccount,
 		accountRole,
 		preApprovals,
 	)
 	if err != nil {
-		log.Print(err)
 		return "", err
 	}
 
 	// add manual approval timestamps to approval records
 	_, err = data.UpdateApprovalsByAccountAndRole(
 		db,
-		accountName,
+		authAccount,
 		accountRole,
 		preApprovalTransaction.ID,
 	)
 	if err != nil {
-		log.Print(err)
 		return "", err
 	}
 
@@ -72,7 +65,6 @@ func Approve(
 		preApprovalTransaction.ID,
 	)
 	if err != nil {
-		log.Print(err)
 		return "", err
 	}
 
@@ -83,7 +75,6 @@ func Approve(
 		preApprovalTransaction,
 	)
 	if err != nil {
-		log.Print(err)
 		return "", err
 	}
 
@@ -93,7 +84,6 @@ func Approve(
 		preApprovalTransaction.ID,
 	)
 	if err != nil {
-		log.Print(err)
 		return "", err
 	}
 
