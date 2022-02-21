@@ -21,6 +21,9 @@
 \* *notes*
 * rule endpoint passes transaction, transaction_item, rule_instance_id primary keys to accommodate testing by transaction approval endpoint
 
+### requirements
+1. debitor approval rules condition setting approval time stamps on sufficient account balances
+
 ### dev
 1. follow steps in `schema/README.md` to start postgres in docker
 1. `make install` to install prod + dev deps
