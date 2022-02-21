@@ -33,7 +33,7 @@ func lambdaFn(
 		return "", errors.New("missing auth_account. exiting")
 	}
 
-	if &e.AccountName == nil {
+	if e.AccountName == nil {
 		return "", errors.New("missing account_name. exiting")
 	}
 
@@ -46,7 +46,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get balance
-	balance, err := transact.GetAccountBalance(db, *e.AccountName)
+	balance, err := transact.GetAccountBalance(db, e.AccountName)
 	if err != nil {
 		var errMsg string = "get account balance %v"
 		log.Printf(errMsg, err)

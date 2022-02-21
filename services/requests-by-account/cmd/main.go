@@ -61,7 +61,7 @@ func lambdaFn(
 		return "", errors.New("missing auth_account. exiting")
 	}
 
-	if &e.AccountName == nil {
+	if e.AccountName == nil {
 		return "", errors.New("missing account_name. exiting")
 	}
 
@@ -92,6 +92,8 @@ func lambdaFn(
 	}
 
 	if len(trItems) == 0 {
+		log.Println("0 transaction items found")
+
 		// create empty response to client
 		intraTrs := tools.CreateIntraTransactions(e.AuthAccount, []*types.Transaction{})
 
