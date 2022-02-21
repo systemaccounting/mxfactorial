@@ -138,17 +138,6 @@ func lambdaFn(
 	// close db connection when main exits
 	defer db.Close(context.Background())
 
-	// test debitor capacity
-	err = request.TestDebitorCapacity(
-		db,
-		e.Transaction.Author,
-		ruleTested.Transaction.TransactionItems,
-	)
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-
 	// unmarshal account profile ids with account names
 	profileIDList, err := data.GetProfileIDsByAccountList(db, uniqueAccounts)
 	if err != nil {
@@ -222,7 +211,6 @@ func lambdaFn(
 	// 4. notify approvers
 	return request.Approve(
 		db,
-		&e.AuthAccount,
 		&e.AuthAccount,
 		authorRole,
 		preTr,
