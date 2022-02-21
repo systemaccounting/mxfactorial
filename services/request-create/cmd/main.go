@@ -196,7 +196,7 @@ func lambdaFn(
 		return "", err
 	}
 
-	// urge permanent solution if client items not stored
+	// urge permanent solution if client transaction items not stored
 	if len(preTrItems) != clientItemCount && len(preApprovals) != clientApprovalCount {
 		return "", errors.New("move inserts into a single sql transaction")
 	}

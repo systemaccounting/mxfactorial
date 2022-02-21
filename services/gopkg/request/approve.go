@@ -48,7 +48,7 @@ func Approve(
 		return "", err
 	}
 
-	// add manual approval timestamps to approval records
+	// add approval timestamps from requester to approvals
 	_, err = data.UpdateApprovalsByAccountAndRole(
 		db,
 		authAccount,
