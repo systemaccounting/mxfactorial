@@ -203,7 +203,7 @@ func lambdaFn(
 
 				// add connection id to delete list if
 				// 410 status code in error, and connection id is unique
-				if re.MatchString(errMsg) && tools.IsStringUnique(*w.ConnectionID, websocketsToDelete) {
+				if re.MatchString(errMsg) && tools.IsIfaceStringUnique(*w.ConnectionID, websocketsToDelete) {
 					websocketsToDelete = append(websocketsToDelete, *w.ConnectionID)
 				}
 			}
