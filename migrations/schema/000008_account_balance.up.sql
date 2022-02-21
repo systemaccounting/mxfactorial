@@ -1,6 +1,6 @@
 CREATE TABLE account_balance (
   account_name character varying(255) not null unique,
-  current_balance numeric default 0,
+  current_balance numeric default 0 CHECK (current_balance > 0),
   current_transaction_item_id int, -- todo: not null, accounts created by transaction
   updated_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
