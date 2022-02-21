@@ -43,6 +43,7 @@ export default function (
 			units_measured: repeatedUnitsMeasured,
 			debitor: trsDebitor,
 			creditor: trsCreditor,
+			approvals: new Array(),
 		},
 	};
 
