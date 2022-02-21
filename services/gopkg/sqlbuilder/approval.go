@@ -20,7 +20,7 @@ var buildFInsApproval string = "%v returning" + " " + strings.Join([]string{
 	"expiration_time",
 }, ", ")
 
-func InsertApprovalsSQL(trID, trItID types.ID, approvals []*types.Approval) (string, []interface{}) {
+func InsertApprovalsSQL(trID, trItID *types.ID, approvals []*types.Approval) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("approval")
 	ib.Cols(
@@ -52,7 +52,7 @@ func InsertApprovalsSQL(trID, trItID types.ID, approvals []*types.Approval) (str
 	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
 }
 
-func UpdateApprovalsSQL(account, role *string, trID *types.ID) (string, []interface{}) {
+func UpdateApprovalsSQL(account *string, role types.Role, trID *types.ID) (string, []interface{}) {
 	ub := sqlb.PostgreSQL.NewUpdateBuilder()
 	ub.Update("approval").
 		Set(
@@ -60,15 +60,17 @@ func UpdateApprovalsSQL(account, role *string, trID *types.ID) (string, []interf
 		).
 		Where(
 			ub.Equal("account_name", *account),
-			ub.Equal("account_role", *role),
+			ub.Equal("account_role", role.String()),
 			ub.Equal("transaction_id", *trID),
+			ub.IsNull("approval_time"),
+			// ub.IsNull("rule_instance_id"),
 		)
 	ret := sqlb.Buildf(buildFInsApproval, ub)
 	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
 }
 
 func SelectApprovalsByTrItemIDsSQL(
-	role *string,
+	role types.Role,
 	trItemIDs []interface{},
 ) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
@@ -86,16 +88,13 @@ func SelectApprovalsByTrItemIDsSQL(
 	)
 	sb.From("approval").
 		Where(
-			sb.Equal("account_role", *role),
+			sb.Equal("account_role", role.String()),
 			sb.In("transaction_item_id", trItemIDs...),
 		)
 	return sb.Build()
 }
 
-func SelectApprovalsByTrIDSQL(
-	account string,
-	trID *types.ID,
-) (string, []interface{}) {
+func SelectApprovalsByTrIDSQL(trID *types.ID) (string, []interface{}) {
 	sb := sqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select(
 		"id",

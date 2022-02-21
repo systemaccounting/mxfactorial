@@ -5,7 +5,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func InsertTrItemsSQL(trID types.ID, trItems []*types.TransactionItem) (string, []interface{}) {
+func InsertTrItemsSQL(trID *types.ID, trItems []*types.TransactionItem) (string, []interface{}) {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("transaction_item")
 	ib.Cols(
@@ -62,14 +62,20 @@ func SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
 	return sb.Build()
 }
 
-func UpdateTrItemAfterApprovalSQL(colName string, trItemIDs []interface{}) (string, []interface{}) {
+func UpdateTrItemRoleApprovalSQL(
+	accountRole types.Role,
+	trItemID *types.ID,
+	apprTime *string,
+) (string, []interface{}) {
 	ub := sqlb.PostgreSQL.NewUpdateBuilder()
 	ub.Update("transaction_item").
 		Set(
-			ub.Assign(colName, "NOW()"),
+			ub.Assign(accountRole.String()+"_approval_time", *apprTime),
 		).
 		Where(
-			ub.In("id", trItemIDs...),
+			ub.Equal("id", *trItemID),
+			// avoid rule added approvals
+			ub.IsNull(accountRole.String()+"_approval_time"),
 		)
 	return ub.Build()
 }
