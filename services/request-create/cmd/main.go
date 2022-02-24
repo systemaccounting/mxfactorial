@@ -182,7 +182,7 @@ func lambdaFn(
 		return "", err
 	}
 
-	// create approvals without manual timestamps
+	// create approvals without requester timestamps
 	preApprovals, err := data.CreateApprovals(
 		db,
 		preTr.ID,
