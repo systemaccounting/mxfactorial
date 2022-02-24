@@ -61,7 +61,7 @@ infrastructure/aws-cdk/**/*.d.ts
 tst.sh
 
 # postgres docker
-**/postgres-data
+migrations/postgres/data
 
 # go migrate
 migrate.linux-amd64
