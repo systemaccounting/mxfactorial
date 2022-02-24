@@ -69,7 +69,7 @@ func GetRoleApprovalsByTrItemIDs(
 	return roleApprovals, nil
 }
 
-func UpdateApprovalsByAccountAndRole(
+func AddApprovalTimesByAccountAndRole(
 	db lpg.SQLDB,
 	accountName *string,
 	accountRole types.Role,

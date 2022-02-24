@@ -48,8 +48,8 @@ func Approve(
 		return "", err
 	}
 
-	// add approval timestamps from requester to approvals
-	_, err = data.UpdateApprovalsByAccountAndRole(
+	// add requester timestamps to approvals
+	_, err = data.AddApprovalTimesByAccountAndRole(
 		db,
 		authAccount,
 		accountRole,
@@ -69,7 +69,7 @@ func Approve(
 	}
 
 	// update approved transaction items
-	postApprovalTransaction, err := AddApprovalTimes(
+	postApprovalTransaction, err := CopyApprovalTimes(
 		db,
 		endingApprovals,
 		preApprovalTransaction,
@@ -112,7 +112,7 @@ func Approve(
 
 }
 
-func AddApprovalTimes(
+func CopyApprovalTimes(
 	db lpg.SQLDB,
 	approvals []*types.Approval,
 	preApprovalTransaction *types.Transaction,
