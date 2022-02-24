@@ -1,4 +1,4 @@
-`binami/postgres` docker image
+`bitnami/postgres` docker image
 
 #### issue
 
