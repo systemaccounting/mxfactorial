@@ -47,7 +47,7 @@ func NullTimeToString(t null.Time) *string {
 	if pgTime.IsZero() {
 		return nil
 	}
-	f := pgTime.Format("2006-01-02T15:04:05.000000Z")
+	f := pgTime.UTC().Format("2006-01-02T15:04:05.000000Z")
 	return &f
 }
 
