@@ -32,14 +32,14 @@ func GetAuthAccount(ctx context.Context, graphQLRequestAccount string) (string, 
 			return "", errors.New(ErrNotAuthorized)
 		}
 
-		// get account from jwt claims
-		account, ok := claims["cognito:username"].(string)
+		// get authenticated account from jwt claims
+		authAccount, ok := claims["cognito:username"].(string)
 		if !ok {
 			log.Print("account not available from cognito:username")
 			return "", errors.New(ErrNotAuthorized)
 		}
 
-		return account, nil
+		return authAccount, nil
 	}
 
 	// return account passed by user in graphql
