@@ -1,14 +1,13 @@
 APP_NAME=notifications-get
 CMD_DIR=$(CURDIR)/cmd
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-PROJECT_CONF=../../project.json
+RELATIVE_PROJECT_ROOT_PATH=../..
+PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION=us-east-1
-BINARY_NAME=index.handler
-LAMBDA_OS=linux
-LAMBDA_NAME=$(APP_NAME)-$(ENV)
-ENV_VARS=COGNITO_JWKS_URI
+EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".\"executable-name\"" $(PROJECT_CONF))
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -24,67 +23,100 @@ endif
 run:
 	@$(DOCKER_ENV_VARS) go run ./cmd/main.go
 
+###################### dependencies ######################
+
+install:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/download-go-mod.sh
+
+###################### build ######################
+
+build:
+	@$(MAKE) -s clean
+	$(MAKE) install
+	$(MAKE) compile
+	$(MAKE) zip
+
+compile:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/compile-go-linux.sh \
+		--app-name $(APP_NAME)
+
+zip:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/zip-executable.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+		--executable-name $(EXECUTABLE_NAME)
+
 ###################### clean ######################
 
 clean:
 	$(MAKE) clean-binary
 	$(MAKE) clean-artifact
-
-clean-artifact:
-		rm -f $(APP_NAME)-src.zip
+	$(MAKE) clean-log
 
 clean-binary:
-		rm -f $(BINARY_NAME)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-binary.sh \
+		--app-name $(APP_NAME) \
+		--binary-name $(EXECUTABLE_NAME)
 
-###################### dependencies ######################
+clean-artifact:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-artifact.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME)
 
-install:
-	go mod download
+clean-log:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-invoke-log.sh \
+		--app-name $(APP_NAME)
 
-###################### build ######################
+###################### secrets ######################
 
-compile:
-	GOOS=$(LAMBDA_OS) go build -o $(BINARY_NAME) $(CMD_DIR)/main.go
+test-env-file:
+ifeq (,$(wildcard $(ENV_FILE)))
+	$(error no .env file, run 'make get-secrets ENV=dev')
+endif
 
-zip:
-	zip $(APP_NAME)-src.zip ./$(BINARY_NAME)
+clean-env:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-env.sh \
+		--app-name $(APP_NAME)
 
-build:
-	$(MAKE) clean
-	$(MAKE) install
-	$(MAKE) compile
-	$(MAKE) zip
-
+get-secrets:
+	@$(MAKE) -s test-env-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/create-env.sh \
+		--app-name $(APP_NAME) \
+		--env $(ENV) \
+		--region $(REGION)
 
 ###################### deploy ######################
 
 put-object:
 	@$(MAKE) -s test-env-arg
-	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET) \
-		--key=$(ARTIFACT_NAME) \
-		--body=$(CURDIR)/$(ARTIFACT_NAME) \
-		--region=$(REGION) \
-		--output=text | xargs); \
-	echo "***pushed $(ARTIFACT_NAME) artifact with ETag: $$ETAG"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/put-object.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 update-function:
 	@$(MAKE) -s test-env-arg
-	@MOD=$$(aws lambda update-function-code \
-		--function-name=$(LAMBDA_NAME) \
-		--s3-key=$(ARTIFACT_NAME) \
-		--s3-bucket=$(ARTIFACT_BUCKET) \
-		--region=$(REGION) \
-		--query 'LastModified' | xargs);\
-	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/update-function.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 initial-deploy:
 	@$(MAKE) -s test-env-arg
-	$(MAKE) clean
-	$(MAKE) install
-	$(MAKE) compile
-	$(MAKE) zip
-	$(MAKE) put-object ENV=$(ENV)
+	$(MAKE) build
+	$(MAKE) put-object
 
 deploy:
 	@$(MAKE) -s test-env-arg
@@ -94,22 +126,11 @@ deploy:
 
 deploy-only:
 	@$(MAKE) -s test-env-arg
-	$(MAKE) put-object ENV=$(ENV)
-	$(MAKE) update-function ENV=$(ENV)
+	$(MAKE) put-object
+	$(MAKE) update-function
 
 now:
-	$(MAKE) clean
+	@$(MAKE) -s clean
 	$(MAKE) compile
 	$(MAKE) zip
 	$(MAKE) deploy-only ENV=dev
-
-###################### warm up ######################
-
-warm-up:
-	@$(MAKE) -s test-env-arg
-	@aws lambda invoke \
-		--region $(REGION) \
-		--invocation-type RequestResponse \
-		--function-name $(LAMBDA_NAME) \
-		--payload '{}' \
-		invoke.log

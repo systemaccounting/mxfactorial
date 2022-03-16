@@ -1,8 +1,9 @@
 APP_NAME=rules
 APP_DIR_NAME=$(APP_NAME)
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-LAMBDA_NAME=$(APP_NAME)-$(ENV)
-PROJECT_CONF=../../project.json
+RELATIVE_PROJECT_ROOT_PATH=../..
+PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION=us-east-1
@@ -10,11 +11,11 @@ BUILD_DIR=$(CURDIR)/dist
 COMPILE_SRC_DIR=$(BUILD_DIR)/$(APP_DIR_NAME)/src
 DEPS_DIR=$(CURDIR)/node_modules
 ENV_FILE=$(CURDIR)/.env
-LAMBDA_INVOKE_LOG=$(CURDIR)/invoke.log
 ENTRYPOINT=$(COMPILE_SRC_DIR)/invoke.js
+
 TEST_DATA_FILE=preRuleTrItems.json
 TEST_DATA_DIR=../gopkg/testdata
-TEST_EVENT=$(TEST_DATA_DIR)/$(TEST_DATA_FILE)
+TEST_EVENT=$(shell base64 $(TEST_DATA_DIR)/$(TEST_DATA_FILE))
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -25,18 +26,6 @@ PG_MAX_CONNECTIONS=20 \
 PG_IDLE_TIMEOUT=10000 \
 PG_CONN_TIMEOUT=500 \
 PG_DISCONNECT=true
-
-WORKFLOW_ENV_VARS := AWS_REGION \
-SECRET \
-PGDATABASE \
-PGUSER \
-PGPASSWORD \
-PGHOST \
-PGPORT \
-CLIENT_ID \
-POOL_ID \
-GRAPHQL_URI \
-RULE_LAMBDA_ARN
 
 run:
 	@$(MAKE) clean-build
@@ -119,18 +108,25 @@ clean-build:
 	rm -rf $(BUILD_DIR)
 
 clean-artifact:
-	rm -f $(ARTIFACT_NAME)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-artifact.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME)
 
 clean-env:
-	rm -f $(ENV_FILE)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-env.sh \
+		--app-name $(APP_NAME)
 
 clean-log:
-	rm -f $(LAMBDA_INVOKE_LOG)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-invoke-log.sh \
+		--app-name $(APP_NAME)
 
 ###################### deploy ######################
 
 now:
-	$(MAKE) deploy ENV=dev
+	$(MAKE) deploy
 
 initial-deploy:
 	@$(MAKE) -s test-env-arg
@@ -139,8 +135,8 @@ initial-deploy:
 
 deploy-only:
 	@$(MAKE) -s test-env-arg
-	$(MAKE) put-object ENV=$(ENV)
-	$(MAKE) update-function ENV=$(ENV)
+	$(MAKE) put-object
+	$(MAKE) update-function
 
 deploy:
 	@$(MAKE) -s test-env-arg
@@ -149,61 +145,43 @@ deploy:
 
 put-object:
 	@$(MAKE) -s test-env-arg
-	$(MAKE) zip
-	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET) \
-		--key=$(ARTIFACT_NAME) \
-		--body=$(CURDIR)/$(ARTIFACT_NAME) \
-		--region=$(REGION) \
-		--output=text | xargs); \
-	echo "***Deployed $(ENV)/$(ARTIFACT_NAME) from s3 ETag: $$ETAG"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/put-object.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 update-function:
 	@$(MAKE) -s test-env-arg
-	@MOD=$$(aws lambda update-function-code \
-		--function-name=$(LAMBDA_NAME) \
-		--s3-key=$(ARTIFACT_NAME) \
-		--s3-bucket=$(ARTIFACT_BUCKET) \
-		--region=$(REGION) \
-		--query 'LastModified' | xargs);\
-	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/update-function.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 ###################### invoke ######################
 
 invoke:
 	@$(MAKE) -s test-env-arg
-	@aws lambda invoke \
-		--region $(REGION) \
-		--invocation-type RequestResponse \
-		--function-name $(LAMBDA_NAME) \
-		--payload $$(cat $(TEST_EVENT) | base64) \
-		$(LAMBDA_INVOKE_LOG)
-	@cat $(LAMBDA_INVOKE_LOG)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/invoke-function.sh \
+		--app-name $(APP_NAME) \
+		--payload $(TEST_EVENT) \
+        --env $(ENV) \
+        --region $(REGION)
 
 
 ###################### secrets ######################
 
 get-secrets:
-	@$(MAKE) -s retrieve-each-secret
-	@if [ ! -s $(CURDIR)/.env ]; then \
-		rm $(CURDIR)/.env; \
-		echo 'no env vars required'; \
-	else \
-		echo 'env vars retrieved'; \
-	fi
-
-retrieve-each-secret: test-env-arg clean-env $(WORKFLOW_ENV_VARS)
-$(WORKFLOW_ENV_VARS):
-	@if [ $@ = AWS_REGION ]; then \
-		echo AWS_REGION=$(REGION) >> $(CURDIR)/.env; \
-	else \
-		ENV_VAR=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(ENV)/$@ \
-			--query 'SecretString' \
-			--output text); \
-		echo $@=$$ENV_VAR >> $(CURDIR)/.env; \
-	fi
+	@$(MAKE) -s test-env-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/create-env.sh \
+		--app-name $(APP_NAME) \
+		--env $(ENV) \
+		--region $(REGION)
 
 ###################### init ######################
 
