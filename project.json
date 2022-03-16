@@ -235,7 +235,7 @@
 			"executable_name": "index.sh",
 			"build_src_path": null
 		},
-		"delete-faker": {
+		"delete-faker-accounts": {
 			"runtime": "nodejs14.x",
 			"path": "services/internal-tools/delete-faker-accounts",
 			"secrets": [],
