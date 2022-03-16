@@ -7,9 +7,9 @@ PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION=us-east-1
-EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".\"executable-name\"" $(PROJECT_CONF))
+EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 
-TEST_ACCOUNT=JohnSmith
+TEST_ACCOUNT=JoeCarter
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","account_name":"$(TEST_ACCOUNT)"}'
 TEST_SENDER_ACCOUNT=$(TEST_ACCOUNT)

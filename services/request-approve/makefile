@@ -7,7 +7,7 @@ BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 CMD_DIR=$(CURDIR)/cmd
 REGION=us-east-1
-EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".\"executable-name\"" $(PROJECT_CONF))
+EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
 
 TEST_ACCOUNT=JacobWebb

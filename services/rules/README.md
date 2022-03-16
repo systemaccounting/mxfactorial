@@ -2,21 +2,10 @@
   <a href="https://www.systemaccounting.org/" target="_blank"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></a>
 </p>
 
-1. user sends `rule tested x 0` transaction to rule endpoint
-1. apply approval rules
-1. rule endpoint sends `rule tested x 1` transaction to user
-1. user sends `rule tested x 1` transaction to request endpoint
-1. request endpoint receives `rule tested x 1` transaction from user
-1. request endpoint sends `rule tested x 1` transaction to rule endpoint
-1. request endpoint receives `rule tested x 2` transaction from rule endpoint
-1. request endpoint tests `rule tested x 1` transaction equality with `rule tested x 2` transaction
-1. return error on equality test failure (todo: include missing items in error)
-1. create transaction
-1. create transaction_item
-1. create approvals
-1. apply approval rules
-1. send transaction request notifications
-1. return transaction.id to requesting user
+1. invoked by `graphql` after request sent by client, or by `request-create` service testing if client request includes all current and expected items
+1. queries for rules applicable to items and accounts
+1. applies transaction_item and approval rules
+1. returns current and expected items
 
 \* *notes*
 * rule endpoint passes transaction, transaction_item, rule_instance_id primary keys to accommodate testing by transaction approval endpoint
@@ -56,3 +45,5 @@
 
 ### prepare for terraform
 1. `make initial-deploy ENV=dev` to zip and put source in s3 only
+
+terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infrastructure/terraform/aws/modules/environment/v001/rules.tf

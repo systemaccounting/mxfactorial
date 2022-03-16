@@ -1,5 +1,5 @@
 -- accounts
-insert into account (name, password) values ('JohnSmith', 'password');
+insert into account (name, password) values ('JoeCarter', 'password');
 insert into account (name, password) values ('IrisLynn', 'password');
 insert into account (name, password) values ('DanLee', 'password');
 insert into account (name, password) values ('AaronHill', 'password');
@@ -12,7 +12,7 @@ insert into account (name, password) values ('IgorPetrov', 'password');
 insert into account (name, password) values ('GroceryStore', 'password');
 
 -- account profiles
-insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('JohnSmith', 'inventor', 'John', 'Wilson', 'Smith', 'United States of America', '1050', 'W Olive Ave', null, null, 'Merced', 'Merced County', null, 'California', '95348', '(37.318830, -120.486230)', 'joe@address.xz', 1, 209, 5555555, 1, 1);
+insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('JoeCarter', 'inventor', 'John', 'Wilson', 'Smith', 'United States of America', '1050', 'W Olive Ave', null, null, 'Merced', 'Merced County', null, 'California', '95348', '(37.318830, -120.486230)', 'joe@address.xz', 1, 209, 5555555, 1, 1);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('IrisLynn', 'Hospital volunteer', 'Iris', 'Hannah', 'Lynn', 'United States of America', '2356', 'S Seneca St', null, null, 'Wichita', 'Sedgwick County', null, 'Kansas', '67213', '(37.651930, -97.352190)', 'iris@address.xz', 1, 316, 5555555, 2, 2);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('DanLee', 'Guitar player', 'Dan', 'Howard', 'Lee', 'United States of America', '1101', '2nd Ave NE', null, null, 'Staples', 'Todd County', null, 'Minnesota', '56479', '(46.355720, -94.784420)', 'dan@address.xz', 1, 218, 5555555, 3, 3);
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('AaronHill', 'Shortwave radio operator', 'Aaron', 'Baker', 'Hill', 'United States of America', '2344', 'Central Ave', null, null, 'Billings', 'Yellowstone County', null, 'Montana', '59102', '(45.769540, -108.575760)', 'aaron@address.xz', 1, 406, 5555555, 4, 4);
@@ -25,7 +25,7 @@ insert into account_profile (account_name, description, first_name, middle_name,
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('GroceryStore', 'Sells groceries', 'Grocery', null, 'Store', 'United States of America', '8701', 'Lincoln Blvd', null, null, 'Los Angeles', 'Los Angeles County', null, 'California', '90045', '(33.958050,-118.418388)', 'grocerystore@address.xz', 1, 310, 5555555, 11, 11);
 
 -- subaccounts
-insert into account (name, created_by) values ('CPA', 'JohnSmith');
+insert into account (name, created_by) values ('CPA', 'JoeCarter');
 insert into account (name, created_by) values ('SunflowerFarms', 'IrisLynn');
 insert into account (name, created_by) values ('GoldMiners', 'DanLee');
 insert into account (name, created_by) values ('EnergyCo', 'AaronHill');
@@ -49,7 +49,7 @@ insert into account_profile (account_name, description, first_name, middle_name,
 insert into account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) values ('CloudBiz', 'Cloud hosting', null, null, null, 'United States of America', '1142', 'Front st', null, null, 'Uniondale', 'Nassau County', null, 'New York', '11553', '(40.710037,-73.588058)', 'CloudBiz@address.xz', 1, 516, 5555555, null, 10);
 
 -- subaccount owners
-insert into account_owner (owner_account, owned_subaccount) values ('JohnSmith', 'CPA');
+insert into account_owner (owner_account, owned_subaccount) values ('JoeCarter', 'CPA');
 insert into account_owner (owner_account, owned_subaccount) values ('IrisLynn', 'SunflowerFarms');
 insert into account_owner (owner_account, owned_subaccount) values ('DanLee', 'GoldMiners');
 insert into account_owner (owner_account, owned_subaccount) values ('AaronHill', 'EnergyCo');
@@ -65,7 +65,7 @@ insert into account_owner (owner_account, owned_subaccount) values ('IgorPetrov'
 insert into account_owner (owner_account, owned_subaccount) values ('IgorPetrov', 'CloudBiz');
 
 -- account balances
-insert into account_balance (account_name, current_balance) values ('JohnSmith', 1000);
+insert into account_balance (account_name, current_balance) values ('JoeCarter', 1000);
 insert into account_balance (account_name, current_balance) values ('IrisLynn', 1000);
 insert into account_balance (account_name, current_balance) values ('DanLee', 1000);
 insert into account_balance (account_name, current_balance) values ('AaronHill', 1000);

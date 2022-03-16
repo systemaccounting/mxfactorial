@@ -55,7 +55,7 @@ data "aws_iam_policy_document" "db_reset_trust_policy" {
   }
 }
 
-# allow function to create logs and access rds
+# allow function to create logs and invoke lambda
 resource "aws_iam_role_policy" "db_reset_policy" {
   name = "db-reset-policy-${var.env}"
   role = aws_iam_role.db_reset.id

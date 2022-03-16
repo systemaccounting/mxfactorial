@@ -28,7 +28,7 @@ done
 PROJECT_CONFIG=project.json
 ARTIFACT_BUCKET_NAME_PREFIX=$(jq -r ".artifacts_bucket_name_prefix" $PROJECT_CONFIG)
 ARTIFACT_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
-LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".\"lambda-name-prefix\"" $PROJECT_CONFIG)
+LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_prefix" $PROJECT_CONFIG)
 LAMBDA_NAME="$LAMBDA_NAME_PREFIX-$ENVIRONMENT"
 
 MOD=$(aws lambda update-function-code \

@@ -15,6 +15,6 @@ done
 
 PROJECT_CONFIG=project.json
 APP_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
-INVOKE_LOG_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".\"lambda-invoke-log\"" $PROJECT_CONFIG)
+INVOKE_LOG_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".lambda_invoke_log" $PROJECT_CONFIG)
 
 rm -f "$APP_PATH/$INVOKE_LOG_FILE_NAME"

@@ -40,7 +40,7 @@ describe('addApprovalsAndRules', () => {
 			.mockImplementation(() => ({ rows: [] }));
 		const client = { query: mockFn } as IPGClient;
 
-		const testaccounts = ['GroceryCo', 'JohnSmith'];
+		const testaccounts = ['GroceryCo', 'JoeCarter'];
 		const mockGetNamesFn = jest.fn(() => Promise.resolve(
 			[
 				testaccounts[0],

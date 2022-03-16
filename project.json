@@ -21,10 +21,10 @@
 				"LOCAL_ENV"
 			],
 			"deploy": true,
-			"lambda-name-prefix": "graphql",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "."
+			"lambda_name_prefix": "graphql",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "."
 		},
 		"request-create": {
 			"runtime": "go1.x",
@@ -37,10 +37,10 @@
 				"AWS_REGION"
 			],
 			"deploy": true,
-			"lambda-name-prefix": "request-create",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "request-create",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"request-approve": {
 			"runtime": "go1.x",
@@ -52,10 +52,10 @@
 				"AWS_REGION"
 			],
 			"deploy": true,
-			"lambda-name-prefix": "request-approve",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "request-approve",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"rules": {
 			"runtime": "nodejs14.x",
@@ -74,10 +74,10 @@
 				"AWS_REGION"
 			],
 			"deploy": true,
-			"lambda-name-prefix": "rules",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": null,
-			"build-src-path": null
+			"lambda_name_prefix": "rules",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": null,
+			"build_src_path": null
 		},
 		"request-by-id": {
 			"runtime": "go1.x",
@@ -85,10 +85,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "request-by-id",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "request-by-id",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"requests-by-account": {
 			"runtime": "go1.x",
@@ -96,10 +96,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "requests-by-account",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "requests-by-account",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"transaction-by-id": {
 			"runtime": "go1.x",
@@ -107,10 +107,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "transaction-by-id",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "transaction-by-id",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"transactions-by-account": {
 			"runtime": "go1.x",
@@ -118,10 +118,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "transactions-by-account",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "transactions-by-account",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"notifications-send": {
 			"runtime": "go1.x",
@@ -134,10 +134,10 @@
 				"AWS_REGION"
 			],
 			"deploy": true,
-			"lambda-name-prefix": "notifications-send",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "notifications-send",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"notifications-get": {
 			"runtime": "go1.x",
@@ -147,10 +147,10 @@
 			],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "notifications-get",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "notifications-get",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"notifications-clear": {
 			"runtime": "go1.x",
@@ -158,10 +158,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "notifications-clear",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "notifications-clear",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"balance-by-account": {
 			"runtime": "go1.x",
@@ -169,10 +169,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "balance-by-account",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "balance-by-account",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"wss-connect": {
 			"runtime": "go1.x",
@@ -180,10 +180,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "wss-connect",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "wss-connect",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"auto-confirm": {
 			"runtime": "go1.x",
@@ -194,10 +194,10 @@
 			],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "auto-confirm",
-			"lambda-invoke-log": "invoke.log",
-			"executable-name": "index.handler",
-			"build-src-path": "cmd"
+			"lambda_name_prefix": "auto-confirm",
+			"lambda_invoke_log": "invoke.log",
+			"executable_name": "index.handler",
+			"build_src_path": "cmd"
 		},
 		"client": {
 			"runtime": "es2015",
@@ -219,10 +219,10 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "go-migrate",
-			"lambda-invoke-log": null,
-			"executable-name": "index.sh",
-			"build-src-path": null
+			"lambda_name_prefix": "go-migrate",
+			"lambda_invoke_log": null,
+			"executable_name": "index.sh",
+			"build_src_path": null
 		},
 		"db-reset": {
 			"runtime": "provided",
@@ -230,21 +230,21 @@
 			"secrets": [],
 			"params": [],
 			"deploy": true,
-			"lambda-name-prefix": "db-reset",
-			"lambda-invoke-log": null,
-			"executable-name": "index.sh",
-			"build-src-path": null
+			"lambda_name_prefix": "db-reset",
+			"lambda_invoke_log": null,
+			"executable_name": "index.sh",
+			"build_src_path": null
 		},
-		"delete-faker": {
+		"delete-faker-accounts": {
 			"runtime": "nodejs14.x",
 			"path": "services/internal-tools/delete-faker-accounts",
 			"secrets": [],
 			"params": [],
 			"deploy": false,
-			"lambda-name-prefix": null,
-			"lambda-invoke-log": null,
-			"executable-name": null,
-			"build-src-path": null
+			"lambda_name_prefix": null,
+			"lambda_invoke_log": null,
+			"executable_name": null,
+			"build_src_path": null
 		}
 	},
 	"path": ".",
