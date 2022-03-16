@@ -28,7 +28,7 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-# options are "deploy" or "initial-deploy" to prep for terraform
+# options are "deploy", or "initial-deploy" to prep for terraform
 MAKE_CMD="${INITIAL}"deploy
 
 INVENTORY_SIZE=$(echo "$INVENTORY_LIST" | wc -l)
