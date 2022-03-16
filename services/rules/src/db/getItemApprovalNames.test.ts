@@ -30,7 +30,7 @@ describe('getItemApprovalNames', () => {
 	});
 
 	test('returns list of item approval names', async () => {
-		const want = ['JohnSmith', 'IrisLynn', 'DanLee'];
+		const want = ['JoeCarter', 'IrisLynn', 'DanLee'];
 		const testownedaccount = 'testownedaccount';
 		const mockFn: any = jest.fn()
 			.mockImplementation(() => ({
