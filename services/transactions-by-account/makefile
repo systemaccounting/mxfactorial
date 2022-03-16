@@ -1,23 +1,19 @@
-CMD_DIR = $(CURDIR)/cmd
 APP_NAME = transactions-by-account
+CMD_DIR = $(CURDIR)/cmd
 ARTIFACT_NAME=$(APP_NAME)-src.zip
-PROJECT_CONF=../../project.json
+RELATIVE_PROJECT_ROOT_PATH=../..
+PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
-REGION = us-east-1
-BINARY_NAME = index.handler
-LAMBDA_OS=linux
-PGHOST_KEY = $(ENV)/PGHOST
-PGUSER_KEY = $(ENV)/PGUSER
-PGPASSWORD_KEY = $(ENV)/PGPASSWORD
-PGDATABASE_KEY = $(ENV)/PGDATABASE
-PGPORT=5432
-RETURN_RECORD_LIMIT=2
+REGION=us-east-1
+EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".\"executable-name\"" $(PROJECT_CONF))
+
 TEST_ACCOUNT=JohnSmith
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","account_name":"$(TEST_ACCOUNT)"}'
 TEST_SENDER_ACCOUNT=$(TEST_ACCOUNT)
-LAMBDA_NAME=$(APP_NAME)-$(ENV)
+RETURN_RECORD_LIMIT=2
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -36,144 +32,80 @@ run:
 		TEST_EVENT=$(TEST_EVENT) \
 		go run ./cmd/main.go
 
-###################### clean ######################
-
-clean-artifact:
-	rm -f $(APP_NAME)-src.zip
-
-clean-binary:
-	rm -f $(BINARY_NAME)
-
-clean:
-	$(MAKE) clean-binary
-	$(MAKE) clean-artifact
-
 ###################### dependencies ######################
 
 install:
-	go mod download
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/download-go-mod.sh
 
 ###################### build ######################
 
-compile:
-	GOOS=$(LAMBDA_OS) go build -o $(BINARY_NAME) $(CMD_DIR)/main.go
-
-zip:
-	zip $(APP_NAME)-src.zip ./$(BINARY_NAME)
-
 build:
-	$(MAKE) clean
+	@$(MAKE) -s clean
 	$(MAKE) install
 	$(MAKE) compile
 	$(MAKE) zip
 
-###################### test ######################
+compile:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/compile-go-linux.sh \
+		--app-name $(APP_NAME)
 
-test:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) test-unit
-	$(MAKE) test-integration ENV=$(ENV)
-	$(MAKE) test-cover
+zip:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/zip-executable.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+		--executable-name $(EXECUTABLE_NAME)
 
-mock:
-	mockgen -package=mock \
-		-destination=./pkg/mock/rows.go \
-		github.com/jackc/pgx/v4 \
-		Rows
-	mockgen -package=mock \
-		-source=./sqldb.go \
-		-destination=./pkg/mock/sqldb.go
+###################### clean ######################
 
-test-cover:
-	go test -cover ./...
+clean:
+	$(MAKE) clean-binary
+	$(MAKE) clean-artifact
+	$(MAKE) clean-log
 
-test-unit:
-	go test -v ./...
+clean-binary:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-binary.sh \
+		--app-name $(APP_NAME) \
+		--binary-name $(EXECUTABLE_NAME)
 
-test-integration:
-	@$(MAKE) -s test-env-arg
-	@PGHOST=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGHOST_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		PGPORT=${PGPORT} \
-		PGUSER=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGUSER_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		PGPASSWORD=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGPASSWORD_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		PGDATABASE=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGDATABASE_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		TEST_SENDER_ACCOUNT=$(TEST_SENDER_ACCOUNT) \
-		AWS_REGION=$(REGION) \
-		LAMBDA_NAME=$(LAMBDA_NAME) \
-			go test -v --tags=integration ./cmd
+clean-artifact:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-artifact.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME)
 
-test-local:
-	@$(MAKE) -s test-env-arg
-	PGHOST=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGHOST_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		PGPORT=${PGPORT} \
-		PGUSER=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGUSER_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		PGPASSWORD=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGPASSWORD_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		PGDATABASE=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(PGDATABASE_KEY) \
-			--query 'SecretString' \
-			--output text) \
-		RETURN_RECORD_LIMIT=$(RETURN_RECORD_LIMIT) \
-		TEST_EVENT=$(TEST_EVENT) \
-		go run ./cmd/main.go
+clean-log:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-invoke-log.sh \
+		--app-name $(APP_NAME)
 
 ###################### deploy ######################
 
 put-object:
 	@$(MAKE) -s test-env-arg
-	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET) \
-		--key=$(ARTIFACT_NAME) \
-		--body=$(CURDIR)/$(ARTIFACT_NAME) \
-		--region=$(REGION) \
-		--output=text | xargs); \
-	echo "***pushed $(ARTIFACT_NAME) artifact with ETag: $$ETAG"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/put-object.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 update-function:
 	@$(MAKE) -s test-env-arg
-	@MOD=$$(aws lambda update-function-code \
-		--function-name=$(LAMBDA_NAME) \
-		--s3-key=$(ARTIFACT_NAME) \
-		--s3-bucket=$(ARTIFACT_BUCKET) \
-		--region=$(REGION) \
-		--query 'LastModified' | xargs);\
-	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/update-function.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 initial-deploy:
 	@$(MAKE) -s test-env-arg
-	$(MAKE) clean
-	$(MAKE) install
-	$(MAKE) compile
-	$(MAKE) zip
-	$(MAKE) put-object ENV=$(ENV)
+	$(MAKE) build
+	$(MAKE) put-object
 
 deploy:
 	@$(MAKE) -s test-env-arg
@@ -183,22 +115,11 @@ deploy:
 
 deploy-only:
 	@$(MAKE) -s test-env-arg
-	$(MAKE) put-object ENV=$(ENV)
-	$(MAKE) update-function ENV=$(ENV)
+	$(MAKE) put-object
+	$(MAKE) update-function
 
 now:
-	$(MAKE) clean
+	@$(MAKE) -s clean
 	$(MAKE) compile
 	$(MAKE) zip
 	$(MAKE) deploy-only ENV=dev
-
-###################### warm up ######################
-
-warm-up:
-	@$(MAKE) -s test-env-arg
-	@aws lambda invoke \
-		--region $(REGION) \
-		--invocation-type RequestResponse \
-		--function-name $(APP_NAME)-$(ENV) \
-		--payload '{}' \
-		invoke.log

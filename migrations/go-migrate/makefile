@@ -1,8 +1,11 @@
 APP_NAME = go-migrate
 ARTIFACT_NAME = $(APP_NAME)-src.zip
 LAMBDA_NAME = $(APP_NAME)-$(ENV)
-PROJECT_CONF=../../project.json
+RELATIVE_PROJECT_ROOT_PATH=../..
+PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".\"executable-name\"" $(PROJECT_CONF))
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 RUNTIME=provided
 REGION = us-east-1
@@ -15,71 +18,28 @@ BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
 DATABASE ?= postgres mysql redshift cassandra spanner cockroachdb clickhouse mongodb sqlserver firebird neo4j pgx
 DATABASE_TEST ?= $(DATABASE) sqlite sqlcipher
 VERSION ?= $(shell git describe --tags 2>/dev/null | cut -c 2-)
+DOCKER_IMAGE_NAME=psql-lambda
+DOCKER_CONTAINER_NAME=$(DOCKER_IMAGE_NAME)
+
 test-env-arg:
 ifndef ENV
 	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
-###################### clean ######################
+test-docker-availability:
+	@docker version > /dev/null 2>&1; if [[ $$? -ne 0 ]]; then echo "\033[1;31mdocker required. start docker \033[0m"; fi
 
-clean:
-	$(MAKE) clean-script
-	$(MAKE) clean-layer
-	$(MAKE) clean-build-dir
+###################### dependencies ######################
 
-clean-script:
-	rm -f $(ARTIFACT_NAME)
-
-clean-layer:
-	rm -f $(LAMBDA_LAYER_ARCHIVE)
-
-clean-build-dir:
-	rm -rf $(TMP_MIGRATE_REPO_DIR)
-
-zip:
-	$(MAKE) clean-script
-	zip -r $(ARTIFACT_NAME) index.sh
-
-build-layer:
-	$(MAKE) clean
-	$(MAKE) build
-	(cd $(TMP_MIGRATE_REPO_DIR); zip -r $(LAMBDA_LAYER_ARCHIVE) bin lib; mv $(LAMBDA_LAYER_ARCHIVE) ../)
-	$(MAKE) clean-build-dir
-
-###################### secrets ######################
-
-get-secrets: retrieve-each-secret
-	@if [ ! -s $(CURDIR)/.env ]; then \
-		rm $(CURDIR)/.env; \
-		echo 'no env vars required'; \
-	else \
-		echo 'env vars retrieved'; \
-	fi
-
-retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
-$(ENV_VARS):
-	@if [ $@ = AWS_REGION ]; then \
-		echo AWS_REGION=$(REGION) >> $(CURDIR)/.env; \
-	else \
-		ENV_VAR=$$(aws secretsmanager get-secret-value \
-			--region $(REGION) \
-			--secret-id $(ENV)/$@ \
-			--query 'SecretString' \
-			--output text); \
-			echo $@=$$ENV_VAR \
-			>> $(CURDIR)/.env; \
-	fi
+install:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/download-go-mod.sh
 
 ###################### build ######################
 
-build-psql:
-	docker build --force-rm --progress=plain -t psql-lambda .
-	CONTAINER_ID=$$(docker create psql-lambda --name psql-lambda); \
-	docker cp $$CONTAINER_ID:/tmp/$(PSQL_LAMBDA_ARCHIVE) $(TMP_MIGRATE_REPO_DIR)/$(PSQL_LAMBDA_ARCHIVE)
-
 build:
-	rm -f $(LAMBDA_LAYER_ARCHIVE)
-	rm -rf $(TMP_MIGRATE_REPO_DIR)
+	$(MAKE) clean-layer
+	$(MAKE) clean-build-dir
 	git clone --depth 1 --single-branch --branch master https://github.com/golang-migrate/migrate.git $(TMP_MIGRATE_REPO_DIR)
 	-mkdir $(TMP_MIGRATE_REPO_DIR)/bin
 	-mkdir $(TMP_MIGRATE_REPO_DIR)/lib
@@ -88,33 +48,78 @@ build:
 	unzip $(TMP_MIGRATE_REPO_DIR)/$(PSQL_LAMBDA_ARCHIVE) -d $(TMP_MIGRATE_REPO_DIR)/bin
 	(mv $(TMP_MIGRATE_REPO_DIR)/bin/*.so* $(TMP_MIGRATE_REPO_DIR)/lib)
 
+build-layer:
+	$(MAKE) clean
+	$(MAKE) build
+	(cd $(TMP_MIGRATE_REPO_DIR); zip -r $(LAMBDA_LAYER_ARCHIVE) bin lib; mv $(LAMBDA_LAYER_ARCHIVE) ../)
+	$(MAKE) clean-build-dir
+
+build-psql:
+	$(MAKE) test-docker-availability
+	docker build --force-rm --progress=plain -t $(DOCKER_IMAGE_NAME) .
+	CONTAINER_ID=$$(docker create $(DOCKER_IMAGE_NAME) --name $(DOCKER_CONTAINER_NAME)); \
+	docker cp $$CONTAINER_ID:/tmp/$(PSQL_LAMBDA_ARCHIVE) $(TMP_MIGRATE_REPO_DIR)/$(PSQL_LAMBDA_ARCHIVE)
+
+zip:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/zip-executable.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+		--executable-name $(EXECUTABLE_NAME)
+
+###################### clean ######################
+
+clean:
+	$(MAKE) clean-artifact
+	$(MAKE) clean-layer
+	$(MAKE) clean-build-dir
+	$(MAKE) clean-containers
+	$(MAKE) clean-image
+
+clean-artifact:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-artifact.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME)
+
+clean-layer:
+	rm -f $(LAMBDA_LAYER_ARCHIVE)
+
+clean-build-dir:
+	rm -rf $(TMP_MIGRATE_REPO_DIR)
+
+clean-containers:
+	docker ps -a | awk '{ print $$1,$$2 }' | grep $(DOCKER_IMAGE_NAME) | awk '{print $$1 }' | xargs -I {} docker rm {}
+
+clean-image:
+	-docker rmi $(DOCKER_IMAGE_NAME)
+
 ###################### deploy ######################
 
 deploy-script:
 	@$(MAKE) -s test-env-arg
+	$(MAKE) clean-artifact
 	$(MAKE) zip
 	$(MAKE) put-object
 	$(MAKE) update-function
 
 put-object:
 	@$(MAKE) -s test-env-arg
-	@ETAG=$$(aws s3api put-object \
-		--bucket=$(ARTIFACT_BUCKET) \
-		--key=$(ARTIFACT_NAME) \
-		--body=$(CURDIR)/$(ARTIFACT_NAME) \
-		--region=$(REGION) \
-		--output=text | xargs); \
-	echo "***pushed $(ARTIFACT_NAME) artifact with ETag: $$ETAG"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/put-object.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 update-function:
 	@$(MAKE) -s test-env-arg
-	@MOD=$$(aws lambda update-function-code \
-		--function-name=$(LAMBDA_NAME) \
-		--s3-key=$(ARTIFACT_NAME) \
-		--s3-bucket=$(ARTIFACT_BUCKET) \
-		--region=$(REGION) \
-		--query 'LastModified' | xargs);\
-	echo "***$(LAMBDA_NAME) lambda deployed @ $$MOD"
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/update-function.sh \
+		--app-name $(APP_NAME) \
+		--artifact-name $(ARTIFACT_NAME) \
+        --env $(ENV) \
+        --region $(REGION)
 
 deploy-layer:
 	@$(MAKE) -s test-env-arg
@@ -129,7 +134,7 @@ put-layer:
 		--body=$(CURDIR)/$(APP_NAME)-layer.zip \
 		--region=$(REGION) \
 		--output=text | xargs); \
-	echo "***Deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"
+	echo "*** deployed $(ENV)/$(APP_NAME)-layer.zip from s3 ETag: $$ETAG"
 
 update-lambda-layer:
 	@$(MAKE) -s test-env-arg
@@ -146,7 +151,7 @@ update-lambda-layer:
 		--query='LastModified' \
 		--layers $$LAYER_VERSION_ARN $(BASH_LAYER_ARN); \
 	LAYER_VERSION=$$(echo $$LAYER_VERSION_ARN | cut -d ':' -f8); \
-	echo "***updated lambda $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
+	echo "*** updated lambda $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
 publish-layer:
 	@$(MAKE) -s test-env-arg
@@ -158,22 +163,24 @@ publish-layer:
 		--query 'LayerVersionArn' \
 		--output=text | xargs); \
 	LAYER_VERSION=$$(echo $$LAYER_VERSION_ARN | cut -d ':' -f8); \
-	echo "***published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
+	echo "*** published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
 
 deploy:
 	@$(MAKE) -s test-env-arg
+	@$(MAKE) -s clean
 	$(MAKE) build-layer
-	$(MAKE) put-layer ENV=$(ENV)
-	$(MAKE) update-lambda-layer ENV=$(ENV)
+	$(MAKE) put-layer
+	$(MAKE) update-lambda-layer
 	$(MAKE) zip
-	$(MAKE) put-object ENV=$(ENV)
-	$(MAKE) update-function ENV=$(ENV)
+	$(MAKE) put-object
+	$(MAKE) update-function
 
 # run before deploying terraform
 initial-deploy:
 	@$(MAKE) -s test-env-arg
+	@$(MAKE) -s clean
 	$(MAKE) build-layer
-	$(MAKE) put-layer ENV=$(ENV)
-	$(MAKE) publish-layer ENV=$(ENV)
+	$(MAKE) put-layer
+	$(MAKE) publish-layer
 	$(MAKE) zip
-	$(MAKE) put-object ENV=$(ENV)
+	$(MAKE) put-object

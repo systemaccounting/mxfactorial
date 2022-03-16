@@ -1,15 +1,13 @@
 INVENTORY_FILE=$(CURDIR)/inventory
-
-PARENT_DIRS=services \
-migrations \
-client
-
-APP_DIRS=$(shell cat $(INVENTORY_FILE))
-SIZE=$(shell wc -l < "$(INVENTORY_FILE)" | xargs)
+SIZE=$(shell wc -l < "$(INVENTORY_FILE)" | awk '{print $$1}')
+ifeq (0,$(SIZE))
+  SIZE = 1
+endif
+PROJECT_CONF=project.json
+SECRETS=$(shell jq '.secrets[]' $(PROJECT_CONF))
+ENV_VARS=$(SECRETS)
 REGION=us-east-1
 ENV_FILE=$(CURDIR)/.env
-ENV_VARS=CLIENT_URI \
-GRAPHQL_URI
 
 # approx 5 minutes
 all:
@@ -17,21 +15,22 @@ all:
 	@$(MAKE) -s test-env-arg
 	@$(MAKE) -s test-cmd-arg
 	@$(MAKE) -s test-cmd-val
-	@echo "deployment inventory size: $(SIZE)"
-	@$(foreach DIR,$(APP_DIRS), $(MAKE) -C $(DIR) $(CMD) ENV=$(ENV);)
+ifeq (deploy,$(CMD))
+	bash scripts/deploy-all.sh --env $(ENV)
+endif
+ifeq (initial-deploy,$(CMD))
+	bash scripts/deploy-all.sh --env $(ENV) --initial
+endif
 
 .PHONY: inventory
 inventory:
 	@rm -f $(INVENTORY_FILE)
-	@$(foreach DIR,$(PARENT_DIRS), \
-		grep --include=project.json -rlw '$(DIR)' -e '"deploy": true' \
-		| sed -e 's/\.\///' -e 's/\/project.json//' \
-		>> $(INVENTORY_FILE);)
+	@jq -r '.apps[] | select(.deploy==true) | .path' project.json | sort -r >> $(INVENTORY_FILE)
 	@echo "project inventory size: $$(wc -l < "$(INVENTORY_FILE)" | xargs)"
 
 size:
 	@$(MAKE) -s test-inv-file
-	@echo "$(SIZE)"
+	@echo $(SIZE)
 
 print:
 	cat $(INVENTORY_FILE)
@@ -51,7 +50,6 @@ install:
 init:
 	go mod init github.com/systemaccounting/mxfactorial
 
-
 ###################### secrets ######################
 
 clean-env:
@@ -63,22 +61,11 @@ ifeq (,$(wildcard $(ENV_FILE)))
 endif
 
 get-secrets:
-	@$(MAKE) -s retrieve-each-secret
-	@if [ ! -s $(ENV_FILE) ]; then \
-		rm $(ENV_FILE); \
-		echo 'no env vars required'; \
-	else \
-		echo 'env vars retrieved'; \
-	fi
-
-retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
-$(ENV_VARS):
-	ENV_VAR=$$(aws secretsmanager get-secret-value \
-		--region $(REGION) \
-		--secret-id $(ENV)/$@ \
-		--query 'SecretString' \
-		--output text); \
-	echo $@=$$ENV_VAR >> $(ENV_FILE)
+	@$(MAKE) -s test-env-arg
+	@bash scripts/create-env.sh \
+		--app-name root \
+		--env $(ENV) \
+		--region $(REGION)
 
 ### arg tests
 test-env-arg:

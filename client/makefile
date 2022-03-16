@@ -1,25 +1,19 @@
-REGION=us-east-1
-PROJECT_CONF=../project.json
+APP_NAME=client
+RELATIVE_PROJECT_ROOT_PATH=..
+PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT_CONF))
 ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV)
 NO_AUTH=1
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
 BUILD_DIR=$(CURDIR)/public
 DEPS_DIR=$(CURDIR)/node_modules
+REGION=us-east-1
 
 ENV_FILE=$(CURDIR)/.env
-ENV_VARS=AWS_REGION \
-POOL_ID \
-CLIENT_ID \
-GRAPHQL_URI \
-NO_AUTH
-
-install:
-	npm install
-
-build:
-	npm run build
-	rm -f $(BUILD_DIR)/.DS_Store
+PARAMS=$(shell jq '.apps.client.params[]' $(PROJECT_CONF))
+SECRETS=$(shell jq '.apps.client.secrets[]' $(PROJECT_CONF))
+ENV_VARS=$(PARAMS) $(SECRETS)
 
 dev:
 	npm run dev
@@ -27,8 +21,23 @@ dev:
 start:
 	npm start
 
+###################### dependencies ######################
+
+install:
+	npm install
+
+###################### build ######################
+
+build:
+	npm run build
+	rm -f $(BUILD_DIR)/.DS_Store
+
+###################### clean ######################
+
 clean-env:
-	rm -f $(ENV_FILE)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-env.sh \
+		--app-name $(APP_NAME)
 
 clean-deps:
 	rm -rf $(DEPS_DIR)
@@ -79,15 +88,15 @@ $(ENV_VARS):
 ###################### deploy ######################
 
 initial-deploy:
-	@echo '***skipping client initial-deploy. redeploy after environment build'
+	@echo '*** skipping client initial-deploy. redeploy after environment build'
 
 deploy:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) install
-	$(MAKE) get-secrets ENV=$(ENV)
+	$(MAKE) get-secrets
 	$(MAKE) build
-	$(MAKE) sync ENV=$(ENV)
-	$(MAKE) empty-cache ENV=$(ENV)
+	$(MAKE) sync
+	$(MAKE) empty-cache
 
 sync:
 	@$(MAKE) -s test-env-arg
@@ -106,7 +115,6 @@ ifeq ($(ENV), prod)
 	echo 'emptying www cache'; \
 	aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 endif
-
 
 test-env-arg:
 ifndef ENV

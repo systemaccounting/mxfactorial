@@ -10,18 +10,22 @@ all:
 	@$(MAKE) -s test-env-arg
 	@$(MAKE) -s test-cmd-arg
 	@$(MAKE) -s test-cmd-val
-	@echo "service deployment inventory size: $(SIZE)"
-	@$(foreach DIR,$(SERVICE_DIRS), $(MAKE) -C $(DIR) $(CMD) ENV=$(ENV);)
+ifeq (deploy,$(CMD))
+	@cd ..; bash scripts/deploy-all.sh --env $(ENV) --services-only
+endif
+ifeq (initial-deploy,$(CMD))
+	@cd ..; bash scripts/deploy-all.sh --env $(ENV) --initial --services-only
+endif
 
 inventory:
-	$(MAKE) -C '..' inventory
+	@$(MAKE) -C '..' inventory
 
 size:
 	@$(MAKE) -s test-inv-file
-	@echo "$(SIZE)"
+	@echo $(SIZE)
 
 print:
-	@echo $(SERVICE_DIRS) | tr " " "\n"
+	@echo "$(SERVICE_DIRS)" | tr " " "\n"
 
 ### arg tests
 test-env-arg:
