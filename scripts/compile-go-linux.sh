@@ -15,8 +15,8 @@ done
 
 PROJECT_CONF=project.json
 APP_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONF)
-BINARY_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".\"executable-name\"" $PROJECT_CONF)
-BUILD_SRC_PATH=$(jq -r ".apps.\"$APP_NAME\".\"build-src-path\"" $PROJECT_CONF)
+BINARY_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".executable_name" $PROJECT_CONF)
+BUILD_SRC_PATH=$(jq -r ".apps.\"$APP_NAME\".build_src_path" $PROJECT_CONF)
 
 cd $APP_PATH
 

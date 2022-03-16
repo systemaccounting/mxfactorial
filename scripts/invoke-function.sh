@@ -26,10 +26,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONFIG=project.json
-LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".\"lambda-name-prefix\"" $PROJECT_CONFIG)
+LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_prefix" $PROJECT_CONFIG)
 LAMBDA_NAME="$LAMBDA_NAME_PREFIX-$ENVIRONMENT"
 LAMBDA_INVOKE_LOG_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
-LAMBDA_INVOKE_LOG_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".\"lambda-invoke-log\"" $PROJECT_CONFIG)
+LAMBDA_INVOKE_LOG_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".lambda_invoke_log" $PROJECT_CONFIG)
 LAMBDA_INVOKE_LOG="$LAMBDA_INVOKE_LOG_FILE_PATH/$LAMBDA_INVOKE_LOG_FILE_NAME"
 
 aws lambda invoke \
