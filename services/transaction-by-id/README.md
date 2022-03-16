@@ -2,31 +2,12 @@
   <img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png">
 </p>
 
+### transaction-by-id
 
-### app name
+1. invoked by `graphql` service after request sent by client
+1. queries transaction tables for transaction by `id`
+1. returns `transaction` with `transaction_item`s
 
-trans-query-id-faas
+deploy: `make deploy ENV=dev`
 
-### description
-
-1. receives lambda invoke from graphql resolver
-1. queries transaction in postgres by transaction id
-1. responds with transaction to graphql resolver
-
-### development
-
-1. save creds in `~/.aws/credentials` to access lambda and postgres
-1. set desired values for `TEST_ACCOUNT`, `TEST_TRANSACTION_ID`, `TEST_EVENT` and `TEST_SENDER_ACCOUNT` variables in `./makefile`
-1. `make test-local` to get postgres creds from secrets manager, then run code locally
-
-### testing
-
-1. `make test-unit` for unit tests
-1. `make test-cover` to measure unit test coverage
-1.  complete steps 1 & 2 in `development` section above to prep for integration tests
-1. `make deploy ENV=dev` to manually deploy to dev env
-1. `make test-integration ENV=dev` to set up data in postgres, test lambda, then tear down data in dev env
-
-### deploy
-
-push commit OR `make deploy ENV=dev` to manually deploy to dev env
+terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infrastructure/terraform/aws/modules/environment/v001/lambda-services.tf#L87-L94
