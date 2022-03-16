@@ -1,4 +1,256 @@
 {
 	"artifacts_bucket_name_prefix": "mxfactorial-artifacts",
-	"client_origin_bucket_name_prefix": "mxfactorial-client"
+	"client_origin_bucket_name_prefix": "mxfactorial-client",
+	"apps": {
+		"graphql": {
+			"runtime": "go1.x",
+			"path": "services/graphql",
+			"secrets": [
+				"GRAPHQL_URI",
+				"RULE_LAMBDA_ARN",
+				"REQUEST_CREATE_LAMBDA_ARN",
+				"REQUEST_APPROVE_LAMBDA_ARN",
+				"REQUEST_BY_ID_LAMBDA_ARN",
+				"REQUESTS_BY_ACCOUNT_LAMBDA_ARN",
+				"TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN",
+				"TRANSACTION_BY_ID_LAMBDA_ARN",
+				"BALANCE_BY_ACCOUNT_LAMBDA_ARN"
+			],
+			"params": [
+				"AWS_REGION",
+				"LOCAL_ENV"
+			],
+			"deploy": true,
+			"lambda-name-prefix": "graphql",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "."
+		},
+		"request-create": {
+			"runtime": "go1.x",
+			"path": "services/request-create",
+			"secrets": [
+				"RULE_LAMBDA_ARN",
+				"NOTIFY_TOPIC_ARN"
+			],
+			"params": [
+				"AWS_REGION"
+			],
+			"deploy": true,
+			"lambda-name-prefix": "request-create",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"request-approve": {
+			"runtime": "go1.x",
+			"path": "services/request-approve",
+			"secrets": [
+				"NOTIFY_TOPIC_ARN"
+			],
+			"params": [
+				"AWS_REGION"
+			],
+			"deploy": true,
+			"lambda-name-prefix": "request-approve",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"rules": {
+			"runtime": "nodejs14.x",
+			"path": "services/rules",
+			"secrets": [
+				"PGDATABASE",
+				"PGUSER",
+				"PGPASSWORD",
+				"PGHOST",
+				"PGPORT",
+				"CLIENT_ID",
+				"POOL_ID",
+				"GRAPHQL_URI"
+			],
+			"params": [
+				"AWS_REGION"
+			],
+			"deploy": true,
+			"lambda-name-prefix": "rules",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": null,
+			"build-src-path": null
+		},
+		"request-by-id": {
+			"runtime": "go1.x",
+			"path": "services/request-by-id",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "request-by-id",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"requests-by-account": {
+			"runtime": "go1.x",
+			"path": "services/requests-by-account",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "requests-by-account",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"transaction-by-id": {
+			"runtime": "go1.x",
+			"path": "services/transaction-by-id",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "transaction-by-id",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"transactions-by-account": {
+			"runtime": "go1.x",
+			"path": "services/transactions-by-account",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "transactions-by-account",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"notifications-send": {
+			"runtime": "go1.x",
+			"path": "services/notifications-send",
+			"secrets": [
+				"NOTIFY_TOPIC_ARN",
+				"APIGW_CONNECTIONS_URI"
+			],
+			"params": [
+				"AWS_REGION"
+			],
+			"deploy": true,
+			"lambda-name-prefix": "notifications-send",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"notifications-get": {
+			"runtime": "go1.x",
+			"path": "services/notifications-get",
+			"secrets": [
+				"COGNITO_JWKS_URI"
+			],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "notifications-get",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"notifications-clear": {
+			"runtime": "go1.x",
+			"path": "services/notifications-clear",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "notifications-clear",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"balance-by-account": {
+			"runtime": "go1.x",
+			"path": "services/balance-by-account",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "balance-by-account",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"wss-connect": {
+			"runtime": "go1.x",
+			"path": "services/wss-connect",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "wss-connect",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"auto-confirm": {
+			"runtime": "go1.x",
+			"path": "services/auto-confirm",
+			"secrets": [
+				"POOL_ID",
+				"CLIENT_ID"
+			],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "auto-confirm",
+			"lambda-invoke-log": "invoke.log",
+			"executable-name": "index.handler",
+			"build-src-path": "cmd"
+		},
+		"client": {
+			"runtime": "es2015",
+			"path": "client",
+			"secrets": [
+				"POOL_ID",
+				"CLIENT_ID",
+				"GRAPHQL_URI"
+			],
+			"params": [
+				"AWS_REGION",
+				"NO_AUTH"
+			],
+			"deploy": true
+		},
+		"go-migrate": {
+			"runtime": "provided",
+			"path": "migrations/go-migrate",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "go-migrate",
+			"lambda-invoke-log": null,
+			"executable-name": "index.sh",
+			"build-src-path": null
+		},
+		"db-reset": {
+			"runtime": "provided",
+			"path": "migrations/db-reset",
+			"secrets": [],
+			"params": [],
+			"deploy": true,
+			"lambda-name-prefix": "db-reset",
+			"lambda-invoke-log": null,
+			"executable-name": "index.sh",
+			"build-src-path": null
+		},
+		"delete-faker": {
+			"runtime": "nodejs14.x",
+			"path": "services/internal-tools/delete-faker-accounts",
+			"secrets": [],
+			"params": [],
+			"deploy": false,
+			"lambda-name-prefix": null,
+			"lambda-invoke-log": null,
+			"executable-name": null,
+			"build-src-path": null
+		}
+	},
+	"path": ".",
+	"secrets": [
+		"CLIENT_URI",
+		"GRAPHQL_URI"
+	],
+	"params": []
 }
