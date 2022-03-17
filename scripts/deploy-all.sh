@@ -31,8 +31,6 @@ done
 # options are "deploy", or "initial-deploy" to prep for terraform
 MAKE_CMD="${INITIAL}"deploy
 
-INVENTORY_SIZE=$(echo "$INVENTORY_LIST" | wc -l)
-
 # wc -l returns 0 for single line file with 0 newline characters
 INVENTORY_SIZE=$(echo "$INVENTORY_LIST" | wc -l | awk '{print $1}')
 if [[ $INVENTORY_SIZE -eq 0 ]]; then
