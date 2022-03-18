@@ -7,7 +7,7 @@ if [[ "$#" -ne 8 ]]; then
 	use:
 	bash invoke-function.sh \
 	        --app-name request-create \
-	        --payload $(base64 testEvent.json) \
+	        --payload "$(cat testEvent.json)" \
 	        --env dev \
 	        --region us-east-1
 	EOF
@@ -36,14 +36,19 @@ aws lambda invoke \
 	--region $REGION \
 	--invocation-type RequestResponse \
 	--function-name $LAMBDA_NAME \
-	--payload "$PAYLOAD" \
+	--payload $(echo "$PAYLOAD" | base64) \
 	$LAMBDA_INVOKE_LOG
 
-# test first character of invoke log file
-if [[ $(head -c 1 $LAMBDA_INVOKE_LOG) == "{" ]]; then
-	# rules lambda returns object
-	jq '.' $LAMBDA_INVOKE_LOG
-else
-	# others return object as string
-	jq 'fromjson' $LAMBDA_INVOKE_LOG
-fi
+# store first character of invoke log file
+RESPONSE_FIRST_CHARACTER=$(head -c 1 $LAMBDA_INVOKE_LOG)
+case $RESPONSE_FIRST_CHARACTER in
+	'{') # rules lambda returns object
+		jq '.' $LAMBDA_INVOKE_LOG
+		;;
+	'"') # others return object as string
+		jq 'fromjson' $LAMBDA_INVOKE_LOG
+		;;
+	*) # print null response
+		jq '.' $LAMBDA_INVOKE_LOG
+		;;
+esac

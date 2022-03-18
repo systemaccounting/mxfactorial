@@ -14,8 +14,7 @@ TEST_ACCOUNT=JacobWebb
 TEST_ROLE=debitor
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_ID=3
-TEST_OBJECT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","id":"$(TEST_ID)","account_name":"$(TEST_ACCOUNT)","account_role":"$(TEST_ROLE)"}'
-TEST_EVENT=$(shell echo $(TEST_OBJECT) | base64)
+TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","id":"$(TEST_ID)","account_name":"$(TEST_ACCOUNT)","account_role":"$(TEST_ROLE)"}'
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \

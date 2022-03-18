@@ -15,7 +15,7 @@ ENTRYPOINT=$(COMPILE_SRC_DIR)/invoke.js
 
 TEST_DATA_FILE=preRuleTrItems.json
 TEST_DATA_DIR=../gopkg/testdata
-TEST_EVENT=$(shell base64 $(TEST_DATA_DIR)/$(TEST_DATA_FILE))
+TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \

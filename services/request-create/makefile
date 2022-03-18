@@ -12,7 +12,7 @@ ENV_FILE=$(CURDIR)/.env
 
 TEST_DATA_FILE=transNoAppr.json
 TEST_DATA_DIR=../gopkg/testdata
-TEST_EVENT=$(shell base64 $(TEST_DATA_DIR)/$(TEST_DATA_FILE))
+TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -28,7 +28,7 @@ endif
 run:
 	@$(MAKE) -s test-env-file
 	@$(DOCKER_ENV_VARS) \
-		TEST_EVENT=$$(cat $(TEST_EVENT)) \
+		TEST_EVENT=$(TEST_EVENT) \
 		eval $$(cat $(ENV_FILE)) \
 		go run $(CMD_DIR)
 
