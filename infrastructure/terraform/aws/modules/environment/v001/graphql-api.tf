@@ -1,7 +1,7 @@
 module "graphql_apigwv2" {
   source                   = "../../apigwv2-lambda/v001"
   api_name                 = "graphql"
-  payload_format_version   = "1.0"
+  payload_format_version   = "2.0"
   enable_api_auth          = var.enable_api_auth
   api_version              = 001
   env                      = var.env
