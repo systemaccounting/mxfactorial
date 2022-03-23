@@ -19,5 +19,9 @@ jobs:
       - name: unit test
         run: go test -race -covermode=atomic -coverprofile=coverage.out
         working-directory: services/gopkg/tools
+      - name: set CODECOV_FLAGS env var
+        run: bash scripts/set-codecov-flags.sh --app-or-pkg-name tools --test-type unittest
       - name: report coverage
         uses: codecov/codecov-action@v2
+        with:
+          flags: ${{ env.CODECOV_FLAGS }}

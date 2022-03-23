@@ -277,6 +277,12 @@
 			"dependent_services": []
 		}
 	},
+	"pkgs": {
+		"tools": {
+			"runtime": "go1.x",
+			"path": "services/gopkg/tools"
+		}
+	},
 	"path": ".",
 	"secrets": [
 		"CLIENT_URI",
