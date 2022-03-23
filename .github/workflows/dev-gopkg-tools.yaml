@@ -3,7 +3,7 @@ name: dev-gopkg-tools
 on:
   push:
     paths:
-    - 'services/gopkg/tools'
+    - 'services/gopkg/tools/**'
     branches-ignore:
     - 'master'
 
