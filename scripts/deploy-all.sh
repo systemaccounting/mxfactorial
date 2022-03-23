@@ -6,7 +6,7 @@ set -e
 # requires filtering to deploy services only
 INVENTORY_LIST=$(cat inventory)
 
-if [[ "$#" -ne 2 ]] && [[ "$#" -ne 3 ]]; then
+if [[ "$#" -lt 2 ]] && [[ "$#" -gt 4 ]]; then
 	cat <<- 'EOF'
 	use:
 	bash deploy-all.sh --env dev
