@@ -40,7 +40,6 @@ func TestCreateIntraTransactions(t *testing.T) {
 		},
 		Transaction: testtrs,
 	}
-
 	if !cmp.Equal(got, want) {
 		t.Errorf("got %v, want %v", got, want)
 	}
