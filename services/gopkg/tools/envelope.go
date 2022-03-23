@@ -24,6 +24,7 @@ func CreateIntraTransactions(
 		IntraEvent: types.IntraEvent{
 			AuthAccount: authAccount,
 		},
+		// todo: change field name to "transactions"
 		Transaction: trs,
 	}
 }
