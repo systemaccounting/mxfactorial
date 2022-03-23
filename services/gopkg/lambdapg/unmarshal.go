@@ -98,7 +98,7 @@ func UnmarshalTransaction(
 		AuthorDeviceID:     authorDeviceID,
 		AuthorDeviceLatlng: geoPoint,
 		AuthorRole:         authorRole,
-		EquilibriumTime:    tools.NullTimeToString(equilibriumTime),
+		EquilibriumTime:    tools.NullTimeToStringPtr(equilibriumTime),
 		SumValue:           &sumVal,
 	}
 	return &t, nil
@@ -149,7 +149,7 @@ func UnmarshalTransactions(
 			AuthorDeviceID:     authorDeviceID,
 			AuthorDeviceLatlng: geoPoint,
 			AuthorRole:         authorRole,
-			EquilibriumTime:    tools.NullTimeToString(equilibriumTime),
+			EquilibriumTime:    tools.NullTimeToStringPtr(equilibriumTime),
 			SumValue:           &sumVal,
 		}
 		transactions = append(transactions, t)
@@ -265,12 +265,12 @@ func UnmarshalTrItems(
 			Creditor:               creditor,
 			DebitorProfileID:       debitorProfileID,
 			CreditorProfileID:      creditorProfileID,
-			DebitorApprovalTime:    tools.NullTimeToString(debitorApprovalTime),
-			CreditorApprovalTime:   tools.NullTimeToString(creditorApprovalTime),
-			DebitorRejectionTime:   tools.NullTimeToString(debitorRejectionTime),
-			CreditorRejectionTime:  tools.NullTimeToString(creditorRejectionTime),
-			DebitorExpirationTime:  tools.NullTimeToString(debitorExpirationTime),
-			CreditorExpirationTime: tools.NullTimeToString(creditorExpirationTime),
+			DebitorApprovalTime:    tools.NullTimeToStringPtr(debitorApprovalTime),
+			CreditorApprovalTime:   tools.NullTimeToStringPtr(creditorApprovalTime),
+			DebitorRejectionTime:   tools.NullTimeToStringPtr(debitorRejectionTime),
+			CreditorRejectionTime:  tools.NullTimeToStringPtr(creditorRejectionTime),
+			DebitorExpirationTime:  tools.NullTimeToStringPtr(debitorExpirationTime),
+			CreditorExpirationTime: tools.NullTimeToStringPtr(creditorExpirationTime),
 		}
 		trItems = append(trItems, &i)
 	}
@@ -328,8 +328,8 @@ func UnmarshalApprovals(
 			AccountRole:       accountRole,
 			DeviceID:          deviceID,
 			DeviceLatlng:      geoPoint,
-			ApprovalTime:      tools.NullTimeToString(approvalTime),
-			ExpirationTime:    tools.NullTimeToString(expirationTime),
+			ApprovalTime:      tools.NullTimeToStringPtr(approvalTime),
+			ExpirationTime:    tools.NullTimeToStringPtr(expirationTime),
 		}
 		approvals = append(approvals, &a)
 	}
