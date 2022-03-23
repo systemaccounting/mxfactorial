@@ -12,7 +12,7 @@ var ErrAuthorNotInItems = errors.New("author not in items")
 func GetAuthorRole(tr *types.Transaction, author string) (types.Role, error) {
 
 	// test for rule added transaction author
-	if tr.RuleInstanceID != nil && len(*tr.RuleInstanceID) > 0 {
+	if tr.RuleInstanceID != nil && *tr.RuleInstanceID != "" {
 		var authorRole *types.Role
 		authorRole.Set(*tr.AuthorRole)
 		return *authorRole, nil
