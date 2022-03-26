@@ -26,11 +26,13 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-IS_IN_PROJECT_JSON=$(jq "[.apps, .pkgs | keys] | flatten | any(. == \"$APP_OR_PKG_NAME\")" project.json)
+PROJECT_CONFIG=project.json
+
+IS_IN_PROJECT_JSON=$(jq "[.apps, .pkgs | keys] | flatten | any(. == \"$APP_OR_PKG_NAME\")" $PROJECT_CONFIG)
 TEST_TYPES=(unittest integration ui)
 
 if [[ "$IS_IN_PROJECT_JSON" == 'false' ]]; then
-	echo "\"$APP_OR_PKG_NAME\" NOT in project.json. exiting"
+	echo "\"$APP_OR_PKG_NAME\" NOT in $PROJECT_CONFIG. exiting"
 	exit 1
 fi
 
@@ -41,9 +43,11 @@ for t in "${TEST_TYPES[@]}"; do
 	fi
 done
 
-if [[ $COUNT -eq 0 ]]; then
-		echo "\"$TEST_TYPE\" not standard \"${TEST_TYPES[@]}\" codecov coverage flag. exiting"
-		exit 1
+if [[ "$COUNT" -eq 0 ]]; then
+	echo "\"$TEST_TYPE\" not standard \"${TEST_TYPES[@]}\" codecov coverage flag. exiting"
+	exit 1
 fi
 
-echo "CODECOV_FLAGS=$APP_OR_PKG_NAME,$TEST_TYPE" >> $GITHUB_ENV
+if [[ "$CI" == 'true' ]]; then
+	echo "CODECOV_FLAGS=$APP_OR_PKG_NAME,$TEST_TYPE" >> $GITHUB_ENV
+fi
