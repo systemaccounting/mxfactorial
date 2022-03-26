@@ -2,7 +2,7 @@
 
 set -e
 
-if [[ "$#" -ne 2 ]] || [[ "$#" -ne 3 ]]; then
+if [[ "$#" -ne 2 ]] && [[ "$#" -ne 3 ]]; then
 	cat <<- 'EOF'
 	use:
 	bash scripts/list-changed-svcs.sh --pkg-name tools
