@@ -51,6 +51,7 @@ DDB_EXPRESSION_ATTR_VALUES="{\":p\": {\"SS\": [\"$TEST_TO_REMOVE\"]}}"
 
 # get PendingTest item from dynamodb
 DDB_RESPONSE=$(aws dynamodb get-item \
+    --region "$REGION" \
     --table-name "$DDB_TABLE" \
     --key "$DDB_KEY")
 

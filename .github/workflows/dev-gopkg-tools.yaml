@@ -7,9 +7,12 @@ on:
     branches-ignore:
     - 'master'
 
+env:
+  AWS_REGION: us-east-1
+  ENVIRONMENT: dev
+
 jobs:
-  build:
-    name: gopkg-tools
+  tools:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,9 +22,82 @@ jobs:
       - name: unit test
         run: go test -race -covermode=atomic -coverprofile=coverage.out
         working-directory: services/gopkg/tools
+      - name: set PENDING_TESTS in dynamodb
+        run: bash scripts/set-pending-tests.sh --app-or-pkg-name tools --sha $GITHUB_SHA --region $AWS_REGION --env $ENVIRONMENT
       - name: set CODECOV_FLAGS env var
         run: bash scripts/set-codecov-flags.sh --app-or-pkg-name tools --test-type unittest
       - name: report coverage
         uses: codecov/codecov-action@v2
         with:
           flags: ${{ env.CODECOV_FLAGS }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+  lambdapg:
+    uses: ./.github/workflows/REUSE_go-lambda.yaml
+    needs: tools
+    with:
+      environment: dev
+      directory: services/gopkg/lambdapg
+      aws_region: us-east-1
+      app_or_pkg_name: lambdapg
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  request:
+    uses: ./.github/workflows/REUSE_go-lambda.yaml
+    needs: tools
+    with:
+      environment: dev
+      directory: services/gopkg/request
+      aws_region: us-east-1
+      app_or_pkg_name: request
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  notify:
+    uses: ./.github/workflows/REUSE_go-lambda.yaml
+    needs: tools
+    with:
+      environment: dev
+      directory: services/gopkg/notify
+      aws_region: us-east-1
+      app_or_pkg_name: notify
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  websocket:
+    uses: ./.github/workflows/REUSE_go-lambda.yaml
+    needs: tools
+    with:
+      environment: dev
+      directory: services/gopkg/websocket
+      aws_region: us-east-1
+      app_or_pkg_name: websocket
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  data:
+    uses: ./.github/workflows/REUSE_go-lambda.yaml
+    needs: tools
+    with:
+      environment: dev
+      directory: services/gopkg/data
+      aws_region: us-east-1
+      app_or_pkg_name: data
+    secrets:
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  inventory:
+    name: all dependencies tested
+    runs-on: ubuntu-latest
+    needs: [tools, lambdapg, request, notify, websocket, data]
+    steps:
+      - uses: actions/checkout@v3
+      - name: test zero PENDING_TESTS
+        run: bash scripts/test-zero-pending-tests.sh --sha $GITHUB_SHA --region $AWS_REGION --env $ENVIRONMENT
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
