@@ -45,14 +45,17 @@ IS_APP_IN_PROJECT_JSON=$(jq ".apps | keys | any(. == \"$APP_OR_PKG_NAME\")" $PRO
 # test if in project.json pkgs
 IS_PKG_IN_PROJECT_JSON=$(jq ".pkgs | keys | any(. == \"$APP_OR_PKG_NAME\")" $PROJECT_CONFIG)
 
-# set CHANGED_DIRS to go package OR app service directories
+# test if jq any found app
 if [[ "$IS_APP_IN_PROJECT_JSON" == 'true' ]]; then
 	# get list of CHANGED_SVCS dirs
 	source ./scripts/list-changed-svcs.sh --pkg-name "$APP_OR_PKG_NAME"
+	# set CHANGED_DIRS to CHANGED_SVCS
 	CHANGED_DIRS=("${CHANGED_SVCS[@]}")
+# test if jq any found pkg
 elif [[ "$IS_PKG_IN_PROJECT_JSON" == 'true' ]]; then
 	# get list of IMPORTING_PKG_DIRS
 	source ./scripts/list-changed-pkgs.sh --pkg-name "$APP_OR_PKG_NAME"
+	# set IMPORTING_PKG_DIRS to CHANGED_SVCS
 	CHANGED_DIRS=("${IMPORTING_PKG_DIRS[@]}")
 else
 	# error when script arg not found in project.json apps or pkgs
