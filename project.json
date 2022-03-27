@@ -363,6 +363,13 @@
             "ttl_attribute": "ttl",
             "ttl_days": "1",
             "pending_tests_attribute": "PendingTests"
+        },
+        "codecov": {
+            "flags": [
+                "unittest",
+                "integration",
+                "ui"
+            ]
         }
     },
     "params": []
