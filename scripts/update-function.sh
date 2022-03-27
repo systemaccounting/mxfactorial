@@ -5,7 +5,7 @@ set -e
 if [[ "$#" -ne 8 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash update-function.sh \
+	bash scripts/update-function.sh \
 	        --app-name request-create \
 	        --artifact-name request-create-src.zip \
 	        --env dev \

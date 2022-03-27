@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ "$#" -ne 2 ]]; then
-	echo "use: bash go-compile-linux.sh --app-name request-create"
+	echo "use: bash scripts/compile-go-linux.sh --app-name request-create"
 	exit 1
 fi
 

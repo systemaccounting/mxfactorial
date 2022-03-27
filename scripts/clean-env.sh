@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ "$#" -ne 2 ]]; then
-	echo "use: bash create-env.sh --app-name request-create"
+	echo "use: bash scripts/clean-env.sh --app-name request-create"
 	exit 1
 fi
 

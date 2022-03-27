@@ -5,7 +5,7 @@ set -e
 if [[ "$#" -ne 8 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash invoke-function.sh \
+	bash scripts/invoke-function.sh \
 	        --app-name request-create \
 	        --payload "$(cat testEvent.json)" \
 	        --env dev \
