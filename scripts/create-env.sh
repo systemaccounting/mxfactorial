@@ -3,7 +3,7 @@
 set -e
 
 if [[ "$#" -ne 6 ]]; then
-	echo "use: bash create-env.sh --app-name request-create --env dev --region us-east-1"
+	echo "use: bash scripts/create-env.sh --app-name request-create --env dev --region us-east-1"
 	exit 1
 fi
 

@@ -5,7 +5,7 @@ set -e
 if [[ "$#" -ne 8 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash invoke-function.sh \
+	bash scripts/invoke-function.sh \
 	        --app-name request-create \
 	        --payload "$(cat testEvent.json)" \
 	        --env dev \
@@ -42,13 +42,10 @@ aws lambda invoke \
 # store first character of invoke log file
 RESPONSE_FIRST_CHARACTER=$(head -c 1 $LAMBDA_INVOKE_LOG)
 case $RESPONSE_FIRST_CHARACTER in
-	'{') # rules lambda returns object
-		jq '.' $LAMBDA_INVOKE_LOG
-		;;
-	'"') # others return object as string
+	'"') # when object returned as string
 		jq 'fromjson' $LAMBDA_INVOKE_LOG
 		;;
-	*) # print null response
+	*)
 		jq '.' $LAMBDA_INVOKE_LOG
 		;;
 esac

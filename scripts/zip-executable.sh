@@ -3,7 +3,7 @@
 if [[ "$#" -ne 6 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash zip-executable.sh \
+	bash scripts/zip-executable.sh \
 	        --app-name request-create \
 	        --artifact-name request-create-src.zip \
 	        --executable-name index.handler

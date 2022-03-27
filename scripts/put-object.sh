@@ -5,7 +5,7 @@ set -e
 if [[ "$#" -ne 8 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash put-object.sh \
+	bash scripts/put-object.sh \
 	        --app-name request-create \
 	        --artifact-name request-create-src.zip \
 	        --env dev \

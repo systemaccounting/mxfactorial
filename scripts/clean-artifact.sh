@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ "$#" -ne 4 ]]; then
-	echo "use: bash clean-artifact.sh --app-name request-create --artifact-name request-create-src.zip"
+	echo "use: bash scripts/clean-artifact.sh --app-name request-create --artifact-name request-create-src.zip"
 	exit 1
 fi
 

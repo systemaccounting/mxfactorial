@@ -65,10 +65,6 @@ func lambdaFn(
 		return "", errors.New("missing transaction. exiting")
 	}
 
-	if e.Transaction.Author == nil {
-		return "", errors.New("missing transaction.author. exiting")
-	}
-
 	// store transaction items received from client in var
 	var fromClient []*types.TransactionItem = request.RemoveUnauthorizedValues(e.Transaction.TransactionItems)
 
@@ -120,7 +116,7 @@ func lambdaFn(
 
 	// get author_role from items using
 	// account from authentication service
-	authorRole, err := tools.GetAuthorRole(e.Transaction, *e.Transaction.Author)
+	authorRole, err := tools.GetAuthorRole(e.Transaction, e.AuthAccount)
 	if err != nil {
 		return "", err
 	}
