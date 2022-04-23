@@ -22,6 +22,8 @@ jobs:
       - name: unit test
         run: go test -race -covermode=atomic -coverprofile=coverage.out
         working-directory: services/gopkg/tools
+      - name: test for missing and unnecessary dependents in project.json
+        run: bash scripts/test-dependents.sh --app-or-pkg-name tools
       - name: set PENDING_TESTS in dynamodb
         run: bash scripts/set-pending-tests.sh --app-or-pkg-name tools --sha $GITHUB_SHA --region $AWS_REGION --env $ENVIRONMENT
       - name: set CODECOV_FLAGS env var
