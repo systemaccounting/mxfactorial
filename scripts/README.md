@@ -245,3 +245,7 @@ deploys lambda function from s3 object created by `put-object.sh`
 ##### `zip-executable.sh`
 
 adds binaries and shell scripts to `*.zip` files for deployment in app directories
+
+##### `test-dependents.sh`
+
+tests for missing and unnecessary dependents in project.json and fails github workflows with message
