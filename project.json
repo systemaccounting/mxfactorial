@@ -341,8 +341,7 @@
                 "lambdapg",
                 "request",
                 "notify",
-                "websocket",
-                "data"
+                "websocket"
             ]
         },
         "websocket": {
