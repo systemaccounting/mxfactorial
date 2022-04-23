@@ -17,7 +17,6 @@ func IsCustomIDUnique(i types.ID, l []interface{}) bool {
 	return true
 }
 
-//
 func IsIfaceStringUnique(s string, l []interface{}) bool {
 	for _, v := range l {
 		if v.(string) == s {
