@@ -5,6 +5,7 @@
 		"item_id": "bottled water",
 		"price": "1.000",
 		"quantity": "1",
+		"rule_exec_ids": [],
 		"debitor_first": null,
 		"rule_instance_id": null,
 		"unit_of_measurement": null,

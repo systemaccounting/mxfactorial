@@ -4,6 +4,7 @@
 	"item_id": "milk",
 	"price": "2.000",
 	"quantity": "1",
+	"rule_exec_ids": [],
 	"debitor_first": null,
 	"rule_instance_id": null,
 	"unit_of_measurement": "",
