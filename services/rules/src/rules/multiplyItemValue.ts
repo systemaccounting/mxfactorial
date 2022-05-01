@@ -49,9 +49,9 @@ export default function (
 			item_id: ITEM_NAME,
 			price: numberToFixedString(addedItemValue),
 			quantity: numberToFixedString(addedItemQuantity),
-			rule_exec_ids: [ruleExecID], // rule_exec_ids.length for rule added items always 1
 			debitor_first: repeatedTransactionSequence,
 			rule_instance_id: ruleInstID,
+			rule_exec_ids: [ruleExecID], // rule_exec_ids.length for rule added items always 1
 			unit_of_measurement: repeatedUnitOfMeasurement,
 			units_measured: repeatedUnitsMeasured,
 			debitor: trsDebitor,
