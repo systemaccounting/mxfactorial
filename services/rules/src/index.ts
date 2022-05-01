@@ -37,6 +37,7 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 	// add approvals property to each transaction item received in event
 	const eventWithApprovals: ITransactionItem[] = event.map(x => ({
 		...x,
+		rule_exec_ids: new Array(),
 		approvals: new Array(),
 	}))
 

@@ -20,6 +20,7 @@ export interface ITransactionItem {
 	item_id: string;
 	price: string;
 	quantity: string;
+	rule_exec_ids: string[];
 	debitor_first: boolean;
 	rule_instance_id: string;
 	unit_of_measurement: string;
