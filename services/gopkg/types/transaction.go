@@ -24,6 +24,7 @@ type TransactionItem struct {
 	ItemID                 *string             `json:"item_id"`
 	Price                  decimal.Decimal     `json:"price"`
 	Quantity               decimal.Decimal     `json:"quantity"`
+	RuleExecIDs            []*string           `json:"rule_exec_ids"`
 	DebitorFirst           *bool               `json:"debitor_first,omitempty"`
 	RuleInstanceID         *ID                 `json:"rule_instance_id"`
 	UnitOfMeasurement      *string             `json:"unit_of_measurement"`
