@@ -77,21 +77,21 @@ describe('multiplyItemValue', () => {
 		const milkRuleExecID: string = milkTrItem.rule_exec_ids[0]
 
 		// set counters
-		let breadTaxItem = 0
-		let milkTaxItem = 0
+		let breadTaxItemCount = 0
+		let milkTaxItemCount = 0
 
 		// count bread and milk occurrence of rule_exec_id value
 		for (const a of addedItems) {
 			if (a.rule_exec_ids[0] == breadRuleExecID) {
-				breadTaxItem++
+				breadTaxItemCount++
 			}
 			if (a.rule_exec_ids[0] == milkRuleExecID) {
-				milkTaxItem++
+				milkTaxItemCount++
 			}
 		}
 
-		expect(breadTaxItem).toBe(1)
-		expect(milkTaxItem).toBe(1)
+		expect(breadTaxItemCount).toBe(1)
+		expect(milkTaxItemCount).toBe(1)
 	});
 	// todo: negative tests
 });
