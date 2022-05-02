@@ -214,6 +214,7 @@ func UnmarshalTrItems(
 		var quantity decimal.Decimal
 		var debitorFirst *bool
 		var ruleInstanceID *types.ID
+		var ruleExecIDs []*string
 		var unitOfMeasurement *string
 		var unitsMeasured decimal.NullDecimal
 		var debitor *string
@@ -234,6 +235,7 @@ func UnmarshalTrItems(
 			&quantity,
 			&debitorFirst,
 			&ruleInstanceID,
+			&ruleExecIDs,
 			&unitOfMeasurement,
 			&unitsMeasured,
 			&debitor,
@@ -259,6 +261,7 @@ func UnmarshalTrItems(
 			Quantity:               quantity,
 			DebitorFirst:           debitorFirst,
 			RuleInstanceID:         ruleInstanceID,
+			RuleExecIDs:            ruleExecIDs,
 			UnitOfMeasurement:      unitOfMeasurement,
 			UnitsMeasured:          unitsMeasured,
 			Debitor:                debitor,

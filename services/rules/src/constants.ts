@@ -15,4 +15,5 @@ export default Object.freeze({
 	APPROVAL: "approval",
 	ACCOUNT_ROLE_MISSING_ERROR: "account role missing",
 	ACCOUNT_NAME_MISSING_ERROR: "account name missing",
+	RULE_EXEC_ID_SIZE: 8,
 });
