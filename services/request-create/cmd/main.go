@@ -275,7 +275,7 @@ func testLengthEquality(rule, client []preTestItem) error {
 	ruleLength := len(rule)
 	clientLength := len(client)
 	if ruleLength != clientLength {
-		var errMsg error = fmt.Errorf("client item count not equal to rule, %d vs %d", ruleLength, clientLength)
+		var errMsg error = fmt.Errorf("client item count not equal to rule, %d vs %d", clientLength, ruleLength)
 		return errMsg
 	}
 	return nil

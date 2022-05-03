@@ -12,14 +12,14 @@ export default async function (ruleInstances: IRuleInstance[], transactionItem: 
 		const ruleInstancePath = c.RELATIVE_RULES_PATH + "/" + ruleName;
 		const { default: itemRuleModule } = await import(ruleInstancePath);
 		const ruleVariableValues = r.variable_values;
-		ruleAppliedItems = [...itemRuleModule( // spread returned items from rules
+		ruleAppliedItems.push(...itemRuleModule( // spread returned items from rules
 			ruleInstanceId,
 			ruleName,
 			ruleAccountRole,
 			ruleAccountName,
 			transactionItem,
 			...ruleVariableValues,
-		)];
+		));
 	};
 	return ruleAppliedItems;
 };

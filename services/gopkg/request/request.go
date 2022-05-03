@@ -37,6 +37,7 @@ func RemoveUnauthorizedValues(trItems []*types.TransactionItem) []*types.Transac
 			Quantity:               v.Quantity,
 			DebitorFirst:           &debitorFirst,
 			RuleInstanceID:         v.RuleInstanceID,
+			RuleExecIDs:            []*string{},
 			UnitOfMeasurement:      nil,
 			UnitsMeasured:          v.UnitsMeasured,
 			Debitor:                v.Debitor,

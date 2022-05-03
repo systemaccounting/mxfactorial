@@ -27,6 +27,7 @@ interface ITransactionItem {
   quantity: String
   debitor_first: Boolean
   rule_instance_id: String
+  rule_exec_ids: [String]
   unit_of_measurement: String
   units_measured: String
   debitor: String
@@ -49,6 +50,7 @@ type TransactionItem implements ITransactionItem {
   quantity: String
   debitor_first: Boolean
   rule_instance_id: String
+  rule_exec_ids: [String]
   unit_of_measurement: String
   units_measured: String
   debitor: String

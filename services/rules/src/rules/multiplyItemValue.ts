@@ -1,5 +1,10 @@
 import { ANY } from "./tokens";
-import { stringIfNull, stringIfNumber, numberToFixedString } from "./shared";
+import {
+	stringIfNull,
+	stringIfNumber,
+	numberToFixedString,
+	createRuleExecID,
+} from "./shared";
 import type { ITransactionItem } from "../index.d";
 import emptyTransactionItem from "../initial/transactionItem.json";
 
@@ -31,6 +36,13 @@ export default function (
 	const trsDebitor = DEBITOR == ANY ? transactionItem.debitor : DEBITOR
 	const trsCreditor = CREDITOR == ANY ? transactionItem.creditor : CREDITOR
 
+	// create rule execution id
+	const ruleExecID = createRuleExecID()
+
+	// add rule exec id to user transaction item, and
+	// push since user created transaction items may have rule_exec_ids.length >= 0
+	transactionItem.rule_exec_ids.push(ruleExecID)
+
 	const addedItem: ITransactionItem = {
 		...emptyTransactionItem,
 		...{
@@ -39,6 +51,7 @@ export default function (
 			quantity: numberToFixedString(addedItemQuantity),
 			debitor_first: repeatedTransactionSequence,
 			rule_instance_id: ruleInstID,
+			rule_exec_ids: [ruleExecID], // rule_exec_ids.length for rule added items always 1
 			unit_of_measurement: repeatedUnitOfMeasurement,
 			units_measured: repeatedUnitsMeasured,
 			debitor: trsDebitor,

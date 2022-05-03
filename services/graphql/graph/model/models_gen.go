@@ -49,6 +49,7 @@ type TransactionItem struct {
 	Quantity               *string     `json:"quantity"`
 	DebitorFirst           *bool       `json:"debitor_first"`
 	RuleInstanceID         *string     `json:"rule_instance_id"`
+	RuleExecIds            []*string   `json:"rule_exec_ids"`
 	UnitOfMeasurement      *string     `json:"unit_of_measurement"`
 	UnitsMeasured          *string     `json:"units_measured"`
 	Debitor                *string     `json:"debitor"`

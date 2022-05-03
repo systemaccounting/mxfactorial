@@ -7,6 +7,7 @@ CREATE TABLE transaction_item (
   quantity numeric NOT NULL CHECK (quantity > 0),
   debitor_first boolean default true,
   rule_instance_id int,
+  rule_exec_ids text[],
   unit_of_measurement character varying(255),
   units_measured numeric,
   debitor character varying(255) not null,
