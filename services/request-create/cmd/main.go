@@ -65,16 +65,19 @@ func lambdaFn(
 		return "", errors.New("missing transaction. exiting")
 	}
 
+	// match author_role from items to authenticated account
+	authorRole, err := tools.GetAuthorRole(e.Transaction, e.AuthAccount)
+	if err != nil {
+		log.Printf("GetAuthorRole error: %v\n", err)
+		return "", err
+	}
+
+	// overwrite transaction author role with authenticated role
+	role := authorRole.String()
+	e.Transaction.AuthorRole = &role
+
 	// store transaction items received from client in var
 	var fromClient []*types.TransactionItem = request.RemoveUnauthorizedValues(e.Transaction.TransactionItems)
-
-	// create client control totals
-	// to test all items stored at end
-	var clientItemCount int = len(fromClient)
-	var clientApprovalCount int
-	for _, it := range fromClient {
-		clientApprovalCount += len(it.Approvals)
-	}
 
 	// filter non-rule generated items from client
 	var nonRuleClientItems []*types.TransactionItem
@@ -95,6 +98,10 @@ func lambdaFn(
 		return "", err
 	}
 
+	// add authenticated values to rule tested transaction
+	ruleTested.Transaction.Author = &e.AuthAccount
+	ruleTested.Transaction.AuthorRole = &role
+
 	// reduce items to simple structure and
 	// relevant values for equality testing
 	clientPreEqualityTest := testPrep(fromClient)
@@ -114,13 +121,6 @@ func lambdaFn(
 
 	log.Print("client items equal to rules")
 
-	// get author_role from items using
-	// account from authentication service
-	authorRole, err := tools.GetAuthorRole(e.Transaction, e.AuthAccount)
-	if err != nil {
-		return "", err
-	}
-
 	// list debitors and creditors to fetch profile ids
 	uniqueAccounts := tools.ListUniqueAccountsFromTrItems(
 		ruleTested.Transaction.TransactionItems,
@@ -129,6 +129,7 @@ func lambdaFn(
 	// connect to postgres
 	db, err := c.Connect(context.Background(), pgConn)
 	if err != nil {
+		log.Printf("pg connect error: %v", err)
 		return "", err
 	}
 	// close db connection when main exits
@@ -137,7 +138,7 @@ func lambdaFn(
 	// unmarshal account profile ids with account names
 	profileIDList, err := data.GetProfileIDsByAccountList(db, uniqueAccounts)
 	if err != nil {
-		log.Print(err)
+		log.Printf("GetProfileIDsByAccountList error: %v", err)
 		return "", err
 	}
 
@@ -151,55 +152,20 @@ func lambdaFn(
 		profileIDs,
 	)
 
-	// create pre approval transaction
-	preTr, err := data.CreateTransaction(
-		db,
-		nil,
-		&e.AuthAccount,
-		nil,
-		nil,
-		authorRole,
-		nil,
-		ruleTested.Transaction.SumValue,
-	)
+	trID, err := data.RequestCreate(db, ruleTested.Transaction)
 	if err != nil {
-		log.Print(err)
-		return "", err
+		errMsg := fmt.Errorf("RequestCreate error: %v", err)
+		log.Print(errMsg)
+		return "", errMsg
 	}
 
-	// create transaction items
-	preTrItems, err := data.CreateTransactionItems(
-		db,
-		preTr.ID,
-		ruleTested.Transaction.TransactionItems,
-	)
+	// get new transaction request
+	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, trID)
 	if err != nil {
-		log.Printf("unmarshal transaction items error: %v", err)
-		return "", err
+		errMsg := fmt.Errorf("GetTransactionWithTrItemsAndApprovalsByID error: %v", err)
+		log.Print(errMsg)
+		return "", errMsg
 	}
-
-	// create approvals without requester timestamps
-	preApprovals, err := data.CreateApprovals(
-		db,
-		preTr.ID,
-		// transaction items WITH IDs and WITHOUT rule-added approvals
-		preTrItems,
-		// transaction items WITHOUT IDs and WITH rule-added approvals
-		ruleTested.Transaction.TransactionItems,
-	)
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-
-	// urge permanent solution if client transaction items not stored
-	if len(preTrItems) != clientItemCount && len(preApprovals) != clientApprovalCount {
-		return "", errors.New("move inserts into a single sql transaction")
-	}
-
-	// attach pre approval transaction items to
-	// pre approval transaction
-	preTr.TransactionItems = preTrItems
 
 	// 1. add requested approval
 	// 2. update approval time stamps in transaction items and transaction
@@ -209,8 +175,7 @@ func lambdaFn(
 		db,
 		&e.AuthAccount,
 		authorRole,
-		preTr,
-		preApprovals,
+		preApprTr,
 		&notifyTopicArn,
 	)
 }
