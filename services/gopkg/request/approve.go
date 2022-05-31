@@ -1,7 +1,6 @@
 package request
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
@@ -13,10 +12,9 @@ import (
 
 func Approve(
 	db lpg.SQLDB,
-	authAccount *string,
+	authAccount *string, // requester may be different from preApprovalTransaction.Author
 	accountRole types.Role,
 	preApprovalTransaction *types.Transaction,
-	preApprovals []*types.Approval,
 	notifyTopicArn *string,
 ) (string, error) {
 
@@ -38,18 +36,20 @@ func Approve(
 		return "", err
 	}
 
+	beginningApprovals := getApprovalsFromTransaction(preApprovalTransaction)
+
 	// fail approval if timestamps not pending
 	err = TestPendingRoleApproval(
 		authAccount,
 		accountRole,
-		preApprovals,
+		beginningApprovals,
 	)
 	if err != nil {
 		return "", err
 	}
 
 	// add requester timestamps to approvals
-	_, err = data.AddApprovalTimesByAccountAndRole(
+	eqTime, err := data.AddApprovalTimesByAccountAndRole(
 		db,
 		authAccount,
 		accountRole,
@@ -59,8 +59,7 @@ func Approve(
 		return "", err
 	}
 
-	// get ending approvals
-	endingApprovals, err := data.GetApprovalsByTransactionID(
+	postApprovalTransaction, err := data.GetTransactionWithTrItemsAndApprovalsByID(
 		db,
 		preApprovalTransaction.ID,
 	)
@@ -68,27 +67,18 @@ func Approve(
 		return "", err
 	}
 
-	// update approved transaction items
-	postApprovalTransaction, err := CopyApprovalTimes(
-		db,
-		endingApprovals,
-		preApprovalTransaction,
-	)
-	if err != nil {
-		return "", err
-	}
+	endingApprovals := getApprovalsFromTransaction(postApprovalTransaction)
 
-	// get ending transaction items
-	endingTrItems, err := data.GetTrItemsByTransactionID(
-		db,
-		preApprovalTransaction.ID,
-	)
-	if err != nil {
-		return "", err
-	}
+	// test for equilibrium
+	equilibriumTime := *eqTime
+	if !equilibriumTime.Time.IsZero() {
+		// change account balances from transaction items
+		ChangeAccountBalances(
+			db,
+			preApprovalTransaction.TransactionItems,
+		)
 
-	// attach ending transaction items to returning transaction
-	postApprovalTransaction.TransactionItems = endingTrItems
+	}
 
 	// notify role approvers
 	err = notify.NotifyTransactionRoleApprovers(
@@ -112,86 +102,14 @@ func Approve(
 
 }
 
-func CopyApprovalTimes(
-	db lpg.SQLDB,
-	approvals []*types.Approval,
-	preApprovalTransaction *types.Transaction,
-) (*types.Transaction, error) {
+func getApprovalsFromTransaction(tr *types.Transaction) []*types.Approval {
+	var approvals []*types.Approval
 
-	// map transaction item id count from debitor approvals
-	DbTrItemCount := MapTrItemIDOccurrenceFromApprovals(
-		types.DEBITOR,
-		approvals,
-	)
-
-	// map transaction item id count from creditor approvals
-	CrTrItemCount := MapTrItemIDOccurrenceFromApprovals(
-		types.CREDITOR,
-		approvals,
-	)
-
-	// map debitor approved transaction item ids to latest approval time stamp
-	DbApprovedTrItemIDs, err := MapApprovedTrItemIDsToApprovalTimes(
-		DbTrItemCount,
-		types.DEBITOR,
-		approvals,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("UpdateApprovalTimes debitor error: %v", err.Error())
-	}
-
-	// map creditor approved transaction item ids to latest approval time stamp
-	CrApprovedTrItemIDs, err := MapApprovedTrItemIDsToApprovalTimes(
-		CrTrItemCount,
-		types.CREDITOR,
-		approvals,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("UpdateApprovalTimes creditor error: %v", err.Error())
-	}
-
-	// update debitor approvals of transaction items
-	data.UpdateTrItemApprovalTimesByRole(
-		db,
-		types.DEBITOR,
-		DbApprovedTrItemIDs,
-	)
-
-	// update creditor approvals of transaction items
-	data.UpdateTrItemApprovalTimesByRole(
-		db,
-		types.CREDITOR,
-		CrApprovedTrItemIDs,
-	)
-
-	// set ending transaction to pre approval transaction if not equilibrium
-	endingTransaction := preApprovalTransaction
-
-	// test for equilibrium from approvals
-	if IsEquilibrium(approvals) {
-
-		// get equilibrium time from last approval time
-		equilibriumTime, err := GetLastApprovalTime(approvals)
-		if err != nil {
-			return nil, err
+	for _, v := range tr.TransactionItems {
+		for _, u := range v.Approvals {
+			approvals = append(approvals, u)
 		}
-
-		// set transaction equilibrium time
-		endingTransaction, err = SetEquilibrium(
-			db,
-			approvals[0].TransactionID,
-			equilibriumTime,
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		// change account balances from transaction items
-		ChangeAccountBalances(
-			db,
-			preApprovalTransaction.TransactionItems,
-		)
 	}
 
-	return endingTransaction, nil
+	return approvals
 }
