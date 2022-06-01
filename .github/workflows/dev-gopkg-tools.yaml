@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.x'
+      - name: generate mocks
+        run: go generate
       - name: unit test
         run: go test -race -covermode=atomic -coverprofile=coverage.out
         working-directory: services/gopkg/tools
