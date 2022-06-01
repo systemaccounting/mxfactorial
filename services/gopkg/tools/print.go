@@ -9,8 +9,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-// not adding receivers to
-// services/gopkg/types yet
+// not adding receivers to services/gopkg/types yet
 // so wrapping transactions
 type Printable struct {
 	types.Transaction
