@@ -3,6 +3,9 @@ RELATIVE_PROJECT_ROOT_PATH=../..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 
+install:
+	go install github.com/golang/mock/mockgen@latest
+
 generate:
 	go generate
 

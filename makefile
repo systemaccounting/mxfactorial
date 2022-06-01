@@ -38,6 +38,7 @@ print:
 install:
 	brew install go
 	go install github.com/99designs/gqlgen@latest
+	go install github.com/golang/mock/mockgen@latest
 	brew install node
 	brew install awscli
 	brew install terraform
