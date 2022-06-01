@@ -20,9 +20,10 @@ jobs:
         with:
           go-version: '1.18.x'
       - name: generate mocks
-        run: go generate
+        run: make generate
+        working-directory: services/gopkg/tools
       - name: unit test
-        run: go test -race -covermode=atomic -coverprofile=coverage.out
+        run: make test
         working-directory: services/gopkg/tools
       - name: test for missing and unnecessary dependents in project.json
         run: bash scripts/test-dependents.sh --app-or-pkg-name tools
