@@ -24,8 +24,3 @@ set-pending-tests:
 		--sha $$GITHUB_SHA \
 		--region $$AWS_REGION \
 		--env $$ENVIRONMENT
-
-set-codecov-flags:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/set-codecov-flags.sh \
-		--app-or-pkg-name $(PKG_NAME)
