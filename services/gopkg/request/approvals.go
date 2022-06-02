@@ -20,7 +20,8 @@ func TestPendingRoleApproval(
 
 	for _, v := range approvals {
 		if *v.AccountName == *accountName &&
-			*v.AccountRole == accountRole.String() {
+			*v.AccountRole == accountRole.String() &&
+			v.ApprovalTime == nil {
 			approvalTimeStampsPending++
 		}
 	}
