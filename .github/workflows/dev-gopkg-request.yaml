@@ -41,7 +41,7 @@ jobs:
     needs: request
     with:
       environment: dev
-      directory: services/gopkg/request-create
+      directory: services/request-create
       aws_region: us-east-1
       app_or_pkg_name: request-create
     secrets:
@@ -52,7 +52,7 @@ jobs:
     needs: request
     with:
       environment: dev
-      directory: services/gopkg/request-approve
+      directory: services/request-approve
       aws_region: us-east-1
       app_or_pkg_name: request-approve
     secrets:
@@ -63,7 +63,7 @@ jobs:
     needs: request
     with:
       environment: dev
-      directory: services/gopkg/balance-by-account
+      directory: services/balance-by-account
       aws_region: us-east-1
       app_or_pkg_name: balance-by-account
     secrets:
