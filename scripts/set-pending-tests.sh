@@ -61,7 +61,7 @@ elif [[ "$IS_PKG_IN_PROJECT_JSON" == 'true' ]]; then
 	# get list of CHANGED_SVCS
 	source ./scripts/list-changed-svcs.sh --pkg-name "$APP_OR_PKG_NAME"
 	# add CHANGED_SVCS to CHANGED_DIRS
-	CHANGED_DIRS+=("${CHANGED_SVCS[@]}")=
+	CHANGED_DIRS+=("${CHANGED_SVCS[@]}")
 else
 	# error when script arg not found in project.json apps or pkgs
 	error_exit "error: \"$APP_OR_PKG_NAME\" is NOT in $PROJECT_CONFIG. exiting."
