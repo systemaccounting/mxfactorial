@@ -8,8 +8,8 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-// TestPendingRoleApproval errors when 0 pending
-// approvals found for current debitor or creditor account
+// TestPendingRoleApproval errors when 0 pending approvals
+// found for current debitor or creditor account
 func TestPendingRoleApproval(
 	accountName *string,
 	accountRole types.Role,
