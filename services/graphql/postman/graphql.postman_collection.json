@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "67250d0b-3e58-4d57-98a5-6cf1f130f408",
+		"_postman_id": "4deeb374-0fb5-4dfe-af43-c92c05375fb1",
 		"name": "graphql",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -245,7 +245,7 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query getRequestByID($transaction_id: String!, $auth_account: String!) {\n  requestByID(transaction_id: $transaction_id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
-						"variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"transaction_id\": \"4\"\n}"
+						"variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"transaction_id\": \"1\"\n}"
 					}
 				},
 				"url": {
@@ -315,7 +315,7 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query getTransactionsByAccount($account_name: String!, $auth_account: String!) {\n  transactionsByAccount(account_name: $account_name, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n\tsum_value\n\tequilibrium_time\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
-						"variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"account_name\": \"JacobWebb\"\n}"
+						"variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"account_name\": \"JoeCarter\"\n}"
 					}
 				},
 				"url": {
@@ -350,7 +350,7 @@
 					"mode": "graphql",
 					"graphql": {
 						"query": "query getTransactionByID($transaction_id: String!, $auth_account: String!) {\n  transactionByID(transaction_id: $transaction_id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
-						"variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"transaction_id\": \"3\"\n}"
+						"variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"transaction_id\": \"2\"\n}"
 					}
 				},
 				"url": {
