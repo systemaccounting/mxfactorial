@@ -19,12 +19,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.18.x'
-      - name: install deps
-        run: make install
-        working-directory: services/gopkg/request
-      - name: generate mocks
-        run: make generate
-        working-directory: services/gopkg/request
       - name: unit test
         run: make test
         working-directory: services/gopkg/request
