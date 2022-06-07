@@ -17,7 +17,7 @@ module "graphql_apigwv2_dns" {
   source                = "../../apigwv2-dns/v001"
   apigwv2_custom_domain = var.custom_domain_name == "" ? null : (var.env == "prod" ? "api.${var.custom_domain_name}" : "${var.env}-api.${var.custom_domain_name}")
   apigwv2_id            = module.graphql_apigwv2.api_id
-  apigwv2_stage_id      = module.graphql_apigwv2.stage_id
+  apigwv2_stage_id      = "$default"
   acm_cert_arn          = var.custom_domain_name == "" ? null : var.api_cert_arn
   route53_zone_id       = var.custom_domain_name == "" ? null : join("", data.aws_route53_zone.default.*.zone_id)
 }
