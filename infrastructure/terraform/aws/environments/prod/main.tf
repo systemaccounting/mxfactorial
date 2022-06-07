@@ -31,8 +31,9 @@ locals {
   APP              = "mxfactorial"
   ENV              = "prod"
   APP_ENV          = "${local.APP}-${local.ENV}"
-  ORIGIN_PREFIX    = jsondecode(file("${path.module}/../../../../../project.json")).client_origin_bucket_name_prefix
-  ARTIFACTS_PREFIX = jsondecode(file("${path.module}/../../../../../project.json")).artifacts_bucket_name_prefix
+  PROJECT_JSON     = "../../../../../project.json"
+  ORIGIN_PREFIX    = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).client_origin_bucket_name_prefix
+  ARTIFACTS_PREFIX = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).artifacts_bucket_name_prefix
   CUSTOM_DOMAIN    = "mxfactorial.io"
 }
 
@@ -56,7 +57,7 @@ module "prod" {
 
   ############### rds ###############
 
-  rds_db_version                  = "13.3"
+  rds_db_version                  = "13.4"
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
