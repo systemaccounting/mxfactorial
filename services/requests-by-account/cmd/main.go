@@ -13,31 +13,11 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jackc/pgx/v4"
 
+	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
-)
-
-// 1. from subquery, get transaction items pending approval
-// 			by account, and limit the subquery return with
-// 			configured RETURN_RECORD_LIMIT
-// 2. query all transaction items by distinct transaction_id
-// 3. return all transaction items in desc order
-const (
-	sql string = `
-	SELECT * FROM transaction_item
-	WHERE transaction_id IN (
-		SELECT DISTINCT transaction_id
-		FROM transaction_item
-		WHERE (debitor = $1 OR creditor = $1)
-		AND debitor_approval_time IS NULL
-		OR creditor_approval_time IS NULL
-		ORDER BY transaction_id
-		DESC
-		LIMIT $2
-	) ORDER BY transaction_id
-	DESC;`
 )
 
 var (
@@ -72,26 +52,18 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
-	// query
-	rows, err := db.Query(
-		ctx,
-		sql,
-		e.AccountName,
-		recordLimit,
-	)
+	// create sql
+	requestsSQL, requestsArgs := sqlb.SelectLastNRequestsByAccount(e.AuthAccount, recordLimit)
+
+	// get requests
+	requests, err := data.GetTransactionsWithTrItemsAndApprovalsByID(db, requestsSQL, requestsArgs)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
-	// unmarshal query response
-	trItems, err := lpg.UnmarshalTrItems(rows)
-	if err != nil {
-		log.Print("UnmarshalTrItems ", err)
-		return "", err
-	}
-
-	if len(trItems) == 0 {
+	// test for empty request list
+	if len(requests) == 0 {
 		log.Println("0 transaction items found")
 
 		// create empty response to client
@@ -101,41 +73,8 @@ func lambdaFn(
 		return tools.MarshalIntraTransactions(&intraTrs)
 	}
 
-	var trIDs []interface{}
-	for _, v := range trItems {
-		if tools.IsCustomIDUnique(*v.TransactionID, trIDs) {
-			trIDs = append(trIDs, *v.TransactionID)
-		}
-	}
-
-	// create sql to get current transaction
-	trsSQL, trsArgs := sqlb.SelectTransactionsByIDsSQL(
-		trIDs,
-	)
-
-	// get transactions
-	trRows, err := db.Query(context.Background(), trsSQL, trsArgs...)
-	if err != nil {
-		return "", err
-	}
-
-	// unmarshal transactions
-	trs, err := lpg.UnmarshalTransactions(trRows)
-	if err != nil {
-		return "", err
-	}
-
-	// add transaction items to each transaction
-	for _, v := range trs {
-		for _, w := range trItems {
-			if *w.TransactionID == *v.ID {
-				v.TransactionItems = append(v.TransactionItems, w)
-			}
-		}
-	}
-
 	// create for response to client
-	intraTrs := tools.CreateIntraTransactions(e.AuthAccount, trs)
+	intraTrs := tools.CreateIntraTransactions(e.AuthAccount, requests)
 
 	// send string or error response to client
 	return tools.MarshalIntraTransactions(&intraTrs)
