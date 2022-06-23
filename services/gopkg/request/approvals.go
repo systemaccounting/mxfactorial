@@ -27,8 +27,7 @@ func TestPendingRoleApproval(
 	}
 
 	if approvalTimeStampsPending == 0 {
-		var err = errors.New("0 timestamps pending for approver. exiting")
-		return err
+		return errors.New("0 timestamps pending for approver. skipping approval")
 	}
 
 	return nil
