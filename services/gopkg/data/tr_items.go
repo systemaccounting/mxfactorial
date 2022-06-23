@@ -38,3 +38,31 @@ func GetTrItemsByTransactionID(db lpg.SQLDB, ID *types.ID) ([]*types.Transaction
 
 	return trItems, nil
 }
+
+func GetTrItemsByTrIDs(db lpg.SQLDB, IDs []interface{}) ([]*types.TransactionItem, error) {
+
+	// create sql to get current transaction items
+	selectSQL, selectARGs := sqlb.SelectTrItemsByTrIDsSQL(IDs)
+
+	// get transaction items
+	trItemsRows, err := db.Query(
+		context.Background(),
+		selectSQL,
+		selectARGs...,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("get transaction items query error: %v", err)
+	}
+
+	// unmarshal transaction items
+	trItems, err := lpg.UnmarshalTrItems(
+		trItemsRows,
+	)
+
+	if err != nil {
+		log.Print(err)
+		return nil, fmt.Errorf("get transaction items unmarshal error: %v", err)
+	}
+
+	return trItems, nil
+}
