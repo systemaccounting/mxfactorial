@@ -64,3 +64,13 @@ func SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
 		)
 	return sb.Build()
 }
+
+func SelectTrItemsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select("*")
+	sb.From("transaction_item").
+		Where(
+			sb.In("transaction_id", trIDs...),
+		)
+	return sb.Build()
+}
