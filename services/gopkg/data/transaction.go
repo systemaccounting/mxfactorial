@@ -109,3 +109,50 @@ func AttachApprovalsToTransactionItems(
 		}
 	}
 }
+
+func AttachTransactionItemsToTransaction(
+	trItems []*types.TransactionItem,
+	tr *types.Transaction,
+) {
+	for _, ti := range trItems {
+		if *ti.TransactionID == *tr.ID {
+			tr.TransactionItems = append(tr.TransactionItems, ti)
+		}
+	}
+}
+
+func GetTransactionsWithTrItemsAndApprovalsByID(db lpg.SQLDB, selSQL string, selArgs []interface{}) ([]*types.Transaction, error) {
+
+	rows, err := db.Query(context.TODO(), selSQL, selArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	transactions, err := lpg.UnmarshalTransactions(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	reqIDs := make([]interface{}, 0)
+	for _, v := range transactions {
+		reqIDs = append(reqIDs, v.ID)
+	}
+
+	trItems, err := GetTrItemsByTrIDs(db, reqIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	apprvs, err := GetApprovalsByTrIDs(db, reqIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	AttachApprovalsToTransactionItems(apprvs, trItems)
+
+	for _, v := range transactions {
+		AttachTransactionItemsToTransaction(trItems, v)
+	}
+
+	return transactions, nil
+}
