@@ -7,8 +7,13 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
+const (
+	transWAppr  string = "../testdata/transWAppr.json"
+	transWTimes        = "../testdata/transWTimes.json"
+)
+
 func TestTestPendingRoleApproval(t *testing.T) {
-	tr := testdata.GetTestTransaction("../testdata/transWAppr.json")
+	tr := testdata.GetTestTransaction(transWAppr)
 	testapprovals := tr.TransactionItems[3].Approvals
 	testaccount := "JoeCarter"
 	testrole := types.Role(0)
@@ -21,13 +26,13 @@ func TestTestPendingRoleApproval(t *testing.T) {
 }
 
 func TestTestPendingRoleApprovalErr(t *testing.T) {
-	tr := testdata.GetTestTransaction("../testdata/transWAppr.json")
+	tr := testdata.GetTestTransaction(transWAppr)
 	testapprovals := tr.TransactionItems[0].Approvals
 	testaccount := "BenRoss"
 	testrole := types.Role(1)
 
 	got := TestPendingRoleApproval(&testaccount, testrole, testapprovals)
-	want := "0 timestamps pending for approver. exiting"
+	want := "0 timestamps pending for approver. skipping approval"
 
 	if got != nil {
 		if got.Error() != want {
