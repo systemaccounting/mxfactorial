@@ -80,3 +80,24 @@ func SelectApprovalsByTrIDSQL(trID *types.ID) (string, []interface{}) {
 		)
 	return sb.Build()
 }
+
+func SelectApprovalsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select(
+		"id",
+		"rule_instance_id",
+		"transaction_id",
+		"transaction_item_id",
+		"account_name",
+		"account_role",
+		"device_id",
+		"device_latlng",
+		"approval_time",
+		"expiration_time",
+	)
+	sb.From("approval").
+		Where(
+			sb.In("transaction_id", trIDs...),
+		)
+	return sb.Build()
+}
