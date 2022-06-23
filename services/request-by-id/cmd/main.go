@@ -12,41 +12,13 @@ import (
 
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/jackc/pgx/v4"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 // todo: integration test
-// 1. get transaction items by transaction id
-// 2. count transaction items where account included
-// 3. count unapproved transactions items
-// 4. return all transactions items IF:
-//			i) the requesting account is present
-//			ii) at least 1 unapproved item
-const sql string = `
-WITH transaction_id_items AS (
-	SELECT *
-	FROM transaction_item
-	WHERE transaction_item.transaction_id = $1
-),
-included AS(
-	SELECT count(id)
-	FROM transaction_id_items
-	WHERE creditor = $2
-	OR debitor = $2
-),
-unapproved_count AS (
-	SELECT count(id)
-	FROM transaction_id_items
-	WHERE debitor_approval_time IS NULL
-	OR creditor_approval_time IS NULL
-)
-SELECT *
-FROM transaction_id_items
-WHERE (SELECT * FROM included) > 0
-AND (SELECT * FROM unapproved_count) > 0;`
 
 var pgConn string = fmt.Sprintf(
 	"host=%s port=%s user=%s password=%s dbname=%s",
@@ -78,47 +50,49 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
-	// query
-	rows, err := db.Query(
-		ctx,
-		sql,
-		e.ID,
-		e.AuthAccount,
-	)
+	// get approvals
+	apprvs, err := data.GetApprovalsByTransactionID(db, e.ID)
 	if err != nil {
 		log.Printf("query error: %v", err)
 		return "", err
 	}
 
-	// unmarshal query response
-	trItems, err := lpg.UnmarshalTrItems(rows)
+	accountOccurrence := 0
+	pendingApprovalCount := 0
+	for _, v := range apprvs {
+		// count account occurrence in approvals
+		if *v.AccountName == e.AuthAccount {
+			accountOccurrence++
+		}
+		// also, count pending approvals
+		if v.ApprovalTime == nil {
+			pendingApprovalCount++
+		}
+	}
+
+	// return empty response if account or
+	// pending approvals not found in approvals
+	if accountOccurrence == 0 || pendingApprovalCount == 0 {
+		return tools.EmptyMarshaledIntraTransaction(e.AuthAccount)
+	}
+
+	// get transaction items
+	trItems, err := data.GetTrItemsByTransactionID(db, e.ID)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
-	// cte not retuning pgx.ErrNoRows when empty so test here
-	if len(trItems) == 0 {
-		log.Print("0 transaction items found. exiting")
-		return "", errors.New("request not found")
-	}
-
-	// create sql to get current transaction
-	trSQL, trArgs := sqlb.SelectTransactionByIDSQL(
-		e.ID,
-	)
-
 	// get transaction
-	trRow := db.QueryRow(context.Background(), trSQL, trArgs...)
-
-	// unmarshal transaction
-	tr, err := lpg.UnmarshalTransaction(trRow)
+	tr, err := data.GetTransactionByID(db, e.ID)
 	if err != nil {
 		return "", err
 	}
 
 	// add transaction items to returning transaction
 	tr.TransactionItems = trItems
+
+	data.AttachApprovalsToTransactionItems(apprvs, tr.TransactionItems)
 
 	// create transaction for response to client
 	intraTr := tools.CreateIntraTransaction(e.AuthAccount, tr)
