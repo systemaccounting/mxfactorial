@@ -14,6 +14,22 @@ const (
 	trItemAliasPrefix   = "i"
 	approvalAliasPrefix = "a"
 	trAlias             = "insert_transaction"
+	requestsSQL         = `WITH requests AS (
+		SELECT DISTINCT(transaction_id)
+		FROM approval
+		WHERE approval_time IS NULL
+		AND transaction_id IN (
+			SELECT DISTINCT(transaction_id)
+			FROM approval
+			WHERE account_name = $1
+			ORDER BY transaction_id
+			DESC
+		) ORDER BY transaction_id
+		DESC
+		LIMIT $2
+	)
+	SELECT * FROM transaction
+	WHERE id IN (SELECT transaction_id FROM requests);`
 )
 
 func InsertTransactionSQL(
@@ -167,4 +183,8 @@ func CreateTransactionRequestSQL(tr *types.Transaction) (string, []interface{}, 
 	insSQL, insArgs := sqlb.Build(with, builders...).BuildWithFlavor(sqlb.PostgreSQL)
 
 	return insSQL, insArgs, nil
+}
+
+func SelectLastNRequestsByAccount(accountName string, recordLimit string) (string, []interface{}) {
+	return requestsSQL, []interface{}{accountName, recordLimit}
 }
