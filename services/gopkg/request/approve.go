@@ -3,6 +3,7 @@ package request
 import (
 	"log"
 
+	"github.com/jackc/pgtype"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/notify"
@@ -38,25 +39,28 @@ func Approve(
 
 	beginningApprovals := getApprovalsFromTransaction(preApprovalTransaction)
 
-	// fail approval if timestamps not pending
+	var equilibriumTime pgtype.Timestamptz
+
+	// test for pending approvals to reduce db writes
 	err = TestPendingRoleApproval(
 		authAccount,
 		accountRole,
 		beginningApprovals,
 	)
-	if err != nil {
-		return "", err
-	}
-
-	// add requester timestamps to approvals
-	eqTime, err := data.AddApprovalTimesByAccountAndRole(
-		db,
-		authAccount,
-		accountRole,
-		preApprovalTransaction.ID,
-	)
-	if err != nil {
-		return "", err
+	if err == nil {
+		// add requester timestamps to approvals
+		equilibriumTime, err = data.AddApprovalTimesByAccountAndRole(
+			db,
+			authAccount,
+			accountRole,
+			preApprovalTransaction.ID,
+		)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		// avoid repeating approval when added by rule
+		log.Println(err)
 	}
 
 	postApprovalTransaction, err := data.GetTransactionWithTrItemsAndApprovalsByID(
@@ -70,7 +74,6 @@ func Approve(
 	endingApprovals := getApprovalsFromTransaction(postApprovalTransaction)
 
 	// test for equilibrium
-	equilibriumTime := *eqTime
 	if !equilibriumTime.Time.IsZero() {
 		// change account balances from transaction items
 		ChangeAccountBalances(
