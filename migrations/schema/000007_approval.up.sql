@@ -47,6 +47,8 @@ CREATE TABLE approval (
     )
 );
 
+-- supports approval table scans from queries used by
+-- requests-by-account and transactions-by-account
 CREATE INDEX idx_acct_name_trans_id ON approval (account_name, transaction_id);
 
 -- 1. adds approval timestamps to all approvals for a
