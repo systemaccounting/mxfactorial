@@ -52,8 +52,8 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
-	// create sql
-	requestsSQL, requestsArgs := sqlb.SelectLastNRequestsByAccount(e.AuthAccount, recordLimit)
+	// create requests sql
+	requestsSQL, requestsArgs := sqlb.SelectLastNReqsOrTransByAccount(e.AuthAccount, false, recordLimit)
 
 	// get requests
 	requests, err := data.GetTransactionsWithTrItemsAndApprovalsByID(db, requestsSQL, requestsArgs)

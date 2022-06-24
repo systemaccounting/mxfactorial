@@ -14,22 +14,6 @@ const (
 	trItemAliasPrefix   = "i"
 	approvalAliasPrefix = "a"
 	trAlias             = "insert_transaction"
-	requestsSQL         = `WITH requests AS (
-		SELECT DISTINCT(transaction_id)
-		FROM approval
-		WHERE approval_time IS NULL
-		AND transaction_id IN (
-			SELECT DISTINCT(transaction_id)
-			FROM approval
-			WHERE account_name = $1
-			ORDER BY transaction_id
-			DESC
-		) ORDER BY transaction_id
-		DESC
-		LIMIT $2
-	)
-	SELECT * FROM transaction
-	WHERE id IN (SELECT transaction_id FROM requests);`
 )
 
 func InsertTransactionSQL(
@@ -185,6 +169,38 @@ func CreateTransactionRequestSQL(tr *types.Transaction) (string, []interface{}, 
 	return insSQL, insArgs, nil
 }
 
-func SelectLastNRequestsByAccount(accountName string, recordLimit string) (string, []interface{}) {
-	return requestsSQL, []interface{}{accountName, recordLimit}
+func SelectLastNReqsOrTransByAccount(
+	accountName string,
+	isAllApproved bool,
+	recordLimit string) (string, []interface{}) {
+
+	// postgres boolean as $2 argument placeholder throws
+	// ERROR: syntax error at or near "$2" (SQLSTATE 42601)
+	// temp workaround:
+	isTransaction := "TRUE"
+	if !isAllApproved {
+		isTransaction = "FALSE"
+	}
+
+	return fmt.Sprintf(`WITH transactions AS (
+		SELECT transaction_id, every(approval_time IS NOT NULL) AS all_approved
+		FROM approval
+		WHERE transaction_id IN (
+			SELECT DISTINCT(transaction_id)
+			FROM approval
+			WHERE account_name = $1
+			ORDER BY transaction_id
+			DESC
+		)
+		GROUP BY transaction_id
+		ORDER BY transaction_id
+		DESC
+	)
+	SELECT * FROM transaction
+	WHERE id IN (
+		SELECT transaction_id
+		FROM transactions
+		WHERE all_approved IS %s
+		LIMIT $2
+	);`, isTransaction), []interface{}{accountName, recordLimit}
 }
