@@ -52,7 +52,7 @@ func lambdaFn(
 	}
 	defer db.Close(context.Background())
 
-	// create requests sql
+	// create requests sql with false boolean value as arg #2
 	requestsSQL, requestsArgs := sqlb.SelectLastNReqsOrTransByAccount(e.AuthAccount, false, recordLimit)
 
 	// get requests
