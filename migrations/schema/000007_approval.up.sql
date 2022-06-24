@@ -47,6 +47,8 @@ CREATE TABLE approval (
     )
 );
 
+CREATE INDEX idx_acct_name_trans_id ON approval (account_name, transaction_id);
+
 -- 1. adds approval timestamps to all approvals for a
 --    transaction where account appears as debitor or creditor
 --    for example, JacobWebb the debitor approves all
