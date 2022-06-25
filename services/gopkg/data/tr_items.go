@@ -39,59 +39,29 @@ func GetTrItemsByTransactionID(db lpg.SQLDB, ID *types.ID) ([]*types.Transaction
 	return trItems, nil
 }
 
-func UpdateTrItemApprovalTimesByRole(
-	db lpg.SQLDB,
-	accountRole types.Role,
-	approvedTrItems map[types.ID]string,
-) error {
+func GetTrItemsByTrIDs(db lpg.SQLDB, IDs []interface{}) ([]*types.TransactionItem, error) {
 
-	for trItemID, apprTime := range approvedTrItems {
-		updTrItemSQL, updTrItemArgs := sqlb.UpdateTrItemRoleApprovalSQL(
-			accountRole,
-			&trItemID,
-			&apprTime,
-		)
+	// create sql to get current transaction items
+	selectSQL, selectARGs := sqlb.SelectTrItemsByTrIDsSQL(IDs)
 
-		_, err := db.Exec(
-			context.Background(),
-			updTrItemSQL,
-			updTrItemArgs...,
-		)
-		if err != nil {
-			return fmt.Errorf("update transation item error: %v", err)
-		}
-	}
-
-	return nil
-}
-
-func CreateTransactionItems(
-	db lpg.SQLDB,
-	trID *types.ID,
-	trItems []*types.TransactionItem) ([]*types.TransactionItem, error) {
-
-	// create insert transaction item sql
-	insTrItemSQL, insTrItemArgs := sqlb.InsertTrItemsSQL(
-		trID,
-		trItems,
-	)
-
-	// insert transaction items returning ids
-	trItemRows, err := db.Query(
+	// get transaction items
+	trItemsRows, err := db.Query(
 		context.Background(),
-		insTrItemSQL,
-		insTrItemArgs...,
+		selectSQL,
+		selectARGs...,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("create transaction items error: %v", err)
+		return nil, fmt.Errorf("get transaction items query error: %v", err)
 	}
 
 	// unmarshal transaction items
-	// returned from transaction item insert
-	trItems, err = lpg.UnmarshalTrItems(trItemRows)
+	trItems, err := lpg.UnmarshalTrItems(
+		trItemsRows,
+	)
+
 	if err != nil {
-		log.Printf("unmarshal transaction items error: %v", err)
-		return nil, err
+		log.Print(err)
+		return nil, fmt.Errorf("get transaction items unmarshal error: %v", err)
 	}
 
 	return trItems, nil

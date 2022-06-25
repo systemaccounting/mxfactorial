@@ -15,6 +15,12 @@ func CreateIntraTransaction(
 	}
 }
 
+func EmptyMarshaledIntraTransaction(authAccount string) (string, error) {
+	emptyTr := &types.Transaction{}
+	emptyIntraTr := CreateIntraTransaction(authAccount, emptyTr)
+	return MarshalIntraTransaction(&emptyIntraTr)
+}
+
 // CreateIntraTransaction ...
 func CreateIntraTransactions(
 	authAccount string,

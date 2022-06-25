@@ -249,3 +249,21 @@ adds binaries and shell scripts to `*.zip` files for deployment in app directori
 ##### `test-dependents.sh`
 
 tests for missing and unnecessary dependents in project.json and fails github workflows with message
+
+##### `insert-transactions.sh`
+
+adds a mix of requests and transactions in docker postgres (requires `cd migrations && make run`)
+
+1. `cd migrations && make insert`
+1. drops and up migrates postgres in docker
+1. inserts requests from `services/gopkg/testdata/requests.json` using `services/request-create`
+1. converts every other request into a transaction using `services/request-approve`
+
+
+##### `dump-db.sh`
+
+dumps postgres db to path passed as parameter, e.g. `bash scripts/dump-db.sh --path migrations/dumps/testseed.sql`
+
+##### `restore-db.sh`
+
+restores postgres db from path passed as parameter

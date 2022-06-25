@@ -372,5 +372,13 @@
             ]
         }
     },
-    "params": []
+    "params": [],
+    "postgres": {
+        "pgdatabase": "mxfactorial",
+        "pghost": "localhost",
+        "pgport": 5432,
+        "pguser": "test",
+        "pgpassword": "test",
+        "testseed_dump_path": "./migrations/dumps/testseed.sql"
+    }
 }

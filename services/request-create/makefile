@@ -26,6 +26,7 @@ ifndef ENV
 endif
 
 run:
+	$(MAKE) -C ../../migrations resetdocker DB=test
 	@$(MAKE) -s test-env-file
 	@$(DOCKER_ENV_VARS) \
 		TEST_EVENT=$(TEST_EVENT) \

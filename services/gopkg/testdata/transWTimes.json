@@ -1,0 +1,327 @@
+{
+	"auth_account": "SarahBell",
+	"transaction": {
+		"id": "12",
+		"author": "GroceryCo",
+		"author_role": "creditor",
+		"equilibrium_time": "2022-06-24T03:09:32.772142Z",
+		"sum_value": "22.89",
+		"transaction_items": [
+			{
+				"id": "67",
+				"transaction_id": "12",
+				"item_id": "ground coffee",
+				"price": "5",
+				"quantity": "1",
+				"debitor_first": false,
+				"rule_instance_id": null,
+				"rule_exec_ids": [
+					"RPY4ycoT"
+				],
+				"unit_of_measurement": null,
+				"units_measured": null,
+				"debitor": "SarahBell",
+				"creditor": "GroceryCo",
+				"debitor_profile_id": "5",
+				"creditor_profile_id": "29",
+				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"approvals": [
+					{
+						"id": "256",
+						"rule_instance_id": "8",
+						"transaction_id": "12",
+						"transaction_item_id": "67",
+						"account_name": "IgorPetrov",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "257",
+						"rule_instance_id": "7",
+						"transaction_id": "12",
+						"transaction_item_id": "67",
+						"account_name": "MiriamLevy",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "258",
+						"transaction_id": "12",
+						"transaction_item_id": "67",
+						"account_name": "SarahBell",
+						"account_role": "debitor",
+						"approval_time": "2022-06-24T03:09:32.772142Z"
+					}
+				]
+			},
+			{
+				"id": "68",
+				"transaction_id": "12",
+				"item_id": "pasta",
+				"price": "2.5",
+				"quantity": "4",
+				"debitor_first": false,
+				"rule_instance_id": null,
+				"rule_exec_ids": [
+					"hoPzSXuj"
+				],
+				"unit_of_measurement": null,
+				"units_measured": null,
+				"debitor": "SarahBell",
+				"creditor": "GroceryCo",
+				"debitor_profile_id": "5",
+				"creditor_profile_id": "29",
+				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"approvals": [
+					{
+						"id": "259",
+						"rule_instance_id": "8",
+						"transaction_id": "12",
+						"transaction_item_id": "68",
+						"account_name": "IgorPetrov",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "260",
+						"rule_instance_id": "7",
+						"transaction_id": "12",
+						"transaction_item_id": "68",
+						"account_name": "MiriamLevy",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "261",
+						"transaction_id": "12",
+						"transaction_item_id": "68",
+						"account_name": "SarahBell",
+						"account_role": "debitor",
+						"approval_time": "2022-06-24T03:09:32.772142Z"
+					}
+				]
+			},
+			{
+				"id": "69",
+				"transaction_id": "12",
+				"item_id": "paper towels",
+				"price": "3",
+				"quantity": "2",
+				"debitor_first": false,
+				"rule_instance_id": null,
+				"rule_exec_ids": [
+					"dhlp9OBs"
+				],
+				"unit_of_measurement": null,
+				"units_measured": null,
+				"debitor": "SarahBell",
+				"creditor": "GroceryCo",
+				"debitor_profile_id": "5",
+				"creditor_profile_id": "29",
+				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"approvals": [
+					{
+						"id": "262",
+						"rule_instance_id": "8",
+						"transaction_id": "12",
+						"transaction_item_id": "69",
+						"account_name": "IgorPetrov",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "263",
+						"rule_instance_id": "7",
+						"transaction_id": "12",
+						"transaction_item_id": "69",
+						"account_name": "MiriamLevy",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "264",
+						"transaction_id": "12",
+						"transaction_item_id": "69",
+						"account_name": "SarahBell",
+						"account_role": "debitor",
+						"approval_time": "2022-06-24T03:09:32.772142Z"
+					}
+				]
+			},
+			{
+				"id": "70",
+				"transaction_id": "12",
+				"item_id": "9% state sales tax",
+				"price": "0.45",
+				"quantity": "1",
+				"debitor_first": false,
+				"rule_instance_id": "1",
+				"rule_exec_ids": [
+					"RPY4ycoT"
+				],
+				"unit_of_measurement": null,
+				"units_measured": null,
+				"debitor": "SarahBell",
+				"creditor": "StateOfCalifornia",
+				"debitor_profile_id": "5",
+				"creditor_profile_id": "27",
+				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"approvals": [
+					{
+						"id": "265",
+						"rule_instance_id": "4",
+						"transaction_id": "12",
+						"transaction_item_id": "70",
+						"account_name": "BenRoss",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "266",
+						"rule_instance_id": "5",
+						"transaction_id": "12",
+						"transaction_item_id": "70",
+						"account_name": "DanLee",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "267",
+						"rule_instance_id": "7",
+						"transaction_id": "12",
+						"transaction_item_id": "70",
+						"account_name": "MiriamLevy",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "268",
+						"transaction_id": "12",
+						"transaction_item_id": "70",
+						"account_name": "SarahBell",
+						"account_role": "debitor",
+						"approval_time": "2022-06-24T03:09:32.772142Z"
+					}
+				]
+			},
+			{
+				"id": "71",
+				"transaction_id": "12",
+				"item_id": "9% state sales tax",
+				"price": "0.225",
+				"quantity": "4",
+				"debitor_first": false,
+				"rule_instance_id": "1",
+				"rule_exec_ids": [
+					"hoPzSXuj"
+				],
+				"unit_of_measurement": null,
+				"units_measured": null,
+				"debitor": "SarahBell",
+				"creditor": "StateOfCalifornia",
+				"debitor_profile_id": "5",
+				"creditor_profile_id": "27",
+				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"approvals": [
+					{
+						"id": "269",
+						"rule_instance_id": "4",
+						"transaction_id": "12",
+						"transaction_item_id": "71",
+						"account_name": "BenRoss",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "270",
+						"rule_instance_id": "5",
+						"transaction_id": "12",
+						"transaction_item_id": "71",
+						"account_name": "DanLee",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "271",
+						"rule_instance_id": "7",
+						"transaction_id": "12",
+						"transaction_item_id": "71",
+						"account_name": "MiriamLevy",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "272",
+						"transaction_id": "12",
+						"transaction_item_id": "71",
+						"account_name": "SarahBell",
+						"account_role": "debitor",
+						"approval_time": "2022-06-24T03:09:32.772142Z"
+					}
+				]
+			},
+			{
+				"id": "72",
+				"transaction_id": "12",
+				"item_id": "9% state sales tax",
+				"price": "0.27",
+				"quantity": "2",
+				"debitor_first": false,
+				"rule_instance_id": "1",
+				"rule_exec_ids": [
+					"dhlp9OBs"
+				],
+				"unit_of_measurement": null,
+				"units_measured": null,
+				"debitor": "SarahBell",
+				"creditor": "StateOfCalifornia",
+				"debitor_profile_id": "5",
+				"creditor_profile_id": "27",
+				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"approvals": [
+					{
+						"id": "273",
+						"rule_instance_id": "4",
+						"transaction_id": "12",
+						"transaction_item_id": "72",
+						"account_name": "BenRoss",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "274",
+						"rule_instance_id": "5",
+						"transaction_id": "12",
+						"transaction_item_id": "72",
+						"account_name": "DanLee",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "275",
+						"rule_instance_id": "7",
+						"transaction_id": "12",
+						"transaction_item_id": "72",
+						"account_name": "MiriamLevy",
+						"account_role": "creditor",
+						"approval_time": "2022-06-24T03:09:31.587545Z"
+					},
+					{
+						"id": "276",
+						"transaction_id": "12",
+						"transaction_item_id": "72",
+						"account_name": "SarahBell",
+						"account_role": "debitor",
+						"approval_time": "2022-06-24T03:09:32.772142Z"
+					}
+				]
+			}
+		]
+	}
+}

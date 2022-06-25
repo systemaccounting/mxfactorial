@@ -3,8 +3,6 @@ package data
 import (
 	"context"
 	"fmt"
-	"log"
-	"time"
 
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
@@ -14,9 +12,7 @@ import (
 func GetTransactionByID(db lpg.SQLDB, ID *types.ID) (*types.Transaction, error) {
 
 	// create sql to get current transaction
-	transactionSQL, transactionArgs := sqlb.SelectTransactionByIDSQL(
-		ID,
-	)
+	transactionSQL, transactionArgs := sqlb.SelectTransactionByIDSQL(ID)
 
 	// get transaction
 	transactionRow := db.QueryRow(
@@ -26,9 +22,7 @@ func GetTransactionByID(db lpg.SQLDB, ID *types.ID) (*types.Transaction, error) 
 	)
 
 	// unmarshal transaction
-	transaction, err := lpg.UnmarshalTransaction(
-		transactionRow,
-	)
+	transaction, err := lpg.UnmarshalTransaction(transactionRow)
 	if err != nil {
 		return nil, fmt.Errorf("get transaction unmarshal error: %v", err)
 	}
@@ -36,64 +30,129 @@ func GetTransactionByID(db lpg.SQLDB, ID *types.ID) (*types.Transaction, error) 
 	return transaction, nil
 }
 
-func UpdateTransactionEquilibriumByID(
-	db lpg.SQLDB,
-	equilibriumTime time.Time,
-	ID *types.ID,
-) (*types.Transaction, error) {
-	// create update transaction sql
-	updTrByIDSQL, updTrByIDArgs := sqlb.UpdateTransactionByIDSQL(
-		ID,
-		equilibriumTime.Format("2006-01-02T15:04:05.000000Z"),
-	)
+func InsertTransactionTx(db lpg.SQLDB, trSQL string, args []interface{}) (*types.ID, error) {
 
-	// update transaction with equilibrium values
-	updTrRow := db.QueryRow(
-		context.Background(),
-		updTrByIDSQL,
-		updTrByIDArgs...,
-	)
-
-	// unmarshal transaction with equilibrium values
-	updTr, err := lpg.UnmarshalTransaction(updTrRow)
+	dbtx, err := db.Begin(context.TODO())
 	if err != nil {
-		log.Print(err)
-		return nil, fmt.Errorf("update transaction unmarshal error: %v", err)
+		return nil, fmt.Errorf("begin error: %v", err)
 	}
 
-	return updTr, nil
+	defer dbtx.Rollback(context.TODO())
+
+	row := dbtx.QueryRow(context.TODO(), trSQL, args...)
+
+	var trID types.ID
+	err = row.Scan(&trID)
+	if err != nil {
+		return nil, fmt.Errorf("insert error: %v", err)
+	}
+
+	err = dbtx.Commit(context.TODO())
+	if err != nil {
+		return nil, fmt.Errorf("commit error: %v", err)
+	}
+
+	return &trID, nil
 }
 
-func CreateTransaction(
+func RequestCreate(
 	db lpg.SQLDB,
-	trRuleInstanceID *types.ID,
-	trAuthor *string,
-	trDeviceID *string,
-	trAuthorDeviceLatlng *string,
-	trAuthorRole types.Role,
-	trEquilibriumTime *string,
-	trSumValue *string,
-) (*types.Transaction, error) {
-	// create insert transaction sql
-	insTrSQL, insTrArgs := sqlb.InsertTransactionSQL(
-		trRuleInstanceID,
-		trAuthor,
-		trDeviceID,
-		trAuthorDeviceLatlng,
-		trAuthorRole,
-		trEquilibriumTime,
-		trSumValue,
-	)
+	ruleTestedTransaction *types.Transaction,
+) (*types.ID, error) {
 
-	// insert transaction returning id
-	trRow := db.QueryRow(context.Background(), insTrSQL, insTrArgs...)
-
-	// unmarshal transaction id
-	// returned from transaction insert
-	tr, err := lpg.UnmarshalTransaction(trRow)
+	sql, args, err := sqlb.CreateTransactionRequestSQL(ruleTestedTransaction)
 	if err != nil {
-		return nil, fmt.Errorf("create transaction unmarshal error: %v", err)
+		return nil, err
 	}
 
-	return tr, nil
+	trID, err := InsertTransactionTx(db, sql, args)
+	if err != nil {
+		return nil, err
+	}
+
+	return trID, nil
+}
+
+func GetTransactionWithTrItemsAndApprovalsByID(db lpg.SQLDB, trID *types.ID) (*types.Transaction, error) {
+
+	t, err := GetTransactionByID(db, trID)
+	if err != nil {
+		return nil, fmt.Errorf("GetTransactionByID error: %v", err)
+	}
+
+	trItems, err := GetTrItemsByTransactionID(db, trID)
+	if err != nil {
+		return nil, fmt.Errorf("GetTrItemsByTransactionID error: %v", err)
+	}
+
+	apprvs, err := GetApprovalsByTransactionID(db, trID)
+	if err != nil {
+		return nil, fmt.Errorf("GetApprovalsByTransactionID error: %v", err)
+	}
+
+	t.TransactionItems = trItems
+
+	AttachApprovalsToTransactionItems(apprvs, t.TransactionItems)
+
+	return t, nil
+}
+
+func AttachApprovalsToTransactionItems(
+	apprvs []*types.Approval,
+	trItems []*types.TransactionItem,
+) {
+	for _, ti := range trItems {
+		for _, ap := range apprvs {
+			if *ap.TransactionItemID == *ti.ID {
+				ti.Approvals = append(ti.Approvals, ap)
+			}
+		}
+	}
+}
+
+func AttachTransactionItemsToTransaction(
+	trItems []*types.TransactionItem,
+	tr *types.Transaction,
+) {
+	for _, ti := range trItems {
+		if *ti.TransactionID == *tr.ID {
+			tr.TransactionItems = append(tr.TransactionItems, ti)
+		}
+	}
+}
+
+func GetTransactionsWithTrItemsAndApprovalsByID(db lpg.SQLDB, selSQL string, selArgs []interface{}) ([]*types.Transaction, error) {
+
+	rows, err := db.Query(context.TODO(), selSQL, selArgs...)
+	if err != nil {
+		return nil, err
+	}
+
+	transactions, err := lpg.UnmarshalTransactions(rows)
+	if err != nil {
+		return nil, err
+	}
+
+	reqIDs := make([]interface{}, 0)
+	for _, v := range transactions {
+		reqIDs = append(reqIDs, v.ID)
+	}
+
+	trItems, err := GetTrItemsByTrIDs(db, reqIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	apprvs, err := GetApprovalsByTrIDs(db, reqIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	AttachApprovalsToTransactionItems(apprvs, trItems)
+
+	for _, v := range transactions {
+		AttachTransactionItemsToTransaction(trItems, v)
+	}
+
+	return transactions, nil
 }

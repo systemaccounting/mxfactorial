@@ -1,3 +1,4 @@
+RELATIVE_PROJECT_ROOT_PATH=..
 POSTGRESQL_USERNAME=test
 POSTGRESQL_PASSWORD=test
 POSTGRESQL_HOST=localhost
@@ -82,6 +83,10 @@ dropdocker:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
 	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(DOCKER_POSTGRES)" drop -f;)
+
+insert:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/insert-transactions.sh
 
 # looped go migrate targets for rds postgres
 resetrds:

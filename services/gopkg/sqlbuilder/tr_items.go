@@ -5,7 +5,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func InsertTrItemsSQL(trID *types.ID, trItems []*types.TransactionItem) (string, []interface{}) {
+func InsertTrItemSQL(trItem *types.TransactionItem) sqlb.Builder {
 	ib := sqlb.PostgreSQL.NewInsertBuilder()
 	ib.InsertInto("transaction_item")
 	ib.Cols(
@@ -27,31 +27,32 @@ func InsertTrItemsSQL(trID *types.ID, trItems []*types.TransactionItem) (string,
 		"debitor_expiration_time",
 		"creditor_expiration_time",
 	)
-	for _, v := range trItems {
-		ib.Values(
-			trID,
-			v.ItemID,
-			v.Price,
-			v.Quantity,
-			v.DebitorFirst,
-			v.RuleInstanceID,
-			v.RuleExecIDs,
-			v.UnitOfMeasurement,
-			v.UnitsMeasured,
-			v.Debitor,
-			v.Creditor,
-			v.DebitorProfileID,
-			v.CreditorProfileID,
-			NullSQLFromStrPtr(v.DebitorApprovalTime),
-			NullSQLFromStrPtr(v.CreditorApprovalTime),
-			NullSQLFromStrPtr(v.DebitorExpirationTime),
-			NullSQLFromStrPtr(v.CreditorExpirationTime),
-		)
-	}
-	// format with ib arg only to avoid
-	// can't scan into dest[0]: unable to assign to *int32
-	ret := sqlb.Buildf("%v returning *", ib)
-	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
+
+	sbTr := sqlb.NewSelectBuilder()
+	sbTr.Select("id")
+	sbTr.From("insert_transaction")
+
+	ib.Values(
+		sqlb.Buildf("(%v)", sbTr),
+		trItem.ItemID,
+		trItem.Price,
+		trItem.Quantity,
+		trItem.DebitorFirst,
+		trItem.RuleInstanceID,
+		trItem.RuleExecIDs,
+		trItem.UnitOfMeasurement,
+		trItem.UnitsMeasured,
+		trItem.Debitor,
+		trItem.Creditor,
+		trItem.DebitorProfileID,
+		trItem.CreditorProfileID,
+		NullSQLFromStrPtr(trItem.DebitorApprovalTime),
+		NullSQLFromStrPtr(trItem.CreditorApprovalTime),
+		NullSQLFromStrPtr(trItem.DebitorExpirationTime),
+		NullSQLFromStrPtr(trItem.CreditorExpirationTime),
+	)
+
+	return sqlb.Buildf("%v returning id", ib)
 }
 
 func SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
@@ -64,20 +65,12 @@ func SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
 	return sb.Build()
 }
 
-func UpdateTrItemRoleApprovalSQL(
-	accountRole types.Role,
-	trItemID *types.ID,
-	apprTime *string,
-) (string, []interface{}) {
-	ub := sqlb.PostgreSQL.NewUpdateBuilder()
-	ub.Update("transaction_item").
-		Set(
-			ub.Assign(accountRole.String()+"_approval_time", *apprTime),
-		).
+func SelectTrItemsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select("*")
+	sb.From("transaction_item").
 		Where(
-			ub.Equal("id", *trItemID),
-			// avoid rule added approvals
-			ub.IsNull(accountRole.String()+"_approval_time"),
+			sb.In("transaction_id", trIDs...),
 		)
-	return ub.Build()
+	return sb.Build()
 }

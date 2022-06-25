@@ -61,38 +61,15 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get current transaction
-	preTr, err := data.GetTransactionByID(db, e.ID)
+	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, e.ID)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
 	// fail approval if equilibrium_time set
-	if preTr.EquilibriumTime != nil {
+	if preApprTr.EquilibriumTime != nil {
 		var err = errors.New("equilibrium timestamp found. approval not pending")
-		return "", err
-	}
-
-	// get transaction items
-	preTrItems, err := data.GetTrItemsByTransactionID(
-		db,
-		e.ID,
-	)
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-
-	// attach pre approval transaction items to
-	// pre approval transaction
-	preTr.TransactionItems = preTrItems
-
-	// get transaction approvers
-	preApprovals, err := data.GetApprovalsByTransactionID(
-		db,
-		e.ID,
-	)
-	if err != nil {
 		log.Print(err)
 		return "", err
 	}
@@ -105,8 +82,7 @@ func lambdaFn(
 		db,
 		&e.AuthAccount,
 		accountRole,
-		preTr,
-		preApprovals,
+		preApprTr,
 		&notifyTopicArn,
 	)
 }

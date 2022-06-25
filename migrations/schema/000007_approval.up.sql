@@ -46,3 +46,43 @@ CREATE TABLE approval (
       END
     )
 );
+
+-- supports approval table scans from queries used by
+-- requests-by-account and transactions-by-account
+CREATE INDEX idx_acct_name_trans_id ON approval (account_name, transaction_id);
+
+-- 1. adds approval timestamps to all approvals for a
+--    transaction where account appears as debitor or creditor
+--    for example, JacobWebb the debitor approves all
+--    transaction items where JacobWebb appears as debitor:
+--        SELECT approve_all_role_account(3, 'JacobWebb', 'debitor') AS equilibrium_time;
+-- 2. adds approval timestamps to affected transaction_item(s)
+-- 3. adds equilibrium timestamp to transaction if all approvals have timestamps
+-- 4. RETURNS time if equilibrium, NULL if not
+CREATE OR REPLACE FUNCTION approve_all_role_account(
+		tr_id int,
+		acct_name text,
+		acct_role text
+	) RETURNS TIMESTAMPTZ AS $$
+DECLARE apprvl_time TIMESTAMPTZ DEFAULT NOW();
+DECLARE apprvl RECORD;
+BEGIN
+	FOR apprvl IN UPDATE approval
+		SET approval_time = apprvl_time
+		WHERE transaction_id = tr_id AND account_name = acct_name AND account_role = acct_role AND approval_time IS NULL
+		RETURNING *
+	LOOP
+		IF apprvl.account_name = acct_name AND apprvl.account_role = acct_role THEN
+			UPDATE transaction_item SET debitor_approval_time = apprvl_time WHERE id = apprvl.transaction_item_id;
+		END IF;
+	END LOOP;
+	FOR apprvl IN SELECT approval_time FROM approval WHERE transaction_id = tr_id
+	LOOP
+		IF apprvl.approval_time IS NULL THEN
+			RETURN apprvl.approval_time;
+		END IF;
+	END LOOP;
+	UPDATE transaction SET equilibrium_time = apprvl_time WHERE id = tr_id;
+	RETURN apprvl_time;
+END;
+$$ LANGUAGE plpgsql;

@@ -13,6 +13,16 @@ insert into industry (sector, index, index_item_description) values (44, 445110,
 insert into industry (sector, index, index_item_description) values (48, 481111, 'Passenger carriers, air, scheduled');
 insert into industry (sector, index, index_item_description) values (51, 518210, 'Application hosting');
 insert into industry (sector, index, index_item_description) values (92, 921110, 'Executive offices, federal, state, and local (e.g., governor, mayor, president)');
+insert into industry (sector, index, index_item_description) values (44, 444130, 'Hardware stores');
+insert into industry (sector, index, index_item_description) values (45, 453210, 'Office supply stores');
+insert into industry (sector, index, index_item_description) values (54, 541940, 'Veterinary services');
+insert into industry (sector, index, index_item_description) values (56, 561431, 'Mailbox rental centers, private');
+insert into industry (sector, index, index_item_description) values (61, 611310, 'Colleges, universities, and professional schools');
+insert into industry (sector, index, index_item_description) values (62, 622110, 'General medical and surgical hospitals');
+insert into industry (sector, index, index_item_description) values (62, 622110, 'Dentists'' offices (e.g., centers, clinics)');
+insert into industry (sector, index, index_item_description) values (71, 713990, 'Golf driving ranges');
+insert into industry (sector, index, index_item_description) values (72, 722511, 'Diners, full service');
+insert into industry (sector, index, index_item_description) values (81, 811111, 'Automotive repair and replacement shops, general');
 
 -- todo: import from https://www.bls.gov/soc/
 -- example data: https://www.bls.gov/soc/2018/soc_structure_2018.pdf
@@ -28,6 +38,17 @@ insert into occupation (major_group, minor_group, broad_group, detailed_occupati
 insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('15-0000', '15-1200', '15-1240', '15-1242', 'Database Administrators');
 insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('11-0000', '11-1000', '11-1010', '11-1011', 'Chief Executives');
 insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('11-0000', '11-1000', '11-1020', '11-1021', 'General and Operations Managers');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('29-0000', '29-1000', '29-1020', '29-1021', 'Dentists, General');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('29-0000', '29-1000', '29-1210', '29-1216', 'General Internal Medicine Physicians');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('35-0000', '35-2000', '35-2010', '35-2014', 'Cooks, Restaurant');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('39-0000', '39-5000', '39-5010', '39-5012', 'Hairdressers, Hairstylists, and Cosmetologists');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('47-0000', '47-2000', '47-2180', '47-2181', 'Roofers');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('51-0000', '51-4000', '51-4040', '51-4041', 'Machinists');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('51-0000', '51-7000', '51-7090', '51-7099', 'Woodworkers, All Other');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('53-0000', '53-2000', '53-2020', '53-2021', 'Air Traffic Controllers');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('53-0000', '53-7000', '53-7020', '53-7021', 'Crane and Tower Operators');
+insert into occupation (major_group, minor_group, broad_group, detailed_occupation, occupation_text) values ('53-0000', '53-7000', '53-7050', '53-7051', 'Industrial Truck and Tractor Operators');
+
 -- rule
 insert into rule (name, variable_names) values ('approveCreditItems', '{ "CREDITOR" }');
 insert into rule (name, variable_names) values ('multiplyItemValue', '{ "DEBITOR", "CREDITOR", "ITEM_NAME", "FACTOR" }');
