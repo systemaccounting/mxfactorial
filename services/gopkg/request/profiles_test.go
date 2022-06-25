@@ -8,10 +8,6 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-const (
-	transNoAppr string = "../testdata/transNoAppr.json"
-)
-
 func TestMapProfileIDsToAccounts(t *testing.T) {
 	acct1 := "test1"
 	id1 := types.ID("1")
