@@ -59,3 +59,18 @@ func SelectCurrentAccountBalanceByAccountNameSQL(
 		)
 	return sb.Build()
 }
+
+func SelectAccountBalancesSQL(
+	accountNames []interface{},
+) (string, []interface{}) {
+	sb := sqlb.PostgreSQL.NewSelectBuilder()
+	sb.Select(
+		"account_name",
+		"current_balance",
+	)
+	sb.From("account_balance").
+		Where(
+			sb.In("account_name", accountNames...),
+		)
+	return sb.Build()
+}
