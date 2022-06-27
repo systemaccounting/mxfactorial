@@ -1,5 +1,7 @@
 package types
 
+import "github.com/shopspring/decimal"
+
 type AccountProfile struct {
 	ID                   *ID     `json:"id"`
 	AccountName          *string `json:"account_name"`
@@ -24,4 +26,9 @@ type AccountProfile struct {
 	TelephoneNumber      *int32  `json:"telephone_number"`
 	OccupationID         *int32  `json:"occupation_id"`
 	IndustryID           *int32  `json:"industry_id"`
+}
+
+type AccountBalance struct {
+	AccountName    *string         `json:"account_name"`
+	CurrentBalance decimal.Decimal `json:"current_balance"`
 }
