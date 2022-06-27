@@ -17,37 +17,66 @@ func TestDebitorCapacity(
 	trItems []*types.TransactionItem,
 ) error {
 
+	// map required debitor funds from transaction items
+	requiredFunds := MapDebitorsToRequiredFunds(trItems)
+
+	// list unique debitors
 	debitors := tools.ListUniqueDebitorAccountsFromTrItems(trItems)
 
-	for _, d := range debitors {
-		// measure debitor funds required by transaction items
-		required := DebitorFundsRequired(&d, trItems)
+	// get debitor account balances from db
+	accountBalances, err := GetAccountBalances(db, debitors)
+	if err != nil {
+		var errMsg string = "get account balances %v"
+		log.Printf(errMsg, err)
+		return fmt.Errorf(errMsg, err)
+	}
 
-		// get debitor balance to test approval capacity
-		approverBalance, err := GetAccountBalance(db, &d)
-		if err != nil {
-			var errMsg string = "get approver balance %v"
-			log.Printf(errMsg, err)
-			return fmt.Errorf(errMsg, err)
-		}
+	// loop through map of required debitor funds
+	for acct, reqd := range requiredFunds {
 
-		// test debitor capacity
-		err = TestDebitorBalanceGreaterThanRequiredFunds(&d, required, approverBalance)
-		if err != nil {
-			return err
+		// loop through account balances returned from db
+		for _, v := range accountBalances {
+
+			// match account balance belonging to debitor
+			if *v.AccountName == acct {
+
+				// test debitor capacity
+				err = TestDebitorBalanceGreaterThanRequiredFunds(&acct, reqd, v.CurrentBalance)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 
 	return nil
 }
 
-func DebitorFundsRequired(accountName *string, trItems []*types.TransactionItem) decimal.Decimal {
-	var reqd decimal.Decimal = decimal.New(0, 1)
+func MapDebitorsToRequiredFunds(trItems []*types.TransactionItem) map[string]decimal.Decimal {
+
+	// map stores debitor funds required for transaction
+	// e.g. JacobWebb needs 10.000, SarahBell needs 1.000
+	reqd := make(map[string]decimal.Decimal)
+
+	// loop through transaction items
 	for _, v := range trItems {
-		if *v.Debitor == *accountName && v.DebitorApprovalTime == nil {
-			reqd = reqd.Add(v.Price.Mul(v.Quantity))
+
+		// test map for debitor
+		if _, ok := reqd[*v.Debitor]; !ok {
+
+			// init decimal value for account
+			// when account not found in map
+			reqd[*v.Debitor] = decimal.New(0, 1)
+		}
+
+		// test for pending approval timestamp
+		if v.DebitorApprovalTime == nil {
+
+			// increase required debitor funds by price * quantity
+			reqd[*v.Debitor] = reqd[*v.Debitor].Add(v.Price.Mul(v.Quantity))
 		}
 	}
+
 	return reqd
 }
 
@@ -75,6 +104,38 @@ func GetAccountBalance(db lpg.SQLDB, accountName *string) (decimal.Decimal, erro
 	}
 
 	return balance, nil
+}
+
+func GetAccountBalances(db lpg.SQLDB, accountNames []string) ([]*types.AccountBalance, error) {
+
+	// sqlbuilder wants interface slice
+	accts := make([]interface{}, 0)
+	for _, v := range accountNames {
+		accts = append(accts, v)
+	}
+
+	// create select current account balance sql
+	selCurrBalSQL, selCurrBalArgs := sqlb.SelectAccountBalancesSQL(accts)
+
+	// query
+	rows, err := db.Query(
+		context.Background(),
+		selCurrBalSQL,
+		selCurrBalArgs...,
+	)
+	if err != nil {
+		log.Printf("query account balances %v", err)
+		return nil, err
+	}
+
+	// unmarshal current account balance
+	balances, err := lpg.UnmarshalAccountBalances(rows)
+	if err != nil {
+		log.Printf("unmarshal account balance %v", err)
+		return nil, err
+	}
+
+	return balances, nil
 }
 
 func TestDebitorBalanceGreaterThanRequiredFunds(
