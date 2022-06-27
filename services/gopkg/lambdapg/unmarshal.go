@@ -462,3 +462,26 @@ func UnmarshalAccountBalance(
 	}
 	return AccountBalance, nil
 }
+
+func UnmarshalAccountBalances(
+	rows pgx.Rows,
+) ([]*types.AccountBalance, error) {
+	var balances []*types.AccountBalance
+	defer rows.Close()
+	for rows.Next() {
+		var accountName *string
+		var currentBalance decimal.Decimal
+		err := rows.Scan(
+			&accountName,
+			&currentBalance,
+		)
+		if err != nil {
+			return nil, err
+		}
+		balances = append(balances, &types.AccountBalance{
+			AccountName:    accountName,
+			CurrentBalance: currentBalance,
+		})
+	}
+	return balances, nil
+}
