@@ -30,6 +30,8 @@ func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
 	c lpg.Connector,
+	ibc func() sqlb.InsertSQLBuilder,
+	dbc func() sqlb.DeleteSQLBuilder,
 ) (events.APIGatewayProxyResponse, error) {
 
 	// values required to insert and delete on connect and disconnect routes
@@ -50,7 +52,11 @@ func lambdaFn(
 
 	// insert websocket connection in db on connect
 	if routeKey == connectRouteKey {
-		insSQL, insArgs := sqlb.InsertWebsocketConnectionSQL(
+
+		// create sql builder with constructor
+		ib := ibc()
+
+		insSQL, insArgs := ib.InsertWebsocketConnectionSQL(
 			connectionID,
 			connectedAt,
 		)
@@ -64,12 +70,19 @@ func lambdaFn(
 
 	// delete websocket connection in db on disconnect
 	if routeKey == disconnectRouteKey {
-		delSQL, delArgs := sqlb.DeleteWebsocketConnectionSQL(connectionID)
+		// create sql builder from constructor
+		dbWs := dbc()
+
+		// create sql
+		delSQL, delArgs := dbWs.DeleteWebsocketConnectionSQL(connectionID)
+
+		// insert websocket
 		_, err := db.Exec(context.Background(), delSQL, delArgs...)
 		if err != nil {
 			log.Printf("wss conn delete error: %v", err)
 			return events.APIGatewayProxyResponse{}, err
 		}
+
 		return success, nil
 	}
 
@@ -90,7 +103,7 @@ func handleEvent(
 	e events.APIGatewayWebsocketProxyRequest,
 ) (events.APIGatewayProxyResponse, error) {
 	c := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, c)
+	return lambdaFn(ctx, e, c, sqlb.NewInsertBuilder, sqlb.NewDeleteBuilder)
 }
 
 func main() {

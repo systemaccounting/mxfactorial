@@ -12,9 +12,15 @@ import (
 
 const ApproveAllRoleAccountSQL string = "SELECT approve_all_role_account($1, $2, $3) AS equilibrium_time"
 
-func GetApprovalsByTransactionID(db lpg.SQLDB, ID *types.ID) ([]*types.Approval, error) {
+func GetApprovalsByTransactionID(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	ID *types.ID) ([]*types.Approval, error) {
+
+	sb := sbc()
+
 	// create sql to get all approvals
-	apprSQL, args := sqlb.SelectApprovalsByTrIDSQL(
+	apprSQL, args := sb.SelectApprovalsByTrIDSQL(
 		ID,
 	)
 
@@ -39,10 +45,16 @@ func GetApprovalsByTransactionID(db lpg.SQLDB, ID *types.ID) ([]*types.Approval,
 	return approvals, nil
 }
 
-func GetApprovalsByTrIDs(db lpg.SQLDB, IDs []interface{}) ([]*types.Approval, error) {
+func GetApprovalsByTrIDs(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	IDs []interface{}) ([]*types.Approval, error) {
+
+	// create sql builder from constructor
+	sb := sbc()
 
 	// create sql to get all approvals
-	apprSQL, args := sqlb.SelectApprovalsByTrIDsSQL(IDs)
+	apprSQL, args := sb.SelectApprovalsByTrIDsSQL(IDs)
 
 	// get transaction approvers
 	apprRows, err := db.Query(

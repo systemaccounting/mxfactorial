@@ -13,6 +13,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
+	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -37,6 +38,10 @@ func lambdaFn(
 	ctx context.Context,
 	e *types.RequestApprove,
 	c lpg.Connector,
+	ibc func() sqlb.InsertSQLBuilder,
+	sbc func() sqlb.SelectSQLBuilder,
+	ubc func() sqlb.UpdateSQLBuilder,
+	dbc func() sqlb.DeleteSQLBuilder,
 ) (string, error) {
 
 	// todo: more
@@ -61,7 +66,10 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get current transaction
-	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, e.ID)
+	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(
+		db,
+		sbc,
+		e.ID)
 	if err != nil {
 		log.Print(err)
 		return "", err
@@ -80,6 +88,10 @@ func lambdaFn(
 	// 4. notify approvers
 	return request.Approve(
 		db,
+		ibc,
+		sbc,
+		ubc,
+		dbc,
 		&e.AuthAccount,
 		accountRole,
 		preApprTr,
@@ -92,8 +104,17 @@ func handleEvent(
 	ctx context.Context,
 	e *types.RequestApprove,
 ) (string, error) {
+
 	c := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, c)
+
+	return lambdaFn(
+		ctx,
+		e,
+		c,
+		sqlb.NewInsertBuilder,
+		sqlb.NewSelectBuilder,
+		sqlb.NewUpdateBuilder,
+		sqlb.NewDeleteBuilder)
 }
 
 // avoids lambda package dependency during local development

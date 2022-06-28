@@ -35,6 +35,7 @@ func lambdaFn(
 	ctx context.Context,
 	e types.QueryByAccount,
 	c lpg.Connector,
+	sbc func() sqlb.SelectSQLBuilder,
 ) (string, error) {
 
 	if e.AuthAccount == "" {
@@ -56,7 +57,7 @@ func lambdaFn(
 	requestsSQL, requestsArgs := sqlb.SelectLastNReqsOrTransByAccount(e.AuthAccount, false, recordLimit)
 
 	// get requests
-	requests, err := data.GetTransactionsWithTrItemsAndApprovalsByID(db, requestsSQL, requestsArgs)
+	requests, err := data.GetTransactionsWithTrItemsAndApprovalsByID(db, sbc, requestsSQL, requestsArgs)
 	if err != nil {
 		log.Print(err)
 		return "", err
@@ -85,8 +86,8 @@ func handleEvent(
 	ctx context.Context,
 	e types.QueryByAccount,
 ) (string, error) {
-	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d)
+	c := lpg.NewConnector(pgx.Connect)
+	return lambdaFn(ctx, e, c, sqlb.NewSelectBuilder)
 }
 
 // avoids lambda package dependency during local development

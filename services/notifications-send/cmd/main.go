@@ -42,6 +42,8 @@ func lambdaFn(
 	ctx context.Context,
 	e events.SNSEvent,
 	c lpg.Connector,
+	sbc func() sqlb.SelectSQLBuilder,
+	dbc func() sqlb.DeleteSQLBuilder,
 ) {
 
 	msg := e.Records[0].SNS.Message
@@ -79,8 +81,11 @@ func lambdaFn(
 		transNotifIDs = append(transNotifIDs, v)
 	}
 
+	// create builder from constructor
+	sb := sbc()
+
 	// create select transaction_notifications by id sql
-	selNotifSQL, selNotifArgs := sqlb.SelectTransNotifsByIDsSQL(
+	selNotifSQL, selNotifArgs := sb.SelectTransNotifsByIDsSQL(
 		transNotifIDs,
 	)
 
@@ -115,8 +120,11 @@ func lambdaFn(
 		wssAccountsIFace = append(wssAccountsIFace, *v.AccountName)
 	}
 
+	// create sql builder from constructor
+	sbWs := sbc()
+
 	// create select websockets by account sql
-	selWssSQL, selWssArgs := sqlb.SelectWebsocketByAccountsSQL(
+	selWssSQL, selWssArgs := sbWs.SelectWebsocketByAccountsSQL(
 		wssAccountsIFace,
 	)
 
@@ -212,8 +220,12 @@ func lambdaFn(
 
 	// delete stale websockets
 	if len(websocketsToDelete) > 0 {
+
+		// create sql builder from constructor
+		dbWs := dbc()
+
 		// create delete websockets by connection ids sql
-		delWssSQL, delWssArgs := sqlb.DeleteWebsocketsByConnectionIDSQL(
+		delWssSQL, delWssArgs := dbWs.DeleteWebsocketsByConnectionIDSQL(
 			websocketsToDelete,
 		)
 		_, err = db.Exec(
@@ -233,7 +245,7 @@ func handleEvent(
 	e events.SNSEvent,
 ) {
 	c := lpg.NewConnector(pgx.Connect)
-	lambdaFn(ctx, e, c)
+	lambdaFn(ctx, e, c, sqlb.NewSelectBuilder, sqlb.NewDeleteBuilder)
 }
 
 func main() {

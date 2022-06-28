@@ -7,12 +7,17 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/notify"
+	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func Approve(
 	db lpg.SQLDB,
+	ibc func() sqlb.InsertSQLBuilder,
+	sbc func() sqlb.SelectSQLBuilder,
+	ubc func() sqlb.UpdateSQLBuilder,
+	dbc func() sqlb.DeleteSQLBuilder,
 	authAccount *string, // requester may be different from preApprovalTransaction.Author
 	accountRole types.Role,
 	preApprovalTransaction *types.Transaction,
@@ -22,6 +27,7 @@ func Approve(
 	// test debitor capacity
 	err := TestDebitorCapacity(
 		db,
+		sbc,
 		preApprovalTransaction.TransactionItems,
 	)
 	if err != nil {
@@ -65,6 +71,7 @@ func Approve(
 
 	postApprovalTransaction, err := data.GetTransactionWithTrItemsAndApprovalsByID(
 		db,
+		sbc,
 		preApprovalTransaction.ID,
 	)
 	if err != nil {
@@ -78,6 +85,7 @@ func Approve(
 		// change account balances from transaction items
 		ChangeAccountBalances(
 			db,
+			ubc,
 			preApprovalTransaction.TransactionItems,
 		)
 
@@ -86,6 +94,8 @@ func Approve(
 	// notify role approvers
 	err = notify.NotifyTransactionRoleApprovers(
 		db,
+		ibc,
+		dbc,
 		notifyTopicArn,
 		endingApprovals,
 		postApprovalTransaction,

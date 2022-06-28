@@ -14,6 +14,7 @@ import (
 
 func TestDebitorCapacity(
 	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
 	trItems []*types.TransactionItem,
 ) error {
 
@@ -24,7 +25,7 @@ func TestDebitorCapacity(
 	debitors := tools.ListUniqueDebitorAccountsFromTrItems(trItems)
 
 	// get debitor account balances from db
-	accountBalances, err := GetAccountBalances(db, debitors)
+	accountBalances, err := GetAccountBalances(db, sbc, debitors)
 	if err != nil {
 		var errMsg string = "get account balances %v"
 		log.Printf(errMsg, err)
@@ -80,9 +81,16 @@ func MapDebitorsToRequiredFunds(trItems []*types.TransactionItem) map[string]dec
 	return reqd
 }
 
-func GetAccountBalance(db lpg.SQLDB, accountName *string) (decimal.Decimal, error) {
+func GetAccountBalance(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	accountName *string) (decimal.Decimal, error) {
+
+	// create select builder from constructor
+	sb := sbc()
+
 	// create select current account balance sql
-	selCurrBalSQL, selCurrBalArgs := sqlb.SelectCurrentAccountBalanceByAccountNameSQL(
+	selCurrBalSQL, selCurrBalArgs := sb.SelectCurrentAccountBalanceByAccountNameSQL(
 		accountName,
 	)
 
@@ -106,7 +114,10 @@ func GetAccountBalance(db lpg.SQLDB, accountName *string) (decimal.Decimal, erro
 	return balance, nil
 }
 
-func GetAccountBalances(db lpg.SQLDB, accountNames []string) ([]*types.AccountBalance, error) {
+func GetAccountBalances(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	accountNames []string) ([]*types.AccountBalance, error) {
 
 	// sqlbuilder wants interface slice
 	accts := make([]interface{}, 0)
@@ -114,8 +125,11 @@ func GetAccountBalances(db lpg.SQLDB, accountNames []string) ([]*types.AccountBa
 		accts = append(accts, v)
 	}
 
+	// init select builder from constructor
+	sb := sbc()
+
 	// create select current account balance sql
-	selCurrBalSQL, selCurrBalArgs := sqlb.SelectAccountBalancesSQL(accts)
+	selCurrBalSQL, selCurrBalArgs := sb.SelectAccountBalancesSQL(accts)
 
 	// query
 	rows, err := db.Query(
@@ -152,10 +166,16 @@ func TestDebitorBalanceGreaterThanRequiredFunds(
 	return nil
 }
 
-func ChangeAccountBalances(db lpg.SQLDB, trItems []*types.TransactionItem) {
+func ChangeAccountBalances(
+	db lpg.SQLDB,
+	ubc func() sqlb.UpdateSQLBuilder,
+	trItems []*types.TransactionItem) {
+
 	for _, v := range trItems {
+
 		// debitors
-		updDbBalSQL, updDbBalArgs := sqlb.UpdateDebitorAccountBalanceSQL(v)
+		dub := ubc() // create sql builder from constructor
+		updDbBalSQL, updDbBalArgs := dub.UpdateDebitorAccountBalanceSQL(v)
 		_, err := db.Exec(
 			context.Background(),
 			updDbBalSQL,
@@ -164,8 +184,10 @@ func ChangeAccountBalances(db lpg.SQLDB, trItems []*types.TransactionItem) {
 		if err != nil {
 			log.Printf("failed to update balance of debitor %v, %v", *v.Debitor, err)
 		}
+
 		// creditors
-		updCrBalSQL, updCrBalArgs := sqlb.UpdateCreditorAccountBalanceSQL(v)
+		cub := ubc() // create update sql builder from constructor
+		updCrBalSQL, updCrBalArgs := cub.UpdateCreditorAccountBalanceSQL(v)
 		_, err = db.Exec(
 			context.Background(),
 			updCrBalSQL,
