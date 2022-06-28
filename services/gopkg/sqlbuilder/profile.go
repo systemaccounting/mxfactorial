@@ -1,28 +1,26 @@
 package sqlbuilder
 
 import (
-	sqlb "github.com/huandu/go-sqlbuilder"
+	gsqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func SelectProfileIDsByAccount(accountNames []interface{}) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
-	sb.Select(
+func (b *BuildSelectSQL) SelectProfileIDsByAccount(accountNames []interface{}) (string, []interface{}) {
+	b.sb.Select(
 		"id",
 		"account_name",
 	)
-	sb.From("account_profile").
+	b.sb.From("account_profile").
 		Where(
-			sb.In("account_name", accountNames...),
-			sb.IsNull("removal_time"),
+			b.sb.In("account_name", accountNames...),
+			b.sb.IsNull("removal_time"),
 		)
-	return sb.Build()
+	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
-	ib := sqlb.PostgreSQL.NewInsertBuilder()
-	ib.InsertInto("account_profile")
-	ib.Cols(
+func (b *BuildInsertSQL) InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
+	b.ib.InsertInto("account_profile")
+	b.ib.Cols(
 		"account_name",
 		"description",
 		"first_name",
@@ -46,7 +44,7 @@ func InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
 		"occupation_id",
 		"industry_id",
 	)
-	ib.Values(
+	b.ib.Values(
 		p.AccountName,
 		p.Description,
 		p.FirstName,
@@ -70,5 +68,5 @@ func InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
 		p.OccupationID,
 		p.IndustryID,
 	)
-	return ib.Build()
+	return b.ib.BuildWithFlavor(gsqlb.PostgreSQL)
 }

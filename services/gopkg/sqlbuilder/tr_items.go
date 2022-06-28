@@ -1,14 +1,16 @@
 package sqlbuilder
 
 import (
-	sqlb "github.com/huandu/go-sqlbuilder"
+	gsqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func InsertTrItemSQL(trItem *types.TransactionItem) sqlb.Builder {
-	ib := sqlb.PostgreSQL.NewInsertBuilder()
-	ib.InsertInto("transaction_item")
-	ib.Cols(
+func (b *BuildInsertSQL) InsertTrItemSQL(
+	sbc func() SelectSQLBuilder,
+	trItem *types.TransactionItem) gsqlb.Builder {
+
+	b.ib.InsertInto("transaction_item")
+	b.ib.Cols(
 		"transaction_id",
 		"item_id",
 		"price",
@@ -28,12 +30,12 @@ func InsertTrItemSQL(trItem *types.TransactionItem) sqlb.Builder {
 		"creditor_expiration_time",
 	)
 
-	sbTr := sqlb.NewSelectBuilder()
+	sbTr := sbc()
 	sbTr.Select("id")
 	sbTr.From("insert_transaction")
 
-	ib.Values(
-		sqlb.Buildf("(%v)", sbTr),
+	b.ib.Values(
+		gsqlb.Buildf("(%v)", sbTr),
 		trItem.ItemID,
 		trItem.Price,
 		trItem.Quantity,
@@ -51,26 +53,24 @@ func InsertTrItemSQL(trItem *types.TransactionItem) sqlb.Builder {
 		NullSQLFromStrPtr(trItem.DebitorExpirationTime),
 		NullSQLFromStrPtr(trItem.CreditorExpirationTime),
 	)
-
-	return sqlb.Buildf("%v returning id", ib)
+	retID := gsqlb.Buildf("%v returning id", b.ib)
+	return gsqlb.WithFlavor(retID, gsqlb.PostgreSQL)
 }
 
-func SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
-	sb.Select("*")
-	sb.From("transaction_item").
+func (b *BuildSelectSQL) SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
+	b.sb.Select("*")
+	b.sb.From("transaction_item").
 		Where(
-			sb.Equal("transaction_id", *trID),
+			b.sb.Equal("transaction_id", *trID),
 		)
-	return sb.Build()
+	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func SelectTrItemsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
-	sb.Select("*")
-	sb.From("transaction_item").
+func (b *BuildSelectSQL) SelectTrItemsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
+	b.sb.Select("*")
+	b.sb.From("transaction_item").
 		Where(
-			sb.In("transaction_id", trIDs...),
+			b.sb.In("transaction_id", trIDs...),
 		)
-	return sb.Build()
+	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }

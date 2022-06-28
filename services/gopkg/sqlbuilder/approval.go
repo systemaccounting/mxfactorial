@@ -3,7 +3,7 @@ package sqlbuilder
 import (
 	"strings"
 
-	sqlb "github.com/huandu/go-sqlbuilder"
+	gsqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -20,10 +20,9 @@ var buildFInsApproval string = "%v returning" + " " + strings.Join([]string{
 	"expiration_time",
 }, ", ")
 
-func InsertApprovalsSQL(alias string, approvals []*types.Approval) sqlb.Builder {
-	ib := sqlb.PostgreSQL.NewInsertBuilder()
-	ib.InsertInto("approval")
-	ib.Cols(
+func (b *BuildInsertSQL) InsertApprovalsSQL(sbc func() SelectSQLBuilder, alias string, approvals []*types.Approval) gsqlb.Builder {
+	b.ib.InsertInto("approval")
+	b.ib.Cols(
 		"rule_instance_id",
 		"transaction_id",
 		"transaction_item_id",
@@ -35,19 +34,19 @@ func InsertApprovalsSQL(alias string, approvals []*types.Approval) sqlb.Builder 
 		"expiration_time",
 	)
 
-	sbTr := sqlb.NewSelectBuilder()
+	sbTr := sbc()
 	sbTr.Select("id")
 	sbTr.From("insert_transaction")
 
-	sbTrItem := sqlb.NewSelectBuilder()
+	sbTrItem := sbc()
 	sbTrItem.Select("id")
 	sbTrItem.From(alias)
 
 	for _, a := range approvals {
-		ib.Values(
+		b.ib.Values(
 			a.RuleInstanceID,
-			sqlb.Buildf("(%v)", sbTr),
-			sqlb.Buildf("(%v)", sbTrItem),
+			gsqlb.Buildf("(%v)", sbTr),
+			gsqlb.Buildf("(%v)", sbTrItem),
 			a.AccountName,
 			a.AccountRole,
 			a.DeviceID,
@@ -57,11 +56,11 @@ func InsertApprovalsSQL(alias string, approvals []*types.Approval) sqlb.Builder 
 		)
 	}
 
-	return ib
+	return gsqlb.WithFlavor(b.ib, gsqlb.PostgreSQL)
 }
 
-func SelectApprovalsByTrIDSQL(trID *types.ID) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
+func (b *BuildSelectSQL) SelectApprovalsByTrIDSQL(trID *types.ID) (string, []interface{}) {
+	sb := gsqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select(
 		"id",
 		"rule_instance_id",
@@ -78,11 +77,11 @@ func SelectApprovalsByTrIDSQL(trID *types.ID) (string, []interface{}) {
 		Where(
 			sb.Equal("transaction_id", *trID),
 		)
-	return sb.Build()
+	return sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func SelectApprovalsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
+func (b *BuildSelectSQL) SelectApprovalsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
+	sb := gsqlb.PostgreSQL.NewSelectBuilder()
 	sb.Select(
 		"id",
 		"rule_instance_id",
@@ -99,5 +98,5 @@ func SelectApprovalsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
 		Where(
 			sb.In("transaction_id", trIDs...),
 		)
-	return sb.Build()
+	return sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }
