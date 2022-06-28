@@ -21,13 +21,15 @@ var (
 
 func NotifyTransactionRoleApprovers(
 	db lpg.SQLDB,
+	ibc func() sqlb.InsertSQLBuilder,
+	dbc func() sqlb.DeleteSQLBuilder,
 	topicArn *string,
 	approvals []*types.Approval,
 	transaction *types.Transaction,
 ) error {
 
 	// delete obselete notifications
-	err := deleteObseleteApprovalNotifications(db, *transaction.ID)
+	err := deleteObseleteApprovalNotifications(db, dbc, *transaction.ID)
 	if err != nil {
 		log.Printf("delete obselete transaction notification error: %v", err)
 		return err
@@ -46,8 +48,8 @@ func NotifyTransactionRoleApprovers(
 	// create transaction notifications returning ids
 	notifIDs, err := insertTransactionApprovalNotifications(
 		db,
-		notifications,
-	)
+		ibc,
+		notifications)
 	if err != nil {
 		log.Printf("create transaction notitfications error: %v", err)
 		return err
@@ -122,11 +124,15 @@ func createNotificationsPerRoleApprover(
 
 func deleteObseleteApprovalNotifications(
 	db lpg.SQLDB,
+	dbc func() sqlb.DeleteSQLBuilder,
 	trID types.ID,
 ) error {
 
+	// create sql builder from constructor
+	dbSQL := dbc()
+
 	// create delete transaction_notification sql to delete obsolete notifications
-	delNotifSQL, delNotifArgs := sqlb.DeleteTransNotificationsByTransIDSQL(
+	delNotifSQL, delNotifArgs := dbSQL.DeleteTransNotificationsByTransIDSQL(
 		trID,
 	)
 
@@ -142,11 +148,15 @@ func deleteObseleteApprovalNotifications(
 
 func insertTransactionApprovalNotifications(
 	db lpg.SQLDB,
+	ibc func() sqlb.InsertSQLBuilder,
 	notifications []*types.TransactionNotification,
 ) ([]int64, error) {
 
+	// create sql builder from constructor
+	ib := ibc()
+
 	// create insert transaction_notification sql returning ids
-	insNotifSQL, insNotifArgs := sqlb.InsertTransactionNotificationSQL(
+	insNotifSQL, insNotifArgs := ib.InsertTransactionNotificationSQL(
 		notifications,
 	)
 

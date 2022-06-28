@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
+	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -27,6 +28,7 @@ func lambdaFn(
 	ctx context.Context,
 	e types.QueryByAccount,
 	c lpg.Connector,
+	sbc func() sqlb.SelectSQLBuilder,
 ) (string, error) {
 
 	if e.AuthAccount == "" {
@@ -46,7 +48,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get balance
-	balance, err := request.GetAccountBalance(db, e.AccountName)
+	balance, err := request.GetAccountBalance(db, sbc, e.AccountName)
 	if err != nil {
 		var errMsg string = "get account balance %v"
 		log.Printf(errMsg, err)
@@ -60,7 +62,7 @@ func lambdaFn(
 // wraps lambdaFn accepting db interface for testability
 func handleEvent(ctx context.Context, e types.QueryByAccount) (string, error) {
 	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d)
+	return lambdaFn(ctx, e, d, sqlb.NewSelectBuilder)
 }
 
 // avoids lambda package dependency during local development

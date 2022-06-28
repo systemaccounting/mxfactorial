@@ -17,12 +17,16 @@ import (
 
 func AddAccountToCurrentWebsocket(
 	db lpg.SQLDB,
+	ubc func() sqlb.UpdateSQLBuilder,
 	accountName,
 	connectionID string,
 ) error {
 
+	// create sql builder from constructor
+	ub := ubc()
+
 	// create update websocket by id sql
-	updWss, updWssArgs := sqlb.UpdateWebsocketByConnIDSQL(
+	updWss, updWssArgs := ub.UpdateWebsocketByConnIDSQL(
 		accountName,
 		connectionID,
 	)

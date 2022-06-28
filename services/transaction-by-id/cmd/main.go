@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
+	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -29,7 +30,8 @@ var pgConn string = fmt.Sprintf(
 func lambdaFn(
 	ctx context.Context,
 	e types.QueryByID,
-	d lpg.Connector,
+	c lpg.Connector,
+	sbc func() sqlb.SelectSQLBuilder,
 ) (string, error) {
 
 	if e.AuthAccount == "" {
@@ -41,7 +43,7 @@ func lambdaFn(
 	}
 
 	// connect to postgres
-	db, err := d.Connect(ctx, pgConn)
+	db, err := c.Connect(ctx, pgConn)
 	if err != nil {
 		log.Printf("connect error: %v", err)
 		return "", err
@@ -49,7 +51,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get approvals
-	apprvs, err := data.GetApprovalsByTransactionID(db, e.ID)
+	apprvs, err := data.GetApprovalsByTransactionID(db, sbc, e.ID)
 	if err != nil {
 		log.Printf("query error: %v", err)
 		return "", err
@@ -75,14 +77,14 @@ func lambdaFn(
 	}
 
 	// get transaction items
-	trItems, err := data.GetTrItemsByTransactionID(db, e.ID)
+	trItems, err := data.GetTrItemsByTransactionID(db, sbc, e.ID)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
 	// get transaction
-	tr, err := data.GetTransactionByID(db, e.ID)
+	tr, err := data.GetTransactionByID(db, sbc, e.ID)
 	if err != nil {
 		return "", err
 	}
@@ -101,8 +103,8 @@ func lambdaFn(
 
 // wraps lambdaFn accepting db interface for testability
 func handleEvent(ctx context.Context, e types.QueryByID) (string, error) {
-	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d)
+	c := lpg.NewConnector(pgx.Connect)
+	return lambdaFn(ctx, e, c, sqlb.NewSelectBuilder)
 }
 
 // avoids lambda package dependency during local development

@@ -55,6 +55,8 @@ func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
 	c lpg.Connector,
+	dbc func() sqlb.DeleteSQLBuilder,
+	ubc func() sqlb.UpdateSQLBuilder,
 ) (events.APIGatewayProxyResponse, error) {
 
 	// unmarshal body from apigw request
@@ -93,6 +95,7 @@ func lambdaFn(
 	// update websocket with account name
 	err = websocket.AddAccountToCurrentWebsocket(
 		db,
+		ubc,
 		accountName,
 		connectionID,
 	)
@@ -107,8 +110,11 @@ func lambdaFn(
 		notifIDsArg = append(notifIDsArg, v)
 	}
 
+	// create sql builder from constructor
+	dbNot := dbc()
+
 	// create delete transaction notifications sql
-	delNotifSQL, delNotifArgs := sqlb.DeleteTransNotificationsByIDSQL(
+	delNotifSQL, delNotifArgs := dbNot.DeleteTransNotificationsByIDSQL(
 		notifIDsArg,
 	)
 
@@ -171,8 +177,12 @@ func lambdaFn(
 		// queue connection id to delete if
 		// 410 status code in error, and connection id is unique
 		if re.MatchString(errMsg) {
+
+			// create sql builder from constructor
+			dbWs := dbc()
+
 			// create delete websockets by connection ids sql
-			delWssSQL, delWssArgs := sqlb.DeleteWebsocketsByConnectionIDSQL(
+			delWssSQL, delWssArgs := dbWs.DeleteWebsocketsByConnectionIDSQL(
 				websocketsToDeleteOnErr,
 			)
 			// delete current websocket
@@ -198,7 +208,7 @@ func handleEvent(
 	e events.APIGatewayWebsocketProxyRequest,
 ) (events.APIGatewayProxyResponse, error) {
 	c := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, c)
+	return lambdaFn(ctx, e, c, sqlb.NewDeleteBuilder, sqlb.NewUpdateBuilder)
 }
 
 func main() {

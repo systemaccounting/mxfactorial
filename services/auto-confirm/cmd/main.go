@@ -37,6 +37,8 @@ func lambdaFn(
 	ctx context.Context,
 	e events.CognitoEventUserPoolsPreSignup,
 	c lpg.Connector,
+	ibc func() sqlb.InsertSQLBuilder,
+	sbc func() sqlb.SelectSQLBuilder,
 ) (events.CognitoEventUserPoolsPreSignup, error) {
 
 	if e.Request.ClientMetadata != nil {
@@ -59,27 +61,38 @@ func lambdaFn(
 		lastName,
 	)
 
+	// create insert sql builder from constructor
+	ibAcct := ibc()
+
 	// create insert account sql
-	insAccSQL, insAccArgs := sqlb.InsertAccountSQL(
+	insAccSQL, insAccArgs := ibAcct.InsertAccountSQL(
 		cognitoUser,
 	)
 
 	// create insert account balance sql
 	beginningBalance, _ := decimal.NewFromString(os.Getenv("INITIAL_ACCOUNT_BALANCE"))
-	insAccBalSQL, insAccBalArgs := sqlb.InsertAccountBalanceSQL(
+
+	// create insert sql builder from constructor
+	ibBal := ibc()
+
+	insAccBalSQL, insAccBalArgs := ibBal.InsertAccountBalanceSQL(
 		cognitoUser,
 		beginningBalance,
 		types.ID("0"), // todo: create transaction before creating account balance, then
 		// pass transaction_item.id as arg to account balance insert
 	)
 
+	insPr := ibc()
+
 	// create insert account profile sql
-	profileSQL, profileArgs := sqlb.InsertAccountProfileSQL(
+	profileSQL, profileArgs := insPr.InsertAccountProfileSQL(
 		&fakeProfile,
 	)
 
+	sbRule := sbc()
+
 	// create select rule instance sql
-	getRuleInstSQL, getRuleInstArgs := sqlb.SelectRuleInstanceSQL(
+	getRuleInstSQL, getRuleInstArgs := sbRule.SelectRuleInstanceSQL(
 		"approval",
 		"approveAnyCreditItem",
 		"ApprovalAllCreditRequests",
@@ -92,8 +105,11 @@ func lambdaFn(
 		),
 	)
 
+	// create sql builder from constructor
+	ibRule := ibc()
+
 	// create insert rule instance sql
-	insRuleInstSQL, insRuleInstArgs := sqlb.InsertRuleInstanceSQL(
+	insRuleInstSQL, insRuleInstArgs := ibRule.InsertRuleInstanceSQL(
 		"approval",
 		"approveAnyCreditItem",
 		"ApprovalAllCreditRequests",
@@ -213,7 +229,7 @@ func lambdaFn(
 // wraps lambdaFn accepting db interface for testability
 func handleEvent(ctx context.Context, e events.CognitoEventUserPoolsPreSignup) (events.CognitoEventUserPoolsPreSignup, error) {
 	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d)
+	return lambdaFn(ctx, e, d, sqlb.NewInsertBuilder, sqlb.NewSelectBuilder)
 }
 
 func main() {

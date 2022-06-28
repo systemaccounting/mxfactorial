@@ -10,9 +10,16 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func GetTrItemsByTransactionID(db lpg.SQLDB, ID *types.ID) ([]*types.TransactionItem, error) {
+func GetTrItemsByTransactionID(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	ID *types.ID) ([]*types.TransactionItem, error) {
+
+	// create sql builder from constructor
+	sb := sbc()
+
 	// create sql to get current transaction items
-	trItemsSQL, trItemsArgs := sqlb.SelectTrItemsByTrIDSQL(
+	trItemsSQL, trItemsArgs := sb.SelectTrItemsByTrIDSQL(
 		ID,
 	)
 
@@ -39,10 +46,16 @@ func GetTrItemsByTransactionID(db lpg.SQLDB, ID *types.ID) ([]*types.Transaction
 	return trItems, nil
 }
 
-func GetTrItemsByTrIDs(db lpg.SQLDB, IDs []interface{}) ([]*types.TransactionItem, error) {
+func GetTrItemsByTrIDs(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	IDs []interface{}) ([]*types.TransactionItem, error) {
+
+	// create sql builder from constructor
+	sb := sbc()
 
 	// create sql to get current transaction items
-	selectSQL, selectARGs := sqlb.SelectTrItemsByTrIDsSQL(IDs)
+	selectSQL, selectARGs := sb.SelectTrItemsByTrIDsSQL(IDs)
 
 	// get transaction items
 	trItemsRows, err := db.Query(

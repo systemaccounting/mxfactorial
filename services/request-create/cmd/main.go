@@ -9,11 +9,13 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	gsqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/jackc/pgx/v4"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	lam "github.com/systemaccounting/mxfactorial/services/gopkg/lambdasdk"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
+	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -54,6 +56,11 @@ func lambdaFn(
 	ctx context.Context,
 	e *types.IntraTransaction,
 	c lpg.Connector,
+	ibc func() sqlb.InsertSQLBuilder,
+	sbc func() sqlb.SelectSQLBuilder,
+	ubc func() sqlb.UpdateSQLBuilder,
+	dbc func() sqlb.DeleteSQLBuilder,
+	b func(string, ...interface{}) gsqlb.Builder,
 	resp *[]*types.TransactionItem,
 ) (string, error) {
 
@@ -136,7 +143,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// unmarshal account profile ids with account names
-	profileIDList, err := data.GetProfileIDsByAccountList(db, uniqueAccounts)
+	profileIDList, err := data.GetProfileIDsByAccountList(db, sbc, uniqueAccounts)
 	if err != nil {
 		log.Printf("GetProfileIDsByAccountList error: %v", err)
 		return "", err
@@ -152,7 +159,7 @@ func lambdaFn(
 		profileIDs,
 	)
 
-	trID, err := data.RequestCreate(db, ruleTested.Transaction)
+	trID, err := data.RequestCreate(db, ibc, sbc, b, ruleTested.Transaction)
 	if err != nil {
 		errMsg := fmt.Errorf("RequestCreate error: %v", err)
 		log.Print(errMsg)
@@ -160,7 +167,7 @@ func lambdaFn(
 	}
 
 	// get new transaction request
-	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, trID)
+	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, sbc, trID)
 	if err != nil {
 		errMsg := fmt.Errorf("GetTransactionWithTrItemsAndApprovalsByID error: %v", err)
 		log.Print(errMsg)
@@ -173,6 +180,10 @@ func lambdaFn(
 	// 4. notify approvers
 	return request.Approve(
 		db,
+		ibc,
+		sbc,
+		ubc,
+		dbc,
 		&e.AuthAccount,
 		authorRole,
 		preApprTr,
@@ -277,7 +288,16 @@ func handleEvent(
 ) (string, error) {
 	var resp []*types.TransactionItem
 	c := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, c, &resp)
+	return lambdaFn(
+		ctx,
+		e,
+		c,
+		sqlb.NewInsertBuilder,
+		sqlb.NewSelectBuilder,
+		sqlb.NewUpdateBuilder,
+		sqlb.NewDeleteBuilder,
+		gsqlb.Build,
+		&resp)
 }
 
 // avoids lambda package dependency during local development

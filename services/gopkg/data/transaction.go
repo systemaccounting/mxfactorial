@@ -4,15 +4,22 @@ import (
 	"context"
 	"fmt"
 
+	gsqlb "github.com/huandu/go-sqlbuilder"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func GetTransactionByID(db lpg.SQLDB, ID *types.ID) (*types.Transaction, error) {
+func GetTransactionByID(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	ID *types.ID) (*types.Transaction, error) {
+
+	// create sql builder from constructor
+	sb := sbc()
 
 	// create sql to get current transaction
-	transactionSQL, transactionArgs := sqlb.SelectTransactionByIDSQL(ID)
+	transactionSQL, transactionArgs := sb.SelectTransactionByIDSQL(ID)
 
 	// get transaction
 	transactionRow := db.QueryRow(
@@ -57,10 +64,17 @@ func InsertTransactionTx(db lpg.SQLDB, trSQL string, args []interface{}) (*types
 
 func RequestCreate(
 	db lpg.SQLDB,
+	ibc func() sqlb.InsertSQLBuilder,
+	sbc func() sqlb.SelectSQLBuilder,
+	b func(string, ...interface{}) gsqlb.Builder,
 	ruleTestedTransaction *types.Transaction,
 ) (*types.ID, error) {
 
-	sql, args, err := sqlb.CreateTransactionRequestSQL(ruleTestedTransaction)
+	sql, args, err := sqlb.CreateTransactionRequestSQL(
+		ibc,
+		sbc,
+		b,
+		ruleTestedTransaction)
 	if err != nil {
 		return nil, err
 	}
@@ -73,19 +87,23 @@ func RequestCreate(
 	return trID, nil
 }
 
-func GetTransactionWithTrItemsAndApprovalsByID(db lpg.SQLDB, trID *types.ID) (*types.Transaction, error) {
+func GetTransactionWithTrItemsAndApprovalsByID(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	trID *types.ID) (*types.Transaction, error) {
 
-	t, err := GetTransactionByID(db, trID)
+	t, err := GetTransactionByID(db, sbc, trID)
 	if err != nil {
 		return nil, fmt.Errorf("GetTransactionByID error: %v", err)
 	}
 
-	trItems, err := GetTrItemsByTransactionID(db, trID)
+	trItems, err := GetTrItemsByTransactionID(db, sbc, trID)
 	if err != nil {
 		return nil, fmt.Errorf("GetTrItemsByTransactionID error: %v", err)
 	}
 
-	apprvs, err := GetApprovalsByTransactionID(db, trID)
+	// create sql builder from constructor
+	apprvs, err := GetApprovalsByTransactionID(db, sbc, trID)
 	if err != nil {
 		return nil, fmt.Errorf("GetApprovalsByTransactionID error: %v", err)
 	}
@@ -121,7 +139,11 @@ func AttachTransactionItemsToTransaction(
 	}
 }
 
-func GetTransactionsWithTrItemsAndApprovalsByID(db lpg.SQLDB, selSQL string, selArgs []interface{}) ([]*types.Transaction, error) {
+func GetTransactionsWithTrItemsAndApprovalsByID(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	selSQL string,
+	selArgs []interface{}) ([]*types.Transaction, error) {
 
 	rows, err := db.Query(context.TODO(), selSQL, selArgs...)
 	if err != nil {
@@ -138,12 +160,12 @@ func GetTransactionsWithTrItemsAndApprovalsByID(db lpg.SQLDB, selSQL string, sel
 		reqIDs = append(reqIDs, v.ID)
 	}
 
-	trItems, err := GetTrItemsByTrIDs(db, reqIDs)
+	trItems, err := GetTrItemsByTrIDs(db, sbc, reqIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	apprvs, err := GetApprovalsByTrIDs(db, reqIDs)
+	apprvs, err := GetApprovalsByTrIDs(db, sbc, reqIDs)
 	if err != nil {
 		return nil, err
 	}

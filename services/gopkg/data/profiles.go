@@ -8,10 +8,17 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func GetProfileIDsByAccountList(db lpg.SQLDB, accounts []interface{}) ([]*types.AccountProfileID, error) {
+func GetProfileIDsByAccountList(
+	db lpg.SQLDB,
+	sbc func() sqlb.SelectSQLBuilder,
+	accounts []interface{}) ([]*types.AccountProfileID, error) {
+
+	// create sql builder from constructor
+	sb := sbc()
+
 	// create sql to get profile ids of debitors
 	// and creditors referenced in transaction items
-	profileIDSQL, profileIDArgs := sqlb.SelectProfileIDsByAccount(
+	profileIDSQL, profileIDArgs := sb.SelectProfileIDsByAccount(
 		accounts,
 	)
 
