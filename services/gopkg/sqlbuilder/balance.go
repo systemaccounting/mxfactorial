@@ -1,76 +1,71 @@
 package sqlbuilder
 
 import (
-	sqlb "github.com/huandu/go-sqlbuilder"
+	gsqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/shopspring/decimal"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func InsertAccountBalanceSQL(
+func (b *BuildInsertSQL) InsertAccountBalanceSQL(
 	accountName string,
 	accountBalance decimal.Decimal,
 	account types.ID,
 ) (string, []interface{}) {
-	ib := sqlb.PostgreSQL.NewInsertBuilder()
-	ib.InsertInto("account_balance")
-	ib.Cols(
+	b.ib.InsertInto("account_balance")
+	b.ib.Cols(
 		"account_name",
 		"current_balance",
 		"current_transaction_item_id",
 	)
-	ib.Values(accountName, accountBalance, account)
-	return ib.Build()
+	b.ib.Values(accountName, accountBalance, account)
+	return b.ib.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func UpdateDebitorAccountBalanceSQL(trItem *types.TransactionItem) (string, []interface{}) {
-	ub := sqlb.PostgreSQL.NewUpdateBuilder()
-	ub.Update("account_balance").
+func (b *BuildUpdateSQL) UpdateDebitorAccountBalanceSQL(trItem *types.TransactionItem) (string, []interface{}) {
+	b.ub.Update("account_balance").
 		Set(
-			ub.Assign("current_balance", trItem.Price.Mul(trItem.Quantity).Neg()),
-			ub.Assign("current_transaction_item_id", trItem.ID),
+			b.ub.Assign("current_balance", trItem.Price.Mul(trItem.Quantity).Neg()),
+			b.ub.Assign("current_transaction_item_id", trItem.ID),
 		).
 		Where(
-			ub.Equal("account_name", *trItem.Debitor),
+			b.ub.Equal("account_name", *trItem.Debitor),
 		)
-	return ub.Build()
+	return b.ub.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func UpdateCreditorAccountBalanceSQL(trItem *types.TransactionItem) (string, []interface{}) {
-	ub := sqlb.PostgreSQL.NewUpdateBuilder()
-	ub.Update("account_balance").
+func (b *BuildUpdateSQL) UpdateCreditorAccountBalanceSQL(trItem *types.TransactionItem) (string, []interface{}) {
+	b.ub.Update("account_balance").
 		Set(
-			ub.Assign("current_balance", trItem.Price.Mul(trItem.Quantity)),
-			ub.Assign("current_transaction_item_id", trItem.ID),
+			b.ub.Assign("current_balance", trItem.Price.Mul(trItem.Quantity)),
+			b.ub.Assign("current_transaction_item_id", trItem.ID),
 		).
 		Where(
-			ub.Equal("account_name", *trItem.Creditor),
+			b.ub.Equal("account_name", *trItem.Creditor),
 		)
-	return ub.Build()
+	return b.ub.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func SelectCurrentAccountBalanceByAccountNameSQL(
+func (b *BuildSelectSQL) SelectCurrentAccountBalanceByAccountNameSQL(
 	accountName *string,
 ) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
-	sb.Select("current_balance")
-	sb.From("account_balance").
+	b.sb.Select("current_balance")
+	b.sb.From("account_balance").
 		Where(
-			sb.Equal("account_name", *accountName),
+			b.sb.Equal("account_name", *accountName),
 		)
-	return sb.Build()
+	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func SelectAccountBalancesSQL(
+func (b *BuildSelectSQL) SelectAccountBalancesSQL(
 	accountNames []interface{},
 ) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
-	sb.Select(
+	b.sb.Select(
 		"account_name",
 		"current_balance",
 	)
-	sb.From("account_balance").
+	b.sb.From("account_balance").
 		Where(
-			sb.In("account_name", accountNames...),
+			b.sb.In("account_name", accountNames...),
 		)
-	return sb.Build()
+	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }

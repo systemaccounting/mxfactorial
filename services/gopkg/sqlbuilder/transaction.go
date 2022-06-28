@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	sqlb "github.com/huandu/go-sqlbuilder"
+	gsqlb "github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -16,7 +16,7 @@ const (
 	trAlias             = "insert_transaction"
 )
 
-func InsertTransactionSQL(
+func (b *BuildInsertSQL) InsertTransactionSQL(
 	trRuleInstanceID *types.ID,
 	trAuthor *string,
 	trDeviceID *string,
@@ -24,11 +24,10 @@ func InsertTransactionSQL(
 	trAuthorRole types.Role,
 	trEquilibriumTime *string,
 	trSumValue *string,
-) sqlb.Builder {
+) gsqlb.Builder {
 
-	ib := sqlb.PostgreSQL.NewInsertBuilder()
-	ib.InsertInto("transaction")
-	ib.Cols(
+	b.ib.InsertInto("transaction")
+	b.ib.Cols(
 		"rule_instance_id",
 		"author",
 		"author_device_id",
@@ -38,7 +37,7 @@ func InsertTransactionSQL(
 		"sum_value",
 	)
 
-	ib.Values(
+	b.ib.Values(
 		trRuleInstanceID,
 		trAuthor,
 		trDeviceID,
@@ -47,42 +46,40 @@ func InsertTransactionSQL(
 		trEquilibriumTime,
 		trSumValue,
 	)
-	return sqlb.Buildf("%v returning *", ib)
+	ret := gsqlb.Buildf("%v returning *", b.ib)
+	return gsqlb.WithFlavor(ret, gsqlb.PostgreSQL)
 }
 
-func SelectTransactionByIDSQL(trID *types.ID) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
-	sb.Select("*")
-	sb.From("transaction").
+func (b *BuildSelectSQL) SelectTransactionByIDSQL(trID *types.ID) (string, []interface{}) {
+	b.sb.Select("*")
+	b.sb.From("transaction").
 		Where(
-			sb.Equal("id", *trID),
+			b.sb.Equal("id", *trID),
 		)
-	return sb.Build()
+	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func SelectTransactionsByIDsSQL(IDs []interface{}) (string, []interface{}) {
-	sb := sqlb.PostgreSQL.NewSelectBuilder()
-	sb.Select("*")
-	sb.From("transaction").
+func (b *BuildSelectSQL) SelectTransactionsByIDsSQL(IDs []interface{}) (string, []interface{}) {
+	b.sb.Select("*")
+	b.sb.From("transaction").
 		Where(
-			sb.In("id", IDs...),
+			b.sb.In("id", IDs...),
 		)
-	return sb.Build()
+	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func UpdateTransactionByIDSQL(trID *types.ID, equilTime string) (string, []interface{}) {
-	ub := sqlb.PostgreSQL.NewUpdateBuilder()
-	ub.Update("transaction").
+func (b *BuildUpdateSQL) UpdateTransactionByIDSQL(trID *types.ID, equilTime string) (string, []interface{}) {
+	b.ub.Update("transaction").
 		Set(
-			ub.Assign("equilibrium_time", equilTime),
+			b.ub.Assign("equilibrium_time", equilTime),
 		).
 		Where(
-			ub.Equal("id", *trID),
+			b.ub.Equal("id", *trID),
 		)
 	// format with ub arg only to avoid
 	// can't scan into dest[0]: unable to assign to *int32
-	retID := sqlb.Buildf("%v returning *", ub)
-	return sqlb.WithFlavor(retID, sqlb.PostgreSQL).Build()
+	retID := gsqlb.Buildf("%v returning *", b.ub)
+	return gsqlb.WithFlavor(retID, gsqlb.PostgreSQL).Build()
 }
 
 // => i_0, transaction_item insert index 0
@@ -120,7 +117,11 @@ func buildWithSQL(trItems []*types.TransactionItem) (string, error) {
 	return cte, nil
 }
 
-func CreateTransactionRequestSQL(tr *types.Transaction) (string, []interface{}, error) {
+func CreateTransactionRequestSQL(
+	ibc func() InsertSQLBuilder,
+	sbc func() SelectSQLBuilder,
+	b func(string, ...interface{}) gsqlb.Builder,
+	tr *types.Transaction) (string, []interface{}, error) {
 
 	var role types.Role
 	err := role.Set(*tr.AuthorRole)
@@ -128,7 +129,11 @@ func CreateTransactionRequestSQL(tr *types.Transaction) (string, []interface{}, 
 		return "", nil, err
 	}
 
-	insTr := InsertTransactionSQL(
+	// crete sql builder from constructor
+	ibTr := ibc()
+
+	// create insert transaction sql
+	insTr := ibTr.InsertTransactionSQL(
 		nil,
 		tr.Author,
 		nil,
@@ -138,18 +143,27 @@ func CreateTransactionRequestSQL(tr *types.Transaction) (string, []interface{}, 
 		tr.SumValue,
 	)
 
+	// build with sql
 	with, err := buildWithSQL(tr.TransactionItems)
 	if err != nil {
 		return "", nil, err
 	}
 
+	// init 'WITH' sql builder list
 	builders := make([]interface{}, 0)
+	// add transaction sql builder as first builder
 	builders = append(builders, insTr)
 
+	// add to 'WITH' sql builders list by looping
+	// through transaction items and adding
+	// transaction item sql builders
 	for i, v := range tr.TransactionItems {
 
+		// create sql builder from constructor
+		ibTrItem := ibc()
+
 		// create transaction_item sql builder
-		trItemBuilder := InsertTrItemSQL(v)
+		trItemBuilder := ibTrItem.InsertTrItemSQL(sbc, v)
 		// add transction_item sql builder to list
 		builders = append(builders, trItemBuilder)
 
@@ -157,14 +171,21 @@ func CreateTransactionRequestSQL(tr *types.Transaction) (string, []interface{}, 
 		// in the cte as theyre inserted, e.g. t_01 AS ... (select id from t_01)
 		trItemAlias := buildAuxStmtName(trItemAliasPrefix, i)
 
+		// create sql builder from constructor
+		ibAppr := ibc()
+
 		// create approval sql builder
-		apprBuilder := InsertApprovalsSQL(trItemAlias, v.Approvals)
+		apprBuilder := ibAppr.InsertApprovalsSQL(sbc, trItemAlias, v.Approvals)
 
 		// add approval sql builder to list
 		builders = append(builders, apprBuilder)
 	}
 
-	insSQL, insArgs := sqlb.Build(with, builders...).BuildWithFlavor(sqlb.PostgreSQL)
+	// build 'WITH' sql that includes rows for:
+	// 1. transaction
+	// 2. transaction_item
+	// 3. approval
+	insSQL, insArgs := gsqlb.Build(with, builders...).BuildWithFlavor(gsqlb.PostgreSQL)
 
 	return insSQL, insArgs, nil
 }

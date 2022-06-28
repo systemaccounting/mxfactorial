@@ -1,13 +1,13 @@
 package sqlbuilder
 
-import sqlb "github.com/huandu/go-sqlbuilder"
+import gsqlb "github.com/huandu/go-sqlbuilder"
 
 func NullSQLFromStrPtr(s *string) interface{} {
 	if s == nil {
-		return sqlb.Raw("NULL")
+		return gsqlb.Raw("NULL")
 	}
 	if *s == "" {
-		return sqlb.Raw("NULL")
+		return gsqlb.Raw("NULL")
 	}
-	return sqlb.Raw(*s)
+	return gsqlb.Raw(*s)
 }

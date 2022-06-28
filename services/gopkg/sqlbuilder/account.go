@@ -1,34 +1,31 @@
 package sqlbuilder
 
 import (
-	sqlb "github.com/huandu/go-sqlbuilder"
+	gsqlb "github.com/huandu/go-sqlbuilder"
 )
 
-func InsertAccountSQL(account string) (string, []interface{}) {
-	ib := sqlb.PostgreSQL.NewInsertBuilder()
-	ib.InsertInto("account")
-	ib.Cols("name")
-	ib.Values(account)
+func (b *BuildInsertSQL) InsertAccountSQL(account string) (string, []interface{}) {
+	b.ib.InsertInto("account")
+	b.ib.Cols("name")
+	b.ib.Values(account)
 	// format with ib arg only to avoid
 	// can't scan into dest[0]: unable to assign to *int32
-	ret := sqlb.Buildf("%v ON CONFLICT (name) DO NOTHING", ib)
-	return sqlb.WithFlavor(ret, sqlb.PostgreSQL).Build()
+	ret := gsqlb.Buildf("%v ON CONFLICT (name) DO NOTHING", b.ib)
+	return gsqlb.WithFlavor(ret, gsqlb.PostgreSQL).Build()
 }
 
-func DeleteOwnerAccountSQL(account string) (string, []interface{}) {
-	db := sqlb.PostgreSQL.NewDeleteBuilder()
-	db.DeleteFrom("account_owner")
-	db.Where(
-		db.Equal("owner_account", account),
+func (b *BuildDeleteSQL) DeleteOwnerAccountSQL(account string) (string, []interface{}) {
+	b.db.DeleteFrom("account_owner")
+	b.db.Where(
+		b.db.Equal("owner_account", account),
 	)
-	return db.Build()
+	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
 }
 
-func DeleteAccountSQL(account string) (string, []interface{}) {
-	db := sqlb.PostgreSQL.NewDeleteBuilder()
-	db.DeleteFrom("account")
-	db.Where(
-		db.Equal("name", account),
+func (b *BuildDeleteSQL) DeleteAccountSQL(account string) (string, []interface{}) {
+	b.db.DeleteFrom("account")
+	b.db.Where(
+		b.db.Equal("name", account),
 	)
-	return db.Build()
+	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
 }
