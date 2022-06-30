@@ -22,21 +22,27 @@ done
 
 PROJECT_CONFIG=project.json
 
-# get IMPORTING_PKG_DIRS
-source ./scripts/list-changed-pkgs.sh --pkg-name "$PKG_NAME"
+# get IMPORTING_PKG_DIRS and CHANGED_SVCS
+source scripts/list-changed-svcs.sh --pkg-name "$PKG_NAME"
 
-# create PACKAGE_NAMES array
-declare -a PACKAGE_NAMES
+# create DEPENDENTS array
+declare -a DEPENDENTS
 
 # loop over IMPORTING_PKG_DIRS
 for d in "${IMPORTING_PKG_DIRS[@]}"; do
-	# add package names to PACKAGE_NAMES array
-	PACKAGE_NAMES+=($(basename $d))
+	# add package names to DEPENDENTS array
+	DEPENDENTS+=($(basename $d))
+done
+
+# loop over CHANGED_SVCS
+for s in "${CHANGED_SVCS[@]}"; do
+	# add service names to DEPENDENTS array
+	DEPENDENTS+=($(basename $s))
 done
 
 # prior art https://stackoverflow.com/a/67489301
 # create json array of packages importing $PKG_NAME
-NEW_DEPENDENTS=$(jq --compact-output --null-input '$ARGS.positional' --args "${PACKAGE_NAMES[@]}")
+NEW_DEPENDENTS=$(jq --compact-output --null-input '$ARGS.positional' --args "${DEPENDENTS[@]}")
 
 # copy package.json with new dependents into memory
 CONTENTS=$(jq --indent 4 ".pkgs.$PKG_NAME.dependents = $NEW_DEPENDENTS" $PROJECT_CONFIG)
