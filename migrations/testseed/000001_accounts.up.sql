@@ -11,7 +11,7 @@ insert into account (name, password) values ('AzizKhan', 'password');
 insert into account (name, password) values ('IgorPetrov', 'password');
 
 -- accounts WITHOUT subaccounts
-insert into account (name, password) values ('GroceryStore', 'password'); -- for convenience, nonhuman account not realistic
+insert into account (name, password) values ('GroceryStore', 'password'); -- for convenience, account not realistic
 insert into account (name, password) values ('LisaWagner', 'password');
 insert into account (name, password) values ('NancyCole', 'password');
 insert into account (name, password) values ('WayneHolt', 'password');
