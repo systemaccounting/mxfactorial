@@ -6,7 +6,7 @@ import (
 	"log"
 
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 )
 
 // account names not added to websocket connection records on connect
@@ -17,7 +17,7 @@ import (
 
 func AddAccountToCurrentWebsocket(
 	db lpg.SQLDB,
-	ubc func() sqlb.UpdateSQLBuilder,
+	ubc func() sqls.UpdateSQLBuilder,
 	accountName,
 	connectionID string,
 ) error {

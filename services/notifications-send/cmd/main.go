@@ -15,7 +15,7 @@ import (
 	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
 	"github.com/jackc/pgx/v4"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -42,8 +42,8 @@ func lambdaFn(
 	ctx context.Context,
 	e events.SNSEvent,
 	c lpg.Connector,
-	sbc func() sqlb.SelectSQLBuilder,
-	dbc func() sqlb.DeleteSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
+	dbc func() sqls.DeleteSQLBuilder,
 ) {
 
 	msg := e.Records[0].SNS.Message
@@ -245,7 +245,7 @@ func handleEvent(
 	e events.SNSEvent,
 ) {
 	c := lpg.NewConnector(pgx.Connect)
-	lambdaFn(ctx, e, c, sqlb.NewSelectBuilder, sqlb.NewDeleteBuilder)
+	lambdaFn(ctx, e, c, sqls.NewSelectBuilder, sqls.NewDeleteBuilder)
 }
 
 func main() {

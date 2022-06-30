@@ -4,15 +4,15 @@ import (
 	"context"
 	"fmt"
 
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func GetTransactionByID(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	ID *types.ID) (*types.Transaction, error) {
 
 	// create sql builder from constructor
@@ -64,13 +64,13 @@ func InsertTransactionTx(db lpg.SQLDB, trSQL string, args []interface{}) (*types
 
 func RequestCreate(
 	db lpg.SQLDB,
-	ibc func() sqlb.InsertSQLBuilder,
-	sbc func() sqlb.SelectSQLBuilder,
-	b func(string, ...interface{}) gsqlb.Builder,
+	ibc func() sqls.InsertSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
+	b func(string, ...interface{}) sqlbuilder.Builder,
 	ruleTestedTransaction *types.Transaction,
 ) (*types.ID, error) {
 
-	sql, args, err := sqlb.CreateTransactionRequestSQL(
+	sql, args, err := sqls.CreateTransactionRequestSQL(
 		ibc,
 		sbc,
 		b,
@@ -89,7 +89,7 @@ func RequestCreate(
 
 func GetTransactionWithTrItemsAndApprovalsByID(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	trID *types.ID) (*types.Transaction, error) {
 
 	t, err := GetTransactionByID(db, sbc, trID)
@@ -141,7 +141,7 @@ func AttachTransactionItemsToTransaction(
 
 func GetTransactionsWithTrItemsAndApprovalsByID(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	selSQL string,
 	selArgs []interface{}) ([]*types.Transaction, error) {
 

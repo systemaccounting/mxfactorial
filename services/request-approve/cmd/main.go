@@ -13,7 +13,7 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -38,10 +38,10 @@ func lambdaFn(
 	ctx context.Context,
 	e *types.RequestApprove,
 	c lpg.Connector,
-	ibc func() sqlb.InsertSQLBuilder,
-	sbc func() sqlb.SelectSQLBuilder,
-	ubc func() sqlb.UpdateSQLBuilder,
-	dbc func() sqlb.DeleteSQLBuilder,
+	ibc func() sqls.InsertSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
+	ubc func() sqls.UpdateSQLBuilder,
+	dbc func() sqls.DeleteSQLBuilder,
 ) (string, error) {
 
 	// todo: more
@@ -111,10 +111,10 @@ func handleEvent(
 		ctx,
 		e,
 		c,
-		sqlb.NewInsertBuilder,
-		sqlb.NewSelectBuilder,
-		sqlb.NewUpdateBuilder,
-		sqlb.NewDeleteBuilder)
+		sqls.NewInsertBuilder,
+		sqls.NewSelectBuilder,
+		sqls.NewUpdateBuilder,
+		sqls.NewDeleteBuilder)
 }
 
 // avoids lambda package dependency during local development

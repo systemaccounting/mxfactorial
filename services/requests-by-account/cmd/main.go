@@ -15,7 +15,7 @@ import (
 
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -35,7 +35,7 @@ func lambdaFn(
 	ctx context.Context,
 	e types.QueryByAccount,
 	c lpg.Connector,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 ) (string, error) {
 
 	if e.AuthAccount == "" {
@@ -54,7 +54,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// create requests sql with false boolean value as arg #2
-	requestsSQL, requestsArgs := sqlb.SelectLastNReqsOrTransByAccount(e.AuthAccount, false, recordLimit)
+	requestsSQL, requestsArgs := sqls.SelectLastNReqsOrTransByAccount(e.AuthAccount, false, recordLimit)
 
 	// get requests
 	requests, err := data.GetTransactionsWithTrItemsAndApprovalsByID(db, sbc, requestsSQL, requestsArgs)
@@ -87,7 +87,7 @@ func handleEvent(
 	e types.QueryByAccount,
 ) (string, error) {
 	c := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, c, sqlb.NewSelectBuilder)
+	return lambdaFn(ctx, e, c, sqls.NewSelectBuilder)
 }
 
 // avoids lambda package dependency during local development

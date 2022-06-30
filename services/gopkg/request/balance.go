@@ -7,22 +7,21 @@ import (
 
 	"github.com/shopspring/decimal"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func TestDebitorCapacity(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
-	trItems []*types.TransactionItem,
+	sbc func() sqls.SelectSQLBuilder,
+	trItems types.TrItemListHelper,
 ) error {
 
 	// map required debitor funds from transaction items
-	requiredFunds := MapDebitorsToRequiredFunds(trItems)
+	requiredFunds := trItems.MapDebitorsToRequiredFunds()
 
 	// list unique debitors
-	debitors := tools.ListUniqueDebitorAccountsFromTrItems(trItems)
+	debitors := trItems.ListUniqueDebitorAccountsFromTrItems()
 
 	// get debitor account balances from db
 	accountBalances, err := GetAccountBalances(db, sbc, debitors)
@@ -53,37 +52,9 @@ func TestDebitorCapacity(
 	return nil
 }
 
-func MapDebitorsToRequiredFunds(trItems []*types.TransactionItem) map[string]decimal.Decimal {
-
-	// map stores debitor funds required for transaction
-	// e.g. JacobWebb needs 10.000, SarahBell needs 1.000
-	reqd := make(map[string]decimal.Decimal)
-
-	// loop through transaction items
-	for _, v := range trItems {
-
-		// test map for debitor
-		if _, ok := reqd[*v.Debitor]; !ok {
-
-			// init decimal value for account
-			// when account not found in map
-			reqd[*v.Debitor] = decimal.New(0, 1)
-		}
-
-		// test for pending approval timestamp
-		if v.DebitorApprovalTime == nil {
-
-			// increase required debitor funds by price * quantity
-			reqd[*v.Debitor] = reqd[*v.Debitor].Add(v.Price.Mul(v.Quantity))
-		}
-	}
-
-	return reqd
-}
-
 func GetAccountBalance(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	accountName *string) (decimal.Decimal, error) {
 
 	// create select builder from constructor
@@ -116,7 +87,7 @@ func GetAccountBalance(
 
 func GetAccountBalances(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	accountNames []string) ([]*types.AccountBalance, error) {
 
 	// sqlbuilder wants interface slice
@@ -142,7 +113,7 @@ func GetAccountBalances(
 		return nil, err
 	}
 
-	// unmarshal current account balance
+	// unmarshal current account balances
 	balances, err := lpg.UnmarshalAccountBalances(rows)
 	if err != nil {
 		log.Printf("unmarshal account balance %v", err)
@@ -168,8 +139,10 @@ func TestDebitorBalanceGreaterThanRequiredFunds(
 
 func ChangeAccountBalances(
 	db lpg.SQLDB,
-	ubc func() sqlb.UpdateSQLBuilder,
+	ubc func() sqls.UpdateSQLBuilder,
 	trItems []*types.TransactionItem) {
+
+	// todo: change to single sql
 
 	for _, v := range trItems {
 

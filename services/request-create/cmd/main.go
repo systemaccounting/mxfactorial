@@ -9,13 +9,13 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/jackc/pgx/v4"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	lam "github.com/systemaccounting/mxfactorial/services/gopkg/lambdasdk"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -56,11 +56,11 @@ func lambdaFn(
 	ctx context.Context,
 	e *types.IntraTransaction,
 	c lpg.Connector,
-	ibc func() sqlb.InsertSQLBuilder,
-	sbc func() sqlb.SelectSQLBuilder,
-	ubc func() sqlb.UpdateSQLBuilder,
-	dbc func() sqlb.DeleteSQLBuilder,
-	b func(string, ...interface{}) gsqlb.Builder,
+	ibc func() sqls.InsertSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
+	ubc func() sqls.UpdateSQLBuilder,
+	dbc func() sqls.DeleteSQLBuilder,
+	b func(string, ...interface{}) sqlbuilder.Builder,
 	resp *[]*types.TransactionItem,
 ) (string, error) {
 
@@ -128,10 +128,9 @@ func lambdaFn(
 
 	log.Print("client items equal to rules")
 
+	var trItemsFromRules types.TransactionItems = ruleTested.Transaction.TransactionItems
 	// list debitors and creditors to fetch profile ids
-	uniqueAccounts := tools.ListUniqueAccountsFromTrItems(
-		ruleTested.Transaction.TransactionItems,
-	)
+	uniqueAccounts := trItemsFromRules.ListUniqueAccountsFromTrItems()
 
 	// connect to postgres
 	db, err := c.Connect(context.Background(), pgConn)
@@ -155,7 +154,7 @@ func lambdaFn(
 
 	// add profile IDs to rule tested transaction items
 	request.AddProfileIDsToTrItems(
-		ruleTested.Transaction.TransactionItems,
+		trItemsFromRules,
 		profileIDs,
 	)
 
@@ -292,11 +291,11 @@ func handleEvent(
 		ctx,
 		e,
 		c,
-		sqlb.NewInsertBuilder,
-		sqlb.NewSelectBuilder,
-		sqlb.NewUpdateBuilder,
-		sqlb.NewDeleteBuilder,
-		gsqlb.Build,
+		sqls.NewInsertBuilder,
+		sqls.NewSelectBuilder,
+		sqls.NewUpdateBuilder,
+		sqls.NewDeleteBuilder,
+		sqlbuilder.Build,
 		&resp)
 }
 

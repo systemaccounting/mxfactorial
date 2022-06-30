@@ -6,13 +6,13 @@ import (
 	"log"
 
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func GetTrItemsByTransactionID(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	ID *types.ID) ([]*types.TransactionItem, error) {
 
 	// create sql builder from constructor
@@ -48,7 +48,7 @@ func GetTrItemsByTransactionID(
 
 func GetTrItemsByTrIDs(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	IDs []interface{}) ([]*types.TransactionItem, error) {
 
 	// create sql builder from constructor
