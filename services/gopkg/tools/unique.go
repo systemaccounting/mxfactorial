@@ -45,30 +45,3 @@ func IsEachContraAccountUnique(trItems []*types.TransactionItem) error {
 	}
 	return nil
 }
-
-// used for sql builder
-func ListUniqueAccountsFromTrItems(trItems []*types.TransactionItem) []interface{} {
-	var uniqueAccounts []interface{}
-	for _, v := range trItems {
-		if IsIfaceStringUnique(*v.Debitor, uniqueAccounts) {
-			uniqueAccounts = append(uniqueAccounts, *v.Debitor)
-		}
-		if IsIfaceStringUnique(*v.Creditor, uniqueAccounts) {
-			uniqueAccounts = append(uniqueAccounts, *v.Creditor)
-		}
-	}
-	return uniqueAccounts
-}
-
-// used for sufficient debit balance test
-func ListUniqueDebitorAccountsFromTrItems(
-	trItems []*types.TransactionItem,
-) []string {
-	var uniqueDebitors []string
-	for _, v := range trItems {
-		if IsStringUnique(*v.Debitor, uniqueDebitors) {
-			uniqueDebitors = append(uniqueDebitors, *v.Debitor)
-		}
-	}
-	return uniqueDebitors
-}

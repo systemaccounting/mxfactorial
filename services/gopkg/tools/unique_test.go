@@ -3,8 +3,6 @@ package tools
 import (
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -103,25 +101,5 @@ func TestIsStringUnique(t *testing.T) {
 		if got != tc.want {
 			t.Errorf("got %v, want %v", got, tc.want)
 		}
-	}
-}
-
-func TestListUniqueAccountsFromTrItems(t *testing.T) {
-	testtr := GetTestTransaction(t, transNoAppr)
-	got := ListUniqueAccountsFromTrItems(testtr.TransactionItems)
-	want := []interface{}{
-		"JacobWebb", "StateOfCalifornia", "GroceryStore",
-	}
-	if !cmp.Equal(got, want, cmpopts.SortSlices(less)) {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
-
-func TestListUniqueDebitorAccountsFromTrItems(t *testing.T) {
-	testtr := GetTestTransaction(t, transNoAppr)
-	got := ListUniqueDebitorAccountsFromTrItems(testtr.TransactionItems)
-	want := []string{"JacobWebb"}
-	if !cmp.Equal(got, want, cmpopts.SortSlices(less)) {
-		t.Errorf("got %v, want %v", got, want)
 	}
 }
