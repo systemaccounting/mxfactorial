@@ -12,6 +12,15 @@ on:
 jobs:
   migrations:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: bitnami/postgresql
+        ports:
+          - 5432:5432
+        env:
+          POSTGRESQL_USERNAME: test
+          POSTGRES_PASSWORD: test
+          POSTGRESQL_DATABASE: mxfactorial
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -20,11 +29,8 @@ jobs:
       - name: install deps
         run: make install-ci
         working-directory: migrations
-      - name: run postgres in docker container
-        run: make run-ci
-        working-directory: migrations
       - name: wait for docker postgres and "test" user availability
-        run: while ! pg_isready -h 127.0.0.1 -p 5432; do sleep 1; done; sleep 5
+        run: while ! pg_isready -h localhost -p 5432; do sleep 1; done; sleep 5
         working-directory: migrations
       - name: up migrate from schema, seed and testseed directories
         run: make updocker DB=test
