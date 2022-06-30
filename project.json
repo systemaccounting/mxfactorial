@@ -300,7 +300,16 @@
                 "websocket",
                 "request",
                 "data"
-            ]
+            ],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg": [
+                    "Connector",
+                    "SQLDB"
+                ],
+                "github.com/jackc/pgx/v4": [
+                    "Rows"
+                ]
+            }
         },
         "lambdasdk": {
             "runtime": "go1.x",
@@ -319,15 +328,23 @@
             "path": "services/gopkg/request",
             "dependents": []
         },
-        "sqlbuilder": {
+        "sqls": {
             "runtime": "go1.x",
-            "path": "services/gopkg/sqlbuilder",
+            "path": "services/gopkg/sqls",
             "dependents": [
                 "notify",
                 "websocket",
                 "request",
                 "data"
-            ]
+            ],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/sqls": [
+                    "InsertSQLBuilder",
+                    "UpdateSQLBuilder",
+                    "SelectSQLBuilder",
+                    "DeleteSQLBuilder"
+                ]
+            }
         },
         "testdata": {
             "runtime": "go1.x",
@@ -344,6 +361,38 @@
                 "websocket",
                 "data"
             ]
+        },
+        "types": {
+            "runtime": "go1.x",
+            "path": "services/gopkg/types",
+            "dependents": [
+                "notify",
+                "testdata",
+                "tools",
+                "lambdapg",
+                "sqlbuilder",
+                "lambdasdk",
+                "request",
+                "data",
+                "websocket",
+                "request-create",
+                "request-approve",
+                "request-by-id",
+                "requests-by-account",
+                "transaction-by-id",
+                "transactions-by-account",
+                "notifications-send",
+                "notifications-get",
+                "notifications-clear",
+                "balance-by-account",
+                "wss-connect",
+                "auto-confirm"
+            ],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/types": [
+                    "TrItemListHelper"
+                ]
+            }
         },
         "websocket": {
             "runtime": "go1.x",
@@ -380,5 +429,9 @@
         "pguser": "test",
         "pgpassword": "test",
         "testseed_dump_path": "./migrations/dumps/testseed.sql"
+    },
+    "gomock": {
+        "package_name_prefix": "mock",
+        "file_name_suffix": "mock.go"
     }
 }
