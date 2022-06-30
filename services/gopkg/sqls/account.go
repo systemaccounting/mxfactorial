@@ -1,7 +1,7 @@
-package sqlbuilder
+package sqls
 
 import (
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 )
 
 func (b *BuildInsertSQL) InsertAccountSQL(account string) (string, []interface{}) {
@@ -10,8 +10,8 @@ func (b *BuildInsertSQL) InsertAccountSQL(account string) (string, []interface{}
 	b.ib.Values(account)
 	// format with ib arg only to avoid
 	// can't scan into dest[0]: unable to assign to *int32
-	ret := gsqlb.Buildf("%v ON CONFLICT (name) DO NOTHING", b.ib)
-	return gsqlb.WithFlavor(ret, gsqlb.PostgreSQL).Build()
+	ret := sqlbuilder.Buildf("%v ON CONFLICT (name) DO NOTHING", b.ib)
+	return sqlbuilder.WithFlavor(ret, sqlbuilder.PostgreSQL).Build()
 }
 
 func (b *BuildDeleteSQL) DeleteOwnerAccountSQL(account string) (string, []interface{}) {
@@ -19,7 +19,7 @@ func (b *BuildDeleteSQL) DeleteOwnerAccountSQL(account string) (string, []interf
 	b.db.Where(
 		b.db.Equal("owner_account", account),
 	)
-	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildDeleteSQL) DeleteAccountSQL(account string) (string, []interface{}) {
@@ -27,5 +27,5 @@ func (b *BuildDeleteSQL) DeleteAccountSQL(account string) (string, []interface{}
 	b.db.Where(
 		b.db.Equal("name", account),
 	)
-	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

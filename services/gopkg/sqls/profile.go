@@ -1,7 +1,7 @@
-package sqlbuilder
+package sqls
 
 import (
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -15,7 +15,7 @@ func (b *BuildSelectSQL) SelectProfileIDsByAccount(accountNames []interface{}) (
 			b.sb.In("account_name", accountNames...),
 			b.sb.IsNull("removal_time"),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildInsertSQL) InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
@@ -68,5 +68,5 @@ func (b *BuildInsertSQL) InsertAccountProfileSQL(p *types.AccountProfile) (strin
 		p.OccupationID,
 		p.IndustryID,
 	)
-	return b.ib.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

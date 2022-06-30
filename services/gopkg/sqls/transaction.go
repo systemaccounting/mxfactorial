@@ -1,11 +1,11 @@
-package sqlbuilder
+package sqls
 
 import (
 	"errors"
 	"fmt"
 	"strings"
 
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -24,7 +24,7 @@ func (b *BuildInsertSQL) InsertTransactionSQL(
 	trAuthorRole types.Role,
 	trEquilibriumTime *string,
 	trSumValue *string,
-) gsqlb.Builder {
+) sqlbuilder.Builder {
 
 	b.ib.InsertInto("transaction")
 	b.ib.Cols(
@@ -46,8 +46,8 @@ func (b *BuildInsertSQL) InsertTransactionSQL(
 		trEquilibriumTime,
 		trSumValue,
 	)
-	ret := gsqlb.Buildf("%v returning *", b.ib)
-	return gsqlb.WithFlavor(ret, gsqlb.PostgreSQL)
+	ret := sqlbuilder.Buildf("%v returning *", b.ib)
+	return sqlbuilder.WithFlavor(ret, sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectTransactionByIDSQL(trID *types.ID) (string, []interface{}) {
@@ -56,7 +56,7 @@ func (b *BuildSelectSQL) SelectTransactionByIDSQL(trID *types.ID) (string, []int
 		Where(
 			b.sb.Equal("id", *trID),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectTransactionsByIDsSQL(IDs []interface{}) (string, []interface{}) {
@@ -65,7 +65,7 @@ func (b *BuildSelectSQL) SelectTransactionsByIDsSQL(IDs []interface{}) (string, 
 		Where(
 			b.sb.In("id", IDs...),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildUpdateSQL) UpdateTransactionByIDSQL(trID *types.ID, equilTime string) (string, []interface{}) {
@@ -78,8 +78,8 @@ func (b *BuildUpdateSQL) UpdateTransactionByIDSQL(trID *types.ID, equilTime stri
 		)
 	// format with ub arg only to avoid
 	// can't scan into dest[0]: unable to assign to *int32
-	retID := gsqlb.Buildf("%v returning *", b.ub)
-	return gsqlb.WithFlavor(retID, gsqlb.PostgreSQL).Build()
+	retID := sqlbuilder.Buildf("%v returning *", b.ub)
+	return sqlbuilder.WithFlavor(retID, sqlbuilder.PostgreSQL).Build()
 }
 
 // => i_0, transaction_item insert index 0
@@ -120,7 +120,7 @@ func buildWithSQL(trItems []*types.TransactionItem) (string, error) {
 func CreateTransactionRequestSQL(
 	ibc func() InsertSQLBuilder,
 	sbc func() SelectSQLBuilder,
-	b func(string, ...interface{}) gsqlb.Builder,
+	b func(string, ...interface{}) sqlbuilder.Builder,
 	tr *types.Transaction) (string, []interface{}, error) {
 
 	var role types.Role
@@ -185,7 +185,7 @@ func CreateTransactionRequestSQL(
 	// 1. transaction
 	// 2. transaction_item
 	// 3. approval
-	insSQL, insArgs := gsqlb.Build(with, builders...).BuildWithFlavor(gsqlb.PostgreSQL)
+	insSQL, insArgs := sqlbuilder.Build(with, builders...).BuildWithFlavor(sqlbuilder.PostgreSQL)
 
 	return insSQL, insArgs, nil
 }

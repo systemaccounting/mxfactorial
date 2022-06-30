@@ -1,7 +1,7 @@
-package sqlbuilder
+package sqls
 
 import (
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/shopspring/decimal"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -18,7 +18,7 @@ func (b *BuildInsertSQL) InsertAccountBalanceSQL(
 		"current_transaction_item_id",
 	)
 	b.ib.Values(accountName, accountBalance, account)
-	return b.ib.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildUpdateSQL) UpdateDebitorAccountBalanceSQL(trItem *types.TransactionItem) (string, []interface{}) {
@@ -30,7 +30,7 @@ func (b *BuildUpdateSQL) UpdateDebitorAccountBalanceSQL(trItem *types.Transactio
 		Where(
 			b.ub.Equal("account_name", *trItem.Debitor),
 		)
-	return b.ub.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.ub.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildUpdateSQL) UpdateCreditorAccountBalanceSQL(trItem *types.TransactionItem) (string, []interface{}) {
@@ -42,7 +42,7 @@ func (b *BuildUpdateSQL) UpdateCreditorAccountBalanceSQL(trItem *types.Transacti
 		Where(
 			b.ub.Equal("account_name", *trItem.Creditor),
 		)
-	return b.ub.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.ub.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectCurrentAccountBalanceByAccountNameSQL(
@@ -53,7 +53,7 @@ func (b *BuildSelectSQL) SelectCurrentAccountBalanceByAccountNameSQL(
 		Where(
 			b.sb.Equal("account_name", *accountName),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectAccountBalancesSQL(
@@ -67,5 +67,5 @@ func (b *BuildSelectSQL) SelectAccountBalancesSQL(
 		Where(
 			b.sb.In("account_name", accountNames...),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
