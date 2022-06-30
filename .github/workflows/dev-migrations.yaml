@@ -10,7 +10,7 @@ on:
     - 'master'
 
 jobs:
-  tools:
+  migrations:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,15 +18,18 @@ jobs:
         with:
           go-version: '1.18.x'
       - name: install deps
-        run: make install
+        run: make install-ci
         working-directory: migrations
       - name: run postgres in docker container
         run: make run-ci
+        working-directory: migrations
+      - name: wait for docker postgres availability
+        run: while ! pg_isready -h 0.0.0.0 -p 5432; do sleep 1; done;
         working-directory: migrations
       - name: up migrate from schema, seed and testseed directories
         run: make updocker DB=test
         working-directory: migrations
       # todo: add insert, update and select tests
-      - name: stop container and clean up postgres docker data
+      - name: stop container and clean up docker postgres data
         run: make clean
         working-directory: migrations
