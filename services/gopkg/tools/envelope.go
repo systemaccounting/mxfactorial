@@ -2,7 +2,6 @@ package tools
 
 import "github.com/systemaccounting/mxfactorial/services/gopkg/types"
 
-// CreateIntraTransaction ...
 func CreateIntraTransaction(
 	authAccount string,
 	tr *types.Transaction,
@@ -21,7 +20,6 @@ func EmptyMarshaledIntraTransaction(authAccount string) (string, error) {
 	return MarshalIntraTransaction(&emptyIntraTr)
 }
 
-// CreateIntraTransaction ...
 func CreateIntraTransactions(
 	authAccount string,
 	trs []*types.Transaction,

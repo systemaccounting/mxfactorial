@@ -3,16 +3,18 @@
 set -e
 
 # print use
-if [[ "$#" -lt 8 ]] || [[ "$#" -gt 9 ]]; then
+if [[ "$#" -lt 8 ]] || [[ "$#" -gt 10 ]]; then
 	cat <<- 'EOF'
 	use:
 	bash scripts/set-pending-tests.sh \
 		--app-or-pkg-name tools \
 		--sha ffac537e6cbbf934b08745a378932722df287a53 \
 		--region us-east-1 \
-		--env dev
+		--env dev \
+		--exclude-services
 
 	OPTIONAL ARGS:
+	"--exclude-services", excludes services from package dependents
 	"--debug", prints variable contents
 	EOF
 	exit 1
@@ -25,6 +27,7 @@ while [[ "$#" -gt 0 ]]; do
         --sha) GITHUB_SHA="$2"; shift ;;
         --region) REGION="$2"; shift ;;
         --env) ENVIRONMENT="$2"; shift ;;
+        --exclude-services) EXCLUDE_SERVICES=1 ;;
         --debug) DEBUG=1 ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -58,10 +61,13 @@ elif [[ "$IS_PKG_IN_PROJECT_JSON" == 'true' ]]; then
 	# set IMPORTING_PKG_DIRS to CHANGED_SVCS
 	CHANGED_DIRS=("${IMPORTING_PKG_DIRS[@]}")
 
-	# get list of CHANGED_SVCS
-	source ./scripts/list-changed-svcs.sh --pkg-name "$APP_OR_PKG_NAME"
-	# add CHANGED_SVCS to CHANGED_DIRS
-	CHANGED_DIRS+=("${CHANGED_SVCS[@]}")
+	# include services if EXCLUDE_SERVICES is NOT set
+	if [[ -z "$EXCLUDE_SERVICES" ]]; then
+		# get list of CHANGED_SVCS
+		source ./scripts/list-changed-svcs.sh --pkg-name "$APP_OR_PKG_NAME"
+		# add CHANGED_SVCS to CHANGED_DIRS
+		CHANGED_DIRS+=("${CHANGED_SVCS[@]}")
+	fi
 else
 	# error when script arg not found in project.json apps or pkgs
 	error_exit "error: \"$APP_OR_PKG_NAME\" is NOT in $PROJECT_CONFIG. exiting."
