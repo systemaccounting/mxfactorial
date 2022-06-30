@@ -1,6 +1,6 @@
-package sqlbuilder
+package sqls
 
-import gsqlb "github.com/huandu/go-sqlbuilder"
+import "github.com/huandu/go-sqlbuilder"
 
 func (b *BuildSelectSQL) SelectRuleInstanceSQL(
 	ruleType,
@@ -27,7 +27,7 @@ func (b *BuildSelectSQL) SelectRuleInstanceSQL(
 			b.sb.Equal("account_name", accountName),
 			b.sb.Equal("variable_values", variableValuesArray),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildInsertSQL) InsertRuleInstanceSQL(
@@ -55,5 +55,5 @@ func (b *BuildInsertSQL) InsertRuleInstanceSQL(
 		accountName,
 		variableValues,
 	)
-	return b.ib.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

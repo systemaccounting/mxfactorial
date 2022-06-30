@@ -1,7 +1,7 @@
-package sqlbuilder
+package sqls
 
 import (
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -21,8 +21,8 @@ func (b *BuildInsertSQL) InsertTransactionNotificationSQL(n []*types.Transaction
 			*v.Message,
 		)
 	}
-	retID := gsqlb.Buildf("%v returning id", b.ib)
-	return gsqlb.WithFlavor(retID, gsqlb.PostgreSQL).Build()
+	retID := sqlbuilder.Buildf("%v returning id", b.ib)
+	return sqlbuilder.WithFlavor(retID, sqlbuilder.PostgreSQL).Build()
 }
 
 func (b *BuildSelectSQL) SelectTransNotifsByIDsSQL(IDs []interface{}) (string, []interface{}) {
@@ -31,7 +31,7 @@ func (b *BuildSelectSQL) SelectTransNotifsByIDsSQL(IDs []interface{}) (string, [
 		Where(
 			b.sb.In("id", IDs...),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildDeleteSQL) DeleteTransNotificationsByIDSQL(IDs []interface{}) (string, []interface{}) {
@@ -39,7 +39,7 @@ func (b *BuildDeleteSQL) DeleteTransNotificationsByIDSQL(IDs []interface{}) (str
 	b.db.Where(
 		b.db.In("id", IDs...),
 	)
-	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectTransNotifsByAccountSQL(accountName string, limit int) (string, []interface{}) {
@@ -50,7 +50,7 @@ func (b *BuildSelectSQL) SelectTransNotifsByAccountSQL(accountName string, limit
 		)
 	b.sb.OrderBy("id").Desc()
 	b.sb.Limit(limit)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildDeleteSQL) DeleteTransNotificationsByTransIDSQL(trID types.ID) (string, []interface{}) {
@@ -58,5 +58,5 @@ func (b *BuildDeleteSQL) DeleteTransNotificationsByTransIDSQL(trID types.ID) (st
 	b.db.Where(
 		b.db.Equal("transaction_id", trID),
 	)
-	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

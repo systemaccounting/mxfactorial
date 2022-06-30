@@ -1,13 +1,13 @@
-package sqlbuilder
+package sqls
 
 import (
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func (b *BuildInsertSQL) InsertTrItemSQL(
 	sbc func() SelectSQLBuilder,
-	trItem *types.TransactionItem) gsqlb.Builder {
+	trItem *types.TransactionItem) sqlbuilder.Builder {
 
 	b.ib.InsertInto("transaction_item")
 	b.ib.Cols(
@@ -35,7 +35,7 @@ func (b *BuildInsertSQL) InsertTrItemSQL(
 	sbTr.From("insert_transaction")
 
 	b.ib.Values(
-		gsqlb.Buildf("(%v)", sbTr),
+		sqlbuilder.Buildf("(%v)", sbTr),
 		trItem.ItemID,
 		trItem.Price,
 		trItem.Quantity,
@@ -53,8 +53,8 @@ func (b *BuildInsertSQL) InsertTrItemSQL(
 		NullSQLFromStrPtr(trItem.DebitorExpirationTime),
 		NullSQLFromStrPtr(trItem.CreditorExpirationTime),
 	)
-	retID := gsqlb.Buildf("%v returning id", b.ib)
-	return gsqlb.WithFlavor(retID, gsqlb.PostgreSQL)
+	retID := sqlbuilder.Buildf("%v returning id", b.ib)
+	return sqlbuilder.WithFlavor(retID, sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
@@ -63,7 +63,7 @@ func (b *BuildSelectSQL) SelectTrItemsByTrIDSQL(trID *types.ID) (string, []inter
 		Where(
 			b.sb.Equal("transaction_id", *trID),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectTrItemsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
@@ -72,5 +72,5 @@ func (b *BuildSelectSQL) SelectTrItemsByTrIDsSQL(trIDs []interface{}) (string, [
 		Where(
 			b.sb.In("transaction_id", trIDs...),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

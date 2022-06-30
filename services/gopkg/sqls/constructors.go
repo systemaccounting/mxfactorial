@@ -1,22 +1,22 @@
-package sqlbuilder
+package sqls
 
 import (
-	gsqlb "github.com/huandu/go-sqlbuilder"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/shopspring/decimal"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 type BuildInsertSQL struct {
-	ib *gsqlb.InsertBuilder
+	ib *sqlbuilder.InsertBuilder
 }
 
 type InsertSQLBuilder interface {
-	gsqlb.Builder
+	sqlbuilder.Builder
 	InsertAccountBalanceSQL(string, decimal.Decimal, types.ID) (string, []interface{})
 	InsertAccountSQL(string) (string, []interface{})
-	InsertApprovalsSQL(sbc func() SelectSQLBuilder, alias string, approvals []*types.Approval) gsqlb.Builder
-	InsertTransactionSQL(*types.ID, *string, *string, *string, types.Role, *string, *string) gsqlb.Builder
-	InsertTrItemSQL(sbc func() SelectSQLBuilder, trItem *types.TransactionItem) gsqlb.Builder
+	InsertApprovalsSQL(sbc func() SelectSQLBuilder, alias string, approvals []*types.Approval) sqlbuilder.Builder
+	InsertTransactionSQL(*types.ID, *string, *string, *string, types.Role, *string, *string) sqlbuilder.Builder
+	InsertTrItemSQL(sbc func() SelectSQLBuilder, trItem *types.TransactionItem) sqlbuilder.Builder
 	InsertTransactionNotificationSQL([]*types.TransactionNotification) (string, []interface{})
 	InsertAccountProfileSQL(*types.AccountProfile) (string, []interface{})
 	InsertRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
@@ -27,22 +27,22 @@ func (b BuildInsertSQL) Build() (string, []interface{}) {
 	return b.ib.Build()
 }
 
-func (b BuildInsertSQL) BuildWithFlavor(flavor gsqlb.Flavor, initialArg ...interface{}) (string, []interface{}) {
+func (b BuildInsertSQL) BuildWithFlavor(flavor sqlbuilder.Flavor, initialArg ...interface{}) (string, []interface{}) {
 	return b.ib.BuildWithFlavor(flavor, initialArg...)
 }
 
 func NewInsertBuilder() InsertSQLBuilder {
 	return &BuildInsertSQL{
-		ib: gsqlb.NewInsertBuilder(),
+		ib: sqlbuilder.NewInsertBuilder(),
 	}
 }
 
 type BuildUpdateSQL struct {
-	ub *gsqlb.UpdateBuilder
+	ub *sqlbuilder.UpdateBuilder
 }
 
 type UpdateSQLBuilder interface {
-	gsqlb.Builder
+	sqlbuilder.Builder
 	UpdateDebitorAccountBalanceSQL(*types.TransactionItem) (string, []interface{})
 	UpdateCreditorAccountBalanceSQL(*types.TransactionItem) (string, []interface{})
 	UpdateTransactionByIDSQL(*types.ID, string) (string, []interface{})
@@ -53,22 +53,22 @@ func (b BuildUpdateSQL) Build() (string, []interface{}) {
 	return b.ub.Build()
 }
 
-func (b BuildUpdateSQL) BuildWithFlavor(flavor gsqlb.Flavor, initialArg ...interface{}) (string, []interface{}) {
+func (b BuildUpdateSQL) BuildWithFlavor(flavor sqlbuilder.Flavor, initialArg ...interface{}) (string, []interface{}) {
 	return b.ub.BuildWithFlavor(flavor, initialArg...)
 }
 
 func NewUpdateBuilder() UpdateSQLBuilder {
 	return &BuildUpdateSQL{
-		ub: gsqlb.NewUpdateBuilder(),
+		ub: sqlbuilder.NewUpdateBuilder(),
 	}
 }
 
 type BuildSelectSQL struct {
-	sb *gsqlb.SelectBuilder
+	sb *sqlbuilder.SelectBuilder
 }
 
 type SelectSQLBuilder interface {
-	gsqlb.Builder
+	sqlbuilder.Builder
 	SelectApprovalsByTrIDSQL(*types.ID) (string, []interface{})
 	SelectApprovalsByTrIDsSQL([]interface{}) (string, []interface{})
 	SelectCurrentAccountBalanceByAccountNameSQL(*string) (string, []interface{})
@@ -83,15 +83,15 @@ type SelectSQLBuilder interface {
 	SelectRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
 	SelectWebsocketByAccountsSQL([]interface{}) (string, []interface{})
 	SelectWebsocketByConnectionIDSQL(string) (string, []interface{})
-	Select(...string) gsqlb.Builder
-	From(...string) gsqlb.Builder
+	Select(...string) sqlbuilder.Builder
+	From(...string) sqlbuilder.Builder
 }
 
-func (b BuildSelectSQL) Select(col ...string) gsqlb.Builder {
+func (b BuildSelectSQL) Select(col ...string) sqlbuilder.Builder {
 	return b.sb.Select(col...)
 }
 
-func (b BuildSelectSQL) From(table ...string) gsqlb.Builder {
+func (b BuildSelectSQL) From(table ...string) sqlbuilder.Builder {
 	return b.sb.From(table...)
 }
 
@@ -99,22 +99,22 @@ func (b BuildSelectSQL) Build() (string, []interface{}) {
 	return b.sb.Build()
 }
 
-func (b BuildSelectSQL) BuildWithFlavor(flavor gsqlb.Flavor, initialArg ...interface{}) (string, []interface{}) {
+func (b BuildSelectSQL) BuildWithFlavor(flavor sqlbuilder.Flavor, initialArg ...interface{}) (string, []interface{}) {
 	return b.sb.BuildWithFlavor(flavor, initialArg...)
 }
 
 func NewSelectBuilder() SelectSQLBuilder {
 	return &BuildSelectSQL{
-		sb: gsqlb.NewSelectBuilder(),
+		sb: sqlbuilder.NewSelectBuilder(),
 	}
 }
 
 type BuildDeleteSQL struct {
-	db *gsqlb.DeleteBuilder
+	db *sqlbuilder.DeleteBuilder
 }
 
 type DeleteSQLBuilder interface {
-	gsqlb.Builder
+	sqlbuilder.Builder
 	DeleteOwnerAccountSQL(string) (string, []interface{})
 	DeleteAccountSQL(string) (string, []interface{})
 	DeleteTransNotificationsByIDSQL([]interface{}) (string, []interface{})
@@ -127,12 +127,12 @@ func (b BuildDeleteSQL) Build() (string, []interface{}) {
 	return b.db.Build()
 }
 
-func (b BuildDeleteSQL) BuildWithFlavor(flavor gsqlb.Flavor, initialArg ...interface{}) (string, []interface{}) {
+func (b BuildDeleteSQL) BuildWithFlavor(flavor sqlbuilder.Flavor, initialArg ...interface{}) (string, []interface{}) {
 	return b.db.BuildWithFlavor(flavor, initialArg...)
 }
 
 func NewDeleteBuilder() DeleteSQLBuilder {
 	return &BuildDeleteSQL{
-		db: gsqlb.NewDeleteBuilder(),
+		db: sqlbuilder.NewDeleteBuilder(),
 	}
 }

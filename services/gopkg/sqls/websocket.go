@@ -1,6 +1,6 @@
-package sqlbuilder
+package sqls
 
-import gsqlb "github.com/huandu/go-sqlbuilder"
+import "github.com/huandu/go-sqlbuilder"
 
 func (b *BuildInsertSQL) InsertWebsocketConnectionSQL(
 	connectionID string,
@@ -15,7 +15,7 @@ func (b *BuildInsertSQL) InsertWebsocketConnectionSQL(
 		connectionID,
 		epochCreatedAt,
 	)
-	return b.ib.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildDeleteSQL) DeleteWebsocketConnectionSQL(connectionID string) (string, []interface{}) {
@@ -23,7 +23,7 @@ func (b *BuildDeleteSQL) DeleteWebsocketConnectionSQL(connectionID string) (stri
 	b.db.Where(
 		b.db.Equal("connection_id", connectionID),
 	)
-	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildDeleteSQL) DeleteWebsocketsByConnectionIDSQL(IDs []interface{}) (string, []interface{}) {
@@ -31,7 +31,7 @@ func (b *BuildDeleteSQL) DeleteWebsocketsByConnectionIDSQL(IDs []interface{}) (s
 	b.db.Where(
 		b.db.In("connection_id", IDs...),
 	)
-	return b.db.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectWebsocketByAccountsSQL(accounts []interface{}) (string, []interface{}) {
@@ -40,7 +40,7 @@ func (b *BuildSelectSQL) SelectWebsocketByAccountsSQL(accounts []interface{}) (s
 		Where(
 			b.sb.In("account_name", accounts...),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildSelectSQL) SelectWebsocketByConnectionIDSQL(connID string) (string, []interface{}) {
@@ -49,7 +49,7 @@ func (b *BuildSelectSQL) SelectWebsocketByConnectionIDSQL(connID string) (string
 		Where(
 			b.sb.Equal("connection_id", connID),
 		)
-	return b.sb.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
 func (b *BuildUpdateSQL) UpdateWebsocketByConnIDSQL(accountName, connectionID string) (string, []interface{}) {
@@ -60,5 +60,5 @@ func (b *BuildUpdateSQL) UpdateWebsocketByConnIDSQL(accountName, connectionID st
 		Where(
 			b.ub.Equal("connection_id", connectionID),
 		)
-	return b.ub.BuildWithFlavor(gsqlb.PostgreSQL)
+	return b.ub.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
