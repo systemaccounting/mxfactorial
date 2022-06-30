@@ -14,6 +14,7 @@ POSTGRES_DATA_VOLUME_MOUNT_PATH=$(POSTGRES_VOLUME_MOUNT_PATH)/data
 CONTAINER_POSTGRES_STORAGE_PATH=/bitnami/postgresql
 DOCKER_IMAGE=bitnami/postgresql
 IMAGE_VERSION=latest
+GO_MIGRATE=github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 ENV_FILE=$(CURDIR)/.env
 ENV_VARS=DATABASE_TYPE \
@@ -39,15 +40,28 @@ test_down = testseed $(prod_down)
 # postgres docker
 run:
 	docker run \
-	--rm \
-	--name $(CONTAINER_NAME) \
-	-e POSTGRESQL_USERNAME=$(POSTGRESQL_USERNAME) \
-	-e POSTGRESQL_PASSWORD=$(POSTGRESQL_PASSWORD) \
-	-e POSTGRESQL_DATABASE=$(POSTGRESQL_DATABASE) \
-	-p $(HOST_PORT):$(CONTAINER_PORT) \
-	-v $(POSTGRES_DATA_VOLUME_MOUNT_PATH):$(CONTAINER_POSTGRES_STORAGE_PATH) \
-	-v $(POSTGRES_VOLUME_MOUNT_PATH)/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf \
-	$(DOCKER_IMAGE):$(IMAGE_VERSION)
+		--rm \
+		--name $(CONTAINER_NAME) \
+		-e POSTGRESQL_USERNAME=$(POSTGRESQL_USERNAME) \
+		-e POSTGRESQL_PASSWORD=$(POSTGRESQL_PASSWORD) \
+		-e POSTGRESQL_DATABASE=$(POSTGRESQL_DATABASE) \
+		-p $(HOST_PORT):$(CONTAINER_PORT) \
+		-v $(POSTGRES_DATA_VOLUME_MOUNT_PATH):$(CONTAINER_POSTGRES_STORAGE_PATH) \
+		-v $(POSTGRES_VOLUME_MOUNT_PATH)/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf \
+		$(DOCKER_IMAGE):$(IMAGE_VERSION)
+
+run-ci:
+	docker run \
+		-d \
+		--rm \
+		--name $(CONTAINER_NAME) \
+		-e POSTGRESQL_USERNAME=$(POSTGRESQL_USERNAME) \
+		-e POSTGRESQL_PASSWORD=$(POSTGRESQL_PASSWORD) \
+		-e POSTGRESQL_DATABASE=$(POSTGRESQL_DATABASE) \
+		-p $(HOST_PORT):$(CONTAINER_PORT) \
+		-v $(POSTGRES_DATA_VOLUME_MOUNT_PATH):$(CONTAINER_POSTGRES_STORAGE_PATH) \
+		-v $(POSTGRES_VOLUME_MOUNT_PATH)/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf \
+		$(DOCKER_IMAGE):$(IMAGE_VERSION)
 
 stop:
 	docker stop $(CONTAINER_NAME)
@@ -197,6 +211,9 @@ lambda-drop-all:
 	@$(MAKE) -s test-env-arg
 	@$(MAKE) -s test-branch-arg
 	$(foreach DIR,$($(DB)_down), $(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=drop COUNT=all;)
+
+install:
+	go install -tags '$(DATABASE_TYPE)' $(GO_MIGRATE)
 
 # arg tests
 test-db-arg:
