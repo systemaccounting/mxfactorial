@@ -7,28 +7,30 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/notify"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func Approve(
 	db lpg.SQLDB,
-	ibc func() sqlb.InsertSQLBuilder,
-	sbc func() sqlb.SelectSQLBuilder,
-	ubc func() sqlb.UpdateSQLBuilder,
-	dbc func() sqlb.DeleteSQLBuilder,
+	ibc func() sqls.InsertSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
+	ubc func() sqls.UpdateSQLBuilder,
+	dbc func() sqls.DeleteSQLBuilder,
 	authAccount *string, // requester may be different from preApprovalTransaction.Author
 	accountRole types.Role,
 	preApprovalTransaction *types.Transaction,
 	notifyTopicArn *string,
 ) (string, error) {
 
+	var preAppTrItems types.TransactionItems = preApprovalTransaction.TransactionItems
+
 	// test debitor capacity
 	err := TestDebitorCapacity(
 		db,
 		sbc,
-		preApprovalTransaction.TransactionItems,
+		preAppTrItems,
 	)
 	if err != nil {
 		return "", err

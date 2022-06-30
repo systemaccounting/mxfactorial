@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/jackc/pgtype"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -21,8 +21,8 @@ var (
 
 func NotifyTransactionRoleApprovers(
 	db lpg.SQLDB,
-	ibc func() sqlb.InsertSQLBuilder,
-	dbc func() sqlb.DeleteSQLBuilder,
+	ibc func() sqls.InsertSQLBuilder,
+	dbc func() sqls.DeleteSQLBuilder,
 	topicArn *string,
 	approvals []*types.Approval,
 	transaction *types.Transaction,
@@ -124,7 +124,7 @@ func createNotificationsPerRoleApprover(
 
 func deleteObseleteApprovalNotifications(
 	db lpg.SQLDB,
-	dbc func() sqlb.DeleteSQLBuilder,
+	dbc func() sqls.DeleteSQLBuilder,
 	trID types.ID,
 ) error {
 
@@ -148,7 +148,7 @@ func deleteObseleteApprovalNotifications(
 
 func insertTransactionApprovalNotifications(
 	db lpg.SQLDB,
-	ibc func() sqlb.InsertSQLBuilder,
+	ibc func() sqls.InsertSQLBuilder,
 	notifications []*types.TransactionNotification,
 ) ([]int64, error) {
 

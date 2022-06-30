@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/shopspring/decimal"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/testdata"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -37,8 +37,8 @@ func lambdaFn(
 	ctx context.Context,
 	e events.CognitoEventUserPoolsPreSignup,
 	c lpg.Connector,
-	ibc func() sqlb.InsertSQLBuilder,
-	sbc func() sqlb.SelectSQLBuilder,
+	ibc func() sqls.InsertSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 ) (events.CognitoEventUserPoolsPreSignup, error) {
 
 	if e.Request.ClientMetadata != nil {
@@ -229,7 +229,7 @@ func lambdaFn(
 // wraps lambdaFn accepting db interface for testability
 func handleEvent(ctx context.Context, e events.CognitoEventUserPoolsPreSignup) (events.CognitoEventUserPoolsPreSignup, error) {
 	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d, sqlb.NewInsertBuilder, sqlb.NewSelectBuilder)
+	return lambdaFn(ctx, e, d, sqls.NewInsertBuilder, sqls.NewSelectBuilder)
 }
 
 func main() {

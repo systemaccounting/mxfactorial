@@ -6,7 +6,7 @@ import (
 
 	"github.com/jackc/pgtype"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -14,7 +14,7 @@ const ApproveAllRoleAccountSQL string = "SELECT approve_all_role_account($1, $2,
 
 func GetApprovalsByTransactionID(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	ID *types.ID) ([]*types.Approval, error) {
 
 	sb := sbc()
@@ -47,7 +47,7 @@ func GetApprovalsByTransactionID(
 
 func GetApprovalsByTrIDs(
 	db lpg.SQLDB,
-	sbc func() sqlb.SelectSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
 	IDs []interface{}) ([]*types.Approval, error) {
 
 	// create sql builder from constructor

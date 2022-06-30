@@ -18,7 +18,7 @@ import (
 	"github.com/lestrrat-go/jwx/jwk"
 	cjwt "github.com/systemaccounting/mxfactorial/services/gopkg/cognitojwt"
 	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	sqlb "github.com/systemaccounting/mxfactorial/services/gopkg/sqlbuilder"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/websocket"
 )
@@ -55,9 +55,9 @@ func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
 	c lpg.Connector,
-	sbc func() sqlb.SelectSQLBuilder,
-	ubc func() sqlb.UpdateSQLBuilder,
-	dbc func() sqlb.DeleteSQLBuilder,
+	sbc func() sqls.SelectSQLBuilder,
+	ubc func() sqls.UpdateSQLBuilder,
+	dbc func() sqls.DeleteSQLBuilder,
 ) (events.APIGatewayProxyResponse, error) {
 
 	// unmarshal body from apigw request
@@ -229,9 +229,9 @@ func handleEvent(
 		ctx,
 		e,
 		c,
-		sqlb.NewSelectBuilder,
-		sqlb.NewUpdateBuilder,
-		sqlb.NewDeleteBuilder)
+		sqls.NewSelectBuilder,
+		sqls.NewUpdateBuilder,
+		sqls.NewDeleteBuilder)
 }
 
 func main() {
