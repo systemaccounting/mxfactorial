@@ -17,6 +17,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/huandu/go-sqlbuilder v1.13.0
 	github.com/jackc/pgconn v1.12.1
+	github.com/jackc/pgproto3/v2 v2.3.0
 	github.com/jackc/pgtype v1.11.0
 	github.com/jackc/pgx/v4 v4.16.1
 	github.com/lestrrat-go/jwx v1.2.20
