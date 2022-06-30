@@ -24,7 +24,7 @@ jobs:
         run: make run-ci
         working-directory: migrations
       - name: wait for docker postgres and "test" user availability
-        run: while ! pg_isready -h localhost -p 5432; do sleep 1; done; sleep 5
+        run: while ! pg_isready -h 127.0.0.1 -p 5432; do sleep 1; done; sleep 5
         working-directory: migrations
       - name: up migrate from schema, seed and testseed directories
         run: make updocker DB=test
