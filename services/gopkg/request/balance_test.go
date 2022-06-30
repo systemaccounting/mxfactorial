@@ -62,9 +62,7 @@ func TestTestDebitorCapacity(t *testing.T) {
 	// test
 	got := TestDebitorCapacity(
 		testdb,
-		func() sqls.SelectSQLBuilder {
-			return sb
-		},
+		func() sqls.SelectSQLBuilder { return sb },
 		testtritems)
 
 	if got != nil {
