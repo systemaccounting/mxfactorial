@@ -212,8 +212,10 @@ lambda-drop-all:
 	@$(MAKE) -s test-branch-arg
 	$(foreach DIR,$($(DB)_down), $(MAKE) deploy-migrations ENV=$(ENV) DIR=$(DIR) BRANCH=$(BRANCH) CMD=drop COUNT=all;)
 
-install:
+install-ci:
 	go install -tags '$(DATABASE_TYPE)' $(GO_MIGRATE)
+	sudo apt update
+	sudo apt install -y postgresql-client
 
 # arg tests
 test-db-arg:
