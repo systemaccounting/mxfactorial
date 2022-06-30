@@ -4,7 +4,26 @@
 
 #### scripts reused in makefiles and workflows for consistency
 
-add and edit by assigning variables from root `project.json` to avoid reconciling terraform variable assignments
+add and edit by assigning variables from root `project.json` to avoid reconciling variable assignments in terraform and elsewhere, for example:
+
+`project.json`
+```json
+"artifacts_bucket_name_prefix": "mxfactorial-artifacts"
+```
+
+`infrastructure/terraform/aws/environments/prod/main.tf`
+```
+ARTIFACTS_PREFIX = jsondecode(file("../../../../../project.json")).artifacts_bucket_name_prefix
+```
+
+`scripts/put-object.sh`
+```sh
+ARTIFACT_BUCKET_NAME_PREFIX=$(jq -r ".artifacts_bucket_name_prefix" project.json)
+```
+
+\*scripts assume **project root** as initial current working directory
+
+---
 
 ##### `clean-artifact.sh`
 
@@ -50,6 +69,8 @@ lists packages requiring test coverage by an internal package code change
 1. recursively loops through `services/gopkg` directories finding files importing the internal package
 1. creates a bash array of other internal packages importing it
 
+\**note: mock packages are excluded*
+
 example:
 ```sh
 bash scripts/list-changed-pkgs.sh --pkg-name tools --debug
@@ -74,6 +95,8 @@ lists services requiring test coverage by an internal package code change
 1. sources `list-changed-pkgs.sh` to create a bash array of other internal packages importing it
 1. loops through `package.json` app directories finding files importing all internal packages affected by package code change
 1. creates a bash array of services affected by go package change
+
+\**note: mock packages are excluded*
 
 example:
 ```sh
@@ -166,13 +189,15 @@ sets custom [CODECOV_FLAGS](https://docs.codecov.com/docs/flags) github workflow
 
 example: `CODECOV_FLAGS=tools,unittest`
 
-##### `set-intra-pkg-deps.sh`
+##### `set-intra-dependents.sh`
 
-sets package dependents in `package.json`
+sets package and service dependents in `package.json`
 
 1. accepts an internal package name as an argument
-1. sources `list-changed-pkgs.sh` to create a bash array of other internal packages importing it
+1. sources `list-changed-svcs.sh` to create a bash array of other packages importing it
 1. sets package `dependents` in `package.json`
+
+\**note: mock packages are excluded*
 
 example:
 
@@ -267,3 +292,40 @@ dumps postgres db to path passed as parameter, e.g. `bash scripts/dump-db.sh --p
 ##### `restore-db.sh`
 
 restores postgres db from path passed as parameter
+
+##### `shared-error.sh`
+
+script sourced to standardize error handling in other scripts
+
+##### `shared-set-dir-path.sh`
+
+script sourced to set DIR_PATH from project.json, for example:
+
+1. assigns `DIR_PATH` variable the `services/request-approve` value from the `.apps.\"request-approve\".path` property in `project.json`
+1. sourcing script then `cd $DIR_PATH`
+1. sourcing script performs some work in `$DIR_PATH`
+
+##### `mock-go-ifaces.sh`
+
+creates go mocks from list of interfaces inside `mock` subdirectory using [gomock](https://github.com/golang/mock)
+
+1. set `.pkgs.lambdapg.mocked_interfaces` property under package or service in `project.json` to map of go package import paths and desired list of interfaces:
+
+    ```json
+    "mocked_interfaces": {
+        "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg": [
+            "Connector",
+            "SQLDB"
+        ],
+        "github.com/jackc/pgx/v4": [
+            "Rows"
+        ]
+    }
+    ```
+1. `make -C './services/gopkg/lambdapg' mock`
+
+creates:
+```
+services/gopkg/lambdapg/lambdapg_mock/lambdapg_mock.go
+services/gopkg/lambdapg/lambdapg_mock/v4_mock.go
+```
