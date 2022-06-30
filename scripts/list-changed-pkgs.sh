@@ -37,6 +37,8 @@ GO_MOD_FILE="$GO_MOD_FILE_PATH/$GO_MOD_FILE_NAME"
 GO_MOD=$(head -n 1 $GO_MOD_FILE | awk '{print $2}')
 PKG_DIR=$(jq -r ".pkgs.$PKG_NAME.path" $PROJECT_CONFIG)
 GO_PKG="$GO_MOD/$PKG_DIR"
+MOCK_FILE_SUFFIX=$(jq -r '.gomock.file_name_suffix' "$PROJECT_CONFIG")
+MOCK_PACKAGE_PREFIX=$(jq -r '.gomock.package_name_prefix' "$PROJECT_CONFIG")
 
 # create array to store go packages affected by neighboring go package change
 # todo: eliminate interpackage dependencies by importing them into main packages
@@ -48,7 +50,10 @@ declare -a IMPORTING_PKG_FILES
 
 # list files importing the initially changed package
 for i in $(grep -r \"$GO_PKG\" ./services/gopkg | awk '{print $1}' | sed 's/://'); do
-	IMPORTING_PKG_FILES+=("$i")
+	# exclude files created by mockgen
+	if [[ "$i" != *"$MOCK_FILE_SUFFIX" ]]; then
+		IMPORTING_PKG_FILES+=("$i")
+	fi
 done
 
 # create array to store go package directories affected go package changes
@@ -136,8 +141,11 @@ while [[ $LOOPS_PENDING -gt 0 ]]; do
 				fi
 			done
 
-			# add .go file affected by go package change to list
-			IMPORTING_PKG_FILES+=("$a")
+			# exclude files created by mockgen
+			if [[ "$a" != *"$MOCK_FILE_SUFFIX" ]]; then
+				# add .go file affected by go package change to list
+				IMPORTING_PKG_FILES+=("$a")
+			fi
 
 			# parse path of file in affected go package directory
 			ADDED_IMPORTING_PKG_DIRS=$(echo "$a" | grep ./services/gopkg | sed 's/\.\///' | xargs dirname)
@@ -154,9 +162,12 @@ while [[ $LOOPS_PENDING -gt 0 ]]; do
 					fi
 				done
 
-				# add newly detected package directory to list of
-				# go package directories affected by changed go package
-				IMPORTING_PKG_DIRS+=("$aipd")
+				# exclude mockgen files
+				if [[ "$aipd" != *"/$MOCK_PACKAGE_PREFIX"_* ]]; then
+					# add newly detected package directory to list of
+					# go package directories affected by changed go package
+					IMPORTING_PKG_DIRS+=("$aipd")
+				fi
 			done
 		done
 	done
