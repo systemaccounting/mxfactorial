@@ -49,7 +49,7 @@ CHANGED_PKGS=("$GO_PKG")
 declare -a IMPORTING_PKG_FILES
 
 # list files importing the initially changed package
-for i in $(grep -r \"$GO_PKG\" ./services/gopkg | awk '{print $1}' | sed 's/://'); do
+for i in $(grep -r \"$GO_PKG\" ./services/gopkg | awk '{print $1}' | sed 's/\.go.*/\.go/'); do
 	# exclude files created by mockgen
 	if [[ "$i" != *"$MOCK_FILE_SUFFIX" ]]; then
 		IMPORTING_PKG_FILES+=("$i")
@@ -127,7 +127,7 @@ while [[ $LOOPS_PENDING -gt 0 ]]; do
 		# 1. "github.com/systemaccounting/mxfactorial/services/gopkg/tools" was changed
 		# 2. "github.com/systemaccounting/mxfactorial/services/gopkg/request" imports "github.com/systemaccounting/mxfactorial/services/gopkg/tools"
 		# 3. these .go files import "github.com/systemaccounting/mxfactorial/services/gopkg/request"
-		ADDED_IMPORTING_PKG_FILES=$(grep -r \"$IMPORTING_PKG\" ./services/gopkg | awk '{print $1}' | sed 's/://')
+		ADDED_IMPORTING_PKG_FILES=$(grep -r \"$IMPORTING_PKG\" ./services/gopkg | awk '{print $1}' | sed 's/\.go.*/\.go/')
 
 		# loop through newly detected .go files importing changed go package
 		for a in $ADDED_IMPORTING_PKG_FILES; do
