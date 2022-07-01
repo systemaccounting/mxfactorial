@@ -9,6 +9,9 @@ mock:
 test:
 	go test -race -covermode=atomic -coverprofile=coverage.out
 
+install:
+	go install github.com/golang/mock/mockgen@latest
+
 test-dependents:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/test-dependents.sh \
