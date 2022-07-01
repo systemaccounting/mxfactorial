@@ -346,6 +346,15 @@
                 ]
             }
         },
+        "test": {
+            "runtime": "go1.x",
+            "path": "test",
+            "dependents": [],
+            "secrets": [
+                "GRAPHQL_URI"
+            ],
+            "params": []
+        },
         "testdata": {
             "runtime": "go1.x",
             "path": "services/gopkg/testdata",
@@ -433,5 +442,8 @@
     "gomock": {
         "package_name_prefix": "mock",
         "file_name_suffix": "mock.go"
+    },
+    "cognito": {
+        "test_accounts_file": "./migrations/testseed/000001_accounts.up.sql"
     }
 }
