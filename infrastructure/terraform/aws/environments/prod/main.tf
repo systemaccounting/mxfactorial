@@ -56,7 +56,7 @@ module "prod" {
 
   ############### rds ###############
 
-  rds_db_version                  = "13.3"
+  rds_db_version                  = "13.4"
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
