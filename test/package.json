@@ -1,0 +1,20 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "author": "max funk",
+  "private": true,
+  "description": "mxfactorial integration tests",
+  "main": "index.js",
+  "scripts": {
+    "test": "env-cmd jest --runInBand --silent --testRegex='.*\\.integ\\.[tj]sx?'"
+  },
+  "dependencies": {
+    "env-cmd": "^10.1.0",
+    "graphql-request": "^4.3.0",
+    "jest": "^28.1.2"
+  },
+  "jest": {
+    "verbose": true,
+    "testTimeout": 10000
+  }
+}
