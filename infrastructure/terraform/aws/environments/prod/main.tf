@@ -31,8 +31,9 @@ locals {
   APP              = "mxfactorial"
   ENV              = "prod"
   APP_ENV          = "${local.APP}-${local.ENV}"
-  ORIGIN_PREFIX    = jsondecode(file("${path.module}/../../../../../project.json")).client_origin_bucket_name_prefix
-  ARTIFACTS_PREFIX = jsondecode(file("${path.module}/../../../../../project.json")).artifacts_bucket_name_prefix
+  PROJECT_JSON     = "../../../../../project.json"
+  ORIGIN_PREFIX    = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).client_origin_bucket_name_prefix
+  ARTIFACTS_PREFIX = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).artifacts_bucket_name_prefix
   CUSTOM_DOMAIN    = "mxfactorial.io"
 }
 
