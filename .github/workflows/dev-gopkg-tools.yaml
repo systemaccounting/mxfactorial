@@ -23,7 +23,7 @@ jobs:
         run: make install
         working-directory: services/gopkg/tools
       - name: generate mocks
-        run: make generate
+        run: make mock
         working-directory: services/gopkg/tools
       - name: unit test
         run: make test
