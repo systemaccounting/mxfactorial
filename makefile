@@ -35,6 +35,12 @@ size:
 print:
 	cat $(INVENTORY_FILE)
 
+.PHONY: test
+test:
+	@$(MAKE) -s test-env-arg
+	$(MAKE) -C './test' get-secrets ENV=$(ENV)
+	$(MAKE) -C './test' test
+
 install:
 	brew install go
 	go install github.com/99designs/gqlgen@latest
