@@ -329,3 +329,11 @@ creates:
 services/gopkg/lambdapg/lambdapg_mock/lambdapg_mock.go
 services/gopkg/lambdapg/lambdapg_mock/v4_mock.go
 ```
+
+##### `create-accounts.sh`
+
+creates testseed migration accounts in cognito
+
+##### `delete-accounts.sh`
+
+deletes testseed migration accounts from cognito
