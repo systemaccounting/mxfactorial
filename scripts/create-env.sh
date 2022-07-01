@@ -18,16 +18,23 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-APP_PROPERTY=".apps.\"$APP_NAME\""
-
-if [[ $APP_NAME == 'root' ]]; then
-	APP_PROPERTY=
-fi
 
 PROJECT_CONFIG=project.json
-SECRETS=$(jq -r "[$APP_PROPERTY.secrets[]] | join (\" \")" $PROJECT_CONFIG)
-PARAMS=$(jq -r "[$APP_PROPERTY.params[]] | join (\" \")" $PROJECT_CONFIG)
-ENV_FILE_PATH=$(jq -r "$APP_PROPERTY.path" $PROJECT_CONFIG)
+
+# set PROJECT_JSON_PROPERTY variable
+APP_OR_PKG_NAME="$APP_NAME" # todo: change APP_NAME to APP_OR_PKG_NAME
+source ./scripts/shared-set-property.sh
+
+if [[ "$APP_OR_PKG_NAME" == 'root' ]]; then
+	PROJECT_JSON_PROPERTY=
+fi
+
+
+SECRETS=$(jq -r "[$PROJECT_JSON_PROPERTY.secrets[]] | join (\" \")" $PROJECT_CONFIG)
+PARAMS=$(jq -r "[$PROJECT_JSON_PROPERTY.params[]] | join (\" \")" $PROJECT_CONFIG)
+
+
+ENV_FILE_PATH=$(jq -r "$PROJECT_JSON_PROPERTY.path" $PROJECT_CONFIG)
 ENV_FILE_NAME='.env'
 ENV_FILE="$ENV_FILE_PATH/$ENV_FILE_NAME"
 
