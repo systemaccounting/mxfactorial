@@ -50,7 +50,7 @@ createuser:
 		--region $(REGION) \
 		--user-pool-id $$POOL_ID \
 		--username $(ACC) \
-		--password $(ACC) \
+		--password password \
 		--permanent;
 
 ###################### dependencies ######################
