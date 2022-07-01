@@ -1,13 +1,10 @@
 PKG_NAME=tools
-RELATIVE_PROJECT_ROOT_PATH=../..
-PROJECT_CONF_FILE_NAME=project.json
-PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
+RELATIVE_PROJECT_ROOT_PATH=../../..
 
-install:
-	go install github.com/golang/mock/mockgen@latest
-
-generate:
-	go generate
+mock:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/mock-go-ifaces.sh \
+		--app-or-pkg-name $(PKG_NAME)
 
 test:
 	go test -race -covermode=atomic -coverprofile=coverage.out

@@ -369,7 +369,12 @@
                 "notify",
                 "websocket",
                 "data"
-            ]
+            ],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/tools": [
+                    "Marshaler"
+                ]
+            }
         },
         "types": {
             "runtime": "go1.x",
