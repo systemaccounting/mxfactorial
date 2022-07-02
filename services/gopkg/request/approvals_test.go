@@ -1,36 +1,55 @@
 package request
 
-import (
-	"testing"
+import "testing"
 
-	"github.com/systemaccounting/mxfactorial/services/gopkg/testdata"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
-)
+var strPtrVar string = "test"
+var boolPrtVar bool = true
 
-func TestTestPendingRoleApproval(t *testing.T) {
-	tr := testdata.GetTestTransaction("../testdata/transWAppr.json")
-	testapprovals := tr.TransactionItems[3].Approvals
-	testaccount := "JoeCarter"
-	testrole := types.Role(0)
+func TestEmptyStringIfNilPtr(t *testing.T) {
 
-	got := TestPendingRoleApproval(&testaccount, testrole, testapprovals)
+	tests := []struct {
+		input *string
+		want  string
+	}{
+		{
+			input: nil,
+			want:  "",
+		},
+		{
+			input: &strPtrVar,
+			want:  "test",
+		},
+	}
 
-	if got != nil {
-		t.Errorf("got %v, want nil", got.Error())
+	for _, v := range tests {
+		got := EmptyStringIfNilPtr(v.input)
+		want := v.want
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
 	}
 }
 
-func TestTestPendingRoleApprovalErr(t *testing.T) {
-	tr := testdata.GetTestTransaction("../testdata/transWAppr.json")
-	testapprovals := tr.TransactionItems[0].Approvals
-	testaccount := "BenRoss"
-	testrole := types.Role(1)
+func TestFalseIfNilPtr(t *testing.T) {
 
-	got := TestPendingRoleApproval(&testaccount, testrole, testapprovals)
-	want := "0 timestamps pending for approver. exiting"
+	tests := []struct {
+		input *bool
+		want  bool
+	}{
+		{
+			input: nil,
+			want:  false,
+		},
+		{
+			input: &boolPrtVar,
+			want:  true,
+		},
+	}
 
-	if got != nil {
-		if got.Error() != want {
+	for _, v := range tests {
+		got := FalseIfNilPtr(v.input)
+		want := v.want
+		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
 	}
