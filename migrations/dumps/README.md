@@ -10,6 +10,8 @@ replaces 2 minute running time to create test db using migrations and service ca
 
 #### tl;dr
 1. `make -C './migrations' run` to start postgres in docker
+1. `make -C './migrations' insert` to up migrate and insert a mix of approximately 40 requests and transactions
+1. `make -C './migrations/dumps' dump-testseed` to create a sql dump in `./migrations/dumps`
 1. `make -C './migrations/dumps' restore-testseed` to build a test db in 5 seconds
 
 #### running times
@@ -24,7 +26,7 @@ replaces 2 minute running time to create test db using migrations and service ca
   1. drops test db to discard migration tool tables
   1. restores db with `./migrations/dumps/testseed.sql`
 
-  #### use
+  #### development
   1. change schema and test data in:
       1. `./migrations/schema`
       1. `./migrations/seed`

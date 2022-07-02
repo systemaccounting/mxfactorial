@@ -22,7 +22,9 @@ test db = `./schema` + `./seed` + `./testseed`
 
 ### tl;dr start local development
 1. `make run` to start postgres in docker
-1. `make -C './dumps' restore-testseed` to build a test db
+1. `make insert` to up migrate and insert a mix of approximately 40 requests and transactions
+1. `make -C './dumps' dump-testseed` to create a sql dump in `./migrations/dumps`
+1. `make -C './dumps' restore-testseed` to build a test db in 5 seconds
 
 ### work fast
 1. add changes to migration directories

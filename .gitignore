@@ -66,3 +66,6 @@ migrations/postgres/data
 
 # go migrate
 migrate.linux-amd64
+
+# psql
+migrations/dumps/*.sql
