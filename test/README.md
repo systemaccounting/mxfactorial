@@ -5,8 +5,6 @@
 
 ### integration tests
 
-integration tests
-
 plain javascript keeps configuration cost low
 
 1. OPTIONAL: `make resetrds` to reset dev rds database
