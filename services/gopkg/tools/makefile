@@ -1,7 +1,6 @@
 PKG_NAME=tools
 RELATIVE_PROJECT_ROOT_PATH=../../..
 
-.PHONY: mock
 mock:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/mock-go-ifaces.sh \
