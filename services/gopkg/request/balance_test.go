@@ -153,10 +153,115 @@ func TestGetAccountBalance(t *testing.T) {
 	got := bal.String()
 
 	if count != 1 {
-		t.Error("wasnt called once")
+		t.Error("select sql builder constructor wasnt called once")
 	}
 
 	if got != want {
 		t.Errorf("got %v, want %v", got, want)
+	}
+}
+
+func TestGetAccountBalances(t *testing.T) {
+
+	ctrl := gomock.NewController(t)
+
+	mockdb := mlpg.NewMockSQLDB(ctrl)
+	mockpgunmarshaler := mlpg.NewMockPGUnmarshaler(ctrl)
+	mockbuilder := msqls.NewMockSelectSQLBuilder(ctrl)
+	count := 0
+	mocksbfn := func() sqls.SelectSQLBuilder {
+		count++
+		return mockbuilder
+	}
+	mockrows := mlpg.NewMockRows(ctrl)
+
+	testacc1 := "testacc1"
+	testacc1bal, err := decimal.NewFromString("10.000")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	testacc2 := "testacc2"
+	testacc2bal, err := decimal.NewFromString("11.000")
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	testbalances := []*types.AccountBalance{
+		{
+			AccountName:    &testacc1,
+			CurrentBalance: testacc1bal,
+		},
+		{
+			AccountName:    &testacc2,
+			CurrentBalance: testacc2bal,
+		},
+	}
+
+	testacctsstr := []string{testacc1, testacc2}
+	testacctsiface := []interface{}{testacc1, testacc2}
+
+	testsql := "testsql"
+
+	mockbuilder.
+		EXPECT().
+		SelectAccountBalancesSQL(testacctsiface).
+		Times(1).
+		Return(testsql, testacctsiface)
+
+	mockdb.
+		EXPECT().
+		Query(
+			context.TODO(),
+			testsql,
+			testacctsiface...,
+		).
+		Times(1).
+		Return(mockrows, nil)
+
+	mockpgunmarshaler.
+		EXPECT().
+		UnmarshalAccountBalances(mockrows).
+		Times(1).
+		Return(testbalances, nil)
+
+	acctbalances, err := GetAccountBalances(
+		mockdb,
+		mockpgunmarshaler,
+		mocksbfn,
+		testacctsstr)
+	if err != nil {
+		t.Errorf("GetAccountBalance err: %v", err)
+	}
+
+	if count != 1 {
+		t.Error("select sql builder constructor wasnt called once")
+	}
+
+	gotFirstAcct := *acctbalances[0].AccountName
+	wantFirstAcct := testacc1
+
+	if gotFirstAcct != wantFirstAcct {
+		t.Errorf("got %v as first account, want %v", gotFirstAcct, wantFirstAcct)
+	}
+
+	gotFirstAcctBal := acctbalances[0].CurrentBalance
+	wantFirstAcctBal := testacc1bal
+
+	if gotFirstAcctBal.Cmp(wantFirstAcctBal) != 0 {
+		t.Errorf("got %v as first account balance, want %v", gotFirstAcctBal, wantFirstAcctBal)
+	}
+
+	gotSecondAcct := *acctbalances[1].AccountName
+	wantSecondAcct := testacc2
+
+	if gotSecondAcct != wantSecondAcct {
+		t.Errorf("got %v as second account, want %v", gotSecondAcct, wantSecondAcct)
+	}
+
+	gotSecondAcctBal := acctbalances[1].CurrentBalance
+	wantSecondAcctBal := testacc2bal
+
+	if gotSecondAcctBal.Cmp(wantSecondAcctBal) != 0 {
+		t.Errorf("got %v as second account balance, want %v", gotSecondAcctBal, wantSecondAcctBal)
 	}
 }
