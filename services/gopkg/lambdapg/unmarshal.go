@@ -11,8 +11,28 @@ import (
 	"gopkg.in/guregu/null.v4"
 )
 
-// UnmarshalID ...
-func UnmarshalID(
+type PGUnmarshal struct{}
+
+type PGUnmarshaler interface {
+	UnmarshalID(pgx.Row) (int64, error)
+	UnmarshalAccountProfileIDs(pgx.Rows) ([]*types.AccountProfileID, error)
+	UnmarshalTransaction(pgx.Row) (*types.Transaction, error)
+	UnmarshalTransactions(pgx.Rows) ([]*types.Transaction, error)
+	UnmarshalIDs(pgx.Rows) ([]int64, error)
+	UnmarshalTrItems(pgx.Rows) ([]*types.TransactionItem, error)
+	UnmarshalApprovals(pgx.Rows) ([]*types.Approval, error)
+	UnmarshalTransactionNotifications(pgx.Rows) ([]*types.TransactionNotification, error)
+	UnmarshalWebsockets(pgx.Rows) ([]*types.Websocket, error)
+	UnmarshalWebsocket(pgx.Row) (*types.Websocket, error)
+	UnmarshalAccountBalance(pgx.Row) (decimal.Decimal, error)
+	UnmarshalAccountBalances(rows pgx.Rows) ([]*types.AccountBalance, error)
+}
+
+func NewPGUnmarshaler() PGUnmarshaler {
+	return &PGUnmarshal{}
+}
+
+func (p PGUnmarshal) UnmarshalID(
 	row pgx.Row,
 ) (int64, error) {
 	var ID int64
@@ -23,8 +43,7 @@ func UnmarshalID(
 	return ID, nil
 }
 
-// UnmarshalIDs ...
-func UnmarshalAccountProfileIDs(
+func (p PGUnmarshal) UnmarshalAccountProfileIDs(
 	rows pgx.Rows,
 ) ([]*types.AccountProfileID, error) {
 	var profileIDs []*types.AccountProfileID
@@ -52,8 +71,7 @@ func UnmarshalAccountProfileIDs(
 	return profileIDs, nil
 }
 
-// UnmarshalTransaction ...
-func UnmarshalTransaction(
+func (p PGUnmarshal) UnmarshalTransaction(
 	row pgx.Row,
 ) (*types.Transaction, error) {
 	// scanning into variables first to avoid:
@@ -105,7 +123,7 @@ func UnmarshalTransaction(
 }
 
 // UnmarshalTransactions ...
-func UnmarshalTransactions(
+func (p PGUnmarshal) UnmarshalTransactions(
 	rows pgx.Rows,
 ) ([]*types.Transaction, error) {
 	var transactions []*types.Transaction
@@ -178,8 +196,7 @@ func geoPointToStringPtr(gp pgtype.Point) (*string, error) {
 	return geoPoint, nil
 }
 
-// UnmarshalIDs ...
-func UnmarshalIDs(
+func (p PGUnmarshal) UnmarshalIDs(
 	rows pgx.Rows,
 ) ([]int64, error) {
 	// https://github.com/jackc/pgx/blob/909b81a16372d7e2574b2b11e8993895bdd5a065/conn.go#L676-L677
@@ -201,7 +218,7 @@ func UnmarshalIDs(
 }
 
 // UnmarshalTrItems ...
-func UnmarshalTrItems(
+func (p PGUnmarshal) UnmarshalTrItems(
 	rows pgx.Rows,
 ) ([]*types.TransactionItem, error) {
 	var trItems []*types.TransactionItem
@@ -284,8 +301,7 @@ func UnmarshalTrItems(
 	return trItems, nil
 }
 
-// UnmarshalApprovals ...
-func UnmarshalApprovals(
+func (p PGUnmarshal) UnmarshalApprovals(
 	rows pgx.Rows,
 ) ([]*types.Approval, error) {
 	var approvals []*types.Approval
@@ -343,8 +359,7 @@ func UnmarshalApprovals(
 	return approvals, nil
 }
 
-// UnmarshalTransactionNotifications ...
-func UnmarshalTransactionNotifications(
+func (p PGUnmarshal) UnmarshalTransactionNotifications(
 	rows pgx.Rows,
 ) ([]*types.TransactionNotification, error) {
 	var transNotifs []*types.TransactionNotification
@@ -384,8 +399,7 @@ func UnmarshalTransactionNotifications(
 	return transNotifs, nil
 }
 
-// UnmarshalWebsockets ...
-func UnmarshalWebsockets(
+func (p PGUnmarshal) UnmarshalWebsockets(
 	rows pgx.Rows,
 ) ([]*types.Websocket, error) {
 	var wss []*types.Websocket
@@ -422,7 +436,7 @@ func UnmarshalWebsockets(
 	return wss, nil
 }
 
-func UnmarshalWebsocket(
+func (p PGUnmarshal) UnmarshalWebsocket(
 	row pgx.Row,
 ) (*types.Websocket, error) {
 	// scanning into variables first to avoid:
@@ -452,7 +466,7 @@ func UnmarshalWebsocket(
 	return w, nil
 }
 
-func UnmarshalAccountBalance(
+func (p PGUnmarshal) UnmarshalAccountBalance(
 	row pgx.Row,
 ) (decimal.Decimal, error) {
 	var AccountBalance decimal.Decimal
@@ -463,7 +477,7 @@ func UnmarshalAccountBalance(
 	return AccountBalance, nil
 }
 
-func UnmarshalAccountBalances(
+func (p PGUnmarshal) UnmarshalAccountBalances(
 	rows pgx.Rows,
 ) ([]*types.AccountBalance, error) {
 	var balances []*types.AccountBalance
