@@ -2,6 +2,7 @@ package request
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -101,6 +102,8 @@ func TestTestDebitorCapacity(t *testing.T) {
 func TestGetAccountBalance(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
+
+	// mocks
 	mockdb := mlpg.NewMockSQLDB(ctrl)
 	mockpgunmarshaler := mlpg.NewMockPGUnmarshaler(ctrl)
 	mockbuilder := msqls.NewMockSelectSQLBuilder(ctrl)
@@ -110,6 +113,8 @@ func TestGetAccountBalance(t *testing.T) {
 		return mockbuilder
 	}
 	mockrow := mlpg.NewMockRow(ctrl)
+
+	// test values
 	testacct := "testaccount"
 	testsql := "testsql"
 	testargs := []interface{}{""}
@@ -118,6 +123,7 @@ func TestGetAccountBalance(t *testing.T) {
 		t.Errorf("NewFromString err: %v", err)
 	}
 
+	// expects
 	mockbuilder.
 		EXPECT().
 		SelectCurrentAccountBalanceByAccountNameSQL(&testacct).
@@ -140,6 +146,7 @@ func TestGetAccountBalance(t *testing.T) {
 		Times(1).
 		Return(testbalance, nil)
 
+	// test
 	bal, err := GetAccountBalance(
 		mockdb,
 		mockpgunmarshaler,
@@ -149,6 +156,7 @@ func TestGetAccountBalance(t *testing.T) {
 		t.Errorf("GetAccountBalance err: %v", err)
 	}
 
+	// assert
 	want := testbalance.String()
 	got := bal.String()
 
@@ -165,6 +173,7 @@ func TestGetAccountBalances(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 
+	// mocks
 	mockdb := mlpg.NewMockSQLDB(ctrl)
 	mockpgunmarshaler := mlpg.NewMockPGUnmarshaler(ctrl)
 	mockbuilder := msqls.NewMockSelectSQLBuilder(ctrl)
@@ -175,15 +184,16 @@ func TestGetAccountBalances(t *testing.T) {
 	}
 	mockrows := mlpg.NewMockRows(ctrl)
 
+	// test values
 	testacc1 := "testacc1"
 	testacc1bal, err := decimal.NewFromString("10.000")
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 	}
 	testacc2 := "testacc2"
 	testacc2bal, err := decimal.NewFromString("11.000")
 	if err != nil {
-		t.Errorf(err.Error())
+		t.Error(err.Error())
 	}
 
 	testbalances := []*types.AccountBalance{
@@ -199,9 +209,9 @@ func TestGetAccountBalances(t *testing.T) {
 
 	testacctsstr := []string{testacc1, testacc2}
 	testacctsiface := []interface{}{testacc1, testacc2}
-
 	testsql := "testsql"
 
+	// mocks
 	mockbuilder.
 		EXPECT().
 		SelectAccountBalancesSQL(testacctsiface).
@@ -224,6 +234,7 @@ func TestGetAccountBalances(t *testing.T) {
 		Times(1).
 		Return(testbalances, nil)
 
+	// test
 	acctbalances, err := GetAccountBalances(
 		mockdb,
 		mockpgunmarshaler,
@@ -233,6 +244,7 @@ func TestGetAccountBalances(t *testing.T) {
 		t.Errorf("GetAccountBalance err: %v", err)
 	}
 
+	// assert
 	if count != 1 {
 		t.Error("select sql builder constructor wasnt called once")
 	}
@@ -263,5 +275,36 @@ func TestGetAccountBalances(t *testing.T) {
 
 	if gotSecondAcctBal.Cmp(wantSecondAcctBal) != 0 {
 		t.Errorf("got %v as second account balance, want %v", gotSecondAcctBal, wantSecondAcctBal)
+	}
+}
+
+func TestTestDebitorBalanceGreaterThanRequiredFunds(t *testing.T) {
+
+	// test values
+	testacct := "testacct"
+	testrequiredbalance, err := decimal.NewFromString("1.000")
+	if err != nil {
+		t.Error(err.Error())
+	}
+	testcurrentbalance, err := decimal.NewFromString("0.999")
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	// test
+	err = TestDebitorBalanceGreaterThanRequiredFunds(
+		&testacct,
+		testrequiredbalance,
+		testcurrentbalance)
+
+	// assert
+	want := fmt.Sprintf("error: insufficient funds in debitor %v account", testacct)
+	if err == nil {
+		t.Error("expected " + want)
+	} else {
+		got := err.Error()
+		if got != want {
+			t.Errorf("got %v, want %v", got, want)
+		}
 	}
 }
