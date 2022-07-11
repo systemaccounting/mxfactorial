@@ -23,10 +23,10 @@ PROJECT_CONFIG=project.json
 
 # set PROJECT_JSON_PROPERTY variable
 APP_OR_PKG_NAME="$APP_NAME" # todo: change APP_NAME to APP_OR_PKG_NAME
-source ./scripts/shared-set-property.sh
-
 if [[ "$APP_OR_PKG_NAME" == 'root' ]]; then
 	PROJECT_JSON_PROPERTY=
+else
+	source ./scripts/shared-set-property.sh
 fi
 
 
