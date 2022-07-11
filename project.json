@@ -304,10 +304,12 @@
             "mocked_interfaces": {
                 "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg": [
                     "Connector",
-                    "SQLDB"
+                    "SQLDB",
+                    "PGUnmarshaler"
                 ],
                 "github.com/jackc/pgx/v4": [
-                    "Rows"
+                    "Rows",
+                    "Row"
                 ]
             }
         },
