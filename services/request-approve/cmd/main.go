@@ -38,6 +38,7 @@ func lambdaFn(
 	ctx context.Context,
 	e *types.RequestApprove,
 	c lpg.Connector,
+	u lpg.PGUnmarshaler,
 	ibc func() sqls.InsertSQLBuilder,
 	sbc func() sqls.SelectSQLBuilder,
 	ubc func() sqls.UpdateSQLBuilder,
@@ -68,6 +69,7 @@ func lambdaFn(
 	// get current transaction
 	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(
 		db,
+		u,
 		sbc,
 		e.ID)
 	if err != nil {
@@ -88,6 +90,7 @@ func lambdaFn(
 	// 4. notify approvers
 	return request.Approve(
 		db,
+		u,
 		ibc,
 		sbc,
 		ubc,
@@ -106,11 +109,13 @@ func handleEvent(
 ) (string, error) {
 
 	c := lpg.NewConnector(pgx.Connect)
+	u := lpg.NewPGUnmarshaler()
 
 	return lambdaFn(
 		ctx,
 		e,
 		c,
+		u,
 		sqls.NewInsertBuilder,
 		sqls.NewSelectBuilder,
 		sqls.NewUpdateBuilder,

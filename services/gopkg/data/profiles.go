@@ -10,6 +10,7 @@ import (
 
 func GetProfileIDsByAccountList(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	accounts []interface{}) ([]*types.AccountProfileID, error) {
 
@@ -33,7 +34,7 @@ func GetProfileIDsByAccountList(
 	}
 
 	// unmarshal account profile ids with account names
-	profileIDList, err := lpg.UnmarshalAccountProfileIDs(profileIDRows)
+	profileIDList, err := u.UnmarshalAccountProfileIDs(profileIDRows)
 	if err != nil {
 		return nil, err
 	}

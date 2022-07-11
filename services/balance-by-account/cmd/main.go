@@ -28,6 +28,7 @@ func lambdaFn(
 	ctx context.Context,
 	e types.QueryByAccount,
 	c lpg.Connector,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 ) (string, error) {
 
@@ -48,7 +49,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get balance
-	balance, err := request.GetAccountBalance(db, sbc, e.AccountName)
+	balance, err := request.GetAccountBalance(db, u, sbc, e.AccountName)
 	if err != nil {
 		var errMsg string = "get account balance %v"
 		log.Printf(errMsg, err)
@@ -59,10 +60,12 @@ func lambdaFn(
 	return balance.StringFixed(3), nil
 }
 
-// wraps lambdaFn accepting db interface for testability
+// wraps lambdaFn accepting services satisfying
+// interfaces for testability
 func handleEvent(ctx context.Context, e types.QueryByAccount) (string, error) {
-	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d, sqls.NewSelectBuilder)
+	c := lpg.NewConnector(pgx.Connect)
+	u := lpg.NewPGUnmarshaler()
+	return lambdaFn(ctx, e, c, u, sqls.NewSelectBuilder)
 }
 
 // avoids lambda package dependency during local development

@@ -56,6 +56,7 @@ func lambdaFn(
 	ctx context.Context,
 	e *types.IntraTransaction,
 	c lpg.Connector,
+	u lpg.PGUnmarshaler,
 	ibc func() sqls.InsertSQLBuilder,
 	sbc func() sqls.SelectSQLBuilder,
 	ubc func() sqls.UpdateSQLBuilder,
@@ -142,7 +143,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// unmarshal account profile ids with account names
-	profileIDList, err := data.GetProfileIDsByAccountList(db, sbc, uniqueAccounts)
+	profileIDList, err := data.GetProfileIDsByAccountList(db, u, sbc, uniqueAccounts)
 	if err != nil {
 		log.Printf("GetProfileIDsByAccountList error: %v", err)
 		return "", err
@@ -166,7 +167,7 @@ func lambdaFn(
 	}
 
 	// get new transaction request
-	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, sbc, trID)
+	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, u, sbc, trID)
 	if err != nil {
 		errMsg := fmt.Errorf("GetTransactionWithTrItemsAndApprovalsByID error: %v", err)
 		log.Print(errMsg)
@@ -179,6 +180,7 @@ func lambdaFn(
 	// 4. notify approvers
 	return request.Approve(
 		db,
+		u,
 		ibc,
 		sbc,
 		ubc,
@@ -287,10 +289,12 @@ func handleEvent(
 ) (string, error) {
 	var resp []*types.TransactionItem
 	c := lpg.NewConnector(pgx.Connect)
+	u := lpg.NewPGUnmarshaler()
 	return lambdaFn(
 		ctx,
 		e,
 		c,
+		u,
 		sqls.NewInsertBuilder,
 		sqls.NewSelectBuilder,
 		sqls.NewUpdateBuilder,

@@ -55,6 +55,7 @@ func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
 	c lpg.Connector,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	ubc func() sqls.UpdateSQLBuilder,
 	dbc func() sqls.DeleteSQLBuilder,
@@ -130,7 +131,7 @@ func lambdaFn(
 	}
 
 	// unmarshal transaction_notifications
-	transNotifs, err := lpg.UnmarshalTransactionNotifications(
+	transNotifs, err := u.UnmarshalTransactionNotifications(
 		transNotifsRows,
 	)
 	if err != nil {
@@ -225,10 +226,12 @@ func handleEvent(
 	e events.APIGatewayWebsocketProxyRequest,
 ) (events.APIGatewayProxyResponse, error) {
 	c := lpg.NewConnector(pgx.Connect)
+	u := lpg.NewPGUnmarshaler()
 	return lambdaFn(
 		ctx,
 		e,
 		c,
+		u,
 		sqls.NewSelectBuilder,
 		sqls.NewUpdateBuilder,
 		sqls.NewDeleteBuilder)

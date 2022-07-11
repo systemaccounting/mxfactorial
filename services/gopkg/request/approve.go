@@ -14,6 +14,7 @@ import (
 
 func Approve(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	ibc func() sqls.InsertSQLBuilder,
 	sbc func() sqls.SelectSQLBuilder,
 	ubc func() sqls.UpdateSQLBuilder,
@@ -29,6 +30,7 @@ func Approve(
 	// test debitor capacity
 	err := TestDebitorCapacity(
 		db,
+		u,
 		sbc,
 		preAppTrItems,
 	)
@@ -73,6 +75,7 @@ func Approve(
 
 	postApprovalTransaction, err := data.GetTransactionWithTrItemsAndApprovalsByID(
 		db,
+		u,
 		sbc,
 		preApprovalTransaction.ID,
 	)
@@ -96,6 +99,7 @@ func Approve(
 	// notify role approvers
 	err = notify.NotifyTransactionRoleApprovers(
 		db,
+		u,
 		ibc,
 		dbc,
 		notifyTopicArn,

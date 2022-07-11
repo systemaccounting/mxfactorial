@@ -12,6 +12,7 @@ import (
 
 func GetTrItemsByTransactionID(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	ID *types.ID) ([]*types.TransactionItem, error) {
 
@@ -34,9 +35,7 @@ func GetTrItemsByTransactionID(
 	}
 
 	// unmarshal transaction items
-	trItems, err := lpg.UnmarshalTrItems(
-		preTrItemRows,
-	)
+	trItems, err := u.UnmarshalTrItems(preTrItemRows)
 
 	if err != nil {
 		log.Print(err)
@@ -48,6 +47,7 @@ func GetTrItemsByTransactionID(
 
 func GetTrItemsByTrIDs(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	IDs []interface{}) ([]*types.TransactionItem, error) {
 
@@ -68,9 +68,7 @@ func GetTrItemsByTrIDs(
 	}
 
 	// unmarshal transaction items
-	trItems, err := lpg.UnmarshalTrItems(
-		trItemsRows,
-	)
+	trItems, err := u.UnmarshalTrItems(trItemsRows)
 
 	if err != nil {
 		log.Print(err)

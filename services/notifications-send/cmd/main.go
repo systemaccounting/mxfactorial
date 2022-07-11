@@ -42,6 +42,7 @@ func lambdaFn(
 	ctx context.Context,
 	e events.SNSEvent,
 	c lpg.Connector,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	dbc func() sqls.DeleteSQLBuilder,
 ) {
@@ -107,7 +108,7 @@ func lambdaFn(
 	}
 
 	// unmarshal transaction_notifications
-	transNotifs, err := lpg.UnmarshalTransactionNotifications(
+	transNotifs, err := u.UnmarshalTransactionNotifications(
 		transNotifsRows,
 	)
 	if err != nil {
@@ -139,7 +140,7 @@ func lambdaFn(
 	}
 
 	// unmarshal websockets
-	websockets, err := lpg.UnmarshalWebsockets(
+	websockets, err := u.UnmarshalWebsockets(
 		wssRows,
 	)
 	if err != nil {
@@ -245,7 +246,8 @@ func handleEvent(
 	e events.SNSEvent,
 ) {
 	c := lpg.NewConnector(pgx.Connect)
-	lambdaFn(ctx, e, c, sqls.NewSelectBuilder, sqls.NewDeleteBuilder)
+	u := lpg.NewPGUnmarshaler()
+	lambdaFn(ctx, e, c, u, sqls.NewSelectBuilder, sqls.NewDeleteBuilder)
 }
 
 func main() {

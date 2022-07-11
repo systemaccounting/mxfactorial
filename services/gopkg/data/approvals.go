@@ -14,6 +14,7 @@ const ApproveAllRoleAccountSQL string = "SELECT approve_all_role_account($1, $2,
 
 func GetApprovalsByTransactionID(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	ID *types.ID) ([]*types.Approval, error) {
 
@@ -35,7 +36,7 @@ func GetApprovalsByTransactionID(
 	}
 
 	// unmarshal transaction approvals
-	approvals, err := lpg.UnmarshalApprovals(
+	approvals, err := u.UnmarshalApprovals(
 		apprRows,
 	)
 	if err != nil {
@@ -47,6 +48,7 @@ func GetApprovalsByTransactionID(
 
 func GetApprovalsByTrIDs(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	IDs []interface{}) ([]*types.Approval, error) {
 
@@ -67,7 +69,7 @@ func GetApprovalsByTrIDs(
 	}
 
 	// unmarshal transaction approvals
-	approvals, err := lpg.UnmarshalApprovals(
+	approvals, err := u.UnmarshalApprovals(
 		apprRows,
 	)
 	if err != nil {

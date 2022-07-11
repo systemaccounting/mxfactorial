@@ -12,6 +12,7 @@ import (
 
 func GetTransactionByID(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	ID *types.ID) (*types.Transaction, error) {
 
@@ -29,7 +30,7 @@ func GetTransactionByID(
 	)
 
 	// unmarshal transaction
-	transaction, err := lpg.UnmarshalTransaction(transactionRow)
+	transaction, err := u.UnmarshalTransaction(transactionRow)
 	if err != nil {
 		return nil, fmt.Errorf("get transaction unmarshal error: %v", err)
 	}
@@ -89,21 +90,22 @@ func RequestCreate(
 
 func GetTransactionWithTrItemsAndApprovalsByID(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	trID *types.ID) (*types.Transaction, error) {
 
-	t, err := GetTransactionByID(db, sbc, trID)
+	t, err := GetTransactionByID(db, u, sbc, trID)
 	if err != nil {
 		return nil, fmt.Errorf("GetTransactionByID error: %v", err)
 	}
 
-	trItems, err := GetTrItemsByTransactionID(db, sbc, trID)
+	trItems, err := GetTrItemsByTransactionID(db, u, sbc, trID)
 	if err != nil {
 		return nil, fmt.Errorf("GetTrItemsByTransactionID error: %v", err)
 	}
 
 	// create sql builder from constructor
-	apprvs, err := GetApprovalsByTransactionID(db, sbc, trID)
+	apprvs, err := GetApprovalsByTransactionID(db, u, sbc, trID)
 	if err != nil {
 		return nil, fmt.Errorf("GetApprovalsByTransactionID error: %v", err)
 	}
@@ -141,6 +143,7 @@ func AttachTransactionItemsToTransaction(
 
 func GetTransactionsWithTrItemsAndApprovalsByID(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	selSQL string,
 	selArgs []interface{}) ([]*types.Transaction, error) {
@@ -150,7 +153,7 @@ func GetTransactionsWithTrItemsAndApprovalsByID(
 		return nil, err
 	}
 
-	transactions, err := lpg.UnmarshalTransactions(rows)
+	transactions, err := u.UnmarshalTransactions(rows)
 	if err != nil {
 		return nil, err
 	}
@@ -160,12 +163,12 @@ func GetTransactionsWithTrItemsAndApprovalsByID(
 		reqIDs = append(reqIDs, v.ID)
 	}
 
-	trItems, err := GetTrItemsByTrIDs(db, sbc, reqIDs)
+	trItems, err := GetTrItemsByTrIDs(db, u, sbc, reqIDs)
 	if err != nil {
 		return nil, err
 	}
 
-	apprvs, err := GetApprovalsByTrIDs(db, sbc, reqIDs)
+	apprvs, err := GetApprovalsByTrIDs(db, u, sbc, reqIDs)
 	if err != nil {
 		return nil, err
 	}

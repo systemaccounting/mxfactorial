@@ -33,6 +33,7 @@ func lambdaFn(
 	ctx context.Context,
 	e types.QueryByID,
 	c lpg.Connector,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 ) (string, error) {
 
@@ -53,7 +54,7 @@ func lambdaFn(
 	defer db.Close(context.Background())
 
 	// get approvals
-	apprvs, err := data.GetApprovalsByTransactionID(db, sbc, e.ID)
+	apprvs, err := data.GetApprovalsByTransactionID(db, u, sbc, e.ID)
 	if err != nil {
 		log.Printf("query error: %v", err)
 		return "", err
@@ -79,14 +80,14 @@ func lambdaFn(
 	}
 
 	// get transaction items
-	trItems, err := data.GetTrItemsByTransactionID(db, sbc, e.ID)
+	trItems, err := data.GetTrItemsByTransactionID(db, u, sbc, e.ID)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
 	// get transaction
-	tr, err := data.GetTransactionByID(db, sbc, e.ID)
+	tr, err := data.GetTransactionByID(db, u, sbc, e.ID)
 	if err != nil {
 		return "", err
 	}
@@ -106,7 +107,8 @@ func lambdaFn(
 // wraps lambdaFn accepting db interface for testability
 func handleEvent(ctx context.Context, e types.QueryByID) (string, error) {
 	c := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, c, sqls.NewSelectBuilder)
+	u := lpg.NewPGUnmarshaler()
+	return lambdaFn(ctx, e, c, u, sqls.NewSelectBuilder)
 }
 
 // avoids lambda package dependency during local development

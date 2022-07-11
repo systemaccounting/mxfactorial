@@ -13,6 +13,7 @@ import (
 
 func TestDebitorCapacity(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	trItems types.TrItemListHelper,
 ) error {
@@ -24,7 +25,7 @@ func TestDebitorCapacity(
 	debitors := trItems.ListUniqueDebitorAccountsFromTrItems()
 
 	// get debitor account balances from db
-	accountBalances, err := GetAccountBalances(db, sbc, debitors)
+	accountBalances, err := GetAccountBalances(db, u, sbc, debitors)
 	if err != nil {
 		var errMsg string = "get account balances %v"
 		log.Printf(errMsg, err)
@@ -54,6 +55,7 @@ func TestDebitorCapacity(
 
 func GetAccountBalance(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	accountName *string) (decimal.Decimal, error) {
 
@@ -67,15 +69,13 @@ func GetAccountBalance(
 
 	// query
 	row := db.QueryRow(
-		context.Background(),
+		context.TODO(),
 		selCurrBalSQL,
 		selCurrBalArgs...,
 	)
 
 	// unmarshal current account balance
-	balance, err := lpg.UnmarshalAccountBalance(
-		row,
-	)
+	balance, err := u.UnmarshalAccountBalance(row)
 
 	if err != nil {
 		log.Printf("unmarshal account balance %v", err)
@@ -87,6 +87,7 @@ func GetAccountBalance(
 
 func GetAccountBalances(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	sbc func() sqls.SelectSQLBuilder,
 	accountNames []string) ([]*types.AccountBalance, error) {
 
@@ -114,7 +115,7 @@ func GetAccountBalances(
 	}
 
 	// unmarshal current account balances
-	balances, err := lpg.UnmarshalAccountBalances(rows)
+	balances, err := u.UnmarshalAccountBalances(rows)
 	if err != nil {
 		log.Printf("unmarshal account balance %v", err)
 		return nil, err

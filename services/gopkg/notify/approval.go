@@ -21,6 +21,7 @@ var (
 
 func NotifyTransactionRoleApprovers(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	ibc func() sqls.InsertSQLBuilder,
 	dbc func() sqls.DeleteSQLBuilder,
 	topicArn *string,
@@ -48,6 +49,7 @@ func NotifyTransactionRoleApprovers(
 	// create transaction notifications returning ids
 	notifIDs, err := insertTransactionApprovalNotifications(
 		db,
+		u,
 		ibc,
 		notifications)
 	if err != nil {
@@ -148,6 +150,7 @@ func deleteObseleteApprovalNotifications(
 
 func insertTransactionApprovalNotifications(
 	db lpg.SQLDB,
+	u lpg.PGUnmarshaler,
 	ibc func() sqls.InsertSQLBuilder,
 	notifications []*types.TransactionNotification,
 ) ([]int64, error) {
@@ -168,7 +171,7 @@ func insertTransactionApprovalNotifications(
 	}
 
 	// unmarshal notification ids
-	notifIDs, err := lpg.UnmarshalIDs(notifIDRows)
+	notifIDs, err := u.UnmarshalIDs(notifIDRows)
 	if err != nil {
 		log.Printf("unmarshal ids error: %v", err)
 		return nil, err
