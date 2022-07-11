@@ -4,11 +4,12 @@ RELATIVE_PROJECT_ROOT_PATH=..
 REGION=us-east-1
 
 install:
-	npm install
+	if ! [[ -d node_modules ]]; then npm install; fi
 
 .PHONY: test
 test:
 	@$(MAKE) -s test-env-file
+	$(MAKE) install
 	npm test
 
 resetrds:
