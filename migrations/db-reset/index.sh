@@ -27,7 +27,7 @@ handler () {
       UP+=(testseed)
     fi
 
-    invoke() {
+    function invoke() {
       aws lambda invoke \
       --region "${AWS_REGION}" \
       --invocation-type RequestResponse \
@@ -37,10 +37,28 @@ handler () {
       cat "${INVOKE_LOG_FILE}" >> "${FINAL_LOG_FILE}"
     }
 
+    # todo: reduce 'drop' event payload to "command" property only
+    function drop() {
+      aws lambda invoke \
+      --region "${AWS_REGION}" \
+      --invocation-type RequestResponse \
+      --function-name "${MIGRATION_LAMBDA_ARN}" \
+      --payload "{\"branch\":\""$BRANCH"\",\"command\":\"drop\",\"directory\":\""$1"\"}" \
+      "${INVOKE_LOG_FILE}"
+      cat "${INVOKE_LOG_FILE}" >> "${FINAL_LOG_FILE}"
+    }
+
+    # down required because dropping types not supported until merged:
+    # # https://github.com/golang-migrate/migrate/pull/627
     for i in ${DOWN[@]}
     do
-      invoke 'drop' $i
+      invoke 'down' $i
     done
+
+    # drop db contents
+    drop "${UP[@]:0:1}" # arg irrelevant, will remove after above todo
+
+    # up migrate
     for j in ${UP[@]}
     do
       invoke 'up' $j
