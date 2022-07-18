@@ -45,6 +45,7 @@ type UpdateSQLBuilder interface {
 	sqlbuilder.Builder
 	UpdateDebitorAccountBalanceSQL(*types.TransactionItem) (string, []interface{})
 	UpdateCreditorAccountBalanceSQL(*types.TransactionItem) (string, []interface{})
+	UpdateAccountBalancesSQL([]*types.TransactionItem) (string, []interface{})
 	UpdateTransactionByIDSQL(*types.ID, string) (string, []interface{})
 	UpdateWebsocketByConnIDSQL(string, string) (string, []interface{})
 }
