@@ -262,6 +262,21 @@ func (mr *MockUpdateSQLBuilderMockRecorder) BuildWithFlavor(arg0 interface{}, ar
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuildWithFlavor", reflect.TypeOf((*MockUpdateSQLBuilder)(nil).BuildWithFlavor), varargs...)
 }
 
+// UpdateAccountBalancesSQL mocks base method.
+func (m *MockUpdateSQLBuilder) UpdateAccountBalancesSQL(arg0 []*types.TransactionItem) (string, []interface{}) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateAccountBalancesSQL", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].([]interface{})
+	return ret0, ret1
+}
+
+// UpdateAccountBalancesSQL indicates an expected call of UpdateAccountBalancesSQL.
+func (mr *MockUpdateSQLBuilderMockRecorder) UpdateAccountBalancesSQL(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAccountBalancesSQL", reflect.TypeOf((*MockUpdateSQLBuilder)(nil).UpdateAccountBalancesSQL), arg0)
+}
+
 // UpdateCreditorAccountBalanceSQL mocks base method.
 func (m *MockUpdateSQLBuilder) UpdateCreditorAccountBalanceSQL(arg0 *types.TransactionItem) (string, []interface{}) {
 	m.ctrl.T.Helper()
