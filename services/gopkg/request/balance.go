@@ -143,32 +143,15 @@ func ChangeAccountBalances(
 	ubc func() sqls.UpdateSQLBuilder,
 	trItems []*types.TransactionItem) {
 
-	// todo: change to single sql
+	ub := ubc()
+	updSQL, updArgs := ub.UpdateAccountBalancesSQL(trItems)
 
-	for _, v := range trItems {
-
-		// debitors
-		dub := ubc() // create sql builder from constructor
-		updDbBalSQL, updDbBalArgs := dub.UpdateDebitorAccountBalanceSQL(v)
-		_, err := db.Exec(
-			context.Background(),
-			updDbBalSQL,
-			updDbBalArgs...,
-		)
-		if err != nil {
-			log.Printf("failed to update balance of debitor %v, %v", *v.Debitor, err)
-		}
-
-		// creditors
-		cub := ubc() // create update sql builder from constructor
-		updCrBalSQL, updCrBalArgs := cub.UpdateCreditorAccountBalanceSQL(v)
-		_, err = db.Exec(
-			context.Background(),
-			updCrBalSQL,
-			updCrBalArgs...,
-		)
-		if err != nil {
-			log.Printf("failed to update balance of creditor %v, %v", *v.Creditor, err)
-		}
+	_, err := db.Exec(
+		context.TODO(),
+		updSQL,
+		updArgs...,
+	)
+	if err != nil {
+		log.Printf("failed to update balances: %v", err)
 	}
 }
