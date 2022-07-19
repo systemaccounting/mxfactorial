@@ -10,6 +10,7 @@ import (
 	mlpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg/mock_lambdapg"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
 	msqls "github.com/systemaccounting/mxfactorial/services/gopkg/sqls/mock_sqls"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/testdata"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 	mtypes "github.com/systemaccounting/mxfactorial/services/gopkg/types/mock_types"
 )
@@ -306,5 +307,46 @@ func TestTestDebitorBalanceGreaterThanRequiredFunds(t *testing.T) {
 		if got != want {
 			t.Errorf("got %v, want %v", got, want)
 		}
+	}
+}
+
+func TestChangeAccountBalances(t *testing.T) {
+	ctrl := gomock.NewController(t)
+
+	// test data
+	testtr := testdata.GetTestTransaction("../testdata/transWTimes.json")
+	testsql := "SELECT change_account_balances(($1, $2, $3), ($4, $5, $6), ($7, $8, $9), ($10, $11, $12), ($13, $14, $15), ($16, $17, $18), ($19, $20, $21), ($22, $23, $24), ($25, $26, $27), ($28, $29, $30), ($31, $32, $33), ($34, $35, $36))"
+	testargs := []interface{}{}
+
+	// mocks
+	mockdb := mlpg.NewMockSQLDB(ctrl)
+	mockbuilder := msqls.NewMockUpdateSQLBuilder(ctrl)
+	count := 0
+	mocksbfn := func() sqls.UpdateSQLBuilder {
+		count++
+		return mockbuilder
+	}
+
+	// assert
+	mockbuilder.
+		EXPECT().
+		UpdateAccountBalancesSQL(testtr.TransactionItems).
+		Times(1).
+		Return(testsql, testargs)
+
+	mockdb.
+		EXPECT().
+		Exec(
+			context.TODO(),
+			testsql,
+			testargs,
+		).
+		Times(1)
+
+	// test
+	ChangeAccountBalances(mockdb, mocksbfn, testtr.TransactionItems)
+
+	if count != 1 {
+		t.Error("update sql builder constructor wasnt called once")
 	}
 }
