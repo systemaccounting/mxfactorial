@@ -14,11 +14,9 @@ import (
 type PGUnmarshal struct{}
 
 type PGUnmarshaler interface {
-	UnmarshalID(pgx.Row) (int64, error)
 	UnmarshalAccountProfileIDs(pgx.Rows) ([]*types.AccountProfileID, error)
 	UnmarshalTransaction(pgx.Row) (*types.Transaction, error)
 	UnmarshalTransactions(pgx.Rows) ([]*types.Transaction, error)
-	UnmarshalIDs(pgx.Rows) ([]int64, error)
 	UnmarshalTrItems(pgx.Rows) ([]*types.TransactionItem, error)
 	UnmarshalApprovals(pgx.Rows) ([]*types.Approval, error)
 	UnmarshalTransactionNotifications(pgx.Rows) ([]*types.TransactionNotification, error)
@@ -30,17 +28,6 @@ type PGUnmarshaler interface {
 
 func NewPGUnmarshaler() PGUnmarshaler {
 	return &PGUnmarshal{}
-}
-
-func (p PGUnmarshal) UnmarshalID(
-	row pgx.Row,
-) (int64, error) {
-	var ID int64
-	err := row.Scan(&ID)
-	if err != nil {
-		return 0, err
-	}
-	return ID, nil
 }
 
 func (p PGUnmarshal) UnmarshalAccountProfileIDs(
@@ -194,27 +181,6 @@ func geoPointToStringPtr(gp pgtype.Point) (*string, error) {
 		*geoPoint = string(b)
 	}
 	return geoPoint, nil
-}
-
-func (p PGUnmarshal) UnmarshalIDs(
-	rows pgx.Rows,
-) ([]int64, error) {
-	// https://github.com/jackc/pgx/blob/909b81a16372d7e2574b2b11e8993895bdd5a065/conn.go#L676-L677
-	var IDs []int64
-	defer rows.Close()
-	for rows.Next() {
-		var ID int64
-		err := rows.Scan(&ID)
-		if err != nil {
-			return nil, err
-		}
-		IDs = append(IDs, ID)
-	}
-	err := rows.Err()
-	if err != nil {
-		return nil, err
-	}
-	return IDs, nil
 }
 
 // UnmarshalTrItems ...

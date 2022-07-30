@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"strconv"
+
+	"github.com/jackc/pgx/v4"
 )
 
 type ID string
@@ -47,4 +49,32 @@ func (id *ID) Scan(v interface{}) error {
 	default:
 		return fmt.Errorf("failed to scan ID var with value: %v", val)
 	}
+}
+
+func (id *ID) Unmarshal(r pgx.Row) error {
+	err := r.Scan(id)
+	if err != nil {
+		return fmt.Errorf("unmarshal id error: %v", err)
+	}
+	return nil
+}
+
+type IDs []*ID
+
+func (ids IDs) Unmarshal(r pgx.Rows) error {
+	// https://github.com/jackc/pgx/blob/909b81a16372d7e2574b2b11e8993895bdd5a065/conn.go#L676-L677
+	defer r.Close()
+	for r.Next() {
+		var ID *ID
+		err := r.Scan(ID)
+		if err != nil {
+			return fmt.Errorf("unmarshal IDs error: %v", err)
+		}
+		ids = append(ids, ID)
+	}
+	err := r.Err()
+	if err != nil {
+		return fmt.Errorf("scan rows for IDs error: %v ", err)
+	}
+	return nil
 }

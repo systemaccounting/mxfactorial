@@ -153,7 +153,7 @@ func insertTransactionApprovalNotifications(
 	u lpg.PGUnmarshaler,
 	ibc func() sqls.InsertSQLBuilder,
 	notifications []*types.TransactionNotification,
-) ([]int64, error) {
+) (types.IDs, error) {
 
 	// create sql builder from constructor
 	ib := ibc()
@@ -171,7 +171,9 @@ func insertTransactionApprovalNotifications(
 	}
 
 	// unmarshal notification ids
-	notifIDs, err := u.UnmarshalIDs(notifIDRows)
+	var notifIDs types.IDs
+	// notifIDs, err := u.UnmarshalIDs(notifIDRows)
+	err = notifIDs.Unmarshal(notifIDRows)
 	if err != nil {
 		log.Printf("unmarshal ids error: %v", err)
 		return nil, err
