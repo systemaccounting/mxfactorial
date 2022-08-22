@@ -14,6 +14,7 @@ if [[ "$#" -lt 2 ]] || [[ "$#" -gt 4 ]]; then
 	OPTIONAL ARGS:
 	"--initial", prepares for terraform apply
 	"--services-only", deploys services only
+	"--transaction-services-only", deploys transaction services only
 	EOF
 	exit 1
 fi
@@ -23,6 +24,8 @@ while [[ "$#" -gt 0 ]]; do
         --env) ENVIRONMENT="$2"; shift ;;
         --initial) INITIAL='initial-' ;;
         --services-only) INVENTORY_LIST=$(cat inventory | grep services/) ;;
+		# for convenience, not currently referenced in makefiles
+        --transaction-services-only) INVENTORY_LIST=$(cat inventory | grep -e transaction -e request -e rules -e graphql) ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
 	shift
