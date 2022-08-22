@@ -22,8 +22,6 @@ jobs:
       - name: unit test
         run: make test
         working-directory: services/gopkg/request
-      - name: test for missing and unnecessary dependents in project.json
-        run: bash scripts/test-dependents.sh --app-or-pkg-name request
       - name: set PENDING_TESTS in dynamodb
         run: bash scripts/set-pending-tests.sh --app-or-pkg-name request --sha $GITHUB_SHA --region $AWS_REGION --env $ENVIRONMENT
       - name: set CODECOV_FLAGS env var
