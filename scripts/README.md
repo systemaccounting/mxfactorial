@@ -307,7 +307,9 @@ script sourced to set DIR_PATH from project.json, for example:
 
 ##### `mock-go-ifaces.sh`
 
-creates go mocks from list of interfaces inside `mock` subdirectory using [gomock](https://github.com/golang/mock)
+creates go mocks from list of interfaces inside `mock` subdirectory using [gomock](https://github.com/golang/mock) and `project.json` assignments
+
+`//go:generate mockgen...` not used, script and `project.json` preferred for convenient interface use and mock coverage audit
 
 1. set `.pkgs.lambdapg.mocked_interfaces` property under package or service in `project.json` to map of go package import paths and desired list of interfaces:
 
@@ -337,3 +339,7 @@ creates testseed migration accounts in cognito
 ##### `delete-accounts.sh`
 
 deletes testseed migration accounts from cognito
+
+##### `sum-value.sh`
+
+sums value in json `transaction_item` list
