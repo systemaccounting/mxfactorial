@@ -10,7 +10,7 @@ todo:
 1. local development with [postgres in docker](https://hub.docker.com/r/bitnami/postgresql) and [go migrate](https://github.com/golang-migrate/migrate)
 1. creates test and prod databases in postgres rds through:
     1. `make uprds DB=test`, OR
-    1. lambda maintained in `./go-migrate-faas`
+    1. lambda maintained in `./go-migrate`
 
 ### migration directories
 1. `./schema`
