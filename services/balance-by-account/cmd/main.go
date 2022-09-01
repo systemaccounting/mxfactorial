@@ -9,10 +9,9 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgx/v4"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -27,10 +26,11 @@ var pgConn string = fmt.Sprintf(
 func lambdaFn(
 	ctx context.Context,
 	e types.QueryByAccount,
-	c lpg.Connector,
-	sbc func() sqls.SelectSQLBuilder,
+	dbConnector func(context.Context, string) (*postgres.DB, error),
+	balanceServiceConstructor func(db postgres.SQLDB) (service.IBalanceService, error),
 ) (string, error) {
 
+	// test required values
 	if e.AuthAccount == "" {
 		return "", errors.New("missing auth_account. exiting")
 	}
@@ -39,30 +39,49 @@ func lambdaFn(
 		return "", errors.New("missing account_name. exiting")
 	}
 
-	// connect to postgres
-	db, err := c.Connect(ctx, pgConn)
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
 	if err != nil {
-		log.Printf("connect error: %v", err)
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 	defer db.Close(context.Background())
 
-	// get balance
-	balance, err := request.GetAccountBalance(db, sbc, e.AccountName)
+	// create account balance service
+	bs, err := balanceServiceConstructor(db)
 	if err != nil {
-		var errMsg string = "get account balance %v"
-		log.Printf(errMsg, err)
-		return "", fmt.Errorf(errMsg, err)
+		logger.Log(logger.Trace(), err)
+		return "", err
 	}
 
-	// send string or error response to client
-	return balance.StringFixed(3), nil
+	// get account balance
+	accountBalance, err := bs.GetAccountBalance(*e.AccountName)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+
+	// return balance
+	return accountBalance.CurrentBalance.StringFixed(3), nil
 }
 
-// wraps lambdaFn accepting db interface for testability
+// wraps lambdaFn accepting services satisfying interfaces for testability
 func handleEvent(ctx context.Context, e types.QueryByAccount) (string, error) {
-	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d, sqls.NewSelectBuilder)
+	return lambdaFn(
+		ctx,
+		e,
+		postgres.NewDB,
+		newBalanceService,
+	)
+}
+
+// enables lambdaFn unit testing
+func newBalanceService(idb postgres.SQLDB) (service.IBalanceService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newBalanceService: failed to assert *postgres.DB")
+	}
+	return service.NewAccountBalanceService(db), nil
 }
 
 // avoids lambda package dependency during local development
@@ -83,7 +102,6 @@ func localEnvOnly(event string) {
 	}
 
 	log.Print(resp)
-	// _ = resp
 }
 
 func main() {

@@ -285,66 +285,65 @@
             "path": "services/gopkg/cognitojwt",
             "dependents": []
         },
-        "data": {
-            "runtime": "go1.x",
-            "path": "services/gopkg/data",
-            "dependents": [
-                "request"
-            ]
-        },
-        "lambdapg": {
-            "runtime": "go1.x",
-            "path": "services/gopkg/lambdapg",
-            "dependents": [
-                "notify",
-                "websocket",
-                "request",
-                "data"
-            ],
-            "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg": [
-                    "Connector",
-                    "SQLDB"
-                ],
-                "github.com/jackc/pgx/v4": [
-                    "Rows"
-                ]
-            }
-        },
         "lambdasdk": {
             "runtime": "go1.x",
             "path": "services/gopkg/lambdasdk",
             "dependents": []
         },
-        "notify": {
+        "service": {
             "runtime": "go1.x",
-            "path": "services/gopkg/notify",
+            "path": "services/gopkg/service",
             "dependents": [
-                "request"
-            ]
+                "request-create",
+                "request-approve",
+                "request-by-id",
+                "requests-by-account",
+                "transaction-by-id",
+                "transactions-by-account",
+                "notifications-send",
+                "notifications-get",
+                "notifications-clear",
+                "balance-by-account",
+                "wss-connect",
+                "auto-confirm"
+            ],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/service": [
+                    "IAccountService",
+                    "IApproveService",
+                    "IBalanceService",
+                    "ICreateAccountService",
+                    "ITransactionNotificationService",
+                    "IProfileService",
+                    "IRuleInstanceService",
+                    "ITransactionService",
+                    "IWebsocketService"
+                ]
+            }
         },
-        "request": {
+        "postgres": {
             "runtime": "go1.x",
-            "path": "services/gopkg/request",
-            "dependents": []
+            "path": "services/gopkg/postgres",
+            "dependents": [
+                "service"
+            ],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/postgres": [
+                    "Connector",
+                    "SQLDB"
+                ],
+                "github.com/jackc/pgx/v4": [
+                    "Rows",
+                    "Row"
+                ]
+            }
         },
         "sqls": {
             "runtime": "go1.x",
-            "path": "services/gopkg/sqls",
+            "path": "services/gopkg/postgres",
             "dependents": [
-                "notify",
-                "websocket",
-                "request",
-                "data"
-            ],
-            "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/sqls": [
-                    "InsertSQLBuilder",
-                    "UpdateSQLBuilder",
-                    "SelectSQLBuilder",
-                    "DeleteSQLBuilder"
-                ]
-            }
+                "postgres"
+            ]
         },
         "test": {
             "runtime": "go1.x",
@@ -363,13 +362,7 @@
         "tools": {
             "runtime": "go1.x",
             "path": "services/gopkg/tools",
-            "dependents": [
-                "lambdapg",
-                "request",
-                "notify",
-                "websocket",
-                "data"
-            ],
+            "dependents": [],
             "mocked_interfaces": {
                 "github.com/systemaccounting/mxfactorial/services/gopkg/tools": [
                     "Marshaler"
@@ -380,15 +373,12 @@
             "runtime": "go1.x",
             "path": "services/gopkg/types",
             "dependents": [
-                "notify",
                 "testdata",
+                "postgres",
+                "service",
                 "tools",
-                "lambdapg",
-                "sqlbuilder",
+                "sqls",
                 "lambdasdk",
-                "request",
-                "data",
-                "websocket",
                 "request-create",
                 "request-approve",
                 "request-by-id",
@@ -404,14 +394,11 @@
             ],
             "mocked_interfaces": {
                 "github.com/systemaccounting/mxfactorial/services/gopkg/types": [
-                    "TrItemListHelper"
+                    "TrItemListHelper",
+                    "IScanRow",
+                    "IScanRows"
                 ]
             }
-        },
-        "websocket": {
-            "runtime": "go1.x",
-            "path": "services/gopkg/websocket",
-            "dependents": []
         }
     },
     "path": ".",

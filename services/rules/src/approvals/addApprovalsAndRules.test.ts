@@ -14,12 +14,14 @@ describe('addApprovalsAndRules', () => {
 		const mockGetNamesFn = jest.fn(() => Promise.resolve({})) as any;
 		const testGetRulesFn = () => { };
 		const testApplyRulesFn = () => { };
+		const testapprovaltime = new Date().toISOString();
 		const testItems = [...nullFirst];
 
 		await addApprovalsAndRules(
 			c.SEQUENCE,
 			client,
 			nullFirst,
+			testapprovaltime,
 			mockGetNamesFn,
 			testGetRulesFn,
 			testApplyRulesFn,
@@ -49,12 +51,14 @@ describe('addApprovalsAndRules', () => {
 		));
 		const mockGetRulesFn = jest.fn();
 		const testApplyRulesFn = () => { };
+		const testapprovaltime = new Date().toISOString();
 		const testItems = [...nullFirst];
 
 		await addApprovalsAndRules(
 			c.SEQUENCE,
 			client,
 			testItems,
+			testapprovaltime,
 			mockGetNamesFn,
 			mockGetRulesFn,
 			testApplyRulesFn,
@@ -87,13 +91,14 @@ describe('addApprovalsAndRules', () => {
 		));
 		const mockGetRulesFn = jest.fn();
 		const mockApplyRulesFn = jest.fn(() => testapproval);
-
+		const testapprovaltime = new Date().toISOString();
 		const testItems = [...nullFirst];
 
 		const got = await addApprovalsAndRules(
 			c.SEQUENCE,
 			client,
 			testItems,
+			testapprovaltime,
 			mockGetNamesFn,
 			mockGetRulesFn,
 			mockApplyRulesFn,

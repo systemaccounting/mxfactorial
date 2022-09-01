@@ -5,12 +5,23 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func (b *BuildInsertSQL) InsertTrItemSQL(
-	sbc func() SelectSQLBuilder,
-	trItem *types.TransactionItem) sqlbuilder.Builder {
+type ITransactionItemSQLs interface {
+	InsertTrItemSQL(*types.TransactionItem, sqlbuilder.Builder) sqlbuilder.Builder
+	SelectTrItemsByTrIDSQL(types.ID) (string, []interface{})
+	SelectTrItemsByTrIDsSQL(types.IDs) (string, []interface{})
+}
 
-	b.ib.InsertInto("transaction_item")
-	b.ib.Cols(
+type TransactionItemSQLs struct {
+	SQLBuilder
+}
+
+func (t *TransactionItemSQLs) InsertTrItemSQL(
+	trItem *types.TransactionItem,
+	transactionAuxStmt sqlbuilder.Builder,
+) sqlbuilder.Builder {
+	t.Init()
+	t.ib.InsertInto("transaction_item")
+	t.ib.Cols(
 		"transaction_id",
 		"item_id",
 		"price",
@@ -30,12 +41,8 @@ func (b *BuildInsertSQL) InsertTrItemSQL(
 		"creditor_expiration_time",
 	)
 
-	sbTr := sbc()
-	sbTr.Select("id")
-	sbTr.From("insert_transaction")
-
-	b.ib.Values(
-		sqlbuilder.Buildf("(%v)", sbTr),
+	t.ib.Values(
+		sqlbuilder.Buildf("(%v)", transactionAuxStmt),
 		trItem.ItemID,
 		trItem.Price,
 		trItem.Quantity,
@@ -48,29 +55,37 @@ func (b *BuildInsertSQL) InsertTrItemSQL(
 		trItem.Creditor,
 		trItem.DebitorProfileID,
 		trItem.CreditorProfileID,
-		NullSQLFromStrPtr(trItem.DebitorApprovalTime),
-		NullSQLFromStrPtr(trItem.CreditorApprovalTime),
-		NullSQLFromStrPtr(trItem.DebitorExpirationTime),
-		NullSQLFromStrPtr(trItem.CreditorExpirationTime),
+		trItem.DebitorApprovalTime,
+		trItem.CreditorApprovalTime,
+		trItem.DebitorExpirationTime,
+		trItem.CreditorExpirationTime,
 	)
-	retID := sqlbuilder.Buildf("%v returning id", b.ib)
+
+	retID := sqlbuilder.Buildf("%v returning id", t.ib)
 	return sqlbuilder.WithFlavor(retID, sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildSelectSQL) SelectTrItemsByTrIDSQL(trID *types.ID) (string, []interface{}) {
-	b.sb.Select("*")
-	b.sb.From("transaction_item").
+func (t *TransactionItemSQLs) SelectTrItemsByTrIDSQL(trID types.ID) (string, []interface{}) {
+	t.Init()
+	t.sb.Select("*")
+	t.sb.From("transaction_item").
 		Where(
-			b.sb.Equal("transaction_id", *trID),
+			t.sb.Equal("transaction_id", trID),
 		)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return t.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildSelectSQL) SelectTrItemsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
-	b.sb.Select("*")
-	b.sb.From("transaction_item").
+func (t *TransactionItemSQLs) SelectTrItemsByTrIDsSQL(trIDs types.IDs) (string, []interface{}) {
+	t.Init()
+
+	// sql builder wants interface slice
+	iIDs := IDtoInterfaceSlice(trIDs)
+
+	t.sb.Select("*")
+	t.sb.From("transaction_item").
 		Where(
-			b.sb.In("transaction_id", trIDs...),
+			t.sb.In("transaction_id", iIDs...),
 		)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	return t.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

@@ -37,8 +37,15 @@ describe('applyApprovalRules', () => {
 				account_role: c.DEBITOR,
 			}
 		};
+
+		const testapprovaltime = new Date().toISOString();
+
 		await expect(
-			applyApprovalRules(testapproval, testruleinstances, nullFirst[0])
+			applyApprovalRules(
+				testapproval,
+				testruleinstances,
+				nullFirst[0],
+				testapprovaltime)
 		).rejects.toThrow(c.ACCOUNT_NAME_MISSING_ERROR);
 	})
 
@@ -53,8 +60,14 @@ describe('applyApprovalRules', () => {
 			}
 		};
 
+		const testapprovaltime = new Date().toISOString();
+
 		await expect(
-			applyApprovalRules(testapproval, testruleinstances, nullFirst[0])
+			applyApprovalRules(
+				testapproval,
+				testruleinstances,
+				nullFirst[0],
+				testapprovaltime)
 		).rejects.toThrow(c.ACCOUNT_ROLE_MISSING_ERROR);
 	})
 
@@ -70,10 +83,13 @@ describe('applyApprovalRules', () => {
 			}
 		};
 
+		const testapprovaltime = new Date().toISOString();
+
 		await applyApprovalRules(
 			testapproval,
 			testruleinstances,
 			nullFirst[0],
+			testapprovaltime,
 		);
 
 		await expect(global.applyApproverRuleMockFn)
@@ -84,6 +100,7 @@ describe('applyApprovalRules', () => {
 				testruleinstances[0].account_name,
 				nullFirst[0],
 				testapproval,
+				testapprovaltime,
 				...testruleinstances[0].variable_values,
 			);
 	});

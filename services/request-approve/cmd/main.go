@@ -9,11 +9,9 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgx/v4"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -37,11 +35,9 @@ var (
 func lambdaFn(
 	ctx context.Context,
 	e *types.RequestApprove,
-	c lpg.Connector,
-	ibc func() sqls.InsertSQLBuilder,
-	sbc func() sqls.SelectSQLBuilder,
-	ubc func() sqls.UpdateSQLBuilder,
-	dbc func() sqls.DeleteSQLBuilder,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	tranactionServiceConstructor func(db postgres.SQLDB) (service.ITransactionService, error),
+	approveServiceConstructor func(db postgres.SQLDB) (service.IApproveService, error),
 ) (string, error) {
 
 	// todo: more
@@ -55,30 +51,39 @@ func lambdaFn(
 	var accountRole types.Role
 	accountRole.Set(*e.AccountRole)
 
-	// connect to postgres
-	db, err := c.Connect(context.Background(), pgConn)
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
 	if err != nil {
-		log.Print(err)
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+	defer db.Close(context.Background())
+
+	// create transaction service
+	tranService, err := tranactionServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 
-	// close db connection when main exits
-	defer db.Close(context.Background())
-
-	// get current transaction
-	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(
-		db,
-		sbc,
-		e.ID)
+	// get transaction request
+	preApprTr, err := tranService.GetTransactionWithTrItemsAndApprovalsByID(*e.ID)
 	if err != nil {
-		log.Print(err)
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 
 	// fail approval if equilibrium_time set
-	if preApprTr.EquilibriumTime != nil {
+	if preApprTr.EquilibriumTime != nil && !preApprTr.EquilibriumTime.IsZero() {
 		var err = errors.New("equilibrium timestamp found. approval not pending")
 		log.Print(err)
+		return "", err
+	}
+
+	// create approve service
+	apprService, err := approveServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 
@@ -86,16 +91,12 @@ func lambdaFn(
 	// 2. update approval time stamps in transaction items and transaction
 	// 3. change account balances if equilibrium
 	// 4. notify approvers
-	return request.Approve(
-		db,
-		ibc,
-		sbc,
-		ubc,
-		dbc,
-		&e.AuthAccount,
+	return apprService.Approve(
+		ctx,
+		e.AuthAccount,
 		accountRole,
 		preApprTr,
-		&notifyTopicArn,
+		notifyTopicArn,
 	)
 }
 
@@ -105,17 +106,33 @@ func handleEvent(
 	e *types.RequestApprove,
 ) (string, error) {
 
-	c := lpg.NewConnector(pgx.Connect)
-
 	return lambdaFn(
 		ctx,
 		e,
-		c,
-		sqls.NewInsertBuilder,
-		sqls.NewSelectBuilder,
-		sqls.NewUpdateBuilder,
-		sqls.NewDeleteBuilder)
+		postgres.NewIDB,
+		newTransactionService,
+		newApproveService,
+	)
 }
+
+// BEGIN: enables lambdaFn unit testing
+func newTransactionService(idb postgres.SQLDB) (service.ITransactionService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newTransactionService: failed to assert *postgres.DB")
+	}
+	return service.NewTransactionService(db), nil
+}
+
+func newApproveService(idb postgres.SQLDB) (service.IApproveService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newApproveService: failed to assert *postgres.DB")
+	}
+	return service.NewApproveService(db), nil
+}
+
+// END: enables lambdaFn unit testing
 
 // avoids lambda package dependency during local development
 func localEnvOnly(event string) {
@@ -135,8 +152,9 @@ func localEnvOnly(event string) {
 		log.Fatal(err)
 	}
 
-	// log.Print(resp)
-	_ = resp
+	if len(os.Getenv("DEBUG")) > 0 {
+		log.Print(resp)
+	}
 }
 
 func main() {

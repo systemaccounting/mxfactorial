@@ -59,7 +59,7 @@ public demonstration of the following use cases through a systemaccounting funct
 // "Mary" account balance Δ = 0 after selling and buying in
 // autonomous market pricing bread = milk
 ```  
-* *contracts as code*: enabling transaction automation through user-generated, e.g. automating tax, debt & equity sales, dividend, interest, wage and bill payments  **(input)**
+* *contracts as code*: enabling transaction automation through publicly-contributed scripts, e.g. automating tax, debt & equity sales, dividend, interest, wage and bill payments  **(input)**
 * maintaining publicly-accessible static and streaming endpoints servicing third-party visualization and [optimization](https://en.wikipedia.org/wiki/Combinatorial_optimization) **(output)**
 
 this project intends to exploit the software engineering community's familiarity with data science to rapidly develop their capacity to describe an economy using mathemtical physics. software engineers may be expediently converted to phd-level experts because they come equipped with the technology to test, adopt, and communicate the subject to others. adding to the project's **[list of features](https://github.com/systemaccounting/mxfactorial/issues?q=is%3Aissue+is%3Apublic+sort%3Acreated-asc)** is designed to foster enough interaction between engineers and the data model that a movement to eliminate nothing but [public ignorance](https://en.wikipedia.org/wiki/Pareto_efficiency) becomes generally accepted as possible *only* when it's precipitated by activism pursued—not in the streets where slogans, bottles, and rocks are blindly hurled at others who are equally frustrated with their economy, but on knowledge's frontier where science and technology are used as tools to empower mankinds revolution in the cloud

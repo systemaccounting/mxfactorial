@@ -88,7 +88,7 @@ resource "aws_api_gateway_deployment" "db_reset" {
   depends_on = [
     aws_api_gateway_integration.db_reset_sns,
   ]
-  stage_description = "deploy-003"
+  stage_description = "deploy-004"
   rest_api_id       = aws_api_gateway_rest_api.db_reset.id
   stage_name        = var.env
 

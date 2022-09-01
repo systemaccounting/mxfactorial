@@ -1,3 +1,6 @@
+-- config in first migration
+SET timezone TO 'UTC';
+
 -- personal account
 CREATE TABLE account (
   name character varying(255) not null PRIMARY KEY,

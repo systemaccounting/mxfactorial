@@ -28,13 +28,11 @@ echo "*** adding a mix of requests and transactions from $TEST_DATA_FILE"
 
 # create services/request-create/.env file if not available
 if [[ ! -f $REQ_CREATE_DIR/.env ]]; then
-ls
 	(cd $REQ_CREATE_DIR; make get-secrets ENV=$TEST_ENV)
 fi
 
 # create services/request-approve/.env file if not available
 if [[ ! -f $REQ_APPROVE_DIR/.env ]]; then
-ls
 	(cd $REQ_APPROVE_DIR; make get-secrets ENV=$TEST_ENV)
 fi
 

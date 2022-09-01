@@ -15,6 +15,7 @@ CONTAINER_POSTGRES_STORAGE_PATH=/bitnami/postgresql
 DOCKER_IMAGE=bitnami/postgresql
 IMAGE_VERSION=latest
 GO_MIGRATE=github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+SHELL=/bin/bash
 
 ENV_FILE=$(CURDIR)/.env
 ENV_VARS=DATABASE_TYPE \
@@ -46,8 +47,6 @@ run:
 		-e POSTGRESQL_PASSWORD=$(POSTGRESQL_PASSWORD) \
 		-e POSTGRESQL_DATABASE=$(POSTGRESQL_DATABASE) \
 		-p $(HOST_PORT):$(CONTAINER_PORT) \
-		-v $(POSTGRES_DATA_VOLUME_MOUNT_PATH):$(CONTAINER_POSTGRES_STORAGE_PATH) \
-		-v $(POSTGRES_VOLUME_MOUNT_PATH)/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf \
 		$(DOCKER_IMAGE):$(IMAGE_VERSION)
 
 run-ci:
@@ -75,8 +74,18 @@ redocker:
 	$(MAKE) run
 
 # looped go migrate targets for docker postgres
+# 2022-07-12: down migrate required until 9 month old pr merged:
+# https://github.com/golang-migrate/migrate/pull/627
 resetdocker:
-	$(MAKE) dropdocker DB=test
+	@TABLE_COUNT=$$(psql \
+		-At "host=$(POSTGRESQL_HOST) port=$(CONTAINER_PORT) user=$(POSTGRESQL_USERNAME) password=$(POSTGRESQL_PASSWORD) dbname=$(POSTGRESQL_DATABASE)" \
+		-tc "select count(*) from information_schema.tables where table_schema = 'public';"); \
+	if [[ "$$TABLE_COUNT" -gt 3 ]]; then \
+		echo "***down migrating docker"; \
+		$(MAKE) downdocker DB=test; \
+		$(MAKE) dropdocker DB=test; \
+	fi; \
+	echo "***up migrating docker"; \
 	$(MAKE) updocker DB=test
 
 testdocker:
@@ -104,7 +113,19 @@ insert:
 
 # looped go migrate targets for rds postgres
 resetrds:
-	$(MAKE) droprds DB=test
+	@$(MAKE) -s test-env-arg
+	@$(MAKE) -s test-db-arg
+	@$(MAKE) -s test-db-val
+	$(MAKE) get-secrets
+	@while read -r i; do export "$$i"; done < $(ENV_FILE); \
+	TABLE_COUNT=$$(psql \
+		-tc "select count(*) from information_schema.tables where table_schema = 'public';"); \
+	if [[ "$$TABLE_COUNT" -gt 3 ]]; then \
+		echo "***down migrating rds"; \
+		$(MAKE) downrds DB=test; \
+		$(MAKE) droprds DB=test; \
+	fi; \
+	echo "***up migrating rds"; \
 	$(MAKE) uprds DB=test
 
 testrds:

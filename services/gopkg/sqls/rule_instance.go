@@ -2,7 +2,16 @@ package sqls
 
 import "github.com/huandu/go-sqlbuilder"
 
-func (b *BuildSelectSQL) SelectRuleInstanceSQL(
+type IRuleInstanceSQLs interface {
+	SelectRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
+	InsertRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
+}
+
+type RuleInstanceSQLs struct {
+	SQLBuilder
+}
+
+func (r *RuleInstanceSQLs) SelectRuleInstanceSQL(
 	ruleType,
 	ruleName,
 	ruleInstanceName,
@@ -10,7 +19,8 @@ func (b *BuildSelectSQL) SelectRuleInstanceSQL(
 	accountName,
 	variableValuesArray string,
 ) (string, []interface{}) {
-	b.sb.Select(
+	r.Init()
+	r.sb.Select(
 		"rule_type",
 		"rule_name",
 		"rule_instance_name",
@@ -18,19 +28,19 @@ func (b *BuildSelectSQL) SelectRuleInstanceSQL(
 		"account_name",
 		"variable_values",
 	)
-	b.sb.From("rule_instance").
+	r.sb.From("rule_instance").
 		Where(
-			b.sb.Equal("rule_type", ruleType),
-			b.sb.Equal("rule_name", ruleName),
-			b.sb.Equal("rule_instance_name", ruleInstanceName),
-			b.sb.Equal("account_role", accountRole),
-			b.sb.Equal("account_name", accountName),
-			b.sb.Equal("variable_values", variableValuesArray),
+			r.sb.Equal("rule_type", ruleType),
+			r.sb.Equal("rule_name", ruleName),
+			r.sb.Equal("rule_instance_name", ruleInstanceName),
+			r.sb.Equal("account_role", accountRole),
+			r.sb.Equal("account_name", accountName),
+			r.sb.Equal("variable_values", variableValuesArray),
 		)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return r.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildInsertSQL) InsertRuleInstanceSQL(
+func (r *RuleInstanceSQLs) InsertRuleInstanceSQL(
 	ruleType,
 	ruleName,
 	ruleInstanceName,
@@ -38,8 +48,9 @@ func (b *BuildInsertSQL) InsertRuleInstanceSQL(
 	accountName,
 	variableValues string,
 ) (string, []interface{}) {
-	b.ib.InsertInto("rule_instance")
-	b.ib.Cols(
+	r.Init()
+	r.ib.InsertInto("rule_instance")
+	r.ib.Cols(
 		"rule_type",
 		"rule_name",
 		"rule_instance_name",
@@ -47,7 +58,7 @@ func (b *BuildInsertSQL) InsertRuleInstanceSQL(
 		"account_name",
 		"variable_values",
 	)
-	b.ib.Values(
+	r.ib.Values(
 		ruleType,
 		ruleName,
 		ruleInstanceName,
@@ -55,5 +66,5 @@ func (b *BuildInsertSQL) InsertRuleInstanceSQL(
 		accountName,
 		variableValues,
 	)
-	return b.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return r.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

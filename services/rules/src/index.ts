@@ -20,6 +20,10 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 		return null;
 	}
 
+	// create global to apply same aproval timestamp
+	// to all rule added approvals
+	const approvalTime = new Date().toISOString()
+
 	// user wants DEBITOR or CREDITOR processed first
 	let transactionSequence;
 	try {
@@ -78,6 +82,7 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 			transactionSequence,
 			client,
 			ruleAppliedItems,
+			approvalTime,
 			getItemApprovalNames,
 			getRulesPerApproval,
 			applyApprovalRules,
@@ -105,6 +110,7 @@ export async function handler(event: ITransactionItem[]): Promise<IIntraTransact
 		labeledApproved = labelApprovedItems(
 			ruleAppliedApprovals,
 			transactionSequence,
+			approvalTime,
 		) as ITransactionItem[];
 	} catch (e) {
 		if (e instanceof Error) {

@@ -7,9 +7,13 @@ import type { ITransactionItem } from "../index.d"
 describe('labelApprovedItems', () => {
 	test('returns item labeled as approved', () => {
 		const want = Object.assign({}, wAppr);
-		want.debitor_approval_time = c.CURRENT_TIMESTAMP
-		want.creditor_approval_time = c.CURRENT_TIMESTAMP
-		const got = labelApprovedItems([wAppr], c.SEQUENCE);
+		const testapprovaltime = new Date().toISOString();
+		want.debitor_approval_time = testapprovaltime
+		want.creditor_approval_time = testapprovaltime
+		const got = labelApprovedItems(
+			[wAppr],
+			c.SEQUENCE,
+			testapprovaltime);
 		expect(got).toEqual([want]);
 	});
 
@@ -17,7 +21,7 @@ describe('labelApprovedItems', () => {
 		const want = Object.assign({}, wZeroAppr);
 		want.debitor_approval_time = null
 		want.creditor_approval_time = null
-		const got = labelApprovedItems([wZeroAppr], c.SEQUENCE);
+		const got = labelApprovedItems([wZeroAppr], c.SEQUENCE, null);
 		expect(got).toEqual([want]);
 	});
 });

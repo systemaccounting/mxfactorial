@@ -9,14 +9,10 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/huandu/go-sqlbuilder"
-	"github.com/jackc/pgx/v4"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
 	lam "github.com/systemaccounting/mxfactorial/services/gopkg/lambdasdk"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/request"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -39,44 +35,36 @@ var (
 )
 
 type preTestItem struct {
-	ItemID                 string
-	Price                  string
-	Quantity               string
-	DebitorFirst           bool
-	RuleInstanceID         string
-	UnitOfMeasurement      string
-	UnitsMeasured          string
-	Debitor                string
-	Creditor               string
-	DebitorExpirationTime  string
-	CreditorExpirationTime string
+	ItemID            string
+	Price             string
+	Quantity          string
+	DebitorFirst      bool
+	RuleInstanceID    string
+	UnitOfMeasurement string
+	UnitsMeasured     string
+	Debitor           string
+	Creditor          string
 }
 
-func lambdaFn(
+func testValues(
 	ctx context.Context,
 	e *types.IntraTransaction,
-	c lpg.Connector,
-	ibc func() sqls.InsertSQLBuilder,
-	sbc func() sqls.SelectSQLBuilder,
-	ubc func() sqls.UpdateSQLBuilder,
-	dbc func() sqls.DeleteSQLBuilder,
-	b func(string, ...interface{}) sqlbuilder.Builder,
-	resp *[]*types.TransactionItem,
-) (string, error) {
+) (*types.IntraTransaction, string, types.Role, error) {
 
 	if e.AuthAccount == "" {
-		return "", errors.New("missing auth_account. exiting")
+		return nil, "", types.Role(0), errors.New("missing auth_account. exiting")
 	}
 
 	if e.Transaction == nil {
-		return "", errors.New("missing transaction. exiting")
+		return nil, "", types.Role(0), errors.New("missing transaction. exiting")
 	}
 
 	// match author_role from items to authenticated account
-	authorRole, err := tools.GetAuthorRole(e.Transaction, e.AuthAccount)
+	// todo: globally rename authorRole to authRole
+	authorRole, err := e.Transaction.GetAuthorRole(e.AuthAccount)
 	if err != nil {
 		log.Printf("GetAuthorRole error: %v\n", err)
-		return "", err
+		return nil, "", types.Role(0), err
 	}
 
 	// overwrite transaction author role with authenticated role
@@ -84,10 +72,10 @@ func lambdaFn(
 	e.Transaction.AuthorRole = &role
 
 	// store transaction items received from client in var
-	var fromClient []*types.TransactionItem = request.RemoveUnauthorizedValues(e.Transaction.TransactionItems)
+	fromClient := e.Transaction.TransactionItems.RemoveUnauthorizedValues()
 
 	// filter non-rule generated items from client
-	var nonRuleClientItems []*types.TransactionItem
+	var nonRuleClientItems types.TransactionItems
 	for _, v := range fromClient {
 		if v.RuleInstanceID == nil || *v.RuleInstanceID == "" {
 			nonRuleClientItems = append(nonRuleClientItems, v)
@@ -102,7 +90,7 @@ func lambdaFn(
 		rulesLambdaArn,
 	)
 	if err != nil {
-		return "", err
+		return nil, "", types.Role(0), err
 	}
 
 	// add authenticated values to rule tested transaction
@@ -117,103 +105,23 @@ func lambdaFn(
 	// test length equality between client and rule tested items
 	err = testLengthEquality(rulePreEqualityTest, clientPreEqualityTest)
 	if err != nil {
-		return "", err
+		return nil, "", types.Role(0), err
 	}
 
 	// test item equality between client and rule tested items
 	err = testItemEquality(rulePreEqualityTest, clientPreEqualityTest)
 	if err != nil {
-		return "", err
+		return nil, "", types.Role(0), err
 	}
 
 	log.Print("client items equal to rules")
 
-	var trItemsFromRules types.TransactionItems = ruleTested.Transaction.TransactionItems
-	// list debitors and creditors to fetch profile ids
-	uniqueAccounts := trItemsFromRules.ListUniqueAccountsFromTrItems()
-
-	// connect to postgres
-	db, err := c.Connect(context.Background(), pgConn)
-	if err != nil {
-		log.Printf("pg connect error: %v", err)
-		return "", err
-	}
-	// close db connection when main exits
-	defer db.Close(context.Background())
-
-	// unmarshal account profile ids with account names
-	profileIDList, err := data.GetProfileIDsByAccountList(db, sbc, uniqueAccounts)
-	if err != nil {
-		log.Printf("GetProfileIDsByAccountList error: %v", err)
-		return "", err
-	}
-
-	// convert profile id list to map for convenient
-	// addition of profile ids to transaction items
-	profileIDs := request.MapProfileIDsToAccounts(profileIDList)
-
-	// add profile IDs to rule tested transaction items
-	request.AddProfileIDsToTrItems(
-		trItemsFromRules,
-		profileIDs,
-	)
-
-	trID, err := data.RequestCreate(db, ibc, sbc, b, ruleTested.Transaction)
-	if err != nil {
-		errMsg := fmt.Errorf("RequestCreate error: %v", err)
-		log.Print(errMsg)
-		return "", errMsg
-	}
-
-	// get new transaction request
-	preApprTr, err := data.GetTransactionWithTrItemsAndApprovalsByID(db, sbc, trID)
-	if err != nil {
-		errMsg := fmt.Errorf("GetTransactionWithTrItemsAndApprovalsByID error: %v", err)
-		log.Print(errMsg)
-		return "", errMsg
-	}
-
-	// 1. add requested approval
-	// 2. update approval time stamps in transaction items and transaction
-	// 3. change account balances if equilibrium
-	// 4. notify approvers
-	return request.Approve(
-		db,
-		ibc,
-		sbc,
-		ubc,
-		dbc,
-		&e.AuthAccount,
-		authorRole,
-		preApprTr,
-		&notifyTopicArn,
-	)
-}
-
-func nilString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
-}
-
-func nilCustomID(i *types.ID) string {
-	if i == nil {
-		return ""
-	}
-	return string(*i)
-}
-
-func nilBool(b *bool) bool {
-	if b == nil {
-		return false
-	}
-	return *b
+	return ruleTested, e.AuthAccount, authorRole, nil
 }
 
 // simplifies transaction items before testing their
 // equality between client request and rules response
-func testPrep(items []*types.TransactionItem) []preTestItem {
+func testPrep(items types.TransactionItems) []preTestItem {
 
 	var reduced []preTestItem
 
@@ -237,13 +145,32 @@ func testPrep(items []*types.TransactionItem) []preTestItem {
 		st.UnitsMeasured = unitsMeasured
 		st.Debitor = nilString(u.Debitor)
 		st.Creditor = nilString(u.Creditor)
-		st.DebitorExpirationTime = nilString(u.DebitorExpirationTime)
-		st.CreditorExpirationTime = nilString(u.CreditorExpirationTime)
 
 		reduced = append(reduced, st)
 	}
 
 	return reduced
+}
+
+func nilString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func nilCustomID(i *types.ID) string {
+	if i == nil {
+		return ""
+	}
+	return string(*i)
+}
+
+func nilBool(b *bool) bool {
+	if b == nil {
+		return false
+	}
+	return *b
 }
 
 func testLengthEquality(rule, client []preTestItem) error {
@@ -280,24 +207,145 @@ func testItemEquality(rule, client []preTestItem) error {
 	return nil
 }
 
-// wraps lambdaFn accepting interfaces for testability
+func createRequest(
+	ctx context.Context,
+	ruleTested *types.IntraTransaction,
+	rcs iCreateRequestService,
+) (types.Transaction, error) {
+
+	// list debitors and creditors to fetch profile ids
+	uniqueAccounts := ruleTested.Transaction.TransactionItems.ListUniqueAccountsFromTrItems()
+
+	// unmarshal account profile ids with account names
+	profileIDList, err := rcs.GetProfileIDsByAccountNames(uniqueAccounts)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return types.Transaction{}, err
+	}
+
+	// convert profile id list to map for convenient
+	// addition of profile ids to transaction items
+	profileIDsMap := profileIDList.MapProfileIDsToAccounts()
+
+	// add profile IDs to rule tested transaction items
+	ruleTested.Transaction.TransactionItems.AddProfileIDsToTrItems(profileIDsMap)
+
+	// create transaction request
+	trID, err := rcs.InsertTransactionTx(ruleTested.Transaction)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return types.Transaction{}, err
+	}
+
+	// get new transaction request with transaction items and approvals
+	return rcs.GetTransactionWithTrItemsAndApprovalsByID(trID)
+}
+
+func lambdaFn(
+	ctx context.Context,
+	e *types.IntraTransaction,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	requestCreateServiceConstructor func(db postgres.SQLDB) (iCreateRequestService, error),
+	approveServiceConstructor func(db postgres.SQLDB) (service.IApproveService, error),
+) (string, error) {
+
+	// delay connecting to db and initing
+	// deps until after client values tested
+	ruleTested, authAccount, authRole, err := testValues(ctx, e)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+	defer db.Close(context.Background())
+
+	// create request service
+	reqService, err := requestCreateServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+
+	// create request
+	request, err := createRequest(ctx, ruleTested, reqService)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+
+	// create approve service
+	apprService, err := approveServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+
+	// 1. add requested approval
+	// 2. update approval time stamps in transaction items and transaction
+	// 3. change account balances if equilibrium
+	// 4. notify approvers
+	return apprService.Approve(
+		ctx,
+		authAccount,
+		authRole,
+		request,
+		notifyTopicArn,
+	)
+}
+
+// handleEvent wraps lambdaFn which
+// accepts interfaces for testability
 func handleEvent(
 	ctx context.Context,
 	e *types.IntraTransaction,
 ) (string, error) {
-	var resp []*types.TransactionItem
-	c := lpg.NewConnector(pgx.Connect)
+
 	return lambdaFn(
 		ctx,
 		e,
-		c,
-		sqls.NewInsertBuilder,
-		sqls.NewSelectBuilder,
-		sqls.NewUpdateBuilder,
-		sqls.NewDeleteBuilder,
-		sqlbuilder.Build,
-		&resp)
+		postgres.NewIDB,
+		newRequestCreateService,
+		newApproveService,
+	)
 }
+
+// BEGIN: enables lambdaFn unit testing
+type iCreateRequestService interface {
+	service.IProfileService
+	service.ITransactionService
+}
+
+type createRequestService struct {
+	*service.ProfileService
+	*service.TransactionService
+}
+
+func newRequestCreateService(idb postgres.SQLDB) (iCreateRequestService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newRequestCreateService: failed to assert *postgres.DB")
+	}
+	return &createRequestService{
+		ProfileService:     service.NewProfileService(db),
+		TransactionService: service.NewTransactionService(db),
+	}, nil
+}
+
+func newApproveService(idb postgres.SQLDB) (service.IApproveService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newApproveService: failed to assert *postgres.DB")
+	}
+	return service.NewApproveService(db), nil
+}
+
+// END: enables lambdaFn unit testing
 
 // avoids lambda package dependency during local development
 func localEnvOnly(event string) {
@@ -314,10 +362,13 @@ func localEnvOnly(event string) {
 	// call event handler with test event
 	resp, err := handleEvent(context.Background(), testEvent)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
-	// log.Print(resp)
+	if len(os.Getenv("DEBUG")) > 0 {
+		log.Print(resp)
+	}
+
 	_ = resp
 }
 

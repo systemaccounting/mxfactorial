@@ -1,64 +1,94 @@
 package sqls
 
-import "github.com/huandu/go-sqlbuilder"
+import (
+	"github.com/huandu/go-sqlbuilder"
+)
 
-func (b *BuildInsertSQL) InsertWebsocketConnectionSQL(
+type IWebsocketSQLs interface {
+	InsertWebsocketConnectionSQL(string, int64) (string, []interface{})
+	DeleteWebsocketConnectionByConnectionIDSQL(string) (string, []interface{})
+	DeleteWebsocketsByConnectionIDsSQL([]string) (string, []interface{})
+	SelectWebsocketsByAccountsSQL([]string) (string, []interface{})
+	SelectWebsocketByConnectionIDSQL(string) (string, []interface{})
+	UpdateWebsocketByConnIDSQL(string, string) (string, []interface{})
+}
+
+type WebsocketSQLs struct {
+	SQLBuilder
+}
+
+func (w *WebsocketSQLs) InsertWebsocketConnectionSQL(
 	connectionID string,
 	epochCreatedAt int64,
 ) (string, []interface{}) {
-	b.ib.InsertInto("websocket")
-	b.ib.Cols(
+	w.Init()
+	w.ib.InsertInto("websocket")
+	w.ib.Cols(
 		"connection_id",
 		"epoch_created_at",
 	)
-	b.ib.Values(
+	w.ib.Values(
 		connectionID,
 		epochCreatedAt,
 	)
-	return b.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return w.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildDeleteSQL) DeleteWebsocketConnectionSQL(connectionID string) (string, []interface{}) {
-	b.db.DeleteFrom("websocket")
-	b.db.Where(
-		b.db.Equal("connection_id", connectionID),
+func (w *WebsocketSQLs) DeleteWebsocketConnectionByConnectionIDSQL(connectionID string) (string, []interface{}) {
+	w.Init()
+	w.db.DeleteFrom("websocket")
+	w.db.Where(
+		w.db.Equal("connection_id", connectionID),
 	)
-	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return w.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildDeleteSQL) DeleteWebsocketsByConnectionIDSQL(IDs []interface{}) (string, []interface{}) {
-	b.db.DeleteFrom("websocket")
-	b.db.Where(
-		b.db.In("connection_id", IDs...),
+func (w *WebsocketSQLs) DeleteWebsocketsByConnectionIDsSQL(connectionIDs []string) (string, []interface{}) {
+
+	// sqlbuilder wants interface slice
+	iConnectionIDs := stringToInterfaceSlice(connectionIDs)
+
+	w.Init()
+	w.db.DeleteFrom("websocket")
+	w.db.Where(
+		w.db.In("connection_id", iConnectionIDs...),
 	)
-	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	return w.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildSelectSQL) SelectWebsocketByAccountsSQL(accounts []interface{}) (string, []interface{}) {
-	b.sb.Select("*")
-	b.sb.From("websocket").
+func (w *WebsocketSQLs) SelectWebsocketsByAccountsSQL(accounts []string) (string, []interface{}) {
+
+	// sqlbuilder wants interface slice
+	iaccounts := stringToInterfaceSlice(accounts)
+
+	w.Init()
+	w.sb.Select("*")
+	w.sb.From("websocket").
 		Where(
-			b.sb.In("account_name", accounts...),
+			w.sb.In("account_name", iaccounts...),
 		)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return w.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildSelectSQL) SelectWebsocketByConnectionIDSQL(connID string) (string, []interface{}) {
-	b.sb.Select("*")
-	b.sb.From("websocket").
+func (w *WebsocketSQLs) SelectWebsocketByConnectionIDSQL(connID string) (string, []interface{}) {
+	w.Init()
+	w.sb.Select("*")
+	w.sb.From("websocket").
 		Where(
-			b.sb.Equal("connection_id", connID),
+			w.sb.Equal("connection_id", connID),
 		)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return w.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildUpdateSQL) UpdateWebsocketByConnIDSQL(accountName, connectionID string) (string, []interface{}) {
-	b.ub.Update("websocket").
+func (w *WebsocketSQLs) UpdateWebsocketByConnIDSQL(accountName, connectionID string) (string, []interface{}) {
+	w.Init()
+	w.ub.Update("websocket").
 		Set(
-			b.ub.Assign("account_name", accountName),
+			w.ub.Assign("account_name", accountName),
 		).
 		Where(
-			b.ub.Equal("connection_id", connectionID),
+			w.ub.Equal("connection_id", connectionID),
 		)
-	return b.ub.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return w.ub.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

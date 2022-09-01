@@ -17,7 +17,8 @@ handler () {
 
     # set event dependent migration values
     MIGRATIONS_DIR="$REPO_DIR/migrations/$DIRECTORY"
-    POSTGRESQL_CONNECTION="postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=disable&x-migrations-table=schema_version_${DIRECTORY}"
+    VERSION_TABLE="migration_${DIRECTORY}_version"
+    POSTGRESQL_CONNECTION="postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=disable&x-migrations-table=${VERSION_TABLE}"
 
     # build go migrate command
     CMD="migrate.linux-amd64 -verbose -path ${MIGRATIONS_DIR} -database \"${POSTGRESQL_CONNECTION}\""
@@ -47,7 +48,7 @@ handler () {
       fi
     fi
 
-    if [[ "$DIRECTION" != 'drop' ]]
+    if [[ "$DIRECTION" != 'drop' ]] && [[ "$DIRECTION" != 'force' ]]
     then
       # if count not a number, then must be 'all'
       if ! [[ "$COUNT" =~ ^[0-9]+$ ]]
@@ -61,16 +62,14 @@ handler () {
       fi
     fi
 
-    # if down all migration, prefix magic to avoid SIGPIPE
-    if [[ "$DIRECTION" == 'down' ]] && [[ "$COUNT" == 'all' ]]
-      then
-        # prior art https://unix.stackexchange.com/a/582850
-        CMD="(yes ||:) | ${CMD}"
+    # go migrate down migrates all migrations when '--all' flag passed
+    if [[ "$DIRECTION" == 'down' ]] && [[ "$COUNT" == 'all' ]]; then
+      COUNT="--${COUNT}"
     fi
 
-    # go migrate runs all migrations when no arg is passed, 'all' == null
-    if [[ "$COUNT" == 'all' ]]
-      then COUNT=""
+    # go migrate up migrates all migrations when count argument absent
+    if [[ "$DIRECTION" == 'up' ]] && [[ "$COUNT" == 'all' ]]; then
+      COUNT=
     fi
 
     # concat the go migrate command
@@ -93,7 +92,7 @@ handler () {
     fi
 
     # show go migrate command
-    echo -e "\ngo migrate command: \"$CMD\""
+    echo -e "\nrunning: \"$CMD\""
 
     # clean up between invocations
     rm -rf $REPO_DIR

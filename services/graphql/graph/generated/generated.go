@@ -593,8 +593,8 @@ var sources = []*ast.Source{
   id: ID
   rule_instance_id: String
   author: String
-  author_device_id: Float
-  author_device_latlng: Float
+  author_device_id: String
+  author_device_latlng: String
   author_role: String
   equilibrium_time: String
   sum_value: String
@@ -605,8 +605,8 @@ input TransactionInput {
   id: ID
   rule_instance_id: String
   author: String
-  author_device_id: Float
-  author_device_latlng: Float
+  author_device_id: String
+  author_device_latlng: String
   author_role: String
 }
 
@@ -2254,9 +2254,9 @@ func (ec *executionContext) _Transaction_author_device_id(ctx context.Context, f
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*float64)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Transaction_author_device_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2266,7 +2266,7 @@ func (ec *executionContext) fieldContext_Transaction_author_device_id(ctx contex
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -2295,9 +2295,9 @@ func (ec *executionContext) _Transaction_author_device_latlng(ctx context.Contex
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*float64)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Transaction_author_device_latlng(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2307,7 +2307,7 @@ func (ec *executionContext) fieldContext_Transaction_author_device_latlng(ctx co
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5219,7 +5219,7 @@ func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("author_device_id"))
-			it.AuthorDeviceID, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			it.AuthorDeviceID, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -5227,7 +5227,7 @@ func (ec *executionContext) unmarshalInputTransactionInput(ctx context.Context, 
 			var err error
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("author_device_latlng"))
-			it.AuthorDeviceLatlng, err = ec.unmarshalOFloat2ᚖfloat64(ctx, v)
+			it.AuthorDeviceLatlng, err = ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -6602,22 +6602,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	}
 	res := graphql.MarshalBoolean(*v)
 	return res
-}
-
-func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalFloatContext(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalFloatContext(*v)
-	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

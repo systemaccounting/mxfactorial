@@ -116,7 +116,7 @@ describe('rules function handler', () => {
 		const { handler } = await import('./index');
 		await handler(nullFirstTrItems);
 		expect(mockLabelApprovedItems.mock.calls[0][0]).toEqual(transWAppr.transaction.transaction_items);
-		expect(mockLabelApprovedItems.mock.calls[0].length).toBe(2);
+		expect(mockLabelApprovedItems.mock.calls[0].length).toBe(3);
 	});
 
 	test('returns labelApprovedItems in IntraTransaction object', async () => {

@@ -14,6 +14,7 @@ describe('approveItemOnAccount', () => {
 		const approvalRuleInstanceId = "1";
 		const approvalTransactionId = "3";
 		const approvalTransactionItemId = "2";
+		const testapprovaltime = new Date().toISOString();
 
 		const want: IApproval = {
 			...emptyApproval,
@@ -24,7 +25,7 @@ describe('approveItemOnAccount', () => {
 				transaction_item_id: approvalTransactionItemId,
 				account_name: testapprovername,
 				account_role: c.CREDITOR,
-				approval_time: c.CURRENT_TIMESTAMP
+				approval_time: testapprovaltime
 			},
 		};
 
@@ -52,6 +53,7 @@ describe('approveItemOnAccount', () => {
 			testapprovername,
 			singleTestItem,
 			testApproval,
+			testapprovaltime,
 			testdebitor,
 			testcreditor,
 			c.CREDITOR,
@@ -69,7 +71,7 @@ describe('approveItemOnAccount', () => {
 		const approvalRuleInstanceId = "1";
 		const approvalTransactionId = "3";
 		const approvalTransactionItemId = "2";
-
+		const testapprovaltime = new Date().toISOString();
 
 		const want: IApproval = {
 			...emptyApproval,
@@ -102,6 +104,7 @@ describe('approveItemOnAccount', () => {
 			testapprovername,
 			singleTestItem,
 			testApproval,
+			testapprovaltime,
 			testdebitor,
 			testcreditor,
 			c.CREDITOR,

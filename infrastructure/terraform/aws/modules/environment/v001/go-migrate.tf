@@ -16,7 +16,7 @@ resource "aws_lambda_function" "go_migrate" {
     data.aws_lambda_layer_version.go_migrate.arn
   ]
   runtime = "provided"
-  timeout = 60
+  timeout = 60 // 1 min
   role    = aws_iam_role.go_migrate.arn
 
   environment {
