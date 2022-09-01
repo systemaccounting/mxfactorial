@@ -6,6 +6,7 @@ export default async function (
 	sequence: string[],
 	client: IPGClient,
 	transactionItems: ITransactionItem[],
+	approvalTime: string,
 	getNamesFn: Function,
 	getRulesFn: Function,
 	applyRulesFn: Function,
@@ -44,6 +45,7 @@ export default async function (
 					approvalObj,
 					rulesPerApprover,
 					item,
+					approvalTime,
 				);
 
 				// todo: label item approval only

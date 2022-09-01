@@ -5,6 +5,7 @@ export default async function (
 	approval: IApproval,
 	ruleInstances: IRuleInstance[],
 	transactionItem: ITransactionItem,
+	approvalTime: string,
 ): Promise<IApproval> {
 	let postRuleApproval = Object.assign({}, approval);
 	for (var r of ruleInstances) {
@@ -28,6 +29,7 @@ export default async function (
 			ruleAccountName,
 			transactionItem,
 			approval,
+			approvalTime,
 			...ruleVariableValues,
 		);
 		// accommodates multiple rules

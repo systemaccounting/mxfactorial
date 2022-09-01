@@ -1,8 +1,4 @@
-import c from "../constants"
-import {
-	stringIfNull,
-	stringIfNumber
-} from "./shared"
+import { stringIfNull, stringIfNumber } from "./shared"
 import type { IApproval, ITransactionItem } from "../index.d"
 
 export default function (
@@ -12,6 +8,7 @@ export default function (
 	ruleInstanceAccount: string,
 	transactionItem: ITransactionItem,
 	approval: IApproval,
+	approvalTime: string,
 	CREDITOR: string,
 	APPROVER_ROLE: string,
 	APPROVER_NAME: string,
@@ -32,7 +29,7 @@ export default function (
 		&& postRuleApproval.account_name == APPROVER_NAME
 	) {
 		// בסדר
-		postRuleApproval.approval_time = c.CURRENT_TIMESTAMP;
+		postRuleApproval.approval_time = approvalTime;
 		postRuleApproval.rule_instance_id = ruleInstID;
 		postRuleApproval.transaction_id = trID;
 		postRuleApproval.transaction_item_id = trItemID;
