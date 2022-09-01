@@ -2,8 +2,8 @@ type Transaction {
   id: ID
   rule_instance_id: String
   author: String
-  author_device_id: Float
-  author_device_latlng: Float
+  author_device_id: String
+  author_device_latlng: String
   author_role: String
   equilibrium_time: String
   sum_value: String
@@ -14,8 +14,8 @@ input TransactionInput {
   id: ID
   rule_instance_id: String
   author: String
-  author_device_id: Float
-  author_device_latlng: Float
+  author_device_id: String
+  author_device_latlng: String
   author_role: String
 }
 

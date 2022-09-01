@@ -24,8 +24,8 @@ type Transaction struct {
 	ID                 *string            `json:"id"`
 	RuleInstanceID     *string            `json:"rule_instance_id"`
 	Author             *string            `json:"author"`
-	AuthorDeviceID     *float64           `json:"author_device_id"`
-	AuthorDeviceLatlng *float64           `json:"author_device_latlng"`
+	AuthorDeviceID     *string            `json:"author_device_id"`
+	AuthorDeviceLatlng *string            `json:"author_device_latlng"`
 	AuthorRole         *string            `json:"author_role"`
 	EquilibriumTime    *string            `json:"equilibrium_time"`
 	SumValue           *string            `json:"sum_value"`
@@ -33,12 +33,12 @@ type Transaction struct {
 }
 
 type TransactionInput struct {
-	ID                 *string  `json:"id"`
-	RuleInstanceID     *string  `json:"rule_instance_id"`
-	Author             *string  `json:"author"`
-	AuthorDeviceID     *float64 `json:"author_device_id"`
-	AuthorDeviceLatlng *float64 `json:"author_device_latlng"`
-	AuthorRole         *string  `json:"author_role"`
+	ID                 *string `json:"id"`
+	RuleInstanceID     *string `json:"rule_instance_id"`
+	Author             *string `json:"author"`
+	AuthorDeviceID     *string `json:"author_device_id"`
+	AuthorDeviceLatlng *string `json:"author_device_latlng"`
+	AuthorRole         *string `json:"author_role"`
 }
 
 type TransactionItem struct {
