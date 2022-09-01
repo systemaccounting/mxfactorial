@@ -27,54 +27,35 @@ func (id *ID) Value() (driver.Value, error) {
 }
 
 func (id *ID) Scan(v interface{}) error {
-	if v == nil {
-		*id = ID("")
-		return nil
-	}
-	switch val := v.(type) {
-	case int:
-		s := strconv.Itoa(val)
-		*id = ID(s)
-		return nil
-	case int32:
-		i := int(val)
-		s := strconv.Itoa(i)
-		*id = ID(s)
-		return nil
-	case int64: // listing int32,int64 together returns "need type assertion" error
-		i := int(val)
-		s := strconv.Itoa(i)
-		*id = ID(s)
-		return nil
-	default:
+	val, ok := v.(int64)
+	if !ok {
 		return fmt.Errorf("failed to scan ID var with value: %v", val)
 	}
-}
-
-func (id *ID) Unmarshal(r pgx.Row) error {
-	err := r.Scan(id)
-	if err != nil {
-		return fmt.Errorf("unmarshal id error: %v", err)
-	}
+	s := ID(strconv.FormatInt(val, 10))
+	*id = s
 	return nil
 }
 
 type IDs []*ID
 
-func (ids IDs) Unmarshal(r pgx.Rows) error {
-	// https://github.com/jackc/pgx/blob/909b81a16372d7e2574b2b11e8993895bdd5a065/conn.go#L676-L677
-	defer r.Close()
-	for r.Next() {
-		var ID *ID
-		err := r.Scan(ID)
+func (ids IDs) ScanRows(rows pgx.Rows) error {
+	defer rows.Close()
+
+	for rows.Next() {
+
+		ID := new(ID)
+		err := rows.Scan(&ID)
 		if err != nil {
-			return fmt.Errorf("unmarshal IDs error: %v", err)
+			return fmt.Errorf("IDs scan: %v", err)
 		}
+
 		ids = append(ids, ID)
 	}
-	err := r.Err()
+
+	err := rows.Err()
 	if err != nil {
-		return fmt.Errorf("scan rows for IDs error: %v ", err)
+		return fmt.Errorf("IDs rows: %v ", err)
 	}
+
 	return nil
 }
