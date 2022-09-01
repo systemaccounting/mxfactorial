@@ -29,7 +29,7 @@
 			"account_role": "debitor",
 			"device_id": null,
 			"device_latlng": null,
-			"approval_time": "NOW()",
+			"approval_time": "2022-08-07T22:34:23.943Z",
 			"rejection_time": null,
 			"expiration_time": null
 		},
@@ -42,7 +42,7 @@
 			"account_role": "creditor",
 			"device_id": null,
 			"device_latlng": null,
-			"approval_time": "NOW()",
+			"approval_time": "2022-08-07T22:34:23.943Z",
 			"rejection_time": null,
 			"expiration_time": null
 		},
@@ -55,7 +55,7 @@
 			"account_role": "creditor",
 			"device_id": null,
 			"device_latlng": null,
-			"approval_time": "NOW()",
+			"approval_time": "2022-08-07T22:34:23.943Z",
 			"rejection_time": null,
 			"expiration_time": null
 		}

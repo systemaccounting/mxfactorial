@@ -4,7 +4,7 @@
 		"id": "12",
 		"author": "GroceryCo",
 		"author_role": "creditor",
-		"equilibrium_time": "2022-06-24T03:09:32.772142Z",
+		"equilibrium_time": "2022-06-24T03:09:32.772Z",
 		"sum_value": "22.89",
 		"transaction_items": [
 			{
@@ -24,8 +24,8 @@
 				"creditor": "GroceryCo",
 				"debitor_profile_id": "5",
 				"creditor_profile_id": "29",
-				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
-				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"debitor_approval_time": "2022-06-24T03:09:32.772Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587Z",
 				"approvals": [
 					{
 						"id": "256",
@@ -34,7 +34,7 @@
 						"transaction_item_id": "67",
 						"account_name": "IgorPetrov",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "257",
@@ -43,7 +43,7 @@
 						"transaction_item_id": "67",
 						"account_name": "MiriamLevy",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "258",
@@ -51,7 +51,7 @@
 						"transaction_item_id": "67",
 						"account_name": "SarahBell",
 						"account_role": "debitor",
-						"approval_time": "2022-06-24T03:09:32.772142Z"
+						"approval_time": "2022-06-24T03:09:32.772Z"
 					}
 				]
 			},
@@ -72,8 +72,8 @@
 				"creditor": "GroceryCo",
 				"debitor_profile_id": "5",
 				"creditor_profile_id": "29",
-				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
-				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"debitor_approval_time": "2022-06-24T03:09:32.772Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587Z",
 				"approvals": [
 					{
 						"id": "259",
@@ -82,7 +82,7 @@
 						"transaction_item_id": "68",
 						"account_name": "IgorPetrov",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "260",
@@ -91,7 +91,7 @@
 						"transaction_item_id": "68",
 						"account_name": "MiriamLevy",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "261",
@@ -99,7 +99,7 @@
 						"transaction_item_id": "68",
 						"account_name": "SarahBell",
 						"account_role": "debitor",
-						"approval_time": "2022-06-24T03:09:32.772142Z"
+						"approval_time": "2022-06-24T03:09:32.772Z"
 					}
 				]
 			},
@@ -120,8 +120,8 @@
 				"creditor": "GroceryCo",
 				"debitor_profile_id": "5",
 				"creditor_profile_id": "29",
-				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
-				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"debitor_approval_time": "2022-06-24T03:09:32.772Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587Z",
 				"approvals": [
 					{
 						"id": "262",
@@ -130,7 +130,7 @@
 						"transaction_item_id": "69",
 						"account_name": "IgorPetrov",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "263",
@@ -139,7 +139,7 @@
 						"transaction_item_id": "69",
 						"account_name": "MiriamLevy",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "264",
@@ -147,7 +147,7 @@
 						"transaction_item_id": "69",
 						"account_name": "SarahBell",
 						"account_role": "debitor",
-						"approval_time": "2022-06-24T03:09:32.772142Z"
+						"approval_time": "2022-06-24T03:09:32.772Z"
 					}
 				]
 			},
@@ -168,8 +168,8 @@
 				"creditor": "StateOfCalifornia",
 				"debitor_profile_id": "5",
 				"creditor_profile_id": "27",
-				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
-				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"debitor_approval_time": "2022-06-24T03:09:32.772Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587Z",
 				"approvals": [
 					{
 						"id": "265",
@@ -178,7 +178,7 @@
 						"transaction_item_id": "70",
 						"account_name": "BenRoss",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "266",
@@ -187,7 +187,7 @@
 						"transaction_item_id": "70",
 						"account_name": "DanLee",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "267",
@@ -196,7 +196,7 @@
 						"transaction_item_id": "70",
 						"account_name": "MiriamLevy",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "268",
@@ -204,7 +204,7 @@
 						"transaction_item_id": "70",
 						"account_name": "SarahBell",
 						"account_role": "debitor",
-						"approval_time": "2022-06-24T03:09:32.772142Z"
+						"approval_time": "2022-06-24T03:09:32.772Z"
 					}
 				]
 			},
@@ -225,8 +225,8 @@
 				"creditor": "StateOfCalifornia",
 				"debitor_profile_id": "5",
 				"creditor_profile_id": "27",
-				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
-				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"debitor_approval_time": "2022-06-24T03:09:32.772Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587Z",
 				"approvals": [
 					{
 						"id": "269",
@@ -235,7 +235,7 @@
 						"transaction_item_id": "71",
 						"account_name": "BenRoss",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "270",
@@ -244,7 +244,7 @@
 						"transaction_item_id": "71",
 						"account_name": "DanLee",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "271",
@@ -253,7 +253,7 @@
 						"transaction_item_id": "71",
 						"account_name": "MiriamLevy",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "272",
@@ -261,7 +261,7 @@
 						"transaction_item_id": "71",
 						"account_name": "SarahBell",
 						"account_role": "debitor",
-						"approval_time": "2022-06-24T03:09:32.772142Z"
+						"approval_time": "2022-06-24T03:09:32.772Z"
 					}
 				]
 			},
@@ -282,8 +282,8 @@
 				"creditor": "StateOfCalifornia",
 				"debitor_profile_id": "5",
 				"creditor_profile_id": "27",
-				"debitor_approval_time": "2022-06-24T03:09:32.772142Z",
-				"creditor_approval_time": "2022-06-24T03:09:31.587545Z",
+				"debitor_approval_time": "2022-06-24T03:09:32.772Z",
+				"creditor_approval_time": "2022-06-24T03:09:31.587Z",
 				"approvals": [
 					{
 						"id": "273",
@@ -292,7 +292,7 @@
 						"transaction_item_id": "72",
 						"account_name": "BenRoss",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "274",
@@ -301,7 +301,7 @@
 						"transaction_item_id": "72",
 						"account_name": "DanLee",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "275",
@@ -310,7 +310,7 @@
 						"transaction_item_id": "72",
 						"account_name": "MiriamLevy",
 						"account_role": "creditor",
-						"approval_time": "2022-06-24T03:09:31.587545Z"
+						"approval_time": "2022-06-24T03:09:31.585Z"
 					},
 					{
 						"id": "276",
@@ -318,7 +318,7 @@
 						"transaction_item_id": "72",
 						"account_name": "SarahBell",
 						"account_role": "debitor",
-						"approval_time": "2022-06-24T03:09:32.772142Z"
+						"approval_time": "2022-06-24T03:09:32.772Z"
 					}
 				]
 			}
