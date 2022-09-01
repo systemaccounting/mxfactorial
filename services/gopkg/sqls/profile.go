@@ -5,22 +5,38 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func (b *BuildSelectSQL) SelectProfileIDsByAccount(accountNames []interface{}) (string, []interface{}) {
-	b.sb.Select(
+type IAccountProfileSQLS interface {
+	SelectProfileIDsByAccountNames([]string) (string, []interface{})
+	InsertAccountProfileSQL(*types.AccountProfile) (string, []interface{})
+}
+
+type AccountProfileSQLS struct {
+	SQLBuilder
+}
+
+func (ap *AccountProfileSQLS) SelectProfileIDsByAccountNames(accountNames []string) (string, []interface{}) {
+	ap.Init()
+
+	// sqlbuilder wants interface slice
+	iAccts := stringToInterfaceSlice(accountNames)
+
+	ap.sb.Select(
 		"id",
 		"account_name",
 	)
-	b.sb.From("account_profile").
+	ap.sb.From("account_profile").
 		Where(
-			b.sb.In("account_name", accountNames...),
-			b.sb.IsNull("removal_time"),
+			ap.sb.In("account_name", iAccts...),
+			ap.sb.IsNull("removal_time"),
 		)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	return ap.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildInsertSQL) InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
-	b.ib.InsertInto("account_profile")
-	b.ib.Cols(
+func (ap *AccountProfileSQLS) InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
+	ap.Init()
+	ap.ib.InsertInto("account_profile")
+	ap.ib.Cols(
 		"account_name",
 		"description",
 		"first_name",
@@ -44,7 +60,7 @@ func (b *BuildInsertSQL) InsertAccountProfileSQL(p *types.AccountProfile) (strin
 		"occupation_id",
 		"industry_id",
 	)
-	b.ib.Values(
+	ap.ib.Values(
 		p.AccountName,
 		p.Description,
 		p.FirstName,
@@ -57,7 +73,7 @@ func (b *BuildInsertSQL) InsertAccountProfileSQL(p *types.AccountProfile) (strin
 		p.UnitNumber,
 		p.CityName,
 		p.CountyName,
-		NullSQLFromStrPtr(p.RegionName),
+		p.RegionName,
 		p.StateName,
 		p.PostalCode,
 		p.Latlng,
@@ -68,5 +84,5 @@ func (b *BuildInsertSQL) InsertAccountProfileSQL(p *types.AccountProfile) (strin
 		p.OccupationID,
 		p.IndustryID,
 	)
-	return b.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return ap.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

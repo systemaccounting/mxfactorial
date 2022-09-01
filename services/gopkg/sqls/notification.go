@@ -5,58 +5,83 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-func (b *BuildInsertSQL) InsertTransactionNotificationSQL(n []*types.TransactionNotification) (string, []interface{}) {
-	b.ib.InsertInto("transaction_notification")
-	b.ib.Cols(
+type INotificationSQLs interface {
+	InsertTransactionNotificationsSQL(types.TransactionNotifications) (string, []interface{})
+	SelectTransNotifsByIDsSQL(types.IDs) (string, []interface{})
+	DeleteTransNotificationsByIDsSQL(types.IDs) (string, []interface{})
+	SelectTransNotifsByAccountSQL(string, int) (string, []interface{})
+	DeleteTransNotificationsByTransIDSQL(types.ID) (string, []interface{})
+}
+
+type NotificationSQLs struct {
+	SQLBuilder
+}
+
+func (n *NotificationSQLs) InsertTransactionNotificationsSQL(tns types.TransactionNotifications) (string, []interface{}) {
+	n.Init()
+	n.ib.InsertInto("transaction_notification")
+	n.ib.Cols(
 		"transaction_id",
 		"account_name",
 		"account_role",
 		"message",
 	)
-	for _, v := range n {
-		b.ib.Values(
+	for _, v := range tns {
+		n.ib.Values(
 			*v.TransactionID,
 			*v.AccountName,
 			*v.AccountRole,
 			*v.Message,
 		)
 	}
-	retID := sqlbuilder.Buildf("%v returning id", b.ib)
+	retID := sqlbuilder.Buildf("%v returning id", n.ib)
 	return sqlbuilder.WithFlavor(retID, sqlbuilder.PostgreSQL).Build()
 }
 
-func (b *BuildSelectSQL) SelectTransNotifsByIDsSQL(IDs []interface{}) (string, []interface{}) {
-	b.sb.Select("*")
-	b.sb.From("transaction_notification").
+func (n *NotificationSQLs) SelectTransNotifsByIDsSQL(notifIDs types.IDs) (string, []interface{}) {
+	n.Init()
+
+	iNotifIDs := IDtoInterfaceSlice(notifIDs)
+
+	n.sb.Select("*")
+	n.sb.From("transaction_notification").
 		Where(
-			b.sb.In("id", IDs...),
+			n.sb.In("id", iNotifIDs...),
 		)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	return n.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildDeleteSQL) DeleteTransNotificationsByIDSQL(IDs []interface{}) (string, []interface{}) {
-	b.db.DeleteFrom("transaction_notification")
-	b.db.Where(
-		b.db.In("id", IDs...),
+func (n *NotificationSQLs) DeleteTransNotificationsByIDsSQL(notifIDs types.IDs) (string, []interface{}) {
+	n.Init()
+
+	iNotifIDs := IDtoInterfaceSlice(notifIDs)
+
+	n.db.DeleteFrom("transaction_notification")
+	n.db.Where(
+		n.db.In("id", iNotifIDs...),
 	)
-	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	return n.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildSelectSQL) SelectTransNotifsByAccountSQL(accountName string, limit int) (string, []interface{}) {
-	b.sb.Select("*")
-	b.sb.From("transaction_notification").
+func (n *NotificationSQLs) SelectTransNotifsByAccountSQL(accountName string, limit int) (string, []interface{}) {
+	n.Init()
+	n.sb.Select("*")
+	n.sb.From("transaction_notification").
 		Where(
-			b.sb.Equal("account_name", accountName),
+			n.sb.Equal("account_name", accountName),
 		)
-	b.sb.OrderBy("id").Desc()
-	b.sb.Limit(limit)
-	return b.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	n.sb.OrderBy("id").Desc()
+	n.sb.Limit(limit)
+	return n.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildDeleteSQL) DeleteTransNotificationsByTransIDSQL(trID types.ID) (string, []interface{}) {
-	b.db.DeleteFrom("transaction_notification")
-	b.db.Where(
-		b.db.Equal("transaction_id", trID),
+func (n *NotificationSQLs) DeleteTransNotificationsByTransIDSQL(trID types.ID) (string, []interface{}) {
+	n.Init()
+	n.db.DeleteFrom("transaction_notification")
+	n.db.Where(
+		n.db.Equal("transaction_id", trID),
 	)
-	return b.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return n.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }

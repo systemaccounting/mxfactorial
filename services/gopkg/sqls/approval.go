@@ -1,28 +1,28 @@
 package sqls
 
 import (
-	"strings"
-
 	"github.com/huandu/go-sqlbuilder"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-var buildFInsApproval string = "%v returning" + " " + strings.Join([]string{
-	"id",
-	"rule_instance_id",
-	"transaction_id",
-	"transaction_item_id",
-	"account_name",
-	"account_role",
-	"device_id",
-	"device_latlng",
-	"approval_time",
-	"expiration_time",
-}, ", ")
+type IApprovalSQLs interface {
+	InsertApprovalsSQL(types.Approvals, sqlbuilder.Builder, sqlbuilder.Builder) sqlbuilder.Builder
+	SelectApprovalsByTrIDSQL(types.ID) (string, []interface{})
+	SelectApprovalsByTrIDsSQL(types.IDs) (string, []interface{})
+}
 
-func (b *BuildInsertSQL) InsertApprovalsSQL(sbc func() SelectSQLBuilder, alias string, approvals []*types.Approval) sqlbuilder.Builder {
-	b.ib.InsertInto("approval")
-	b.ib.Cols(
+type ApprovalSQLs struct {
+	SQLBuilder
+}
+
+func (a *ApprovalSQLs) InsertApprovalsSQL(
+	approvals types.Approvals,
+	transactionAuxStmt,
+	trItemAuxStatement sqlbuilder.Builder,
+) sqlbuilder.Builder {
+	a.Init()
+	a.ib.InsertInto("approval")
+	a.ib.Cols(
 		"rule_instance_id",
 		"transaction_id",
 		"transaction_item_id",
@@ -34,69 +34,44 @@ func (b *BuildInsertSQL) InsertApprovalsSQL(sbc func() SelectSQLBuilder, alias s
 		"expiration_time",
 	)
 
-	sbTr := sbc()
-	sbTr.Select("id")
-	sbTr.From("insert_transaction")
-
-	sbTrItem := sbc()
-	sbTrItem.Select("id")
-	sbTrItem.From(alias)
-
-	for _, a := range approvals {
-		b.ib.Values(
-			a.RuleInstanceID,
-			sqlbuilder.Buildf("(%v)", sbTr),
-			sqlbuilder.Buildf("(%v)", sbTrItem),
-			a.AccountName,
-			a.AccountRole,
-			a.DeviceID,
-			a.DeviceLatlng,
-			a.ApprovalTime,
-			a.ExpirationTime,
+	for _, ap := range approvals {
+		a.ib.Values(
+			ap.RuleInstanceID,
+			sqlbuilder.Buildf("(%v)", transactionAuxStmt),
+			sqlbuilder.Buildf("(%v)", trItemAuxStatement),
+			ap.AccountName,
+			ap.AccountRole,
+			ap.DeviceID,
+			ap.DeviceLatlng,
+			ap.ApprovalTime,
+			ap.ExpirationTime,
 		)
 	}
 
-	return sqlbuilder.WithFlavor(b.ib, sqlbuilder.PostgreSQL)
+	return sqlbuilder.WithFlavor(a.ib, sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildSelectSQL) SelectApprovalsByTrIDSQL(trID *types.ID) (string, []interface{}) {
-	sb := sqlbuilder.PostgreSQL.NewSelectBuilder()
-	sb.Select(
-		"id",
-		"rule_instance_id",
-		"transaction_id",
-		"transaction_item_id",
-		"account_name",
-		"account_role",
-		"device_id",
-		"device_latlng",
-		"approval_time",
-		"expiration_time",
-	)
-	sb.From("approval").
+func (a *ApprovalSQLs) SelectApprovalsByTrIDSQL(trID types.ID) (string, []interface{}) {
+	a.Init()
+	a.sb.Select("*")
+	a.sb.From("approval").
 		Where(
-			sb.Equal("transaction_id", *trID),
+			a.sb.Equal("transaction_id", trID),
 		)
-	return sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+	return a.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (b *BuildSelectSQL) SelectApprovalsByTrIDsSQL(trIDs []interface{}) (string, []interface{}) {
-	sb := sqlbuilder.PostgreSQL.NewSelectBuilder()
-	sb.Select(
-		"id",
-		"rule_instance_id",
-		"transaction_id",
-		"transaction_item_id",
-		"account_name",
-		"account_role",
-		"device_id",
-		"device_latlng",
-		"approval_time",
-		"expiration_time",
-	)
-	sb.From("approval").
+func (a *ApprovalSQLs) SelectApprovalsByTrIDsSQL(trIDs types.IDs) (string, []interface{}) {
+	a.Init()
+
+	// sqlbuilder wants interface slice
+	iIDs := IDtoInterfaceSlice(trIDs)
+
+	a.sb.Select("*")
+	a.sb.From("approval").
 		Where(
-			sb.In("transaction_id", trIDs...),
+			a.sb.In("transaction_id", iIDs...),
 		)
-	return sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+
+	return a.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
