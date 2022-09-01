@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgx/v4"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 )
 
 const (
@@ -29,9 +30,8 @@ var pgConn string = fmt.Sprintf(
 func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
-	c lpg.Connector,
-	ibc func() sqls.InsertSQLBuilder,
-	dbc func() sqls.DeleteSQLBuilder,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	websocketServiceConstructor func(db postgres.SQLDB) (service.IWebsocketService, error),
 ) (events.APIGatewayProxyResponse, error) {
 
 	// values required to insert and delete on connect and disconnect routes
@@ -42,44 +42,39 @@ func lambdaFn(
 	// set success response
 	success := events.APIGatewayProxyResponse{StatusCode: 200}
 
-	// connect to postgres
-	db, err := c.Connect(ctx, pgConn)
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
 	if err != nil {
-		log.Printf("connect error: %v", err)
+		logger.Log(logger.Trace(), err)
 		return events.APIGatewayProxyResponse{}, err
 	}
 	defer db.Close(context.Background())
 
+	// create websocket service
+	ws, err := websocketServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return events.APIGatewayProxyResponse{}, err
+	}
+
 	// insert websocket connection in db on connect
 	if routeKey == connectRouteKey {
 
-		// create sql builder with constructor
-		ib := ibc()
-
-		insSQL, insArgs := ib.InsertWebsocketConnectionSQL(
-			connectionID,
-			connectedAt,
-		)
-		_, err := db.Exec(context.Background(), insSQL, insArgs...)
+		err := ws.AddWebsocketConnection(connectedAt, connectionID)
 		if err != nil {
-			log.Printf("wss conn insert error: %v", err)
+			logger.Log(logger.Trace(), err)
 			return events.APIGatewayProxyResponse{}, err
 		}
+
 		return success, nil
 	}
 
 	// delete websocket connection in db on disconnect
 	if routeKey == disconnectRouteKey {
-		// create sql builder from constructor
-		dbWs := dbc()
 
-		// create sql
-		delSQL, delArgs := dbWs.DeleteWebsocketConnectionSQL(connectionID)
-
-		// insert websocket
-		_, err := db.Exec(context.Background(), delSQL, delArgs...)
+		err := ws.DeleteWebsocketConnection(connectionID)
 		if err != nil {
-			log.Printf("wss conn delete error: %v", err)
+			logger.Log(logger.Trace(), err)
 			return events.APIGatewayProxyResponse{}, err
 		}
 
@@ -97,13 +92,26 @@ func lambdaFn(
 	}, nil
 }
 
-// wraps lambdaFn accepting db interface for testability
+// wraps lambdaFn accepting interfaces for testability
 func handleEvent(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
 ) (events.APIGatewayProxyResponse, error) {
-	c := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, c, sqls.NewInsertBuilder, sqls.NewDeleteBuilder)
+	return lambdaFn(
+		ctx,
+		e,
+		postgres.NewIDB,
+		newWebsocketService,
+	)
+}
+
+// enables lambdaFn unit testing
+func newWebsocketService(idb postgres.SQLDB) (service.IWebsocketService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newWebsocketService: failed to assert *postgres.DB")
+	}
+	return service.NewWebsocketService(db), nil
 }
 
 func main() {

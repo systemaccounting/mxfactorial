@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,10 +14,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
-	"github.com/jackc/pgx/v4"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -41,13 +41,12 @@ type NotificationAndWebsockets struct {
 func lambdaFn(
 	ctx context.Context,
 	e events.SNSEvent,
-	c lpg.Connector,
-	u lpg.PGUnmarshaler,
-	sbc func() sqls.SelectSQLBuilder,
-	dbc func() sqls.DeleteSQLBuilder,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	notificationServiceConstructor func(db postgres.SQLDB) (service.ITransactionNotificationService, error),
+	websocketServiceConstructor func(db postgres.SQLDB) (service.IWebsocketService, error),
 ) {
 
-	msg := e.Records[0].SNS.Message
+	msg := e.Records[0].SNS.Message // `["23","45","67"]`
 	attributes := e.Records[0].SNS.MessageAttributes
 
 	var service string
@@ -70,81 +69,48 @@ func lambdaFn(
 	}
 
 	// unmarshal transaction_notifcation ids
-	var IDs []int32
-	err := json.Unmarshal([]byte(msg), &IDs)
+	var notifIDs types.IDs
+	err := json.Unmarshal([]byte(msg), &notifIDs)
 	if err != nil {
 		log.Print(err)
 	}
 
-	// package wants interface slice
-	var transNotifIDs []interface{}
-	for _, v := range IDs {
-		transNotifIDs = append(transNotifIDs, v)
-	}
-
-	// create builder from constructor
-	sb := sbc()
-
-	// create select transaction_notifications by id sql
-	selNotifSQL, selNotifArgs := sb.SelectTransNotifsByIDsSQL(
-		transNotifIDs,
-	)
-
-	// connect to postgres
-	db, err := c.Connect(ctx, pgConn)
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
 	if err != nil {
-		log.Printf("connect error: %v", err)
+		logger.Log(logger.Trace(), err)
+		log.Fatal(err)
 	}
 	defer db.Close(context.Background())
 
-	// get transaction_notifications
-	transNotifsRows, err := db.Query(
-		context.Background(),
-		selNotifSQL,
-		selNotifArgs...,
-	)
+	// create transaction service
+	ns, err := notificationServiceConstructor(db)
 	if err != nil {
-		log.Printf("query err: %v", err)
+		logger.Log(logger.Trace(), err)
+		log.Fatal(err)
 	}
 
-	// unmarshal transaction_notifications
-	transNotifs, err := u.UnmarshalTransactionNotifications(
-		transNotifsRows,
-	)
+	// get transactions
+	transNotifs, err := ns.GetTransactionNotificationsByIDs(notifIDs)
 	if err != nil {
-		log.Printf("unmarshal err: %v", err)
+		logger.Log(logger.Trace(), err)
+		log.Fatal(err)
 	}
 
-	// sqlbuilder package In() receiver wants interface slice
-	var wssAccountsIFace []interface{}
+	// create websocket service
+	ws, err := websocketServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+	}
+
+	var wssAccounts []string
 	for _, v := range transNotifs {
-		wssAccountsIFace = append(wssAccountsIFace, *v.AccountName)
+		wssAccounts = append(wssAccounts, *v.AccountName)
 	}
 
-	// create sql builder from constructor
-	sbWs := sbc()
-
-	// create select websockets by account sql
-	selWssSQL, selWssArgs := sbWs.SelectWebsocketByAccountsSQL(
-		wssAccountsIFace,
-	)
-
-	// get websockets for notification recipients
-	wssRows, err := db.Query(
-		context.Background(),
-		selWssSQL,
-		selWssArgs...,
-	)
+	websockets, err := ws.GetWebsocketsByAccounts(wssAccounts)
 	if err != nil {
-		log.Printf("query err: %v", err)
-	}
-
-	// unmarshal websockets
-	websockets, err := u.UnmarshalWebsockets(
-		wssRows,
-	)
-	if err != nil {
-		log.Printf("unmarshal err: %v", err)
+		logger.Log(logger.Trace(), err)
 	}
 
 	// attach websockets per recipient
@@ -168,7 +134,7 @@ func lambdaFn(
 		aws.NewConfig().WithRegion(awsRegion).WithEndpoint(apiGWConnectionsURI),
 	)
 
-	var websocketsToDelete []interface{} // sqlbuilder pkg want interface slice
+	var websocketsToDelete []string
 
 	// temp solution to https://github.com/aws/aws-sdk-go/issues/3477
 	// delete websocket from postgres after matching 410 status code in apigw error
@@ -212,7 +178,7 @@ func lambdaFn(
 
 				// add connection id to delete list if
 				// 410 status code in error, and connection id is unique
-				if re.MatchString(errMsg) && tools.IsIfaceStringUnique(*w.ConnectionID, websocketsToDelete) {
+				if re.MatchString(errMsg) && isStringUnique(*w.ConnectionID, websocketsToDelete) {
 					websocketsToDelete = append(websocketsToDelete, *w.ConnectionID)
 				}
 			}
@@ -222,22 +188,20 @@ func lambdaFn(
 	// delete stale websockets
 	if len(websocketsToDelete) > 0 {
 
-		// create sql builder from constructor
-		dbWs := dbc()
-
-		// create delete websockets by connection ids sql
-		delWssSQL, delWssArgs := dbWs.DeleteWebsocketsByConnectionIDSQL(
-			websocketsToDelete,
-		)
-		_, err = db.Exec(
-			context.Background(),
-			delWssSQL,
-			delWssArgs...,
-		)
+		err := ws.DeleteWebsocketsByConnectionIDs(websocketsToDelete)
 		if err != nil {
-			log.Printf("delete websockets err: %v", err)
+			logger.Log(logger.Trace(), fmt.Errorf("delete websockets err: %v", err))
 		}
 	}
+}
+
+func isStringUnique(s string, l []string) bool {
+	for _, v := range l {
+		if v == s {
+			return false
+		}
+	}
+	return true
 }
 
 // wraps lambdaFn accepting interfaces for testability
@@ -245,9 +209,31 @@ func handleEvent(
 	ctx context.Context,
 	e events.SNSEvent,
 ) {
-	c := lpg.NewConnector(pgx.Connect)
-	u := lpg.NewPGUnmarshaler()
-	lambdaFn(ctx, e, c, u, sqls.NewSelectBuilder, sqls.NewDeleteBuilder)
+	lambdaFn(
+		ctx,
+		e,
+		postgres.NewIDB,
+		newNotificationService,
+		newWebsocketService,
+	)
+}
+
+// enables lambdaFn unit testing
+func newNotificationService(idb postgres.SQLDB) (service.ITransactionNotificationService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newNotificationService: failed to assert *postgres.DB")
+	}
+	return service.NewTransactionNotificationService(db), nil
+}
+
+// enables lambdaFn unit testing
+func newWebsocketService(idb postgres.SQLDB) (service.IWebsocketService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newWebsocketService: failed to assert *postgres.DB")
+	}
+	return service.NewWebsocketService(db), nil
 }
 
 func main() {

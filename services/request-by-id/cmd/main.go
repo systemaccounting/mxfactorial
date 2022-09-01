@@ -11,11 +11,9 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgx/v4"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -32,9 +30,8 @@ var pgConn string = fmt.Sprintf(
 func lambdaFn(
 	ctx context.Context,
 	e types.QueryByID,
-	c lpg.Connector,
-	u lpg.PGUnmarshaler,
-	sbc func() sqls.SelectSQLBuilder,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	tranactionServiceConstructor func(db postgres.SQLDB) (service.ITransactionService, error),
 ) (string, error) {
 
 	if e.AuthAccount == "" {
@@ -45,18 +42,25 @@ func lambdaFn(
 		return "", errors.New("missing id. exiting")
 	}
 
-	// connect to postgres
-	db, err := c.Connect(ctx, pgConn)
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
 	if err != nil {
-		log.Printf("connect error: %v", err)
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 	defer db.Close(context.Background())
 
-	// get approvals
-	apprvs, err := data.GetApprovalsByTransactionID(db, u, sbc, e.ID)
+	// create transaction service
+	ts, err := tranactionServiceConstructor(db)
 	if err != nil {
-		log.Printf("query error: %v", err)
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
+
+	// get approvals
+	apprvs, err := ts.GetApprovalsByTransactionID(*e.ID)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 
@@ -76,39 +80,49 @@ func lambdaFn(
 	// return empty response if account or
 	// pending approvals not found in approvals
 	if accountOccurrence == 0 || pendingApprovalCount == 0 {
-		return tools.EmptyMarshaledIntraTransaction(e.AuthAccount)
+		return types.EmptyMarshaledIntraTransaction(e.AuthAccount)
 	}
 
 	// get transaction items
-	trItems, err := data.GetTrItemsByTransactionID(db, u, sbc, e.ID)
+	trItems, err := ts.GetTrItemsByTransactionID(*e.ID)
 	if err != nil {
 		log.Print(err)
 		return "", err
 	}
 
 	// get transaction
-	tr, err := data.GetTransactionByID(db, u, sbc, e.ID)
+	tr, err := ts.GetTransactionByID(*e.ID)
 	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 
-	// add transaction items to returning transaction
-	tr.TransactionItems = trItems
-
-	data.AttachApprovalsToTransactionItems(apprvs, tr.TransactionItems)
+	trWithTrItemsAndApprvs := service.BuildTransaction(tr, trItems, apprvs)
 
 	// create transaction for response to client
-	intraTr := tools.CreateIntraTransaction(e.AuthAccount, tr)
+	intraTr := trWithTrItemsAndApprvs.CreateIntraTransaction(e.AuthAccount)
 
-	// send string or error response to client
-	return tools.MarshalIntraTransaction(&intraTr)
+	// send string response to client
+	return intraTr.MarshalIntraTransaction()
 }
 
 // wraps lambdaFn accepting db interface for testability
 func handleEvent(ctx context.Context, e types.QueryByID) (string, error) {
-	c := lpg.NewConnector(pgx.Connect)
-	u := lpg.NewPGUnmarshaler()
-	return lambdaFn(ctx, e, c, u, sqls.NewSelectBuilder)
+	return lambdaFn(
+		ctx,
+		e,
+		postgres.NewIDB,
+		newTransactionService,
+	)
+}
+
+// enables lambdaFn unit testing
+func newTransactionService(idb postgres.SQLDB) (service.ITransactionService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newTransactionService: failed to assert *postgres.DB")
+	}
+	return service.NewTransactionService(db), nil
 }
 
 // avoids lambda package dependency during local development
@@ -129,7 +143,6 @@ func localEnvOnly(event string) {
 	}
 
 	log.Print(resp)
-	// _ = resp
 }
 
 func main() {

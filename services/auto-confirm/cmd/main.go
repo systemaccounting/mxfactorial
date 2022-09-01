@@ -2,16 +2,17 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgx/v4"
 	"github.com/shopspring/decimal"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/testdata"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
@@ -36,9 +37,8 @@ type minimalRuleInstance struct {
 func lambdaFn(
 	ctx context.Context,
 	e events.CognitoEventUserPoolsPreSignup,
-	c lpg.Connector,
-	ibc func() sqls.InsertSQLBuilder,
-	sbc func() sqls.SelectSQLBuilder,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	createAccountServiceConstructor func(db postgres.SQLDB) (service.ICreateAccountService, error),
 ) (events.CognitoEventUserPoolsPreSignup, error) {
 
 	if e.Request.ClientMetadata != nil {
@@ -61,71 +61,17 @@ func lambdaFn(
 		lastName,
 	)
 
-	// create insert sql builder from constructor
-	ibAcct := ibc()
-
-	// create insert account sql
-	insAccSQL, insAccArgs := ibAcct.InsertAccountSQL(
-		cognitoUser,
-	)
-
 	// create insert account balance sql
-	beginningBalance, _ := decimal.NewFromString(os.Getenv("INITIAL_ACCOUNT_BALANCE"))
-
-	// create insert sql builder from constructor
-	ibBal := ibc()
-
-	insAccBalSQL, insAccBalArgs := ibBal.InsertAccountBalanceSQL(
-		cognitoUser,
-		beginningBalance,
-		types.ID("0"), // todo: create transaction before creating account balance, then
-		// pass transaction_item.id as arg to account balance insert
-	)
-
-	insPr := ibc()
-
-	// create insert account profile sql
-	profileSQL, profileArgs := insPr.InsertAccountProfileSQL(
-		&fakeProfile,
-	)
-
-	sbRule := sbc()
-
-	// create select rule instance sql
-	getRuleInstSQL, getRuleInstArgs := sbRule.SelectRuleInstanceSQL(
-		"approval",
-		"approveAnyCreditItem",
-		"ApprovalAllCreditRequests",
-		"creditor",
-		cognitoUser,
-		fmt.Sprintf(
-			"{\"%s\", \"creditor\", \"%s\"}",
-			cognitoUser,
-			cognitoUser,
-		),
-	)
-
-	// create sql builder from constructor
-	ibRule := ibc()
-
-	// create insert rule instance sql
-	insRuleInstSQL, insRuleInstArgs := ibRule.InsertRuleInstanceSQL(
-		"approval",
-		"approveAnyCreditItem",
-		"ApprovalAllCreditRequests",
-		"creditor",
-		cognitoUser,
-		fmt.Sprintf(
-			"{\"%s\", \"creditor\", \"%s\"}",
-			cognitoUser,
-			cognitoUser,
-		),
-	)
-
-	// connect to postgres
-	db, err := c.Connect(ctx, pgConn)
+	beginningBalance, err := decimal.NewFromString(os.Getenv("INITIAL_ACCOUNT_BALANCE"))
 	if err != nil {
-		log.Printf("db connect %v", err)
+		logger.Log(logger.Trace(), err)
+		log.Fatal(err)
+	}
+
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return events.CognitoEventUserPoolsPreSignup{}, err
 	}
 	defer db.Close(context.Background())
@@ -168,56 +114,24 @@ func lambdaFn(
 		log.Printf("delete account %v", err)
 	}
 
-	// insert account
-	_, err = db.Exec(context.Background(), insAccSQL, insAccArgs...)
+	// construct create account balance service
+	cas, err := createAccountServiceConstructor(db)
 	if err != nil {
-		log.Printf("insert account %v", err)
+		logger.Log(logger.Trace(), err)
 		return events.CognitoEventUserPoolsPreSignup{}, err
 	}
 
-	// insert initial account balance
-	_, err = db.Exec(context.Background(), insAccBalSQL, insAccBalArgs...)
-	if err != nil {
-		log.Printf("insert account balance %v", err)
-		return events.CognitoEventUserPoolsPreSignup{}, err
-	}
-
-	// insert profile
-	_, err = db.Exec(context.Background(), profileSQL, profileArgs...)
-	if err != nil {
-		log.Printf("insert profile %v", err)
-		return events.CognitoEventUserPoolsPreSignup{}, err
-	}
-
-	// test for approve any credit rule
-	row := db.QueryRow(context.Background(), getRuleInstSQL, getRuleInstArgs...)
-
-	var r minimalRuleInstance
-	err = row.Scan(
-		&r.RuleType,
-		&r.RuleName,
-		&r.RuleInstanceName,
-		&r.AccountRole,
-		&r.AccountName,
-		&r.VariableValues,
+	// create 1) account, 2) profile, 3) initial balance
+	// and 4) approval all credit rule instance
+	err = cas.CreateAccountFromCognitoTrigger(
+		&fakeProfile,
+		beginningBalance,
+		types.ID("0"), // todo: create transaction before creating account balance, then
+		// pass transaction_item.id as arg to account balance insert
 	)
-	if err != nil && err != pgx.ErrNoRows {
-		log.Printf("select rule instance %v", err)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return events.CognitoEventUserPoolsPreSignup{}, err
-	}
-
-	// insert approve all credit rule instance
-	// if not in table
-	if err == pgx.ErrNoRows {
-		_, execErr := db.Exec(
-			context.Background(),
-			insRuleInstSQL,
-			insRuleInstArgs...,
-		)
-		if execErr != nil {
-			log.Printf("insert rule instance %v", execErr)
-			return events.CognitoEventUserPoolsPreSignup{}, execErr
-		}
 	}
 
 	// auto confirm cognito user
@@ -228,8 +142,21 @@ func lambdaFn(
 
 // wraps lambdaFn accepting db interface for testability
 func handleEvent(ctx context.Context, e events.CognitoEventUserPoolsPreSignup) (events.CognitoEventUserPoolsPreSignup, error) {
-	d := lpg.NewConnector(pgx.Connect)
-	return lambdaFn(ctx, e, d, sqls.NewInsertBuilder, sqls.NewSelectBuilder)
+	return lambdaFn(
+		ctx,
+		e,
+		postgres.NewIDB,
+		newCreateAccountService,
+	)
+}
+
+// enables lambdaFn unit testing
+func newCreateAccountService(idb postgres.SQLDB) (service.ICreateAccountService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newCreateAccountService: failed to assert *postgres.DB")
+	}
+	return service.NewCreateAccountService(db), nil
 }
 
 func main() {

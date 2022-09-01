@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -14,13 +15,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
-	"github.com/jackc/pgx/v4"
 	"github.com/lestrrat-go/jwx/jwk"
 	cjwt "github.com/systemaccounting/mxfactorial/services/gopkg/cognitojwt"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/websocket"
 )
 
 var (
@@ -54,17 +54,16 @@ func init() {
 func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
-	c lpg.Connector,
-	u lpg.PGUnmarshaler,
-	sbc func() sqls.SelectSQLBuilder,
-	ubc func() sqls.UpdateSQLBuilder,
-	dbc func() sqls.DeleteSQLBuilder,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	websocketServiceConstructor func(db postgres.SQLDB) (service.IWebsocketService, error),
+	notificationServiceConstructor func(db postgres.SQLDB) (service.ITransactionNotificationService, error),
 ) (events.APIGatewayProxyResponse, error) {
 
 	// unmarshal body from apigw request
 	var b Body
 	err := json.Unmarshal([]byte(e.Body), &b)
 	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return events.APIGatewayProxyResponse{}, nil
 	}
 
@@ -85,22 +84,25 @@ func lambdaFn(
 		}
 	}
 
-	// connect to postgres
-	db, err := c.Connect(ctx, pgConn)
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
 	if err != nil {
-		log.Printf("connect error: %v", err)
+		logger.Log(logger.Trace(), err)
 		return events.APIGatewayProxyResponse{}, err
 	}
 	defer db.Close(context.Background())
 
-	// update websocket with account name
-	err = websocket.AddAccountToCurrentWebsocket(
-		db,
-		ubc,
-		accountName,
-		connectionID,
-	)
+	// create websocket service
+	ws, err := websocketServiceConstructor(db)
 	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return events.APIGatewayProxyResponse{}, err
+	}
+
+	// update websocket with account name
+	err = ws.AddAccountToCurrentWebsocket(accountName, connectionID)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
 		log.Printf("websocket update failure: %v", err)
 		return events.APIGatewayProxyResponse{}, err
 	}
@@ -108,34 +110,21 @@ func lambdaFn(
 	// create select notifications sql
 	limit, err := strconv.Atoi(notificationsReturnLimit)
 	if err != nil {
+		logger.Log(logger.Trace(), err)
 		log.Printf("string to int conversion fail %v", err)
 		return events.APIGatewayProxyResponse{}, nil
 	}
 
-	// create sql builder from constructor
-	sb := sbc()
-
-	selNotifSQL, selNotifArgs := sb.SelectTransNotifsByAccountSQL(
-		accountName,
-		limit,
-	)
-
-	// get transaction_notifications
-	transNotifsRows, err := db.Query(
-		context.Background(),
-		selNotifSQL,
-		selNotifArgs...,
-	)
+	// create transaction service
+	ns, err := notificationServiceConstructor(db)
 	if err != nil {
-		log.Printf("query err: %v", err)
+		logger.Log(logger.Trace(), err)
+		log.Fatal(err)
 	}
 
-	// unmarshal transaction_notifications
-	transNotifs, err := u.UnmarshalTransactionNotifications(
-		transNotifsRows,
-	)
+	transNotifs, err := ns.GetTransNotifsByAccount(accountName, limit)
 	if err != nil {
-		log.Printf("unmarshal err: %v", err)
+		logger.Log(logger.Trace(), err)
 	}
 
 	// create api gateway session
@@ -146,10 +135,6 @@ func lambdaFn(
 		sess,
 		aws.NewConfig().WithRegion(awsRegion).WithEndpoint(apiGWConnectionsURI),
 	)
-
-	// store connection id in interface slice
-	// for sqlbuilder package in case of error
-	var websocketsToDeleteOnErr = []interface{}{connectionID}
 
 	// 1. create notification payload
 	// 2. store notifications for delete after delivery
@@ -166,7 +151,7 @@ func lambdaFn(
 	// delete websocket from postgres after matching 410 status code in apigw error
 	re, err := regexp.Compile("410")
 	if err != nil {
-		log.Print(err)
+		logger.Log(logger.Trace(), err)
 	}
 
 	// create payload from notifications slice
@@ -196,22 +181,11 @@ func lambdaFn(
 		// 410 status code in error, and connection id is unique
 		if re.MatchString(errMsg) {
 
-			// create sql builder from constructor
-			dbWs := dbc()
-
-			// create delete websockets by connection ids sql
-			delWssSQL, delWssArgs := dbWs.DeleteWebsocketsByConnectionIDSQL(
-				websocketsToDeleteOnErr,
-			)
-			// delete current websocket
-			_, err = db.Exec(
-				context.Background(),
-				delWssSQL,
-				delWssArgs...,
-			)
+			err := ws.DeleteWebsocketConnection(connectionID)
 			if err != nil {
-				log.Printf("delete websockets err: %v", err)
+				logger.Log(logger.Trace(), fmt.Errorf("DeleteWebsocketConnection: %v", err))
 			}
+
 			log.Printf("lost websococket on %v", connectionID)
 		}
 	}
@@ -225,16 +199,31 @@ func handleEvent(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
 ) (events.APIGatewayProxyResponse, error) {
-	c := lpg.NewConnector(pgx.Connect)
-	u := lpg.NewPGUnmarshaler()
 	return lambdaFn(
 		ctx,
 		e,
-		c,
-		u,
-		sqls.NewSelectBuilder,
-		sqls.NewUpdateBuilder,
-		sqls.NewDeleteBuilder)
+		postgres.NewIDB,
+		newWebsocketService,
+		newNotificationService,
+	)
+}
+
+// enables lambdaFn unit testing
+func newWebsocketService(idb postgres.SQLDB) (service.IWebsocketService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newWebsocketService: failed to assert *postgres.DB")
+	}
+	return service.NewWebsocketService(db), nil
+}
+
+// enables lambdaFn unit testing
+func newNotificationService(idb postgres.SQLDB) (service.ITransactionNotificationService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newNotificationService: failed to assert *postgres.DB")
+	}
+	return service.NewTransactionNotificationService(db), nil
 }
 
 func main() {

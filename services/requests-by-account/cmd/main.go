@@ -11,12 +11,10 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgx/v4"
 
-	"github.com/systemaccounting/mxfactorial/services/gopkg/data"
-	lpg "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/sqls"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/tools"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -34,9 +32,8 @@ var (
 func lambdaFn(
 	ctx context.Context,
 	e types.QueryByAccount,
-	c lpg.Connector,
-	u lpg.PGUnmarshaler,
-	sbc func() sqls.SelectSQLBuilder,
+	dbConnector func(context.Context, string) (postgres.SQLDB, error),
+	tranactionServiceConstructor func(db postgres.SQLDB) (service.ITransactionService, error),
 ) (string, error) {
 
 	if e.AuthAccount == "" {
@@ -47,49 +44,64 @@ func lambdaFn(
 		return "", errors.New("missing account_name. exiting")
 	}
 
-	// connect to postgres
-	db, err := c.Connect(ctx, pgConn)
+	// connect to db
+	db, err := dbConnector(context.Background(), pgConn)
 	if err != nil {
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 	defer db.Close(context.Background())
 
-	// create requests sql with false boolean value as arg #2
-	requestsSQL, requestsArgs := sqls.SelectLastNReqsOrTransByAccount(e.AuthAccount, false, recordLimit)
+	// create transaction service
+	ts, err := tranactionServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return "", err
+	}
 
 	// get requests
-	requests, err := data.GetTransactionsWithTrItemsAndApprovalsByID(db, u, sbc, requestsSQL, requestsArgs)
+	requests, err := ts.GetLastNRequests(e.AuthAccount, recordLimit)
 	if err != nil {
-		log.Print(err)
+		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 
 	// test for empty request list
 	if len(requests) == 0 {
-		log.Println("0 transaction items found")
 
-		// create empty response to client
-		intraTrs := tools.CreateIntraTransactions(e.AuthAccount, []*types.Transaction{})
+		log.Println("0 requests found")
 
-		// send string or error response to client
-		return tools.MarshalIntraTransactions(&intraTrs)
+		// send empty response to client
+		return types.EmptyMarshaledIntraTransaction(e.AuthAccount)
 	}
 
 	// create for response to client
-	intraTrs := tools.CreateIntraTransactions(e.AuthAccount, requests)
+	intraTrs := requests.CreateIntraTransactions(e.AuthAccount)
 
 	// send string or error response to client
-	return tools.MarshalIntraTransactions(&intraTrs)
+	return intraTrs.MarshalIntraTransactions()
 }
 
-// wraps lambdaFn accepting db interface for testability
+// wraps lambdaFn which accepts interfaces for testability
 func handleEvent(
 	ctx context.Context,
 	e types.QueryByAccount,
 ) (string, error) {
-	c := lpg.NewConnector(pgx.Connect)
-	u := lpg.NewPGUnmarshaler()
-	return lambdaFn(ctx, e, c, u, sqls.NewSelectBuilder)
+	return lambdaFn(
+		ctx,
+		e,
+		postgres.NewIDB,
+		newTransactionService,
+	)
+}
+
+// enables lambdaFn unit testing
+func newTransactionService(idb postgres.SQLDB) (service.ITransactionService, error) {
+	db, ok := idb.(*postgres.DB)
+	if !ok {
+		return nil, errors.New("newTransactionService: failed to assert *postgres.DB")
+	}
+	return service.NewTransactionService(db), nil
 }
 
 // avoids lambda package dependency during local development
