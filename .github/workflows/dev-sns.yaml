@@ -1,0 +1,20 @@
+name: dev-sns
+
+on:
+  push:
+    paths:
+    - 'services/gopkg/aws/sns/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.x'
+      - name: unit test
+        run: make test
+        working-directory: services/gopkg/aws/sns
