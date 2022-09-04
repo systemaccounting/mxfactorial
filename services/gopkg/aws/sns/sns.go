@@ -2,7 +2,6 @@ package sns
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/sns"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/aws/session"
@@ -11,11 +10,21 @@ import (
 )
 
 type ISNS interface {
-	Publish(types.IDs, *string, *string) error
+	PublishMessage(*sns.PublishInput) (*sns.PublishOutput, error)
+}
+
+type AWSSNS struct {
+	*sns.SNS
+}
+
+type snsMsgAttributes map[string]*sns.MessageAttributeValue
+
+func (s *AWSSNS) PublishMessage(i *sns.PublishInput) (*sns.PublishOutput, error) {
+	return s.SNS.Publish(i)
 }
 
 type SNS struct {
-	*sns.SNS
+	ISNS
 }
 
 var (
@@ -26,13 +35,13 @@ var (
 
 func (s *SNS) Publish(notifIDs types.IDs, serviceName *string, topicArn *string) error {
 
-	input, err := CreateSNSInput(notifIDs, serviceName, topicArn)
+	input, err := createPublishInput(notifIDs, serviceName, topicArn)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
 	}
 
-	_, err = s.SNS.Publish(input)
+	_, err = s.PublishMessage(input)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -41,36 +50,46 @@ func (s *SNS) Publish(notifIDs types.IDs, serviceName *string, topicArn *string)
 	return nil
 }
 
-func NewSNS() *SNS {
-	sess := session.NewAWSSession()
-	return &SNS{
-		SNS: sns.New(sess.Session),
+func createSNSAttributes(serviceName *string) snsMsgAttributes {
+	return snsMsgAttributes{
+		snsMsgAttributeName: &sns.MessageAttributeValue{
+			DataType:    &snsMsgAttributeValueDataType,
+			StringValue: serviceName,
+		},
 	}
 }
 
-func CreateSNSInput(
+func createPublishInput(
 	notifIDs types.IDs,
 	serviceName *string,
 	topicArn *string,
 ) (*sns.PublishInput, error) {
 
-	snsMsgBytes, err := json.Marshal(notifIDs)
+	snsMsgBytes, err := json.Marshal(&notifIDs)
 	if err != nil {
-		return nil, fmt.Errorf("CreateSNSInput json marshal: %v", err)
+		logger.Log(logger.Trace(), err)
+		return nil, err
 	}
 
 	snsMsg := string(snsMsgBytes)
 
-	snsMsgAttributes := make(map[string]*sns.MessageAttributeValue)
-
-	snsMsgAttributes[snsMsgAttributeName] = &sns.MessageAttributeValue{
-		DataType:    &snsMsgAttributeValueDataType,
-		StringValue: serviceName,
-	}
+	msgAttr := createSNSAttributes(serviceName)
 
 	return &sns.PublishInput{
 		Message:           &snsMsg,
 		TopicArn:          topicArn,
-		MessageAttributes: snsMsgAttributes,
+		MessageAttributes: msgAttr,
 	}, nil
+}
+
+func NewSNS() *SNS {
+
+	sess := session.NewAWSSession()
+	awssns := new(AWSSNS)
+	awssns.SNS = sns.New(sess.Session)
+
+	snsService := new(SNS)
+	snsService.ISNS = awssns
+
+	return snsService
 }
