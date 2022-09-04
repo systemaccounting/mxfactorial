@@ -399,6 +399,18 @@
                     "IScanRows"
                 ]
             }
+        },
+        "sns": {
+            "runtime": "go1.x",
+            "path": "services/gopkg/aws/sns",
+            "dependents": [
+                "notifications-send"
+            ],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/aws/sns": [
+                    "ISNS"
+                ]
+            }
         }
     },
     "path": ".",
