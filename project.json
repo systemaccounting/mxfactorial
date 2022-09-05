@@ -285,10 +285,16 @@
             "path": "services/gopkg/cognitojwt",
             "dependents": []
         },
-        "lambdasdk": {
+        "lambda": {
             "runtime": "go1.x",
-            "path": "services/gopkg/lambdasdk",
-            "dependents": []
+            "path": "services/gopkg/aws/lambda",
+            "dependents": [],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/aws/lambda": [
+                    "IAWSLambda",
+                    "ILambdaService"
+                ]
+            }
         },
         "service": {
             "runtime": "go1.x",
@@ -396,7 +402,8 @@
                 "github.com/systemaccounting/mxfactorial/services/gopkg/types": [
                     "TrItemListHelper",
                     "IScanRow",
-                    "IScanRows"
+                    "IScanRows",
+                    "IEncodingJSON"
                 ]
             }
         },
