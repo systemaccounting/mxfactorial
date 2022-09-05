@@ -8,7 +8,7 @@
 1. queries `transaction_notification` records by `id`
 1. queries open websockets, or `connection_id`, for each recipient account in `websocket` table
 1. sends `transaction_notification` records to account recipients with open websockets
-1. deletes websocket record in `websocket` table IF websockets proves stale
+1. deletes websocket record in `websocket` table IF websocket proves stale
 
 deploy: `make deploy ENV=dev`
 

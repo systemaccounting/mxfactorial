@@ -58,7 +58,7 @@ CREATE INDEX idx_acct_name_trans_id ON approval (account_name, transaction_id);
 --        SELECT approve_all_role_account(3, 'JacobWebb', 'debitor') AS equilibrium_time;
 -- 2. adds approval timestamps to affected transaction_item(s)
 -- 3. adds equilibrium timestamp to transaction if all approvals have timestamps
--- 4. RETURNS time if equilibrium, NULL if not
+-- 4. RETURNS time if equilibrium, or NULL if not
 CREATE OR REPLACE FUNCTION approve_all_role_account(
 		tr_id int,
 		acct_name text,

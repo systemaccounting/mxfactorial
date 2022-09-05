@@ -4,7 +4,7 @@
 
 ### requests-by-account
 
-1. invoked by `graphql` service after request sent by client
+1. invoked by `graphql` service after receiving request sent by client
 1. queries transaction tables for last 20 requests* by account name
 1. returns requests
 

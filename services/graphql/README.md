@@ -6,7 +6,7 @@
 
 1. invoked by api gateway v2
 1. routes request to service
-1. responds to client
+1. responds on behalf of service to client
 
 ##### local development
 1. `make deps` to install deps

@@ -121,6 +121,7 @@ func lambdaFn(
 	// create api gateway session
 	sess := session.Must(session.NewSession())
 
+	// todo: move to new gopkg/aws/apigw
 	// create api gateway service with custom endpoint
 	svc := apigw.New(
 		sess,

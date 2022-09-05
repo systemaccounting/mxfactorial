@@ -81,8 +81,7 @@ func lambdaFn(
 		return success, nil
 	}
 
-	// return route not found to alert
-	// misconfigured route integrations
+	// return route not found to alert misconfigured route integrations
 	ErrRouteNotFound := fmt.Sprintf("route not found: %v", routeKey)
 	log.Print(ErrRouteNotFound)
 
