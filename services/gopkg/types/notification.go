@@ -52,6 +52,32 @@ func (t *TransactionNotifications) ScanRows(rows pgx.Rows) error {
 	return nil
 }
 
+func (t *TransactionNotifications) ScanIDs(rows pgx.Rows) error {
+	defer rows.Close()
+
+	for rows.Next() {
+
+		n := new(TransactionNotification)
+
+		err := rows.Scan(
+			&n.ID,
+		)
+
+		if err != nil {
+			return fmt.Errorf("TransactionNotifications scan: %v", err)
+		}
+
+		*t = append(*t, n)
+	}
+
+	err := rows.Err()
+	if err != nil {
+		return fmt.Errorf("TransactionNotifications rows: %v", err)
+	}
+
+	return nil
+}
+
 func (trs TransactionNotifications) ListIDs() IDs {
 	var trIDs IDs
 
