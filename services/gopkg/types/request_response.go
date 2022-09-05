@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v4"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 )
 
 // IntraEvent is embedded for
@@ -17,6 +18,16 @@ type IntraEvent struct {
 type IntraTransaction struct {
 	IntraEvent
 	Transaction *Transaction `json:"transaction"`
+}
+
+func (it *IntraTransaction) Unmarshal(data []byte) error {
+	err := json.Unmarshal(data, &it)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return err
+	}
+
+	return nil
 }
 
 // Marshal returns a IntraTransaction as json string

@@ -815,7 +815,7 @@ func (t *TransactionNotificationModel) InsertTransactionApprovalNotifications(
 	}
 
 	// scan rows
-	err = t.ScanRows(rows)
+	err = t.ScanIDs(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err

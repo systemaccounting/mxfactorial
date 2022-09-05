@@ -84,7 +84,7 @@ func createPublishInput(
 
 func NewSNS() *SNS {
 
-	sess := session.NewAWSSession()
+	sess := session.NewAWSSession(nil)
 	awssns := new(AWSSNS)
 	awssns.SNS = sns.New(sess.Session)
 
