@@ -1,4 +1,4 @@
-name: dev-sns
+name: dev-gopkg-sns
 
 on:
   push:
