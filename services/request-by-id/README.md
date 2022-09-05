@@ -4,7 +4,7 @@
 
 ### request-by-id
 
-1. invoked by `graphql` service after request sent by client
+1. invoked by `graphql` service after receiving request sent by client
 1. queries transaction tables for request* by `id`
 1. returns request with `transaction_item`s
 

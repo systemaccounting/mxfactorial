@@ -4,7 +4,7 @@
 
 ### balance-by-account
 
-1. invoked by `graphql` after request sent by client
+1. invoked by `graphql` after receiving request sent by client
 1. queries `account_balance` table by `account_name`
 1. returns `current_balance`
 

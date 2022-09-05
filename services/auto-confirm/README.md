@@ -8,6 +8,7 @@
 1. adds fake entry in `account_profile` table to avoid profile input forms in ui
 1. sets `California` in account_profile to trigger a transaction rule
 1. adds [approveAnyCreditItem](https://github.com/systemaccounting/mxfactorial/blob/dd809b5e5a45324c129d29d48155335312f12433/services/rules/src/rules/approveAnyCreditItem.js) rule instance to new account
+1. adds initial `1000.00` demo account balance
 
 deploy: `make deploy ENV=dev`
 

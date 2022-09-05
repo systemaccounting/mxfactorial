@@ -4,7 +4,7 @@
 
 ### notifications-get
 
-1. invoked by apigateway v2 with `getnotifications` websocket message from client
+1. invoked by apigateway v2 with `getnotifications` websocket message received from client
 1. sets `account_name` in `websocket` table if not set
 1. queries `transaction_notification` by `account_name`
 1. returns `transaction_notification` records

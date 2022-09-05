@@ -4,7 +4,7 @@
 
 ### request-approve
 
-1. invoked by `graphql` service after request sent by client
+1. invoked by `graphql` service after receiving request sent by client
 1. queries request by `id`
 1. adds timestamps to records in `approval` table
 1. copies timestamps to records in `transaction_item` and `transaction` tables

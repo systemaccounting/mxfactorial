@@ -14,7 +14,7 @@ deploys pushed migrations in `/mxfactorial/migrations/$DESIRED_MIGRATION_DIRECTO
 #### build & deploy
 1. `make build-layer` to build lambda layer storing `psql` and `go-migrate` dependencies as `go-migrate-layer.zip`
 1. put lambda layer in s3 with `make put-layer ENV=dev`
-1. publish layer in s3 with `make publish-layer ENV=dev`
+1. publish layer to s3 with `make publish-layer ENV=dev`
 1. `make zip` to zip `index.sh` as `go-migrate-src.zip`
 1. put zip in s3 with `make put-object ENV=dev`
 1. update function from zip in s3 with `make update-function ENV=dev`
