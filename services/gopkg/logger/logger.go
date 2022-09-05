@@ -16,7 +16,7 @@ func Trace() string {
 }
 
 func Err(trace string, err error) error {
-	return fmt.Errorf("%v: %s\n%v", Now(), trace, err)
+	return fmt.Errorf("%v: %s: %v", Now(), trace, err)
 }
 
 func ErrFmt(err error) error {
