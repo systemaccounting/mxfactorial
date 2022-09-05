@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	lam "github.com/systemaccounting/mxfactorial/services/gopkg/lambdasdk"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
@@ -49,6 +48,7 @@ type preTestItem struct {
 func testValues(
 	ctx context.Context,
 	e *types.IntraTransaction,
+	rulesServiceConstructor func(lambdaFnName, awsRegion *string) service.IRulesService,
 ) (*types.IntraTransaction, string, types.Role, error) {
 
 	if e.AuthAccount == "" {
@@ -82,12 +82,17 @@ func testValues(
 		}
 	}
 
+	// create rules service
+	rulesService := rulesServiceConstructor(&rulesLambdaArn, &awsRegion)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, "", types.Role(0), err
+	}
+
 	// reproduce rules service response
 	// with items sent from client
-	ruleTested, err := lam.Invoke(
+	ruleTested, err := rulesService.GetRuleAppliedIntraTransactionFromTrItems(
 		nonRuleClientItems,
-		awsRegion,
-		rulesLambdaArn,
 	)
 	if err != nil {
 		return nil, "", types.Role(0), err
@@ -247,11 +252,11 @@ func lambdaFn(
 	dbConnector func(context.Context, string) (postgres.SQLDB, error),
 	requestCreateServiceConstructor func(db postgres.SQLDB) (iCreateRequestService, error),
 	approveServiceConstructor func(db postgres.SQLDB) (service.IApproveService, error),
+	rulesServiceConstructor func(lambdaFnName, awsRegion *string) service.IRulesService,
 ) (string, error) {
 
-	// delay connecting to db and initing
-	// deps until after client values tested
-	ruleTested, authAccount, authRole, err := testValues(ctx, e)
+	// delay connecting to db until after client values tested
+	ruleTested, authAccount, authRole, err := testValues(ctx, e, rulesServiceConstructor)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return "", err
@@ -312,10 +317,15 @@ func handleEvent(
 		postgres.NewIDB,
 		newRequestCreateService,
 		newApproveService,
+		newRulesService,
 	)
 }
 
 // BEGIN: enables lambdaFn unit testing
+func newRulesService(lambdaFnName, awsRegion *string) service.IRulesService {
+	return service.NewRulesService(lambdaFnName, awsRegion)
+}
+
 type iCreateRequestService interface {
 	service.IProfileService
 	service.ITransactionService
