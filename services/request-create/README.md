@@ -8,7 +8,6 @@
 1. tests request received from client for all current and expected items returned by rules
 1. adds request in db
 1. adds approval timestamp from requester
-1. copies timestamps to records in `transaction_item` and `transaction` tables
 1. notifies approvers of pending and completed approvals
 
 deploy: `make deploy ENV=dev`
