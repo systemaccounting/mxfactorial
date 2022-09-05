@@ -35,7 +35,6 @@ func (tz *TZTime) Scan(v interface{}) error {
 	return nil
 }
 
-// didnt move to ../postgres, promoted?
 func (tz *TZTime) UnmarshalJSON(b []byte) error {
 
 	s, err := strconv.Unquote(string(b))
