@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/jackc/pgconn"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	"github.com/shopspring/decimal"
@@ -14,15 +15,30 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
+type SQLDB interface {
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Begin(context.Context) (pgx.Tx, error)
+	Close(context.Context) error
+	IsClosed() bool
+}
+
+type IAccountSQL interface {
+	InsertAccountSQL(string) (string, []interface{})
+	DeleteOwnerAccountSQL(string) (string, []interface{})
+	DeleteAccountSQL(string) (string, []interface{})
+}
+
 type AccountModel struct {
-	db *DB
-	sqls.AccountSQL
+	db SQLDB
+	s  IAccountSQL
 }
 
 func (a *AccountModel) InsertAccount(accountName string) error {
 
 	// create sql
-	sql, args := a.AccountSQL.InsertAccountSQL(accountName)
+	sql, args := a.s.InsertAccountSQL(accountName)
 
 	// query
 	_, err := a.db.Exec(context.Background(), sql, args...)
@@ -37,7 +53,7 @@ func (a *AccountModel) InsertAccount(accountName string) error {
 func (a *AccountModel) DeleteOwnerAccount(accountName string) error {
 
 	// create sql
-	sql, args := a.AccountSQL.DeleteOwnerAccountSQL(accountName)
+	sql, args := a.s.DeleteOwnerAccountSQL(accountName)
 
 	// query
 	_, err := a.db.Exec(context.Background(), sql, args...)
@@ -52,7 +68,7 @@ func (a *AccountModel) DeleteOwnerAccount(accountName string) error {
 func (a *AccountModel) DeleteAccount(accountName string) error {
 
 	// create sql
-	sql, args := a.AccountSQL.DeleteAccountSQL(accountName)
+	sql, args := a.s.DeleteAccountSQL(accountName)
 
 	// query
 	_, err := a.db.Exec(context.Background(), sql, args...)
@@ -63,22 +79,30 @@ func (a *AccountModel) DeleteAccount(accountName string) error {
 	return nil
 }
 
-func NewAccountModel(db *DB) *AccountModel {
-	m := new(AccountModel)
-	m.db = db
-	return m
+func NewAccountModel(db SQLDB) *AccountModel {
+	return &AccountModel{
+		db: db,
+		s:  sqls.NewAccountSQLs(),
+	}
+}
+
+type IAccountBalanceSQLs interface {
+	SelectAccountBalancesSQL([]string) (string, []interface{})
+	SelectCurrentAccountBalanceByAccountNameSQL(string) (string, []interface{})
+	InsertAccountBalanceSQL(string, decimal.Decimal, types.ID) (string, []interface{})
+	UpdateAccountBalancesSQL(types.TransactionItems) (string, []interface{})
 }
 
 type AccountBalanceModel struct {
-	db *DB
+	db SQLDB
+	s  IAccountBalanceSQLs
 	types.AccountBalance
-	sqls.AccountBalanceSQLs
 }
 
-func (ab *AccountBalanceModel) GetAccountBalance(accountName string) error {
+func (ab *AccountBalanceModel) GetAccountBalance(accountName string) (*types.AccountBalance, error) {
 
 	// create sql
-	sql, args := ab.AccountBalanceSQLs.SelectCurrentAccountBalanceByAccountNameSQL(accountName)
+	sql, args := ab.s.SelectCurrentAccountBalanceByAccountNameSQL(accountName)
 
 	// query
 	row := ab.db.QueryRow(context.Background(), sql, args...)
@@ -87,50 +111,51 @@ func (ab *AccountBalanceModel) GetAccountBalance(accountName string) error {
 	err := ab.AccountBalance.ScanRow(row)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &ab.AccountBalance, nil
 }
 
-func NewAccountBalanceModel(db *DB) *AccountBalanceModel {
-	m := new(AccountBalanceModel)
-	m.db = db
-	return m
+func NewAccountBalanceModel(db SQLDB) *AccountBalanceModel {
+	return &AccountBalanceModel{
+		db: db,
+		s:  sqls.NewAccountBalanceSQLs(),
+	}
 }
 
 type AccountBalancesModel struct {
-	db *DB
+	db SQLDB
+	s  IAccountBalanceSQLs
 	types.AccountBalances
-	sqls.AccountBalanceSQLs
 }
 
-func (abs *AccountBalancesModel) GetAccountBalances(accounts []string) error {
+func (abs *AccountBalancesModel) GetAccountBalances(accounts []string) (types.AccountBalances, error) {
 
 	// create sql
-	sql, args := abs.AccountBalanceSQLs.SelectAccountBalancesSQL(accounts)
+	sql, args := abs.s.SelectAccountBalancesSQL(accounts)
 
 	// query
 	rows, err := abs.db.Query(context.Background(), sql, args...)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows into struct field
 	err = abs.AccountBalances.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return abs.AccountBalances, nil
 }
 
 func (abs *AccountBalancesModel) ChangeAccountBalances(trItems types.TransactionItems) error {
 
 	// create sql
-	sql, args := abs.AccountBalanceSQLs.UpdateAccountBalancesSQL(trItems)
+	sql, args := abs.s.UpdateAccountBalancesSQL(trItems)
 
 	// query
 	_, err := abs.db.Exec(
@@ -146,6 +171,7 @@ func (abs *AccountBalancesModel) ChangeAccountBalances(trItems types.Transaction
 	return nil
 }
 
+// todo: move to AccountBalanceModel
 func (abs *AccountBalancesModel) InsertAccountBalance(
 	accountName string,
 	accountBalance decimal.Decimal,
@@ -153,7 +179,7 @@ func (abs *AccountBalancesModel) InsertAccountBalance(
 ) error {
 
 	// create sql
-	sql, args := abs.AccountBalanceSQLs.InsertAccountBalanceSQL(
+	sql, args := abs.s.InsertAccountBalanceSQL(
 		accountName,
 		accountBalance,
 		account,
@@ -173,22 +199,29 @@ func (abs *AccountBalancesModel) InsertAccountBalance(
 	return nil
 }
 
-func NewAccountBalancesModel(db *DB) *AccountBalancesModel {
-	m := new(AccountBalancesModel)
-	m.db = db
-	return m
+func NewAccountBalancesModel(db SQLDB) *AccountBalancesModel {
+	return &AccountBalancesModel{
+		db: db,
+		s:  sqls.NewAccountBalanceSQLs(),
+	}
+}
+
+type IApprovalSQLs interface {
+	InsertApprovalsSQL(types.Approvals, sqls.Builder, sqls.Builder) sqls.Builder
+	SelectApprovalsByTrIDSQL(types.ID) (string, []interface{})
+	SelectApprovalsByTrIDsSQL(types.IDs) (string, []interface{})
 }
 
 type ApprovalsModel struct {
-	db *DB
+	db SQLDB
+	s  IApprovalSQLs
 	types.Approvals
-	sqls.ApprovalSQLs
 }
 
-func (a *ApprovalsModel) GetApprovalsByTransactionID(id types.ID) error {
+func (a *ApprovalsModel) GetApprovalsByTransactionID(id types.ID) (types.Approvals, error) {
 
 	// create sql
-	sql, args := a.ApprovalSQLs.SelectApprovalsByTrIDSQL(id)
+	sql, args := a.s.SelectApprovalsByTrIDSQL(id)
 
 	// query
 	rows, err := a.db.Query(
@@ -198,23 +231,23 @@ func (a *ApprovalsModel) GetApprovalsByTransactionID(id types.ID) error {
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = a.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return a.Approvals, nil
 }
 
-func (a *ApprovalsModel) GetApprovalsByTransactionIDs(IDs types.IDs) error {
+func (a *ApprovalsModel) GetApprovalsByTransactionIDs(IDs types.IDs) (types.Approvals, error) {
 
 	// create sql
-	sql, args := a.ApprovalSQLs.SelectApprovalsByTrIDsSQL(IDs)
+	sql, args := a.s.SelectApprovalsByTrIDsSQL(IDs)
 
 	// query
 	rows, err := a.db.Query(
@@ -224,17 +257,17 @@ func (a *ApprovalsModel) GetApprovalsByTransactionIDs(IDs types.IDs) error {
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = a.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return a.Approvals, nil
 }
 
 func (a *ApprovalsModel) UpdateApprovalsByAccountAndRole(
@@ -282,16 +315,22 @@ func (a *ApprovalsModel) UpdateApprovalsByAccountAndRole(
 	return equilibriumTime, nil
 }
 
-func NewApprovalsModel(db *DB) *ApprovalsModel {
-	m := new(ApprovalsModel)
-	m.db = db
-	return m
+func NewApprovalsModel(db SQLDB) *ApprovalsModel {
+	return &ApprovalsModel{
+		db: db,
+		s:  sqls.NewApprovalSQLs(),
+	}
+}
+
+type IAccountProfileSQLS interface {
+	SelectProfileIDsByAccountNames([]string) (string, []interface{})
+	InsertAccountProfileSQL(*types.AccountProfile) (string, []interface{})
 }
 
 type AccountProfileModel struct {
-	db *DB
+	db SQLDB
+	s  IAccountProfileSQLS
 	types.AccountProfile
-	sqls.AccountProfileSQLS
 }
 
 func (ap *AccountProfileModel) GetProfileIDsByAccountNames(
@@ -299,7 +338,7 @@ func (ap *AccountProfileModel) GetProfileIDsByAccountNames(
 ) (types.AccountProfileIDs, error) {
 
 	// create sql
-	sql, args := ap.AccountProfileSQLS.SelectProfileIDsByAccountNames(accountNames)
+	sql, args := ap.s.SelectProfileIDsByAccountNames(accountNames)
 
 	// query
 	rows, err := ap.db.Query(
@@ -328,7 +367,7 @@ func (ap *AccountProfileModel) InsertAccountProfile(
 ) error {
 
 	// create sql
-	sql, args := ap.AccountProfileSQLS.InsertAccountProfileSQL(accountProfile)
+	sql, args := ap.s.InsertAccountProfileSQL(accountProfile)
 
 	// query
 	_, err := ap.db.Exec(
@@ -344,28 +383,35 @@ func (ap *AccountProfileModel) InsertAccountProfile(
 	return nil
 }
 
-func NewAccountProfileModel(db *DB) *AccountProfileModel {
-	m := new(AccountProfileModel)
-	m.db = db
-	return m
+func NewAccountProfileModel(db SQLDB) *AccountProfileModel {
+	return &AccountProfileModel{
+		db: db,
+		s:  sqls.NewAccountProfileSQLs(),
+	}
+}
+
+type ITransactionItemSQLs interface {
+	InsertTrItemSQL(*types.TransactionItem, sqls.Builder) sqls.Builder
+	SelectTrItemsByTrIDSQL(types.ID) (string, []interface{})
+	SelectTrItemsByTrIDsSQL(types.IDs) (string, []interface{})
 }
 
 type TransactionItemsModel struct {
-	db *DB
+	db SQLDB
+	s  ITransactionItemSQLs
 	types.TransactionItems
-	sqls.TransactionItemSQLs
 }
 
-func (t *TransactionItemsModel) GetTrItemsByTransactionID(ID types.ID) error {
+func (t *TransactionItemsModel) GetTrItemsByTransactionID(ID types.ID) (types.TransactionItems, error) {
 
 	// create sql
-	sql, args := t.TransactionItemSQLs.SelectTrItemsByTrIDSQL(ID)
+	sql, args := t.s.SelectTrItemsByTrIDSQL(ID)
 
 	// query
 	rows, err := t.db.Query(context.Background(), sql, args...)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
@@ -373,22 +419,22 @@ func (t *TransactionItemsModel) GetTrItemsByTransactionID(ID types.ID) error {
 	if err != nil {
 		log.Print(err)
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.TransactionItems, nil
 }
 
-func (t *TransactionItemsModel) GetTrItemsByTrIDs(IDs types.IDs) error {
+func (t *TransactionItemsModel) GetTrItemsByTrIDs(IDs types.IDs) (types.TransactionItems, error) {
 
 	// create sql
-	sql, args := t.TransactionItemSQLs.SelectTrItemsByTrIDsSQL(IDs)
+	sql, args := t.s.SelectTrItemsByTrIDsSQL(IDs)
 
 	// query
 	rows, err := t.db.Query(context.Background(), sql, args...)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
@@ -396,28 +442,38 @@ func (t *TransactionItemsModel) GetTrItemsByTrIDs(IDs types.IDs) error {
 	if err != nil {
 		log.Print(err)
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.TransactionItems, nil
 }
 
-func NewTransactionItemsModel(db *DB) *TransactionItemsModel {
-	m := new(TransactionItemsModel)
-	m.db = db
-	return m
+func NewTransactionItemsModel(db SQLDB) *TransactionItemsModel {
+	return &TransactionItemsModel{
+		db: db,
+		s:  sqls.NewTransactionItemSQLs(),
+	}
+}
+
+type ITransactionSQLs interface {
+	InsertTransactionSQL(*types.ID, *string, *string, *string, types.Role, *string, *decimal.NullDecimal) sqls.Builder
+	SelectTransactionByIDSQL(types.ID) (string, []interface{})
+	SelectTransactionsByIDsSQL(types.IDs) (string, []interface{})
+	UpdateTransactionByIDSQL(*types.ID, string) (string, []interface{})
+	CreateTransactionRequestSQL(*types.Transaction) (string, []interface{}, error)
+	SelectLastNReqsOrTransByAccount(string, bool, string) (string, []interface{})
 }
 
 type TransactionModel struct {
-	db *DB
+	db SQLDB
+	s  ITransactionSQLs
 	types.Transaction
-	sqls.TransactionSQLs
 }
 
-func (t *TransactionModel) GetTransactionByID(trID types.ID) error {
+func (t *TransactionModel) GetTransactionByID(trID types.ID) (*types.Transaction, error) {
 
 	// create sql
-	sql, args := t.TransactionSQLs.SelectTransactionByIDSQL(trID)
+	sql, args := t.s.SelectTransactionByIDSQL(trID)
 
 	// query
 	row := t.db.QueryRow(
@@ -430,29 +486,29 @@ func (t *TransactionModel) GetTransactionByID(trID types.ID) error {
 	err := t.ScanRow(row)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &t.Transaction, nil
 }
 
 func (t *TransactionModel) InsertTransactionTx(
 	ruleTestedTransaction *types.Transaction,
-) error {
+) (*types.ID, error) {
 
 	// begin tx
 	dbtx, err := t.db.Begin(context.Background())
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	defer dbtx.Rollback(context.Background())
 
 	// create sql
-	sql, args, err := t.TransactionSQLs.CreateTransactionRequestSQL(ruleTestedTransaction)
+	sql, args, err := t.s.CreateTransactionRequestSQL(ruleTestedTransaction)
 	if err != nil {
-		return fmt.Errorf("%v: %s\n%v", time.Now(), logger.Trace(), err)
+		return nil, fmt.Errorf("%v: %s\n%v", time.Now(), logger.Trace(), err)
 	}
 
 	// query
@@ -466,38 +522,39 @@ func (t *TransactionModel) InsertTransactionTx(
 	err = t.ScanID(row)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// commit tx
 	err = dbtx.Commit(context.Background())
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.ID, nil
 }
 
-func NewTransactionModel(db *DB) *TransactionModel {
-	m := new(TransactionModel)
-	m.db = db
-	return m
+func NewTransactionModel(db SQLDB) *TransactionModel {
+	return &TransactionModel{
+		db: db,
+		s:  sqls.NewTransactionSQLs(),
+	}
 }
 
 type TransactionsModel struct {
-	db *DB
+	db SQLDB
+	s  ITransactionSQLs
 	types.Transactions
-	sqls.TransactionSQLs
 }
 
 func (t *TransactionsModel) GetLastNTransactions(
 	accountName string,
 	recordLimit string,
-) error {
+) (types.Transactions, error) {
 
 	// create sql
-	sql, args := t.TransactionSQLs.SelectLastNReqsOrTransByAccount(
+	sql, args := t.s.SelectLastNReqsOrTransByAccount(
 		accountName,
 		true, // get transactions
 		recordLimit,
@@ -511,26 +568,26 @@ func (t *TransactionsModel) GetLastNTransactions(
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = t.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.Transactions, nil
 }
 
 func (t *TransactionsModel) GetLastNRequests(
 	accountName string,
 	recordLimit string,
-) error {
+) (types.Transactions, error) {
 
 	// create sql
-	sql, args := t.TransactionSQLs.SelectLastNReqsOrTransByAccount(
+	sql, args := t.s.SelectLastNReqsOrTransByAccount(
 		accountName,
 		false, // get requests
 		recordLimit,
@@ -544,23 +601,23 @@ func (t *TransactionsModel) GetLastNRequests(
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = t.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.Transactions, nil
 }
 
-func (t *TransactionsModel) GetTransactionsByIDs(trIDs types.IDs) error {
+func (t *TransactionsModel) GetTransactionsByIDs(trIDs types.IDs) (types.Transactions, error) {
 
 	// create sql
-	sql, args := t.TransactionSQLs.SelectTransactionsByIDsSQL(trIDs)
+	sql, args := t.s.SelectTransactionsByIDsSQL(trIDs)
 
 	// query
 	rows, err := t.db.Query(
@@ -570,29 +627,35 @@ func (t *TransactionsModel) GetTransactionsByIDs(trIDs types.IDs) error {
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = t.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.Transactions, nil
 }
 
-func NewTransactionsModel(db *DB) *TransactionsModel {
-	m := new(TransactionsModel)
-	m.db = db
-	return m
+func NewTransactionsModel(db SQLDB) *TransactionsModel {
+	return &TransactionsModel{
+		db: db,
+		s:  sqls.NewTransactionSQLs(),
+	}
+}
+
+type IRuleInstanceSQLs interface {
+	SelectRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
+	InsertRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
 }
 
 type RuleInstanceModel struct {
-	db *DB
+	db SQLDB
+	s  IRuleInstanceSQLs
 	types.RuleInstance
-	sqls.RuleInstanceSQLs
 }
 
 func (ri *RuleInstanceModel) SelectRuleInstance(
@@ -605,7 +668,7 @@ func (ri *RuleInstanceModel) SelectRuleInstance(
 ) error {
 
 	// create sql
-	sql, args := ri.RuleInstanceSQLs.SelectRuleInstanceSQL(
+	sql, args := ri.s.SelectRuleInstanceSQL(
 		ruleType,
 		ruleName,
 		ruleInstanceName,
@@ -641,7 +704,7 @@ func (ri *RuleInstanceModel) InsertRuleInstance(
 ) error {
 
 	// create sql
-	sql, args := ri.RuleInstanceSQLs.InsertRuleInstanceSQL(
+	sql, args := ri.s.InsertRuleInstanceSQL(
 		ruleType,
 		ruleName,
 		ruleInstanceName,
@@ -666,10 +729,10 @@ func (ri *RuleInstanceModel) InsertRuleInstance(
 
 func (ri *RuleInstanceModel) SelectApproveAllCreditRuleInstance(
 	accountName string,
-) error {
+) (*types.RuleInstance, error) {
 
 	// create sql
-	sql, args := ri.RuleInstanceSQLs.SelectRuleInstanceSQL(
+	sql, args := ri.s.SelectRuleInstanceSQL(
 		"approval",
 		"approveAnyCreditItem",
 		"ApprovalAllCreditRequests",
@@ -693,10 +756,10 @@ func (ri *RuleInstanceModel) SelectApproveAllCreditRuleInstance(
 	err := ri.ScanRow(row)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &ri.RuleInstance, nil
 }
 
 func (ri *RuleInstanceModel) InsertApproveAllCreditRuleInstance(
@@ -704,7 +767,7 @@ func (ri *RuleInstanceModel) InsertApproveAllCreditRuleInstance(
 ) error {
 
 	// create sql
-	sql, args := ri.RuleInstanceSQLs.InsertRuleInstanceSQL(
+	sql, args := ri.s.InsertRuleInstanceSQL(
 		"approval",
 		"approveAnyCreditItem",
 		"ApprovalAllCreditRequests",
@@ -737,7 +800,7 @@ func (ri *RuleInstanceModel) InsertApproveAllCreditRuleInstanceIfDoesNotExist(
 
 	// test availability of approve all credit rule instance for account
 	// create sql
-	sql, args := ri.RuleInstanceSQLs.SelectRuleInstanceSQL(
+	sql, args := ri.s.SelectRuleInstanceSQL(
 		"approval",
 		"approveAnyCreditItem",
 		"ApprovalAllCreditRequests",
@@ -784,24 +847,33 @@ func (ri *RuleInstanceModel) InsertApproveAllCreditRuleInstanceIfDoesNotExist(
 	return nil
 }
 
-func NewRuleInstanceModel(db *DB) *RuleInstanceModel {
-	m := new(RuleInstanceModel)
-	m.db = db
-	return m
+func NewRuleInstanceModel(db SQLDB) *RuleInstanceModel {
+	return &RuleInstanceModel{
+		db: db,
+		s:  sqls.NewRuleInstanceSQLs(),
+	}
+}
+
+type INotificationSQLs interface {
+	InsertTransactionNotificationsSQL(types.TransactionNotifications) (string, []interface{})
+	SelectTransNotifsByIDsSQL(types.IDs) (string, []interface{})
+	DeleteTransNotificationsByIDsSQL(types.IDs) (string, []interface{})
+	SelectTransNotifsByAccountSQL(string, int) (string, []interface{})
+	DeleteTransNotificationsByTransIDSQL(types.ID) (string, []interface{})
 }
 
 type TransactionNotificationModel struct {
-	db *DB
+	db SQLDB
+	s  INotificationSQLs
 	types.TransactionNotifications
-	sqls.NotificationSQLs
 }
 
 func (t *TransactionNotificationModel) InsertTransactionApprovalNotifications(
 	n types.TransactionNotifications,
-) error {
+) (types.IDs, error) {
 
 	// create sql
-	sql, args := t.NotificationSQLs.InsertTransactionNotificationsSQL(n)
+	sql, args := t.s.InsertTransactionNotificationsSQL(n)
 
 	// query
 	rows, err := t.db.Query(
@@ -811,23 +883,23 @@ func (t *TransactionNotificationModel) InsertTransactionApprovalNotifications(
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = t.ScanIDs(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.TransactionNotifications.ListIDs(), nil
 }
 
-func (t *TransactionNotificationModel) SelectTransNotifsByIDs(notifIDs types.IDs) error {
+func (t *TransactionNotificationModel) SelectTransNotifsByIDs(notifIDs types.IDs) (types.TransactionNotifications, error) {
 
 	// create sql
-	sql, args := t.NotificationSQLs.SelectTransNotifsByIDsSQL(notifIDs)
+	sql, args := t.s.SelectTransNotifsByIDsSQL(notifIDs)
 
 	// query
 	rows, err := t.db.Query(
@@ -837,23 +909,23 @@ func (t *TransactionNotificationModel) SelectTransNotifsByIDs(notifIDs types.IDs
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = t.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.TransactionNotifications, nil
 }
 
-func (t *TransactionNotificationModel) SelectTransNotifsByAccount(accountName string, recordLimit int) error {
+func (t *TransactionNotificationModel) SelectTransNotifsByAccount(accountName string, recordLimit int) (types.TransactionNotifications, error) {
 
 	// create sql
-	sql, args := t.NotificationSQLs.SelectTransNotifsByAccountSQL(accountName, recordLimit)
+	sql, args := t.s.SelectTransNotifsByAccountSQL(accountName, recordLimit)
 
 	// query
 	rows, err := t.db.Query(
@@ -863,17 +935,17 @@ func (t *TransactionNotificationModel) SelectTransNotifsByAccount(accountName st
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = t.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return t.TransactionNotifications, nil
 }
 
 // a single transaction ID can delete multiple notifications
@@ -882,7 +954,7 @@ func (t *TransactionNotificationModel) DeleteTransactionApprovalNotifications(
 ) error {
 
 	// create sql
-	sql, args := t.NotificationSQLs.DeleteTransNotificationsByTransIDSQL(trID)
+	sql, args := t.s.DeleteTransNotificationsByTransIDSQL(trID)
 
 	// query
 	_, err := t.db.Exec(
@@ -903,7 +975,7 @@ func (t *TransactionNotificationModel) DeleteTransNotificationsByIDs(
 ) error {
 
 	// create sql
-	sql, args := t.NotificationSQLs.DeleteTransNotificationsByIDsSQL(notifIDs)
+	sql, args := t.s.DeleteTransNotificationsByIDsSQL(notifIDs)
 
 	// query
 	_, err := t.db.Exec(
@@ -919,16 +991,26 @@ func (t *TransactionNotificationModel) DeleteTransNotificationsByIDs(
 	return nil
 }
 
-func NewTransactionNotificationModel(db *DB) *TransactionNotificationModel {
-	m := new(TransactionNotificationModel)
-	m.db = db
-	return m
+func NewTransactionNotificationModel(db SQLDB) *TransactionNotificationModel {
+	return &TransactionNotificationModel{
+		db: db,
+		s:  sqls.NewNotificationSQLs(),
+	}
+}
+
+type IWebsocketSQLs interface {
+	InsertWebsocketConnectionSQL(string, int64) (string, []interface{})
+	DeleteWebsocketConnectionByConnectionIDSQL(string) (string, []interface{})
+	DeleteWebsocketsByConnectionIDsSQL([]string) (string, []interface{})
+	SelectWebsocketsByAccountsSQL([]string) (string, []interface{})
+	SelectWebsocketByConnectionIDSQL(string) (string, []interface{})
+	UpdateWebsocketByConnIDSQL(string, string) (string, []interface{})
 }
 
 type WebsocketsModel struct {
-	db *DB
+	db SQLDB
+	s  IWebsocketSQLs
 	types.Websockets
-	sqls.WebsocketSQLs
 }
 
 func (w *WebsocketsModel) UpdateWebsocketByConnID(
@@ -937,7 +1019,7 @@ func (w *WebsocketsModel) UpdateWebsocketByConnID(
 ) error {
 
 	// create sql
-	sql, args := w.WebsocketSQLs.UpdateWebsocketByConnIDSQL(accountName, connectionID)
+	sql, args := w.s.UpdateWebsocketByConnIDSQL(accountName, connectionID)
 
 	// query
 	_, err := w.db.Exec(
@@ -959,7 +1041,7 @@ func (w *WebsocketsModel) InsertWebsocketConnection(
 ) error {
 
 	// create sql
-	sql, args := w.WebsocketSQLs.InsertWebsocketConnectionSQL(connectionID, epochCreatedAt)
+	sql, args := w.s.InsertWebsocketConnectionSQL(connectionID, epochCreatedAt)
 
 	// query
 	_, err := w.db.Exec(
@@ -978,7 +1060,7 @@ func (w *WebsocketsModel) InsertWebsocketConnection(
 func (w *WebsocketsModel) DeleteWebsocketConnection(connectionID string) error {
 
 	// create sql
-	sql, args := w.WebsocketSQLs.DeleteWebsocketConnectionByConnectionIDSQL(connectionID)
+	sql, args := w.s.DeleteWebsocketConnectionByConnectionIDSQL(connectionID)
 
 	// query
 	_, err := w.db.Exec(
@@ -997,7 +1079,7 @@ func (w *WebsocketsModel) DeleteWebsocketConnection(connectionID string) error {
 func (w *WebsocketsModel) DeleteWebsocketsByConnectionIDs(connectionIDs []string) error {
 
 	// create sql
-	sql, args := w.WebsocketSQLs.DeleteWebsocketsByConnectionIDsSQL(connectionIDs)
+	sql, args := w.s.DeleteWebsocketsByConnectionIDsSQL(connectionIDs)
 
 	// query
 	_, err := w.db.Exec(
@@ -1013,10 +1095,10 @@ func (w *WebsocketsModel) DeleteWebsocketsByConnectionIDs(connectionIDs []string
 	return nil
 }
 
-func (w *WebsocketsModel) SelectWebsocketsByAccounts(accounts []string) error {
+func (w *WebsocketsModel) SelectWebsocketsByAccounts(accounts []string) (types.Websockets, error) {
 
 	// create sql
-	sql, args := w.WebsocketSQLs.SelectWebsocketsByAccountsSQL(accounts)
+	sql, args := w.s.SelectWebsocketsByAccountsSQL(accounts)
 
 	// query
 	rows, err := w.db.Query(
@@ -1026,21 +1108,22 @@ func (w *WebsocketsModel) SelectWebsocketsByAccounts(accounts []string) error {
 	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
 	// scan rows
 	err = w.ScanRows(rows)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return w.Websockets, nil
 }
 
-func NewWebsocketsModel(db *DB) *WebsocketsModel {
-	m := new(WebsocketsModel)
-	m.db = db
-	return m
+func NewWebsocketsModel(db SQLDB) *WebsocketsModel {
+	return &WebsocketsModel{
+		db: db,
+		s:  sqls.NewWebsocketSQLs(),
+	}
 }

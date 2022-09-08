@@ -4,15 +4,6 @@ import (
 	"github.com/huandu/go-sqlbuilder"
 )
 
-type IWebsocketSQLs interface {
-	InsertWebsocketConnectionSQL(string, int64) (string, []interface{})
-	DeleteWebsocketConnectionByConnectionIDSQL(string) (string, []interface{})
-	DeleteWebsocketsByConnectionIDsSQL([]string) (string, []interface{})
-	SelectWebsocketsByAccountsSQL([]string) (string, []interface{})
-	SelectWebsocketByConnectionIDSQL(string) (string, []interface{})
-	UpdateWebsocketByConnIDSQL(string, string) (string, []interface{})
-}
-
 type WebsocketSQLs struct {
 	SQLBuilder
 }
@@ -91,4 +82,8 @@ func (w *WebsocketSQLs) UpdateWebsocketByConnIDSQL(accountName, connectionID str
 			w.ub.Equal("connection_id", connectionID),
 		)
 	return w.ub.BuildWithFlavor(sqlbuilder.PostgreSQL)
+}
+
+func NewWebsocketSQLs() *WebsocketSQLs {
+	return new(WebsocketSQLs)
 }

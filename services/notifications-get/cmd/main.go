@@ -7,14 +7,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
 	"github.com/lestrrat-go/jwx/jwk"
 	cjwt "github.com/systemaccounting/mxfactorial/services/gopkg/cognitojwt"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
@@ -43,6 +41,33 @@ type Body struct {
 	*cjwt.Token `json:"token"`
 }
 
+type SQLDB interface {
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Begin(context.Context) (pgx.Tx, error)
+	Close(context.Context) error
+	IsClosed() bool
+}
+
+type IWebsocketService interface {
+	SendNotificationOrDeleteStaleWebsocket(connectionID *string, v any) error
+	BroadcastNotificationsToWebsockets(transNotifs types.TransactionNotifications) ([]string, error)
+	BroadcastNotificationsOrDeleteStaleWebsockets(transNotifs types.TransactionNotifications) error
+	AddAccountToCurrentWebsocket(accountName, connectionID string) error
+}
+
+type ITransactionNotificationService interface {
+	InsertTransactionApprovalNotifications(n types.TransactionNotifications) (types.IDs, error)
+	DeleteTransactionApprovalNotifications(trID types.ID) error
+	DeleteTransNotificationsByIDs(notifIDs types.IDs) error
+	Publish(notifIDs types.IDs, serviceName *string, topicArn *string) error
+	NotifyTransactionRoleApprovers(approvals types.Approvals, transaction *types.Transaction, topicArn *string) error
+	GetTransactionNotificationsByIDs(notifIDs types.IDs) (types.TransactionNotifications, error)
+	GetTransNotifsByAccount(accountName string, recordLimit int) (types.TransactionNotifications, error)
+	CreateNotificationsPerRoleApprover(approvals types.Approvals, transaction *types.Transaction) (types.TransactionNotifications, error)
+}
+
 func init() {
 	var err error
 	jwkSet, err = cjwt.FetchJWKSet(context.Background(), cognitoJWKSURI)
@@ -54,9 +79,9 @@ func init() {
 func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
-	dbConnector func(context.Context, string) (postgres.SQLDB, error),
-	websocketServiceConstructor func(db postgres.SQLDB) (service.IWebsocketService, error),
-	notificationServiceConstructor func(db postgres.SQLDB) (service.ITransactionNotificationService, error),
+	dbConnector func(context.Context, string) (SQLDB, error),
+	websocketServiceConstructor func(db SQLDB) (IWebsocketService, error),
+	notificationServiceConstructor func(db SQLDB) (ITransactionNotificationService, error),
 ) (events.APIGatewayProxyResponse, error) {
 
 	// unmarshal body from apigw request
@@ -127,15 +152,6 @@ func lambdaFn(
 		logger.Log(logger.Trace(), err)
 	}
 
-	// create api gateway session
-	sess := session.Must(session.NewSession())
-
-	// create api gateway service with custom endpoint
-	svc := apigw.New(
-		sess,
-		aws.NewConfig().WithRegion(awsRegion).WithEndpoint(apiGWConnectionsURI),
-	)
-
 	// 1. create notification payload
 	// 2. store notifications for delete after delivery
 	var notificationsToSend types.PendingNotifications
@@ -147,47 +163,14 @@ func lambdaFn(
 		notificationsToSend.Pending = append(notificationsToSend.Pending, msg)
 	}
 
-	// temp solution to https://github.com/aws/aws-sdk-go/issues/3477
-	// delete websocket from postgres after matching 410 status code in apigw error
-	re, err := regexp.Compile("410")
+	// send notification to websocket connection
+	// or delete stale websocket from db
+	err = ws.SendNotificationOrDeleteStaleWebsocket(
+		&connectionID,
+		notificationsToSend,
+	)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-	}
-
-	// create payload from notifications slice
-	payload, err := json.Marshal(notificationsToSend)
-	if err != nil {
-		log.Printf("transaction list marshal fail %v", err)
-		return events.APIGatewayProxyResponse{}, nil
-	}
-
-	// create input to api gateway websocket endpoint
-	input := &apigw.PostToConnectionInput{
-		ConnectionId: &connectionID,
-		Data:         payload,
-	}
-
-	// send notifications to websocket connection
-	_, err = svc.PostToConnection(input)
-	if err != nil {
-		errMsg := err.Error()
-
-		// print error if not 410 from api gateway
-		if !re.MatchString(errMsg) {
-			log.Print(errMsg)
-		}
-
-		// queue connection id to delete if
-		// 410 status code in error, and connection id is unique
-		if re.MatchString(errMsg) {
-
-			err := ws.DeleteWebsocketConnection(connectionID)
-			if err != nil {
-				logger.Log(logger.Trace(), fmt.Errorf("DeleteWebsocketConnection: %v", err))
-			}
-
-			log.Printf("lost websococket on %v", connectionID)
-		}
 	}
 
 	// 200 to api gateway
@@ -202,28 +185,33 @@ func handleEvent(
 	return lambdaFn(
 		ctx,
 		e,
-		postgres.NewIDB,
+		newIDB,
 		newWebsocketService,
 		newNotificationService,
 	)
 }
 
 // enables lambdaFn unit testing
-func newWebsocketService(idb postgres.SQLDB) (service.IWebsocketService, error) {
+func newWebsocketService(idb SQLDB) (IWebsocketService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
-		return nil, errors.New("newWebsocketService: failed to assert *postgres.DB")
+		return nil, errors.New("newWebsocketService: failed to assert *DB")
 	}
-	return service.NewWebsocketService(db), nil
+	return service.NewWebsocketService(db, &apiGWConnectionsURI, &awsRegion), nil
 }
 
 // enables lambdaFn unit testing
-func newNotificationService(idb postgres.SQLDB) (service.ITransactionNotificationService, error) {
+func newNotificationService(idb SQLDB) (ITransactionNotificationService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
-		return nil, errors.New("newNotificationService: failed to assert *postgres.DB")
+		return nil, errors.New("newNotificationService: failed to assert *DB")
 	}
 	return service.NewTransactionNotificationService(db), nil
+}
+
+// enables lambdaFn unit testing
+func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
+	return postgres.NewDB(ctx, dsn)
 }
 
 func main() {

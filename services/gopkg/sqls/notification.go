@@ -5,14 +5,6 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type INotificationSQLs interface {
-	InsertTransactionNotificationsSQL(types.TransactionNotifications) (string, []interface{})
-	SelectTransNotifsByIDsSQL(types.IDs) (string, []interface{})
-	DeleteTransNotificationsByIDsSQL(types.IDs) (string, []interface{})
-	SelectTransNotifsByAccountSQL(string, int) (string, []interface{})
-	DeleteTransNotificationsByTransIDSQL(types.ID) (string, []interface{})
-}
-
 type NotificationSQLs struct {
 	SQLBuilder
 }
@@ -84,4 +76,8 @@ func (n *NotificationSQLs) DeleteTransNotificationsByTransIDSQL(trID types.ID) (
 		n.db.Equal("transaction_id", trID),
 	)
 	return n.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
+}
+
+func NewNotificationSQLs() *NotificationSQLs {
+	return new(NotificationSQLs)
 }

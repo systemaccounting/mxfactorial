@@ -6,22 +6,22 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type IProfileService interface {
+type IAccountProfileModel interface {
 	GetProfileIDsByAccountNames([]string) (types.AccountProfileIDs, error)
-	CreateAccountProfile(*types.AccountProfile) error
+	InsertAccountProfile(*types.AccountProfile) error
 }
 
 type ProfileService struct {
-	*postgres.AccountProfileModel
+	m IAccountProfileModel
 }
 
 func (p ProfileService) GetProfileIDsByAccountNames(accountNames []string) (types.AccountProfileIDs, error) {
-	return p.AccountProfileModel.GetProfileIDsByAccountNames(accountNames)
+	return p.m.GetProfileIDsByAccountNames(accountNames)
 }
 
 func (p ProfileService) CreateAccountProfile(accountProfile *types.AccountProfile) error {
 
-	err := p.AccountProfileModel.InsertAccountProfile(accountProfile)
+	err := p.m.InsertAccountProfile(accountProfile)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -30,8 +30,8 @@ func (p ProfileService) CreateAccountProfile(accountProfile *types.AccountProfil
 	return nil
 }
 
-func NewProfileService(db *postgres.DB) *ProfileService {
+func NewProfileService(db SQLDB) *ProfileService {
 	return &ProfileService{
-		AccountProfileModel: postgres.NewAccountProfileModel(db),
+		m: postgres.NewAccountProfileModel(db),
 	}
 }

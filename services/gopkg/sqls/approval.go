@@ -5,12 +5,6 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type IApprovalSQLs interface {
-	InsertApprovalsSQL(types.Approvals, sqlbuilder.Builder, sqlbuilder.Builder) sqlbuilder.Builder
-	SelectApprovalsByTrIDSQL(types.ID) (string, []interface{})
-	SelectApprovalsByTrIDsSQL(types.IDs) (string, []interface{})
-}
-
 type ApprovalSQLs struct {
 	SQLBuilder
 }
@@ -74,4 +68,8 @@ func (a *ApprovalSQLs) SelectApprovalsByTrIDsSQL(trIDs types.IDs) (string, []int
 		)
 
 	return a.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+}
+
+func NewApprovalSQLs() *ApprovalSQLs {
+	return new(ApprovalSQLs)
 }

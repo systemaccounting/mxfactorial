@@ -2,17 +2,11 @@ package sqls
 
 import "github.com/huandu/go-sqlbuilder"
 
-type IAccountSQL interface {
-	InsertAccountSQL(string) (string, []interface{})
-	DeleteOwnerAccountSQL(string) (string, []interface{})
-	DeleteAccountSQL(string) (string, []interface{})
-}
-
-type AccountSQL struct {
+type AccountSQLs struct {
 	SQLBuilder
 }
 
-func (a *AccountSQL) InsertAccountSQL(account string) (string, []interface{}) {
+func (a *AccountSQLs) InsertAccountSQL(account string) (string, []interface{}) {
 	a.Init()
 	a.ib.InsertInto("account")
 	a.ib.Cols("name")
@@ -23,7 +17,7 @@ func (a *AccountSQL) InsertAccountSQL(account string) (string, []interface{}) {
 	return sqlbuilder.WithFlavor(ret, sqlbuilder.PostgreSQL).Build()
 }
 
-func (a *AccountSQL) DeleteOwnerAccountSQL(account string) (string, []interface{}) {
+func (a *AccountSQLs) DeleteOwnerAccountSQL(account string) (string, []interface{}) {
 	a.Init()
 	a.db.DeleteFrom("account_owner")
 	a.db.Where(
@@ -32,11 +26,15 @@ func (a *AccountSQL) DeleteOwnerAccountSQL(account string) (string, []interface{
 	return a.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (a *AccountSQL) DeleteAccountSQL(account string) (string, []interface{}) {
+func (a *AccountSQLs) DeleteAccountSQL(account string) (string, []interface{}) {
 	a.Init()
 	a.db.DeleteFrom("account")
 	a.db.Where(
 		a.db.Equal("name", account),
 	)
 	return a.db.BuildWithFlavor(sqlbuilder.PostgreSQL)
+}
+
+func NewAccountSQLs() *AccountSQLs {
+	return new(AccountSQLs)
 }

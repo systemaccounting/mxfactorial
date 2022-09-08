@@ -28,3 +28,7 @@ func (w *WithSQLs) SelectIDFromTrItemAliasCTEAuxStmt(alias string) sqlbuilder.Bu
 	w.sb.From(alias)
 	return sqlbuilder.WithFlavor(w.sb, sqlbuilder.PostgreSQL)
 }
+
+func NewWithSQLs() *WithSQLs {
+	return new(WithSQLs)
+}

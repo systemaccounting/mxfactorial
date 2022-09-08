@@ -11,6 +11,9 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v4"
 
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
@@ -29,11 +32,35 @@ var (
 		os.Getenv("PGDATABASE"))
 )
 
+type SQLDB interface {
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Begin(context.Context) (pgx.Tx, error)
+	Close(context.Context) error
+	IsClosed() bool
+}
+
+type ITransactionService interface {
+	GetTransactionByID(ID types.ID) (*types.Transaction, error)
+	InsertTransactionTx(ruleTestedTransaction *types.Transaction) (*types.ID, error)
+	GetTransactionWithTrItemsAndApprovalsByID(trID types.ID) (*types.Transaction, error)
+	GetTransactionsWithTrItemsAndApprovalsByID(trIDs types.IDs) (types.Transactions, error)
+	GetLastNTransactions(accountName string, recordLimit string) (types.Transactions, error)
+	GetLastNRequests(accountName string, recordLimit string) (types.Transactions, error)
+	GetTrItemsAndApprovalsByTransactionIDs(trIDs types.IDs) (types.TransactionItems, types.Approvals, error)
+	GetTrItemsByTransactionID(ID types.ID) (types.TransactionItems, error)
+	GetTrItemsByTrIDs(IDs types.IDs) (types.TransactionItems, error)
+	GetApprovalsByTransactionID(ID types.ID) (types.Approvals, error)
+	GetApprovalsByTransactionIDs(IDs types.IDs) (types.Approvals, error)
+	AddApprovalTimesByAccountAndRole(trID types.ID, accountName string, accountRole types.Role) (pgtype.Timestamptz, error)
+}
+
 func lambdaFn(
 	ctx context.Context,
 	e types.QueryByAccount,
-	dbConnector func(context.Context, string) (postgres.SQLDB, error),
-	tranactionServiceConstructor func(db postgres.SQLDB) (service.ITransactionService, error),
+	dbConnector func(context.Context, string) (SQLDB, error),
+	tranactionServiceConstructor func(db SQLDB) (ITransactionService, error),
 ) (string, error) {
 
 	if e.AuthAccount == "" {
@@ -90,13 +117,18 @@ func handleEvent(
 	return lambdaFn(
 		ctx,
 		e,
-		postgres.NewIDB,
+		newIDB,
 		newTransactionService,
 	)
 }
 
 // enables lambdaFn unit testing
-func newTransactionService(idb postgres.SQLDB) (service.ITransactionService, error) {
+func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
+	return postgres.NewDB(ctx, dsn)
+}
+
+// enables lambdaFn unit testing
+func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
 		return nil, errors.New("newTransactionService: failed to assert *postgres.DB")

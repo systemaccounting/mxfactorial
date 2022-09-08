@@ -9,6 +9,9 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v4"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
@@ -33,6 +36,43 @@ var (
 		pgDatabase)
 )
 
+type SQLDB interface {
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Begin(context.Context) (pgx.Tx, error)
+	Close(context.Context) error
+	IsClosed() bool
+}
+
+type IRulesService interface {
+	GetRuleAppliedIntraTransactionFromTrItems(trItems types.TransactionItems) (*types.IntraTransaction, error)
+}
+
+type IApproveService interface {
+	Approve(ctx context.Context, authAccount string, approverRole types.Role, preApprovalTransaction *types.Transaction, notifyTopicArn string) (string, error)
+}
+
+type ITransactionService interface {
+	GetTransactionByID(ID types.ID) (*types.Transaction, error)
+	InsertTransactionTx(ruleTestedTransaction *types.Transaction) (*types.ID, error)
+	GetTransactionWithTrItemsAndApprovalsByID(trID types.ID) (*types.Transaction, error)
+	GetTransactionsWithTrItemsAndApprovalsByID(trIDs types.IDs) (types.Transactions, error)
+	GetLastNTransactions(accountName string, recordLimit string) (types.Transactions, error)
+	GetLastNRequests(accountName string, recordLimit string) (types.Transactions, error)
+	GetTrItemsAndApprovalsByTransactionIDs(trIDs types.IDs) (types.TransactionItems, types.Approvals, error)
+	GetTrItemsByTransactionID(ID types.ID) (types.TransactionItems, error)
+	GetTrItemsByTrIDs(IDs types.IDs) (types.TransactionItems, error)
+	GetApprovalsByTransactionID(ID types.ID) (types.Approvals, error)
+	GetApprovalsByTransactionIDs(IDs types.IDs) (types.Approvals, error)
+	AddApprovalTimesByAccountAndRole(trID types.ID, accountName string, accountRole types.Role) (pgtype.Timestamptz, error)
+}
+
+type IProfileService interface {
+	GetProfileIDsByAccountNames(accountNames []string) (types.AccountProfileIDs, error)
+	CreateAccountProfile(accountProfile *types.AccountProfile) error
+}
+
 type preTestItem struct {
 	ItemID            string
 	Price             string
@@ -48,7 +88,7 @@ type preTestItem struct {
 func testValues(
 	ctx context.Context,
 	e *types.IntraTransaction,
-	rulesServiceConstructor func(lambdaFnName, awsRegion *string) service.IRulesService,
+	rulesServiceConstructor func(lambdaFnName, awsRegion *string) IRulesService,
 ) (*types.IntraTransaction, string, types.Role, error) {
 
 	if e.AuthAccount == "" {
@@ -215,17 +255,17 @@ func testItemEquality(rule, client []preTestItem) error {
 func createRequest(
 	ctx context.Context,
 	ruleTested *types.IntraTransaction,
-	rcs iCreateRequestService,
-) (types.Transaction, error) {
+	rcs *createRequestService,
+) (*types.Transaction, error) {
 
 	// list debitors and creditors to fetch profile ids
 	uniqueAccounts := ruleTested.Transaction.TransactionItems.ListUniqueAccountsFromTrItems()
 
 	// unmarshal account profile ids with account names
-	profileIDList, err := rcs.GetProfileIDsByAccountNames(uniqueAccounts)
+	profileIDList, err := rcs.p.GetProfileIDsByAccountNames(uniqueAccounts)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.Transaction{}, err
+		return nil, err
 	}
 
 	// convert profile id list to map for convenient
@@ -236,23 +276,23 @@ func createRequest(
 	ruleTested.Transaction.TransactionItems.AddProfileIDsToTrItems(profileIDsMap)
 
 	// create transaction request
-	trID, err := rcs.InsertTransactionTx(ruleTested.Transaction)
+	trID, err := rcs.t.InsertTransactionTx(ruleTested.Transaction)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.Transaction{}, err
+		return nil, err
 	}
 
 	// get new transaction request with transaction items and approvals
-	return rcs.GetTransactionWithTrItemsAndApprovalsByID(trID)
+	return rcs.t.GetTransactionWithTrItemsAndApprovalsByID(*trID)
 }
 
 func lambdaFn(
 	ctx context.Context,
 	e *types.IntraTransaction,
-	dbConnector func(context.Context, string) (postgres.SQLDB, error),
-	requestCreateServiceConstructor func(db postgres.SQLDB) (iCreateRequestService, error),
-	approveServiceConstructor func(db postgres.SQLDB) (service.IApproveService, error),
-	rulesServiceConstructor func(lambdaFnName, awsRegion *string) service.IRulesService,
+	dbConnector func(context.Context, string) (SQLDB, error),
+	requestCreateServiceConstructor func(db SQLDB) (*createRequestService, error),
+	approveServiceConstructor func(db SQLDB) (IApproveService, error),
+	rulesServiceConstructor func(lambdaFnName, awsRegion *string) IRulesService,
 ) (string, error) {
 
 	// delay connecting to db until after client values tested
@@ -314,7 +354,7 @@ func handleEvent(
 	return lambdaFn(
 		ctx,
 		e,
-		postgres.NewIDB,
+		newIDB,
 		newRequestCreateService,
 		newApproveService,
 		newRulesService,
@@ -322,32 +362,31 @@ func handleEvent(
 }
 
 // BEGIN: enables lambdaFn unit testing
-func newRulesService(lambdaFnName, awsRegion *string) service.IRulesService {
+func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
+	return postgres.NewDB(ctx, dsn)
+}
+
+func newRulesService(lambdaFnName, awsRegion *string) IRulesService {
 	return service.NewRulesService(lambdaFnName, awsRegion)
 }
 
-type iCreateRequestService interface {
-	service.IProfileService
-	service.ITransactionService
-}
-
 type createRequestService struct {
-	*service.ProfileService
-	*service.TransactionService
+	p IProfileService
+	t ITransactionService
 }
 
-func newRequestCreateService(idb postgres.SQLDB) (iCreateRequestService, error) {
+func newRequestCreateService(idb SQLDB) (*createRequestService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
 		return nil, errors.New("newRequestCreateService: failed to assert *postgres.DB")
 	}
 	return &createRequestService{
-		ProfileService:     service.NewProfileService(db),
-		TransactionService: service.NewTransactionService(db),
+		p: service.NewProfileService(db),
+		t: service.NewTransactionService(db),
 	}, nil
 }
 
-func newApproveService(idb postgres.SQLDB) (service.IApproveService, error) {
+func newApproveService(idb SQLDB) (IApproveService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
 		return nil, errors.New("newApproveService: failed to assert *postgres.DB")

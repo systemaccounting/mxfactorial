@@ -7,104 +7,114 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type ITransactionService interface {
-	GetTransactionByID(types.ID) (types.Transaction, error)
-	InsertTransactionTx(*types.Transaction) (types.ID, error)
-	GetTransactionWithTrItemsAndApprovalsByID(types.ID) (types.Transaction, error)
-	GetTransactionsWithTrItemsAndApprovalsByID(types.IDs) (types.Transactions, error)
+type ITransactionModel interface {
+	GetTransactionByID(types.ID) (*types.Transaction, error)
+	InsertTransactionTx(*types.Transaction) (*types.ID, error)
+}
+
+type ITransactionsModel interface {
 	GetLastNTransactions(string, string) (types.Transactions, error)
 	GetLastNRequests(string, string) (types.Transactions, error)
-	GetTrItemsAndApprovalsByTransactionIDs(types.IDs) error
-	GetTrItemsByTransactionID(ID types.ID) (types.TransactionItems, error)
-	GetTrItemsByTrIDs(IDs types.IDs) error
-	GetApprovalsByTransactionID(ID types.ID) (types.Approvals, error)
-	GetApprovalsByTransactionIDs(types.IDs) error
-	AddApprovalTimesByAccountAndRole(types.ID, string, types.Role) (pgtype.Timestamptz, error)
+	GetTransactionsByIDs(types.IDs) (types.Transactions, error)
+}
+
+type ITransactionItemsModel interface {
+	GetTrItemsByTransactionID(types.ID) (types.TransactionItems, error)
+	GetTrItemsByTrIDs(types.IDs) (types.TransactionItems, error)
+}
+
+type IApprovalsModel interface {
+	GetApprovalsByTransactionID(types.ID) (types.Approvals, error)
+	GetApprovalsByTransactionIDs(types.IDs) (types.Approvals, error)
+	UpdateApprovalsByAccountAndRole(types.ID, string, types.Role) (pgtype.Timestamptz, error)
 }
 
 type TransactionService struct {
-	*postgres.TransactionModel
-	*postgres.TransactionsModel
-	*postgres.TransactionItemsModel
-	*postgres.ApprovalsModel
+	tm  ITransactionModel
+	tsm ITransactionsModel
+	tim ITransactionItemsModel
+	am  IApprovalsModel
 }
 
-func (t TransactionService) GetTransactionByID(ID types.ID) (types.Transaction, error) {
+func (t TransactionService) GetTransactionByID(ID types.ID) (*types.Transaction, error) {
 
-	err := t.TransactionModel.GetTransactionByID(ID)
+	tr, err := t.tm.GetTransactionByID(ID)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.Transaction{}, err
+		return nil, err
 	}
 
-	return t.Transaction, nil
+	return tr, nil
 }
 
 func (t TransactionService) InsertTransactionTx(
 	ruleTestedTransaction *types.Transaction,
-) (types.ID, error) {
+) (*types.ID, error) {
 
-	err := t.TransactionModel.InsertTransactionTx(ruleTestedTransaction)
+	trID, err := t.tm.InsertTransactionTx(ruleTestedTransaction)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.ID(""), err
+		return nil, err
 	}
 
-	return *t.ID, nil
+	return trID, nil
 }
 
-func (t TransactionService) GetTransactionWithTrItemsAndApprovalsByID(trID types.ID) (types.Transaction, error) {
+// todo: convert to postgres function to avoid 3 db queries
+func (t TransactionService) GetTransactionWithTrItemsAndApprovalsByID(trID types.ID) (*types.Transaction, error) {
 
 	// get the transaction
-	err := t.TransactionModel.GetTransactionByID(trID)
+	tr, err := t.tm.GetTransactionByID(trID)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.Transaction{}, err
+		return nil, err
 	}
 
 	// get the transaction items
-	err = t.TransactionItemsModel.GetTrItemsByTransactionID(trID)
+	trItems, err := t.tim.GetTrItemsByTransactionID(trID)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.Transaction{}, err
+		return nil, err
 	}
 
 	// get the approvals
-	err = t.ApprovalsModel.GetApprovalsByTransactionID(trID)
+	approvals, err := t.am.GetApprovalsByTransactionID(trID)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.Transaction{}, err
+		return nil, err
 	}
 
-	// return the transaction with the transaction items and approvals attached
-	return BuildTransaction(t.Transaction, t.TransactionItems, t.Approvals), nil
+	// return the transaction with the
+	// transaction items and approvals attached
+	return BuildTransaction(tr, trItems, approvals), nil
 }
 
+// todo: convert to postgres function to avoid 3 db queries
 func (t TransactionService) GetTransactionsWithTrItemsAndApprovalsByID(trIDs types.IDs) (types.Transactions, error) {
 
 	// get the transactions
-	err := t.TransactionsModel.GetTransactionsByIDs(trIDs)
+	trs, err := t.tsm.GetTransactionsByIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
 	// get the transaction items
-	err = t.TransactionItemsModel.GetTrItemsByTrIDs(trIDs)
+	trItems, err := t.tim.GetTrItemsByTrIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
 	// get the approvals
-	err = t.ApprovalsModel.GetApprovalsByTransactionIDs(trIDs)
+	approvals, err := t.am.GetApprovalsByTransactionIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
 	// return the transaction with the transaction items and approvals attached
-	return BuildTransactions(t.Transactions, t.TransactionItems, t.Approvals), nil
+	return BuildTransactions(trs, trItems, approvals), nil
 }
 
 func (t TransactionService) GetLastNTransactions(
@@ -112,21 +122,21 @@ func (t TransactionService) GetLastNTransactions(
 	recordLimit string,
 ) (types.Transactions, error) {
 
-	err := t.TransactionsModel.GetLastNTransactions(accountName, recordLimit)
+	trs, err := t.tsm.GetLastNTransactions(accountName, recordLimit)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	trIDs := t.Transactions.ListIDs()
+	trIDs := trs.ListIDs()
 
-	err = t.GetTrItemsAndApprovalsByTransactionIDs(trIDs)
+	trItems, approvals, err := t.GetTrItemsAndApprovalsByTransactionIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	return BuildTransactions(t.Transactions, t.TransactionItems, t.Approvals), nil
+	return BuildTransactions(trs, trItems, approvals), nil
 }
 
 func (t TransactionService) GetLastNRequests(
@@ -134,82 +144,82 @@ func (t TransactionService) GetLastNRequests(
 	recordLimit string,
 ) (types.Transactions, error) {
 
-	err := t.TransactionsModel.GetLastNRequests(accountName, recordLimit)
+	requests, err := t.tsm.GetLastNRequests(accountName, recordLimit)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	trIDs := t.Transactions.ListIDs()
+	trIDs := requests.ListIDs()
 
-	err = t.GetTrItemsAndApprovalsByTransactionIDs(trIDs)
+	trItems, approvals, err := t.GetTrItemsAndApprovalsByTransactionIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	return BuildTransactions(t.Transactions, t.TransactionItems, t.Approvals), nil
+	return BuildTransactions(requests, trItems, approvals), nil
 }
 
-func (t TransactionService) GetTrItemsAndApprovalsByTransactionIDs(trIDs types.IDs) error {
+func (t TransactionService) GetTrItemsAndApprovalsByTransactionIDs(trIDs types.IDs) (types.TransactionItems, types.Approvals, error) {
 
-	err := t.TransactionItemsModel.GetTrItemsByTrIDs(trIDs)
+	trItems, err := t.tim.GetTrItemsByTrIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, nil, err
 	}
 
-	err = t.GetApprovalsByTransactionIDs(trIDs)
+	approvals, err := t.GetApprovalsByTransactionIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, nil, err
 	}
 
-	return nil
+	return trItems, approvals, nil
 }
 
 func (t TransactionService) GetTrItemsByTransactionID(ID types.ID) (types.TransactionItems, error) {
 
-	err := t.TransactionItemsModel.GetTrItemsByTransactionID(ID)
+	trItems, err := t.tim.GetTrItemsByTransactionID(ID)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	return t.TransactionItems, nil
+	return trItems, nil
 }
 
-func (t TransactionService) GetTrItemsByTrIDs(IDs types.IDs) error {
+func (t TransactionService) GetTrItemsByTrIDs(IDs types.IDs) (types.TransactionItems, error) {
 
-	err := t.TransactionItemsModel.GetTrItemsByTrIDs(IDs)
+	trItems, err := t.tim.GetTrItemsByTrIDs(IDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return trItems, nil
 }
 
 func (t TransactionService) GetApprovalsByTransactionID(ID types.ID) (types.Approvals, error) {
 
-	err := t.ApprovalsModel.GetApprovalsByTransactionID(ID)
+	approvals, err := t.am.GetApprovalsByTransactionID(ID)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	return t.Approvals, nil
+	return approvals, nil
 }
 
-func (t TransactionService) GetApprovalsByTransactionIDs(IDs types.IDs) error {
+func (t TransactionService) GetApprovalsByTransactionIDs(IDs types.IDs) (types.Approvals, error) {
 
-	err := t.ApprovalsModel.GetApprovalsByTransactionIDs(IDs)
+	approvals, err := t.am.GetApprovalsByTransactionIDs(IDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return approvals, nil
 }
 
 func (t TransactionService) AddApprovalTimesByAccountAndRole(
@@ -218,7 +228,7 @@ func (t TransactionService) AddApprovalTimesByAccountAndRole(
 	accountRole types.Role,
 ) (pgtype.Timestamptz, error) {
 
-	equilibriumTime, err := t.ApprovalsModel.UpdateApprovalsByAccountAndRole(trID, accountName, accountRole)
+	equilibriumTime, err := t.am.UpdateApprovalsByAccountAndRole(trID, accountName, accountRole)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return pgtype.Timestamptz{}, err
@@ -227,12 +237,12 @@ func (t TransactionService) AddApprovalTimesByAccountAndRole(
 	return equilibriumTime, nil
 }
 
-func NewTransactionService(db *postgres.DB) *TransactionService {
+func NewTransactionService(db SQLDB) *TransactionService {
 	return &TransactionService{
-		TransactionModel:      postgres.NewTransactionModel(db),
-		TransactionsModel:     postgres.NewTransactionsModel(db),
-		TransactionItemsModel: postgres.NewTransactionItemsModel(db),
-		ApprovalsModel:        postgres.NewApprovalsModel(db),
+		tm:  postgres.NewTransactionModel(db),
+		tsm: postgres.NewTransactionsModel(db),
+		tim: postgres.NewTransactionItemsModel(db),
+		am:  postgres.NewApprovalsModel(db),
 	}
 }
 
@@ -261,10 +271,10 @@ func BuildTransactions(
 }
 
 func BuildTransaction(
-	tr types.Transaction,
+	tr *types.Transaction,
 	trItems types.TransactionItems,
 	apprvs types.Approvals,
-) types.Transaction {
+) *types.Transaction {
 
 	// attach approvals to transaction items
 	transactionItems := AttachApprovalsToTransactionItems(apprvs, trItems)

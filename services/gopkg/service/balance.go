@@ -9,51 +9,55 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type IBalanceService interface {
-	GetAccountBalance(string) (types.AccountBalance, error)
-	GetAccountBalances([]string) error
-	GetDebitorAccountBalances(types.TransactionItems) error
-	CreateAccountBalance(string, decimal.Decimal, types.ID) error
+type IAccountBalanceModel interface {
+	GetAccountBalance(string) (*types.AccountBalance, error)
+}
+
+type IAccountBalancesModel interface {
+	GetAccountBalances([]string) (types.AccountBalances, error)
 	ChangeAccountBalances(types.TransactionItems) error
-	TestDebitorCapacity(types.TransactionItems) error
+	// todo: move to AccountBalanceModel
+	InsertAccountBalance(string, decimal.Decimal, types.ID) error
 }
 
 type BalanceService struct {
-	*postgres.AccountBalanceModel
-	*postgres.AccountBalancesModel
+	m  IAccountBalanceModel
+	ms IAccountBalancesModel
 }
 
-func (b BalanceService) GetAccountBalance(accountName string) (types.AccountBalance, error) {
+func (b BalanceService) GetAccountBalance(accountName string) (*types.AccountBalance, error) {
 
-	err := b.AccountBalanceModel.GetAccountBalance(accountName)
+	ab, err := b.m.GetAccountBalance(accountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.AccountBalance{}, err
+		return nil, err
 	}
 
-	return b.AccountBalanceModel.AccountBalance, nil
+	return ab, nil
 }
 
-func (b BalanceService) GetAccountBalances(accountNames []string) error {
+func (b BalanceService) GetAccountBalances(accountNames []string) (types.AccountBalances, error) {
 
-	err := b.AccountBalancesModel.GetAccountBalances(accountNames)
+	abs, err := b.ms.GetAccountBalances(accountNames)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return abs, nil
 }
 
-func (b BalanceService) GetDebitorAccountBalances(trItems types.TransactionItems) error {
+func (b BalanceService) GetDebitorAccountBalances(trItems types.TransactionItems) (types.AccountBalances, error) {
 
-	err := b.AccountBalancesModel.ChangeAccountBalances(trItems)
+	debitors := trItems.ListUniqueDebitorAccountsFromTrItems()
+
+	debitorBalances, err := b.ms.GetAccountBalances(debitors)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return debitorBalances, nil
 }
 
 func (b BalanceService) CreateAccountBalance(
@@ -62,7 +66,7 @@ func (b BalanceService) CreateAccountBalance(
 	account types.ID,
 ) error {
 
-	err := b.AccountBalancesModel.InsertAccountBalance(accountName, accountBalance, account)
+	err := b.ms.InsertAccountBalance(accountName, accountBalance, account)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -73,7 +77,7 @@ func (b BalanceService) CreateAccountBalance(
 
 func (b BalanceService) ChangeAccountBalances(trItems types.TransactionItems) error {
 
-	err := b.AccountBalancesModel.ChangeAccountBalances(trItems)
+	err := b.ms.ChangeAccountBalances(trItems)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -84,7 +88,11 @@ func (b BalanceService) ChangeAccountBalances(trItems types.TransactionItems) er
 
 func (b BalanceService) TestDebitorCapacity(trItems types.TransactionItems) error {
 
-	b.GetDebitorAccountBalances(trItems)
+	debitorBalances, err := b.GetDebitorAccountBalances(trItems)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return err
+	}
 
 	// map required debitor funds from transaction items
 	requiredFunds := trItems.MapDebitorsToRequiredFunds()
@@ -93,7 +101,7 @@ func (b BalanceService) TestDebitorCapacity(trItems types.TransactionItems) erro
 	for acct, reqd := range requiredFunds {
 
 		// loop through account balances returned from db
-		for _, v := range b.AccountBalances {
+		for _, v := range debitorBalances {
 
 			// match account balance belonging to debitor
 			if *v.AccountName == acct {
@@ -110,10 +118,10 @@ func (b BalanceService) TestDebitorCapacity(trItems types.TransactionItems) erro
 	return nil
 }
 
-func NewAccountBalanceService(db *postgres.DB) *BalanceService {
+func NewAccountBalanceService(db SQLDB) *BalanceService {
 	return &BalanceService{
-		AccountBalanceModel:  postgres.NewAccountBalanceModel(db),
-		AccountBalancesModel: postgres.NewAccountBalancesModel(db),
+		m:  postgres.NewAccountBalanceModel(db),
+		ms: postgres.NewAccountBalancesModel(db),
 	}
 }
 

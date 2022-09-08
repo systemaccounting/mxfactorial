@@ -9,6 +9,9 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v4"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
@@ -32,12 +35,40 @@ var (
 	errReqValsMissing error = errors.New("required values missing. exiting")
 )
 
+type SQLDB interface {
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Begin(context.Context) (pgx.Tx, error)
+	Close(context.Context) error
+	IsClosed() bool
+}
+
+type ITransactionService interface {
+	GetTransactionByID(ID types.ID) (*types.Transaction, error)
+	InsertTransactionTx(ruleTestedTransaction *types.Transaction) (*types.ID, error)
+	GetTransactionWithTrItemsAndApprovalsByID(trID types.ID) (*types.Transaction, error)
+	GetTransactionsWithTrItemsAndApprovalsByID(trIDs types.IDs) (types.Transactions, error)
+	GetLastNTransactions(accountName string, recordLimit string) (types.Transactions, error)
+	GetLastNRequests(accountName string, recordLimit string) (types.Transactions, error)
+	GetTrItemsAndApprovalsByTransactionIDs(trIDs types.IDs) (types.TransactionItems, types.Approvals, error)
+	GetTrItemsByTransactionID(ID types.ID) (types.TransactionItems, error)
+	GetTrItemsByTrIDs(IDs types.IDs) (types.TransactionItems, error)
+	GetApprovalsByTransactionID(ID types.ID) (types.Approvals, error)
+	GetApprovalsByTransactionIDs(IDs types.IDs) (types.Approvals, error)
+	AddApprovalTimesByAccountAndRole(trID types.ID, accountName string, accountRole types.Role) (pgtype.Timestamptz, error)
+}
+
+type IApproveService interface {
+	Approve(ctx context.Context, authAccount string, approverRole types.Role, preApprovalTransaction *types.Transaction, notifyTopicArn string) (string, error)
+}
+
 func lambdaFn(
 	ctx context.Context,
 	e *types.RequestApprove,
-	dbConnector func(context.Context, string) (postgres.SQLDB, error),
-	tranactionServiceConstructor func(db postgres.SQLDB) (service.ITransactionService, error),
-	approveServiceConstructor func(db postgres.SQLDB) (service.IApproveService, error),
+	dbConnector func(context.Context, string) (SQLDB, error),
+	tranactionServiceConstructor func(db SQLDB) (ITransactionService, error),
+	approveServiceConstructor func(db SQLDB) (IApproveService, error),
 ) (string, error) {
 
 	// todo: more
@@ -109,14 +140,14 @@ func handleEvent(
 	return lambdaFn(
 		ctx,
 		e,
-		postgres.NewIDB,
+		newIDB,
 		newTransactionService,
 		newApproveService,
 	)
 }
 
-// BEGIN: enables lambdaFn unit testing
-func newTransactionService(idb postgres.SQLDB) (service.ITransactionService, error) {
+// enables lambdaFn unit testing
+func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
 		return nil, errors.New("newTransactionService: failed to assert *postgres.DB")
@@ -124,7 +155,8 @@ func newTransactionService(idb postgres.SQLDB) (service.ITransactionService, err
 	return service.NewTransactionService(db), nil
 }
 
-func newApproveService(idb postgres.SQLDB) (service.IApproveService, error) {
+// enables lambdaFn unit testing
+func newApproveService(idb SQLDB) (IApproveService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
 		return nil, errors.New("newApproveService: failed to assert *postgres.DB")
@@ -132,7 +164,10 @@ func newApproveService(idb postgres.SQLDB) (service.IApproveService, error) {
 	return service.NewApproveService(db), nil
 }
 
-// END: enables lambdaFn unit testing
+// enables lambdaFn unit testing
+func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
+	return postgres.NewDB(ctx, dsn)
+}
 
 // avoids lambda package dependency during local development
 func localEnvOnly(event string) {

@@ -9,15 +9,6 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type IAccountBalanceSQLs interface {
-	SelectAccountBalancesSQL([]string) (string, []interface{})
-	SelectCurrentAccountBalanceByAccountNameSQL(string) (string, []interface{})
-	InsertAccountBalanceSQL(string, decimal.Decimal, types.ID) (string, []interface{})
-	UpdateDebitorAccountBalanceSQL(*types.TransactionItem) (string, []interface{})
-	UpdateCreditorAccountBalanceSQL(*types.TransactionItem) (string, []interface{})
-	UpdateAccountBalancesSQL(types.TransactionItems) (string, []interface{})
-}
-
 type AccountBalanceSQLs struct {
 	SQLBuilder
 }
@@ -157,4 +148,8 @@ func (AccountBalanceSQLs) UpdateAccountBalancesSQL(trItems types.TransactionItem
 	updSQL += `)`
 
 	return updSQL, args
+}
+
+func NewAccountBalanceSQLs() *AccountBalanceSQLs {
+	return new(AccountBalanceSQLs)
 }

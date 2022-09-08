@@ -10,10 +10,6 @@ type RulesService struct {
 	lambda.ILambdaService
 }
 
-type IRulesService interface {
-	GetRuleAppliedIntraTransactionFromTrItems(types.TransactionItems) (*types.IntraTransaction, error)
-}
-
 func (r RulesService) GetRuleAppliedIntraTransactionFromTrItems(trItems types.TransactionItems) (*types.IntraTransaction, error) {
 
 	response, err := r.ILambdaService.Invoke(trItems)
