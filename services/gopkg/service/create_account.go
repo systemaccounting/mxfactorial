@@ -3,23 +3,42 @@ package service
 import (
 	"github.com/shopspring/decimal"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type ICreateAccountService interface {
-	IAccountService
-	IProfileService
-	IBalanceService
-	IRuleInstanceService
-	CreateAccountFromCognitoTrigger(*types.AccountProfile, decimal.Decimal, types.ID) error
+type IAccountService interface {
+	CreateAccount(accountName string) error
+	DeleteOwnerAccount(accountName string) error
+	DeleteAccount(accountName string) error
+}
+
+type IProfileService interface {
+	GetProfileIDsByAccountNames(accountNames []string) (types.AccountProfileIDs, error)
+	CreateAccountProfile(accountProfile *types.AccountProfile) error
+}
+
+type IBalanceService interface {
+	GetAccountBalance(accountName string) (*types.AccountBalance, error)
+	GetAccountBalances(accountNames []string) (types.AccountBalances, error)
+	GetDebitorAccountBalances(trItems types.TransactionItems) (types.AccountBalances, error)
+	CreateAccountBalance(accountName string, accountBalance decimal.Decimal, account types.ID) error
+	ChangeAccountBalances(trItems types.TransactionItems) error
+	TestDebitorCapacity(trItems types.TransactionItems) error
+}
+
+type IRuleInstanceService interface {
+	InsertApproveAllCreditRuleInstance(accountName string) error
+	SelectApproveAllCreditRuleInstance(accountName string) (*types.RuleInstance, error)
+	InsertApproveAllCreditRuleInstanceIfDoesNotExist(accountName string) error
+	AddRuleInstance(ruleType, ruleName, ruleInstanceName, accountRole, accountName, variableValuesArray string) error
+	GetRuleInstanceByCurrentlyUsedValues(ruleType, ruleName, ruleInstanceName, accountRole, accountName, variableValuesArray string) error
 }
 
 type CreateAccountService struct {
-	AccountService
-	ProfileService
-	BalanceService
-	RuleInstanceService
+	a  IAccountService
+	p  IProfileService
+	b  IBalanceService
+	ri IRuleInstanceService
 }
 
 func (c CreateAccountService) CreateAccountFromCognitoTrigger(
@@ -29,14 +48,21 @@ func (c CreateAccountService) CreateAccountFromCognitoTrigger(
 ) error {
 
 	// create account
-	err := c.AccountService.AccountModel.InsertAccount(*accountProfile.AccountName)
+	err := c.a.CreateAccount(*accountProfile.AccountName)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return err
+	}
+
+	// create profile
+	err = c.p.CreateAccountProfile(accountProfile)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
 	}
 
 	// create initial account balance
-	err = c.BalanceService.CreateAccountBalance(
+	err = c.b.CreateAccountBalance(
 		*accountProfile.AccountName,
 		beginningBalance,
 		currentTransactionItemID,
@@ -46,15 +72,8 @@ func (c CreateAccountService) CreateAccountFromCognitoTrigger(
 		return err
 	}
 
-	// create profile
-	err = c.ProfileService.CreateAccountProfile(accountProfile)
-	if err != nil {
-		logger.Log(logger.Trace(), err)
-		return err
-	}
-
 	// insert approve all credit rule for account if does not exist
-	err = c.RuleInstanceService.InsertApproveAllCreditRuleInstanceIfDoesNotExist(*accountProfile.AccountName)
+	err = c.ri.InsertApproveAllCreditRuleInstanceIfDoesNotExist(*accountProfile.AccountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -63,11 +82,11 @@ func (c CreateAccountService) CreateAccountFromCognitoTrigger(
 	return nil
 }
 
-func NewCreateAccountService(db *postgres.DB) *CreateAccountService {
+func NewCreateAccountService(db SQLDB) *CreateAccountService {
 	return &CreateAccountService{
-		AccountService:      *NewAccountService(db),
-		ProfileService:      *NewProfileService(db),
-		BalanceService:      *NewAccountBalanceService(db),
-		RuleInstanceService: *NewRuleInstanceService(db),
+		a:  NewAccountService(db),
+		p:  NewProfileService(db),
+		b:  NewAccountBalanceService(db),
+		ri: NewRuleInstanceService(db),
 	}
 }

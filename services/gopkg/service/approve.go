@@ -6,13 +6,8 @@ import (
 
 	"github.com/jackc/pgtype"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
-
-type IApproveService interface {
-	Approve(context.Context, string, types.Role, types.Transaction, string) (string, error)
-}
 
 type ApproveService struct {
 	*TransactionService
@@ -24,7 +19,7 @@ func (a ApproveService) Approve(
 	ctx context.Context,
 	authAccount string, // requester may be different from preApprovalTransaction.Author
 	approverRole types.Role,
-	preApprovalTransaction types.Transaction,
+	preApprovalTransaction *types.Transaction,
 	notifyTopicArn string,
 ) (string, error) {
 
@@ -97,7 +92,7 @@ func (a ApproveService) Approve(
 	// notify role approvers
 	err = a.TransactionNotificationService.NotifyTransactionRoleApprovers(
 		endingApprovals,
-		&postApprovalTransaction,
+		postApprovalTransaction,
 		&notifyTopicArn,
 	)
 	if err != nil {
@@ -112,7 +107,7 @@ func (a ApproveService) Approve(
 	return intraTr.MarshalIntraTransaction()
 }
 
-func NewApproveService(db *postgres.DB) *ApproveService {
+func NewApproveService(db SQLDB) *ApproveService {
 	return &ApproveService{
 		TransactionService:             NewTransactionService(db),
 		BalanceService:                 NewAccountBalanceService(db),

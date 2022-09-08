@@ -5,6 +5,8 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
+type Builder = sqlbuilder.Builder
+
 type SQLBuilder struct {
 	sb *sqlbuilder.SelectBuilder
 	ib *sqlbuilder.InsertBuilder

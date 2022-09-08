@@ -2,11 +2,6 @@ package sqls
 
 import "github.com/huandu/go-sqlbuilder"
 
-type IRuleInstanceSQLs interface {
-	SelectRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
-	InsertRuleInstanceSQL(string, string, string, string, string, string) (string, []interface{})
-}
-
 type RuleInstanceSQLs struct {
 	SQLBuilder
 }
@@ -67,4 +62,8 @@ func (r *RuleInstanceSQLs) InsertRuleInstanceSQL(
 		variableValues,
 	)
 	return r.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
+}
+
+func NewRuleInstanceSQLs() *RuleInstanceSQLs {
+	return new(RuleInstanceSQLs)
 }

@@ -17,15 +17,6 @@ const (
 	trAlias             = "insert_transaction"
 )
 
-type ITransactionSQLs interface {
-	InsertTransactionSQL(*types.ID, *string, *string, *string, types.Role, *string, *decimal.NullDecimal) sqlbuilder.Builder
-	SelectTransactionByIDSQL(types.ID) (string, []interface{})
-	SelectTransactionsByIDsSQL(types.IDs) (string, []interface{})
-	UpdateTransactionByIDSQL(*types.ID, string) (string, []interface{})
-	CreateTransactionRequestSQL(*types.Transaction) (string, []interface{}, error)
-	SelectLastNReqsOrTransByAccount(string, bool, string) (string, []interface{})
-}
-
 type TransactionSQLs struct {
 	SQLBuilder
 }
@@ -256,4 +247,8 @@ func (TransactionSQLs) SelectLastNReqsOrTransByAccount(
 		WHERE all_approved IS %s
 		LIMIT $2
 	);`, isTransaction), []interface{}{accountName, recordLimit}
+}
+
+func NewTransactionSQLs() *TransactionSQLs {
+	return new(TransactionSQLs)
 }

@@ -6,23 +6,23 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type IRuleInstanceService interface {
+type IRuleInstanceModel interface {
+	SelectRuleInstance(string, string, string, string, string, string) error
+	InsertRuleInstance(string, string, string, string, string, string) error
+	SelectApproveAllCreditRuleInstance(string) (*types.RuleInstance, error)
 	InsertApproveAllCreditRuleInstance(string) error
-	SelectApproveAllCreditRuleInstance(string) (types.RuleInstance, error)
 	InsertApproveAllCreditRuleInstanceIfDoesNotExist(string) error
-	AddRuleInstance(string, string, string, string, string, string) error
-	GetRuleInstanceByCurrentlyUsedValues(string, string, string, string, string, string) error
 }
 
 type RuleInstanceService struct {
-	*postgres.RuleInstanceModel
+	m IRuleInstanceModel
 }
 
 func (ri RuleInstanceService) InsertApproveAllCreditRuleInstance(
 	accountName string,
 ) error {
 
-	err := ri.RuleInstanceModel.InsertApproveAllCreditRuleInstance(accountName)
+	err := ri.m.InsertApproveAllCreditRuleInstance(accountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -33,22 +33,22 @@ func (ri RuleInstanceService) InsertApproveAllCreditRuleInstance(
 
 func (ri RuleInstanceService) SelectApproveAllCreditRuleInstance(
 	accountName string,
-) (types.RuleInstance, error) {
+) (*types.RuleInstance, error) {
 
-	err := ri.RuleInstanceModel.SelectApproveAllCreditRuleInstance(accountName)
+	ruleIn, err := ri.m.SelectApproveAllCreditRuleInstance(accountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return types.RuleInstance{}, err
+		return nil, err
 	}
 
-	return ri.RuleInstance, nil
+	return ruleIn, nil
 }
 
 func (ri RuleInstanceService) InsertApproveAllCreditRuleInstanceIfDoesNotExist(
 	accountName string,
 ) error {
 
-	err := ri.RuleInstanceModel.InsertApproveAllCreditRuleInstanceIfDoesNotExist(accountName)
+	err := ri.m.InsertApproveAllCreditRuleInstanceIfDoesNotExist(accountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -66,7 +66,7 @@ func (ri RuleInstanceService) AddRuleInstance(
 	variableValuesArray string,
 ) error {
 
-	err := ri.RuleInstanceModel.InsertRuleInstance(
+	err := ri.m.InsertRuleInstance(
 		ruleType,
 		ruleName,
 		ruleInstanceName,
@@ -92,7 +92,7 @@ func (ri RuleInstanceService) GetRuleInstanceByCurrentlyUsedValues(
 	variableValuesArray string,
 ) error {
 
-	err := ri.RuleInstanceModel.SelectRuleInstance(
+	err := ri.m.SelectRuleInstance(
 		ruleType,
 		ruleName,
 		ruleInstanceName,
@@ -108,8 +108,8 @@ func (ri RuleInstanceService) GetRuleInstanceByCurrentlyUsedValues(
 	return nil
 }
 
-func NewRuleInstanceService(db *postgres.DB) *RuleInstanceService {
+func NewRuleInstanceService(db SQLDB) *RuleInstanceService {
 	return &RuleInstanceService{
-		RuleInstanceModel: postgres.NewRuleInstanceModel(db),
+		m: postgres.NewRuleInstanceModel(db),
 	}
 }

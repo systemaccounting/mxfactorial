@@ -5,12 +5,6 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type ITransactionItemSQLs interface {
-	InsertTrItemSQL(*types.TransactionItem, sqlbuilder.Builder) sqlbuilder.Builder
-	SelectTrItemsByTrIDSQL(types.ID) (string, []interface{})
-	SelectTrItemsByTrIDsSQL(types.IDs) (string, []interface{})
-}
-
 type TransactionItemSQLs struct {
 	SQLBuilder
 }
@@ -88,4 +82,8 @@ func (t *TransactionItemSQLs) SelectTrItemsByTrIDsSQL(trIDs types.IDs) (string, 
 		)
 
 	return t.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
+}
+
+func NewTransactionItemSQLs() *TransactionItemSQLs {
+	return new(TransactionItemSQLs)
 }

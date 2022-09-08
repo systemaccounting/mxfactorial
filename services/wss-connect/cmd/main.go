@@ -9,9 +9,12 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 const (
@@ -27,11 +30,28 @@ var pgConn string = fmt.Sprintf(
 	os.Getenv("PGPASSWORD"),
 	os.Getenv("PGDATABASE"))
 
+type SQLDB interface {
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Begin(context.Context) (pgx.Tx, error)
+	Close(context.Context) error
+	IsClosed() bool
+}
+
+type IWebsocketStorageService interface {
+	AddAccountToCurrentWebsocket(accountName, connectionID string) error
+	AddWebsocketConnection(epochCreatedAt int64, connectionID string) error
+	DeleteWebsocketConnection(connectionID string) error
+	GetWebsocketsByAccounts(accounts []string) (types.Websockets, error)
+	DeleteWebsocketsByConnectionIDs(connectionIDs []string) error
+}
+
 func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
-	dbConnector func(context.Context, string) (postgres.SQLDB, error),
-	websocketServiceConstructor func(db postgres.SQLDB) (service.IWebsocketService, error),
+	dbConnector func(context.Context, string) (SQLDB, error),
+	websocketServiceConstructor func(db SQLDB) (IWebsocketStorageService, error),
 ) (events.APIGatewayProxyResponse, error) {
 
 	// values required to insert and delete on connect and disconnect routes
@@ -99,18 +119,25 @@ func handleEvent(
 	return lambdaFn(
 		ctx,
 		e,
-		postgres.NewIDB,
-		newWebsocketService,
+		newIDB,
+		newWebsocketStorageService,
 	)
 }
 
 // enables lambdaFn unit testing
-func newWebsocketService(idb postgres.SQLDB) (service.IWebsocketService, error) {
+func newWebsocketStorageService(idb SQLDB) (IWebsocketStorageService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
 		return nil, errors.New("newWebsocketService: failed to assert *postgres.DB")
 	}
-	return service.NewWebsocketService(db), nil
+
+	// not using ApiGatewayMgmtAPIService so passing nil to NewWebsocketService()
+	return service.NewWebsocketService(db, nil, nil), nil
+}
+
+// enables lambdaFn unit testing
+func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
+	return postgres.NewDB(ctx, dsn)
 }
 
 func main() {

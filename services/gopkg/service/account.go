@@ -5,19 +5,19 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 )
 
-type IAccountService interface {
-	CreateAccount(accountName string) error
+type IAccountModel interface {
+	InsertAccount(string) error
 	DeleteOwnerAccount(string) error
 	DeleteAccount(string) error
 }
 
 type AccountService struct {
-	*postgres.AccountModel
+	m IAccountModel
 }
 
 func (a AccountService) CreateAccount(accountName string) error {
 
-	err := a.AccountModel.InsertAccount(accountName)
+	err := a.m.InsertAccount(accountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -27,7 +27,7 @@ func (a AccountService) CreateAccount(accountName string) error {
 }
 func (a AccountService) DeleteOwnerAccount(accountName string) error {
 
-	err := a.AccountModel.DeleteOwnerAccount(accountName)
+	err := a.m.DeleteOwnerAccount(accountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -37,7 +37,7 @@ func (a AccountService) DeleteOwnerAccount(accountName string) error {
 }
 func (a AccountService) DeleteAccount(accountName string) error {
 
-	err := a.AccountModel.DeleteAccount(accountName)
+	err := a.m.DeleteAccount(accountName)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return err
@@ -46,8 +46,8 @@ func (a AccountService) DeleteAccount(accountName string) error {
 	return nil
 }
 
-func NewAccountService(db *postgres.DB) *AccountService {
+func NewAccountService(db SQLDB) *AccountService {
 	return &AccountService{
-		AccountModel: postgres.NewAccountModel(db),
+		m: postgres.NewAccountModel(db),
 	}
 }

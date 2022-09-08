@@ -5,16 +5,11 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-type IAccountProfileSQLS interface {
-	SelectProfileIDsByAccountNames([]string) (string, []interface{})
-	InsertAccountProfileSQL(*types.AccountProfile) (string, []interface{})
-}
-
-type AccountProfileSQLS struct {
+type AccountProfileSQLs struct {
 	SQLBuilder
 }
 
-func (ap *AccountProfileSQLS) SelectProfileIDsByAccountNames(accountNames []string) (string, []interface{}) {
+func (ap *AccountProfileSQLs) SelectProfileIDsByAccountNames(accountNames []string) (string, []interface{}) {
 	ap.Init()
 
 	// sqlbuilder wants interface slice
@@ -33,7 +28,7 @@ func (ap *AccountProfileSQLS) SelectProfileIDsByAccountNames(accountNames []stri
 	return ap.sb.BuildWithFlavor(sqlbuilder.PostgreSQL)
 }
 
-func (ap *AccountProfileSQLS) InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
+func (ap *AccountProfileSQLs) InsertAccountProfileSQL(p *types.AccountProfile) (string, []interface{}) {
 	ap.Init()
 	ap.ib.InsertInto("account_profile")
 	ap.ib.Cols(
@@ -85,4 +80,8 @@ func (ap *AccountProfileSQLS) InsertAccountProfileSQL(p *types.AccountProfile) (
 		p.IndustryID,
 	)
 	return ap.ib.BuildWithFlavor(sqlbuilder.PostgreSQL)
+}
+
+func NewAccountProfileSQLs() *AccountProfileSQLs {
+	return new(AccountProfileSQLs)
 }
