@@ -1,13 +1,11 @@
 package types
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 )
 
 type TransactionNotification struct {
@@ -88,55 +86,6 @@ func (trs TransactionNotifications) ListIDs() IDs {
 	return trIDs
 }
 
-func (trs *TransactionNotifications) CreateNotificationsPerRoleApprover(
-	approvals Approvals,
-	transaction *Transaction,
-) error {
-
-	// dedupe role approvers to send only 1 notification
-	// per approver role: someone shopping at their own store
-	// receives 1 debitor and 1 creditor approval
-	var uniqueRoleApprovers Approvals
-	for _, v := range approvals {
-		if isRoleApproverUnique(*v, uniqueRoleApprovers) {
-			uniqueRoleApprovers = append(uniqueRoleApprovers, v)
-		}
-	}
-
-	// add transaction as notification message
-	pgMsg, err := json.Marshal(transaction)
-	if err != nil {
-		return fmt.Errorf("%s: %v", logger.Trace(), err)
-	}
-
-	jsonb := new(pgtype.JSONB)
-	jsonb.Set(pgMsg)
-
-	// create transaction_notification per role approver
-	for _, v := range uniqueRoleApprovers {
-
-		n := &TransactionNotification{
-			TransactionID: v.TransactionID,
-			AccountName:   v.AccountName,
-			AccountRole:   v.AccountRole,
-			Message:       jsonb,
-		}
-
-		*trs = append(*trs, n)
-	}
-
-	return nil
-}
-
-func isRoleApproverUnique(a Approval, l Approvals) bool {
-	for _, v := range l {
-		if *v.AccountName == *a.AccountName && *v.AccountRole == *a.AccountRole {
-			return false
-		}
-	}
-	return true
-}
-
 type NotificationEvent struct {
 	Service *string
 }
@@ -157,4 +106,9 @@ type PendingNotifications struct {
 
 type ClearedNotifications struct {
 	Cleared []*ID `json:"cleared"`
+}
+
+type NotificationAndWebsockets struct {
+	Notification *TransactionNotification
+	Websockets   []*Websocket
 }
