@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.14
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-lambda-go v1.28.0
-	github.com/aws/aws-sdk-go v1.43.21
+	github.com/aws/aws-sdk-go v1.44.92
 	github.com/awslabs/aws-lambda-go-api-proxy v0.13.0
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
