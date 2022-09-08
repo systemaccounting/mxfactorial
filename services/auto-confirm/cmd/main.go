@@ -9,6 +9,8 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
 	"github.com/shopspring/decimal"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
@@ -34,11 +36,24 @@ type minimalRuleInstance struct {
 	VariableValues   []*string `json:"variable_values"`
 }
 
+type SQLDB interface {
+	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
+	QueryRow(context.Context, string, ...interface{}) pgx.Row
+	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
+	Begin(context.Context) (pgx.Tx, error)
+	Close(context.Context) error
+	IsClosed() bool
+}
+
+type ICreateAccountService interface {
+	CreateAccountFromCognitoTrigger(accountProfile *types.AccountProfile, beginningBalance decimal.Decimal, currentTransactionItemID types.ID) error
+}
+
 func lambdaFn(
 	ctx context.Context,
 	e events.CognitoEventUserPoolsPreSignup,
-	dbConnector func(context.Context, string) (postgres.SQLDB, error),
-	createAccountServiceConstructor func(db postgres.SQLDB) (service.ICreateAccountService, error),
+	dbConnector func(context.Context, string) (SQLDB, error),
+	createAccountServiceConstructor func(db SQLDB) (ICreateAccountService, error),
 ) (events.CognitoEventUserPoolsPreSignup, error) {
 
 	if e.Request.ClientMetadata != nil {
@@ -145,18 +160,23 @@ func handleEvent(ctx context.Context, e events.CognitoEventUserPoolsPreSignup) (
 	return lambdaFn(
 		ctx,
 		e,
-		postgres.NewIDB,
+		newIDB,
 		newCreateAccountService,
 	)
 }
 
 // enables lambdaFn unit testing
-func newCreateAccountService(idb postgres.SQLDB) (service.ICreateAccountService, error) {
+func newCreateAccountService(idb SQLDB) (ICreateAccountService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
 		return nil, errors.New("newCreateAccountService: failed to assert *postgres.DB")
 	}
 	return service.NewCreateAccountService(db), nil
+}
+
+// enables lambdaFn unit testing
+func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
+	return postgres.NewDB(ctx, dsn)
 }
 
 func main() {
