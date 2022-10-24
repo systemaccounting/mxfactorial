@@ -45,7 +45,8 @@
                 "NOTIFY_TOPIC_ARN"
             ],
             "params": [
-                "AWS_REGION"
+                "AWS_REGION",
+                "ENABLE_NOTIFICATIONS"
             ],
             "deploy": true,
             "lambda_name_prefix": "request-create",
@@ -63,7 +64,8 @@
                 "NOTIFY_TOPIC_ARN"
             ],
             "params": [
-                "AWS_REGION"
+                "AWS_REGION",
+                "ENABLE_NOTIFICATIONS"
             ],
             "deploy": true,
             "lambda_name_prefix": "request-approve",
@@ -166,9 +168,16 @@
             "runtime": "go1.x",
             "path": "services/notifications-get",
             "secrets": [
-                "COGNITO_JWKS_URI"
+                "COGNITO_JWKS_URI",
+                "NOTIFICATIONS_RETURN_LIMIT",
+                "CLIENT_ID",
+                "SECRET",
+                "WEBSOCKET_CLIENT_URI"
             ],
-            "params": [],
+            "params": [
+                "AWS_REGION",
+                "ENABLE_API_AUTH"
+            ],
             "deploy": true,
             "lambda_name_prefix": "notifications-get",
             "lambda_invoke_log": "invoke.log",
@@ -179,8 +188,15 @@
         "notifications-clear": {
             "runtime": "go1.x",
             "path": "services/notifications-clear",
-            "secrets": [],
-            "params": [],
+            "secrets": [
+                "COGNITO_JWKS_URI",
+                "CLIENT_ID",
+                "WEBSOCKET_CLIENT_URI"
+            ],
+            "params": [
+                "AWS_REGION",
+                "ENABLE_API_AUTH"
+            ],
             "deploy": true,
             "lambda_name_prefix": "notifications-clear",
             "lambda_invoke_log": "invoke.log",
@@ -237,7 +253,7 @@
             ],
             "params": [
                 "AWS_REGION",
-                "NO_AUTH"
+                "ENABLE_AUTH"
             ],
             "deploy": true,
             "dependents": []
@@ -280,11 +296,6 @@
         }
     },
     "pkgs": {
-        "cognitojwt": {
-            "runtime": "go1.x",
-            "path": "services/gopkg/cognitojwt",
-            "dependents": []
-        },
         "lambda": {
             "runtime": "go1.x",
             "path": "services/gopkg/aws/lambda",
@@ -428,6 +439,19 @@
                     "IAWSAPIGWMA"
                 ]
             }
+        },
+        "cognitoidp": {
+            "runtime": "go1.x",
+            "path": "services/gopkg/aws/cognitoidp",
+            "dependents": [],
+            "mocked_interfaces": {
+                "github.com/systemaccounting/mxfactorial/services/gopkg/aws/cognitoidp": [
+                    "IJwtDeps",
+                    "IGetClaimedKeyID",
+                    "IIdpDeps",
+                    "IJwToken"
+                ]
+            }
         }
     },
     "path": ".",
@@ -466,5 +490,7 @@
     },
     "cognito": {
         "test_accounts_file": "./migrations/testseed/000001_accounts.up.sql"
-    }
+    },
+    "enable_api_auth": false,
+    "enable_notifications": false
 }
