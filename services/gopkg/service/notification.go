@@ -86,6 +86,9 @@ func (tn TransactionNotificationService) NotifyTransactionRoleApprovers(
 	}
 
 	notifIDs, err := tn.InsertTransactionApprovalNotifications(notifs)
+	if err != nil {
+		return err
+	}
 
 	err = tn.Publish(
 		notifIDs,
