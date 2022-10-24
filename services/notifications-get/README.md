@@ -13,3 +13,5 @@
 deploy: `make deploy ENV=dev`
 
 terraform: https://github.com/systemaccounting/mxfactorial/blob/8c92e48e04af73ed700b2471a05f6b0ee76c0912/infrastructure/terraform/aws/modules/environment/v001/lambda-services.tf#L145-L157
+
+wscat: local development instructions for api gateway websockets available from services/internal-tools/wss-demo-client/README.md
