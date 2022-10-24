@@ -8,6 +8,7 @@ package apigwma
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	apigw "github.com/aws/aws-sdk-go/service/apigatewaymanagementapi"
@@ -79,6 +80,19 @@ func (a ApiGatewayMgmtAPIService) PostToConnection(connectionID *string, v any) 
 }
 
 func NewApiGatewayMgmtAPIService(apiGWConnectionsURI, awsRegion *string) *ApiGatewayMgmtAPIService {
+
+	if apiGWConnectionsURI == nil {
+		err := fmt.Errorf("error: apiGWConnectionsURI missing assignment")
+		logger.Log(logger.Trace(), err)
+		panic(err)
+	}
+
+	if awsRegion == nil {
+		err := fmt.Errorf("error: awsRegion missing assignment")
+		logger.Log(logger.Trace(), err)
+		panic(err)
+	}
+
 	// set region and endpoint in config
 	c := session.NewAWSConfig(awsRegion).WithEndpoint(*apiGWConnectionsURI)
 	// create session
