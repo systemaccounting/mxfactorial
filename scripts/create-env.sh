@@ -29,10 +29,10 @@ else
 	source ./scripts/shared-set-property.sh
 fi
 
-
 SECRETS=$(jq -r "[$PROJECT_JSON_PROPERTY.secrets[]] | join (\" \")" $PROJECT_CONFIG)
 PARAMS=$(jq -r "[$PROJECT_JSON_PROPERTY.params[]] | join (\" \")" $PROJECT_CONFIG)
-
+ENABLE_API_AUTH=$(jq -r .enble_api_auth $PROJECT_CONFIG)
+ENABLE_NOTIFICATIONS=$(jq -r .enable_notifications $PROJECT_CONFIG)
 
 ENV_FILE_PATH=$(jq -r "$PROJECT_JSON_PROPERTY.path" $PROJECT_CONFIG)
 ENV_FILE_NAME='.env'
@@ -65,6 +65,10 @@ function set_params() {
 			echo $p=$REGION >> $ENV_FILE
 		elif [[ $p == 'LOCAL_ENV' ]]; then
 			echo LOCAL_ENV=1 >> $ENV_FILE
+		elif [[ $p == 'ENABLE_API_AUTH' ]]; then
+			echo ENABLE_API_AUTH=$ENABLE_API_AUTH >> $ENV_FILE
+		elif [[ $p == 'ENABLE_NOTIFICATIONS' ]]; then
+			echo ENABLE_NOTIFICATIONS=$ENABLE_NOTIFICATIONS >> $ENV_FILE
 		fi
 	done
 }
