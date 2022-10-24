@@ -9,18 +9,17 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgx/v4"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 const (
-	connectRouteKey    string = "$connect"
-	disconnectRouteKey string = "$disconnect"
+	connectRouteKey    = "$connect"
+	disconnectRouteKey = "$disconnect"
 )
+
+var success = events.APIGatewayProxyResponse{StatusCode: 200}
 
 var pgConn string = fmt.Sprintf(
 	"host=%s port=%s user=%s password=%s dbname=%s",
@@ -31,20 +30,12 @@ var pgConn string = fmt.Sprintf(
 	os.Getenv("PGDATABASE"))
 
 type SQLDB interface {
-	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
-	QueryRow(context.Context, string, ...interface{}) pgx.Row
-	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
-	Begin(context.Context) (pgx.Tx, error)
 	Close(context.Context) error
-	IsClosed() bool
 }
 
 type IWebsocketStorageService interface {
-	AddAccountToCurrentWebsocket(accountName, connectionID string) error
 	AddWebsocketConnection(epochCreatedAt int64, connectionID string) error
 	DeleteWebsocketConnection(connectionID string) error
-	GetWebsocketsByAccounts(accounts []string) (types.Websockets, error)
-	DeleteWebsocketsByConnectionIDs(connectionIDs []string) error
 }
 
 func lambdaFn(
@@ -58,9 +49,6 @@ func lambdaFn(
 	routeKey := e.RequestContext.RouteKey
 	connectionID := e.RequestContext.ConnectionID
 	connectedAt := e.RequestContext.ConnectedAt
-
-	// set success response
-	success := events.APIGatewayProxyResponse{StatusCode: 200}
 
 	// connect to db
 	db, err := dbConnector(context.Background(), pgConn)
@@ -131,8 +119,7 @@ func newWebsocketStorageService(idb SQLDB) (IWebsocketStorageService, error) {
 		return nil, errors.New("newWebsocketService: failed to assert *postgres.DB")
 	}
 
-	// not using ApiGatewayMgmtAPIService so passing nil to NewWebsocketService()
-	return service.NewWebsocketService(db, nil, nil), nil
+	return service.NewWebsocketStorageService(db), nil
 }
 
 // enables lambdaFn unit testing
