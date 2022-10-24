@@ -92,7 +92,7 @@ export default {
             "process.env.GRAPHQL_URI": JSON.stringify(process.env.GRAPHQL_URI),
             "process.env.POOL_ID": JSON.stringify(process.env.POOL_ID),
             "process.env.CLIENT_ID": JSON.stringify(process.env.CLIENT_ID),
-            "process.env.NO_AUTH": JSON.stringify(process.env.NO_AUTH),
+            "process.env.ENABLE_AUTH": JSON.stringify(process.env.ENABLE_AUTH),
 			preventAssignment: true,
 		}),
 	],
