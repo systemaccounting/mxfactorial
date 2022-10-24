@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/jackc/pgtype"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
@@ -89,15 +90,17 @@ func (a ApproveService) Approve(
 
 	}
 
-	// notify role approvers
-	err = a.TransactionNotificationService.NotifyTransactionRoleApprovers(
-		endingApprovals,
-		postApprovalTransaction,
-		&notifyTopicArn,
-	)
-	if err != nil {
-		logger.Log(logger.Trace(), err)
-		return "", err
+	if os.Getenv("ENABLE_NOTIFICATIONS") == "true" {
+		// notify role approvers
+		err = a.TransactionNotificationService.NotifyTransactionRoleApprovers(
+			endingApprovals,
+			postApprovalTransaction,
+			&notifyTopicArn,
+		)
+		if err != nil {
+			logger.Log(logger.Trace(), err)
+			return "", err
+		}
 	}
 
 	// create transaction for response to client
