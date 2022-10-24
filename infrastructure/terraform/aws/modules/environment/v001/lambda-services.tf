@@ -5,8 +5,9 @@ module "request_create" {
   service_name = "request-create"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
-    RULE_LAMBDA_ARN  = aws_lambda_function.rules.arn,
-    NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
+    RULE_LAMBDA_ARN      = aws_lambda_function.rules.arn,
+    NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
+    ENABLE_NOTIFICATIONS = var.enable_notifications
   })
   artifacts_bucket_name = var.artifacts_bucket_name
   attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
@@ -46,7 +47,8 @@ module "request_approve" {
   service_name = "request-approve"
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
-    NOTIFY_TOPIC_ARN = aws_sns_topic.notifications.arn,
+    NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
+    ENABLE_NOTIFICATIONS = var.enable_notifications
   })
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
@@ -149,7 +151,8 @@ module "notifications_get" {
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFICATIONS_RETURN_LIMIT = var.notifications_return_limit
     APIGW_CONNECTIONS_URI      = local.APIGW_CONNECTIONS_URI
-    COGNITO_JWKS_URI           = local.COGNITO_JWKS_URI
+    COGNITO_JWKS_URI           = local.COGNITO_JWKS_URI,
+    ENABLE_API_AUTH            = var.enable_api_auth
   })
   artifacts_bucket_name = var.artifacts_bucket_name
   invoke_principals     = ["apigateway.amazonaws.com"]
@@ -163,7 +166,8 @@ module "notifications_clear" {
   env          = var.env
   env_vars = merge(local.POSTGRES_VARS, {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
-    COGNITO_JWKS_URI      = local.COGNITO_JWKS_URI
+    COGNITO_JWKS_URI      = local.COGNITO_JWKS_URI,
+    ENABLE_API_AUTH       = var.enable_api_auth
   })
   artifacts_bucket_name = var.artifacts_bucket_name
   invoke_principals     = ["apigateway.amazonaws.com"]

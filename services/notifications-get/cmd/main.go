@@ -11,10 +11,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/jackc/pgconn"
-	"github.com/jackc/pgx/v4"
-	"github.com/lestrrat-go/jwx/jwk"
-	cjwt "github.com/systemaccounting/mxfactorial/services/gopkg/cognitojwt"
+	cidp "github.com/systemaccounting/mxfactorial/services/gopkg/aws/cognitoidp"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
@@ -33,80 +30,63 @@ var (
 	awsRegion                string = os.Getenv("AWS_REGION")
 	apiGWConnectionsURI             = os.Getenv("APIGW_CONNECTIONS_URI")
 	cognitoJWKSURI                  = os.Getenv("COGNITO_JWKS_URI")
-	jwkSet                   jwk.Set
+	jwks                     *cidp.CognitoJwks
 )
 
-type Body struct {
-	Account     *string `json:"account"` // tmp jwt override
-	*cjwt.Token `json:"token"`
-}
-
 type SQLDB interface {
-	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
-	QueryRow(context.Context, string, ...interface{}) pgx.Row
-	Exec(context.Context, string, ...interface{}) (pgconn.CommandTag, error)
-	Begin(context.Context) (pgx.Tx, error)
 	Close(context.Context) error
-	IsClosed() bool
 }
 
 type IWebsocketService interface {
 	SendNotificationOrDeleteStaleWebsocket(connectionID *string, v any) error
-	BroadcastNotificationsToWebsockets(transNotifs types.TransactionNotifications) ([]string, error)
-	BroadcastNotificationsOrDeleteStaleWebsockets(transNotifs types.TransactionNotifications) error
 	AddAccountToCurrentWebsocket(accountName, connectionID string) error
 }
 
 type ITransactionNotificationService interface {
-	InsertTransactionApprovalNotifications(n types.TransactionNotifications) (types.IDs, error)
-	DeleteTransactionApprovalNotifications(trID types.ID) error
-	DeleteTransNotificationsByIDs(notifIDs types.IDs) error
-	Publish(notifIDs types.IDs, serviceName *string, topicArn *string) error
-	NotifyTransactionRoleApprovers(approvals types.Approvals, transaction *types.Transaction, topicArn *string) error
-	GetTransactionNotificationsByIDs(notifIDs types.IDs) (types.TransactionNotifications, error)
 	GetTransNotifsByAccount(accountName string, recordLimit int) (types.TransactionNotifications, error)
-	CreateNotificationsPerRoleApprover(approvals types.Approvals, transaction *types.Transaction) (types.TransactionNotifications, error)
+}
+
+type IAuthService interface {
+	AuthAccount(*cidp.JWToken, *string) (string, error)
+}
+
+type Body struct {
+	types.WebsocketMessage
+	cidp.JWToken
 }
 
 func init() {
-	var err error
-	jwkSet, err = cjwt.FetchJWKSet(context.Background(), cognitoJWKSURI)
+	jwks = cidp.NewCognitoJwks(cognitoJWKSURI)
+	err := jwks.Fetch()
 	if err != nil {
-		log.Fatalf("json web token key fetch error %v", err)
+		logger.Log(logger.Trace(), err)
+		panic(err)
 	}
 }
 
 func lambdaFn(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
+	b *Body,
+	a IAuthService,
 	dbConnector func(context.Context, string) (SQLDB, error),
 	websocketServiceConstructor func(db SQLDB) (IWebsocketService, error),
 	notificationServiceConstructor func(db SQLDB) (ITransactionNotificationService, error),
 ) (events.APIGatewayProxyResponse, error) {
 
 	// unmarshal body from apigw request
-	var b Body
 	err := json.Unmarshal([]byte(e.Body), &b)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return events.APIGatewayProxyResponse{}, nil
 	}
 
-	connectionID := e.RequestContext.ConnectionID
-
-	// auth account with cognito
-	var accountName string
-	if b.Account != nil {
-		// override with tmp account property during development
-		accountName = *b.Account
-	} else {
-		// or use cognito auth
-		var err error
-		accountName, err = b.GetAuthAccount(jwkSet)
-		if err != nil {
-			log.Printf("cognito auth failure: %v", err)
-			return events.APIGatewayProxyResponse{}, err
-		}
+	// assigns account from cognito token when auth enabled, or
+	// temp account property in websocket message when disabled
+	accountName, err := a.AuthAccount(&b.JWToken, b.Account)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return events.APIGatewayProxyResponse{}, err
 	}
 
 	// connect to db
@@ -124,6 +104,8 @@ func lambdaFn(
 		return events.APIGatewayProxyResponse{}, err
 	}
 
+	connectionID := e.RequestContext.ConnectionID
+
 	// update websocket with account name
 	err = ws.AddAccountToCurrentWebsocket(accountName, connectionID)
 	if err != nil {
@@ -132,19 +114,19 @@ func lambdaFn(
 		return events.APIGatewayProxyResponse{}, err
 	}
 
-	// create select notifications sql
+	// create notification service
+	ns, err := notificationServiceConstructor(db)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		log.Fatal(err)
+	}
+
+	// cadet todo: move into separate function
 	limit, err := strconv.Atoi(notificationsReturnLimit)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		log.Printf("string to int conversion fail %v", err)
 		return events.APIGatewayProxyResponse{}, nil
-	}
-
-	// create transaction service
-	ns, err := notificationServiceConstructor(db)
-	if err != nil {
-		logger.Log(logger.Trace(), err)
-		log.Fatal(err)
 	}
 
 	transNotifs, err := ns.GetTransNotifsByAccount(accountName, limit)
@@ -182,9 +164,13 @@ func handleEvent(
 	ctx context.Context,
 	e events.APIGatewayWebsocketProxyRequest,
 ) (events.APIGatewayProxyResponse, error) {
+	websocketMessageBody := new(Body)
+	authService := service.NewAuthService(jwks)
 	return lambdaFn(
 		ctx,
 		e,
+		websocketMessageBody,
+		authService,
 		newIDB,
 		newWebsocketService,
 		newNotificationService,
@@ -214,6 +200,40 @@ func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
 	return postgres.NewDB(ctx, dsn)
 }
 
+// avoids lambda package dependency during local development
+func localEnvOnly(event string) {
+
+	// create test event by assigning to proxy request body
+	testEvent := events.APIGatewayWebsocketProxyRequest{
+		Body: event,
+		RequestContext: events.APIGatewayWebsocketProxyRequestContext{
+			// temp hardcoded test value during local development
+			ConnectionID: "L0SM9cOFvHcCIhw=",
+		},
+	}
+
+	// call event handler with test event
+	resp, err := handleEvent(context.Background(), testEvent)
+	if err != nil {
+		panic(err)
+	}
+
+	if len(os.Getenv("DEBUG")) > 0 {
+		log.Print(resp)
+	}
+
+	_ = resp
+}
+
 func main() {
+
+	// ### LOCAL ENV only: assign event from env var
+	var osTestEvent string = os.Getenv("TEST_EVENT")
+	if len(osTestEvent) > 0 {
+		localEnvOnly(osTestEvent)
+		return
+	}
+	// ###
+
 	lambda.Start(handleEvent)
 }

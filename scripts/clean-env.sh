@@ -14,7 +14,8 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONFIG=project.json
-ENV_FILE_PATH=$(jq ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG | xargs)
+
+ENV_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
 ENV_FILE_NAME='.env'
 ENV_FILE="$ENV_FILE_PATH/$ENV_FILE_NAME"
 

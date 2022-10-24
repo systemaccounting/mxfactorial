@@ -4,7 +4,7 @@ PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT_CONF))
 ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV)
-NO_AUTH=1
+ENABLE_AUTH=$(shell jq '.enable_api_auth' $(PROJECT_CONF))
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
 BUILD_DIR=$(CURDIR)/public
 DEPS_DIR=$(CURDIR)/node_modules
@@ -67,8 +67,8 @@ $(ENV_VARS):
 		for account in $(TEST_ACCOUNTS); do \
 			echo "$$account=1" >> $(ENV_FILE); \
 		done; \
-	elif [ $@ = NO_AUTH ]; then \
-		echo "NO_AUTH=$(NO_AUTH)" >> $(ENV_FILE); \
+	elif [ $@ = ENABLE_AUTH ]; then \
+		echo "ENABLE_AUTH=$(ENABLE_AUTH)" >> $(ENV_FILE); \
 	elif [ $@ = SECRET ]; then \
 		SECRET=$$(aws secretsmanager get-secret-value \
 			--region $(REGION) \

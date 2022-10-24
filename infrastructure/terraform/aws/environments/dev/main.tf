@@ -10,9 +10,9 @@ locals {
   APP              = "mxfactorial"
   ENV              = "dev"
   APP_ENV          = "${local.APP}-${local.ENV}"
-  PROJECT_JSON     = "../../../../../project.json"
-  ORIGIN_PREFIX    = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).client_origin_bucket_name_prefix
-  ARTIFACTS_PREFIX = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).artifacts_bucket_name_prefix
+  PROJECT_JSON     = jsondecode(file("../../../../../project.json"))
+  ORIGIN_PREFIX    = local.PROJECT_JSON.client_origin_bucket_name_prefix
+  ARTIFACTS_PREFIX = local.PROJECT_JSON.artifacts_bucket_name_prefix
 }
 
 // IMPORTANT: first build lambda artifacts using `make all CMD=initial-deploy ENV=$ENV` from project root
@@ -33,7 +33,6 @@ module "dev" {
 
   ############### rds ###############
 
-  rds_db_version                  = "13.4"
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
@@ -43,14 +42,18 @@ module "dev" {
   ############### api gateway ###############
 
   // change graphql_deployment_version when switching
-  enable_api_auth = false
+  enable_api_auth = local.PROJECT_JSON.enable_api_auth
 
   // change value to deploy api
-  graphql_deployment_version     = 19
+  graphql_deployment_version     = 1
   apigw_authorization_header_key = "Authorization"
 
   // apigw v2
   enable_api_auto_deploy = true
+
+  ############### notifications ###############
+
+  enable_notifications = local.PROJECT_JSON.enable_notifications
 
   ############### client ###############
 

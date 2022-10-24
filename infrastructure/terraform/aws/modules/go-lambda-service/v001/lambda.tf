@@ -2,12 +2,17 @@ locals {
   SERVICE_NAME_TITLE = replace(title(var.service_name), "-", "")
   SERVICE_NAME_DESCR = replace(var.service_name, "-", " ")
   SERVICE_NAME_UPPER = replace(upper(var.service_name), "-", "_")
+  LOG_GROUP_NAME     = "/aws/lambda/${aws_lambda_function.default.function_name}"
 }
 
 data "aws_s3_bucket_object" "default" {
   bucket = var.artifacts_bucket_name
   key    = "${var.service_name}-src.zip"
 }
+
+data "aws_region" "current" {}
+
+data "aws_caller_identity" "current" {}
 
 resource "aws_lambda_function" "default" {
   function_name     = "${var.service_name}-${var.env}"
@@ -26,7 +31,7 @@ resource "aws_lambda_function" "default" {
 }
 
 resource "aws_cloudwatch_log_group" "default" {
-  name              = "/aws/lambda/${aws_lambda_function.default.function_name}"
+  name              = local.LOG_GROUP_NAME
   retention_in_days = 30
 }
 
@@ -54,15 +59,24 @@ resource "aws_iam_policy" "default" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "${local.SERVICE_NAME_TITLE}LoggingPolicy${title(var.env)}"
+        Sid    = "${local.SERVICE_NAME_TITLE}CreateLogGroupPolicy${title(var.env)}"
+        Effect = "Allow",
         Action = [
-          "logs:PutLogEvents",
-          "logs:CreateLogStream",
-          "logs:CreateLogGroup",
-        ]
-        Effect   = "Allow"
-        Resource = "*"
+          "logs:CreateLogGroup"
+        ],
+        Resource = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
       },
+      {
+        Sid    = "${local.SERVICE_NAME_TITLE}LogEventPolicy${title(var.env)}"
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = [
+          "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:${local.LOG_GROUP_NAME}:*"
+        ]
+      }
     ]
   })
 }

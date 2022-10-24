@@ -6,10 +6,10 @@ if [[ "$#" -ne 8 ]]; then
 	cat <<- 'EOF'
 	use:
 	bash scripts/put-object.sh \
-	        --app-name request-create \
-	        --artifact-name request-create-src.zip \
-	        --env dev \
-	        --region us-east-1
+		--app-name request-create \
+		--artifact-name request-create-src.zip \
+		--env dev \
+		--region us-east-1
 	EOF
 	exit 1
 fi
@@ -30,11 +30,11 @@ ARTIFACT_BUCKET_NAME_PREFIX=$(jq -r ".artifacts_bucket_name_prefix" $PROJECT_CON
 ARTIFACT_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
 
 ETAG=$(aws s3api put-object \
-		--bucket="$ARTIFACT_BUCKET_NAME_PREFIX-$ENVIRONMENT" \
-		--key=$ARTIFACT_NAME \
-		--body="$PWD/$ARTIFACT_FILE_PATH/$ARTIFACT_NAME" \
-		--region=$REGION \
-		--output=text \
-		| xargs)
+	--bucket="$ARTIFACT_BUCKET_NAME_PREFIX-$ENVIRONMENT" \
+	--key=$ARTIFACT_NAME \
+	--body="$PWD/$ARTIFACT_FILE_PATH/$ARTIFACT_NAME" \
+	--region=$REGION \
+	--output=text \
+	| awk '{print $1}')
 
 echo "*** pushed $ARTIFACT_NAME artifact with ETag: $ETAG"

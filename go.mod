@@ -7,7 +7,7 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-lambda-go v1.28.0
 	github.com/aws/aws-sdk-go v1.44.92
-	github.com/awslabs/aws-lambda-go-api-proxy v0.13.0
+	github.com/awslabs/aws-lambda-go-api-proxy v0.13.3
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang/mock v1.6.0
@@ -26,7 +26,7 @@ require (
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
-	github.com/goccy/go-json v0.9.5 // indirect
+	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect
@@ -39,13 +39,10 @@ require (
 	github.com/lestrrat-go/backoff/v2 v2.0.8 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.0 // indirect
 	github.com/lestrrat-go/httpcc v1.0.0 // indirect
-	github.com/lestrrat-go/iter v1.0.1 // indirect
+	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
-	github.com/onsi/ginkgo v1.16.2 // indirect
-	github.com/onsi/gomega v1.13.0 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
-	golang.org/x/sys v0.0.0-20220429233432-b5fbb4746d32 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 )

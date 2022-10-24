@@ -61,3 +61,9 @@ func (ws *Websockets) ScanRows(rows pgx.Rows) error {
 
 	return nil
 }
+
+// used in services/notifications-get and services/notifications-clear
+type WebsocketMessage struct {
+	Action  *string `json:"action"`
+	Account *string `json:"account"` // substitutes token when auth disabled during development
+}

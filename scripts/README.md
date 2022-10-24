@@ -343,3 +343,19 @@ deletes testseed migration accounts from cognito
 ##### `sum-value.sh`
 
 sums value in json `transaction_item` list
+
+##### `save-id-token.sh`
+
+references a manually entered `USERNAME` and `PASSWWORD` assignment in a `.env` file, requests an id token from cognito, then saves the `ID_TOKEN` in the `.env` file
+
+##### `print-id-token.sh`
+
+prints cognito user id token for convenient testing
+
+##### `get-notifications.sh`
+
+gets pending notifications from websocket endpoint
+
+##### `clear-notifications.sh`
+
+clears (deletes) pending notifications through websocket endpoint

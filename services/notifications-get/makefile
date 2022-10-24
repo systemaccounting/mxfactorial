@@ -4,10 +4,12 @@ ARTIFACT_NAME=$(APP_NAME)-src.zip
 RELATIVE_PROJECT_ROOT_PATH=../..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
+DIR_PATH=$(shell jq -r ".apps.\"$(APP_NAME)\".path" $(PROJECT_CONF))
 BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 REGION=us-east-1
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
+ENV_FILE=$(CURDIR)/.env
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
@@ -20,11 +22,27 @@ ifndef ENV
 	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
-run:
-	@$(DOCKER_ENV_VARS) go run ./cmd/main.go
+test-username-arg:
+ifndef ACCT
+		$(error trailing ACCT assignment missing, e.g. ACCT=SomeAccount)
+endif
 
-p:
-	@echo $(EXECUTABLE_NAME)
+test-password-arg:
+ifndef PASS
+		$(error trailing PASS assignment missing, e.g. PASS=SomeSecret)
+endif
+
+test-ids-arg:
+ifndef IDS
+		$(error trailing IDS assignment missing, e.g. IDS=2,7,12)
+endif
+
+run:
+	@$(MAKE) -s test-env-file
+	@$(DOCKER_ENV_VARS) \
+		TEST_EVENT=$(TEST_EVENT) \
+		eval $$(cat $(ENV_FILE)) \
+		go run $(CMD_DIR)
 
 ###################### dependencies ######################
 
@@ -95,6 +113,30 @@ get-secrets:
 		--app-name $(APP_NAME) \
 		--env $(ENV) \
 		--region $(REGION)
+
+save-id-token:
+	@$(MAKE) -s test-username-arg
+	@$(MAKE) -s test-password-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/save-id-token.sh \
+		--dir-path $(DIR_PATH) \
+		--username $(ACCT) \
+		--password $(PASS) \
+		--region $(REGION)
+
+###################### notifications ######################
+
+get:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/get-notifications.sh \
+		--dir-path $(DIR_PATH)
+
+clear:
+	@$(MAKE) -s test-ids-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clear-notifications.sh \
+		--dir-path $(DIR_PATH) \
+		--ids '$(IDS)'
 
 ###################### deploy ######################
 
