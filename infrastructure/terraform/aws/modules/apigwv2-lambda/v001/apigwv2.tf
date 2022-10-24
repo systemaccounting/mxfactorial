@@ -35,7 +35,7 @@ resource "aws_apigatewayv2_integration" "default" {
 resource "aws_apigatewayv2_route" "default" {
   count              = var.enable_api_auth ? 0 : 1
   api_id             = aws_apigatewayv2_api.default.id
-  route_key          = "POST /"
+  route_key          = "ANY /{proxy+}"
   authorization_type = "NONE"
   target             = "integrations/${aws_apigatewayv2_integration.default.id}"
 }
@@ -43,7 +43,7 @@ resource "aws_apigatewayv2_route" "default" {
 resource "aws_apigatewayv2_route" "auth_enabled" {
   count              = var.enable_api_auth ? 1 : 0
   api_id             = aws_apigatewayv2_api.default.id
-  route_key          = "POST /"
+  route_key          = "ANY /{proxy+}"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.default[0].id
   target             = "integrations/${aws_apigatewayv2_integration.default.id}"
