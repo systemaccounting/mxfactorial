@@ -25,10 +25,10 @@ const queryRoute string = rootRoute + "query"
 func lambdaFn(
 	ctx context.Context,
 	e core.SwitchableAPIGatewayRequest,
-	schema graphql.ExecutableSchema,
 	server *handler.Server,
 	r *mux.Router,
-	ma *gorillamux.GorillaMuxAdapter) (events.APIGatewayV2HTTPResponse, error) {
+	ma *gorillamux.GorillaMuxAdapter,
+) (events.APIGatewayV2HTTPResponse, error) {
 	r.Handle(queryRoute, server)
 	r.Handle(rootRoute, playground.Handler(playgroundTitle, queryRoute))
 	resp, err := ma.ProxyWithContext(ctx, e)
@@ -41,28 +41,31 @@ func lambdaFn(
 // wraps lambdaFn with deps
 func handleEvent(
 	ctx context.Context,
-	e core.SwitchableAPIGatewayRequest) (events.APIGatewayV2HTTPResponse, error) {
+	e core.SwitchableAPIGatewayRequest,
+) (events.APIGatewayV2HTTPResponse, error) {
 	var r *mux.Router = mux.NewRouter()
 	var muxAdapter *gorillamux.GorillaMuxAdapter = gorillamux.New(r)
 	var schema graphql.ExecutableSchema = generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}})
 	var server *handler.Server = handler.NewDefaultServer(schema)
-	return lambdaFn(ctx, e, schema, server, r, muxAdapter)
+	return lambdaFn(ctx, e, server, r, muxAdapter)
 }
 
 func main() {
-	// set LOCAL_ENV for local development
-	var osLocalEnv string = os.Getenv("LOCAL_ENV")
+
 	// test for lambda env
-	if len(osLocalEnv) == 0 {
+	if len(os.Getenv("LOCAL_ENV")) == 0 {
 		lambda.Start(handleEvent)
 	} else {
-		// create web server for local development
-		port := "8080"
-		r := mux.NewRouter()
+		// or serve from local
 		schema := generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}})
 		server := handler.NewDefaultServer(schema)
+
+		r := mux.NewRouter()
 		r.Handle(queryRoute, server)
 		r.Handle(rootRoute, playground.Handler(playgroundTitle, queryRoute))
+
+		// create web server for local development
+		port := "8080"
 		log.Printf("connect to http://localhost:%s/ for playground", port)
 		log.Fatal(http.ListenAndServe(":"+port, r))
 	}
