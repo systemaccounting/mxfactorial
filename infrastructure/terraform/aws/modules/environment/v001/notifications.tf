@@ -41,7 +41,7 @@ resource "aws_apigatewayv2_deployment" "notifications" {
   api_id      = aws_apigatewayv2_api.notifications.id
   description = "wss notifications deployment in ${var.env}"
   triggers = {
-    version = 1
+    version = 3
   }
   lifecycle {
     create_before_destroy = true

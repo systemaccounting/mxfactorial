@@ -31,9 +31,9 @@ locals {
   APP              = "mxfactorial"
   ENV              = "prod"
   APP_ENV          = "${local.APP}-${local.ENV}"
-  PROJECT_JSON     = "../../../../../project.json"
-  ORIGIN_PREFIX    = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).client_origin_bucket_name_prefix
-  ARTIFACTS_PREFIX = jsondecode(file("${path.module}/${local.PROJECT_JSON}")).artifacts_bucket_name_prefix
+  PROJECT_JSON     = jsondecode(file("../../../../../project.json"))
+  ORIGIN_PREFIX    = local.PROJECT_JSON.client_origin_bucket_name_prefix
+  ARTIFACTS_PREFIX = local.PROJECT_JSON.artifacts_bucket_name_prefix
   CUSTOM_DOMAIN    = "mxfactorial.io"
 }
 
@@ -57,7 +57,6 @@ module "prod" {
 
   ############### rds ###############
 
-  rds_db_version                  = "13.4"
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
@@ -67,10 +66,10 @@ module "prod" {
   ############### api gateway ###############
 
   // change graphql_deployment_version when switching
-  enable_api_auth = false
+  enable_api_auth = local.PROJECT_JSON.enable_api_auth
 
   // change value to deploy api
-  graphql_deployment_version     = 19
+  graphql_deployment_version     = 1
   apigw_authorization_header_key = "Authorization"
 
   // OPTIONAL, comment or delete api_cert_arn if custom_domain_name unused:
@@ -78,6 +77,10 @@ module "prod" {
 
   // apigw v2
   enable_api_auto_deploy = true
+
+  ############### notifications ###############
+
+  enable_notifications = local.PROJECT_JSON.enable_notifications
 
   ############### client ###############
 
