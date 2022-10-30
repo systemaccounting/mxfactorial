@@ -134,7 +134,7 @@ func (AccountBalanceSQLs) UpdateAccountBalancesSQL(trItems types.TransactionItem
 		updSQL += fmt.Sprintf("$%d", paramCount)
 		paramCount++
 		updSQL += `, `
-		args = append(args, fmt.Sprintf("-%s", v.Price.Mul(v.Quantity)))
+		args = append(args, v.Price.Mul(v.Quantity).Neg())
 		updSQL += fmt.Sprintf("$%d", paramCount)
 		paramCount++
 		updSQL += `, `
