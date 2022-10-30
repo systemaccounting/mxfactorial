@@ -1,0 +1,20 @@
+name: dev-gopkg-sqls
+
+on:
+  push:
+    paths:
+    - 'services/gopkg/sqls/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  sqls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.x'
+      - name: unit test
+        run: make test
+        working-directory: services/gopkg/sqls
