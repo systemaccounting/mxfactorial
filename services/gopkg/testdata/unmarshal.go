@@ -3,13 +3,13 @@ package testdata
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
 func GetTestTransaction(path string) types.Transaction {
-	f, err := ioutil.ReadFile(path)
+	f, err := os.ReadFile(path)
 	if err != nil {
 		msgErr := fmt.Errorf("read fail %s: %v", path, err)
 		panic(msgErr)
@@ -20,4 +20,18 @@ func GetTestTransaction(path string) types.Transaction {
 		panic(msgErr)
 	}
 	return *i.Transaction
+}
+
+func GetTestTransactions(path string) []*types.IntraTransaction {
+	f, err := os.ReadFile(path)
+	if err != nil {
+		msgErr := fmt.Errorf("read fail %s: %v", path, err)
+		panic(msgErr)
+	}
+	var i []*types.IntraTransaction
+	if err := json.Unmarshal(f, &i); err != nil {
+		msgErr := fmt.Errorf("unmarshal fail: %v", err)
+		panic(msgErr)
+	}
+	return i
 }

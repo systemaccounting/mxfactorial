@@ -357,7 +357,7 @@
         },
         "sqls": {
             "runtime": "go1.x",
-            "path": "services/gopkg/postgres",
+            "path": "services/gopkg/sqls",
             "dependents": [
                 "postgres"
             ]
