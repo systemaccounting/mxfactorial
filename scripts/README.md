@@ -359,3 +359,7 @@ gets pending notifications from websocket endpoint
 ##### `clear-notifications.sh`
 
 clears (deletes) pending notifications through websocket endpoint
+
+##### `create-all-env-files.sh`
+
+loops through `project.json` apps and creates `.env` files in each directory requring secrets fetched from systems manager parameter store
