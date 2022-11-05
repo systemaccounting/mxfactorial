@@ -24,6 +24,10 @@ module "dev" {
   env                   = local.ENV
   artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ENV}"
 
+  ############### ssm ###############
+
+  ssm_version = local.PROJECT_JSON.ssm_version
+
   ############### lambda ###############
 
   requests_by_account_return_limit     = 20
