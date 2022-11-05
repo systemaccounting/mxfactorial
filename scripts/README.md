@@ -363,3 +363,7 @@ clears (deletes) pending notifications through websocket endpoint
 ##### `create-all-env-files.sh`
 
 loops through `project.json` apps and creates `.env` files in each directory requring secrets fetched from systems manager parameter store
+
+##### `manage-rds.sh`
+
+starts and stops an rds instance

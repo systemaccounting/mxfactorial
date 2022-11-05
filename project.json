@@ -520,5 +520,9 @@
         "WEBSOCKET_CLIENT_URI": "api/websocket/client/uri",
         "DB_RESET_PASSPHRASE": "tool/lambda/db_reset/passphrase",
         "CLIENT_URI": "client/uri"
+    },
+    "region": "us-east-1",
+    "rds": {
+        "instance_name_prefix": "mxfactorial"
     }
 }
