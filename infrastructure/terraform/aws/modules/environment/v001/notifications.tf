@@ -143,32 +143,32 @@ resource "aws_iam_policy" "wss" {
   })
 }
 
-resource "aws_secretsmanager_secret" "apigw_connections_uri" {
-  name                    = "${var.env}/APIGW_CONNECTIONS_URI"
-  recovery_window_in_days = 0
+resource "aws_ssm_parameter" "apigw_connections_uri" {
+  name        = "/${var.env}/${var.ssm_version}/api/websocket/connections/uri"
+  description = "api gateway connections uri in ${var.env}"
+  type        = "SecureString"
+  value       = local.APIGW_CONNECTIONS_URI
+  tags = {
+    env = var.env
+  }
 }
 
-resource "aws_secretsmanager_secret_version" "apigw_connections_uri" {
-  secret_id     = aws_secretsmanager_secret.apigw_connections_uri.id
-  secret_string = local.APIGW_CONNECTIONS_URI
+resource "aws_ssm_parameter" "websocket_client_uri" {
+  name        = "/${var.env}/${var.ssm_version}/api/websocket/client/uri"
+  description = "api gateway websocket client uri in ${var.env}"
+  type        = "SecureString"
+  value       = local.WEBSOCKET_CLIENT_URI
+  tags = {
+    env = var.env
+  }
 }
 
-resource "aws_secretsmanager_secret" "websocket_client_uri" {
-  name                    = "${var.env}/WEBSOCKET_CLIENT_URI"
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret_version" "websocket_client_uri" {
-  secret_id     = aws_secretsmanager_secret.websocket_client_uri.id
-  secret_string = local.WEBSOCKET_CLIENT_URI
-}
-
-resource "aws_secretsmanager_secret" "notifications_return_limit" {
-  name                    = "${var.env}/NOTIFICATIONS_RETURN_LIMIT"
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret_version" "notifications_return_limit" {
-  secret_id     = aws_secretsmanager_secret.notifications_return_limit.id
-  secret_string = var.notifications_return_limit
+resource "aws_ssm_parameter" "notifications_return_limit" {
+  name        = "/${var.env}/${var.ssm_version}/notifications/return_limit"
+  description = "notifications return limit in ${var.env}"
+  type        = "SecureString"
+  value       = var.notifications_return_limit
+  tags = {
+    env = var.env
+  }
 }

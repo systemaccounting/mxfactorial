@@ -1,7 +1,7 @@
 locals {
   SERVICE_NAME_TITLE = replace(title(var.service_name), "-", "")
-  SERVICE_NAME_DESCR = replace(var.service_name, "-", " ")
   SERVICE_NAME_UPPER = replace(upper(var.service_name), "-", "_")
+  SERVICE_NAME_LOWER = replace(var.service_name, "-", "_")
   LOG_GROUP_NAME     = "/aws/lambda/${aws_lambda_function.default.function_name}"
 }
 
@@ -16,7 +16,7 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_lambda_function" "default" {
   function_name     = "${var.service_name}-${var.env}"
-  description       = "${local.SERVICE_NAME_DESCR} lambda service in ${var.env}"
+  description       = "${var.service_name} lambda service in ${var.env}"
   s3_bucket         = data.aws_s3_bucket_object.default.bucket
   s3_key            = data.aws_s3_bucket_object.default.key
   s3_object_version = data.aws_s3_bucket_object.default.version_id
@@ -54,7 +54,7 @@ resource "aws_iam_role" "default" {
 
 resource "aws_iam_policy" "default" {
   name        = "${var.service_name}-lambda-logging-${var.env}"
-  description = "${local.SERVICE_NAME_DESCR} logging permission in ${var.env}"
+  description = "${aws_lambda_function.default.function_name} logging permission in ${var.env}"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -100,16 +100,13 @@ resource "aws_iam_role_policy_attachment" "extra" {
   policy_arn = var.attached_policy_arns[count.index]
 }
 
-// supports local testing
-resource "aws_secretsmanager_secret" "default" {
-  count                   = var.create_secret ? 1 : 0
-  name                    = "${var.env}/${local.SERVICE_NAME_UPPER}_LAMBDA_ARN"
-  recovery_window_in_days = 0
-  description             = "${local.SERVICE_NAME_DESCR} arn in ${var.env}"
-}
-
-resource "aws_secretsmanager_secret_version" "default" {
-  count         = var.create_secret ? 1 : 0
-  secret_id     = aws_secretsmanager_secret.default[count.index].id
-  secret_string = aws_lambda_function.default.arn
+resource "aws_ssm_parameter" "default" {
+  count       = var.create_secret ? 1 : 0
+  name        = "/${var.env}/${var.ssm_version}/service/lambda/${local.SERVICE_NAME_LOWER}/arn"
+  description = "${aws_lambda_function.default.function_name} arn in ${var.env}"
+  type        = "SecureString"
+  value       = aws_lambda_function.default.arn
+  tags = {
+    env = var.env
+  }
 }

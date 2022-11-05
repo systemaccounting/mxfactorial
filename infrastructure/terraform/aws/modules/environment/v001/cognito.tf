@@ -315,13 +315,12 @@ resource "aws_cognito_user_pool_client" "client" {
   ]
 }
 
-resource "aws_secretsmanager_secret" "cognito_jwks_uri" {
-  name                    = "${var.env}/COGNITO_JWKS_URI"
-  recovery_window_in_days = 0
-  description             = "cognito jsonwebkey uri in ${var.env}"
-}
-
-resource "aws_secretsmanager_secret_version" "cognito_jwks_uri" {
-  secret_id     = aws_secretsmanager_secret.cognito_jwks_uri.id
-  secret_string = local.COGNITO_JWKS_URI
+resource "aws_ssm_parameter" "cognito_jwks_uri" {
+  name        = "/${var.env}/${var.ssm_version}/auth/cognito/jwks/uri"
+  description = "json web key REST resource in ${var.env}"
+  type        = "SecureString"
+  value       = local.COGNITO_JWKS_URI
+  tags = {
+    env = var.env
+  }
 }
