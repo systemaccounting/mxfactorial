@@ -455,10 +455,10 @@
         }
     },
     "path": ".",
-    "secrets": {
-        "CLIENT_URI": "api/websocket/client/uri",
-        "GRAPHQL_URI": "api/graphql/uri"
-    },
+    "secrets": [
+        "CLIENT_URI",
+        "GRAPHQL_URI"
+    ],
     "github_workflows": {
         "dynamodb_table": {
             "name_prefix": "github-workflows",
