@@ -30,8 +30,9 @@ else
 fi
 
 SECRETS=$(jq -r "[$PROJECT_JSON_PROPERTY.secrets[]] | join (\" \")" $PROJECT_CONFIG)
+SSM_VERSION=$(jq -r .ssm_version $PROJECT_CONFIG)
 PARAMS=$(jq -r "[$PROJECT_JSON_PROPERTY.params[]] | join (\" \")" $PROJECT_CONFIG)
-ENABLE_API_AUTH=$(jq -r .enble_api_auth $PROJECT_CONFIG)
+ENABLE_API_AUTH=$(jq -r .enable_api_auth $PROJECT_CONFIG)
 ENABLE_NOTIFICATIONS=$(jq -r .enable_notifications $PROJECT_CONFIG)
 
 ENV_FILE_PATH=$(jq -r "$PROJECT_JSON_PROPERTY.path" $PROJECT_CONFIG)
@@ -50,10 +51,12 @@ function test_env_file() {
 
 function set_secrets() {
 	for s in ${SECRETS[@]}; do
-		ENV_VAR=$(aws secretsmanager get-secret-value \
+		PARAM_NAME=$(jq -r ".ssm_params.$s" $PROJECT_CONFIG)
+		ENV_VAR=$(aws ssm get-parameter \
+			--name "/$ENVIRONMENT/$SSM_VERSION/$PARAM_NAME" \
+			--query "Parameter.Value" \
 			--region $REGION \
-			--secret-id $ENVIRONMENT/$s \
-			--query 'SecretString' \
+			--with-decryption \
 			--output text)
 		echo $s=$ENV_VAR >> $ENV_FILE
 	done

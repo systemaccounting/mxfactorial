@@ -4,15 +4,16 @@ PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT_CONF))
 ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV)
-ENABLE_AUTH=$(shell jq '.enable_api_auth' $(PROJECT_CONF))
+ENABLE_AUTH=$(shell jq -r '.enable_api_auth' $(PROJECT_CONF))
+SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
 BUILD_DIR=$(CURDIR)/public
 DEPS_DIR=$(CURDIR)/node_modules
 REGION=us-east-1
 
 ENV_FILE=$(CURDIR)/.env
-PARAMS=$(shell jq '.apps.client.params[]' $(PROJECT_CONF))
-SECRETS=$(shell jq '.apps.client.secrets[]' $(PROJECT_CONF))
+PARAMS=$(shell jq -r '.apps.client.params[]' $(PROJECT_CONF))
+SECRETS=$(shell jq -r '.apps.client.secrets[]' $(PROJECT_CONF))
 ENV_VARS=$(PARAMS) $(SECRETS)
 
 dev:
@@ -70,17 +71,21 @@ $(ENV_VARS):
 	elif [ $@ = ENABLE_AUTH ]; then \
 		echo "ENABLE_AUTH=$(ENABLE_AUTH)" >> $(ENV_FILE); \
 	elif [ $@ = SECRET ]; then \
-		SECRET=$$(aws secretsmanager get-secret-value \
+		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
+		SECRET=$$(aws ssm get-parameter \
+			--name /$(ENV)/$(SSM_VERSION)/$$PARAM_NAME \
+			--query 'Parameter.Value' \
+			--with-decryption \
 			--region $(REGION) \
-			--secret-id $(ENV)/$@ \
-			--query 'SecretString' \
 			--output text); \
 		echo "JEST_$@=$$SECRET" >> $(ENV_FILE); \
 	else \
-		ENV_VAR=$$(aws secretsmanager get-secret-value \
+		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
+		ENV_VAR=$$(aws ssm get-parameter \
+			--name /$(ENV)/$(SSM_VERSION)/$$PARAM_NAME \
+			--query 'Parameter.Value' \
+			--with-decryption \
 			--region $(REGION) \
-			--secret-id $(ENV)/$@ \
-			--query 'SecretString' \
 			--output text | base64); \
 		echo "$@=$$ENV_VAR" >> $(ENV_FILE); \
 	fi;

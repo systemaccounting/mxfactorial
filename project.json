@@ -455,10 +455,10 @@
         }
     },
     "path": ".",
-    "secrets": [
-        "CLIENT_URI",
-        "GRAPHQL_URI"
-    ],
+    "secrets": {
+        "CLIENT_URI": "api/websocket/client/uri",
+        "GRAPHQL_URI": "api/graphql/uri"
+    },
     "github_workflows": {
         "dynamodb_table": {
             "name_prefix": "github-workflows",
@@ -492,5 +492,33 @@
         "test_accounts_file": "./migrations/testseed/000001_accounts.up.sql"
     },
     "enable_api_auth": false,
-    "enable_notifications": false
+    "enable_notifications": false,
+    "ssm_version": "v1",
+    "ssm_params": {
+        "GRAPHQL_URI": "api/graphql/uri",
+        "RULE_LAMBDA_ARN": "service/lambda/rules/arn",
+        "REQUEST_CREATE_LAMBDA_ARN": "service/lambda/request_create/arn",
+        "REQUEST_APPROVE_LAMBDA_ARN": "service/lambda/request_approve/arn",
+        "REQUEST_BY_ID_LAMBDA_ARN": "service/lambda/request_by_id/arn",
+        "REQUESTS_BY_ACCOUNT_LAMBDA_ARN": "service/lambda/requests_by_account/arn",
+        "TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN": "service/lambda/transactions_by_account/arn",
+        "TRANSACTION_BY_ID_LAMBDA_ARN": "service/lambda/transaction_by_id/arn",
+        "BALANCE_BY_ACCOUNT_LAMBDA_ARN": "service/lambda/balance_by_account/arn",
+        "NOTIFY_TOPIC_ARN": "notifications/sns/topic/arn",
+        "PGDATABASE": "database/sql/postgres/pgdatabase",
+        "PGUSER": "database/sql/postgres/pguser",
+        "PGPASSWORD": "database/sql/postgres/pgpassword",
+        "PGHOST": "database/sql/postgres/pghost",
+        "PGPORT": "database/sql/postgres/pgport",
+        "CLIENT_ID": "auth/cognito/client_id",
+        "POOL_ID": "auth/cognito/pool_id",
+        "POOL_NAME": "auth/cognito/pool_name",
+        "APIGW_CONNECTIONS_URI": "api/websocket/connections/uri",
+        "COGNITO_JWKS_URI": "auth/cognito/jwks/uri",
+        "NOTIFICATIONS_RETURN_LIMIT": "notifications/return_limit",
+        "SECRET": "auth/cognito/test_account/secret",
+        "WEBSOCKET_CLIENT_URI": "api/websocket/client/uri",
+        "DB_RESET_PASSPHRASE": "tool/lambda/db_reset/passphrase",
+        "CLIENT_URI": "client/uri"
+    }
 }

@@ -18,3 +18,4 @@ variable "artifacts_bucket_name" {}
 variable "custom_domain_name" { default = "" }
 variable "client_cert_arn" { default = "" }
 variable "api_cert_arn" { default = "" }
+variable "ssm_version" {}

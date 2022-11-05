@@ -20,3 +20,4 @@ variable "create_secret" {
   description = "adds lambda arn in secrets manager for local testing"
 }
 variable "artifacts_bucket_name" {}
+variable "ssm_version" {}

@@ -48,6 +48,10 @@ module "prod" {
   // OPTIONAL, comment or delete if unused:
   custom_domain_name = local.CUSTOM_DOMAIN
 
+  ############### ssm ###############
+
+  ssm_version = local.PROJECT_JSON.ssm_version
+
   ############### lambda ###############
 
   requests_by_account_return_limit     = 20
