@@ -1,6 +1,7 @@
 {
     "artifacts_bucket_name_prefix": "mxfactorial-artifacts",
     "client_origin_bucket_name_prefix": "mxfactorial-client",
+    "tfstate_bucket_name_prefix": "mxfactorial-tfstate",
     "apps": {
         "graphql": {
             "runtime": "go1.x",
@@ -268,7 +269,12 @@
             "lambda_invoke_log": null,
             "executable_name": "index.sh",
             "build_src_path": null,
-            "dependents": []
+            "dependents": [],
+            "terraform": {
+                "aws": {
+                    "layer_name_suffix": "go-migrate-provided-deps"
+                }
+            }
         },
         "db-reset": {
             "runtime": "provided",
@@ -524,5 +530,21 @@
     "region": "us-east-1",
     "rds": {
         "instance_name_prefix": "mxfactorial"
+    },
+    "gitpod": {
+        "iam_user": "mxgitpod",
+        "user_policy_arn": "arn:aws:iam::aws:policy/AdministratorAccess"
+    },
+    "terraform": {
+        "tfstate": {
+            "file_extension": "tfstate",
+            "file_name_suffix": {
+                "apigw_logging": "apigw_logging",
+                "env_infra": "env_infra"
+            }
+        },
+        "aws": {
+            "build_db_and_cache": true
+        }
     }
 }
