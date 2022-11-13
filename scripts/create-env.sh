@@ -31,6 +31,7 @@ fi
 
 SECRETS=$(jq -r "[$PROJECT_JSON_PROPERTY.secrets[]] | join (\" \")" $PROJECT_CONFIG)
 SSM_VERSION=$(jq -r .ssm_version $PROJECT_CONFIG)
+ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
 PARAMS=$(jq -r "[$PROJECT_JSON_PROPERTY.params[]] | join (\" \")" $PROJECT_CONFIG)
 ENABLE_API_AUTH=$(jq -r .enable_api_auth $PROJECT_CONFIG)
 ENABLE_NOTIFICATIONS=$(jq -r .enable_notifications $PROJECT_CONFIG)
@@ -53,7 +54,7 @@ function set_secrets() {
 	for s in ${SECRETS[@]}; do
 		PARAM_NAME=$(jq -r ".ssm_params.$s" $PROJECT_CONFIG)
 		ENV_VAR=$(aws ssm get-parameter \
-			--name "/$ENVIRONMENT/$SSM_VERSION/$PARAM_NAME" \
+			--name "/$ENV_ID/$SSM_VERSION/$ENVIRONMENT/$PARAM_NAME" \
 			--query "Parameter.Value" \
 			--region $REGION \
 			--with-decryption \
