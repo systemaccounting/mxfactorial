@@ -3,10 +3,8 @@ ARTIFACT_NAME=$(APP_NAME)-src.zip
 RELATIVE_PROJECT_ROOT_PATH=../..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
-ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 CMD_DIR=$(CURDIR)/cmd
-REGION=us-east-1
+REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
 
