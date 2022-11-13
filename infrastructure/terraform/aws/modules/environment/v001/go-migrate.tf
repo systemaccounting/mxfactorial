@@ -4,8 +4,8 @@ data "aws_s3_bucket_object" "go_migrate" {
 }
 
 resource "aws_lambda_function" "go_migrate" {
-  function_name     = "go-migrate-${var.env}"
-  description       = "go migrate tool in ${var.env}"
+  function_name     = "${local.ID_ENV}-go-migrate"
+  description       = "go migrate tool in ${local.SPACED_ID_ENV}"
   s3_bucket         = data.aws_s3_bucket_object.go_migrate.bucket
   s3_key            = data.aws_s3_bucket_object.go_migrate.key
   s3_object_version = data.aws_s3_bucket_object.go_migrate.version_id
@@ -25,7 +25,7 @@ resource "aws_lambda_function" "go_migrate" {
 }
 
 data "aws_lambda_layer_version" "go_migrate" {
-  layer_name = "go-migrate-provided-deps-${var.env}"
+  layer_name = "${local.ID_ENV}-${local.GO_MIGRATE_LAYER_SUFFIX}"
 }
 
 data "aws_s3_bucket_object" "go_migrate_layer" {
@@ -39,7 +39,7 @@ resource "aws_cloudwatch_log_group" "go_migrate" {
 }
 
 resource "aws_iam_role" "go_migrate" {
-  name = "go-migrate-role-${var.env}"
+  name = "${local.ID_ENV}-go-migrate-role"
 
   assume_role_policy = <<EOF
 {
@@ -60,7 +60,7 @@ EOF
 
 # allow function to create logs and access rds
 resource "aws_iam_role_policy" "go_migrate_policy" {
-  name = "go-migrate-policy-${var.env}"
+  name = "${local.ID_ENV}-go-migrate-policy"
   role = aws_iam_role.go_migrate.id
 
   policy = data.aws_iam_policy_document.go_migrate_policy.json
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "go_migrate_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "GoMigrateFaasLoggingPolicy${title(var.env)}"
+    sid = "GoMigrateFaasLoggingPolicy${local.TITLED_ID_ENV}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
@@ -82,7 +82,7 @@ data "aws_iam_policy_document" "go_migrate_policy" {
   }
 
   statement {
-    sid = "GoMigrateFaasEc2AccessPolicy${title(var.env)}"
+    sid = "GoMigrateFaasEc2AccessPolicy${local.TITLED_ID_ENV}"
     actions = [
       "ec2:CreateNetworkInterface",
       "ec2:DescribeNetworkInterfaces",

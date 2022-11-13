@@ -8,8 +8,8 @@ data "aws_s3_bucket_object" "graphql" {
 }
 
 resource "aws_lambda_function" "graphql" {
-  function_name     = "${local.GRAPHQL}-${var.env}"
-  description       = "${local.GRAPHQL} on api gateway"
+  function_name     = "${local.ID_ENV}-${local.GRAPHQL}"
+  description       = "${local.GRAPHQL} on api gateway in ${local.SPACED_ID_ENV}"
   s3_bucket         = data.aws_s3_bucket_object.graphql.bucket
   s3_key            = data.aws_s3_bucket_object.graphql.key
   s3_object_version = data.aws_s3_bucket_object.graphql.version_id
@@ -38,14 +38,14 @@ resource "aws_cloudwatch_log_group" "graphql" {
 }
 
 resource "aws_iam_role" "graphql_role" {
-  name               = "${local.GRAPHQL}-${var.env}"
+  name               = "${local.ID_ENV}-${local.GRAPHQL}"
   assume_role_policy = data.aws_iam_policy_document.graphql_trust_policy.json
 }
 
 data "aws_iam_policy_document" "graphql_trust_policy" {
   version = "2012-10-17"
   statement {
-    sid    = "GraphQLFaasTrustPolicy${title(var.env)}"
+    sid    = "GraphQLFaasTrustPolicy${local.TITLED_ID_ENV}"
     effect = "Allow"
     actions = [
       "sts:AssumeRole",
@@ -68,7 +68,7 @@ data "aws_iam_policy_document" "graphql_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "GraphQLInvokeLambdaPolicy${title(var.env)}"
+    sid = "GraphQLInvokeLambdaPolicy${local.TITLED_ID_ENV}"
     actions = [
       "lambda:InvokeFunction"
     ]
@@ -85,7 +85,7 @@ data "aws_iam_policy_document" "graphql_policy" {
   }
 
   statement {
-    sid = "GraphQLLoggingPolicy${title(var.env)}"
+    sid = "GraphQLLoggingPolicy${local.TITLED_ID_ENV}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",

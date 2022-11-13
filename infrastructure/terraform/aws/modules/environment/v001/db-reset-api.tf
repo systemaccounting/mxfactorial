@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_sns_topic" "db_reset" {
-  name = "${local.DB_RESET}-${var.env}"
+  name = "${local.DB_RESET}-${var.env_id}-${var.env}"
 }
 
 resource "aws_sns_topic_subscription" "sns_to_db_reset_lambda" {
@@ -13,7 +13,7 @@ resource "aws_sns_topic_subscription" "sns_to_db_reset_lambda" {
 }
 
 resource "aws_lambda_permission" "sns_to_db_reset_lambda" {
-  statement_id  = "AllowASNSInvoke${title(var.env)}"
+  statement_id  = "AllowASNSInvoke${local.TITLED_ID_ENV}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.db_reset.function_name
   principal     = "sns.amazonaws.com"
@@ -21,8 +21,8 @@ resource "aws_lambda_permission" "sns_to_db_reset_lambda" {
 }
 
 resource "aws_api_gateway_rest_api" "db_reset" {
-  name        = "${local.DB_RESET}-${var.env}"
-  description = "${local.DB_RESET} api in ${var.env}"
+  name        = "${local.ID_ENV}-${local.DB_RESET}"
+  description = "${local.DB_RESET} api in ${local.SPACED_ID_ENV}"
 }
 
 resource "aws_api_gateway_method" "db_reset" {
@@ -98,14 +98,14 @@ resource "aws_api_gateway_deployment" "db_reset" {
 }
 
 resource "aws_iam_role" "db_reset_api" {
-  name               = "${local.DB_RESET}-apigw-role-${var.env}"
+  name               = "${local.ID_ENV}-${local.DB_RESET}-apigw-role"
   assume_role_policy = data.aws_iam_policy_document.db_reset_api_role.json
 }
 
 data "aws_iam_policy_document" "db_reset_api_role" {
   version = "2012-10-17"
   statement {
-    sid    = "ApiGatewayRole${var.env}"
+    sid    = "ApiGatewayRole${local.TITLED_ID_ENV}"
     effect = "Allow"
     principals {
       type        = "Service"
@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "db_reset_api_role" {
 }
 
 resource "aws_iam_role_policy" "db_reset_api" {
-  name   = "${local.DB_RESET}-apigw-cw-policy-${var.env}"
+  name   = "${local.ID_ENV}-${local.DB_RESET}-apigw-cw-policy"
   role   = aws_iam_role.db_reset_api.id
   policy = data.aws_iam_policy_document.db_reset_api_policy.json
 }
@@ -124,7 +124,7 @@ resource "aws_iam_role_policy" "db_reset_api" {
 data "aws_iam_policy_document" "db_reset_api_policy" {
   version = "2012-10-17"
   statement {
-    sid = "ApiGatewaySNSPolicy${title(var.env)}"
+    sid = "ApiGatewaySNSPolicy${local.TITLED_ID_ENV}"
     actions = [
       "sns:Publish",
     ]

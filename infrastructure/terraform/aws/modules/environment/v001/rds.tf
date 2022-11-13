@@ -1,11 +1,12 @@
 resource "aws_db_instance" "postgres" {
+  count                               = var.build_db_and_cache ? 1 : 0 // false during terraform development
   identifier                          = var.rds_instance_name
   snapshot_identifier                 = var.db_snapshot_id
   allocated_storage                   = 20
   storage_type                        = "gp2"
   engine                              = "postgres"
   instance_class                      = var.rds_instance_class
-  name                                = "mxfactorial"
+  db_name                             = "mxfactorial"
   username                            = "u${random_password.pguser.result}"
   password                            = random_password.pgpassword.result
   port                                = 5432
@@ -34,17 +35,17 @@ resource "random_password" "pgpassword" {
 
 locals {
   POSTGRES_VARS = {
-    PGDATABASE = aws_db_instance.postgres.name
-    PGHOST     = aws_db_instance.postgres.address
-    PGPASSWORD = aws_db_instance.postgres.password
-    PGPORT     = aws_db_instance.postgres.port
-    PGUSER     = aws_db_instance.postgres.username
+    PGDATABASE = var.build_db_and_cache ? aws_db_instance.postgres[0].name : ""
+    PGHOST     = var.build_db_and_cache ? aws_db_instance.postgres[0].address : ""
+    PGPASSWORD = var.build_db_and_cache ? aws_db_instance.postgres[0].password : ""
+    PGPORT     = var.build_db_and_cache ? aws_db_instance.postgres[0].port : ""
+    PGUSER     = var.build_db_and_cache ? aws_db_instance.postgres[0].username : ""
   }
 }
 
 ########## Create security group for RDS ##########
 resource "aws_security_group" "postgres" {
-  name        = "db-sec-grp-${var.env}"
+  name        = "${local.ID_ENV}-db-sec-grp"
   description = "internal postgres access"
   vpc_id      = data.aws_vpc.default.id
 }
@@ -105,13 +106,9 @@ resource "aws_security_group_rule" "allow_all_outbound_rds" {
 
 ###### Cherry-pick subnets for RDS in future ######
 resource "aws_db_subnet_group" "default" {
-  description = "postgres db subnet group in ${var.env}"
-  name        = "db-subnet-group-${var.env}"
+  description = "postgres db subnet group in ${local.SPACED_ID_ENV}"
+  name        = "db-subnet-group-${local.ID_ENV}"
   subnet_ids  = data.aws_subnet_ids.default.ids
-
-  tags = {
-    Name = "postgres-db-subnet-group"
-  }
 }
 
 ###### Reference CIDR blocks instead of security groups ######
