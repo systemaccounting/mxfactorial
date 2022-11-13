@@ -367,3 +367,23 @@ loops through `project.json` apps and creates `.env` files in each directory req
 ##### `manage-rds.sh`
 
 starts and stops an rds instance
+
+##### `build-dev-env.sh`
+
+builds a dev environment in aws
+
+##### `delete-dev-env.sh`
+
+deletes dev environment in aws
+
+##### `configure-gitpod.sh`
+
+configures a gitpod with aws credentials, then builds a dev environment in aws
+
+##### `manage-gitpod-iam.sh`
+
+creates and deletes an aws iam user for gitpod
+
+##### `delete-lambda-layers.sh`
+
+deletes lambda layer versions created by `build-dev-env.sh`
