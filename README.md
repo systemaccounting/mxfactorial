@@ -84,6 +84,8 @@ private, receiving added value is sustained & acknowledged by sending value
 1. `make get-secrets ENV=dev` in project root to create an `.env` file with the `CLIENT_URI` and `GRAPHQL_URI` variables
 1. navigate to `CLIENT_URI` and `GRAPHQL_URI` in a browser to view the web client and graphiql explorer
 1. import `services/graphql/postman/graphql.postman_collection.json` into postman and set the `GRAPHQL_URI` environment variable to test the api, e.g. `graphql/balance`
+1. `make delete-dev` to tear down cloud environment
+1. delete gitpod workspace in browser ui
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:
