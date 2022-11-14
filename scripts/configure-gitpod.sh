@@ -39,8 +39,6 @@ if [[ -f "$TFSTATE_ENV_ID" ]] && [[ $(jq '.resources | length > 0' "$TFSTATE_ENV
   fi
 fi
 
-make env-id
-
 printf "\n${CYAN}*** deploying the systemaccounting infrastructure and application code to your own aws account minimizes security administration and billing risk ***
 
 on your own machine where admin aws account credentials are configured, run:

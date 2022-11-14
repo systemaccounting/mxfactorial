@@ -9,6 +9,8 @@ ENVIRONMENT=dev
 PROJECT_CONFIG=project.json
 REGION=$(jq -r '.region' $PROJECT_CONFIG)
 BUCKET_PREFIX=$(jq -r '.tfstate_bucket_name_prefix' $PROJECT_CONFIG)
+
+make env-id
 ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
 
 TFSTATE_EXT=$(jq -r '.terraform.tfstate.file_extension' $PROJECT_CONFIG)
