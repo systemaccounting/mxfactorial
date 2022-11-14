@@ -28,4 +28,4 @@ cd ../init-dev
 
 terraform destroy --auto-approve
 
-printf "\n${YELLOW}*** ${ENV_ID}-${ENVIRONMENT} env deleted. you may now delete your workspace${NOCOLOR}\n\n"
+printf "\n${YELLOW}*** ${ENV_ID}-${ENVIRONMENT} env deleted. you may now delete your workspace${NOCOLOR}\n"
