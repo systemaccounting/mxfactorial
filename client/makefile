@@ -108,16 +108,17 @@ sync:
 	@$(MAKE) -s test-env-arg
 	aws s3 sync $(BUILD_DIR)/ s3://$(ORIGIN_BUCKET) --delete
 
+# https://stackoverflow.com/a/58451831
 empty-cache:
 	@$(MAKE) -s test-env-arg
 	@CACHE_ID=$$(aws cloudfront list-distributions --output text \
-		--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`$(ORIGIN_BUCKET)`][].Id'); \
+		--query 'sort_by(DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`$(ORIGIN_BUCKET)`], &LastModifiedTime)[-1].Id'); \
 	aws configure set preview.cloudfront true; \
 	echo 'emptying cache'; \
 	aws cloudfront create-invalidation --distribution-id $$CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 ifeq ($(ENV), prod)
 	@WWW_CACHE_ID=$$(aws cloudfront list-distributions --output text \
-	--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-$(ORIGIN_BUCKET)`][].Id'); \
+	--query 'sort_by(DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-$(ORIGIN_BUCKET)`], &LastModifiedTime)[-1].Id'); \
 	echo 'emptying www cache'; \
 	aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 endif
