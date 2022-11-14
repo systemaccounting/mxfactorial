@@ -34,7 +34,7 @@ locals {
   PROJECT_JSON     = jsondecode(file("../../../../../project.json"))
   ORIGIN_PREFIX    = local.PROJECT_JSON.client_origin_bucket_name_prefix
   ARTIFACTS_PREFIX = local.PROJECT_JSON.artifacts_bucket_name_prefix
-  RDS_SUFFIX       = local.PROJECT_JSON.terraform.aws.rds.instance_name_suffix
+  RDS_SUFFIX       = local.PROJECT_JSON.terraform.aws.rds.instance_name_prefix
   CUSTOM_DOMAIN    = "mxfactorial.io"
 }
 

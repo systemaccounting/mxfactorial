@@ -543,7 +543,7 @@
         "aws": {
             "build_db_and_cache": true,
             "rds": {
-                "instance_name_suffix": "mxfactorial"
+                "instance_name_prefix": "mxfactorial"
             }
         }
     }
