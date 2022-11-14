@@ -6,7 +6,7 @@ endif
 PROJECT_CONF=project.json
 SECRETS=$(shell jq '.secrets[]' $(PROJECT_CONF))
 ENV_VARS=$(SECRETS)
-REGION=us-east-1
+REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
 
 # approx 5 minutes
@@ -47,13 +47,22 @@ install:
 	go install github.com/golang/mock/mockgen@latest
 	brew install node
 	brew install awscli
-	brew install terraform
+	brew install warrensbox/tap/tfswitch
 	brew install libpq
 	brew link --force libpq
 	brew install golang-migrate
 	brew install jq
 	npm install -g eslint
 #	https://www.docker.com/products/docker-desktop
+
+env-id:
+	(cd infrastructure/terraform/env-id; terraform init && terraform apply --auto-approve)
+
+build-dev:
+	bash scripts/build-dev-env.sh
+
+delete-dev:
+	bash scripts/delete-dev-env.sh
 
 init:
 	go mod init github.com/systemaccounting/mxfactorial
