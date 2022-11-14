@@ -4,6 +4,7 @@ set -e
 
 YELLOW='\033[0;33m'
 NOCOLOR='\033[0m'
+BUILD_START_TIME=$(date +%s)
 
 ENVIRONMENT=dev
 PROJECT_CONFIG=project.json
@@ -122,3 +123,8 @@ popd; popd; popd;
 
 printf "\n${YELLOW}*** testing integration with new infrastructure and app deployments${NOCOLOR}\n\n"
 make --no-print-directory test ENV=dev
+
+BUILD_END_TIME=$(date +%s)
+BUILD_DURATION=$(($BUILD_END_TIME - $BUILD_START_TIME))
+
+printf "\n${YELLOW}*** $ID_ENV environment build time: $(printf '%02dh:%02dm:%02ds\n' $(($BUILD_DURATION/3600)) $(($BUILD_DURATION%3600/60)) $(($BUILD_DURATION%60)))${NOCOLOR}\n"
