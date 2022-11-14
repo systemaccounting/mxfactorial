@@ -528,9 +528,6 @@
         "CLIENT_URI": "client/uri"
     },
     "region": "us-east-1",
-    "rds": {
-        "instance_name_prefix": "mxfactorial"
-    },
     "gitpod": {
         "iam_user": "mxgitpod",
         "user_policy_arn": "arn:aws:iam::aws:policy/AdministratorAccess"
@@ -544,7 +541,10 @@
             }
         },
         "aws": {
-            "build_db_and_cache": true
+            "build_db_and_cache": true,
+            "rds": {
+                "instance_name_suffix": "mxfactorial"
+            }
         }
     }
 }
