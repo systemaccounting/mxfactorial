@@ -1,4 +1,8 @@
 RELATIVE_PROJECT_ROOT_PATH=..
+PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
+ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
+SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
 POSTGRESQL_USERNAME=test
 POSTGRESQL_PASSWORD=test
 POSTGRESQL_HOST=localhost
@@ -318,11 +322,12 @@ $(ENV_VARS):
 	@if [ $@ = DATABASE_TYPE ]; then \
 		echo DATABASE_TYPE=$(DATABASE_TYPE) >> $(ENV_FILE); \
 	else \
-		ENV_VAR=$$(aws secretsmanager get-secret-value \
+		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
+		ENV_VAR=$$(aws ssm get-parameter \
+			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
+			--query 'Parameter.Value' \
+			--with-decryption \
 			--region $(REGION) \
-			--secret-id $(ENV)/$@ \
-			--query 'SecretString' \
 			--output text); \
-		echo $@=$$ENV_VAR >> $(ENV_FILE); \
+		echo "$@=$$ENV_VAR" >> $(ENV_FILE); \
 	fi
-
