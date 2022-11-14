@@ -80,6 +80,10 @@ private, receiving added value is sustained & acknowledged by sending value
 1. `git checkout -b feature-branch`
 1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, e.g. `https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/feature-branch`
 1. follow prompts to build infrastructure and deploy application code to aws, or ***b***uild ***y***our ***o***wn ***e***nvironment
+1. `make test ENV=dev` in project root to test creating a transaction request and approval
+1. `make get-secrets ENV=dev` in project root to create an `.env` file with the `CLIENT_URI` and `GRAPHQL_URI` variables
+1. navigate to `CLIENT_URI` and `GRAPHQL_URI` in a browser to view the web client and graphiql explorer
+1. import `services/graphql/postman/graphql.postman_collection.json` into postman and set the `GRAPHQL_URI` environment variable to test the api, e.g. `graphql/balance`
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:
