@@ -6,10 +6,10 @@ locals {
   ORIGIN_PREFIX    = local.PROJECT_JSON.client_origin_bucket_name_prefix
   ARTIFACTS_PREFIX = local.PROJECT_JSON.artifacts_bucket_name_prefix
   TFSTATE_PREFIX   = local.PROJECT_JSON.tfstate_bucket_name_prefix
-  RDS_PREFIX       = local.PROJECT_JSON.rds.instance_name_prefix
+  RDS_SUFFIX       = local.PROJECT_JSON.terraform.aws.rds.instance_name_suffix
   REGION           = local.PROJECT_JSON.region
   ENV_ID           = jsondecode(file("../../../env-id/terraform.tfstate")).outputs.env_id.value
-  NAME_SUFFIX      = "${local.ENV_ID}-${local.ENV}"
+  ID_ENV           = "${local.ENV_ID}-${local.ENV}"
 }
 
 provider "aws" {
@@ -29,7 +29,7 @@ module "dev" {
   ############### shared ###############
 
   env                   = local.ENV
-  artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.NAME_SUFFIX}"
+  artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ID_ENV}"
   env_id                = local.ENV_ID
   build_db_and_cache    = local.PROJECT_JSON.terraform.aws.build_db_and_cache // false during terraform development
 
@@ -49,7 +49,7 @@ module "dev" {
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
-  rds_instance_name               = "${local.RDS_PREFIX}-${local.NAME_SUFFIX}"
+  rds_instance_name               = "${local.ID_ENV}-${local.RDS_SUFFIX}"
   db_snapshot_id                  = null
 
   ############### api gateway ###############
@@ -70,5 +70,5 @@ module "dev" {
 
   ############### client ###############
 
-  client_origin_bucket_name = "${local.ORIGIN_PREFIX}-${local.NAME_SUFFIX}"
+  client_origin_bucket_name = "${local.ORIGIN_PREFIX}-${local.ID_ENV}"
 }

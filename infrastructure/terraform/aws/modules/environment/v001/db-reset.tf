@@ -36,7 +36,7 @@ resource "aws_cloudwatch_log_group" "db_reset" {
 }
 
 resource "aws_iam_role" "db_reset" {
-  name               = "db-reset-role-${var.env}"
+  name               = "${local.ID_ENV}-db-reset-role"
   assume_role_policy = data.aws_iam_policy_document.db_reset_trust_policy.json
 }
 

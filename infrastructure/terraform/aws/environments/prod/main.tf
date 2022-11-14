@@ -34,7 +34,7 @@ locals {
   PROJECT_JSON     = jsondecode(file("../../../../../project.json"))
   ORIGIN_PREFIX    = local.PROJECT_JSON.client_origin_bucket_name_prefix
   ARTIFACTS_PREFIX = local.PROJECT_JSON.artifacts_bucket_name_prefix
-  RDS_PREFIX       = local.PROJECT_JSON.rds.instance_name_prefix
+  RDS_SUFFIX       = local.PROJECT_JSON.terraform.aws.rds.instance_name_suffix
   CUSTOM_DOMAIN    = "mxfactorial.io"
 }
 
@@ -65,7 +65,7 @@ module "prod" {
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
-  rds_instance_name               = "${local.RDS_PREFIX}-${local.ENV}"
+  rds_instance_name               = "${local.ENV}-${local.RDS_SUFFIX}"
   db_snapshot_id                  = null
 
   ############### api gateway ###############
