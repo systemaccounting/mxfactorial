@@ -540,6 +540,9 @@
                 "env_infra": "env_infra"
             }
         },
+        "prod": {
+            "env_id": 0
+        },
         "aws": {
             "build_db_and_cache": true,
             "rds": {

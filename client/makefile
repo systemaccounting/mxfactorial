@@ -3,7 +3,11 @@ RELATIVE_PROJECT_ROOT_PATH=..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT_CONF))
-ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
+ifeq (prod,$(ENV))
+  ENV_ID=$(shell jq -r '.terraform.prod.env_id' $(PROJECT_CONF))
+else
+  ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
+endif
 ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
 ENABLE_AUTH=$(shell jq -r '.enable_api_auth' $(PROJECT_CONF))
 SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
@@ -107,6 +111,9 @@ deploy:
 sync:
 	@$(MAKE) -s test-env-arg
 	aws s3 sync $(BUILD_DIR)/ s3://$(ORIGIN_BUCKET) --delete
+
+ya:
+	@echo $(ORIGIN_BUCKET)
 
 # https://stackoverflow.com/a/58451831
 empty-cache:

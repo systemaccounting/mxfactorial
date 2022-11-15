@@ -26,7 +26,11 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONFIG=project.json
-ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+if [[ "$ENV" == 'prod' ]]; then
+	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
+else
+	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+fi
 ARTIFACT_BUCKET_NAME_PREFIX=$(jq -r ".artifacts_bucket_name_prefix" $PROJECT_CONFIG)
 ARTIFACT_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
 LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_prefix" $PROJECT_CONFIG)

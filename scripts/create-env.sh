@@ -31,7 +31,11 @@ fi
 
 SECRETS=$(jq -r "[$PROJECT_JSON_PROPERTY.secrets[]] | join (\" \")" $PROJECT_CONFIG)
 SSM_VERSION=$(jq -r .ssm_version $PROJECT_CONFIG)
-ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+if [[ "$ENV" == 'prod' ]]; then
+	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
+else
+	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+fi
 PARAMS=$(jq -r "[$PROJECT_JSON_PROPERTY.params[]] | join (\" \")" $PROJECT_CONFIG)
 ENABLE_API_AUTH=$(jq -r .enable_api_auth $PROJECT_CONFIG)
 ENABLE_NOTIFICATIONS=$(jq -r .enable_notifications $PROJECT_CONFIG)

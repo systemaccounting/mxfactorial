@@ -17,7 +17,11 @@ done
 
 PROJECT_CONF=project.json
 TFSTATE_ENV_ID=infrastructure/terraform/env-id/terraform.tfstate
-ENV_ID=$(jq -r '.outputs.env_id.value' $TFSTATE_ENV_ID)
+if [[ "$ENV" == 'prod' ]]; then
+	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
+else
+	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+fi
 APP_NAME=go-migrate # todo: convert to list populated from project.json
 LAYER_NAME_SUFFIX=$(jq -r ".apps.\"$APP_NAME\".terraform.aws.layer_name_suffix" $PROJECT_CONF)
 LAYER_NAME="$ENV_ID-$ENVIRONMENT-$LAYER_NAME_SUFFIX"

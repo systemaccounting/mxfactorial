@@ -8,7 +8,7 @@ data "aws_route53_zone" "default" {
 }
 
 resource "aws_s3_bucket" "www_mxfactorial_client" {
-  bucket = "www-mxfactorial-client-prod"
+  bucket = "www-${local.ORIGIN_PREFIX}-${local.ID_ENV}"
 
   website {
     # aws parses https prefix and bucket name when creating redirect rule
@@ -66,7 +66,7 @@ resource "aws_cloudfront_distribution" "www_s3_client_distribution" {
 
   viewer_certificate {
     // https://github.com/terraform-providers/terraform-provider-aws/issues/2418#issuecomment-371192507
-    acm_certificate_arn = data.terraform_remote_state.aws_init_prod.outputs.client_www_cert
+    acm_certificate_arn = aws_acm_certificate_validation.client_www_cert.certificate_arn
     ssl_support_method  = "sni-only"
   }
 }

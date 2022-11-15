@@ -28,7 +28,11 @@ done
 PROJECT_CONFIG=project.json
 ARTIFACT_BUCKET_NAME_PREFIX=$(jq -r ".artifacts_bucket_name_prefix" $PROJECT_CONFIG)
 ARTIFACT_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
-ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+if [[ "$ENV" == 'prod' ]]; then
+	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
+else
+	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+fi
 
 ETAG=$(aws s3api put-object \
 	--bucket="$ARTIFACT_BUCKET_NAME_PREFIX-$ENV_ID-$ENVIRONMENT" \
@@ -36,6 +40,6 @@ ETAG=$(aws s3api put-object \
 	--body="$PWD/$ARTIFACT_FILE_PATH/$ARTIFACT_NAME" \
 	--region=$REGION \
 	--output=text \
-	| awk '{print $1}')
+	| xargs)
 
 echo "*** pushed $ARTIFACT_NAME artifact with ETag: $ETAG"
