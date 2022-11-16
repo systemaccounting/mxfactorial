@@ -114,9 +114,6 @@ sync:
 	@$(MAKE) -s test-env-arg
 	aws s3 sync $(BUILD_DIR)/ s3://$(ORIGIN_BUCKET) --delete
 
-ya:
-	@echo $(ORIGIN_BUCKET)
-
 # https://stackoverflow.com/a/58451831
 empty-cache:
 	@$(MAKE) -s test-env-arg
