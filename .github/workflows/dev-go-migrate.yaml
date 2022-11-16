@@ -28,5 +28,5 @@ jobs:
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} make put-object ENV=dev
         working-directory: migrations/go-migrate
       - name: deploy
-        run: run: ENV_ID=${{ secrets.DEV_ENV_ID }} make update-function ENV=dev
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make update-function ENV=dev
         working-directory: migrations/go-migrate
