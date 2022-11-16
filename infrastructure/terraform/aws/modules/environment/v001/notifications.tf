@@ -117,8 +117,8 @@ resource "aws_apigatewayv2_route_response" "default" {
 }
 
 resource "aws_iam_policy" "wss" {
-  name        = "allow-wss-stack-access-${var.env}"
-  description = "allows lambda websocket stack perms in ${var.env}"
+  name        = "${local.ID_ENV}-allow-wss-stack-access"
+  description = "allows lambda websocket stack perms in ${local.SPACED_ID_ENV}"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
