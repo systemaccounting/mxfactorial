@@ -6,7 +6,9 @@ ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT
 ifeq (prod,$(ENV))
   ENV_ID=$(shell jq -r '.terraform.prod.env_id' $(PROJECT_CONF))
 else
-  ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
+ifndef ENV_ID
+ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
+endif
 endif
 ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
 ENABLE_AUTH=$(shell jq -r '.enable_api_auth' $(PROJECT_CONF))

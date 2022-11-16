@@ -21,8 +21,8 @@ jobs:
       - name: install dependencies
         run: make install
         working-directory: client
-      - name: create .env from secrets manager
-        run: make get-secrets ENV=dev
+      - name: create .env
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make get-secrets ENV=dev
         working-directory: client
       - name: build bundle
         run: make build
