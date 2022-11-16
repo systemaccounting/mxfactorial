@@ -28,8 +28,8 @@ jobs:
         run: make build
         working-directory: client
       - name: sync build to s3
-        run: make sync ENV=dev
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make sync ENV=dev
         working-directory: client
       - name: empty cache
-        run: make empty-cache ENV=dev
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make empty-cache ENV=dev
         working-directory: client

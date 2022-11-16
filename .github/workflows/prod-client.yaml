@@ -22,14 +22,14 @@ jobs:
         run: make install
         working-directory: client
       - name: create .env from secrets manager
-        run: make get-secrets ENV=prod
+        run: ENV_ID=${{ secrets.PROD_ENV_ID }} make get-secrets ENV=prod
         working-directory: client
       - name: build bundle
         run: make build
         working-directory: client
       - name: sync build to s3
-        run: make sync ENV=prod
+        run: ENV_ID=${{ secrets.PROD_ENV_ID }} make sync ENV=prod
         working-directory: client
       - name: empty cache
-        run: make empty-cache ENV=prod
+        run: ENV_ID=${{ secrets.PROD_ENV_ID }} make empty-cache ENV=prod
         working-directory: client

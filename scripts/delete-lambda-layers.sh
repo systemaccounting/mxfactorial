@@ -17,9 +17,9 @@ done
 
 PROJECT_CONF=project.json
 TFSTATE_ENV_ID=infrastructure/terraform/env-id/terraform.tfstate
-if [[ "$ENV" == 'prod' ]]; then
+if [[ "$ENV" == 'prod' ]]; then # use configured prod env id
 	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
-else
+elif [[ -z "$ENV_ID" ]]; then # use env id from terraform if not in environment
 	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
 fi
 APP_NAME=go-migrate # todo: convert to list populated from project.json

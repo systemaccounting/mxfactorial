@@ -28,5 +28,5 @@ jobs:
         run: make zip
         working-directory: services/request-by-id
       - name: deploy to dev
-        run: make deploy-only ENV=dev
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make deploy-only ENV=dev
         working-directory: services/request-by-id

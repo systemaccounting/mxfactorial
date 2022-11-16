@@ -31,9 +31,9 @@ fi
 
 SECRETS=$(jq -r "[$PROJECT_JSON_PROPERTY.secrets[]] | join (\" \")" $PROJECT_CONFIG)
 SSM_VERSION=$(jq -r .ssm_version $PROJECT_CONFIG)
-if [[ "$ENV" == 'prod' ]]; then
+if [[ "$ENV" == 'prod' ]]; then # use configured prod env id
 	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
-else
+elif [[ -z "$ENV_ID" ]]; then # use env id from terraform if not in environment
 	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
 fi
 PARAMS=$(jq -r "[$PROJECT_JSON_PROPERTY.params[]] | join (\" \")" $PROJECT_CONFIG)

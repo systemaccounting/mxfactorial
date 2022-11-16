@@ -20,4 +20,4 @@ jobs:
       - uses: actions/checkout@v1
       - name: deploy
         working-directory: services/rules
-        run: make deploy ENV=prod
+        run: ENV_ID=${{ secrets.PROD_ENV_ID }} make deploy ENV=prod

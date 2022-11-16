@@ -26,15 +26,15 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONFIG=project.json
-if [[ "$ENV" == 'prod' ]]; then
+if [[ "$ENV" == 'prod' ]]; then # use configured prod env id
 	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
-else
+elif [[ -z "$ENV_ID" ]]; then # use env id from terraform if not in environment
 	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
 fi
 ARTIFACT_BUCKET_NAME_PREFIX=$(jq -r ".artifacts_bucket_name_prefix" $PROJECT_CONFIG)
 ARTIFACT_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
-LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_prefix" $PROJECT_CONFIG)
-LAMBDA_NAME="$LAMBDA_NAME_PREFIX-$ENV_ID-$ENVIRONMENT"
+LAMBDA_NAME_SUFFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_suffix" $PROJECT_CONFIG)
+LAMBDA_NAME="$ENV_ID-$ENVIRONMENT-$LAMBDA_NAME_SUFFIX"
 
 MOD=$(aws lambda update-function-code \
 		--function-name="$LAMBDA_NAME" \
