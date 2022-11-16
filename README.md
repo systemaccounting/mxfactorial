@@ -8,8 +8,7 @@ a payment application intended for deployment by the united states treasury that
 systemaccounting optimizes the flow of capital by expediting the discovery of economic opportunity through physics and data science. dashboarding real-time business performance within an equally-accessible space spanned by a metric not only maximizes capital's throughput between investors and entrepreneurs, it also transparently benchmarks lending rates between borrowers and lenders. in addition to eliminating interest rate manipulation by central commitees, systemaccounting solves monetary inflation and systemic default risk through its practice of cross-user, double-entry accounting. by recording transactions as conserved quantites, user equity remains separate and protected from the liability produced by government-chartered lending firms
 
 ### content
-[economic policy as code](https://www.youtube.com/watch?v=sN3kh-nv-68&list=PLWTZbGMyrdcWhfa-VNOEOFB0b6t3wX22T
-) video series  
+[economic policy as code](https://mxfactorial.video/) video series  
 
 ### faqs
 **q.** is this a "cryptocurrency"?  
