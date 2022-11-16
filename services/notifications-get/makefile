@@ -5,9 +5,7 @@ RELATIVE_PROJECT_ROOT_PATH=../..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 DIR_PATH=$(shell jq -r ".apps.\"$(APP_NAME)\".path" $(PROJECT_CONF))
-BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
-ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
-REGION=us-east-1
+REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
 

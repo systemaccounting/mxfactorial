@@ -8,7 +8,7 @@ resource "random_password" "referer" {
 resource "aws_s3_bucket_policy" "client_origin" {
   bucket = var.client_origin_bucket_name
   policy = jsonencode({
-    Id = "CloudFrontGetBucketObjects${title(var.env)}"
+    Id = "CloudFrontGetBucketObjects${local.TITLED_ID_ENV}"
     Statement = [
       {
         Action = [
@@ -20,10 +20,10 @@ resource "aws_s3_bucket_policy" "client_origin" {
           AWS = "*"
         }
         Resource = "arn:aws:s3:::${var.client_origin_bucket_name}/*"
-        Sid      = "AllowCloudFrontGetS3Object${title(var.env)}"
+        Sid      = "AllowCloudFrontGetS3Object${local.TITLED_ID_ENV}"
         Condition = {
           StringLike = {
-              "aws:Referer": random_password.referer.result
+            "aws:Referer" : random_password.referer.result
           }
         }
       }

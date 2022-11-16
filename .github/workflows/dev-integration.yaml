@@ -26,7 +26,7 @@ jobs:
         run: make install
         working-directory: test
       - name: create .env file
-        run: make get-secrets ENV=dev
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make get-secrets ENV=dev
         working-directory: test
       - name: integration tests
         run: make test ENV=dev

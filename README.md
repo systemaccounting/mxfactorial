@@ -72,22 +72,20 @@ this project intends to exploit the software engineering community's familiarity
 private, receiving added value is sustained & acknowledged by sending value
 
 ### contribute
-* to contribute code, negotiate rates in new or existing issues, fork, ***b***uild ***y***our ***o***wn ***e***nvironment, then send pull requests  
+* to contribute code, negotiate rates in new or existing issues, fork, build your environment, then send pull requests  
 * supporters preferring to contribute funds may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page
 
 ### byoe development
 1. `git clone https://github.com/systemaccounting/mxfactorial`, or fork and git clone
-1. install project dependencies listed under root `install` makefile target
-1. set s3 bucket names in root `project.json` to unused values
-1. add logging permissions to us-east-1 api gateway with `cd infrastructure/terraform/aws/environments/us-east-1 && terraform init && terraform apply`
-1. create artifact and origin buckets by duplicating and customizing resources in `infrastructure/terraform/aws/environments/init-dev` as new `./init-stg` directory, i.e. duplicate `main.tf` and `storage.tf` from `./init-dev` in new `./init-stg` directory, customize, then `cd infrastructure/terraform/aws/environments/init-stg && terraform init && terraform apply`
-1. from project root, build and push all artifacts to s3 with `make all CMD=initial-deploy ENV=stg`
-1. create infrastructure by duplicating and customizing resources in `infrastructure/terraform/aws/environments/dev` as new `./stg` directory, then `cd infrastructure/terraform/aws/environments/stg && terraform init && terraform apply`
-1. deploy migrations to new environment rds with `cd migrations && make resetrds ENV=stg`
-1. deploy client with `cd client && make deploy ENV=stg`
-1. from project root, `make get-secrets ENV=stg` to store newly created `CLIENT_URI` and `GRAPHQL_URI` values in root `.env` file for manual testing in browser
-1. from project root, `make test ENV=stg` to create `.env` file in `./test` directory and run integration tests
-1. OPTIONAL: `make all CMD=deploy ENV=stg` from project root to redeploy all services
+1. `git checkout -b feature-branch`
+1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, e.g. `https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/feature-branch`
+1. follow prompts to build infrastructure and deploy application code to aws, or ***b***uild ***y***our ***o***wn ***e***nvironment
+1. `make test ENV=dev` in project root to test creating a transaction request and approval
+1. `make get-secrets ENV=dev` in project root to create an `.env` file with the `CLIENT_URI` and `GRAPHQL_URI` variables
+1. navigate to `CLIENT_URI` and `GRAPHQL_URI` in a browser to view the web client and graphiql explorer
+1. import `services/graphql/postman/graphql.postman_collection.json` into postman and set the `GRAPHQL_URI` environment variable to test the api, e.g. `graphql/balance`
+1. `make delete-dev` to tear down cloud environment
+1. delete gitpod workspace in browser ui
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:

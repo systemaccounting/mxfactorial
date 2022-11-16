@@ -1,5 +1,6 @@
 resource "aws_cloudfront_distribution" "s3_client_distribution" {
-  comment = "${var.env} domain cache"
+  count   = var.build_db_and_cache ? 1 : 0 // false during terraform development
+  comment = "client cache for ${local.SPACED_ID_ENV}"
 
   origin {
     domain_name = "${var.client_origin_bucket_name}.s3-website-${data.aws_region.current.name}.amazonaws.com"
@@ -13,13 +14,13 @@ resource "aws_cloudfront_distribution" "s3_client_distribution" {
     }
 
     custom_header {
-      name = "Referer"
+      name  = "Referer"
       value = random_password.referer.result
     }
   }
 
-  enabled         = true
-  aliases         = var.custom_domain_name == "" ? null : [
+  enabled = true
+  aliases = var.custom_domain_name == "" ? null : [
     var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}"
   ]
   is_ipv6_enabled = true

@@ -8,8 +8,8 @@ data "aws_s3_bucket_object" "rules" {
 }
 
 resource "aws_lambda_function" "rules" {
-  function_name     = "${local.RULES}-${var.env}"
-  description       = "${local.RULES} service in ${var.env}"
+  function_name     = "${local.ID_ENV}-${local.RULES}"
+  description       = "${local.RULES} service in ${local.SPACED_ID_ENV}"
   s3_bucket         = data.aws_s3_bucket_object.rules.bucket
   s3_key            = data.aws_s3_bucket_object.rules.key
   s3_object_version = data.aws_s3_bucket_object.rules.version_id
@@ -33,14 +33,14 @@ resource "aws_cloudwatch_log_group" "rules" {
 }
 
 resource "aws_iam_role" "rules" {
-  name               = "${local.RULES}-role-${var.env}"
+  name               = "${local.ID_ENV}-${local.RULES}-role"
   assume_role_policy = data.aws_iam_policy_document.rules_trust_policy.json
 }
 
 data "aws_iam_policy_document" "rules_trust_policy" {
   version = "2012-10-17"
   statement {
-    sid    = "${replace(title(local.RULES), "-", "")}LambdaTrustPolicy${title(var.env)}"
+    sid    = "${replace(title(local.RULES), "-", "")}LambdaTrustPolicy${local.TITLED_ID_ENV}"
     effect = "Allow"
     actions = [
       "sts:AssumeRole",
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "rules_trust_policy" {
 }
 
 resource "aws_iam_role_policy" "rules_policy" {
-  name   = "${local.RULES}-policy-${var.env}"
+  name   = "${local.ID_ENV}-${local.RULES}-policy"
   role   = aws_iam_role.rules.id
   policy = data.aws_iam_policy_document.rules_policy.json
 }
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "rules_policy" {
   version = "2012-10-17"
 
   statement {
-    sid = "${replace(title(local.RULES), "-", "")}LambdaLoggingPolicy${title(var.env)}"
+    sid = "${replace(title(local.RULES), "-", "")}LambdaLoggingPolicy${local.TITLED_ID_ENV}"
     actions = [
       "logs:CreateLogGroup",
       "logs:CreateLogStream",

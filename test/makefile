@@ -4,7 +4,7 @@ RELATIVE_PROJECT_ROOT_PATH=..
 REGION=us-east-1
 
 install:
-	if ! [[ -d node_modules ]]; then npm install; fi
+	if ! [ -d node_modules ]; then npm install; fi
 
 .PHONY: test
 test:

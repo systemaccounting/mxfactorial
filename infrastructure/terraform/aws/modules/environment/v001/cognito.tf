@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_cognito_user_pool" "pool" {
-  name = "mxfactorial-${var.env}"
+  name = "${local.ID_ENV}-mxfactorial"
 
   lambda_config {
     pre_sign_up = module.auto_confirm.lambda_arn
@@ -267,7 +267,7 @@ resource "aws_cognito_user_pool" "pool" {
 }
 
 resource "aws_cognito_user_pool_client" "client" {
-  name = "mxfactorial-client-${var.env}"
+  name = "${local.ID_ENV}-mxfactorial-client"
 
   user_pool_id        = aws_cognito_user_pool.pool.id
   explicit_auth_flows = ["ADMIN_NO_SRP_AUTH", "USER_PASSWORD_AUTH"]
@@ -316,11 +316,8 @@ resource "aws_cognito_user_pool_client" "client" {
 }
 
 resource "aws_ssm_parameter" "cognito_jwks_uri" {
-  name        = "/${var.env}/${var.ssm_version}/auth/cognito/jwks/uri"
-  description = "json web key REST resource in ${var.env}"
+  name        = "/${var.ssm_prefix}/auth/cognito/jwks/uri"
+  description = "json web key REST resource in ${local.TITLED_ID_ENV} project"
   type        = "SecureString"
   value       = local.COGNITO_JWKS_URI
-  tags = {
-    env = var.env
-  }
 }

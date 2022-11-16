@@ -25,10 +25,10 @@ jobs:
         run: make test-unit
         working-directory: services/rules
       - name: deploy to dev
-        run: make deploy ENV=dev
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make deploy ENV=dev
         working-directory: services/rules
-      - name: build .env file from secrets manager
-        run: make get-secrets ENV=dev
+      - name: create .env file
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make get-secrets ENV=dev
         working-directory: services/rules
       - name: integration tests
         run: make test-integration ENV=dev

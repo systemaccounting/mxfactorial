@@ -3,13 +3,18 @@ RELATIVE_PROJECT_ROOT_PATH=..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT_CONF))
-ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV)
+ifeq (prod,$(ENV))
+  ENV_ID=$(shell jq -r '.terraform.prod.env_id' $(PROJECT_CONF))
+else
+  ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
+endif
+ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
 ENABLE_AUTH=$(shell jq -r '.enable_api_auth' $(PROJECT_CONF))
 SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
 BUILD_DIR=$(CURDIR)/public
 DEPS_DIR=$(CURDIR)/node_modules
-REGION=us-east-1
+REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 
 ENV_FILE=$(CURDIR)/.env
 PARAMS=$(shell jq -r '.apps.client.params[]' $(PROJECT_CONF))
@@ -73,7 +78,7 @@ $(ENV_VARS):
 	elif [ $@ = SECRET ]; then \
 		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
 		SECRET=$$(aws ssm get-parameter \
-			--name /$(ENV)/$(SSM_VERSION)/$$PARAM_NAME \
+			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
 			--query 'Parameter.Value' \
 			--with-decryption \
 			--region $(REGION) \
@@ -82,7 +87,7 @@ $(ENV_VARS):
 	else \
 		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
 		ENV_VAR=$$(aws ssm get-parameter \
-			--name /$(ENV)/$(SSM_VERSION)/$$PARAM_NAME \
+			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
 			--query 'Parameter.Value' \
 			--with-decryption \
 			--region $(REGION) \
@@ -107,16 +112,20 @@ sync:
 	@$(MAKE) -s test-env-arg
 	aws s3 sync $(BUILD_DIR)/ s3://$(ORIGIN_BUCKET) --delete
 
+ya:
+	@echo $(ORIGIN_BUCKET)
+
+# https://stackoverflow.com/a/58451831
 empty-cache:
 	@$(MAKE) -s test-env-arg
 	@CACHE_ID=$$(aws cloudfront list-distributions --output text \
-		--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`$(ORIGIN_BUCKET)`][].Id'); \
+		--query 'sort_by(DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`$(ORIGIN_BUCKET)`], &LastModifiedTime)[-1].Id'); \
 	aws configure set preview.cloudfront true; \
 	echo 'emptying cache'; \
 	aws cloudfront create-invalidation --distribution-id $$CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 ifeq ($(ENV), prod)
 	@WWW_CACHE_ID=$$(aws cloudfront list-distributions --output text \
-	--query 'DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-$(ORIGIN_BUCKET)`][].Id'); \
+	--query 'sort_by(DistributionList.Items[?DefaultCacheBehavior.TargetOriginId==`www-$(ORIGIN_BUCKET)`], &LastModifiedTime)[-1].Id'); \
 	echo 'emptying www cache'; \
 	aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 endif

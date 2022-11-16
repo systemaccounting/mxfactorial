@@ -1,18 +1,24 @@
 APP_NAME = go-migrate
 ARTIFACT_NAME = $(APP_NAME)-src.zip
-LAMBDA_NAME = $(APP_NAME)-$(ENV)
 RELATIVE_PROJECT_ROOT_PATH=../..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
+ifeq (prod,$(ENV))
+  ENV_ID=$(shell jq -r '.terraform.prod.env_id' $(PROJECT_CONF))
+else
+  ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
+endif
+LAMBDA_NAME=$(ENV_ID)-$(ENV)-$(APP_NAME)
+ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
-ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 RUNTIME=provided
-REGION = us-east-1
+REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 TMP_MIGRATE_REPO_DIR=./build
 MIGRATE_BINARY_NAME=migrate.linux-amd64
 PSQL_LAMBDA_ARCHIVE=psql11-lambda.zip
 LAMBDA_LAYER_ARCHIVE=$(APP_NAME)-layer.zip
+LAMBDA_LAYER_NAME=$(ENV_ID)-$(ENV)-$(APP_NAME)-$(RUNTIME)-deps
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
 # from https://github.com/golang-migrate/migrate/blob/master/Makefile to avoid building for every os
 DATABASE ?= postgres mysql redshift cassandra spanner cockroachdb clickhouse mongodb sqlserver firebird neo4j pgx
@@ -27,7 +33,7 @@ ifndef ENV
 endif
 
 test-docker-availability:
-	@docker version > /dev/null 2>&1; if [[ $$? -ne 0 ]]; then echo "\033[1;31mdocker required. start docker \033[0m"; fi
+	@docker version > /dev/null 2>&1; if [ $$? -ne 0 ]; then echo "\033[1;31mdocker required. start docker \033[0m"; fi
 
 ###################### dependencies ######################
 
@@ -37,16 +43,14 @@ install:
 
 ###################### build ######################
 
+# todo: set LD_LIBRARY_PATH in lambda to avoid bundling lib/*.so* with bin
 build:
 	$(MAKE) clean-layer
 	$(MAKE) clean-build-dir
 	git clone --depth 1 --single-branch --branch master https://github.com/golang-migrate/migrate.git $(TMP_MIGRATE_REPO_DIR)
-	-mkdir $(TMP_MIGRATE_REPO_DIR)/bin
-	-mkdir $(TMP_MIGRATE_REPO_DIR)/lib
 	(cd $(TMP_MIGRATE_REPO_DIR)/cmd/migrate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o ../../bin/$(MIGRATE_BINARY_NAME) -ldflags='-X main.Version=$(VERSION) -extldflags "-static"' -tags '$(DATABASE) $(SOURCE)' .)
 	$(MAKE) build-psql
-	unzip $(TMP_MIGRATE_REPO_DIR)/$(PSQL_LAMBDA_ARCHIVE) -d $(TMP_MIGRATE_REPO_DIR)/bin
-	(mv $(TMP_MIGRATE_REPO_DIR)/bin/*.so* $(TMP_MIGRATE_REPO_DIR)/lib)
+	(cd $(TMP_MIGRATE_REPO_DIR); unzip $(PSQL_LAMBDA_ARCHIVE); mv lib/*.so* bin)
 
 build-layer:
 	$(MAKE) clean
@@ -139,8 +143,8 @@ put-layer:
 update-lambda-layer:
 	@$(MAKE) -s test-env-arg
 	@LAYER_VERSION_ARN=$$(aws lambda publish-layer-version \
-		--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
-		--description="$(APP_NAME) dependencies in $(ENV)" \
+		--layer-name=$(LAMBDA_LAYER_NAME) \
+		--description="$(ENV_ID) $(APP_NAME) dependencies in $(ENV)" \
 		--content=S3Bucket=$(ARTIFACT_BUCKET),S3Key=$(APP_NAME)-layer.zip \
 		--region=$(REGION) \
 		--query 'LayerVersionArn' \
@@ -151,19 +155,19 @@ update-lambda-layer:
 		--query='LastModified' \
 		--layers $$LAYER_VERSION_ARN $(BASH_LAYER_ARN); \
 	LAYER_VERSION=$$(echo $$LAYER_VERSION_ARN | cut -d ':' -f8); \
-	echo "*** updated lambda $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
+	echo "*** updated lambda $(LAMBDA_LAYER_NAME) layer as version $$LAYER_VERSION"
 
 publish-layer:
 	@$(MAKE) -s test-env-arg
 	@LAYER_VERSION_ARN=$$(aws lambda publish-layer-version \
-		--layer-name=$(APP_NAME)-$(RUNTIME)-deps-$(ENV) \
-		--description="$(APP_NAME) dependencies in $(ENV)" \
+		--layer-name=$(LAMBDA_LAYER_NAME) \
+		--description="$(APP_NAME) dependencies in $(ENV_ID) $(ENV)" \
 		--content=S3Bucket=$(ARTIFACT_BUCKET),S3Key=$(APP_NAME)-layer.zip \
 		--region=$(REGION) \
 		--query 'LayerVersionArn' \
 		--output=text | xargs); \
 	LAYER_VERSION=$$(echo $$LAYER_VERSION_ARN | cut -d ':' -f8); \
-	echo "*** published $(APP_NAME)-$(RUNTIME)-deps-$(ENV) layer as version $$LAYER_VERSION"
+	echo "*** published $(LAMBDA_LAYER_NAME) layer as version $$LAYER_VERSION"
 
 deploy:
 	@$(MAKE) -s test-env-arg

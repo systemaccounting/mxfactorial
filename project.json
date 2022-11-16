@@ -1,6 +1,7 @@
 {
     "artifacts_bucket_name_prefix": "mxfactorial-artifacts",
     "client_origin_bucket_name_prefix": "mxfactorial-client",
+    "tfstate_bucket_name_prefix": "mxfactorial-tfstate",
     "apps": {
         "graphql": {
             "runtime": "go1.x",
@@ -21,7 +22,7 @@
                 "LOCAL_ENV"
             ],
             "deploy": true,
-            "lambda_name_prefix": "graphql",
+            "lambda_name_suffix": "graphql",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": ".",
@@ -49,7 +50,7 @@
                 "ENABLE_NOTIFICATIONS"
             ],
             "deploy": true,
-            "lambda_name_prefix": "request-create",
+            "lambda_name_suffix": "request-create",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -68,7 +69,7 @@
                 "ENABLE_NOTIFICATIONS"
             ],
             "deploy": true,
-            "lambda_name_prefix": "request-approve",
+            "lambda_name_suffix": "request-approve",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -91,7 +92,7 @@
                 "AWS_REGION"
             ],
             "deploy": true,
-            "lambda_name_prefix": "rules",
+            "lambda_name_suffix": "rules",
             "lambda_invoke_log": "invoke.log",
             "executable_name": null,
             "build_src_path": null,
@@ -105,7 +106,7 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "request-by-id",
+            "lambda_name_suffix": "request-by-id",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -117,7 +118,7 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "requests-by-account",
+            "lambda_name_suffix": "requests-by-account",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -129,7 +130,7 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "transaction-by-id",
+            "lambda_name_suffix": "transaction-by-id",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -141,7 +142,7 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "transactions-by-account",
+            "lambda_name_suffix": "transactions-by-account",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -158,7 +159,7 @@
                 "AWS_REGION"
             ],
             "deploy": true,
-            "lambda_name_prefix": "notifications-send",
+            "lambda_name_suffix": "notifications-send",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -179,7 +180,7 @@
                 "ENABLE_API_AUTH"
             ],
             "deploy": true,
-            "lambda_name_prefix": "notifications-get",
+            "lambda_name_suffix": "notifications-get",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -198,7 +199,7 @@
                 "ENABLE_API_AUTH"
             ],
             "deploy": true,
-            "lambda_name_prefix": "notifications-clear",
+            "lambda_name_suffix": "notifications-clear",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -210,7 +211,7 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "balance-by-account",
+            "lambda_name_suffix": "balance-by-account",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -222,7 +223,7 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "wss-connect",
+            "lambda_name_suffix": "wss-connect",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -237,7 +238,7 @@
             ],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "auto-confirm",
+            "lambda_name_suffix": "auto-confirm",
             "lambda_invoke_log": "invoke.log",
             "executable_name": "index.handler",
             "build_src_path": "cmd",
@@ -264,11 +265,16 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "go-migrate",
+            "lambda_name_suffix": "go-migrate",
             "lambda_invoke_log": null,
             "executable_name": "index.sh",
             "build_src_path": null,
-            "dependents": []
+            "dependents": [],
+            "terraform": {
+                "aws": {
+                    "layer_name_suffix": "go-migrate-provided-deps"
+                }
+            }
         },
         "db-reset": {
             "runtime": "provided",
@@ -276,7 +282,7 @@
             "secrets": [],
             "params": [],
             "deploy": true,
-            "lambda_name_prefix": "db-reset",
+            "lambda_name_suffix": "db-reset",
             "lambda_invoke_log": null,
             "executable_name": "index.sh",
             "build_src_path": null,
@@ -288,7 +294,7 @@
             "secrets": [],
             "params": [],
             "deploy": false,
-            "lambda_name_prefix": null,
+            "lambda_name_suffix": null,
             "lambda_invoke_log": null,
             "executable_name": null,
             "build_src_path": null,
@@ -522,7 +528,26 @@
         "CLIENT_URI": "client/uri"
     },
     "region": "us-east-1",
-    "rds": {
-        "instance_name_prefix": "mxfactorial"
+    "gitpod": {
+        "iam_user": "mxgitpod",
+        "user_policy_arn": "arn:aws:iam::aws:policy/AdministratorAccess"
+    },
+    "terraform": {
+        "tfstate": {
+            "file_extension": "tfstate",
+            "file_name_suffix": {
+                "apigw_logging": "apigw_logging",
+                "env_infra": "env_infra"
+            }
+        },
+        "prod": {
+            "env_id": 0
+        },
+        "aws": {
+            "build_db_and_cache": true,
+            "rds": {
+                "instance_name_prefix": "mxfactorial"
+            }
+        }
     }
 }

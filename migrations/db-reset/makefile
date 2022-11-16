@@ -3,11 +3,9 @@ ARTIFACT_NAME=$(APP_NAME)-src.zip
 RELATIVE_PROJECT_ROOT_PATH=../..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
-ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV)
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 RUNTIME=provided
-REGION=us-east-1
+REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
 
 test-env-arg:

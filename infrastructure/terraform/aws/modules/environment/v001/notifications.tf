@@ -5,12 +5,12 @@ locals {
 }
 
 resource "aws_sns_topic" "notifications" {
-  name = "notifications-${var.env}"
+  name = "${local.ID_ENV}-notifications"
 }
 
 resource "aws_apigatewayv2_api" "notifications" {
-  name                       = "notifications-wss-${var.env}"
-  description                = "websocket in api in ${var.env}"
+  name                       = "${local.ID_ENV}-notifications-wss"
+  description                = "websocket in api in ${local.SPACED_ID_ENV}"
   protocol_type              = "WEBSOCKET"
   route_selection_expression = "$request.body.action"
 }
@@ -18,7 +18,7 @@ resource "aws_apigatewayv2_api" "notifications" {
 resource "aws_apigatewayv2_stage" "notifications" {
   api_id        = aws_apigatewayv2_api.notifications.id
   name          = var.env
-  description   = "wss api stage in ${var.env}"
+  description   = "wss api stage in ${local.SPACED_ID_ENV}"
   deployment_id = aws_apigatewayv2_deployment.notifications.id
   default_route_settings {
     throttling_rate_limit  = 10000
@@ -39,7 +39,7 @@ resource "aws_apigatewayv2_deployment" "notifications" {
   ]
 
   api_id      = aws_apigatewayv2_api.notifications.id
-  description = "wss notifications deployment in ${var.env}"
+  description = "wss notifications deployment in ${local.SPACED_ID_ENV}"
   triggers = {
     version = 3
   }
@@ -92,7 +92,7 @@ resource "aws_apigatewayv2_route" "default" {
 resource "aws_apigatewayv2_integration" "default" {
   api_id               = aws_apigatewayv2_api.notifications.id
   integration_type     = "MOCK"
-  description          = "returns error describing available actions in ${var.env}"
+  description          = "returns error describing available actions in ${local.SPACED_ID_ENV}"
   passthrough_behavior = "WHEN_NO_MATCH"
   request_templates = {
     "200" = "{\"statusCode\": 200}"
@@ -123,7 +123,7 @@ resource "aws_iam_policy" "wss" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "AllowAPIGatewayV2Invoke${title(var.env)}"
+        Sid = "AllowAPIGatewayV2Invoke${local.TITLED_ID_ENV}"
         Action = [
           "execute-api:ManageConnections",
           "execute-api:Invoke",
@@ -132,7 +132,7 @@ resource "aws_iam_policy" "wss" {
         Resource = "${aws_apigatewayv2_api.notifications.execution_arn}/${var.env}/*"
       },
       {
-        Sid = "ListCognitoUserPools${title(var.env)}"
+        Sid = "ListCognitoUserPools${local.TITLED_ID_ENV}"
         Action = [
           "cognito-idp:ListUserPools",
         ]
@@ -144,31 +144,22 @@ resource "aws_iam_policy" "wss" {
 }
 
 resource "aws_ssm_parameter" "apigw_connections_uri" {
-  name        = "/${var.env}/${var.ssm_version}/api/websocket/connections/uri"
-  description = "api gateway connections uri in ${var.env}"
+  name        = "/${var.ssm_prefix}/api/websocket/connections/uri"
+  description = "api gateway connections uri in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
   value       = local.APIGW_CONNECTIONS_URI
-  tags = {
-    env = var.env
-  }
 }
 
 resource "aws_ssm_parameter" "websocket_client_uri" {
-  name        = "/${var.env}/${var.ssm_version}/api/websocket/client/uri"
-  description = "api gateway websocket client uri in ${var.env}"
+  name        = "/${var.ssm_prefix}/api/websocket/client/uri"
+  description = "api gateway websocket client uri in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
   value       = local.WEBSOCKET_CLIENT_URI
-  tags = {
-    env = var.env
-  }
 }
 
 resource "aws_ssm_parameter" "notifications_return_limit" {
-  name        = "/${var.env}/${var.ssm_version}/notifications/return_limit"
-  description = "notifications return limit in ${var.env}"
+  name        = "/${var.ssm_prefix}/notifications/return_limit"
+  description = "notifications return limit in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
   value       = var.notifications_return_limit
-  tags = {
-    env = var.env
-  }
 }
