@@ -387,3 +387,11 @@ creates and deletes an aws iam user for gitpod
 ##### `delete-lambda-layers.sh`
 
 deletes lambda layer versions created by `build-dev-env.sh`
+
+##### `terraform-init-dev.sh`
+
+inits terraform state for dev envs
+
+##### `set-custom-env-id.sh`
+
+creates then sets custom env id to enable access to dev env from multiple workspaces

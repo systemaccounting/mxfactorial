@@ -12,6 +12,10 @@ locals {
   ID_ENV           = "${local.ENV_ID}-${local.ENV}"
 }
 
+terraform {
+  backend "s3" {} // override with scripts/terraform-init-dev.sh
+}
+
 provider "aws" {
   region = local.REGION
   default_tags {
