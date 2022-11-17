@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_sns_topic" "db_reset" {
-  name = "${local.DB_RESET}-${var.env_id}-${var.env}"
+  name = "${local.ID_ENV}-${local.DB_RESET}"
 }
 
 resource "aws_sns_topic_subscription" "sns_to_db_reset_lambda" {
