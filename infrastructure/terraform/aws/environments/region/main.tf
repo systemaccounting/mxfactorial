@@ -4,6 +4,10 @@ locals {
   ENV_ID       = jsondecode(file("../../../env-id/terraform.tfstate")).outputs.env_id.value
 }
 
+terraform {
+  backend "s3" {} // override with scripts/terraform-init-dev.sh
+}
+
 provider "aws" {
   region = local.REGION
 }
