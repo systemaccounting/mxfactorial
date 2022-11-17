@@ -9,7 +9,7 @@ BUILD_START_TIME=$(date +%s)
 ENVIRONMENT=dev
 PROJECT_CONFIG=project.json
 REGION=$(jq -r '.region' $PROJECT_CONFIG)
-BUCKET_PREFIX=$(jq -r '.tfstate_bucket_name_prefix' $PROJECT_CONFIG)
+TFSTATE_BUCKET_PREFIX=$(jq -r '.tfstate_bucket_name_prefix' $PROJECT_CONFIG)
 
 make env-id
 ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
@@ -32,17 +32,20 @@ terraform init
 printf "\n${YELLOW}*** provisioning artifact, cache origin and terraform state storage${NOCOLOR}\n\n"
 terraform apply
 
-pushd ../region
+popd
 
 function apply_agigw_logging_perm() {
 
-	terraform init \
-		-backend-config="bucket=$TFSTATE_BUCKET" \
-		-backend-config="key=$TFSTATE_APIGW" \
-		-backend-config="region=$REGION"
+	source ./scripts/terraform-init-dev.sh \
+		--key "$TFSTATE_APIGW" \
+		--dir infrastructure/terraform/aws/environments/region
+
+	pushd infrastructure/terraform/aws/environments/region
 
 	printf "\n${YELLOW}*** provisioning $ID_ENV api gateway logging permission and saving in $TFSTATE_APIGW${NOCOLOR}\n\n"
 	terraform apply
+
+	popd
 }
 
 APIGW_ACCT=$(aws apigateway get-account --region "$REGION")
@@ -68,18 +71,14 @@ else
 	apply_agigw_logging_perm
 fi
 
-# return to project root
-popd; popd;
-
 printf "\n${YELLOW}*** compiling app binaries and pushing to artifact bucket${NOCOLOR}\n\n"
 make --no-print-directory all CMD=initial-deploy ENV=dev
 
-pushd infrastructure/terraform/aws/environments/dev
+source ./scripts/terraform-init-dev.sh \
+	--key "$TFSTATE_ENV" \
+	--dir infrastructure/terraform/aws/environments/dev
 
-terraform init \
-    -backend-config="bucket=$TFSTATE_BUCKET" \
-    -backend-config="key=$TFSTATE_ENV" \
-    -backend-config="region=$REGION"
+pushd infrastructure/terraform/aws/environments/dev
 
 printf "\n${YELLOW}*** creating terraform plan for $ID_ENV infrastructure${NOCOLOR}\n\n"
 terraform plan -out $TFPLAN_FILE
