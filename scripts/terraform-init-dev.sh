@@ -6,7 +6,7 @@ if [[ "$#" -ne 4 ]]; then
 	cat <<- 'EOF'
 	use:
 	bash scripts/terraform-init-dev.sh \
-		--key env_infra.tsftate \
+		--key env_infra.tfstate \
 		--dir infrastructure/terraform/aws/environments/dev
 	EOF
 	exit 1

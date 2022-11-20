@@ -20,4 +20,5 @@ variable "client_cert_arn" { default = "" }
 variable "api_cert_arn" { default = "" }
 variable "ssm_prefix" {}
 variable "env_id" {}
-variable "build_db_and_cache" { type = bool }
+variable "build_db" { type = bool }
+variable "build_cache" { type = bool }

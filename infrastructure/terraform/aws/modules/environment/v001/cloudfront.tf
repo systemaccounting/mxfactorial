@@ -1,5 +1,5 @@
 resource "aws_cloudfront_distribution" "s3_client_distribution" {
-  count   = var.build_db_and_cache ? 1 : 0 // false during terraform development
+  count   = var.build_cache ? 1 : 0 // false during terraform development
   comment = "client cache for ${local.SPACED_ID_ENV}"
 
   origin {

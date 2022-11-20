@@ -8,6 +8,9 @@ SECRETS=$(shell jq '.secrets[]' $(PROJECT_CONF))
 ENV_VARS=$(SECRETS)
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
+TFSTATE_ENV_SUFFIX=$(shell jq -r '.terraform.tfstate.file_name_suffix' $(PROJECT_CONF))
+TFSTATE_FILE_EXT=$(shell jq -r '.terraform.tfstate.file_extension' $(PROJECT_CONF))
+TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_FILE_EXT)
 
 # approx 5 minutes
 all:
@@ -63,6 +66,17 @@ build-dev:
 
 delete-dev:
 	bash scripts/delete-dev-env.sh
+
+init-dev:
+	bash scripts/terraform-init-dev.sh \
+		--key $(TFSTATE_ENV_FILE) \
+		--dir infrastructure/terraform/aws/environments/dev
+
+new-iam:
+	bash scripts/manage-gitpod-iam.sh --new
+
+delete-iam:
+	bash scripts/manage-gitpod-iam.sh --delete
 
 init:
 	go mod init github.com/systemaccounting/mxfactorial

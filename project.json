@@ -274,6 +274,13 @@
                 "aws": {
                     "layer_name_suffix": "go-migrate-provided-deps"
                 }
+            },
+            "docker": {
+                "image": {
+                    "user": "mxfactorial",
+                    "repository": "go-migrate-lambda-layer",
+                    "tag_version": "v1"
+                }
             }
         },
         "db-reset": {
@@ -544,7 +551,8 @@
             "env_id": 0
         },
         "aws": {
-            "build_db_and_cache": true,
+            "build_db": true,
+            "build_cache": true,
             "rds": {
                 "instance_name_prefix": "mxfactorial"
             }
