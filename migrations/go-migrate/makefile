@@ -17,17 +17,14 @@ EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_
 RUNTIME=provided
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 TMP_MIGRATE_REPO_DIR=./build
-MIGRATE_BINARY_NAME=migrate.linux-amd64
-PSQL_LAMBDA_ARCHIVE=psql11-lambda.zip
 LAMBDA_LAYER_ARCHIVE=$(APP_NAME)-layer.zip
 LAMBDA_LAYER_NAME=$(ENV_ID)-$(ENV)-$(APP_NAME)-$(RUNTIME)-deps
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
-# from https://github.com/golang-migrate/migrate/blob/master/Makefile to avoid building for every os
-DATABASE ?= postgres mysql redshift cassandra spanner cockroachdb clickhouse mongodb sqlserver firebird neo4j pgx
-DATABASE_TEST ?= $(DATABASE) sqlite sqlcipher
-VERSION ?= $(shell git describe --tags 2>/dev/null | cut -c 2-)
-DOCKER_IMAGE_NAME=psql-lambda
-DOCKER_CONTAINER_NAME=$(DOCKER_IMAGE_NAME)
+DOCKER_USER=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.user" $(PROJECT_CONF))
+DOCKER_REPOSITORY=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.repository" $(PROJECT_CONF))
+DOCKER_TAG_VERSION=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.tag_version" $(PROJECT_CONF))
+DOCKER_IMAGE_NAME=$(DOCKER_USER)/$(DOCKER_REPOSITORY):$(DOCKER_TAG_VERSION)
+DOCKER_CONTAINER_NAME=go-migrate
 
 test-env-arg:
 ifndef ENV
@@ -45,26 +42,31 @@ install:
 
 ###################### build ######################
 
-# todo: set LD_LIBRARY_PATH in lambda to avoid bundling lib/*.so* with bin
-build:
+build-layer:
+	$(MAKE) test-docker-availability
+	$(MAKE) pull-or-build
+	$(MAKE) docker-copy
+
+pull-or-build:
 	$(MAKE) clean-layer
 	$(MAKE) clean-build-dir
-	git clone --depth 1 --single-branch --branch master https://github.com/golang-migrate/migrate.git $(TMP_MIGRATE_REPO_DIR)
-	(cd $(TMP_MIGRATE_REPO_DIR)/cmd/migrate && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o ../../bin/$(MIGRATE_BINARY_NAME) -ldflags='-X main.Version=$(VERSION) -extldflags "-static"' -tags '$(DATABASE) $(SOURCE)' .)
-	$(MAKE) build-psql
-	(cd $(TMP_MIGRATE_REPO_DIR); unzip $(PSQL_LAMBDA_ARCHIVE); mv lib/*.so* bin)
-
-build-layer:
-	$(MAKE) clean
-	$(MAKE) build
-	(cd $(TMP_MIGRATE_REPO_DIR); zip -r $(LAMBDA_LAYER_ARCHIVE) bin lib; mv $(LAMBDA_LAYER_ARCHIVE) ../)
-	$(MAKE) clean-build-dir
-
-build-psql:
 	$(MAKE) test-docker-availability
-	docker build --force-rm --progress=plain -t $(DOCKER_IMAGE_NAME) .
-	CONTAINER_ID=$$(docker create $(DOCKER_IMAGE_NAME) --name $(DOCKER_CONTAINER_NAME)); \
-	docker cp $$CONTAINER_ID:/tmp/$(PSQL_LAMBDA_ARCHIVE) $(TMP_MIGRATE_REPO_DIR)/$(PSQL_LAMBDA_ARCHIVE)
+	docker pull $(DOCKER_IMAGE_NAME) 2>/dev/null; \
+	if [ "$$?" -ne 0 ]; then \
+		docker build \
+			--force-rm \
+			--progress=plain \
+			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/go-migrate.Dockerfile \
+			-t $(DOCKER_IMAGE_NAME) . ; \
+	fi;
+
+push:
+	docker image push $(DOCKER_IMAGE_NAME)
+
+docker-copy:
+	$(MAKE) test-docker-availability
+	CONTAINER_ID=$$(docker create $(DOCKER_IMAGE_NAME) --name go-migrate); \
+	docker cp $$CONTAINER_ID:/tmp/$(LAMBDA_LAYER_ARCHIVE) $(LAMBDA_LAYER_ARCHIVE)
 
 zip:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
@@ -98,7 +100,7 @@ clean-containers:
 	docker ps -a | awk '{ print $$1,$$2 }' | grep $(DOCKER_IMAGE_NAME) | awk '{print $$1 }' | xargs -I {} docker rm {}
 
 clean-image:
-	-docker rmi $(DOCKER_IMAGE_NAME)
+	-docker rmi -f $(DOCKER_IMAGE_NAME)
 
 ###################### deploy ######################
 
