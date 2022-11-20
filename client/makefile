@@ -108,7 +108,9 @@ deploy:
 	$(MAKE) get-secrets
 	$(MAKE) build
 	$(MAKE) sync
+ifeq (true,$(shell jq -r '.terraform.aws.build_cache' $(PROJECT_CONF)))
 	$(MAKE) empty-cache
+endif
 
 sync:
 	@$(MAKE) -s test-env-arg
