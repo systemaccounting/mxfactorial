@@ -1,6 +1,17 @@
 #!/bin/bash
 
-set -e
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --force) FORCE=1; shift ;;
+        *) echo "unknown parameter passed: $1"; exit 1 ;;
+    esac
+	shift
+done
+
+
+if [[ ! "$FORCE" ]]; then
+	set -e
+fi
 
 YELLOW='\033[0;33m'
 NOCOLOR='\033[0m'
