@@ -46,7 +46,8 @@ module "prod" {
   env                   = local.ENV
   artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ID_ENV}"
   env_id                = local.ENV_ID
-  build_db_and_cache    = true
+  build_db              = true
+  build_cache           = true
 
   // OPTIONAL, comment or delete if unused:
   custom_domain_name = local.CUSTOM_DOMAIN
@@ -98,4 +99,3 @@ module "prod" {
   // OPTIONAL, comment or delete client_cert_arn if custom_domain_name unused:
   client_cert_arn = module.acm_certs_prod.client_cert // acm-certs module requires client subdomain = var.env
 }
-

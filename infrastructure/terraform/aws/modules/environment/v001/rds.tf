@@ -1,5 +1,5 @@
 resource "aws_db_instance" "postgres" {
-  count                               = var.build_db_and_cache ? 1 : 0 // false during terraform development
+  count                               = var.build_db ? 1 : 0 // false during terraform development
   identifier                          = var.rds_instance_name
   snapshot_identifier                 = var.db_snapshot_id
   allocated_storage                   = 20
@@ -35,11 +35,11 @@ resource "random_password" "pgpassword" {
 
 locals {
   POSTGRES_VARS = {
-    PGDATABASE = var.build_db_and_cache ? aws_db_instance.postgres[0].name : ""
-    PGHOST     = var.build_db_and_cache ? aws_db_instance.postgres[0].address : ""
-    PGPASSWORD = var.build_db_and_cache ? aws_db_instance.postgres[0].password : ""
-    PGPORT     = var.build_db_and_cache ? aws_db_instance.postgres[0].port : ""
-    PGUSER     = var.build_db_and_cache ? aws_db_instance.postgres[0].username : ""
+    PGDATABASE = var.build_db ? aws_db_instance.postgres[0].name : ""
+    PGHOST     = var.build_db ? aws_db_instance.postgres[0].address : ""
+    PGPASSWORD = var.build_db ? aws_db_instance.postgres[0].password : ""
+    PGPORT     = var.build_db ? aws_db_instance.postgres[0].port : ""
+    PGUSER     = var.build_db ? aws_db_instance.postgres[0].username : ""
   }
 }
 

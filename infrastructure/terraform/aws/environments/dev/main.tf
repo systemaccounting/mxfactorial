@@ -35,7 +35,8 @@ module "dev" {
   env                   = local.ENV
   artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ID_ENV}"
   env_id                = local.ENV_ID
-  build_db_and_cache    = local.PROJECT_JSON.terraform.aws.build_db_and_cache // false during terraform development
+  build_db              = local.PROJECT_JSON.terraform.aws.build_db    // false during terraform development
+  build_cache           = local.PROJECT_JSON.terraform.aws.build_cache // false during terraform development
 
   ############### ssm ###############
 
