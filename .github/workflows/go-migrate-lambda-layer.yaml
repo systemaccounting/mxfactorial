@@ -1,0 +1,25 @@
+name: go-migrate-lambda-layer
+
+on:
+  push:
+    paths:
+    - 'docker/go-migrate.Dockerfile'
+
+jobs:
+  deploy:
+    name: deploy go-migrate lambda layer image
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: mxfactorial/go-migrate-lambda-layer:v1
+      CI: true
+    steps:
+      - uses: actions/checkout@v3
+      - name: docker login
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u mxfactorial --password-stdin
+        working-directory: docker
+      - name: docker build
+        run: docker build -f go-migrate.Dockerfile -t "$IMAGE_NAME" .
+        working-directory: docker
+      - name: docker push
+        run: docker image push "$IMAGE_NAME"
+        working-directory: docker
