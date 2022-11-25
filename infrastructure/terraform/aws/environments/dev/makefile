@@ -8,10 +8,10 @@ TFSTATE_ENV=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_EXT)
 ### arg test
 test-env-id-arg:
 ifndef ENV_ID
-	$(error trailing ENV_ID assignment missing, e.g. make init ENV_ID=12345)
+	$(error trailing ENV_ID assignment missing, e.g. make resume ENV_ID=12345)
 endif
 
-init:
+resume:
 	@$(MAKE) -s test-env-id-arg
 	cd $(RELATIVE_PROJECT_ROOT_PATH); \
 		bash scripts/set-custom-env-id.sh \
