@@ -18,7 +18,7 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 resource "aws_lambda_function" "default" {
-  function_name     = "${local.ID_ENV}-${var.service_name}"
+  function_name     = "${var.service_name}-${local.ID_ENV}"
   description       = "${var.service_name} lambda service in ${local.SPACED_ID_ENV}"
   s3_bucket         = data.aws_s3_bucket_object.default.bucket
   s3_key            = data.aws_s3_bucket_object.default.key
@@ -39,7 +39,7 @@ resource "aws_cloudwatch_log_group" "default" {
 }
 
 resource "aws_iam_role" "default" {
-  name = "${local.ID_ENV}-${var.service_name}-lambda"
+  name = "${var.service_name}-lambda-${local.ID_ENV}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -56,7 +56,7 @@ resource "aws_iam_role" "default" {
 }
 
 resource "aws_iam_policy" "default" {
-  name        = "${local.ID_ENV}-${var.service_name}-lambda-logging"
+  name        = "${var.service_name}-lambda-logging-${local.ID_ENV}"
   description = "${aws_lambda_function.default.function_name} logging permission in ${local.SPACED_ID_ENV}"
   policy = jsonencode({
     Version = "2012-10-17"

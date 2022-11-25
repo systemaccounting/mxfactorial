@@ -17,7 +17,7 @@ module "request_create" {
 }
 
 resource "aws_iam_policy" "invoke_rules" {
-  name        = "${local.ID_ENV}-allow-rules-invoke"
+  name        = "allow-rules-invoke-${local.ID_ENV}"
   description = "added perms for request-create lambda in ${local.SPACED_ID_ENV}"
   policy = jsonencode({
     Version = "2012-10-17"

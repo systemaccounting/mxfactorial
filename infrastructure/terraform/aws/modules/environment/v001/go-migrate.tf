@@ -4,7 +4,7 @@ data "aws_s3_bucket_object" "go_migrate" {
 }
 
 resource "aws_lambda_function" "go_migrate" {
-  function_name     = "${local.ID_ENV}-go-migrate"
+  function_name     = "go-migrate-${local.ID_ENV}"
   description       = "go migrate tool in ${local.SPACED_ID_ENV}"
   s3_bucket         = data.aws_s3_bucket_object.go_migrate.bucket
   s3_key            = data.aws_s3_bucket_object.go_migrate.key
@@ -25,7 +25,7 @@ resource "aws_lambda_function" "go_migrate" {
 }
 
 data "aws_lambda_layer_version" "go_migrate" {
-  layer_name = "${local.ID_ENV}-${local.GO_MIGRATE_LAYER_SUFFIX}"
+  layer_name = "${local.GO_MIGRATE_LAYER_SUFFIX}-${local.ID_ENV}"
 }
 
 data "aws_s3_bucket_object" "go_migrate_layer" {
@@ -39,7 +39,7 @@ resource "aws_cloudwatch_log_group" "go_migrate" {
 }
 
 resource "aws_iam_role" "go_migrate" {
-  name = "${local.ID_ENV}-go-migrate-role"
+  name = "go-migrate-role-${local.ID_ENV}"
 
   assume_role_policy = <<EOF
 {
@@ -60,7 +60,7 @@ EOF
 
 # allow function to create logs and access rds
 resource "aws_iam_role_policy" "go_migrate_policy" {
-  name = "${local.ID_ENV}-go-migrate-policy"
+  name = "go-migrate-policy-${local.ID_ENV}"
   role = aws_iam_role.go_migrate.id
 
   policy = data.aws_iam_policy_document.go_migrate_policy.json
