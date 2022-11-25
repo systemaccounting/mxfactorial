@@ -41,6 +41,7 @@ if [[ "$IS_IN_PROJECT_JSON" == 'false' ]]; then
 	exit 1
 fi
 
+# todo: add env-id
 DDB_TABLE_NAME_PREFIX=$(jq -r '.github_workflows.dynamodb_table.name_prefix' $PROJECT_CONFIG)
 DDB_TABLE="${DDB_TABLE_NAME_PREFIX}-${ENVIRONMENT}"
 DDB_TABLE_HASH_KEY=$(jq -r '.github_workflows.dynamodb_table.hash_key' $PROJECT_CONFIG)
