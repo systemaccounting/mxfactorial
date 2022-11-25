@@ -26,8 +26,13 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONFIG=project.json
-LAMBDA_NAME_SUFFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_suffix" $PROJECT_CONFIG)
-LAMBDA_NAME="$LAMBDA_NAME_SUFFIX-$ENVIRONMENT"
+if [[ "$ENV" == 'prod' ]]; then # use configured prod env id
+	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
+elif [[ -z "$ENV_ID" ]]; then # use env id from terraform if not in environment
+	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+fi
+LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_prefix" $PROJECT_CONFIG)
+LAMBDA_NAME="$LAMBDA_NAME_PREFIX-$ENV_ID-$ENVIRONMENT"
 LAMBDA_INVOKE_LOG_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
 LAMBDA_INVOKE_LOG_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".lambda_invoke_log" $PROJECT_CONFIG)
 LAMBDA_INVOKE_LOG="$LAMBDA_INVOKE_LOG_FILE_PATH/$LAMBDA_INVOKE_LOG_FILE_NAME"
