@@ -395,3 +395,7 @@ inits terraform state for dev envs
 ##### `set-custom-env-id.sh`
 
 creates then sets custom env id to enable access to dev env from multiple workspaces
+
+##### `delete-dev-storage.sh`
+
+deletes storage for cloud dev environment with aws cli instead of terraform when state file not found, e.g. cloud dev env storage was created on different machine

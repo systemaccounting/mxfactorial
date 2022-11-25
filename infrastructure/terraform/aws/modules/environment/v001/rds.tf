@@ -45,7 +45,7 @@ locals {
 
 ########## Create security group for RDS ##########
 resource "aws_security_group" "postgres" {
-  name        = "${local.ID_ENV}-db-sec-grp"
+  name        = "db-sec-grp-${local.ID_ENV}"
   description = "internal postgres access"
   vpc_id      = data.aws_vpc.default.id
 }

@@ -8,7 +8,7 @@ data "aws_s3_bucket_object" "rules" {
 }
 
 resource "aws_lambda_function" "rules" {
-  function_name     = "${local.ID_ENV}-${local.RULES}"
+  function_name     = "${local.RULES}-${local.ID_ENV}"
   description       = "${local.RULES} service in ${local.SPACED_ID_ENV}"
   s3_bucket         = data.aws_s3_bucket_object.rules.bucket
   s3_key            = data.aws_s3_bucket_object.rules.key
@@ -33,7 +33,7 @@ resource "aws_cloudwatch_log_group" "rules" {
 }
 
 resource "aws_iam_role" "rules" {
-  name               = "${local.ID_ENV}-${local.RULES}-role"
+  name               = "${local.RULES}-role-${local.ID_ENV}"
   assume_role_policy = data.aws_iam_policy_document.rules_trust_policy.json
 }
 
@@ -53,7 +53,7 @@ data "aws_iam_policy_document" "rules_trust_policy" {
 }
 
 resource "aws_iam_role_policy" "rules_policy" {
-  name   = "${local.ID_ENV}-${local.RULES}-policy"
+  name   = "${local.RULES}-policy-${local.ID_ENV}"
   role   = aws_iam_role.rules.id
   policy = data.aws_iam_policy_document.rules_policy.json
 }

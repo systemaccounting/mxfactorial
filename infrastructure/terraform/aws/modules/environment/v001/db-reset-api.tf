@@ -3,7 +3,7 @@ locals {
 }
 
 resource "aws_sns_topic" "db_reset" {
-  name = "${local.ID_ENV}-${local.DB_RESET}"
+  name = "${local.DB_RESET}-${local.ID_ENV}"
 }
 
 resource "aws_sns_topic_subscription" "sns_to_db_reset_lambda" {
@@ -21,7 +21,7 @@ resource "aws_lambda_permission" "sns_to_db_reset_lambda" {
 }
 
 resource "aws_api_gateway_rest_api" "db_reset" {
-  name        = "${local.ID_ENV}-${local.DB_RESET}"
+  name        = "${local.DB_RESET}-${local.ID_ENV}"
   description = "${local.DB_RESET} api in ${local.SPACED_ID_ENV}"
 }
 
@@ -98,7 +98,7 @@ resource "aws_api_gateway_deployment" "db_reset" {
 }
 
 resource "aws_iam_role" "db_reset_api" {
-  name               = "${local.ID_ENV}-${local.DB_RESET}-apigw-role"
+  name               = "${local.DB_RESET}-apigw-role-${local.ID_ENV}"
   assume_role_policy = data.aws_iam_policy_document.db_reset_api_role.json
 }
 
@@ -116,7 +116,7 @@ data "aws_iam_policy_document" "db_reset_api_role" {
 }
 
 resource "aws_iam_role_policy" "db_reset_api" {
-  name   = "${local.ID_ENV}-${local.DB_RESET}-apigw-cw-policy"
+  name   = "${local.DB_RESET}-apigw-cw-policy-${local.ID_ENV}"
   role   = aws_iam_role.db_reset_api.id
   policy = data.aws_iam_policy_document.db_reset_api_policy.json
 }

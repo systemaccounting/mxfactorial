@@ -101,10 +101,10 @@ select yn in "yes" "no"; do
     esac
 done
 
-if [[ $(jq -r '.terraform.aws.build_db_and_cache' "../../../../../$PROJECT_CONFIG") == "false" ]]; then
-	echo "exiting after skipping db and cache during terraform development
+if [[ $(jq -r '.terraform.aws.build_db' "../../../../../$PROJECT_CONFIG") == "false" ]]; then
+	echo "exiting after skipping db during terraform development
 
-*** enable terraform.aws.build_db_and_cache in $PROJECT_CONFIG to build development environment"
+*** enable terraform.aws.build_db in $PROJECT_CONFIG to build development environment"
 	exit 0
 fi
 

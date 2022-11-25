@@ -8,7 +8,7 @@ data "aws_s3_bucket_object" "graphql" {
 }
 
 resource "aws_lambda_function" "graphql" {
-  function_name     = "${local.ID_ENV}-${local.GRAPHQL}"
+  function_name     = "${local.GRAPHQL}-${local.ID_ENV}"
   description       = "${local.GRAPHQL} on api gateway in ${local.SPACED_ID_ENV}"
   s3_bucket         = data.aws_s3_bucket_object.graphql.bucket
   s3_key            = data.aws_s3_bucket_object.graphql.key
@@ -38,7 +38,7 @@ resource "aws_cloudwatch_log_group" "graphql" {
 }
 
 resource "aws_iam_role" "graphql_role" {
-  name               = "${local.ID_ENV}-${local.GRAPHQL}"
+  name               = "${local.GRAPHQL}-${local.ID_ENV}"
   assume_role_policy = data.aws_iam_policy_document.graphql_trust_policy.json
 }
 

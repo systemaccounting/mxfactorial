@@ -28,15 +28,16 @@ popd
 
 source scripts/delete-lambda-layers.sh --env "$ENVIRONMENT"
 
-cd infrastructure/terraform/aws/environments/region
+pushd infrastructure/terraform/aws/environments/region
 
-# skip if api gateway logging permission not managed by terraform
-if [[ -f terraform.tfstate ]] && [[ $(jq '.resources | length > 0' terraform.tfstate) == "true" ]]; then
+# skip if api gateway logging permission not managed by local terraform
+if [[ -f terraform.tfstate ]] && [[ $(jq '.resources | length > 0' ../../../env-id/terraform.state) == "true" ]]; then
 	terraform destroy --auto-approve
+# todo: elif manually delete logging permission if current resource matches naming convention
 fi
 
-cd ../init-dev
+popd
 
-terraform destroy --auto-approve
+source scripts/delete-dev-storage.sh # --env arg not available here, dev only
 
 printf "\n${YELLOW}*** ${ENV_ID}-${ENVIRONMENT} env deleted. you may now delete your workspace${NOCOLOR}\n"

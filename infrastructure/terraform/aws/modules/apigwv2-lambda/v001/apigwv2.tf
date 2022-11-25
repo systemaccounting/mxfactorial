@@ -1,9 +1,5 @@
-locals {
-  API_NAME_ENV = "${var.api_name}-${var.env}"
-}
-
 resource "aws_apigatewayv2_api" "default" {
-  name          = local.API_NAME_ENV
+  name          = var.api_name
   protocol_type = "HTTP"
   description   = "${var.api_name} api in ${var.env}"
   target        = var.lambda_invoke_arn
@@ -54,7 +50,7 @@ resource "aws_apigatewayv2_authorizer" "default" {
   api_id           = aws_apigatewayv2_api.default.id
   authorizer_type  = "JWT"
   identity_sources = ["$request.header.${var.authorization_header_key}"]
-  name             = local.API_NAME_ENV
+  name             = var.api_name
 
   jwt_configuration {
     audience = [var.cognito_client_id]
@@ -63,12 +59,12 @@ resource "aws_apigatewayv2_authorizer" "default" {
 }
 
 resource "aws_cloudwatch_log_group" "default" {
-  name              = local.API_NAME_ENV
+  name              = var.api_name
   retention_in_days = 30
 }
 
 resource "aws_lambda_permission" "default" {
-  statement_id  = "AllowAPIGWLambdaInvoke${replace(title(local.API_NAME_ENV), "-", "")}"
+  statement_id  = "AllowAPIGWLambdaInvoke${replace(title(var.api_name), "-", "")}"
   action        = "lambda:InvokeFunction"
   function_name = trimsuffix(split(":", var.lambda_invoke_arn)[11], "/invocations")
   principal     = "apigateway.amazonaws.com"

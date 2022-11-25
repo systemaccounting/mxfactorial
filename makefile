@@ -8,7 +8,7 @@ SECRETS=$(shell jq '.secrets[]' $(PROJECT_CONF))
 ENV_VARS=$(SECRETS)
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
-TFSTATE_ENV_SUFFIX=$(shell jq -r '.terraform.tfstate.file_name_suffix' $(PROJECT_CONF))
+TFSTATE_ENV_SUFFIX=$(shell jq -r '.terraform.tfstate.file_name_suffix.env_infra' $(PROJECT_CONF))
 TFSTATE_FILE_EXT=$(shell jq -r '.terraform.tfstate.file_extension' $(PROJECT_CONF))
 TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_FILE_EXT)
 
@@ -71,6 +71,9 @@ init-dev:
 	bash scripts/terraform-init-dev.sh \
 		--key $(TFSTATE_ENV_FILE) \
 		--dir infrastructure/terraform/aws/environments/dev
+
+resume-dev:
+	$(MAKE) -C infrastructure/terraform/aws/environments/dev resume
 
 new-iam:
 	bash scripts/manage-gitpod-iam.sh --new

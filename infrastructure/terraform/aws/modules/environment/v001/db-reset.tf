@@ -4,7 +4,7 @@ data "aws_s3_bucket_object" "db_reset" {
 }
 
 resource "aws_lambda_function" "db_reset" {
-  function_name     = "${local.ID_ENV}-db-reset"
+  function_name     = "db-reset-${local.ID_ENV}"
   description       = "go migrate tool in ${var.env_id} ${var.env}"
   s3_bucket         = data.aws_s3_bucket_object.db_reset.bucket
   s3_key            = data.aws_s3_bucket_object.db_reset.key
@@ -36,7 +36,7 @@ resource "aws_cloudwatch_log_group" "db_reset" {
 }
 
 resource "aws_iam_role" "db_reset" {
-  name               = "${local.ID_ENV}-db-reset-role"
+  name               = "db-reset-role-${local.ID_ENV}"
   assume_role_policy = data.aws_iam_policy_document.db_reset_trust_policy.json
 }
 
@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "db_reset_trust_policy" {
 
 # allow function to create logs and invoke lambda
 resource "aws_iam_role_policy" "db_reset_policy" {
-  name = "${local.ID_ENV}-db-reset-policy"
+  name = "db-reset-policy-${local.ID_ENV}"
   role = aws_iam_role.db_reset.id
 
   policy = data.aws_iam_policy_document.db_reset_policy.json

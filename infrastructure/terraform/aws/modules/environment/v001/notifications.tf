@@ -5,11 +5,11 @@ locals {
 }
 
 resource "aws_sns_topic" "notifications" {
-  name = "${local.ID_ENV}-notifications"
+  name = "notifications-${local.ID_ENV}"
 }
 
 resource "aws_apigatewayv2_api" "notifications" {
-  name                       = "${local.ID_ENV}-notifications-wss"
+  name                       = "notifications-wss-${local.ID_ENV}"
   description                = "websocket in api in ${local.SPACED_ID_ENV}"
   protocol_type              = "WEBSOCKET"
   route_selection_expression = "$request.body.action"
@@ -117,7 +117,7 @@ resource "aws_apigatewayv2_route_response" "default" {
 }
 
 resource "aws_iam_policy" "wss" {
-  name        = "${local.ID_ENV}-allow-wss-stack-access"
+  name        = "allow-wss-stack-access-${local.ID_ENV}"
   description = "allows lambda websocket stack perms in ${local.SPACED_ID_ENV}"
   policy = jsonencode({
     Version = "2012-10-17"

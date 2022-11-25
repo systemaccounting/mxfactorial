@@ -11,14 +11,14 @@ ifndef ENV_ID
   ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
 endif
 endif
-LAMBDA_NAME=$(ENV_ID)-$(ENV)-$(APP_NAME)
+LAMBDA_NAME=$(APP_NAME)-$(ENV_ID)-$(ENV)
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 RUNTIME=provided
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 TMP_MIGRATE_REPO_DIR=./build
 LAMBDA_LAYER_ARCHIVE=$(APP_NAME)-layer.zip
-LAMBDA_LAYER_NAME=$(ENV_ID)-$(ENV)-$(APP_NAME)-$(RUNTIME)-deps
+LAMBDA_LAYER_NAME=$(APP_NAME)-$(RUNTIME)-deps-$(ENV_ID)-$(ENV)
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
 DOCKER_USER=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.user" $(PROJECT_CONF))
 DOCKER_REPOSITORY=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.repository" $(PROJECT_CONF))
