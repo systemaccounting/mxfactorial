@@ -5,9 +5,8 @@ variable "env_vars" {
   default = null
 }
 variable "invoke_principals" {
-  type        = list(string)
-  default     = []
-  description = "example: cognito-idp.amazonaws.com"
+  type    = list(string)
+  default = []
 }
 variable "attached_policy_arns" {
   type        = list(string)

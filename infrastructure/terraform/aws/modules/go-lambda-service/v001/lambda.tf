@@ -8,7 +8,7 @@ locals {
   LOG_GROUP_NAME     = "/aws/lambda/${aws_lambda_function.default.function_name}"
 }
 
-data "aws_s3_bucket_object" "default" {
+data "aws_s3_object" "default" {
   bucket = var.artifacts_bucket_name
   key    = "${var.service_name}-src.zip"
 }
@@ -20,17 +20,31 @@ data "aws_caller_identity" "current" {}
 resource "aws_lambda_function" "default" {
   function_name     = "${var.service_name}-${local.ID_ENV}"
   description       = "${var.service_name} lambda service in ${local.SPACED_ID_ENV}"
-  s3_bucket         = data.aws_s3_bucket_object.default.bucket
-  s3_key            = data.aws_s3_bucket_object.default.key
-  s3_object_version = data.aws_s3_bucket_object.default.version_id
+  s3_bucket         = data.aws_s3_object.default.bucket
+  s3_key            = data.aws_s3_object.default.key
+  s3_object_version = data.aws_s3_object.default.version_id
   handler           = "index.handler"
-  runtime           = "go1.x"
+  runtime           = "provided.al2"
   timeout           = 30
   role              = aws_iam_role.default.arn
-  dynamic "environment" {
-    for_each = var.env_vars == null ? [] : [1]
-    content { variables = var.env_vars }
+
+  environment {
+    variables = merge(
+      {
+        READINESS_CHECK_PATH = "/healthz"
+      },
+      var.env_vars,
+    )
   }
+
+  layers = [
+    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:7"
+  ]
+}
+
+resource "aws_lambda_function_url" "default" {
+  function_name      = aws_lambda_function.default.function_name
+  authorization_type = "AWS_IAM"
 }
 
 resource "aws_cloudwatch_log_group" "default" {
@@ -56,8 +70,8 @@ resource "aws_iam_role" "default" {
 }
 
 resource "aws_iam_policy" "default" {
-  name        = "${var.service_name}-lambda-logging-${local.ID_ENV}"
-  description = "${aws_lambda_function.default.function_name} logging permission in ${local.SPACED_ID_ENV}"
+  name        = "${var.service_name}-lambda-${local.ID_ENV}"
+  description = "${aws_lambda_function.default.function_name} permissions in ${local.SPACED_ID_ENV}"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -79,8 +93,7 @@ resource "aws_iam_policy" "default" {
         Resource = [
           "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:${local.LOG_GROUP_NAME}:*"
         ]
-      }
-    ]
+    }],
   })
 }
 
@@ -89,12 +102,13 @@ resource "aws_iam_role_policy_attachment" "default" {
   policy_arn = aws_iam_policy.default.arn
 }
 
-resource "aws_lambda_permission" "default" {
-  count         = length(var.invoke_principals)
-  statement_id  = "Allow${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}${count.index}Execution"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.default.function_name
-  principal     = var.invoke_principals[count.index]
+resource "aws_lambda_permission" "function_url" {
+  count                  = length(var.invoke_principals)
+  statement_id           = "Allow${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}UrlExecution${count.index}"
+  action                 = "lambda:InvokeFunctionUrl"
+  function_name          = aws_lambda_function.default.function_name
+  principal              = var.invoke_principals[count.index]
+  function_url_auth_type = "AWS_IAM"
 }
 
 resource "aws_iam_role_policy_attachment" "extra" {
@@ -109,4 +123,12 @@ resource "aws_ssm_parameter" "default" {
   description = "${aws_lambda_function.default.function_name} arn in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
   value       = aws_lambda_function.default.arn
+}
+
+resource "aws_ssm_parameter" "function_url" {
+  count       = var.create_secret ? 1 : 0
+  name        = "/${var.ssm_prefix}/service/lambda/${local.SERVICE_NAME_LOWER}/url"
+  description = "${aws_lambda_function.default.function_name} url in ${local.SPACED_ID_ENV}"
+  type        = "SecureString"
+  value       = aws_lambda_function_url.default.function_url
 }
