@@ -1,4 +1,4 @@
-data "aws_s3_bucket_object" "go_migrate" {
+data "aws_s3_object" "go_migrate" {
   bucket = var.artifacts_bucket_name
   key    = "go-migrate-src.zip"
 }
@@ -6,9 +6,9 @@ data "aws_s3_bucket_object" "go_migrate" {
 resource "aws_lambda_function" "go_migrate" {
   function_name     = "go-migrate-${local.ID_ENV}"
   description       = "go migrate tool in ${local.SPACED_ID_ENV}"
-  s3_bucket         = data.aws_s3_bucket_object.go_migrate.bucket
-  s3_key            = data.aws_s3_bucket_object.go_migrate.key
-  s3_object_version = data.aws_s3_bucket_object.go_migrate.version_id
+  s3_bucket         = data.aws_s3_object.go_migrate.bucket
+  s3_key            = data.aws_s3_object.go_migrate.key
+  s3_object_version = data.aws_s3_object.go_migrate.version_id
   handler           = "index.handler"
   # https://github.com/gkrizek/bash-lambda-layer
   layers = [
@@ -28,7 +28,7 @@ data "aws_lambda_layer_version" "go_migrate" {
   layer_name = "${local.GO_MIGRATE_LAYER_SUFFIX}-${local.ID_ENV}"
 }
 
-data "aws_s3_bucket_object" "go_migrate_layer" {
+data "aws_s3_object" "go_migrate_layer" {
   bucket = var.artifacts_bucket_name
   key    = "go-migrate-layer.zip"
 }

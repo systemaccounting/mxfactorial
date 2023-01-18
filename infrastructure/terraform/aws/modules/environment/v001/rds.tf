@@ -35,7 +35,7 @@ resource "random_password" "pgpassword" {
 
 locals {
   POSTGRES_VARS = {
-    PGDATABASE = var.build_db ? aws_db_instance.postgres[0].name : ""
+    PGDATABASE = var.build_db ? aws_db_instance.postgres[0].db_name : ""
     PGHOST     = var.build_db ? aws_db_instance.postgres[0].address : ""
     PGPASSWORD = var.build_db ? aws_db_instance.postgres[0].password : ""
     PGPORT     = var.build_db ? aws_db_instance.postgres[0].port : ""
@@ -80,7 +80,7 @@ resource "aws_security_group_rule" "allow_postgres_access" {
 #   description                 = "connecting to rds"
 #   automatic_stop_time_minutes = 15
 #   # assign ANY 1 subnet assigned in aws_db_subnet_group.default.subnet_ids, e.g. 0
-#   subnet_id = tolist(data.aws_subnet_ids.default.ids)[0]
+#   subnet_id = tolist(data.aws_subnets.default.ids)[0]
 # }
 
 
@@ -108,13 +108,13 @@ resource "aws_security_group_rule" "allow_all_outbound_rds" {
 resource "aws_db_subnet_group" "default" {
   description = "postgres db subnet group in ${local.SPACED_ID_ENV}"
   name        = "db-subnet-group-${local.ID_ENV}"
-  subnet_ids  = data.aws_subnet_ids.default.ids
+  subnet_ids  = data.aws_subnets.default.ids
 }
 
 ###### Reference CIDR blocks instead of security groups ######
 ###### since cloud9 creates its own security group ######
 # data "aws_subnet" "rds_cloud9" {
-#   count = length(data.aws_subnet_ids.default.ids)
-#   # id    = data.aws_subnet_ids.default[count.index].ids
-#   id = tolist(data.aws_subnet_ids.default.ids)[count.index]
+#   count = length(data.aws_subnets.default.ids)
+#   # id    = data.aws_subnets.default[count.index].ids
+#   id = tolist(data.aws_subnets.default.ids)[count.index]
 # }

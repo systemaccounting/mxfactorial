@@ -1,4 +1,4 @@
-data "aws_s3_bucket_object" "db_reset" {
+data "aws_s3_object" "db_reset" {
   bucket = var.artifacts_bucket_name
   key    = "db-reset-src.zip"
 }
@@ -6,9 +6,9 @@ data "aws_s3_bucket_object" "db_reset" {
 resource "aws_lambda_function" "db_reset" {
   function_name     = "db-reset-${local.ID_ENV}"
   description       = "go migrate tool in ${var.env_id} ${var.env}"
-  s3_bucket         = data.aws_s3_bucket_object.db_reset.bucket
-  s3_key            = data.aws_s3_bucket_object.db_reset.key
-  s3_object_version = data.aws_s3_bucket_object.db_reset.version_id
+  s3_bucket         = data.aws_s3_object.db_reset.bucket
+  s3_key            = data.aws_s3_object.db_reset.key
+  s3_object_version = data.aws_s3_object.db_reset.version_id
   handler           = "index.handler"
   # https://github.com/gkrizek/bash-lambda-layer
   layers = [
