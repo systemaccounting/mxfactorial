@@ -7,10 +7,11 @@ module "request_create" {
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
-    RULE_LAMBDA_ARN      = aws_lambda_function.rules.arn,
     NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
     ENABLE_NOTIFICATIONS = var.enable_notifications
+    RULES_URL            = aws_lambda_function_url.rules.function_url
   })
+  invoke_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
   create_secret         = true // suppports local testing
@@ -54,6 +55,7 @@ module "request_approve" {
     NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
     ENABLE_NOTIFICATIONS = var.enable_notifications
   })
+  invoke_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
   attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
@@ -68,6 +70,7 @@ module "requests_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
   })
+  invoke_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -79,6 +82,7 @@ module "request_by_id" {
   ssm_prefix            = var.ssm_prefix
   env_id                = var.env_id
   env_vars              = merge(local.POSTGRES_VARS, {})
+  invoke_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -92,6 +96,7 @@ module "transactions_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
   })
+  invoke_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -103,6 +108,7 @@ module "transaction_by_id" {
   ssm_prefix            = var.ssm_prefix
   env_id                = var.env_id
   env_vars              = merge(local.POSTGRES_VARS, {})
+  invoke_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -114,6 +120,7 @@ module "balance_by_account" {
   ssm_prefix            = var.ssm_prefix
   env_id                = var.env_id
   env_vars              = merge(local.POSTGRES_VARS, {})
+  invoke_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }

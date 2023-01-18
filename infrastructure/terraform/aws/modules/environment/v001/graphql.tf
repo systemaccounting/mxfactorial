@@ -2,7 +2,7 @@ locals {
   GRAPHQL = "graphql"
 }
 
-data "aws_s3_bucket_object" "graphql" {
+data "aws_s3_object" "graphql" {
   bucket = var.artifacts_bucket_name
   key    = "${local.GRAPHQL}-src.zip"
 }
@@ -10,24 +10,24 @@ data "aws_s3_bucket_object" "graphql" {
 resource "aws_lambda_function" "graphql" {
   function_name     = "${local.GRAPHQL}-${local.ID_ENV}"
   description       = "${local.GRAPHQL} on api gateway in ${local.SPACED_ID_ENV}"
-  s3_bucket         = data.aws_s3_bucket_object.graphql.bucket
-  s3_key            = data.aws_s3_bucket_object.graphql.key
-  s3_object_version = data.aws_s3_bucket_object.graphql.version_id
+  s3_bucket         = data.aws_s3_object.graphql.bucket
+  s3_key            = data.aws_s3_object.graphql.key
+  s3_object_version = data.aws_s3_object.graphql.version_id
   handler           = "index.handler"
   runtime           = "go1.x"
   timeout           = 30
   role              = aws_iam_role.graphql_role.arn
   environment {
     variables = {
-      RULE_LAMBDA_ARN                    = aws_lambda_function.rules.arn
-      REQUEST_CREATE_LAMBDA_ARN          = module.request_create.lambda_arn,
-      REQUEST_APPROVE_LAMBDA_ARN         = module.request_approve.lambda_arn
-      REQUEST_BY_ID_LAMBDA_ARN           = module.request_by_id.lambda_arn,
-      REQUESTS_BY_ACCOUNT_LAMBDA_ARN     = module.requests_by_account.lambda_arn,
-      TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN = module.transactions_by_account.lambda_arn
-      TRANSACTION_BY_ID_LAMBDA_ARN       = module.transaction_by_id.lambda_arn
-      ENABLE_API_AUTH                    = var.enable_api_auth
-      BALANCE_BY_ACCOUNT_LAMBDA_ARN      = module.balance_by_account.lambda_arn
+      ENABLE_API_AUTH             = var.enable_api_auth
+      RULES_URL                   = aws_lambda_function_url.rules.function_url
+      REQUEST_CREATE_URL          = module.request_create.lambda_function_url
+      REQUEST_APPROVE_URL         = module.request_approve.lambda_function_url
+      REQUEST_BY_ID_URL           = module.request_by_id.lambda_function_url
+      REQUESTS_BY_ACCOUNT_URL     = module.requests_by_account.lambda_function_url
+      TRANSACTIONS_BY_ACCOUNT_URL = module.transactions_by_account.lambda_function_url
+      TRANSACTION_BY_ID_URL       = module.transaction_by_id.lambda_function_url
+      BALANCE_BY_ACCOUNT_URL      = module.balance_by_account.lambda_function_url
     }
   }
 }
