@@ -76,7 +76,8 @@ private, receiving added value is sustained & acknowledged by sending value
 
 ### development
 
-1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, e.g. `https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop`, or `git clone https://github.com/systemaccounting/mxfactorial` locally (*docker & npm required*)
+1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, or click:
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop)
 1. `make bootcamp`
 
 ### notebook
