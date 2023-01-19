@@ -164,7 +164,7 @@ demo-docker:
 	@echo $(TEST_EVENT) | jq .
 	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
 	@$(MAKE) invoke-docker
-	@printf "\n\n*** IN ADDITION to request & response, see post-transaction conservation test below ***\n"
+	@printf "\n\n\e[33m*** OBSERVE the following post-transaction conservation test ***\e[0m\n"
 	@printf "\ninitial balances: %s\n\n" 1000
 	@printf "GroceryStore new balance: %s\n" $$(curl -s -d '{"auth_account":"GroceryStore","account_name":"GroceryStore"}' $(DOCKER_URL))
 	@printf "StateOfCalifornia new balance: %s\n" $$(curl -s -d '{"auth_account":"StateOfCalifornia","account_name":"StateOfCalifornia"}' $(DOCKER_URL))
