@@ -1,16 +1,14 @@
 package main
 
-// todo: testing
-
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
@@ -20,15 +18,16 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-// todo: integration test
-
-var pgConn string = fmt.Sprintf(
-	"host=%s port=%s user=%s password=%s dbname=%s",
-	os.Getenv("PGHOST"),
-	os.Getenv("PGPORT"),
-	os.Getenv("PGUSER"),
-	os.Getenv("PGPASSWORD"),
-	os.Getenv("PGDATABASE"))
+var (
+	pgConn string = fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s",
+		os.Getenv("PGHOST"),
+		os.Getenv("PGPORT"),
+		os.Getenv("PGUSER"),
+		os.Getenv("PGPASSWORD"),
+		os.Getenv("PGDATABASE"))
+	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
+)
 
 type SQLDB interface {
 	Query(context.Context, string, ...interface{}) (pgx.Rows, error)
@@ -54,7 +53,7 @@ type ITransactionService interface {
 	AddApprovalTimesByAccountAndRole(trID types.ID, accountName string, accountRole types.Role) (pgtype.Timestamptz, error)
 }
 
-func lambdaFn(
+func run(
 	ctx context.Context,
 	e types.QueryByID,
 	dbConnector func(context.Context, string) (SQLDB, error),
@@ -133,9 +132,9 @@ func lambdaFn(
 	return intraTr.MarshalIntraTransaction()
 }
 
-// wraps lambdaFn accepting db interface for testability
+// wraps run accepting db interface for testability
 func handleEvent(ctx context.Context, e types.QueryByID) (string, error) {
-	return lambdaFn(
+	return run(
 		ctx,
 		e,
 		newIDB,
@@ -143,7 +142,7 @@ func handleEvent(ctx context.Context, e types.QueryByID) (string, error) {
 	)
 }
 
-// enables lambdaFn unit testing
+// enables unit testing
 func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
@@ -152,39 +151,33 @@ func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	return service.NewTransactionService(db), nil
 }
 
-// enables lambdaFn unit testing
+// enables unit testing
 func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
 	return postgres.NewDB(ctx, dsn)
 }
 
-// avoids lambda package dependency during local development
-func localEnvOnly(event string) {
-
-	var testEvent types.QueryByID
-
-	// unmarshal test event
-	err := json.Unmarshal([]byte(event), &testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// call event handler with test event
-	resp, err := handleEvent(context.Background(), testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print(resp)
-}
-
 func main() {
 
-	// ### TEST ENV only: assign event from env var
-	var osTestEvent string = os.Getenv("TEST_EVENT")
-	if len(osTestEvent) > 0 {
-		localEnvOnly(osTestEvent)
-		return
-	}
+	r := gin.Default()
 
-	lambda.Start(handleEvent)
+	// aws-lambda-web-adapter READINESS_CHECK_*
+	r.GET(readinessCheckPath, func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	var queryByID types.QueryByID
+
+	r.POST("/", func(c *gin.Context) {
+
+		c.BindJSON(&queryByID)
+
+		resp, err := handleEvent(c.Request.Context(), queryByID)
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+		}
+
+		c.String(http.StatusOK, resp)
+	})
+
+	r.Run()
 }

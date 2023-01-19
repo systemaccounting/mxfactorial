@@ -2,28 +2,30 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 
-	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/gin-gonic/gin"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
-var pgConn string = fmt.Sprintf(
-	"host=%s port=%s user=%s password=%s dbname=%s",
-	os.Getenv("PGHOST"),
-	os.Getenv("PGPORT"),
-	os.Getenv("PGUSER"),
-	os.Getenv("PGPASSWORD"),
-	os.Getenv("PGDATABASE"))
+var (
+	pgConn string = fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s",
+		os.Getenv("PGHOST"),
+		os.Getenv("PGPORT"),
+		os.Getenv("PGUSER"),
+		os.Getenv("PGPASSWORD"),
+		os.Getenv("PGDATABASE"))
+	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
+)
 
-func lambdaFn(
+func run(
 	ctx context.Context,
 	e types.QueryByAccount,
 	dbConnector func(context.Context, string) (*postgres.DB, error),
@@ -65,9 +67,9 @@ func lambdaFn(
 	return accountBalance.CurrentBalance.StringFixed(3), nil
 }
 
-// wraps lambdaFn accepting services satisfying interfaces for testability
+// wraps run accepting services satisfying interfaces for testability
 func handleEvent(ctx context.Context, e types.QueryByAccount) (string, error) {
-	return lambdaFn(
+	return run(
 		ctx,
 		e,
 		postgres.NewDB,
@@ -75,7 +77,7 @@ func handleEvent(ctx context.Context, e types.QueryByAccount) (string, error) {
 	)
 }
 
-// enables lambdaFn unit testing
+// enables run fn unit testing
 func newBalanceService(idb postgres.SQLDB) (service.IBalanceService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
@@ -84,34 +86,28 @@ func newBalanceService(idb postgres.SQLDB) (service.IBalanceService, error) {
 	return service.NewAccountBalanceService(db), nil
 }
 
-// avoids lambda package dependency during local development
-func localEnvOnly(event string) {
-
-	var testEvent types.QueryByAccount
-
-	// unmarshal test event
-	err := json.Unmarshal([]byte(event), &testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// call event handler with test event
-	resp, err := handleEvent(context.Background(), testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print(resp)
-}
-
 func main() {
 
-	// ### TEST ENV only: assign event from env var
-	var osTestEvent string = os.Getenv("TEST_EVENT")
-	if len(osTestEvent) > 0 {
-		localEnvOnly(osTestEvent)
-		return
-	}
+	r := gin.Default()
 
-	lambda.Start(handleEvent)
+	// aws-lambda-web-adapter READINESS_CHECK_*
+	r.GET(readinessCheckPath, func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	var queryByAccount types.QueryByAccount
+
+	r.POST("/", func(c *gin.Context) {
+
+		c.BindJSON(&queryByAccount)
+
+		resp, err := handleEvent(c.Request.Context(), queryByAccount)
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+		}
+
+		c.String(http.StatusOK, resp)
+	})
+
+	r.Run()
 }

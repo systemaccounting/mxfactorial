@@ -3,7 +3,7 @@
 	import { Router, Route } from "svelte-navigator";
 	import Nav from "./components/Nav.svelte";
 	import Public from "./containers/Public.svelte";
-	import Private from "./containers/Private.svelte";
+	import TestForDevEnv from "./containers/TestForDevEnv.svelte";
 	import Home from "./routes/Home.svelte";
 	import Requests from "./routes/Requests.svelte";
 	import RequestDetail from "./routes/RequestDetail.svelte";
@@ -19,7 +19,7 @@
 		<Route path="/">
 			<Public />
 		</Route>
-		<Private>
+		<TestForDevEnv>
 			<Route path="account">
 				<Nav>
 					<Home />
@@ -64,6 +64,6 @@
 					</Route>
 				</HistoryUrql>
 			</Route>
-		</Private>
+		</TestForDevEnv>
 	</MobileLayout>
 </Router>

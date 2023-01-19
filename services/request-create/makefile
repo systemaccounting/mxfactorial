@@ -7,6 +7,7 @@ CMD_DIR=$(CURDIR)/cmd
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
+DOCKER_URL=$(shell jq -r ".env_var.REQUEST_CREATE_URL.docker" $(PROJECT_CONF))
 
 TEST_DATA_FILE=transNoAppr.json
 TEST_DATA_DIR=../gopkg/testdata
@@ -26,7 +27,6 @@ endif
 run:
 	@$(MAKE) -s test-env-file
 	@$(DOCKER_ENV_VARS) \
-		TEST_EVENT=$(TEST_EVENT) \
 		eval $$(cat $(ENV_FILE)) \
 		go run $(CMD_DIR)
 
@@ -146,10 +146,22 @@ now:
 ###################### invoke ######################
 
 invoke:
+	@$(MAKE) invoke-url
+
+invoke-url:
 	@$(MAKE) -s test-env-arg
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/invoke-function.sh \
+	bash scripts/invoke-function-url.sh \
 		--app-name $(APP_NAME) \
 		--payload $(TEST_EVENT) \
         --env $(ENV) \
         --region $(REGION)
+
+invoke-docker:
+	@curl -s -d $(TEST_EVENT) $(DOCKER_URL) | jq .
+
+demo-docker:
+	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@jq . $(TEST_DATA_DIR)/$(TEST_DATA_FILE)
+	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@$(MAKE) invoke-docker

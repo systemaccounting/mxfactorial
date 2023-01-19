@@ -56,7 +56,7 @@ function test_env_file() {
 
 function set_secrets() {
 	for s in ${SECRETS[@]}; do
-		PARAM_NAME=$(jq -r ".ssm_params.$s" $PROJECT_CONFIG)
+		PARAM_NAME=$(jq -r ".env_var.$s.ssm" $PROJECT_CONFIG)
 		ENV_VAR=$(aws ssm get-parameter \
 			--name "/$ENV_ID/$SSM_VERSION/$ENVIRONMENT/$PARAM_NAME" \
 			--query "Parameter.Value" \

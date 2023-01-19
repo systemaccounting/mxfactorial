@@ -7,6 +7,7 @@ CMD_DIR=$(CURDIR)/cmd
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
+DOCKER_URL=$(shell jq -r ".env_var.REQUEST_APPROVE_URL.docker" $(PROJECT_CONF))
 
 TEST_ACCOUNT=JacobWebb
 TEST_ROLE=debitor
@@ -144,13 +145,25 @@ now:
 	$(MAKE) zip
 	$(MAKE) deploy-only ENV=dev
 
-###################### deploy ######################
+###################### invoke ######################
 
 invoke:
+	@$(MAKE) invoke-url
+
+invoke-url:
 	@$(MAKE) -s test-env-arg
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/invoke-function.sh \
+	bash scripts/invoke-function-url.sh \
 		--app-name $(APP_NAME) \
 		--payload $(TEST_EVENT) \
         --env $(ENV) \
         --region $(REGION)
+
+invoke-docker:
+	@curl -s -d $(TEST_EVENT) $(DOCKER_URL) | jq .
+
+demo-docker:
+	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@echo $(TEST_EVENT) | jq .
+	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@$(MAKE) invoke-docker

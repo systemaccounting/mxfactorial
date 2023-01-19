@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
@@ -32,7 +32,8 @@ var (
 		pgUser,
 		pgPassword,
 		pgDatabase)
-	errReqValsMissing error = errors.New("required values missing. exiting")
+	errReqValsMissing  error = errors.New("required values missing. exiting")
+	readinessCheckPath       = os.Getenv("READINESS_CHECK_PATH")
 )
 
 type SQLDB interface {
@@ -63,7 +64,7 @@ type IApproveService interface {
 	Approve(ctx context.Context, authAccount string, approverRole types.Role, preApprovalTransaction *types.Transaction, notifyTopicArn string) (string, error)
 }
 
-func lambdaFn(
+func run(
 	ctx context.Context,
 	e *types.RequestApprove,
 	dbConnector func(context.Context, string) (SQLDB, error),
@@ -131,13 +132,13 @@ func lambdaFn(
 	)
 }
 
-// wraps lambdaFn accepting interfaces for testability
+// handleEvent wraps run with interface args for testability
 func handleEvent(
 	ctx context.Context,
 	e *types.RequestApprove,
 ) (string, error) {
 
-	return lambdaFn(
+	return run(
 		ctx,
 		e,
 		newIDB,
@@ -146,7 +147,7 @@ func handleEvent(
 	)
 }
 
-// enables lambdaFn unit testing
+// enables run fn unit testing
 func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
@@ -155,7 +156,7 @@ func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	return service.NewTransactionService(db), nil
 }
 
-// enables lambdaFn unit testing
+// enables unit testing
 func newApproveService(idb SQLDB) (IApproveService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
@@ -164,57 +165,33 @@ func newApproveService(idb SQLDB) (IApproveService, error) {
 	return service.NewApproveService(db), nil
 }
 
-// enables lambdaFn unit testing
+// enables unit testing
 func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
 	return postgres.NewDB(ctx, dsn)
 }
 
-// avoids lambda package dependency during local development
-func localEnvOnly(event string) {
-
-	// var testEvent types.IntraTransaction
-	var testEvent *types.RequestApprove
-
-	// unmarshal test event
-	err := json.Unmarshal([]byte(event), &testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// call event handler with test event
-	resp, err := handleEvent(context.Background(), testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if len(os.Getenv("DEBUG")) > 0 {
-		log.Print(resp)
-	}
-}
-
 func main() {
 
-	var envVars = []string{
-		pgHost,
-		pgPort,
-		pgUser,
-		pgPassword,
-		pgDatabase,
-	}
+	r := gin.Default()
 
-	for _, v := range envVars {
-		if len(v) == 0 {
-			log.Fatal("env var not set")
+	// aws-lambda-web-adapter READINESS_CHECK_*
+	r.GET(readinessCheckPath, func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	var requestApprove *types.RequestApprove
+
+	r.POST("/", func(c *gin.Context) {
+
+		c.BindJSON(&requestApprove)
+
+		resp, err := handleEvent(c.Request.Context(), requestApprove)
+		if err != nil {
+			c.Status(http.StatusBadRequest)
 		}
-	}
 
-	// ### LOCAL ENV only: assign event from env var
-	var osTestEvent string = os.Getenv("TEST_EVENT")
-	if len(osTestEvent) > 0 {
-		localEnvOnly(osTestEvent)
-		return
-	}
-	// ###
+		c.String(http.StatusOK, resp)
+	})
 
-	lambda.Start(handleEvent)
+	r.Run()
 }

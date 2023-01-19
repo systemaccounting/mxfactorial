@@ -1,25 +1,39 @@
 package service
 
 import (
-	"github.com/systemaccounting/mxfactorial/services/gopkg/aws/lambda"
+	"encoding/json"
+
+	"github.com/systemaccounting/mxfactorial/services/gopkg/httpclient"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
+type IHttpClient interface {
+	Post([]byte) ([]byte, error)
+}
+
 type RulesService struct {
-	lambda.ILambdaService
+	Client IHttpClient
 }
 
 func (r RulesService) GetRuleAppliedIntraTransactionFromTrItems(trItems types.TransactionItems) (*types.IntraTransaction, error) {
 
-	response, err := r.ILambdaService.Invoke(trItems)
+	b, err := json.Marshal(trItems)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+
+	response, err := r.Client.Post(b)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
 	var ruleTested types.IntraTransaction
+
 	err = ruleTested.Unmarshal(response)
+
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
@@ -28,8 +42,8 @@ func (r RulesService) GetRuleAppliedIntraTransactionFromTrItems(trItems types.Tr
 	return &ruleTested, nil
 }
 
-func NewRulesService(lambdaFnName, awsRegion *string) *RulesService {
+func NewRulesService(url string) *RulesService {
 	return &RulesService{
-		ILambdaService: lambda.NewLambdaService(lambdaFnName, nil),
+		Client: httpclient.NewHttpClient(url),
 	}
 }

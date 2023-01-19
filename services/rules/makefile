@@ -9,7 +9,8 @@ BUILD_DIR=$(CURDIR)/dist
 COMPILE_SRC_DIR=$(BUILD_DIR)/$(APP_DIR_NAME)/src
 DEPS_DIR=$(CURDIR)/node_modules
 ENV_FILE=$(CURDIR)/.env
-ENTRYPOINT=$(COMPILE_SRC_DIR)/invoke.js
+ENTRYPOINT=$(COMPILE_SRC_DIR)/server.js
+DOCKER_URL=$(shell jq -r ".env_var.RULES_URL.docker" $(PROJECT_CONF))
 
 TEST_DATA_FILE=preRuleTrItems.json
 TEST_DATA_DIR=../gopkg/testdata
@@ -23,7 +24,7 @@ PGPORT=5432 \
 PG_MAX_CONNECTIONS=20 \
 PG_IDLE_TIMEOUT=10000 \
 PG_CONN_TIMEOUT=500 \
-PG_DISCONNECT=true
+READINESS_CHECK_PATH=/healthz
 
 run:
 	@$(MAKE) clean-build
@@ -35,6 +36,15 @@ run:
 		--es-module-specifier-resolution=node \
 		--no-warnings \
 		$(ENTRYPOINT)
+
+nodemon:
+	@$(DOCKER_ENV_VARS) npm run nodemon
+
+tsnode:
+	@$(DOCKER_ENV_VARS) npm run ts-node
+
+water:
+	@REQ=$$(jq -c . ../gopkg/testdata/bottledWater.json); curl -d "$$REQ" -H 'Content-Type: application/json' http://0.0.0.0:8081
 
 watch:
 	npx tsc -w
@@ -59,14 +69,25 @@ test:
 	@$(MAKE) test-unit
 	@$(MAKE) deploy
 	@$(MAKE) get-secrets
-	@$(MAKE) test-integration
+	@$(MAKE) test-cloud
 
 test-unit:
 	$(DOCKER_ENV_VARS) npm run test
 
-test-integration:
+test-local:
+	$(MAKE) test-docker-availability
+	NUM=$$(psql 'postgresql://test:test@0.0.0.0/mxfactorial' -t -c '\dt' | wc -l | tr -d ' '); \
+	if [ "$$NUM" -eq 0 ]; then $(MAKE) -C '../../migrations' updocker DB=test; fi
+	($(MAKE) run)
+
+test-docker:
+	if ! [ -d node_modules ]; then npm install; fi
+	$(MAKE) test-docker-availability
+	npm run test:integ:docker
+
+test-cloud:
 	@$(MAKE) -s test-env-arg
-	npm run test:integration
+	npm run test:integ:cloud
 
 test-single:
 	$(DOCKER_ENV_VARS) npm run test:single
@@ -85,7 +106,7 @@ zip:
 
 zip-only:
 	$(MAKE) clean-artifact
-	zip -r $(ARTIFACT_NAME) node_modules package.json
+	zip -r $(ARTIFACT_NAME) node_modules package.json run-lambda.sh
 	zip -uj $(ARTIFACT_NAME) $(COMPILE_SRC_DIR)/* -x "*.test.*" "*invoke.js*"
 	(cd $(COMPILE_SRC_DIR); zip -ur ../../../$(ARTIFACT_NAME) ./* -x "tests/*" -x "*.test.*" -x "*invoke.js*")
 
@@ -170,6 +191,23 @@ invoke:
         --env $(ENV) \
         --region $(REGION)
 
+invoke-url:
+	@$(MAKE) -s test-env-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/invoke-function-url.sh \
+		--app-name $(APP_NAME) \
+		--payload $(TEST_EVENT) \
+        --env $(ENV) \
+        --region $(REGION)
+
+invoke-docker:
+	@curl -s -H 'Content-Type: application/json' -d $(TEST_EVENT) $(DOCKER_URL) | jq .
+
+demo-docker:
+	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@jq . $(TEST_DATA_DIR)/$(TEST_DATA_FILE)
+	@printf "*** response from service %s at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@$(MAKE) invoke-docker
 
 ###################### secrets ######################
 
@@ -186,6 +224,8 @@ get-secrets:
 init:
 	npx tsc --init
 
+###################### make tests ######################
+
 test-env-arg:
 ifndef ENV
 	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
@@ -195,3 +235,14 @@ test-env-file:
 ifeq (,$(wildcard $(ENV_FILE)))
 	$(error no .env file, run 'make get-secrets ENV=dev')
 endif
+
+###################### docker ######################
+
+test-docker-availability:
+	@docker version > /dev/null 2>&1; if [ $$? -ne 0 ]; then echo "\033[1;31mdocker required. start docker \033[0m"; fi
+
+print-docker-env-vars:
+	@echo "$(DOCKER_ENV_VARS)"
+
+docker-run:
+	docker run --rm -p "0.0.0.0:8080:8080" -e "PGDATABASE=mxfactorial" -e "PGUSER=test" -e "PGPASSWORD=test" -e "PGHOST=172.17.0.2" -e "PGPORT=5432" -e "PG_MAX_CONNECTIONS=20" -e "PG_IDLE_TIMEOUT=10000" -e "PG_CONN_TIMEOUT=500" -e "READINESS_CHECK_PATH=/healthz" --name rules rules:v1

@@ -4,16 +4,27 @@ export default {
 	coverageDirectory: "./coverage",
 	coveragePathIgnorePatterns: ["node_modules"],
 	reporters: ["default"],
-	globals: { "ts-jest": { diagnostics: false } },
+	globals: {
+		'^.+\\.tsx?$': [
+			'ts-jest',
+			{
+				diagnostics: false,
+			},
+		  ],
+	},
 	transform: {},
 	setupFiles: ["./jestSetup.ts"],
+	testMatch: [
+		"**/__tests__/**/*.[jt]s?(x)",
+		"**/?(*.)+(spec|test).[tj]s?(x)"
+	],
 	silent: true,
 	verbose: true,
 	automock: false,
 	testPathIgnorePatterns: [
 		"<rootDir>/src/rules/applyItemRule.test.ts",
 		"<rootDir>/src/rules/applyApprovalRule.test.ts",
-		"<rootDir>/tests/index.integ.ts",
+		"<rootDir>/src/tests/local.integ.ts",
 		"<rootDir>/dist",
 	]
 };

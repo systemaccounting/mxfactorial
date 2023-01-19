@@ -2,16 +2,22 @@ import {
 	CognitoUserPool,
 	AuthenticationDetails,
 	CognitoUser,
+	ICognitoUserPoolData,
 } from 'amazon-cognito-identity-js';
 
-const poolData = {
-	UserPoolId: atob(process.env.POOL_ID).trim(),
-	ClientId: atob(process.env.CLIENT_ID).trim(),
+const poolData: ICognitoUserPoolData = {
+	// avoid atob when developing locally
+	UserPoolId: process.env.POOL_ID ? atob(process.env.POOL_ID).trim() : "",
+	ClientId: process.env.CLIENT_ID ? atob(process.env.CLIENT_ID).trim(): "",
 };
 
-const userPool = new CognitoUserPool(poolData);
+let userPool: CognitoUserPool;
+let cognitoUser: CognitoUser;
 
-var cognitoUser: CognitoUser = userPool.getCurrentUser();
+if (process.env.POOL_ID && process.env.CLIENT_ID) {
+	userPool = new CognitoUserPool(poolData);
+	cognitoUser = userPool.getCurrentUser();
+}
 
 function signIn(account: string, password: string) {
 	const authDetails = new AuthenticationDetails({

@@ -7,10 +7,11 @@ module "request_create" {
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
-    RULE_LAMBDA_ARN      = aws_lambda_function.rules.arn,
     NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
     ENABLE_NOTIFICATIONS = var.enable_notifications
+    RULES_URL            = aws_lambda_function_url.rules.function_url
   })
+  invoke_url_principals = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
   create_secret         = true // suppports local testing
@@ -54,6 +55,7 @@ module "request_approve" {
     NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
     ENABLE_NOTIFICATIONS = var.enable_notifications
   })
+  invoke_url_principals = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
   attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
@@ -68,6 +70,7 @@ module "requests_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
   })
+  invoke_url_principals = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -79,6 +82,7 @@ module "request_by_id" {
   ssm_prefix            = var.ssm_prefix
   env_id                = var.env_id
   env_vars              = merge(local.POSTGRES_VARS, {})
+  invoke_url_principals = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -92,6 +96,7 @@ module "transactions_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
   })
+  invoke_url_principals = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -103,6 +108,7 @@ module "transaction_by_id" {
   ssm_prefix            = var.ssm_prefix
   env_id                = var.env_id
   env_vars              = merge(local.POSTGRES_VARS, {})
+  invoke_url_principals = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -114,6 +120,7 @@ module "balance_by_account" {
   ssm_prefix            = var.ssm_prefix
   env_id                = var.env_id
   env_vars              = merge(local.POSTGRES_VARS, {})
+  invoke_url_principals = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name = var.artifacts_bucket_name
   create_secret         = true
 }
@@ -128,7 +135,7 @@ module "auto_confirm" {
     INITIAL_ACCOUNT_BALANCE = var.initial_account_balance
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals     = ["cognito-idp.amazonaws.com"]
+  invoke_arn_principals = ["cognito-idp.amazonaws.com"]
 }
 
 module "wss_connect" {
@@ -139,7 +146,7 @@ module "wss_connect" {
   env_id                = var.env_id
   env_vars              = merge(local.POSTGRES_VARS, {})
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals     = ["apigateway.amazonaws.com"]
+  invoke_arn_principals = ["apigateway.amazonaws.com"]
 }
 
 // invoked by request-create or request-approve through sns
@@ -152,7 +159,7 @@ module "notifications_send" {
   env_vars = merge(local.POSTGRES_VARS, {
     APIGW_CONNECTIONS_URI = local.APIGW_CONNECTIONS_URI
   })
-  invoke_principals     = ["sns.amazonaws.com"]
+  invoke_arn_principals = ["sns.amazonaws.com"]
   artifacts_bucket_name = var.artifacts_bucket_name
   attached_policy_arns  = [aws_iam_policy.wss.arn]
 }
@@ -177,7 +184,7 @@ module "notifications_get" {
     ENABLE_API_AUTH            = var.enable_api_auth
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals     = ["apigateway.amazonaws.com"]
+  invoke_arn_principals = ["apigateway.amazonaws.com"]
   attached_policy_arns  = [aws_iam_policy.wss.arn]
 }
 
@@ -194,6 +201,6 @@ module "notifications_clear" {
     ENABLE_API_AUTH       = var.enable_api_auth
   })
   artifacts_bucket_name = var.artifacts_bucket_name
-  invoke_principals     = ["apigateway.amazonaws.com"]
+  invoke_arn_principals = ["apigateway.amazonaws.com"]
   attached_policy_arns  = [aws_iam_policy.wss.arn]
 }

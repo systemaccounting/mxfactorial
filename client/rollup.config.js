@@ -98,5 +98,6 @@ export default {
 	],
 	watch: {
 		clearScreen: false
-	}
+	},
+	inlineDynamicImports: true, // https://github.com/lukeed/navaid/issues/5#issuecomment-653823512
 };

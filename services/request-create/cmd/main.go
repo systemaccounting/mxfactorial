@@ -2,13 +2,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
@@ -19,21 +19,21 @@ import (
 )
 
 var (
-	awsRegion      string = os.Getenv("AWS_REGION")
-	rulesLambdaArn        = os.Getenv("RULE_LAMBDA_ARN")
-	notifyTopicArn        = os.Getenv("NOTIFY_TOPIC_ARN")
-	pgHost                = os.Getenv("PGHOST")
-	pgPort                = os.Getenv("PGPORT")
-	pgUser                = os.Getenv("PGUSER")
-	pgPassword            = os.Getenv("PGPASSWORD")
-	pgDatabase            = os.Getenv("PGDATABASE")
-	pgConn                = fmt.Sprintf(
+	notifyTopicArn = os.Getenv("NOTIFY_TOPIC_ARN")
+	pgHost         = os.Getenv("PGHOST")
+	pgPort         = os.Getenv("PGPORT")
+	pgUser         = os.Getenv("PGUSER")
+	pgPassword     = os.Getenv("PGPASSWORD")
+	pgDatabase     = os.Getenv("PGDATABASE")
+	pgConn         = fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s",
 		pgHost,
 		pgPort,
 		pgUser,
 		pgPassword,
 		pgDatabase)
+	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
+	rulesUrl           = os.Getenv("RULES_URL")
 )
 
 type SQLDB interface {
@@ -88,7 +88,7 @@ type preTestItem struct {
 func testValues(
 	ctx context.Context,
 	e *types.IntraTransaction,
-	rulesServiceConstructor func(lambdaFnName, awsRegion *string) IRulesService,
+	rulesServiceConstructor func(url string) IRulesService,
 ) (*types.IntraTransaction, string, types.Role, error) {
 
 	if e.AuthAccount == "" {
@@ -123,7 +123,7 @@ func testValues(
 	}
 
 	// create rules service
-	rulesService := rulesServiceConstructor(&rulesLambdaArn, &awsRegion)
+	rulesService := rulesServiceConstructor(rulesUrl)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, "", types.Role(0), err
@@ -286,13 +286,13 @@ func createRequest(
 	return rcs.t.GetTransactionWithTrItemsAndApprovalsByID(*trID)
 }
 
-func lambdaFn(
+func run(
 	ctx context.Context,
 	e *types.IntraTransaction,
 	dbConnector func(context.Context, string) (SQLDB, error),
 	requestCreateServiceConstructor func(db SQLDB) (*createRequestService, error),
 	approveServiceConstructor func(db SQLDB) (IApproveService, error),
-	rulesServiceConstructor func(lambdaFnName, awsRegion *string) IRulesService,
+	rulesServiceConstructor func(url string) IRulesService,
 ) (string, error) {
 
 	// delay connecting to db until after client values tested
@@ -344,14 +344,13 @@ func lambdaFn(
 	)
 }
 
-// handleEvent wraps lambdaFn which
-// accepts interfaces for testability
+// handleEvent wraps run with interface args for testability
 func handleEvent(
 	ctx context.Context,
 	e *types.IntraTransaction,
 ) (string, error) {
 
-	return lambdaFn(
+	return run(
 		ctx,
 		e,
 		newIDB,
@@ -366,8 +365,8 @@ func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
 	return postgres.NewDB(ctx, dsn)
 }
 
-func newRulesService(lambdaFnName, awsRegion *string) IRulesService {
-	return service.NewRulesService(lambdaFnName, awsRegion)
+func newRulesService(url string) IRulesService {
+	return service.NewRulesService(url)
 }
 
 type createRequestService struct {
@@ -396,56 +395,28 @@ func newApproveService(idb SQLDB) (IApproveService, error) {
 
 // END: enables lambdaFn unit testing
 
-// avoids lambda package dependency during local development
-func localEnvOnly(event string) {
-
-	// var testEvent types.IntraTransaction
-	var testEvent *types.IntraTransaction
-
-	// unmarshal test event
-	err := json.Unmarshal([]byte(event), &testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// call event handler with test event
-	resp, err := handleEvent(context.Background(), testEvent)
-	if err != nil {
-		panic(err)
-	}
-
-	if len(os.Getenv("DEBUG")) > 0 {
-		log.Print(resp)
-	}
-
-	_ = resp
-}
-
 func main() {
 
-	var envVars = []string{
-		awsRegion,
-		rulesLambdaArn,
-		pgHost,
-		pgPort,
-		pgUser,
-		pgPassword,
-		pgDatabase,
-	}
+	r := gin.Default()
 
-	for _, v := range envVars {
-		if len(v) == 0 {
-			log.Fatal("env var not set")
+	// aws-lambda-web-adapter READINESS_CHECK_*
+	r.GET(readinessCheckPath, func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
+
+	var intraTransaction *types.IntraTransaction
+
+	r.POST("/", func(c *gin.Context) {
+
+		c.BindJSON(&intraTransaction)
+
+		resp, err := handleEvent(c.Request.Context(), intraTransaction)
+		if err != nil {
+			c.Status(http.StatusBadRequest)
 		}
-	}
 
-	// ### LOCAL ENV only: assign event from env var
-	var osTestEvent string = os.Getenv("TEST_EVENT")
-	if len(osTestEvent) > 0 {
-		localEnvOnly(osTestEvent)
-		return
-	}
-	// ###
+		c.String(http.StatusOK, resp)
+	})
 
-	lambda.Start(handleEvent)
+	r.Run()
 }

@@ -118,3 +118,18 @@ resource "aws_ssm_parameter" "db_reset_passphrase" {
   type        = "SecureString"
   value       = random_password.db_reset.result
 }
+
+resource "aws_ssm_parameter" "lambda_readiness_check_path" {
+  name = "/${var.ssm_prefix}/service/lambda/readiness_check_path"
+  // https://github.com/awslabs/aws-lambda-web-adapter#readiness-check
+  description = "lambda web adapter readiness check path in ${local.SPACED_ID_ENV}"
+  type        = "SecureString"
+  value       = var.readiness_check_path
+}
+
+resource "aws_ssm_parameter" "function_url" {
+  name        = "/${var.ssm_prefix}/service/lambda/rules/url"
+  description = "rules lambda function url in ${local.SPACED_ID_ENV}"
+  type        = "SecureString"
+  value       = aws_lambda_function_url.rules.function_url
+}

@@ -8,14 +8,14 @@
             "path": "services/graphql",
             "secrets": [
                 "GRAPHQL_URI",
-                "RULE_LAMBDA_ARN",
-                "REQUEST_CREATE_LAMBDA_ARN",
-                "REQUEST_APPROVE_LAMBDA_ARN",
-                "REQUEST_BY_ID_LAMBDA_ARN",
-                "REQUESTS_BY_ACCOUNT_LAMBDA_ARN",
-                "TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN",
-                "TRANSACTION_BY_ID_LAMBDA_ARN",
-                "BALANCE_BY_ACCOUNT_LAMBDA_ARN"
+                "RULES_URL",
+                "REQUEST_CREATE_URL",
+                "REQUEST_APPROVE_URL",
+                "REQUEST_BY_ID_URL",
+                "REQUESTS_BY_ACCOUNT_URL",
+                "TRANSACTIONS_BY_ACCOUNT_URL",
+                "TRANSACTION_BY_ID_URL",
+                "BALANCE_BY_ACCOUNT_URL"
             ],
             "params": [
                 "AWS_REGION",
@@ -42,8 +42,10 @@
             "runtime": "go1.x",
             "path": "services/request-create",
             "secrets": [
-                "RULE_LAMBDA_ARN",
-                "NOTIFY_TOPIC_ARN"
+                "NOTIFY_TOPIC_ARN",
+                "READINESS_CHECK_PATH",
+                "REQUEST_CREATE_URL",
+                "RULES_URL"
             ],
             "params": [
                 "AWS_REGION",
@@ -62,7 +64,9 @@
             "runtime": "go1.x",
             "path": "services/request-approve",
             "secrets": [
-                "NOTIFY_TOPIC_ARN"
+                "NOTIFY_TOPIC_ARN",
+                "READINESS_CHECK_PATH",
+                "REQUEST_APPROVE_URL"
             ],
             "params": [
                 "AWS_REGION",
@@ -76,7 +80,7 @@
             "dependents": []
         },
         "rules": {
-            "runtime": "nodejs14.x",
+            "runtime": "nodejs18.x",
             "path": "services/rules",
             "secrets": [
                 "PGDATABASE",
@@ -86,7 +90,8 @@
                 "PGPORT",
                 "CLIENT_ID",
                 "POOL_ID",
-                "GRAPHQL_URI"
+                "GRAPHQL_URI",
+                "RULES_URL"
             ],
             "params": [
                 "AWS_REGION"
@@ -103,7 +108,9 @@
         "request-by-id": {
             "runtime": "go1.x",
             "path": "services/request-by-id",
-            "secrets": [],
+            "secrets": [
+                "REQUEST_BY_ID_URL"
+            ],
             "params": [],
             "deploy": true,
             "lambda_name_prefix": "request-by-id",
@@ -115,7 +122,9 @@
         "requests-by-account": {
             "runtime": "go1.x",
             "path": "services/requests-by-account",
-            "secrets": [],
+            "secrets": [
+                "REQUESTS_BY_ACCOUNT_URL"
+            ],
             "params": [],
             "deploy": true,
             "lambda_name_prefix": "requests-by-account",
@@ -127,7 +136,9 @@
         "transaction-by-id": {
             "runtime": "go1.x",
             "path": "services/transaction-by-id",
-            "secrets": [],
+            "secrets": [
+                "TRANSACTION_BY_ID_URL"
+            ],
             "params": [],
             "deploy": true,
             "lambda_name_prefix": "transaction-by-id",
@@ -139,7 +150,9 @@
         "transactions-by-account": {
             "runtime": "go1.x",
             "path": "services/transactions-by-account",
-            "secrets": [],
+            "secrets": [
+                "TRANSACTIONS_BY_ACCOUNT_URL"
+            ],
             "params": [],
             "deploy": true,
             "lambda_name_prefix": "transactions-by-account",
@@ -208,7 +221,9 @@
         "balance-by-account": {
             "runtime": "go1.x",
             "path": "services/balance-by-account",
-            "secrets": [],
+            "secrets": [
+                "BALANCE_BY_ACCOUNT_URL"
+            ],
             "params": [],
             "deploy": true,
             "lambda_name_prefix": "balance-by-account",
@@ -376,11 +391,19 @@
             ]
         },
         "test": {
-            "runtime": "go1.x",
+            "runtime": "nodejs18.x",
             "path": "test",
             "dependents": [],
             "secrets": [
-                "GRAPHQL_URI"
+                "GRAPHQL_URI",
+                "RULES_URL",
+                "REQUEST_CREATE_URL",
+                "REQUEST_APPROVE_URL",
+                "REQUEST_BY_ID_URL",
+                "REQUESTS_BY_ACCOUNT_URL",
+                "TRANSACTIONS_BY_ACCOUNT_URL",
+                "TRANSACTION_BY_ID_URL",
+                "BALANCE_BY_ACCOUNT_URL"
             ],
             "params": []
         },
@@ -489,14 +512,6 @@
         }
     },
     "params": [],
-    "postgres": {
-        "pgdatabase": "mxfactorial",
-        "pghost": "localhost",
-        "pgport": 5432,
-        "pguser": "test",
-        "pgpassword": "test",
-        "testseed_dump_path": "./migrations/dumps/testseed.sql"
-    },
     "gomock": {
         "package_name_prefix": "mock",
         "file_name_suffix": "mock.go"
@@ -507,32 +522,115 @@
     "enable_api_auth": false,
     "enable_notifications": false,
     "ssm_version": "v1",
-    "ssm_params": {
-        "GRAPHQL_URI": "api/graphql/uri",
-        "RULE_LAMBDA_ARN": "service/lambda/rules/arn",
-        "REQUEST_CREATE_LAMBDA_ARN": "service/lambda/request_create/arn",
-        "REQUEST_APPROVE_LAMBDA_ARN": "service/lambda/request_approve/arn",
-        "REQUEST_BY_ID_LAMBDA_ARN": "service/lambda/request_by_id/arn",
-        "REQUESTS_BY_ACCOUNT_LAMBDA_ARN": "service/lambda/requests_by_account/arn",
-        "TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN": "service/lambda/transactions_by_account/arn",
-        "TRANSACTION_BY_ID_LAMBDA_ARN": "service/lambda/transaction_by_id/arn",
-        "BALANCE_BY_ACCOUNT_LAMBDA_ARN": "service/lambda/balance_by_account/arn",
-        "NOTIFY_TOPIC_ARN": "notifications/sns/topic/arn",
-        "PGDATABASE": "database/sql/postgres/pgdatabase",
-        "PGUSER": "database/sql/postgres/pguser",
-        "PGPASSWORD": "database/sql/postgres/pgpassword",
-        "PGHOST": "database/sql/postgres/pghost",
-        "PGPORT": "database/sql/postgres/pgport",
-        "CLIENT_ID": "auth/cognito/client_id",
-        "POOL_ID": "auth/cognito/pool_id",
-        "POOL_NAME": "auth/cognito/pool_name",
-        "APIGW_CONNECTIONS_URI": "api/websocket/connections/uri",
-        "COGNITO_JWKS_URI": "auth/cognito/jwks/uri",
-        "NOTIFICATIONS_RETURN_LIMIT": "notifications/return_limit",
-        "SECRET": "auth/cognito/test_account/secret",
-        "WEBSOCKET_CLIENT_URI": "api/websocket/client/uri",
-        "DB_RESET_PASSPHRASE": "tool/lambda/db_reset/passphrase",
-        "CLIENT_URI": "client/uri"
+    "env_var": {
+        "GRAPHQL_URI": {
+            "ssm": "api/graphql/uri",
+            "docker": "http://localhost:8080"
+        },
+        "NOTIFY_TOPIC_ARN": {
+            "ssm": "notifications/sns/topic/arn",
+            "docker": null
+        },
+        "PGDATABASE": {
+            "ssm": "database/sql/postgres/pgdatabase",
+            "docker": "mxfactorial"
+        },
+        "PGUSER": {
+            "ssm": "database/sql/postgres/pguser",
+            "docker": "test"
+        },
+        "PGPASSWORD": {
+            "ssm": "database/sql/postgres/pgpassword",
+            "docker": "test"
+        },
+        "PGHOST": {
+            "ssm": "database/sql/postgres/pghost",
+            "docker": "localhost"
+        },
+        "PGPORT": {
+            "ssm": "database/sql/postgres/pgport",
+            "docker": 5432
+        },
+        "TESTSEED_DUMP_PATH": {
+            "ssm": null,
+            "docker": "./migrations/dumps/testseed.sql"
+        },
+        "CLIENT_ID": {
+            "ssm": "auth/cognito/client_id",
+            "docker": null
+        },
+        "POOL_ID": {
+            "ssm": "auth/cognito/pool_id",
+            "docker": null
+        },
+        "POOL_NAME": {
+            "ssm": "auth/cognito/pool_name",
+            "docker": null
+        },
+        "APIGW_CONNECTIONS_URI": {
+            "ssm": "api/websocket/connections/uri",
+            "docker": null
+        },
+        "COGNITO_JWKS_URI": {
+            "ssm": "auth/cognito/jwks/uri",
+            "docker": null
+        },
+        "NOTIFICATIONS_RETURN_LIMIT": {
+            "ssm": "notifications/return_limit",
+            "docker": null
+        },
+        "SECRET": {
+            "ssm": "auth/cognito/test_account/secret",
+            "docker": null
+        },
+        "WEBSOCKET_CLIENT_URI": {
+            "ssm": "api/websocket/client/uri",
+            "docker": null
+        },
+        "DB_RESET_PASSPHRASE": {
+            "ssm": "tool/lambda/db_reset/passphrase",
+            "docker": null
+        },
+        "CLIENT_URI": {
+            "ssm": "client/uri",
+            "docker": "http://localhost:8090"
+        },
+        "READINESS_CHECK_PATH": {
+            "ssm": "service/lambda/readiness_check_path",
+            "docker": null
+        },
+        "RULES_URL": {
+            "ssm": "service/lambda/rules/url",
+            "docker": "http://localhost:8081"
+        },
+        "REQUEST_CREATE_URL": {
+            "ssm": "service/lambda/request_create/url",
+            "docker": "http://localhost:8082"
+        },
+        "REQUEST_APPROVE_URL": {
+            "ssm": "service/lambda/request_approve/url",
+            "docker": "http://localhost:8083"
+        },
+        "REQUEST_BY_ID_URL": {
+            "ssm": "service/lambda/request_by_id/url",
+            "docker": "http://localhost:8087"
+        },
+        "REQUESTS_BY_ACCOUNT_URL": {
+            "ssm": "service/lambda/requests_by_account/url",
+            "docker": "http://localhost:8086"
+        },
+        "TRANSACTIONS_BY_ACCOUNT_URL": {
+            "ssm": "service/lambda/transactions_by_account/url",
+            "docker": "http://localhost:8088"
+        },
+        "TRANSACTION_BY_ID_URL": {
+            "ssm": "service/lambda/transaction_by_id/url",
+            "docker": "http://localhost:8089"
+        },
+        "BALANCE_BY_ACCOUNT_URL": {
+            "ssm": "service/lambda/balance_by_account/url",
+            "docker": "http://localhost:8085"
+        }
     },
     "region": "us-east-1",
     "gitpod": {
@@ -556,6 +654,11 @@
             "rds": {
                 "instance_name_prefix": "mxfactorial"
             }
+        }
+    },
+    "docker": {
+        "compose": {
+            "dir": "./docker"
         }
     }
 }
