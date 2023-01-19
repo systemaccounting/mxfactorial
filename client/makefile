@@ -78,7 +78,7 @@ $(ENV_VARS):
 	elif [ $@ = ENABLE_AUTH ]; then \
 		echo "ENABLE_AUTH=$(ENABLE_AUTH)" >> $(ENV_FILE); \
 	elif [ $@ = SECRET ]; then \
-		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
+		PARAM_NAME=$(shell jq -r ".env_var.$@.ssm" $(PROJECT_CONF)); \
 		SECRET=$$(aws ssm get-parameter \
 			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
 			--query 'Parameter.Value' \
@@ -87,7 +87,7 @@ $(ENV_VARS):
 			--output text); \
 		echo "JEST_$@=$$SECRET" >> $(ENV_FILE); \
 	else \
-		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
+		PARAM_NAME=$(shell jq -r ".env_var.$@.ssm" $(PROJECT_CONF)); \
 		ENV_VAR=$$(aws ssm get-parameter \
 			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
 			--query 'Parameter.Value' \
@@ -140,3 +140,11 @@ test-env-file:
 ifeq (,$(wildcard $(ENV_FILE)))
 	$(error no .env file, run 'make get-secrets ENV=dev')
 endif
+
+###################### docker ######################
+
+up:
+	docker compose -f ../docker/compose.client.yaml up -d --renew-anon-volumes --force-recreate --build
+
+down:
+	docker compose -f ../docker/compose.client.yaml down
