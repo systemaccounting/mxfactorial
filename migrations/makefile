@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+APP=mxfactorial
 RELATIVE_PROJECT_ROOT_PATH=..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
@@ -6,39 +8,31 @@ ifeq (prod,$(ENV))
 else
   ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
 endif
-SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
-POSTGRESQL_USERNAME=test
-POSTGRESQL_PASSWORD=test
-POSTGRESQL_HOST=localhost
-POSTGRESQL_PORT=5432
-POSTGRESQL_DATABASE=mxfactorial
-HOST_PORT=$(POSTGRESQL_PORT)
-CONTAINER_PORT=$(POSTGRESQL_PORT)
-DATABASE_TYPE=postgres
-APP=mxfactorial
-CONTAINER_NAME=$(APP)-postgres
-POSTGRES_VOLUME_MOUNT_PATH=$(CURDIR)/postgres
-POSTGRES_DATA_VOLUME_MOUNT_PATH=$(POSTGRES_VOLUME_MOUNT_PATH)/data
-CONTAINER_POSTGRES_STORAGE_PATH=/bitnami/postgresql
-DOCKER_IMAGE=bitnami/postgresql
-IMAGE_VERSION=latest
-GO_MIGRATE=github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-SHELL=/bin/bash
-
 ENV_FILE=$(CURDIR)/.env
-ENV_VARS=DATABASE_TYPE \
+SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
+GO_MIGRATE=github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+# migration lambda vars
+MIGRATION_LAMBDA_NAME=go-migrate-$(ENV_ID)-$(ENV)
+REGION=us-east-1
+
+RDS_ENV_VARS=DATABASE_TYPE \
 PGUSER \
 PGPASSWORD \
 PGHOST \
 PGPORT \
 PGDATABASE
 
-DOCKER_POSTGRES=$(DATABASE_TYPE)://$(POSTGRESQL_USERNAME):$(POSTGRESQL_PASSWORD)@$(POSTGRESQL_HOST):$(POSTGRESQL_PORT)/$(POSTGRESQL_DATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version
-MIGRATIONS_DIR=$(CURDIR)/$(DIR)
+DATABASE_TYPE=postgres
+PGUSER=$(shell jq -r '.env_var.PGUSER.docker' $(PROJECT_CONF))
+PGPASSWORD=$(shell jq -r '.env_var.PGPASSWORD.docker' $(PROJECT_CONF))
+PGHOST=$(shell jq -r '.env_var.PGHOST.docker' $(PROJECT_CONF))
+PGPORT=$(shell jq -r '.env_var.PGPORT.docker' $(PROJECT_CONF))
+PGDATABASE=$(shell jq -r '.env_var.PGDATABASE.docker' $(PROJECT_CONF))
+CONTAINER_PORT=$(PGPORT)
 
-# migration lambda vars
-MIGRATION_LAMBDA_NAME=go-migrate-faas-$(ENV)
-REGION=us-east-1
+MIGRATIONS_CONN=$(DATABASE_TYPE)://$(PGUSER):$(PGPASSWORD)@$(PGHOST):$(PGPORT)/$(PGDATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version
+MIGRATIONS_DIR=$(CURDIR)/$(DIR)
 
 # case intended, values matched from make cli args
 prod_up = schema seed
@@ -48,45 +42,31 @@ test_down = testseed $(prod_down)
 
 # postgres docker
 run:
-	docker run \
-		--rm \
-		--name $(CONTAINER_NAME) \
-		-e POSTGRESQL_USERNAME=$(POSTGRESQL_USERNAME) \
-		-e POSTGRESQL_PASSWORD=$(POSTGRESQL_PASSWORD) \
-		-e POSTGRESQL_DATABASE=$(POSTGRESQL_DATABASE) \
-		-p $(HOST_PORT):$(CONTAINER_PORT) \
-		$(DOCKER_IMAGE):$(IMAGE_VERSION)
-
-run-ci:
-	docker run \
+	docker compose \
+		-f ../docker/compose.bitnami-postgres.yaml \
+		up \
 		-d \
-		--rm \
-		--name $(CONTAINER_NAME) \
-		-e POSTGRESQL_USERNAME=$(POSTGRESQL_USERNAME) \
-		-e POSTGRESQL_PASSWORD=$(POSTGRESQL_PASSWORD) \
-		-e POSTGRESQL_DATABASE=$(POSTGRESQL_DATABASE) \
-		-p $(HOST_PORT):$(CONTAINER_PORT) \
-		-v $(POSTGRES_DATA_VOLUME_MOUNT_PATH):$(CONTAINER_POSTGRES_STORAGE_PATH) \
-		-v $(POSTGRES_VOLUME_MOUNT_PATH)/postgresql.conf:/bitnami/postgresql/conf/postgresql.conf \
-		$(DOCKER_IMAGE):$(IMAGE_VERSION)
+		--renew-anon-volumes \
+		--force-recreate --build
+
+up:
+	@$(MAKE) run
+
+down:
+	docker compose -f ../docker/compose.bitnami-postgres.yaml down
 
 stop:
-	docker stop $(CONTAINER_NAME)
+	@$(MAKE) down
 
 clean:
 	-@$(MAKE) stop
-	rm -rf $(POSTGRES_DATA_VOLUME_MOUNT_PATH)
-
-redocker:
-	-@$(MAKE) clean
-	$(MAKE) run
 
 # looped go migrate targets for docker postgres
 # 2022-07-12: down migrate required until 9 month old pr merged:
 # https://github.com/golang-migrate/migrate/pull/627
 resetdocker:
 	@TABLE_COUNT=$$(psql \
-		-At "host=$(POSTGRESQL_HOST) port=$(CONTAINER_PORT) user=$(POSTGRESQL_USERNAME) password=$(POSTGRESQL_PASSWORD) dbname=$(POSTGRESQL_DATABASE)" \
+		-At "host=$(PGHOST) port=$(CONTAINER_PORT) user=$(PGUSER) password=$(PGPASSWORD) dbname=$(PGDATABASE)" \
 		-tc "select count(*) from information_schema.tables where table_schema = 'public';"); \
 	if [[ "$$TABLE_COUNT" -gt 3 ]]; then \
 		echo "***down migrating docker"; \
@@ -103,17 +83,17 @@ testdocker:
 updocker:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
-	$(foreach DIR,$($(DB)_up), migrate -verbose -path ./$(DIR) -database "$(DOCKER_POSTGRES)" up;)
+	$(foreach DIR,$($(DB)_up), migrate -verbose -path ./$(DIR) -database "$(MIGRATIONS_CONN)" up;)
 
 downdocker:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
-	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(DOCKER_POSTGRES)" down --all;)
+	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(MIGRATIONS_CONN)" down --all;)
 
 dropdocker:
 	@$(MAKE) -s test-db-arg
 	@$(MAKE) -s test-db-val
-	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(DOCKER_POSTGRES)" drop -f;)
+	$(foreach DIR,$($(DB)_down), migrate -verbose -path ./$(DIR) -database "$(MIGRATIONS_CONN)" drop -f;)
 
 insert:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
@@ -174,29 +154,29 @@ create:
 updir:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-count-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" up $(COUNT)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(MIGRATIONS_CONN)" up $(COUNT)
 
 downdir:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-count-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" down $(COUNT)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(MIGRATIONS_CONN)" down $(COUNT)
 
 updirall:
 	@$(MAKE) -s test-dir-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" up
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(MIGRATIONS_CONN)" up
 
 downdirall:
 	@$(MAKE) -s test-dir-arg
-	yes | migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" down
+	yes | migrate -verbose -path $(MIGRATIONS_DIR) -database "$(MIGRATIONS_CONN)" down
 
 dropdir:
 	@$(MAKE) -s test-dir-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" drop -f
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(MIGRATIONS_CONN)" drop -f
 
 force:
 	@$(MAKE) -s test-dir-arg
 	@$(MAKE) -s test-version-arg
-	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(DOCKER_POSTGRES)" force $(VERSION)
+	migrate -verbose -path $(MIGRATIONS_DIR) -database "$(MIGRATIONS_CONN)" force $(VERSION)
 
 clear:
 	$(MAKE) drop
@@ -321,12 +301,12 @@ get-secrets:
 		echo 'env vars retrieved'; \
 	fi
 
-retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
-$(ENV_VARS):
+retrieve-each-secret: test-env-arg clean-env $(RDS_ENV_VARS)
+$(RDS_ENV_VARS):
 	@if [ $@ = DATABASE_TYPE ]; then \
 		echo DATABASE_TYPE=$(DATABASE_TYPE) >> $(ENV_FILE); \
 	else \
-		PARAM_NAME=$(shell jq -r ".ssm_params.$@" $(PROJECT_CONF)); \
+		PARAM_NAME=$(shell jq -r ".env_var.$@.ssm" $(PROJECT_CONF)); \
 		ENV_VAR=$$(aws ssm get-parameter \
 			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
 			--query 'Parameter.Value' \
