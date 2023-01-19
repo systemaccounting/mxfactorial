@@ -1,20 +1,29 @@
 {
-  "name": "test",
+  "name": "docker",
   "version": "1.0.0",
-  "author": "max funk",
-  "private": true,
-  "description": "mxfactorial integration tests",
+  "description": "mxfactorial docker integration tests",
   "main": "index.js",
   "scripts": {
-    "test": "env-cmd jest --runInBand --silent --testRegex='.*\\.integ\\.[tj]sx?'"
+    "test:up": "SILENCE_EXEC_LOGS=true jest --config config/docker/jest.docker.config.ts --runInBand --detectOpenHandles",
+    "test:docker": "SILENCE_EXEC_LOGS=true jest --config config/docker/jest.docker.base.config.ts --runInBand --detectOpenHandles",
+    "test:cloud": "eval $(cat .env) SILENCE_EXEC_LOGS=true jest --config config/cloud/jest.cloud.config.ts --runInBand --detectOpenHandles"
   },
-  "dependencies": {
-    "env-cmd": "^10.1.0",
-    "graphql-request": "^4.3.0",
-    "jest": "^28.1.2"
-  },
-  "jest": {
-    "verbose": true,
-    "testTimeout": 10000
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@aws-crypto/sha256-js": "^2.0.2",
+    "@aws-sdk/credential-provider-node": "^3.245.0",
+    "@aws-sdk/protocol-http": "^3.226.0",
+    "@aws-sdk/signature-v4": "^3.226.0",
+    "@types/jest": "^29.2.5",
+    "@types/shelljs": "^0.8.11",
+    "axios": "^1.2.2",
+    "graphql-request": "^5.1.0",
+    "jest": "^29.3.1",
+    "shelljs": "^0.8.5",
+    "ts-jest": "^29.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
   }
 }
