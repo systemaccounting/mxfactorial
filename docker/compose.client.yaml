@@ -5,4 +5,4 @@ services:
       context: ../
       dockerfile: ./docker/dev/client.Dockerfile
     ports:
-      - "8089:80"
+      - "8090:80"

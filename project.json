@@ -525,7 +525,7 @@
     "env_var": {
         "GRAPHQL_URI": {
             "ssm": "api/graphql/uri",
-            "docker": "http://localhost:8088"
+            "docker": "http://localhost:8080"
         },
         "NOTIFY_TOPIC_ARN": {
             "ssm": "notifications/sns/topic/arn",
@@ -593,7 +593,7 @@
         },
         "CLIENT_URI": {
             "ssm": "client/uri",
-            "docker": null
+            "docker": "http://localhost:8090"
         },
         "READINESS_CHECK_PATH": {
             "ssm": "service/lambda/readiness_check_path",
@@ -601,19 +601,19 @@
         },
         "RULES_URL": {
             "ssm": "service/lambda/rules/url",
-            "docker": "http://localhost:8080"
+            "docker": "http://localhost:8081"
         },
         "REQUEST_CREATE_URL": {
             "ssm": "service/lambda/request_create/url",
-            "docker": "http://localhost:8081"
+            "docker": "http://localhost:8082"
         },
         "REQUEST_APPROVE_URL": {
             "ssm": "service/lambda/request_approve/url",
-            "docker": "http://localhost:8082"
+            "docker": "http://localhost:8083"
         },
         "REQUEST_BY_ID_URL": {
             "ssm": "service/lambda/request_by_id/url",
-            "docker": "http://localhost:8085"
+            "docker": "http://localhost:8087"
         },
         "REQUESTS_BY_ACCOUNT_URL": {
             "ssm": "service/lambda/requests_by_account/url",
@@ -621,15 +621,15 @@
         },
         "TRANSACTIONS_BY_ACCOUNT_URL": {
             "ssm": "service/lambda/transactions_by_account/url",
-            "docker": "http://localhost:8084"
+            "docker": "http://localhost:8088"
         },
         "TRANSACTION_BY_ID_URL": {
             "ssm": "service/lambda/transaction_by_id/url",
-            "docker": "http://localhost:8083"
+            "docker": "http://localhost:8089"
         },
         "BALANCE_BY_ACCOUNT_URL": {
             "ssm": "service/lambda/balance_by_account/url",
-            "docker": "http://localhost:8087"
+            "docker": "http://localhost:8085"
         }
     },
     "region": "us-east-1",

@@ -3,19 +3,17 @@ import type { ITransactionItem } from "../index.d"
 
 import nullFirstTrItemsNoAppr from "../../../gopkg/testdata/nullFirstTrItemsNoAppr.json"
 
-const port = process.env['PORT'] || 8080;
-
 describe("rules", () => {
 
 	it("adds 2 rule objects", async () => {
 		await process.nextTick(() => {})
-		let { data } = await axios.post("http://localhost:8080/", nullFirstTrItemsNoAppr)
+		let { data } = await axios.post("http://localhost:8081/", nullFirstTrItemsNoAppr)
 		expect(data.transaction.transaction_items).toHaveLength(4)
 	})
 
 	it('1.620 summed tax price', async () => {
 		await process.nextTick(() => {})
-		let { data } = await axios.post("http://localhost:8080/", nullFirstTrItemsNoAppr)
+		let { data } = await axios.post("http://localhost:8081/", nullFirstTrItemsNoAppr)
 
 		let trItems: ITransactionItem[] = data.transaction.transaction_items;
 

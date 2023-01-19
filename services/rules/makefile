@@ -44,7 +44,7 @@ tsnode:
 	@$(DOCKER_ENV_VARS) npm run ts-node
 
 water:
-	@REQ=$$(jq -c . ../gopkg/testdata/bottledWater.json); curl -d "$$REQ" -H 'Content-Type: application/json' http://0.0.0.0:8080
+	@REQ=$$(jq -c . ../gopkg/testdata/bottledWater.json); curl -d "$$REQ" -H 'Content-Type: application/json' http://0.0.0.0:8081
 
 watch:
 	npx tsc -w

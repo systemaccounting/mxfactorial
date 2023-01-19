@@ -120,12 +120,12 @@ grep -E '^rebuild-' ./makefile | sed 's/.$//' | awk '$0="make " $0'
 
 echo ""
 
-echo -e -n "${GREEN}navigate to http://localhost:8089 in a browser and sign in on the web client as \"JacobWebb\" without a password. press any key to continue${RESET}\n\n>"
+echo -e -n "${GREEN}navigate to http://localhost:8090 in a browser and sign in on the web client as \"JacobWebb\" without a password. press any key to continue${RESET}\n\n>"
 read -n 1
 
 echo ""
 
-echo -e -n "${GREEN}navigate to http://localhost:8088 in a browser to view the graphiql explorer. press any key to continue${RESET}\n\n>"
+echo -e -n "${GREEN}navigate to http://localhost:8080 in a browser to view the graphiql explorer. press any key to continue${RESET}\n\n>"
 read -n 1
 
 echo ""

@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: ./docker/dev/request-create.Dockerfile
     ports:
-      - "8081:8080"
+      - "8082:8080"
     environment:
       PGDATABASE: mxfactorial
       PGUSER: test
