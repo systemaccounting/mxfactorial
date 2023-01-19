@@ -10,10 +10,12 @@ beforeAll(done => {
 
 	exec(`make -C ../migrations resetrds ENV=dev DB=test`, execOpts, (code1, stdout1, stderr1) => {
 
-		// if (stderr) { console.log(stderr1) }
+		if (process.env.SILENCE_EXEC_LOGS != 'true') { console.log(stdout1) }
+
 		exec(`make -C ../migrations/dumps dump-rds-testseed`, execOpts, (code2, stdout2, stderr2) => {
 
-			// if (stderr) { console.log(stderr2) }
+			if (process.env.SILENCE_EXEC_LOGS != 'true') { console.log(stdout2) }
+
 			done()
 		})
 	})
@@ -23,7 +25,8 @@ beforeAll(done => {
 afterEach(done => {
 	exec(`make -C ../migrations/dumps restore-rds-testseed ENV=dev`, execOpts, (code, stdout, stderr) => {
 
-		// if (stderr) { console.log(stderr) }
+		if (process.env.SILENCE_EXEC_LOGS != 'true') { console.log(stdout) }
+
 		done()
 	})
 })
