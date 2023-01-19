@@ -2,15 +2,10 @@ package graph
 
 import (
 	"encoding/json"
-	"log"
 	"os"
-	"strconv"
 
-	"github.com/pkg/errors"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/lambda"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/httpclient"
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
 )
 
@@ -18,20 +13,19 @@ import (
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
 
-var awsRegion string = os.Getenv("AWS_REGION")
-var ruleLambdaArn string = os.Getenv("RULE_LAMBDA_ARN")
-var reqCreateLambdaArn string = os.Getenv("REQUEST_CREATE_LAMBDA_ARN")
-var reqApproveLambdaArn string = os.Getenv("REQUEST_APPROVE_LAMBDA_ARN")
-var reqByIDLambdaArn string = os.Getenv("REQUEST_BY_ID_LAMBDA_ARN")
-var reqsByAccountLambdaArn string = os.Getenv("REQUESTS_BY_ACCOUNT_LAMBDA_ARN")
-var transByIDLambdaArn string = os.Getenv("TRANSACTION_BY_ID_LAMBDA_ARN")
-var transByAccountLambdaArn string = os.Getenv("TRANSACTIONS_BY_ACCOUNT_LAMBDA_ARN")
-var balanceByAccountLmabdaArn string = os.Getenv("BALANCE_BY_ACCOUNT_LAMBDA_ARN")
+var (
+	rulesUrl                 string = os.Getenv("RULES_URL")
+	requestCreateUrl                = os.Getenv("REQUEST_CREATE_URL")
+	requestApproveUrl               = os.Getenv("REQUEST_APPROVE_URL")
+	requestByIDUrl                  = os.Getenv("REQUEST_BY_ID_URL")
+	requestsByAccountUrl            = os.Getenv("REQUESTS_BY_ACCOUNT_URL")
+	transactionByIDUrl              = os.Getenv("TRANSACTION_BY_ID_URL")
+	transactionsByAccountUrl        = os.Getenv("TRANSACTIONS_BY_ACCOUNT_URL")
+	balanceByAccountUrl             = os.Getenv("BALANCE_BY_ACCOUNT_URL")
+)
 
 type Resolver struct {
-	Lambda struct {
-		Sess *lambda.Lambda
-	}
+	// todo: httpclient here
 }
 
 // IntraEvent is modified from
@@ -52,14 +46,6 @@ type MultipleTransactionResponse struct {
 	Transactions []*model.Transaction `json:"transactions"`
 }
 
-func UnquoteBytes(b []byte) ([]byte, error) {
-	str, err := strconv.Unquote(string(b))
-	if err != nil {
-		return nil, err
-	}
-	return []byte(str), nil
-}
-
 func (e *IntraEvent) UnmarshalTransaction(payload []byte) (*model.Transaction, error) {
 	if err := json.Unmarshal(payload, e); err != nil {
 		return nil, err
@@ -71,47 +57,6 @@ func (e *IntraEvent) UnmarshalIntraEvent(payload []byte) error {
 	return json.Unmarshal(payload, e)
 }
 
-func (r *Resolver) CreateLambdaSession() error {
-	// from https://docs.aws.amazon.com/sdk-for-go/api/aws/session/#pkg-overview
-	// Sessions should be cached when possible, because creating a new Session will load all configuration values from the environment, and config files each time the Session is created.
-	if r.Lambda.Sess == nil {
-		if len(awsRegion) == 0 {
-			return errors.New("AWS_REGION not set")
-		}
-
-		sess, err := session.NewSession(
-			&aws.Config{
-				Region: aws.String(awsRegion),
-			},
-		)
-
-		if err != nil {
-			return nil
-		}
-
-		r.Lambda.Sess = lambda.New(sess)
-	}
-
-	return nil
-}
-
-func (r *Resolver) InvokeLambda(
-	arn string,
-	payload []byte,
-) (*lambda.InvokeOutput, error) {
-
-	if len(arn) == 0 {
-		return nil, errors.New("lambda arn required")
-	}
-
-	input := &lambda.InvokeInput{
-		FunctionName: aws.String(arn),
-		Payload:      payload,
-	}
-
-	return r.Lambda.Sess.Invoke(input)
-}
-
 func (r *Resolver) InvokeRules(
 	transactionItems []*model.TransactionItemInput,
 ) (*model.Transaction, error) {
@@ -121,15 +66,16 @@ func (r *Resolver) InvokeRules(
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(ruleLambdaArn, payload)
+	c := httpclient.NewHttpClient(rulesUrl)
+
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Print(err.Error())
 		return nil, err
 	}
 
 	var rulesEvent IntraEvent
 
-	return rulesEvent.UnmarshalTransaction(result.Payload)
+	return rulesEvent.UnmarshalTransaction(response)
 }
 
 type TransactionItemsClientEvent struct {
@@ -202,8 +148,6 @@ func (r *Resolver) InvokeRequestCreate(
 	authAccount string,
 ) (*model.Transaction, error) {
 
-	funcName := "request create"
-
 	requestEvent := CreateIntraTransactionClientEvent(
 		&authAccount,
 		transactionItems,
@@ -211,32 +155,26 @@ func (r *Resolver) InvokeRequestCreate(
 
 	payload, err := json.Marshal(requestEvent)
 	if err != nil {
-		log.Printf("invoke %v marshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(reqCreateLambdaArn, payload)
+	c := httpclient.NewHttpClient(requestCreateUrl)
+
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	// todo: test string(result.Payload) for {"errorMessage":"...","errorType":"errorString"}
 
-	unquoted, err := UnquoteBytes(result.Payload)
-	if err != nil {
-		log.Printf("invoke %v unquote: %v", funcName, err.Error())
-		return nil, err
-	}
-
 	var resp TransactionResponse
 
-	err = json.Unmarshal(unquoted, &resp)
+	err = json.Unmarshal(response, &resp)
 	if err != nil {
-		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
-
 	return resp.Transaction, nil
 }
 
@@ -247,8 +185,6 @@ func (r *Resolver) InvokeRequestApprove(
 	authAccount string,
 ) (*model.Transaction, error) {
 
-	funcName := "request approve"
-
 	approvalEvent := CreateRequestApproveEvent(
 		&transactionID,
 		&accountName,
@@ -258,27 +194,22 @@ func (r *Resolver) InvokeRequestApprove(
 
 	payload, err := json.Marshal(approvalEvent)
 	if err != nil {
-		log.Printf("invoke %v marshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(reqApproveLambdaArn, payload)
-	if err != nil {
-		log.Printf("invoke %v lambda: %v", funcName, err.Error())
-		return nil, err
-	}
+	c := httpclient.NewHttpClient(requestApproveUrl)
 
-	unquoted, err := UnquoteBytes(result.Payload)
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	var resp TransactionResponse
 
-	err = json.Unmarshal(unquoted, &resp)
+	err = json.Unmarshal(response, &resp)
 	if err != nil {
-		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
@@ -290,8 +221,6 @@ func (r *Resolver) InvokeRequestByID(
 	authAccount string,
 ) (*model.Transaction, error) {
 
-	funcName := "request by id"
-
 	queryByIDEvent := CreateQueryByIDEvent(
 		&authAccount,
 		&transactionID,
@@ -299,27 +228,22 @@ func (r *Resolver) InvokeRequestByID(
 
 	payload, err := json.Marshal(queryByIDEvent)
 	if err != nil {
-		log.Printf("invoke %v marshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(reqByIDLambdaArn, payload)
-	if err != nil {
-		log.Printf("invoke %v lambda: %v", funcName, err.Error())
-		return nil, err
-	}
+	c := httpclient.NewHttpClient(requestByIDUrl)
 
-	unquoted, err := UnquoteBytes(result.Payload)
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	var resp TransactionResponse
 
-	err = json.Unmarshal(unquoted, &resp)
+	err = json.Unmarshal(response, &resp)
 	if err != nil {
-		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
@@ -331,8 +255,6 @@ func (r *Resolver) InvokeRequestsByAccount(
 	authAccount string,
 ) ([]*model.Transaction, error) {
 
-	funcName := "requests by acount"
-
 	queryByAccountEvent := CreateQueryByAccountEvent(
 		&authAccount,
 		&accountName,
@@ -340,29 +262,22 @@ func (r *Resolver) InvokeRequestsByAccount(
 
 	payload, err := json.Marshal(queryByAccountEvent)
 	if err != nil {
-		log.Printf("invoke %v marshal: %v", funcName, err.Error())
-		log.Print(err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(reqsByAccountLambdaArn, payload)
-	if err != nil {
-		log.Printf("invoke %v lambda: %v", funcName, err.Error())
-		return nil, err
-	}
+	c := httpclient.NewHttpClient(requestsByAccountUrl)
 
-	unquoted, err := UnquoteBytes(result.Payload)
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	var resp MultipleTransactionResponse
 
-	err = json.Unmarshal(unquoted, &resp)
+	err = json.Unmarshal(response, &resp)
 	if err != nil {
-		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
-		log.Print(err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
@@ -374,8 +289,6 @@ func (r *Resolver) InvokeTransactionByID(
 	authAccount string,
 ) (*model.Transaction, error) {
 
-	funcName := "transaction by id"
-
 	queryByIDEvent := CreateQueryByIDEvent(
 		&authAccount,
 		&transactionID,
@@ -383,27 +296,21 @@ func (r *Resolver) InvokeTransactionByID(
 
 	payload, err := json.Marshal(queryByIDEvent)
 	if err != nil {
-		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(transByIDLambdaArn, payload)
+	c := httpclient.NewHttpClient(transactionByIDUrl)
+
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
-
-	unquoted, err := UnquoteBytes(result.Payload)
-	if err != nil {
-		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
-		return nil, err
-	}
-
 	var resp TransactionResponse
 
-	err = json.Unmarshal(unquoted, &resp)
+	err = json.Unmarshal(response, &resp)
 	if err != nil {
-		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
@@ -415,8 +322,6 @@ func (r *Resolver) InvokeTransactionsByAccount(
 	authAccount string,
 ) ([]*model.Transaction, error) {
 
-	funcName := "transactions by account"
-
 	queryByAccountEvent := CreateQueryByAccountEvent(
 		&authAccount,
 		&accountName,
@@ -424,27 +329,22 @@ func (r *Resolver) InvokeTransactionsByAccount(
 
 	payload, err := json.Marshal(queryByAccountEvent)
 	if err != nil {
-		log.Printf("invoke %v marshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(transByAccountLambdaArn, payload)
-	if err != nil {
-		log.Printf("invoke %v lambda: %v", funcName, err.Error())
-		return nil, err
-	}
+	c := httpclient.NewHttpClient(transactionsByAccountUrl)
 
-	unquoted, err := UnquoteBytes(result.Payload)
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
 		return nil, err
 	}
 
 	var resp MultipleTransactionResponse
 
-	err = json.Unmarshal(unquoted, &resp)
+	err = json.Unmarshal(response, &resp)
 	if err != nil {
-		log.Printf("invoke %v unmarshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
@@ -456,8 +356,6 @@ func (r *Resolver) InvokeBalanceByAccount(
 	authAccount string,
 ) (*string, error) {
 
-	funcName := "balance by account"
-
 	queryByAccountEvent := CreateQueryByAccountEvent(
 		&authAccount,
 		&accountName,
@@ -465,23 +363,18 @@ func (r *Resolver) InvokeBalanceByAccount(
 
 	payload, err := json.Marshal(queryByAccountEvent)
 	if err != nil {
-		log.Printf("invoke %v marshal: %v", funcName, err.Error())
+		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 
-	result, err := r.InvokeLambda(balanceByAccountLmabdaArn, payload)
+	c := httpclient.NewHttpClient(balanceByAccountUrl)
+
+	response, err := c.Post(payload)
 	if err != nil {
-		log.Printf("invoke %v lambda: %v", funcName, err.Error())
 		return nil, err
 	}
 
-	unquoted, err := UnquoteBytes(result.Payload)
-	if err != nil {
-		log.Printf("invoke %v unquote bytes: %v", funcName, err.Error())
-		return nil, err
-	}
+	balance := string(response)
 
-	resp := string(unquoted)
-
-	return &resp, nil
+	return &balance, nil
 }
