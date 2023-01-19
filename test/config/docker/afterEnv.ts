@@ -5,8 +5,9 @@ const execOpts: ExecOptions = { silent: (process.env.SILENCE_EXEC_LOGS === 'true
 
 // dump migrations/dumps/testseed.sql to reset db after each test
 beforeAll(() => {
-	const stderr = exec(`make -C .. dump-testseed`, execOpts).stderr
-	// if (stderr) { console.log(stderr) }
+	const stdout = exec(`make -C .. dump-testseed`, execOpts).stdout
+
+	if (process.env.SILENCE_EXEC_LOGS != 'true') { console.log(stdout) }
 
 	process.env.GRAPHQL_URI = config.env_var.GRAPHQL_URI.docker
 	process.env.RULES_URL = config.env_var.RULES_URL.docker
@@ -21,6 +22,6 @@ beforeAll(() => {
 
 // restore from migrations/dumps/testseed.sql to reset db after each test
 afterEach(async () => {
-	const stderr = exec(`make -C .. restore-testseed`, execOpts)
-	// if (stderr) { console.log(stderr) }
+	const stdout = exec(`make -C .. restore-testseed`, execOpts).stdout
+	if (process.env.SILENCE_EXEC_LOGS != 'true') { console.log(stdout) }
 })
