@@ -71,22 +71,13 @@ this project intends to exploit the software engineering community's familiarity
 private, receiving added value is sustained & acknowledged by sending value
 
 ### contribute
-* to contribute code, negotiate rates in new or existing issues, fork, build your environment, then send pull requests  
+* to contribute code, create an issue to request a developer license and negotiate rates, then fork and send pull requests  
 * supporters preferring to contribute funds may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page
 
-### byoe development
-1. `git clone https://github.com/systemaccounting/mxfactorial`, or fork and git clone
-1. `make new-iam` in project root to create a temporary admin iam credential for your gitpod workspace
-1. `git checkout -b feature-branch`
-1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, e.g. `https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/feature-branch`
-1. ***b***uild ***y***our ***o***wn ***e***nvironment: follow prompts to build infrastructure and deploy app code to aws (10 mins)
-1. `make test ENV=dev` in project root to test creating a transaction request and approval
-1. `make get-secrets ENV=dev` in project root to create an `.env` file with the `CLIENT_URI` and `GRAPHQL_URI` variables
-1. navigate to `CLIENT_URI` and `GRAPHQL_URI` in a browser to view the web client and graphiql explorer
-1. import `services/graphql/postman/graphql.postman_collection.json` into postman and set the `GRAPHQL_URI` environment variable to test the api, e.g. `graphql/balance`
-1. `make delete-dev` to tear down cloud environment (leave workspace running until finished)
-1. delete gitpod workspace in browser ui
-1. `make delete-iam` to delete gitpod iam credential
+### development
+
+1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, e.g. `https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop`, or `git clone https://github.com/systemaccounting/mxfactorial` locally (*docker & npm required*)
+1. `make bootcamp`
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:
