@@ -1,5 +1,5 @@
 APP_NAME=test
-RELATIVE_PROJECT_ROOT_PATH=../..
+RELATIVE_PROJECT_ROOT_PATH=..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 ENV_FILE=$(CURDIR)/.env
@@ -24,6 +24,8 @@ test-docker:
 	if ! [ -d node_modules ]; then npm install; fi; npm run test:docker
 
 test-cloud:
+	@$(MAKE) -s test-env-arg
+	@$(MAKE) get-secrets
 	@echo "cloud integration test run time: <20 min"
 	if ! [ -d node_modules ]; then npm install; fi; npm run test:cloud
 
