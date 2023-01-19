@@ -6,6 +6,7 @@ PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
+DOCKER_URL=$(shell jq -r ".env_var.REQUESTS_BY_ACCOUNT_URL.docker" $(PROJECT_CONF))
 
 RETURN_RECORD_LIMIT=20
 TEST_ACCOUNT=JacobWebb
@@ -79,6 +80,26 @@ clean-log:
 	bash scripts/clean-invoke-log.sh \
 		--app-name $(APP_NAME)
 
+###################### secrets ######################
+
+test-env-file:
+ifeq (,$(wildcard $(ENV_FILE)))
+	$(error no .env file, run 'make get-secrets ENV=dev')
+endif
+
+clean-env:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/clean-env.sh \
+		--app-name $(APP_NAME)
+
+get-secrets:
+	@$(MAKE) -s test-env-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/create-env.sh \
+		--app-name $(APP_NAME) \
+		--env $(ENV) \
+		--region $(REGION)
+
 ###################### deploy ######################
 
 put-object:
@@ -120,3 +141,26 @@ now:
 	$(MAKE) compile
 	$(MAKE) zip
 	$(MAKE) deploy-only ENV=dev
+
+###################### invoke ######################
+
+invoke:
+	@$(MAKE) invoke-url
+
+invoke-url:
+	@$(MAKE) -s test-env-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/invoke-function-url.sh \
+		--app-name $(APP_NAME) \
+		--payload $(TEST_EVENT) \
+        --env $(ENV) \
+        --region $(REGION)
+
+invoke-docker:
+	@curl -s -d $(TEST_EVENT) $(DOCKER_URL) | jq .
+
+demo-docker:
+	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@echo $(TEST_EVENT) | jq .
+	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@$(MAKE) invoke-docker
