@@ -2,6 +2,6 @@ FROM golang:alpine
 
 WORKDIR /app
 
-COPY go.* .
+ADD go.* .
 
 RUN go mod download
