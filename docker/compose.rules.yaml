@@ -1,0 +1,20 @@
+name: mxf
+services:
+  rules:
+    build:
+      context: ../
+      dockerfile: ./docker/dev/rules.Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+    depends_on:
+      - postgres

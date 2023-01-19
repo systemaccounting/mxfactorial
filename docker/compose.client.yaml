@@ -1,0 +1,8 @@
+name: mxf
+services:
+  client:
+    build:
+      context: ../
+      dockerfile: ./docker/dev/client.Dockerfile
+    ports:
+      - "8089:80"

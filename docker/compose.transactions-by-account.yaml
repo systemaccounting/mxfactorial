@@ -1,0 +1,21 @@
+name: mxf
+services:
+  transactions-by-account:
+    build:
+      context: ../
+      dockerfile: ./docker/dev/transactions-by-account.Dockerfile
+    ports:
+      - "8084:8080"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      RETURN_RECORD_LIMIT: 20
+    depends_on:
+      - postgres

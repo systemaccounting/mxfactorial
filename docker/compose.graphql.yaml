@@ -1,0 +1,18 @@
+name: mxf
+services:
+  graphql:
+    build:
+      context: ../
+      dockerfile: ./docker/dev/graphql.Dockerfile
+    ports:
+      - "8088:8080"
+    environment:
+      RULES_URL: "http://rules:8080"
+      REQUEST_CREATE_URL: "http://request-create:8080"
+      REQUEST_APPROVE_URL: "http://request-approve:8080"
+      REQUEST_BY_ID_URL: "http://request-by-id:8080"
+      REQUESTS_BY_ACCOUNT_URL: "http://requests-by-account:8080"
+      TRANSACTIONS_BY_ACCOUNT_URL: "http://transactions-by-account:8080"
+      TRANSACTION_BY_ID_URL: "http://transaction-by-id:8080"
+      BALANCE_BY_ACCOUNT_URL: "http://balance-by-account:8080"
+      LOCAL_ENV: 1
