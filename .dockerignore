@@ -1,0 +1,7 @@
+**/node_modules
+**/*.zip
+**/*.terraform
+**/.env
+**/index.handler
+client/public/build
+migrations/dumps/testseed.sql
