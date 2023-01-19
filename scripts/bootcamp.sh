@@ -109,7 +109,7 @@ eval_with_no_print_directory "$CMD"
 echo ""
 
 while [[ $CMD != "docker logs mxf-transactions-by-account-1" ]]; do
-	read -rep $'\e[32m"docker logs mxf-transactions-by-account-1" to view first entry "hello tutorial" in docker logs\e[0m\n\n> ' CMD
+	read -rep $'\e[32m"docker logs mxf-transactions-by-account-1" to view "hello tutorial" entry in docker logs\e[0m\n\n> ' CMD
 done
 
 eval "$CMD"
