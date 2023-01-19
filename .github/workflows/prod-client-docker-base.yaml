@@ -5,6 +5,7 @@ on:
     paths:
     - client/package.json
     - client/package-lock.json
+    - docker/prod/client-base.Dockerfile
 
 jobs:
   deploy:
