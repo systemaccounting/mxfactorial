@@ -7,7 +7,7 @@
     "test": "jest",
     "test:single": "jest --watch --runInBand ./src/handlers/applyRules.test.ts",
     "test:integ:docker": "eval \"$(make print-docker-env-vars)\" jest --testMatch '**/src/**/*.integ.ts' ./src/tests/docker.integ.ts --testPathIgnorePatterns='[]' --silent=true ./src/tests/docker.integ.ts",
-    "test:integ:cloud": "NODE_NO_WARNINGS=1 env-cmd jest --config ./src/tests/cloud.jest.config.ts --testPathIgnorePatterns='[]' --forceExit --testTimeout=60000 --silent=true --runInBand ./src/tests/cloud.integ.ts",
+    "test:integ:cloud": "NODE_NO_WARNINGS=1 env-cmd jest --config ./src/tests/cloud.jest.config.ts --testPathIgnorePatterns='[]' --detectOpenHandles --testTimeout=60000 --silent=true --runInBand ./src/tests/cloud.integ.ts",
     "build": "tsc",
     "watch": "tsc -w",
     "nodemon": "eval \"$(make print-docker-env-vars)\" nodemon ./src/server.ts",
