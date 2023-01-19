@@ -140,7 +140,7 @@ read -n 1
 
 echo ""
 
-echo -e -n "${GREEN}OPTIONAL: \"make build-dev\" to build a cloud dev environment in your own aws account (cost: 0.60/day). press any key to continue${RESET}\n\n>"
+echo -e -n "${GREEN}OPTIONAL: \"aws configure && make build-dev\" to build a cloud dev environment in your own aws account (cost: 0.60/day). press any key to continue${RESET}\n\n>"
 read -n 1
 
 echo ""
