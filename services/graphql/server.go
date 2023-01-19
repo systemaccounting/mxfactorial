@@ -14,6 +14,7 @@ import (
 	"github.com/awslabs/aws-lambda-go-api-proxy/core"
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/generated"
 )
@@ -67,6 +68,7 @@ func main() {
 		// create web server for local development
 		port := "8080"
 		log.Printf("connect to http://localhost:%s/ for playground", port)
-		log.Fatal(http.ListenAndServe(":"+port, r))
+		handler := cors.Default().Handler(r) // allow any origin in local dev env
+		log.Fatal(http.ListenAndServe(":"+port, handler))
 	}
 }
