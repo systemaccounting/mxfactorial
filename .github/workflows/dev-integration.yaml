@@ -3,9 +3,15 @@ name: dev-rules
 on:
   push:
     paths:
+    - 'services/graphql/**'
     - 'services/rules/**'
     - 'services/request-create/**'
     - 'services/request-approve/**'
+    - 'services/balance-by-account/**'
+    - 'services/request-by-id/**'
+    - 'services/requests-by-account/**'
+    - 'services/transaction-by-id/**'
+    - 'services/transactions-by-account/**'
     - 'migrations/schema/**'
     - 'test/**'
     branches-ignore:
@@ -15,19 +21,18 @@ jobs:
   integration:
     name: integration test
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: us-east-1
-      CI: true
     steps:
       - uses: actions/checkout@v3
-      - name: install dependencies
-        run: make install
-        working-directory: test
-      - name: create .env file
-        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make get-secrets ENV=dev
-        working-directory: test
+      - name: install latest psql client
+        run: |
+          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends postgresql-client
+      - name: install golang-migrate
+        run: |
+          curl -LO https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.deb
+          sudo dpkg -i migrate.linux-amd64.deb
+          rm migrate.linux-amd64.deb
       - name: integration tests
-        run: make test ENV=dev
-        working-directory: test
+        run: make -C ./test test
