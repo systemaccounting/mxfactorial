@@ -376,9 +376,9 @@ builds a dev environment in aws
 
 deletes dev environment in aws
 
-##### `configure-gitpod.sh`
+##### `configure-aws-build.sh`
 
-configures a gitpod with aws credentials, then builds a dev environment in aws
+configures machine with aws credentials, then builds a dev environment in aws
 
 ##### `manage-gitpod-iam.sh`
 
@@ -399,3 +399,23 @@ creates then sets custom env id to enable access to dev env from multiple worksp
 ##### `delete-dev-storage.sh`
 
 deletes storage for cloud dev environment with aws cli instead of terraform when state file not found, e.g. cloud dev env storage was created on different machine
+
+##### `list-lambdas.sh`
+
+lists lambdas created by terraform
+
+##### `compose.sh`
+
+creates systemaccounting services with docker compose
+
+##### `invoke-function-url.sh`
+
+invokes [lambda function urls](https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html)
+
+##### `rebuild-service.sh`
+
+rebuilds image and container for docker compose service
+
+##### `bootcamp.sh`
+
+trains user on docker compose commands, services and tests
