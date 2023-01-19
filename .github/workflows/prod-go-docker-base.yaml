@@ -1,0 +1,23 @@
+name: prod-go-base-image
+
+on:
+  push:
+    paths:
+    - go.mod
+    - go.sum
+
+jobs:
+  deploy:
+    name: deploy go-base image
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: mxfactorial/go-base:v1
+      CI: true
+    steps:
+      - uses: actions/checkout@v3
+      - name: docker login
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u mxfactorial --password-stdin
+      - name: docker build
+        run: docker build -f ./docker/prod/go-base.Dockerfile -t "$IMAGE_NAME" .
+      - name: docker push
+        run: docker image push "$IMAGE_NAME"
