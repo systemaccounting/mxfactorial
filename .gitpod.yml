@@ -2,5 +2,5 @@ image:
   file: docker/.gitpod.Dockerfile
 
 tasks:
-  - name: configure
-    command: bash scripts/configure-gitpod.sh
+  - name: start docker
+    command: sudo docker-up
