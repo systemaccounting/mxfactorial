@@ -130,6 +130,10 @@ func (t TransactionService) GetLastNTransactions(
 
 	trIDs := trs.ListIDs()
 
+	if len(trIDs) == 0 {
+		return BuildTransactions(types.Transactions{}, types.TransactionItems{}, types.Approvals{}), nil
+	}
+
 	trItems, approvals, err := t.GetTrItemsAndApprovalsByTransactionIDs(trIDs)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
@@ -252,21 +256,11 @@ func BuildTransactions(
 	apprvs types.Approvals,
 ) types.Transactions {
 
-	var transactions types.Transactions
-
 	for _, v := range trs {
-
-		trWithTrItems := AttachTransactionItemsToTransaction(trItems, *v)
-
-		trItemsWithApprvs := AttachApprovalsToTransactionItems(apprvs, trItems)
-
-		trWithTrItems.TransactionItems = trItemsWithApprvs
-
-		transactions = append(transactions, &trWithTrItems)
-
+		BuildTransaction(v, trItems, apprvs)
 	}
 
-	return transactions
+	return trs
 
 }
 
@@ -276,20 +270,19 @@ func BuildTransaction(
 	apprvs types.Approvals,
 ) *types.Transaction {
 
-	// attach approvals to transaction items
-	transactionItems := AttachApprovalsToTransactionItems(apprvs, trItems)
-
 	// attach transaction items to transaction
-	tr.TransactionItems = transactionItems
+	AttachTransactionItemsToTransaction(trItems, tr)
 
-	// return transaction
+	// attach approvals to transaction items
+	AttachApprovalsToTransactionItems(apprvs, trItems)
+
 	return tr
 }
 
 func AttachApprovalsToTransactionItems(
 	apprvs types.Approvals,
 	trItems types.TransactionItems,
-) types.TransactionItems {
+) {
 
 	for _, ti := range trItems {
 		for _, ap := range apprvs {
@@ -298,21 +291,17 @@ func AttachApprovalsToTransactionItems(
 			}
 		}
 	}
-
-	return trItems
 }
 
 // used when filtering transaction items belonging to multiple transactions
 func AttachTransactionItemsToTransaction(
 	trItems types.TransactionItems,
-	tr types.Transaction,
-) types.Transaction {
+	tr *types.Transaction,
+) {
 
 	for _, ti := range trItems {
 		if *ti.TransactionID == *tr.ID {
 			tr.TransactionItems = append(tr.TransactionItems, ti)
 		}
 	}
-
-	return tr
 }
