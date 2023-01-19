@@ -4,7 +4,11 @@ variable "env_vars" {
   type    = map(any)
   default = null
 }
-variable "invoke_principals" {
+variable "invoke_url_principals" {
+  type    = list(string)
+  default = []
+}
+variable "invoke_arn_principals" {
   type    = list(string)
   default = []
 }

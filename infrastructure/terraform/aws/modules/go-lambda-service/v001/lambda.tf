@@ -103,12 +103,20 @@ resource "aws_iam_role_policy_attachment" "default" {
 }
 
 resource "aws_lambda_permission" "function_url" {
-  count                  = length(var.invoke_principals)
+  count                  = length(var.invoke_url_principals)
   statement_id           = "Allow${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}UrlExecution${count.index}"
   action                 = "lambda:InvokeFunctionUrl"
   function_name          = aws_lambda_function.default.function_name
-  principal              = var.invoke_principals[count.index]
+  principal              = var.invoke_url_principals[count.index]
   function_url_auth_type = "AWS_IAM"
+}
+
+resource "aws_lambda_permission" "function_arn" {
+  count         = length(var.invoke_arn_principals)
+  statement_id  = "Allow${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}ArnExecution${count.index}"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.default.function_name
+  principal     = var.invoke_arn_principals[count.index]
 }
 
 resource "aws_iam_role_policy_attachment" "extra" {
