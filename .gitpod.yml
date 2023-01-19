@@ -1,6 +1,2 @@
 image:
   file: docker/.gitpod.Dockerfile
-
-tasks:
-  - name: start docker
-    command: sudo docker-up
