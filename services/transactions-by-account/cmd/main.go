@@ -4,13 +4,13 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
@@ -29,6 +29,7 @@ var (
 		os.Getenv("PGUSER"),
 		os.Getenv("PGPASSWORD"),
 		os.Getenv("PGDATABASE"))
+	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
 )
 
 type SQLDB interface {
@@ -55,7 +56,7 @@ type ITransactionService interface {
 	AddApprovalTimesByAccountAndRole(trID types.ID, accountName string, accountRole types.Role) (pgtype.Timestamptz, error)
 }
 
-func lambdaFn(
+func run(
 	ctx context.Context,
 	e types.QueryByAccount,
 	dbConnector func(context.Context, string) (SQLDB, error),
@@ -108,9 +109,9 @@ func lambdaFn(
 	return intraTrs.MarshalIntraTransactions()
 }
 
-// wraps lambdaFn accepting interfaces for testability
+// wraps run accepting interfaces for testability
 func handleEvent(ctx context.Context, e types.QueryByAccount) (string, error) {
-	return lambdaFn(
+	return run(
 		ctx,
 		e,
 		newIDB,
@@ -118,12 +119,12 @@ func handleEvent(ctx context.Context, e types.QueryByAccount) (string, error) {
 	)
 }
 
-// enables lambdaFn unit testing
+// enables run fn unit testing
 func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
 	return postgres.NewDB(ctx, dsn)
 }
 
-// enables lambdaFn unit testing
+// enables run fn unit testing
 func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
@@ -132,39 +133,28 @@ func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	return service.NewTransactionService(db), nil
 }
 
-// avoids lambda package dependency during local development
-func localEnvOnly(event string) {
-
-	var testEvent types.QueryByAccount
-
-	// unmarshal test event
-	err := json.Unmarshal([]byte(event), &testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// call event handler with test event
-	resp, err := handleEvent(context.Background(), testEvent)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print(resp)
-}
-
 func main() {
 
-	if len(recordLimit) == 0 {
-		log.Fatal("env var not set")
-	}
+	r := gin.Default()
 
-	// ### LOCAL ENV only: assign event from env var
-	var osTestEvent string = os.Getenv("TEST_EVENT")
-	if len(osTestEvent) > 0 {
-		localEnvOnly(osTestEvent)
-		return
-	}
-	// ###
+	// aws-lambda-web-adapter READINESS_CHECK_*
+	r.GET(readinessCheckPath, func(c *gin.Context) {
+		c.Status(http.StatusOK)
+	})
 
-	lambda.Start(handleEvent)
+	var queryByAccount types.QueryByAccount
+
+	r.POST("/", func(c *gin.Context) {
+
+		c.BindJSON(&queryByAccount)
+
+		resp, err := handleEvent(c.Request.Context(), queryByAccount)
+		if err != nil {
+			c.Status(http.StatusBadRequest)
+		}
+
+		c.String(http.StatusOK, resp)
+	})
+
+	r.Run()
 }
