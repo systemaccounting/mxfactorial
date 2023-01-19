@@ -13,7 +13,7 @@ export default function setup() {
 
 	const execOpts: ExecOptions = { silent: (process.env.SILENCE_EXEC_LOGS === 'true') }
 
-	exec(`make -C ../.. compose-up`, execOpts)
+	exec(`make -C .. compose-up`, execOpts)
 
 	var lineCount = "0"
 
