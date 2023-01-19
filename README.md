@@ -78,8 +78,8 @@ private, receiving added value is sustained & acknowledged by sending value
 
 1. create an issue with the "developer license request" title
 1. fork after receiving developer license approval
-1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, or click:
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop)
+1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, or click:  
+    [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop)
 1. `make bootcamp`
 
 ### notebook
