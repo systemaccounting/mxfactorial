@@ -46,14 +46,8 @@ export default async function applyRules(req: Request, res: Response, next: Next
 		approvals: new Array(),
 	}))
 
-	// console.log('db', db)
-
 	// get client connection from pool
 	const client = await db.connect()
-
-	// console.log('client', client)
-
-	// console.log('addRuleItems', addRuleItems)
 
 	// get item rules from db, then create items from rules
 	let addedItems: ITransactionItem[];
