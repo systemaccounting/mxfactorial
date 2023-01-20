@@ -1,7 +1,7 @@
 <a href="https://www.youtube.com/watch?v=sN3kh-nv-68&list=PLWTZbGMyrdcWhfa-VNOEOFB0b6t3wX22T
 "><p align="center"><img width="646" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/127420506-ca214ea5-a05b-43a3-b23d-36297ac2adca.png"></p></a>
 
-[![contribute](https://img.shields.io/badge/contribute-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement) [![Discord](https://img.shields.io/discord/868565277955203122.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/TCuRQPSQgF)
+[![contribute](https://img.shields.io/badge/contribute-paypal-brightgreen.svg)](https://systemaccounting.nationbuilder.com/financial_endorsement) [![Contribute with Gitpod](https://img.shields.io/badge/Contribute%20with-Gitpod-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop) [![Discord](https://img.shields.io/discord/868565277955203122.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/TCuRQPSQgF)
 
 a payment application intended for deployment by the united states treasury that eliminates monetary inflation, systemic default risk, and the uncompetitive access to capital  
 
@@ -71,16 +71,17 @@ this project intends to exploit the software engineering community's familiarity
 private, receiving added value is sustained & acknowledged by sending value
 
 ### contribute
-* to contribute code, create an issue to request a developer license and negotiate rates, then fork and send pull requests  
-* supporters preferring to contribute funds may do so from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page
+
+**funds**: send from the [financial support](https://systemaccounting.nationbuilder.com/financial_endorsement) page
+
+**code**: create an issue with a "developer license request" title, negotiate rate, fork, then send pull requests
 
 ### development
 
-1. create an issue with the "developer license request" title
-1. fork after receiving developer license approval
-1. create a gitpod by navigating to a [context url](https://www.gitpod.io/docs/introduction/learn-gitpod/context-url) in the browser, or click:  
-    [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop)
-1. `make bootcamp`
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/systemaccounting/mxfactorial/tree/develop)
+```
+> make bootcamp
+```
 
 ### notebook
 access `./mxfactorial.ipynb` jupyter notebook locally:
