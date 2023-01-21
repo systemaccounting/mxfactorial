@@ -1,2 +1,58 @@
+
 image:
   file: docker/.gitpod.Dockerfile
+ports:
+  - name: graphql
+    description: api
+    port: 8080
+    onOpen: open-browser
+  - name: rules
+    description: automates transactions
+    port: 8081
+    onOpen: ignore
+  - name: request-create
+    description: creates transaction requests
+    port: 8082
+    onOpen: ignore
+  - name: request-approve
+    description: approves transaction requests
+    port: 8083
+    onOpen: ignore
+  - name: balance-by-account
+    description: queries a balance by account
+    port: 8085
+    onOpen: ignore
+  - name: requests-by-account
+    description: queries transaction requests by account
+    port: 8086
+    onOpen: ignore
+  - name: request-by-id
+    description: queries a transaction request by id
+    port: 8087
+    onOpen: ignore
+  - name: transactions-by-account
+    description: queries transactions by account
+    port: 8088
+    onOpen: ignore
+  - name: transaction-by-id
+    description: queries a transaction by id
+    port: 8089
+    onOpen: ignore
+  - name: client
+    description: web client
+    port: 8090
+    onOpen: open-browser
+  - name: postgres
+    description: db
+    port: 5432
+    onOpen: ignore
+vscode:
+  extensions:
+    - rangav.vscode-thunder-client
+    - hashicorp.terraform
+    - golang.go
+    - svelte.svelte-vscode
+    - shd101wyy.markdown-preview-enhanced
+    - GraphQL.vscode-graphql
+    - wmaurer.change-case
+    - dbaeumer.vscode-eslint
