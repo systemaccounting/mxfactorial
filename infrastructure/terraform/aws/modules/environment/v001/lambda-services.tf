@@ -1,7 +1,7 @@
 // modules require ${service_name}-src.zip in artifacts s3
 
 module "request_create" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../web-adapter-lambda/v001"
   service_name = "request-create"
   env          = var.env
   ssm_prefix   = var.ssm_prefix
@@ -46,7 +46,7 @@ resource "aws_iam_policy" "invoke_rules" {
 ##########################
 
 module "request_approve" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../web-adapter-lambda/v001"
   service_name = "request-approve"
   env          = var.env
   ssm_prefix   = var.ssm_prefix
@@ -62,7 +62,7 @@ module "request_approve" {
 }
 
 module "requests_by_account" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../web-adapter-lambda/v001"
   service_name = "requests-by-account"
   env          = var.env
   ssm_prefix   = var.ssm_prefix
@@ -76,7 +76,7 @@ module "requests_by_account" {
 }
 
 module "request_by_id" {
-  source                = "../../go-lambda-service/v001"
+  source                = "../../web-adapter-lambda/v001"
   service_name          = "request-by-id"
   env                   = var.env
   ssm_prefix            = var.ssm_prefix
@@ -88,7 +88,7 @@ module "request_by_id" {
 }
 
 module "transactions_by_account" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../web-adapter-lambda/v001"
   service_name = "transactions-by-account"
   env          = var.env
   ssm_prefix   = var.ssm_prefix
@@ -102,7 +102,7 @@ module "transactions_by_account" {
 }
 
 module "transaction_by_id" {
-  source                = "../../go-lambda-service/v001"
+  source                = "../../web-adapter-lambda/v001"
   service_name          = "transaction-by-id"
   env                   = var.env
   ssm_prefix            = var.ssm_prefix
@@ -114,7 +114,7 @@ module "transaction_by_id" {
 }
 
 module "balance_by_account" {
-  source                = "../../go-lambda-service/v001"
+  source                = "../../web-adapter-lambda/v001"
   service_name          = "balance-by-account"
   env                   = var.env
   ssm_prefix            = var.ssm_prefix
@@ -126,7 +126,7 @@ module "balance_by_account" {
 }
 
 module "auto_confirm" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../go-lambda/v001"
   service_name = "auto-confirm"
   env          = var.env
   ssm_prefix   = var.ssm_prefix
@@ -139,7 +139,7 @@ module "auto_confirm" {
 }
 
 module "wss_connect" {
-  source                = "../../go-lambda-service/v001"
+  source                = "../../go-lambda/v001"
   service_name          = "wss-connect"
   env                   = var.env
   ssm_prefix            = var.ssm_prefix
@@ -151,7 +151,7 @@ module "wss_connect" {
 
 // invoked by request-create or request-approve through sns
 module "notifications_send" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../go-lambda/v001"
   service_name = "notifications-send"
   env          = var.env
   ssm_prefix   = var.ssm_prefix
@@ -172,7 +172,7 @@ resource "aws_sns_topic_subscription" "notifications_send" {
 
 // invoked by getnotifications through wss
 module "notifications_get" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../go-lambda/v001"
   service_name = "notifications-get"
   env          = var.env
   ssm_prefix   = var.ssm_prefix
@@ -190,7 +190,7 @@ module "notifications_get" {
 
 // invoked by clearnotifications through wss
 module "notifications_clear" {
-  source       = "../../go-lambda-service/v001"
+  source       = "../../go-lambda/v001"
   service_name = "notifications-clear"
   env          = var.env
   ssm_prefix   = var.ssm_prefix

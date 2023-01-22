@@ -58,7 +58,7 @@ resource "aws_iam_role" "default" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}LambdaTrustPolicy"
+        Sid    = "${local.SERVICE_NAME_TITLE}LambdaTrustPolicy${local.TITLED_ID_ENV}"
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
@@ -76,7 +76,7 @@ resource "aws_iam_policy" "default" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}CreateLogGroupPolicy"
+        Sid    = "${local.SERVICE_NAME_TITLE}CreateLogGroupPolicy${local.TITLED_ID_ENV}"
         Effect = "Allow",
         Action = [
           "logs:CreateLogGroup"
@@ -84,7 +84,7 @@ resource "aws_iam_policy" "default" {
         Resource = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
       },
       {
-        Sid    = "${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}LogEventPolicy"
+        Sid    = "${local.SERVICE_NAME_TITLE}LogEventPolicy${local.TITLED_ID_ENV}"
         Effect = "Allow",
         Action = [
           "logs:CreateLogStream",
@@ -104,7 +104,7 @@ resource "aws_iam_role_policy_attachment" "default" {
 
 resource "aws_lambda_permission" "function_url" {
   count                  = length(var.invoke_url_principals)
-  statement_id           = "Allow${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}UrlExecution${count.index}"
+  statement_id           = "Allow${local.SERVICE_NAME_TITLE}UrlExecution${local.TITLED_ID_ENV}${count.index}"
   action                 = "lambda:InvokeFunctionUrl"
   function_name          = aws_lambda_function.default.function_name
   principal              = var.invoke_url_principals[count.index]
@@ -113,7 +113,7 @@ resource "aws_lambda_permission" "function_url" {
 
 resource "aws_lambda_permission" "function_arn" {
   count         = length(var.invoke_arn_principals)
-  statement_id  = "Allow${local.TITLED_ID_ENV}${local.SERVICE_NAME_TITLE}ArnExecution${count.index}"
+  statement_id  = "Allow${local.SERVICE_NAME_TITLE}ArnExecution${local.TITLED_ID_ENV}${count.index}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.default.function_name
   principal     = var.invoke_arn_principals[count.index]
