@@ -1,0 +1,324 @@
+[
+  {
+    "_id": "68c0762e-6174-47f3-9652-79e81f944902",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "rules",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 10000,
+    "created": "2023-01-22T03:27:30.997Z",
+    "modified": "2023-01-22T03:28:03.649Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query getRules($transaction_items: [TransactionItemInput!]) {\n  rules(transaction_items: $transaction_items) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
+        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"milk\",\n      \"price\": \"2.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bread\",\n      \"price\": \"3.000\",\n      \"quantity\": \"2\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"eggs\",\n      \"price\": \"4.000\",\n      \"quantity\": \"3\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    }\n  ]\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "c40f413c-a935-4026-9ff8-e9f041084daa",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "rulesWithApprovers",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 20000,
+    "created": "2023-01-22T03:27:30.999Z",
+    "modified": "2023-01-22T03:29:55.816Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query getRules($transaction_items: [TransactionItemInput!]) {\n  rules(transaction_items: $transaction_items) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
+        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"milk\",\n      \"price\": \"2.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bread\",\n      \"price\": \"3.000\",\n      \"quantity\": \"2\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"eggs\",\n      \"price\": \"4.000\",\n      \"quantity\": \"3\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    }\n  ]\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "8935d084-cec3-439a-9c46-f19045879c17",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "rulesBottledWater",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 30000,
+    "created": "2023-01-22T03:27:31.000Z",
+    "modified": "2023-01-22T03:30:06.106Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query getRules($transaction_items: [TransactionItemInput!]) {\n  rules(transaction_items: $transaction_items) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
+        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bottled water\",\n      \"price\": \"1.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    }\n  ]\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "59b2f8f2-5f97-4693-a02d-253791d735d3",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "balance",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 40000,
+    "created": "2023-01-22T03:27:31.001Z",
+    "modified": "2023-01-22T03:30:10.772Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json",
+        "isDisabled": true
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}",
+        "isDisabled": true
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query balance($account_name: String!, $auth_account: String!) {\n  balance(account_name: $account_name, auth_account: $auth_account)\n}",
+        "variables": "{\n  \"auth_account\": \"StateOfCalifornia\",\n  \"account_name\": \"StateOfCalifornia\"\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "2de031a8-9c80-4fc2-b6c2-1305b1ec12e9",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "createRequest",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 50000,
+    "created": "2023-01-22T03:27:31.002Z",
+    "modified": "2023-01-22T03:30:14.974Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "mutation createRequest($transaction_items: [TransactionItemInput!], $auth_account: String!) {\n  createRequest(transaction_items: $transaction_items, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
+        "variables": "{\n\t\"auth_account\": \"GroceryStore\",\n\t\"transaction_items\": [\n\t\t{\n\t\t\t\"id\": null,\n\t\t\t\"transaction_id\": null,\n\t\t\t\"item_id\": \"9% state sales tax\",\n\t\t\t\"price\": \"0.180\",\n\t\t\t\"quantity\": \"1.000\",\n\t\t\t\"debitor_first\": null,\n\t\t\t\"rule_instance_id\": \"1\",\n\t\t\t\"unit_of_measurement\": null,\n\t\t\t\"units_measured\": null,\n\t\t\t\"debitor\": \"JacobWebb\",\n\t\t\t\"creditor\": \"StateOfCalifornia\",\n\t\t\t\"debitor_profile_id\": null,\n\t\t\t\"creditor_profile_id\": null,\n\t\t\t\"debitor_approval_time\": null,\n\t\t\t\"creditor_approval_time\": null,\n\t\t\t\"debitor_expiration_time\": null,\n\t\t\t\"creditor_expiration_time\": null,\n\t\t\t\"debitor_rejection_time\": null,\n\t\t\t\"creditor_rejection_time\": null\n\t\t},\n\t\t{\n\t\t\t\"id\": null,\n\t\t\t\"transaction_id\": null,\n\t\t\t\"item_id\": \"9% state sales tax\",\n\t\t\t\"price\": \"0.270\",\n\t\t\t\"quantity\": \"2.000\",\n\t\t\t\"debitor_first\": null,\n\t\t\t\"rule_instance_id\": \"1\",\n\t\t\t\"unit_of_measurement\": null,\n\t\t\t\"units_measured\": null,\n\t\t\t\"debitor\": \"JacobWebb\",\n\t\t\t\"creditor\": \"StateOfCalifornia\",\n\t\t\t\"debitor_profile_id\": null,\n\t\t\t\"creditor_profile_id\": null,\n\t\t\t\"debitor_approval_time\": null,\n\t\t\t\"creditor_approval_time\": null,\n\t\t\t\"debitor_expiration_time\": null,\n\t\t\t\"creditor_expiration_time\": null,\n\t\t\t\"debitor_rejection_time\": null,\n\t\t\t\"creditor_rejection_time\": null\n\t\t},\n\t\t{\n\t\t\t\"id\": null,\n\t\t\t\"transaction_id\": null,\n\t\t\t\"item_id\": \"9% state sales tax\",\n\t\t\t\"price\": \"0.360\",\n\t\t\t\"quantity\": \"3.000\",\n\t\t\t\"debitor_first\": null,\n\t\t\t\"rule_instance_id\": \"1\",\n\t\t\t\"unit_of_measurement\": null,\n\t\t\t\"units_measured\": null,\n\t\t\t\"debitor\": \"JacobWebb\",\n\t\t\t\"creditor\": \"StateOfCalifornia\",\n\t\t\t\"debitor_profile_id\": null,\n\t\t\t\"creditor_profile_id\": null,\n\t\t\t\"debitor_approval_time\": null,\n\t\t\t\"creditor_approval_time\": null,\n\t\t\t\"debitor_expiration_time\": null,\n\t\t\t\"creditor_expiration_time\": null,\n\t\t\t\"debitor_rejection_time\": null,\n\t\t\t\"creditor_rejection_time\": null\n\t\t},\n\t\t{\n\t\t\t\"id\": null,\n\t\t\t\"transaction_id\": null,\n\t\t\t\"item_id\": \"milk\",\n\t\t\t\"price\": \"2.000\",\n\t\t\t\"quantity\": \"1\",\n\t\t\t\"debitor_first\": null,\n\t\t\t\"rule_instance_id\": null,\n\t\t\t\"unit_of_measurement\": null,\n\t\t\t\"units_measured\": null,\n\t\t\t\"debitor\": \"JacobWebb\",\n\t\t\t\"creditor\": \"GroceryStore\",\n\t\t\t\"debitor_profile_id\": null,\n\t\t\t\"creditor_profile_id\": null,\n\t\t\t\"debitor_approval_time\": null,\n\t\t\t\"creditor_approval_time\": null,\n\t\t\t\"debitor_expiration_time\": null,\n\t\t\t\"creditor_expiration_time\": null,\n\t\t\t\"debitor_rejection_time\": null,\n\t\t\t\"creditor_rejection_time\": null\n\t\t},\n\t\t{\n\t\t\t\"id\": null,\n\t\t\t\"transaction_id\": null,\n\t\t\t\"item_id\": \"bread\",\n\t\t\t\"price\": \"3.000\",\n\t\t\t\"quantity\": \"2\",\n\t\t\t\"debitor_first\": null,\n\t\t\t\"rule_instance_id\": null,\n\t\t\t\"unit_of_measurement\": null,\n\t\t\t\"units_measured\": null,\n\t\t\t\"debitor\": \"JacobWebb\",\n\t\t\t\"creditor\": \"GroceryStore\",\n\t\t\t\"debitor_profile_id\": null,\n\t\t\t\"creditor_profile_id\": null,\n\t\t\t\"debitor_approval_time\": null,\n\t\t\t\"creditor_approval_time\": null,\n\t\t\t\"debitor_expiration_time\": null,\n\t\t\t\"creditor_expiration_time\": null,\n\t\t\t\"debitor_rejection_time\": null,\n\t\t\t\"creditor_rejection_time\": null\n\t\t},\n\t\t{\n\t\t\t\"id\": null,\n\t\t\t\"transaction_id\": null,\n\t\t\t\"item_id\": \"eggs\",\n\t\t\t\"price\": \"4.000\",\n\t\t\t\"quantity\": \"3\",\n\t\t\t\"debitor_first\": null,\n\t\t\t\"rule_instance_id\": null,\n\t\t\t\"unit_of_measurement\": null,\n\t\t\t\"units_measured\": null,\n\t\t\t\"debitor\": \"JacobWebb\",\n\t\t\t\"creditor\": \"GroceryStore\",\n\t\t\t\"debitor_profile_id\": null,\n\t\t\t\"creditor_profile_id\": null,\n\t\t\t\"debitor_approval_time\": null,\n\t\t\t\"creditor_approval_time\": null,\n\t\t\t\"debitor_expiration_time\": null,\n\t\t\t\"creditor_expiration_time\": null,\n\t\t\t\"debitor_rejection_time\": null,\n\t\t\t\"creditor_rejection_time\": null\n\t\t}\n\t]\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "0b0f053c-bdd1-4ee9-a222-15c970ce6d9e",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "approveRequest",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 60000,
+    "created": "2023-01-22T03:27:31.003Z",
+    "modified": "2023-01-22T03:30:19.560Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "mutation approveRequest($transaction_id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {\n  approveRequest(transaction_id: $transaction_id, account_name: $account_name, account_role: $account_role, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    equilibrium_time\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
+        "variables": "{\n    \"transaction_id\": \"3\",\n    \"account_name\": \"JacobWebb\",\n    \"account_role\": \"debitor\",\n    \"auth_account\": \"JacobWebb\"\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "42ffb53d-9342-4a91-9dfe-91e095c3c5f9",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "requestByID",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 70000,
+    "created": "2023-01-22T03:27:31.004Z",
+    "modified": "2023-01-22T03:30:24.437Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query getRequestByID($transaction_id: String!, $auth_account: String!) {\n  requestByID(transaction_id: $transaction_id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
+        "variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"transaction_id\": \"1\"\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "87664015-ad4a-4d32-809c-b42701969011",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "requestsByAccount",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 80000,
+    "created": "2023-01-22T03:27:31.005Z",
+    "modified": "2023-01-22T03:30:28.713Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query getRequestsByAccount($account_name: String!, $auth_account: String!) {\n  requestsByAccount(account_name: $account_name, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
+        "variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"account_name\": \"JacobWebb\"\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "9845cfed-b4c5-490f-a909-ca9aa110c67f",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "transactionsByAccount",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 90000,
+    "created": "2023-01-22T03:27:31.006Z",
+    "modified": "2023-01-22T03:30:34.665Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query getTransactionsByAccount($account_name: String!, $auth_account: String!) {\n  transactionsByAccount(account_name: $account_name, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n\tsum_value\n\tequilibrium_time\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
+        "variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"account_name\": \"JoeCarter\"\n}"
+      }
+    },
+    "tests": []
+  },
+  {
+    "_id": "7eb2e9cf-78d8-4c61-9314-fb43b525a4d3",
+    "colId": "360ef80c-792d-4165-9ad2-835d920284bc",
+    "containerId": "",
+    "name": "transactionByID",
+    "url": "{{GRAPHQL_URI}}/query",
+    "method": "POST",
+    "sortNum": 100000,
+    "created": "2023-01-22T03:27:31.007Z",
+    "modified": "2023-01-22T03:30:39.345Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "Authorization",
+        "value": "{{ID_TOKEN}}"
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "graphql",
+      "raw": "",
+      "form": [],
+      "graphql": {
+        "query": "query getTransactionByID($transaction_id: String!, $auth_account: String!) {\n  transactionByID(transaction_id: $transaction_id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
+        "variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"transaction_id\": \"2\"\n}"
+      }
+    },
+    "tests": []
+  }
+]

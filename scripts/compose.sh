@@ -14,7 +14,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --up) UP=1 ;;
         --down) DOWN=1 ;;
-        --build) BUILD_ARG=' --build' ;;
+        --build) BUILD=1 ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
 	shift
@@ -28,7 +28,7 @@ fi
 PROJECT_CONFIG=project.json
 COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
 
-UP_CMD=$(echo "docker compose \\
+UP_CMD="docker compose \\
   -f $COMPOSE_DIR/compose.bitnami-postgres.yaml \\
   -f $COMPOSE_DIR/compose.rules.yaml \\
   -f $COMPOSE_DIR/compose.request-create.yaml \\
@@ -43,9 +43,9 @@ UP_CMD=$(echo "docker compose \\
   up \\
   -d \\
   --renew-anon-volumes \\
-  --force-recreate")
+  --force-recreate"
 
-DOWN_CMD=$(echo "docker compose \\
+DOWN_CMD="docker compose \\
   -f $COMPOSE_DIR/compose.bitnami-postgres.yaml \\
   -f $COMPOSE_DIR/compose.rules.yaml \\
   -f $COMPOSE_DIR/compose.request-create.yaml \\
@@ -57,12 +57,17 @@ DOWN_CMD=$(echo "docker compose \\
   -f $COMPOSE_DIR/compose.balance-by-account.yaml \\
   -f $COMPOSE_DIR/compose.graphql.yaml \\
   -f $COMPOSE_DIR/compose.client.yaml \\
-  down")
+  down"
 
 if [[ $UP ]]; then
-	echo -e "${UP_CMD} \\ \n \\033[1;33m${BUILD_ARG}\033[0m"
+
+  if [[ $BUILD ]]; then
+    UP_CMD=$(printf '%s \\\n  --build' "$UP_CMD")
+  fi
+
+	echo "$UP_CMD"
   echo ""
-	eval "${UP_CMD}${BUILD_ARG}"
+	eval "$UP_CMD"
 fi
 
 if [[ $DOWN ]]; then

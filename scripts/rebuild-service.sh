@@ -23,10 +23,13 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
+PROJECT_CONFIG=project.json
+COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
+
 COMPOSE_IGNORE_ORPHANS=true \
 	docker compose \
 		${INCLUDE_DB} \
-		-f ./docker/compose.$NAME.yaml \
+		-f $COMPOSE_DIR/compose.$NAME.yaml \
 		up \
 		-d \
 		--force-recreate \

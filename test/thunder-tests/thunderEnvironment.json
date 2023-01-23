@@ -1,0 +1,48 @@
+[
+  {
+    "_id": "a741b5c7-e822-4d11-bc75-01b3ed358faa",
+    "name": "docker",
+    "default": true,
+    "sortNum": 10000,
+    "created": "2023-01-22T03:27:54.774Z",
+    "modified": "2023-01-22T03:27:54.774Z",
+    "data": [
+      {
+        "name": "GRAPHQL_URI",
+        "value": "http://localhost:8080"
+      },
+      {
+        "name": "RULES_URL",
+        "value": "http://localhost:8081"
+      },
+      {
+        "name": "REQUEST_CREATE_URL",
+        "value": "http://localhost:8082"
+      },
+      {
+        "name": "REQUEST_APPROVE_URL",
+        "value": "http://localhost:8083"
+      },
+      {
+        "name": "REQUEST_BY_ID_URL",
+        "value": "http://localhost:8087"
+      },
+      {
+        "name": "REQUESTS_BY_ACCOUNT_URL",
+        "value": "http://localhost:8086"
+      },
+      {
+        "name": "TRANSACTIONS_BY_ACCOUNT_URL",
+        "value": "http://localhost:8088"
+      },
+      {
+        "name": "TRANSACTION_BY_ID_URL",
+        "value": "http://localhost:8089"
+      },
+      {
+        "name": "BALANCE_BY_ACCOUNT_URL",
+        "value": "http://localhost:8085"
+      }
+    ]
+  }
+]

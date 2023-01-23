@@ -5,7 +5,7 @@ ports:
   - name: graphql
     description: api
     port: 8080
-    onOpen: open-browser
+    onOpen: ignore
   - name: rules
     description: automates transactions
     port: 8081
@@ -41,7 +41,7 @@ ports:
   - name: client
     description: web client
     port: 8090
-    onOpen: open-browser
+    onOpen: ignore
   - name: postgres
     description: db
     port: 5432

@@ -42,5 +42,7 @@
 	},
 	"[svelte]": {
 		"editor.defaultFormatter": "svelte.svelte-vscode"
-	}
+	},
+	"thunder-client.saveToWorkspace": true,
+	"thunder-client.workspaceRelativePath": "test",
 }

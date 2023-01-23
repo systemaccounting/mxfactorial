@@ -1,8 +1,10 @@
 FROM mxfactorial/client-base:v1 as builder1
 
+ARG GRAPHQL_URI=aHR0cDovL2xvY2FsaG9zdDo4MDgw
+
 COPY client .
 
-RUN printf 'ENABLE_AUTH=false\nGRAPHQL_URI=aHR0cDovLzAuMC4wLjA6ODA4OA==\n' > .env
+RUN printf "ENABLE_AUTH=false\nGRAPHQL_URI=$GRAPHQL_URI\n" > .env
 
 RUN npm run build
 

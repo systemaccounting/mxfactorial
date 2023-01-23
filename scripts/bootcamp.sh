@@ -4,8 +4,21 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 RESET='\033[0m'
 
+HOST=http://localhost
+
+CLIENT_PORT=$(jq -r .env_var.CLIENT_URI.docker project.json | sed 's/http:\/\/localhost://')
+GRAPHQL_PORT=$(jq -r .env_var.GRAPHQL_URI.docker project.json | sed 's/http:\/\/localhost://')
+
+CLIENT_URI="$HOST:$CLIENT_PORT"
+GRAPHQL_URI="$HOST:$GRAPHQL_PORT"
+
+if [[ $GITPOD_WORKSPACE_URL ]]; then
+	ADDR=$(echo "$GITPOD_WORKSPACE_URL" | sed 's/https:\/\///')
+	CLIENT_URI="https://${CLIENT_PORT}-${ADDR}"
+	GRAPHQL_URI="https://${GRAPHQL_PORT}-${ADDR}"
+fi
+
 function eval_with_no_print_directory() {
-	local CMD="$1"
 	eval "make --no-print-directory $(echo "$1" | sed 's/make //')"
 }
 
@@ -101,7 +114,7 @@ eval_with_no_print_directory "$CMD"
 echo ""
 
 while [[ $CMD != "make rebuild-transactions-by-account" ]]; do
-	read -rep $'\e[32mnow add log.Println("hello tutorial") at the top of func main() in services/transactions-by-account/cmd/main.go and "make rebuild-transactions-by-account" to rebuild\e[0m\n\n> ' CMD
+	read -rep $'\e[32mnow add log.Println("hello cadet") at the top of func main() in services/transactions-by-account/cmd/main.go and "make rebuild-transactions-by-account" to rebuild\e[0m\n\n> ' CMD
 done
 
 eval_with_no_print_directory "$CMD"
@@ -109,7 +122,7 @@ eval_with_no_print_directory "$CMD"
 echo ""
 
 while [[ $CMD != "docker logs mxf-transactions-by-account-1" ]]; do
-	read -rep $'\e[32m"docker logs mxf-transactions-by-account-1" to view "hello tutorial" entry in docker logs\e[0m\n\n> ' CMD
+	read -rep $'\e[32m"docker logs mxf-transactions-by-account-1" to view "hello cadet" entry in docker logs\e[0m\n\n> ' CMD
 done
 
 eval "$CMD"
@@ -125,17 +138,28 @@ grep -E '^rebuild-' ./makefile | sed 's/.$//' | awk '$0="make " $0'
 
 echo ""
 
-echo -e -n "${GREEN}navigate to http://localhost:8090 in a browser and sign in on the web client as \"JacobWebb\" without a password. press any key to continue${RESET}\n\n>"
+echo -e -n "${GREEN}navigate to $CLIENT_URI in a browser and sign in on the web client as \"JacobWebb\" without a password. press any key to continue${RESET}\n\n>"
 read -n 1
 
 echo ""
 
-echo -e -n "${GREEN}navigate to http://localhost:8080 in a browser to view the graphiql explorer. press any key to continue${RESET}\n\n>"
+echo -e -n "${GREEN}navigate to $GRAPHQL_URI in a browser to view the graphiql explorer. press any key to continue${RESET}\n\n>"
 read -n 1
 
 echo ""
 
-echo -e -n "${GREEN}import services/graphql/postman/graphql.postman_collection.json into postman and set GRAPHQL_URI=http://localhost:8088 to test graphql requests. press any key to continue${RESET}\n\n>"
+if [[ $GITPOD_WORKSPACE_URL ]]; then
+	echo -e -n "${GREEN}open the vscode command palette (Shift+Command+P on Mac, Ctrl+Shift+P on Windows/Linux) and run \"View: Toggle Ports\" to view ports opened by running services. press any key to continue${RESET}\n\n>"
+	read -n 1
+
+	echo ""
+fi
+
+if [[ $GITPOD_WORKSPACE_URL ]]; then
+	echo -e -n "${GREEN}open the thunder client by selecting the lightning bolt icon on the activity bar (left side) and navigate to the collections tab to test graphql requests. press any key to continue${RESET}\n\n>"
+else
+	echo -e -n "${GREEN}install the rangav.vscode-thunder-client vscode extension and navigate to the collections tab to test graphql requests. press any key to continue${RESET}\n\n>"
+fi
 read -n 1
 
 echo ""
@@ -150,3 +174,5 @@ echo -e "${GREEN}\"make compose-down\" to clean up${RESET}"
 echo ""
 
 echo -e "\033[0;36mwelcome to systemaccounting${RESET}"
+
+echo ""
