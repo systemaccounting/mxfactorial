@@ -11,10 +11,11 @@ module "request_create" {
     ENABLE_NOTIFICATIONS = var.enable_notifications
     RULES_URL            = aws_lambda_function_url.rules.function_url
   })
-  invoke_url_principals = [aws_iam_role.graphql_role.arn]
-  artifacts_bucket_name = var.artifacts_bucket_name
-  attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
-  create_secret         = true // suppports local testing
+  invoke_url_principals     = [aws_iam_role.graphql_role.arn]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
+  create_secret             = true // suppports local testing
+  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 resource "aws_iam_policy" "invoke_rules" {
@@ -55,10 +56,11 @@ module "request_approve" {
     NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
     ENABLE_NOTIFICATIONS = var.enable_notifications
   })
-  invoke_url_principals = [aws_iam_role.graphql_role.arn]
-  artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret         = true
-  attached_policy_arns  = [aws_iam_policy.invoke_rules.arn]
+  invoke_url_principals     = [aws_iam_role.graphql_role.arn]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  create_secret             = true
+  attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
+  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "requests_by_account" {
@@ -70,21 +72,23 @@ module "requests_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
   })
-  invoke_url_principals = [aws_iam_role.graphql_role.arn]
-  artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret         = true
+  invoke_url_principals     = [aws_iam_role.graphql_role.arn]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  create_secret             = true
+  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "request_by_id" {
-  source                = "../../web-adapter-lambda/v001"
-  service_name          = "request-by-id"
-  env                   = var.env
-  ssm_prefix            = var.ssm_prefix
-  env_id                = var.env_id
-  env_vars              = merge(local.POSTGRES_VARS, {})
-  invoke_url_principals = [aws_iam_role.graphql_role.arn]
-  artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret         = true
+  source                    = "../../web-adapter-lambda/v001"
+  service_name              = "request-by-id"
+  env                       = var.env
+  ssm_prefix                = var.ssm_prefix
+  env_id                    = var.env_id
+  env_vars                  = merge(local.POSTGRES_VARS, {})
+  invoke_url_principals     = [aws_iam_role.graphql_role.arn]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  create_secret             = true
+  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "transactions_by_account" {
@@ -96,33 +100,36 @@ module "transactions_by_account" {
   env_vars = merge(local.POSTGRES_VARS, {
     RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
   })
-  invoke_url_principals = [aws_iam_role.graphql_role.arn]
-  artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret         = true
+  invoke_url_principals     = [aws_iam_role.graphql_role.arn]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  create_secret             = true
+  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "transaction_by_id" {
-  source                = "../../web-adapter-lambda/v001"
-  service_name          = "transaction-by-id"
-  env                   = var.env
-  ssm_prefix            = var.ssm_prefix
-  env_id                = var.env_id
-  env_vars              = merge(local.POSTGRES_VARS, {})
-  invoke_url_principals = [aws_iam_role.graphql_role.arn]
-  artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret         = true
+  source                    = "../../web-adapter-lambda/v001"
+  service_name              = "transaction-by-id"
+  env                       = var.env
+  ssm_prefix                = var.ssm_prefix
+  env_id                    = var.env_id
+  env_vars                  = merge(local.POSTGRES_VARS, {})
+  invoke_url_principals     = [aws_iam_role.graphql_role.arn]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  create_secret             = true
+  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "balance_by_account" {
-  source                = "../../web-adapter-lambda/v001"
-  service_name          = "balance-by-account"
-  env                   = var.env
-  ssm_prefix            = var.ssm_prefix
-  env_id                = var.env_id
-  env_vars              = merge(local.POSTGRES_VARS, {})
-  invoke_url_principals = [aws_iam_role.graphql_role.arn]
-  artifacts_bucket_name = var.artifacts_bucket_name
-  create_secret         = true
+  source                    = "../../web-adapter-lambda/v001"
+  service_name              = "balance-by-account"
+  env                       = var.env
+  ssm_prefix                = var.ssm_prefix
+  env_id                    = var.env_id
+  env_vars                  = merge(local.POSTGRES_VARS, {})
+  invoke_url_principals     = [aws_iam_role.graphql_role.arn]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  create_secret             = true
+  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "auto_confirm" {
