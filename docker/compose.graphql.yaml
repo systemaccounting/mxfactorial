@@ -15,4 +15,4 @@ services:
       TRANSACTIONS_BY_ACCOUNT_URL: "http://transactions-by-account:8080"
       TRANSACTION_BY_ID_URL: "http://transaction-by-id:8080"
       BALANCE_BY_ACCOUNT_URL: "http://balance-by-account:8080"
-      LOCAL_ENV: 1
+      READINESS_CHECK_PATH: "/healthz"
