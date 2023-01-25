@@ -12,6 +12,7 @@
 	import { getTransactionById } from "./utils/transactions";
 	import RequestsUrql from "./containers/RequestsUrql.svelte";
 	import HistoryUrql from "./containers/HistoryUrql.svelte";
+	import InitUrql from "./containers/InitUrql.svelte";
 </script>
 
 <Router primary={false}>
@@ -21,48 +22,54 @@
 		</Route>
 		<TestForDevEnv>
 			<Route path="account">
-				<Nav>
-					<Home />
-				</Nav>
+				<InitUrql>
+					<Nav>
+						<Home />
+					</Nav>
+				</InitUrql>
 			</Route>
 			<Route path="requests/*">
-				<RequestsUrql let:requests>
-					<Route path="/">
-						<Nav>
-							<Requests {requests} />
-						</Nav>
-					</Route>
+				<InitUrql>
+					<RequestsUrql let:requests>
+						<Route path="/">
+							<Nav>
+								<Requests {requests} />
+							</Nav>
+						</Route>
 
-					<Route path=":id" let:params>
-						<Nav>
-							<RequestDetail
-								request={getTransactionById(
-									params.id,
-									requests
-								)}
-							/>
-						</Nav>
-					</Route>
-				</RequestsUrql>
+						<Route path=":id" let:params>
+							<Nav>
+								<RequestDetail
+									request={getTransactionById(
+										params.id,
+										requests
+									)}
+								/>
+							</Nav>
+						</Route>
+					</RequestsUrql>
+				</InitUrql>
 			</Route>
 			<Route path="history/*">
-				<HistoryUrql let:transactions>
-					<Route path="/">
-						<Nav>
-							<History {transactions} />
-						</Nav>
-					</Route>
-					<Route path=":id" let:params>
-						<Nav>
-							<HistoryDetail
-								transaction={getTransactionById(
-									params.id,
-									transactions
-								)}
-							/>
-						</Nav>
-					</Route>
-				</HistoryUrql>
+				<InitUrql>
+					<HistoryUrql let:transactions>
+						<Route path="/">
+							<Nav>
+								<History {transactions} />
+							</Nav>
+						</Route>
+						<Route path=":id" let:params>
+							<Nav>
+								<HistoryDetail
+									transaction={getTransactionById(
+										params.id,
+										transactions
+									)}
+								/>
+							</Nav>
+						</Route>
+					</HistoryUrql>
+				</InitUrql>
 			</Route>
 		</TestForDevEnv>
 	</MobileLayout>
