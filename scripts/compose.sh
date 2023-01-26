@@ -28,7 +28,22 @@ fi
 PROJECT_CONFIG=project.json
 COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
 
-UP_CMD="docker compose \\
+GRAPHQL_URI=$(jq -r .env_var.GRAPHQL_URI.docker $PROJECT_CONFIG)
+
+if [[ $GITPOD_WORKSPACE_URL ]]; then
+  GRAPHQL_PORT=$(printf "$GRAPHQL_URI" | sed 's/http:\/\/localhost://')
+	ADDR=$(printf "$GITPOD_WORKSPACE_URL" | sed 's/https:\/\///')
+	GRAPHQL_URI="https://${GRAPHQL_PORT}-${ADDR}"
+fi
+
+if [[ $(uname -s) == "Darwin" ]]; then
+  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64)
+else
+  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64 -w 0)
+fi
+
+UP_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
+docker compose \\
   -f $COMPOSE_DIR/compose.bitnami-postgres.yaml \\
   -f $COMPOSE_DIR/compose.rules.yaml \\
   -f $COMPOSE_DIR/compose.request-create.yaml \\

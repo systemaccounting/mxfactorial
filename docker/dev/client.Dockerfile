@@ -1,6 +1,6 @@
 FROM mxfactorial/client-base:v1 as builder1
 
-ARG GRAPHQL_URI=aHR0cDovL2xvY2FsaG9zdDo4MDgw
+ARG GRAPHQL_URI
 
 COPY client .
 

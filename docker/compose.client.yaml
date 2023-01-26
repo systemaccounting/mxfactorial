@@ -4,5 +4,7 @@ services:
     build:
       context: ../
       dockerfile: ./docker/dev/client.Dockerfile
+      args:
+        - GRAPHQL_URI=${GRAPHQL_URI}
     ports:
       - "8090:80"

@@ -26,7 +26,22 @@ done
 PROJECT_CONFIG=project.json
 COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
 
+GRAPHQL_URI=$(jq -r .env_var.GRAPHQL_URI.docker $PROJECT_CONFIG)
+
+if [[ $GITPOD_WORKSPACE_URL ]]; then
+  GRAPHQL_PORT=$(printf "$GRAPHQL_URI" | sed 's/http:\/\/localhost://')
+  ADDR=$(printf "$GITPOD_WORKSPACE_URL" | sed 's/https:\/\///')
+  GRAPHQL_URI="https://${GRAPHQL_PORT}-${ADDR}"
+fi
+
+if [[ $(uname -s) == "Darwin" ]]; then
+  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64)
+else
+  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64 -w 0)
+fi
+
 COMPOSE_IGNORE_ORPHANS=true \
+GRAPHQL_URI=$B64_GRAPHQL_URI \
 	docker compose \
 		${INCLUDE_DB} \
 		-f $COMPOSE_DIR/compose.$NAME.yaml \
