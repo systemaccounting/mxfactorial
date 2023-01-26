@@ -18,7 +18,7 @@ resource "aws_lambda_function" "rules" {
   timeout           = 30
   role              = aws_iam_role.rules.arn
   layers = [
-    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:7"
+    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${var.web_adapter_layer_version}"
   ]
 
   environment {
