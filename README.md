@@ -76,7 +76,7 @@ private, receiving added value is sustained & acknowledged by sending value
 
 **code**: create an issue with a "developer license request" title, negotiate rate, fork, then send pull requests
 
-**architecture**
+### architecture
 
 ```
 client (typescript, svelte, cloudfront/s3: demo web client targeting graphql)
