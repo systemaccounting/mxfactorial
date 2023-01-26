@@ -80,19 +80,20 @@ private, receiving added value is sustained & acknowledged by sending value
 
 ```
 client (typescript, svelte, cloudfront/s3: demo web client targeting graphql)
-  └── graphql (go, api gateway/lambda: public interface for below services)
-        ├── balance-by-account (go, lambda: returns account balances)
-        ├── notifications-clear (go, lambda: deletes delivered notifications)
-        ├── notifications-get (go, lambda: returns pending notifications)
-        ├── notifications-send (go, lambda: sends notifications)
-        ├── request-approve (go, lambda: approves a transaction request)
-        ├── request-by-id (go, lambda: returns a transaction request by id)
-        ├── request-create (go, lambda: creates a transaction request between a buyer and seller)
-        ├── requests-by-account (go, lambda: returns transaction requests by account)
-        ├── rules (typescript, lambda: returns transactions with user defined rules applied, e.g. taxes, dividends, etc.)
-        ├── transaction-by-id (go, lambda: returns a transaction by id)
-        ├── transactions-by-account (go, lambda: returns transactions by account)
-        └── wss-connect (go, lambda: stores and clears websocket connections managed by api gateway)
+  ├── graphql (go, api gateway/lambda: public interface for below services)
+  │   ├── balance-by-account (go, lambda: returns account balances)
+  │   ├── request-approve (go, lambda: approves a transaction request)
+  │   ├── request-by-id (go, lambda: returns a transaction request by id)
+  │   ├── request-create (go, lambda: creates a transaction request between a buyer and seller)
+  │   ├── requests-by-account (go, lambda: returns transaction requests by account)
+  │   ├── rules (typescript, lambda: returns transactions with user defined rules applied, e.g. taxes, dividends, etc.)
+  │   ├── transaction-by-id (go, lambda: returns a transaction by id)
+  │   └── transactions-by-account (go, lambda: returns transactions by account)
+  └── websockets (api-gatewayv2: creates websockets and delivers client notifications through below services)
+      ├── notifications-clear (go, lambda: deletes delivered notifications)
+      ├── notifications-get (go, lambda: returns pending notifications)
+      ├── notifications-send (go, lambda: sends notifications)
+      └── wss-connect (go, lambda: stores and clears websocket connections managed by api gateway)
 ```
 
 ### development
