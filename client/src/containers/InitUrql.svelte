@@ -10,11 +10,15 @@
 	let clientOpts: ClientOptions = {
 		url,
 		maskTypename: true,
+		fetchOptions: {
+			credentials: "same-origin",
+		},
 	};
 
 	if (process.env.ENABLE_AUTH == "true") {
 		getIdToken(function (idToken) {
 			clientOpts.fetchOptions = {
+				...clientOpts.fetchOptions,
 				headers: {
 					Authorization: idToken,
 				},
