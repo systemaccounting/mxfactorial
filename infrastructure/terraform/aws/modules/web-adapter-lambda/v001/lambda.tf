@@ -38,7 +38,7 @@ resource "aws_lambda_function" "default" {
   }
 
   layers = [
-    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:7"
+    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${var.web_adapter_layer_version}"
   ]
 }
 

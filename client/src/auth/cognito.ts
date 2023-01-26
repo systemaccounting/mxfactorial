@@ -66,10 +66,22 @@ function signUp(account: string, password: string) {
 	});
 };
 
+function getIdToken(cb: Function) {
+	if (cognitoUser != null) {
+		cognitoUser.getSession(function(err, session) {
+			if (err) {
+				alert(err.message || JSON.stringify(err));
+				return;
+			}
+			cb(session.getIdToken().jwtToken);
+		})
+	}
+}
 
 export {
 	userPool,
 	signIn,
 	signOut,
 	signUp,
+	getIdToken,
 }

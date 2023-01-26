@@ -25,3 +25,4 @@ variable "create_secret" {
 variable "artifacts_bucket_name" {}
 variable "ssm_prefix" {}
 variable "env_id" {}
+variable "web_adapter_layer_version" {}

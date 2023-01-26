@@ -7,19 +7,17 @@ require (
 	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/aws/aws-lambda-go v1.28.0
 	github.com/aws/aws-sdk-go v1.44.171
-	github.com/awslabs/aws-lambda-go-api-proxy v0.13.3
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.7
-	github.com/gorilla/mux v1.8.0
 	github.com/huandu/go-sqlbuilder v1.15.0
 	github.com/jackc/pgconn v1.13.0
 	github.com/jackc/pgtype v1.12.0
 	github.com/jackc/pgx/v4 v4.17.0
 	github.com/lestrrat-go/jwx v1.2.20
-	github.com/rs/cors v1.8.3
+	github.com/rs/cors/wrapper/gin v0.0.0-20221003140808-fcebdb403f4d
 	github.com/shopspring/decimal v1.3.1
 	github.com/vektah/gqlparser/v2 v2.4.8
 )
@@ -54,6 +52,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rs/cors v1.8.3 // indirect
+	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa // indirect
 	golang.org/x/net v0.1.0 // indirect

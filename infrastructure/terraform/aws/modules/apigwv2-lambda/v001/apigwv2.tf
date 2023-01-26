@@ -45,6 +45,15 @@ resource "aws_apigatewayv2_route" "auth_enabled" {
   target             = "integrations/${aws_apigatewayv2_integration.default.id}"
 }
 
+// https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-cors.html#http-api-cors-default-route
+resource "aws_apigatewayv2_route" "enable_unauthorized_options" {
+  count              = var.enable_api_auth ? 1 : 0
+  api_id             = aws_apigatewayv2_api.default.id
+  route_key          = "OPTIONS /{proxy+}"
+  authorization_type = "NONE"
+  target             = "integrations/${aws_apigatewayv2_integration.default.id}"
+}
+
 resource "aws_apigatewayv2_authorizer" "default" {
   count            = var.enable_api_auth ? 1 : 0
   api_id           = aws_apigatewayv2_api.default.id

@@ -14,7 +14,7 @@ resource "aws_lambda_function" "graphql" {
   s3_key            = data.aws_s3_object.graphql.key
   s3_object_version = data.aws_s3_object.graphql.version_id
   handler           = "index.handler"
-  runtime           = "go1.x"
+  runtime           = "provided.al2"
   timeout           = 30
   role              = aws_iam_role.graphql_role.arn
   environment {
@@ -28,8 +28,12 @@ resource "aws_lambda_function" "graphql" {
       TRANSACTIONS_BY_ACCOUNT_URL = module.transactions_by_account.lambda_function_url
       TRANSACTION_BY_ID_URL       = module.transaction_by_id.lambda_function_url
       BALANCE_BY_ACCOUNT_URL      = module.balance_by_account.lambda_function_url
+      READINESS_CHECK_PATH        = "/healthz"
     }
   }
+  layers = [
+    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${var.web_adapter_layer_version}"
+  ]
 }
 
 resource "aws_cloudwatch_log_group" "graphql" {
