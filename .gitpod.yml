@@ -6,6 +6,7 @@ ports:
     description: api
     port: 8080
     onOpen: ignore
+    visibility: public
   - name: rules
     description: automates transactions
     port: 8081
