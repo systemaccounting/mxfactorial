@@ -22,11 +22,15 @@ ENV_FILE=$(CURDIR)/.env
 PARAMS=$(shell jq -r '.apps.client.params[]' $(PROJECT_CONF))
 SECRETS=$(shell jq -r '.apps.client.secrets[]' $(PROJECT_CONF))
 ENV_VARS=$(PARAMS) $(SECRETS)
+GRAPHQL_URI=$(shell jq -r .env_var.GRAPHQL_URI.docker $(PROJECT_CONF))
+B64_GRAPHQL_URI=$(shell if [ `uname -s` == 'Darwin' ]; then printf $(GRAPHQL_URI) | base64; else printf $(GRAPHQL_URI) | base64 -w 0; fi)
 
 dev:
+	if ! [ -f $(ENV_FILE) ]; then $(MAKE) local-env; fi
 	npm run dev
 
 start:
+	if ! [ -f $(ENV_FILE) ]; then $(MAKE) local-env; fi
 	npm start
 
 ###################### dependencies ######################
@@ -96,6 +100,9 @@ $(ENV_VARS):
 			--output text | base64); \
 		echo "$@=$$ENV_VAR" >> $(ENV_FILE); \
 	fi;
+
+local-env:
+	printf "ENABLE_AUTH=false\nGRAPHQL_URI=$(B64_GRAPHQL_URI)\n" > $(ENV_FILE)
 
 ###################### deploy ######################
 
