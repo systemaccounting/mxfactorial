@@ -18,6 +18,11 @@ if [[ $GITPOD_WORKSPACE_URL ]]; then
 	GRAPHQL_URI="https://${GRAPHQL_PORT}-${ADDR}"
 fi
 
+if [[ $CODESPACES ]]; then
+	CLIENT_URI="https://${CODESPACE_NAME}-${CLIENT_PORT}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+	GRAPHQL_URI="https://${CODESPACE_NAME}-${GRAPHQL_PORT}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+fi
+
 function eval_with_no_print_directory() {
 	eval "make --no-print-directory $(echo "$1" | sed 's/make //')"
 }

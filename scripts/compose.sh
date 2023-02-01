@@ -29,11 +29,15 @@ PROJECT_CONFIG=project.json
 COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
 
 GRAPHQL_URI=$(jq -r .env_var.GRAPHQL_URI.docker $PROJECT_CONFIG)
+GRAPHQL_PORT=$(printf "$GRAPHQL_URI" | sed 's/http:\/\/localhost://')
 
 if [[ $GITPOD_WORKSPACE_URL ]]; then
-  GRAPHQL_PORT=$(printf "$GRAPHQL_URI" | sed 's/http:\/\/localhost://')
 	ADDR=$(printf "$GITPOD_WORKSPACE_URL" | sed 's/https:\/\///')
 	GRAPHQL_URI="https://${GRAPHQL_PORT}-${ADDR}"
+fi
+
+if [[ $CODESPACES ]]; then
+	GRAPHQL_URI="https://${CODESPACE_NAME}-${GRAPHQL_PORT}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
 fi
 
 if [[ $(uname -s) == "Darwin" ]]; then

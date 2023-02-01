@@ -1,0 +1,118 @@
+{
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "."
+	},
+	"hostRequirements": {
+		"cpus": 4,
+		"memory": "8gb",
+		"storage": "32gb"
+	},
+	"postCreateCommand": "make compose-up && gh codespace ports visibility 8080:public -c $CODESPACE_NAME",
+	"features": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
+			"installZsh": "true",
+			"username": "codespace",
+			"userUid": "1000",
+			"userGid": "1000",
+			"upgradePackages": "true"
+		},
+		"ghcr.io/devcontainers/features/node:1": {
+			"version": "19"
+		},
+		"ghcr.io/devcontainers/features/git-lfs:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/go:1": {
+			"version": "latest"
+		}
+	},
+	"remoteUser": "codespace",
+	"containerUser": "codespace",
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"go.toolsManagement.checkForUpdates": "local",
+				"go.useLanguageServer": true,
+				"go.gopath": "/go",
+				"lldb.executable": "/usr/bin/lldb",
+				"workbench.colorTheme": "Default Dark+"
+			},
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"GitHub.vscode-pull-request-github",
+				"mutantdino.resourcemonitor",
+				"rangav.vscode-thunder-client",
+				"hashicorp.terraform",
+				"golang.go",
+				"svelte.svelte-vscode",
+				"shd101wyy.markdown-preview-enhanced",
+				"GraphQL.vscode-graphql",
+				"wmaurer.change-case",
+				"dbaeumer.vscode-eslint",
+				"ms-vsliveshare.vsliveshare"
+			]
+		}
+	},
+	"forwardPorts": [
+		8080,
+		8090
+	],
+	"portsAttributes": {
+		"8080": {
+			"label": "graphql",
+			"onAutoForward": "silent"
+		},
+		"8081": {
+			"label": "rules",
+			"onAutoForward": "silent"
+		},
+		"8082": {
+			"label": "request-create",
+			"onAutoForward": "silent"
+		},
+		"8083": {
+			"label": "request-approve",
+			"onAutoForward": "silent"
+		},
+		"8085": {
+			"label": "balance-by-account",
+			"onAutoForward": "silent"
+		},
+		"8086": {
+			"label": "requests-by-account",
+			"onAutoForward": "silent"
+		},
+		"8087": {
+			"label": "request-by-id",
+			"onAutoForward": "silent"
+		},
+		"8088": {
+			"label": "transactions-by-account",
+			"onAutoForward": "silent"
+		},
+		"8089": {
+			"label": "transaction-by-id",
+			"onAutoForward": "silent"
+		},
+		"8090": {
+			"label": "client",
+			"onAutoForward": "silent"
+		},
+		"5432": {
+			"label": "postgres",
+			"onAutoForward": "silent"
+		}
+	}
+}
