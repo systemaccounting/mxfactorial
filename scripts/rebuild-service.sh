@@ -26,6 +26,9 @@ done
 # set B64_GRAPHQL_URI var
 source ./scripts/set-uri-vars.sh
 
+PROJECT_CONFIG=project.json
+COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
+
 COMPOSE_IGNORE_ORPHANS=true \
 GRAPHQL_URI=$B64_GRAPHQL_URI \
 	docker compose \
