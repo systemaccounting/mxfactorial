@@ -25,28 +25,13 @@ if [[ -n $UP ]] && [[ -n $DOWN ]]; then
 	exit 1
 fi
 
+# set B64_GRAPHQL_URI var
+source ./scripts/set-uri-vars.sh
+
 PROJECT_CONFIG=project.json
 COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
 
-GRAPHQL_URI=$(jq -r .env_var.GRAPHQL_URI.docker $PROJECT_CONFIG)
-GRAPHQL_PORT=$(printf "$GRAPHQL_URI" | sed 's/http:\/\/localhost://')
-
-if [[ $GITPOD_WORKSPACE_URL ]]; then
-	ADDR=$(printf "$GITPOD_WORKSPACE_URL" | sed 's/https:\/\///')
-	GRAPHQL_URI="https://${GRAPHQL_PORT}-${ADDR}"
-fi
-
-if [[ $CODESPACES ]]; then
-	GRAPHQL_URI="https://${CODESPACE_NAME}-${GRAPHQL_PORT}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
-fi
-
-if [[ $(uname -s) == "Darwin" ]]; then
-  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64)
-else
-  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64 -w 0)
-fi
-
-UP_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
+INIT_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
 docker compose \\
   -f $COMPOSE_DIR/compose.bitnami-postgres.yaml \\
   -f $COMPOSE_DIR/compose.rules.yaml \\
@@ -58,28 +43,11 @@ docker compose \\
   -f $COMPOSE_DIR/compose.requests-by-account.yaml \\
   -f $COMPOSE_DIR/compose.balance-by-account.yaml \\
   -f $COMPOSE_DIR/compose.graphql.yaml \\
-  -f $COMPOSE_DIR/compose.client.yaml \\
-  up \\
-  -d \\
-  --renew-anon-volumes \\
-  --force-recreate"
-
-DOWN_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
-docker compose \\
-  -f $COMPOSE_DIR/compose.bitnami-postgres.yaml \\
-  -f $COMPOSE_DIR/compose.rules.yaml \\
-  -f $COMPOSE_DIR/compose.request-create.yaml \\
-  -f $COMPOSE_DIR/compose.request-approve.yaml \\
-  -f $COMPOSE_DIR/compose.transaction-by-id.yaml \\
-  -f $COMPOSE_DIR/compose.transactions-by-account.yaml \\
-  -f $COMPOSE_DIR/compose.request-by-id.yaml \\
-  -f $COMPOSE_DIR/compose.requests-by-account.yaml \\
-  -f $COMPOSE_DIR/compose.balance-by-account.yaml \\
-  -f $COMPOSE_DIR/compose.graphql.yaml \\
-  -f $COMPOSE_DIR/compose.client.yaml \\
-  down"
+  -f $COMPOSE_DIR/compose.client.yaml"
 
 if [[ $UP ]]; then
+
+  UP_CMD=$(printf '%s \\\n  up \\\n  -d \\\n  --renew-anon-volumes' "$INIT_CMD")
 
   if [[ $BUILD ]]; then
     UP_CMD=$(printf '%s \\\n  --build' "$UP_CMD")
@@ -90,7 +58,19 @@ if [[ $UP ]]; then
 	eval "$UP_CMD"
 fi
 
+if [[ $BUILD ]]; then
+
+  BUILD_CMD=$(printf '%s \\\n  build' "$INIT_CMD")
+
+  echo "$BUILD_CMD"
+  echo ""
+	eval "$BUILD_CMD"
+fi
+
 if [[ $DOWN ]]; then
+
+  DOWN_CMD=$(printf '%s \\\n  down' "$INIT_CMD")
+
 	echo "$DOWN_CMD"
   echo ""
 	eval "${DOWN_CMD}"

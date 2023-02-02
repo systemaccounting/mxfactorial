@@ -8,7 +8,8 @@
 		"memory": "8gb",
 		"storage": "32gb"
 	},
-	"postCreateCommand": "make compose-up && gh codespace ports visibility 8080:public -c $CODESPACE_NAME",
+	"updateContentCommand": "make compose-build",
+	"postCreateCommand": "bash ./scripts/rebuild-client-image.sh && make compose-up && gh codespace ports visibility 8080:public -c $CODESPACE_NAME",
 	"features": {
 		"ghcr.io/devcontainers/features/common-utils:2": {
 			"installZsh": "true",

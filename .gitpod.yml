@@ -1,6 +1,9 @@
-
 image:
   file: docker/.gitpod.Dockerfile
+tasks:
+  - before: bash scripts/rebuild-client-image.sh
+    init: make compose-build
+    command: make compose-up
 ports:
   - name: graphql
     description: api
@@ -47,6 +50,15 @@ ports:
     description: db
     port: 5432
     onOpen: ignore
+github:
+  prebuilds:
+    master: true
+    branches: true
+    pullRequests: true
+    pullRequestsFromForks: true
+    addCheck: true
+    addComment: false
+    addBadge: false
 vscode:
   extensions:
     - rangav.vscode-thunder-client

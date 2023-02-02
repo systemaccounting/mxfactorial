@@ -419,3 +419,11 @@ rebuilds image and container for docker compose service
 ##### `bootcamp.sh`
 
 trains user on docker compose commands, services and tests
+
+##### `set-uri-vars.sh`
+
+sets `CLIENT_URI`, `GRAPHQL_URI` and `B64_GRAPHQL_URI` vars when sourced in other scripts
+
+##### `rebuild-client-image.sh`
+
+rebuilds client image when the `B64_GRAPHQL_URI` var requires setting by a new devcontainer (gitpod, codespaces)

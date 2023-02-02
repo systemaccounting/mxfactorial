@@ -97,6 +97,9 @@ init:
 test-up:
 	@$(MAKE) test && $(MAKE) compose-up
 
+compose-build:
+	bash scripts/compose.sh --build
+
 compose-up:
 	bash scripts/compose.sh --up
 
