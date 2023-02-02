@@ -12,7 +12,7 @@ function eval_with_no_print_directory() {
 }
 
 while [[ $CMD != "make compose-up" ]]; do
-	read -rep $'\n\e[32m"make compose-up" to create services in docker compose (several minutes to build)\e[0m\n\n> ' CMD
+	read -rep $'\n\e[32m"make compose-up" to create services in docker compose\e[0m\n\n> ' CMD
 done
 
 eval_with_no_print_directory "$CMD"
