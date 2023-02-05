@@ -69,3 +69,5 @@ vscode:
     - GraphQL.vscode-graphql
     - wmaurer.change-case
     - dbaeumer.vscode-eslint
+    - mtxr.sqltools
+    - mtxr.sqltools-driver-pg

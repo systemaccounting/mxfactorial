@@ -45,4 +45,13 @@
 	},
 	"thunder-client.saveToWorkspace": true,
 	"thunder-client.workspaceRelativePath": "test",
+	"sqltools.connections": [
+		{
+			"name": "mxfactorial-docker",
+			"database": "mxfactorial",
+			"driver": "PostgreSQL",
+			"connectString": "postgres://test:test@localhost:5432/mxfactorial",
+			"connectionTimeout": 5
+		}
+	],
 }

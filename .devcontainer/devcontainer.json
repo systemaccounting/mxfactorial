@@ -62,7 +62,9 @@
 				"GraphQL.vscode-graphql",
 				"wmaurer.change-case",
 				"dbaeumer.vscode-eslint",
-				"ms-vsliveshare.vsliveshare"
+				"ms-vsliveshare.vsliveshare",
+				"mtxr.sqltools",
+				"mtxr.sqltools-driver-pg"
 			]
 		}
 	},
