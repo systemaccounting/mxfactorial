@@ -1,17 +1,25 @@
 <script lang="ts">
-	import Card from "./Card.svelte";
-	import Info from "../components/Info.svelte";
-	import { getClient } from "@urql/svelte";
-	import BALANCE_QUERY from "../query/balance";
-	const client = getClient();
+	import Card from './Card.svelte';
+	import Info from './Info.svelte';
+	import { account as currentAccount } from '../stores/account';
+	import BALANCE_QUERY from '../query/balance';
+	import type { Client } from '@urql/core';
+	import { getContext } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 
-	import { account as currentAccount } from "../stores/account";
-	let balance = client
-		.query(BALANCE_QUERY, {
-			auth_account: $currentAccount,
-			account_name: $currentAccount,
-		})
-		.toPromise();
+	let client: Client = getContext('client');
+
+	let balance = '0.000';
+
+	afterNavigate(async () => {
+		let res = await client
+			.query(BALANCE_QUERY, {
+				auth_account: $currentAccount,
+				account_name: $currentAccount
+			})
+			.toPromise();
+		balance = res.data.balance;
+	});
 </script>
 
 <div data-id="balance">
@@ -20,15 +28,7 @@
 		<small>
 			<span> Balance </span>
 		</small>
-		<p data-id="accountBalance">
-			{#await balance}
-				0.000
-			{:then balance}
-				{balance.data.balance}
-			{:catch balance}
-				{balance.error.message}
-			{/await}
-		</p>
+		<p data-id="accountBalance">{balance}</p>
 	</Card>
 </div>
 
