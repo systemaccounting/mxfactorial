@@ -56,6 +56,7 @@ if [[ $UP ]]; then
 	echo "$UP_CMD"
   echo ""
 	eval "$UP_CMD"
+  exit 0
 fi
 
 if [[ $BUILD ]]; then
