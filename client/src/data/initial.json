@@ -5,7 +5,7 @@
 		"item_id": null,
 		"price": null,
 		"quantity": null,
-		"debitor_first": null,
+		"debitor_first": false,
 		"rule_instance_id": null,
 		"unit_of_measurement": null,
 		"units_measured": null,
