@@ -1,11 +1,9 @@
-import type { ITransaction, ITransactionItem } from "../main.d";
-
 export function duplicateRequestsPerRole(
 	currAcct: string,
-	transactions: ITransaction[]
+	requests: ITransaction[]
 ): ITransaction[] {
-	let perRole: ITransaction[] = new Array();
-	for (const tr of transactions) {
+	const perRole: ITransaction[] = [];
+	for (const tr of requests) {
 		for (const trItem of tr.transaction_items) {
 			if (trItem.creditor == currAcct) {
 				perRole.push(tr);
@@ -26,7 +24,7 @@ export function duplicateTransactionsPerRole(
 	currAcct: string,
 	transactions: ITransaction[]
 ): ITransaction[] {
-	let perRole: ITransaction[] = [];
+	const perRole: ITransaction[] = [];
 	for (const tr of transactions) {
 		for (const trItem of tr.transaction_items) {
 			if (trItem.creditor == currAcct) {
@@ -45,10 +43,10 @@ export function duplicateTransactionsPerRole(
 }
 
 export function isCreditor(
-	currAcct: string,
+	currAcct: string | unknown,
 	trItems: ITransactionItem[]
 ): boolean {
-	for (let i: number = 0; i < trItems.length; i++) {
+	for (let i = 0; i < trItems.length; i++) {
 		if (trItems[i].creditor == currAcct) {
 			return true;
 		}
@@ -58,7 +56,7 @@ export function isCreditor(
 
 // todo: temp until transaction rejection time added on server
 export function isRejected(trItems: ITransactionItem[]): boolean {
-	for (let i: number = 0; i < trItems.length; i++) {
+	for (let i = 0; i < trItems.length; i++) {
 		if (
 			trItems[i].debitor_rejection_time != null ||
 			trItems[i].creditor_rejection_time != null
@@ -70,10 +68,10 @@ export function isRejected(trItems: ITransactionItem[]): boolean {
 }
 
 export function sum(trIts: ITransactionItem[]): string {
-	let accumulated: number = 0;
+	let accumulated = 0;
 	for (let i = 0; i < trIts.length; i++) {
-		let price = parseFloat(trIts[i].price);
-		let quantity = parseFloat(trIts[i].quantity);
+		const price = parseFloat(trIts[i].price);
+		const quantity = parseFloat(trIts[i].quantity);
 		if (isNaN(price) || isNaN(quantity)) {
 			continue;
 		}
@@ -86,7 +84,7 @@ export function sum(trIts: ITransactionItem[]): string {
 }
 
 export function disableButton(trIts: ITransactionItem[]): boolean {
-	for (let i of trIts) {
+	for (const i of trIts) {
 		if (i.rule_instance_id && i.rule_instance_id.length > 0) {
 			continue;
 		}
@@ -95,8 +93,8 @@ export function disableButton(trIts: ITransactionItem[]): boolean {
 			(i.price && i.price.length > 0) &&
 			(i.quantity && i.quantity.length > 0)
 		) {
-			let price = parseFloat(i.price);
-			let quantity = parseFloat(i.quantity);
+			const price = parseFloat(i.price);
+			const quantity = parseFloat(i.quantity);
 			if (isNaN(price) || isNaN(quantity)) {
 				return true;
 			}
@@ -129,7 +127,7 @@ export function requestTime(trItems: ITransactionItem[]): Date {
 export function expirationTime(trItems: ITransactionItem[]): Date {
 	let expirationTime: Date = new Date();
 
-	let nullCount: number = 0;
+	let nullCount = 0;
 	for (const trItem of trItems) {
 		if (trItem.creditor_expiration_time != null) {
 			const crExpTime = new Date(trItem.creditor_expiration_time);
@@ -168,18 +166,18 @@ export function filterRuleAddedItems(reqItems: ITransactionItem[]): ITransaction
 }
 
 export function accountValuesPresent(reqItems: ITransactionItem[]): boolean {
-	let debitorsWithValue = reqItems.filter((x) => {
+	const debitorsWithValue = reqItems.filter((x) => {
 		return x.debitor || x.debitor?.length > 0
 	});
-	let creditorsWithValue = reqItems.filter((x) => {
+	const creditorsWithValue = reqItems.filter((x) => {
 		return x.creditor || x.creditor?.length > 0
 	});
-	let allItemsHaveRecipients: boolean = reqItems.length == debitorsWithValue.length && reqItems.length == creditorsWithValue.length;
+	const allItemsHaveRecipients: boolean = reqItems.length == debitorsWithValue.length && reqItems.length == creditorsWithValue.length;
 	return allItemsHaveRecipients;
 }
 
 export function isRequestPending(
-	currAcct: string,
+	currAcct: string | unknown,
 	request: ITransaction,
 ): boolean {
 	for (const req of request.transaction_items) {
@@ -196,7 +194,7 @@ export function isRequestPending(
 }
 
 export function getContraAccount(
-	currentAcct: string,
+	currentAcct: string | unknown,
 	transaction: ITransaction
 ): string {
 	for (const trItem of transaction.transaction_items) {
