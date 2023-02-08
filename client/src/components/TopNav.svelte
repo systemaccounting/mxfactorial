@@ -1,33 +1,23 @@
 <script lang="ts">
-	import { Link, useLocation } from "svelte-navigator";
-	import Icon from "../icons/Icon.svelte";
-	import { faHome, faFlag } from "@fortawesome/free-solid-svg-icons";
-	import request from "../stores/request";
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import Icon from '../icons/Icon.svelte';
+	import { faHome, faFlag } from '@fortawesome/free-solid-svg-icons';
+	import request from '../stores/request';
 
-	const location = useLocation();
-
-	function handleReset() {
-		if ($location.pathname == "/account") {
+	function handleNavigation() {
+		if ($page.url.pathname == '/account') {
 			request.reset();
 		}
+		goto('/account');
 	}
 </script>
 
 <div data-id="topNav">
-	<Link to="/account" replace={true}>
-		<span on:click={handleReset}>
-			<Icon
-				addedStyle="float: left;"
-				iconName={faHome}
-				dataIDValue="homeIcon"
-			/>
-		</span>
-	</Link>
-	<Icon
-		addedStyle="width: 2.5rem;"
-		iconName={faFlag}
-		dataIDValue="notificationIcon"
-	/>
+	<span on:click={handleNavigation} data-id="homeIcon">
+		<Icon addedStyle="float: left;" iconName={faHome} dataIDValue="" />
+	</span>
+	<Icon addedStyle="width: 2.5rem;" iconName={faFlag} dataIDValue="notificationIcon" />
 </div>
 
 <style>
