@@ -1,4 +1,4 @@
-import { gql } from "@urql/svelte";
+import { gql } from "@urql/core";
 
 const APPROVE_REQUEST_MUTATION = gql`
 	mutation approveRequest($transaction_id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {

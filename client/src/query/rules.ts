@@ -1,4 +1,4 @@
-import { gql } from "@urql/svelte";
+import { gql } from "@urql/core";
 
 const RULES_QUERY = gql`
 	query getRules($transaction_items: [TransactionItemInput!]) {

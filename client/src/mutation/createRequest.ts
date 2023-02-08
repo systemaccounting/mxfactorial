@@ -1,4 +1,4 @@
-import { gql } from "@urql/svelte";
+import { gql } from "@urql/core";
 
 const CREATE_REQUEST_MUTATION = gql`
 	mutation createRequest($transaction_items: [TransactionItemInput!], $auth_account: String!) {

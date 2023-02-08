@@ -1,4 +1,4 @@
-import { gql } from "@urql/svelte";
+import { gql } from "@urql/core";
 
 const REQUESTS_BY_ACCOUNT_QUERY = gql`
     query getRequestsByAccount($account_name: String!, $auth_account: String!) {

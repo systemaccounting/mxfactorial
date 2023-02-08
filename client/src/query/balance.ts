@@ -1,4 +1,4 @@
-import { gql } from "@urql/svelte";
+import { gql } from '@urql/core';
 
 const BALANCE_QUERY = gql`
 	query balance($account_name: String!, $auth_account: String!) {
