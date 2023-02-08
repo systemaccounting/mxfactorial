@@ -132,6 +132,14 @@ read -n 1
 
 echo ""
 
+while [[ $CMD != "make -C client test" ]]; do
+	read -rep $'\e[32m"make -C client test" to e2e test a transaction in a headless browser\e[0m\n\n> ' CMD
+done
+
+eval "$CMD"
+
+echo ""
+
 echo -e -n "${GREEN}navigate to $GRAPHQL_URI in a browser to view the graphiql explorer. press any key to continue${RESET}\n\n>"
 read -n 1
 
