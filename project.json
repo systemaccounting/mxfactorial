@@ -260,7 +260,7 @@
             "dependents": []
         },
         "client": {
-            "runtime": "es2015",
+            "runtime": "v8",
             "path": "client",
             "secrets": [
                 "POOL_ID",
@@ -268,7 +268,6 @@
                 "GRAPHQL_URI"
             ],
             "params": [
-                "AWS_REGION",
                 "ENABLE_AUTH"
             ],
             "deploy": true,
