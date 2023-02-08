@@ -1,18 +1,19 @@
+// stores transaction request on account/home screen
+
 import { writable } from 'svelte/store';
-import type { ITransactionItem } from "../main.d"
 import initial from "../data/initial.json"
 import { filterUserAddedItems, filterRuleAddedItems } from "../utils/transactions"
 
-let request: ITransactionItem[] = JSON.parse(JSON.stringify(initial));
+const request: App.ITransactionItem[] = JSON.parse(JSON.stringify(initial));
 
 const { subscribe, set, update } = writable(request);
 
 function addRequestItem(): void {
-	return update(function (reqItems: ITransactionItem[]) {
+	return update(function (reqItems: App.ITransactionItem[]) {
 		// avoid refs
-		let debitor = reqItems[0].debitor;
-		let creditor = reqItems[0].creditor;
-		let newReqItems: ITransactionItem[] = JSON.parse(JSON.stringify(initial));
+		const debitor = reqItems[0].debitor;
+		const creditor = reqItems[0].creditor;
+		const newReqItems: App.ITransactionItem[] = JSON.parse(JSON.stringify(initial));
 		newReqItems[0].debitor = debitor;
 		newReqItems[0].creditor = creditor;
 		reqItems.push(...newReqItems)
@@ -21,9 +22,9 @@ function addRequestItem(): void {
 };
 
 function removeRequestItem(index: number): void {
-	return update(function (reqItems: ITransactionItem[]) {
+	return update(function (reqItems: App.ITransactionItem[]) {
 
-		let init: ITransactionItem[] = JSON.parse(JSON.stringify(initial));
+		const init: App.ITransactionItem[] = JSON.parse(JSON.stringify(initial));
 
 		// reset if only 1 request item
 		if (reqItems.length == 1) {
@@ -32,7 +33,7 @@ function removeRequestItem(index: number): void {
 		}
 
 		// filter items added by user
-		let userAdded = filterUserAddedItems(reqItems)
+		const userAdded = filterUserAddedItems(reqItems)
 
 		// rules can add request items to store,
 		// reset if only 1 user added item left
@@ -46,16 +47,16 @@ function removeRequestItem(index: number): void {
 	});
 };
 
-function addRuleItems(ruleAddedItems: ITransactionItem[]): void {
-	return update(function (reqItems: ITransactionItem[]) {
+function addRuleItems(ruleAddedItems: App.ITransactionItem[]): void {
+	return update(function (reqItems: App.ITransactionItem[]) {
 
 		// filter rule items from rule endpoint response
-		let ruleItems = filterRuleAddedItems(ruleAddedItems)
+		const ruleItems = filterRuleAddedItems(ruleAddedItems)
 
 		// filter items currently added by user in inputs
-		let userAdded = filterUserAddedItems(reqItems)
+		const userAdded = filterUserAddedItems(reqItems)
 
-		let newRuleItems = [...userAdded, ...ruleItems];
+		const newRuleItems = [...userAdded, ...ruleItems];
 
 		return newRuleItems
 	});
@@ -66,16 +67,16 @@ function changeRequestItem(
 	name: string,
 	value: string,
 ): void {
-	return update(function (reqItems: ITransactionItem[]) {
+	return update(function (reqItems: App.ITransactionItem[]) {
 		reqItems[index][name] = value;
 		return [...reqItems];
 	});
 };
 
 function addRecipient(debitor: string, creditor: string): void {
-	return update(function (reqItems: ITransactionItem[]) {
-		let userAdded = filterUserAddedItems(reqItems)
-		let recipientAdded = userAdded.map((x) => {
+	return update(function (reqItems: App.ITransactionItem[]) {
+		const userAdded = filterUserAddedItems(reqItems)
+		const recipientAdded = userAdded.map((x) => {
 			x.debitor = debitor
 			x.creditor = creditor
 			return x
@@ -85,11 +86,11 @@ function addRecipient(debitor: string, creditor: string): void {
 };
 
 function switchRecipient(): void {
-	return update(function (reqItems: ITransactionItem[]) {
-		let userAdded = filterUserAddedItems(reqItems)
-		let debitor = userAdded[0].debitor
-		let creditor = userAdded[0].creditor
-		let recipientAdded = userAdded.map((x) => {
+	return update(function (reqItems: App.ITransactionItem[]) {
+		const userAdded = filterUserAddedItems(reqItems)
+		const debitor = userAdded[0].debitor
+		const creditor = userAdded[0].creditor
+		const recipientAdded = userAdded.map((x) => {
 			x.debitor = creditor
 			x.creditor = debitor
 			return x
@@ -99,7 +100,7 @@ function switchRecipient(): void {
 };
 
 function reset(): void {
-	let init: ITransactionItem[] = JSON.parse(JSON.stringify(initial));
+	const init: App.ITransactionItem[] = JSON.parse(JSON.stringify(initial));
 	return set(init)
 }
 
