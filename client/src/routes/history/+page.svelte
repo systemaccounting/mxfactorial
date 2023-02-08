@@ -27,20 +27,22 @@
 
 <Nav>
 	<Balance />
-	<div class="container">
-		{#each transactionsByAccount as tr, i}
-			<a href={'/history/' + tr['id']}>
-				<div class="history" data-id-index={i} data-id-tr={tr.id}>
-					<HistoryCard
-						contraAccount={$currentAccount == tr.author ? $currentAccount : tr.author}
-						isCurrentAccountCreditor={isCreditor($currentAccount, tr.transaction_items)}
-						equilibriumTime={requestTime(tr.transaction_items)}
-						sumValue={tr.sum_value}
-					/>
-				</div>
-			</a>
-		{/each}
-	</div>
+	{#if transactionsByAccount}
+		<div class="container">
+			{#each transactionsByAccount as tr, i}
+				<a href={'/history/' + tr['id']}>
+					<div class="history" data-id-index={i} data-id-tr={tr.id}>
+						<HistoryCard
+							contraAccount={$currentAccount == tr.author ? $currentAccount : tr.author}
+							isCurrentAccountCreditor={isCreditor($currentAccount, tr.transaction_items)}
+							equilibriumTime={requestTime(tr.transaction_items)}
+							sumValue={tr.sum_value}
+						/>
+					</div>
+				</a>
+			{/each}
+		</div>
+	{/if}
 </Nav>
 
 <style>
