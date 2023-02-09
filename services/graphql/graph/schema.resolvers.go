@@ -6,49 +6,130 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/services/graphql/auth"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
 )
 
 // CreateRequest is the resolver for the createRequest field.
 func (r *mutationResolver) CreateRequest(ctx context.Context, transactionItems []*model.TransactionItemInput, authAccount string) (*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented: CreateRequest - createRequest"))
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	tr, err := r.InvokeRequestCreate(transactionItems, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return tr, nil
 }
 
 // ApproveRequest is the resolver for the approveRequest field.
 func (r *mutationResolver) ApproveRequest(ctx context.Context, transactionID string, accountName string, accountRole string, authAccount string) (*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented: ApproveRequest - approveRequest"))
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	tr, err := r.InvokeRequestApprove(
+		transactionID,
+		accountName,
+		accountRole,
+		authAccount,
+	)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return tr, nil
 }
 
 // Rules is the resolver for the rules field.
 func (r *queryResolver) Rules(ctx context.Context, transactionItems []*model.TransactionItemInput) (*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented: Rules - rules"))
+	tr, err := r.InvokeRules(transactionItems)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return tr, nil
 }
 
 // RequestByID is the resolver for the requestByID field.
 func (r *queryResolver) RequestByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented: RequestByID - requestByID"))
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	tr, err := r.InvokeRequestByID(transactionID, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return tr, nil
 }
 
 // RequestsByAccount is the resolver for the requestsByAccount field.
 func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented: RequestsByAccount - requestsByAccount"))
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	trs, err := r.InvokeRequestsByAccount(accountName, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return trs, nil
 }
 
 // TransactionByID is the resolver for the transactionByID field.
 func (r *queryResolver) TransactionByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented: TransactionByID - transactionByID"))
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	tr, err := r.InvokeTransactionByID(transactionID, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return tr, nil
 }
 
 // TransactionsByAccount is the resolver for the transactionsByAccount field.
 func (r *queryResolver) TransactionsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
-	panic(fmt.Errorf("not implemented: TransactionsByAccount - transactionsByAccount"))
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	trs, err := r.InvokeTransactionsByAccount(accountName, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return trs, nil
 }
 
 // Balance is the resolver for the balance field.
 func (r *queryResolver) Balance(ctx context.Context, accountName string, authAccount string) (*string, error) {
-	panic(fmt.Errorf("not implemented: Balance - balance"))
+	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	bal, err := r.InvokeBalanceByAccount(accountName, authAccount)
+	if err != nil {
+		logger.Log(logger.Trace(), err)
+		return nil, err
+	}
+	return bal, nil
 }
 
 // Mutation returns MutationResolver implementation.
