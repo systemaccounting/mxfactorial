@@ -1,4 +1,4 @@
-name: dev-rules
+name: dev-integration
 
 on:
   push:
@@ -37,4 +37,4 @@ jobs:
       - name: integration tests
         run: make -C ./test test
       - name: e2e tests
-        run: make -C ./client test
+        run: make -C ./client test-ci
