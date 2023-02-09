@@ -36,7 +36,13 @@ preview:
 .PHONY: build
 build:
 	npm run build
-	@rm -rf $(BUILD_DIR); mkdir $(BUILD_DIR); cp ./.svelte-kit/output/prerendered/pages/index.html $(BUILD_DIR); cp -a ./.svelte-kit/output/client/ $(BUILD_DIR);
+	$(MAKE) build-artifact
+
+build-artifact:
+	rm -rf $(BUILD_DIR)
+	mkdir $(BUILD_DIR)
+	cp .svelte-kit/output/prerendered/pages/index.html $(BUILD_DIR)
+	cp -a .svelte-kit/output/client/* $(BUILD_DIR)
 
 build-env:
 	@$(MAKE) -s test-env-arg
