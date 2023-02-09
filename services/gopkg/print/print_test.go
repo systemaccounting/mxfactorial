@@ -1,11 +1,11 @@
-package tools
+package print
 
 import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
-	mtools "github.com/systemaccounting/mxfactorial/services/gopkg/tools/mock_tools"
+	mprint "github.com/systemaccounting/mxfactorial/services/gopkg/print/mock_print"
 	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
 )
 
@@ -20,7 +20,7 @@ func TestNewPrintable(t *testing.T) {
 
 func TestPrintTransaction(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	m := mtools.NewMockMarshaler(ctrl)
+	m := mprint.NewMockMarshaler(ctrl)
 	m.EXPECT().MarshalIndent().Times(1)
 	PrintTransaction(m)
 }

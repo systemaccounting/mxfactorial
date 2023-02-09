@@ -411,12 +411,12 @@
             "path": "services/gopkg/testdata",
             "dependents": []
         },
-        "tools": {
+        "print": {
             "runtime": "go1.x",
-            "path": "services/gopkg/tools",
+            "path": "services/gopkg/print",
             "dependents": [],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/tools": [
+                "github.com/systemaccounting/mxfactorial/services/gopkg/print": [
                     "Marshaler"
                 ]
             }
