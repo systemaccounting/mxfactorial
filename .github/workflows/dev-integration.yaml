@@ -1,4 +1,4 @@
-name: dev-rules
+name: dev-integration
 
 on:
   push:
@@ -36,3 +36,5 @@ jobs:
           rm migrate.linux-amd64.deb
       - name: integration tests
         run: make -C ./test test
+      - name: e2e tests
+        run: make -C ./client test-ci

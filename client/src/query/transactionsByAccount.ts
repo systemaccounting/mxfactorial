@@ -1,4 +1,4 @@
-import { gql } from "@urql/svelte";
+import { gql } from "@urql/core";
 
 const TRANSACTIONS_BY_ACCOUNT_QUERY = gql`
 	query getTransactionsByAccount($account_name: String!, $auth_account: String!) {

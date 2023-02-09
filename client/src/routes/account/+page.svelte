@@ -1,37 +1,41 @@
 <script lang="ts">
-	import Info from "../components/Info.svelte";
-	import Balance from "../components/Balance.svelte";
-	import Input from "../components/Input.svelte";
-	import SwitchButtons from "../components/SwitchButtons.svelte";
-	import TransactionItem from "../components/TransactionItem.svelte";
-	import RulesUrql from "../containers/RulesUrql.svelte";
-	import RuleItem from "../components/RuleItem.svelte";
-	import type { ITransactionItem } from "../main.d";
-	import Button from "../components/Button.svelte";
-	import AddIcon from "../icons/AddIcon.svelte";
-	import SubtractIcon from "../icons/SubtractIcon.svelte";
+	import Nav from '../../components/Nav.svelte';
+	import Info from '../../components/Info.svelte';
+	import Balance from '../../components/Balance.svelte';
+	import Input from '../../components/Input.svelte';
+	import SwitchButtons from '../../components/SwitchButtons.svelte';
+	import TransactionItem from '../../components/TransactionItem.svelte';
+	import RulesUrql from '../../containers/RulesUrql.svelte';
+	import RuleItem from '../../components/RuleItem.svelte';
+	import Button from '../../components/Button.svelte';
+	import AddIcon from '../../icons/AddIcon.svelte';
+	import SubtractIcon from '../../icons/SubtractIcon.svelte';
 	import {
 		sum,
 		disableButton,
 		accountValuesPresent,
-		filterUserAddedItems,
-	} from "../utils/transactions";
+		filterUserAddedItems
+	} from '../../utils/transactions';
 
-	import request from "../stores/request";
-	import { account as currentAccount } from "../stores/account";
-	import { getClient } from "@urql/svelte";
-	import CREATE_REQUEST_MUTATION from "../mutation/createRequest";
-	import { Pulse } from "svelte-loading-spinners";
+	import request from '../../stores/request';
+	import { account as currentAccount } from '../../stores/account';
 
-	const client = getClient();
-	let reqItems: ITransactionItem[];
+	import CREATE_REQUEST_MUTATION from '../../mutation/createRequest';
+	import { Pulse } from 'svelte-loading-spinners';
+	import type { Client } from '@urql/core';
+	import { getContext, onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
+	let client: Client = getContext('client');
+
+	let reqItems: App.ITransactionItem[];
 	let rulesEventCount: number = 0;
 	let trItemHeight: number;
 	let prevReqItemsCount: number = 0;
-	let recipient: string = "";
+	let recipient: string = '';
 	let showLoading: boolean = false;
 
-	request.subscribe(function (requestItems: ITransactionItem[]): void {
+	request.subscribe(function (requestItems: App.ITransactionItem[]): void {
 		// console.log(requestItems);
 		reqItems = requestItems;
 	});
@@ -45,30 +49,33 @@
 		request.removeRequestItem(indexToRemove);
 	}
 
-	function handleAutoScroll(requestItems: ITransactionItem[]) {
+	function handleAutoScroll(requestItems: App.ITransactionItem[]) {
 		let userAdded = filterUserAddedItems(requestItems);
 		if (userAdded.length > prevReqItemsCount) {
-			window.scrollBy(0, trItemHeight);
-			prevReqItemsCount = userAdded.length;
+			onMount(() => {
+				window.scrollBy(0, trItemHeight);
+				prevReqItemsCount = userAdded.length;
+			});
 		}
 	}
 
 	function handleChangeRecipient(e: CustomEvent) {
 		if (isCredit) {
+			// @ts-expect-error
 			request.addRecipient(e.detail.value, $currentAccount);
 		} else {
+			// @ts-expect-error
 			request.addRecipient($currentAccount, e.detail.value);
 		}
 	}
 
-	function resetRecipient(requestItems: ITransactionItem[]) {
+	function resetRecipient(requestItems: App.ITransactionItem[]) {
 		let single = requestItems.length == 1;
 		let propCount = Object.keys(requestItems[0]).length;
-		let nullCount = Object.values(requestItems[0]).filter(
-			(x) => x == null
-		).length;
-		if (single && propCount == nullCount) {
-			recipient = "";
+		let nullCount = Object.values(requestItems[0]).filter((x) => x == null).length;
+		let nullCountPlusDebitorFirstBooleanProperty = nullCount + 1; // debitor_first default == false instead of null
+		if (single && propCount == nullCountPlusDebitorFirstBooleanProperty) {
+			recipient = '';
 		}
 	}
 
@@ -77,13 +84,14 @@
 			client
 				.mutation(CREATE_REQUEST_MUTATION, {
 					auth_account: $currentAccount,
-					transaction_items: reqItems,
+					transaction_items: reqItems
 				})
 				.toPromise()
 				.then((result) => {
 					request.reset();
 					showLoading = false;
-					console.log("sent");
+					console.log('sent');
+					goto('/requests');
 				})
 				.catch((err) => {
 					showLoading = false;
@@ -104,25 +112,17 @@
 	$: resetRecipient(reqItems);
 </script>
 
-<div>
+<Nav>
 	<div class="container" on:click={() => console.log(reqItems)}>
 		<Balance />
 	</div>
 	<div data-id="switchBtns" class="switch container">
 		<SwitchButtons bind:switchButtons={isCredit} dataId="dbCrBtns">
 			<span slot="left">
-				<SubtractIcon
-					size={14}
-					style="transform: translate(-1px, 3px)
-			;"
-				/> debit
+				<SubtractIcon size={14} style="transform: translate(-1px, 3px);" /> debit
 			</span>
 			<span slot="right">
-				credit <AddIcon
-					size={14}
-					style="transform: translate(3px, 2px)
-			;"
-				/>
+				credit <AddIcon size={14} style="transform: translate(3px, 2px);" />
 			</span>
 		</SwitchButtons>
 	</div>
@@ -164,20 +164,13 @@
 			<span class="add-btn" on:click={handleAddClick}>
 				<Button
 					disabled={disableAddItem}
-					class="btn-height {disableAddItem
-						? 'disable-add-btn'
-						: 'enable-add-btn'}"
-					><AddIcon
-						size={14}
-						style="transform: translate(3px, 2px);"
-					/> Item</Button
+					class="btn-height {disableAddItem ? 'disable-add-btn' : 'enable-add-btn'}"
+					><AddIcon size={14} style="transform: translate(3px, 2px);" /> Item</Button
 				>
 			</span>
 			<span on:click={handleRequestClick}>
-				<Button
-					disabled={false}
-					class="btn-height  {isCredit ? 'request-btn' : 'pay-btn'}"
-					>{isCredit ? "Request" : "Pay"}
+				<Button disabled={false} class="btn-height  {isCredit ? 'request-btn' : 'pay-btn'}"
+					>{isCredit ? 'Request' : 'Pay'}
 				</Button>
 			</span>
 		</div>
@@ -187,11 +180,7 @@
 				<RulesUrql />
 				{#each reqItems as item, i}
 					{#if item.rule_instance_id && item.rule_instance_id.length > 0}
-						<div
-							data-id="ruleItem"
-							data-id-index={i}
-							class="container"
-						>
+						<div data-id="ruleItem" data-id-index={i} class="container">
 							<RuleItem
 								nameValue={item.item_id}
 								priceValue={item.price}
@@ -208,7 +197,7 @@
 			<Pulse color="#fff" />
 		</div>
 	{/if}
-</div>
+</Nav>
 
 <style>
 	.container {

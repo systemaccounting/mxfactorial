@@ -1,12 +1,9 @@
 <script lang="ts">
-	import { Link } from "svelte-navigator";
-	import { useNavigate, useLocation } from "svelte-navigator";
-	import { signOut } from "../auth/cognito";
+	import { goto } from '$app/navigation';
+	import { removeAccount } from '../stores/account';
+	import { signOut } from '../auth/cognito';
 
 	export let isActive: boolean;
-
-	const navigate = useNavigate();
-	const location = useLocation();
 
 	function handleDisplayClick(): void {
 		isActive = !isActive;
@@ -14,29 +11,23 @@
 
 	function handleSignOutClick() {
 		signOut();
-		navigate("/", {
-			state: { from: $location.pathname },
-			replace: true,
-		});
+		goto('/');
+		removeAccount();
 	}
 </script>
 
-<div on:click|preventDefault={handleDisplayClick}>
+<div on:click={handleDisplayClick}>
 	<ul data-id="nav-menu">
-		<Link to="/requests">
+		<a href="/requests">
 			<li data-id="nav-menu-item">Requests</li>
-		</Link>
-		<Link to="/history">
+		</a>
+		<a href="/history">
 			<li data-id="nav-menu-item">History</li>
-		</Link>
+		</a>
 		<li data-id="nav-menu-item">Rules</li>
 		<li data-id="nav-menu-item">Query</li>
 		<li data-id="nav-menu-item">Support</li>
-		<li
-			data-name="sign-out"
-			data-id="nav-menu-item"
-			on:click|preventDefault={handleSignOutClick}
-		>
+		<li data-name="sign-out" data-id="nav-menu-item" on:click|preventDefault={handleSignOutClick}>
 			Sign Out
 		</li>
 	</ul>

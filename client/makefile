@@ -14,35 +14,61 @@ ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
 ENABLE_AUTH=$(shell jq -r '.enable_api_auth' $(PROJECT_CONF))
 SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
-BUILD_DIR=$(CURDIR)/public
+BUILD_DIR=$(CURDIR)/build
 DEPS_DIR=$(CURDIR)/node_modules
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
-
 ENV_FILE=$(CURDIR)/.env
-PARAMS=$(shell jq -r '.apps.client.params[]' $(PROJECT_CONF))
-SECRETS=$(shell jq -r '.apps.client.secrets[]' $(PROJECT_CONF))
+PARAMS=$(shell jq -r '.apps.$(APP_NAME).params[]' $(PROJECT_CONF))
+SECRETS=$(shell jq -r '.apps.$(APP_NAME).secrets[]' $(PROJECT_CONF))
 ENV_VARS=$(PARAMS) $(SECRETS)
 GRAPHQL_URI=$(shell jq -r .env_var.GRAPHQL_URI.docker $(PROJECT_CONF))
 B64_GRAPHQL_URI=$(shell if [ `uname -s` == 'Darwin' ]; then printf $(GRAPHQL_URI) | base64; else printf $(GRAPHQL_URI) | base64 -w 0; fi)
 
 dev:
 	if ! [ -f $(ENV_FILE) ]; then $(MAKE) local-env; fi
-	npm run dev
+	npm run dev -- --open
 
-start:
-	if ! [ -f $(ENV_FILE) ]; then $(MAKE) local-env; fi
-	npm start
+preview:
+	npm run preview
+
+###################### build ######################
+
+.PHONY: build
+build:
+	npm run build
+	@rm -rf $(BUILD_DIR); mkdir $(BUILD_DIR); cp ./.svelte-kit/output/prerendered/pages/index.html $(BUILD_DIR); cp -a ./.svelte-kit/output/client/ $(BUILD_DIR);
+
+build-env:
+	@$(MAKE) -s test-env-arg
+ifeq (local,$(ENV))
+	@$(MAKE) local-env
+else
+	@$(MAKE) get-secrets ENV=dev
+endif
+	$(MAKE) build
 
 ###################### dependencies ######################
 
 install:
 	npm install
 
-###################### build ######################
+###################### test ######################
 
-build:
-	npm run build
-	rm -f $(BUILD_DIR)/.DS_Store
+install-browsers:
+	npx playwright install
+
+test:
+	if ! [ -d node_modules ]; then npm install; fi
+	@$(MAKE) install-browsers
+	@$(MAKE) -C .. rebuild-db
+	@$(MAKE) -s local-env
+	npm run test
+
+test-ci:
+	if ! [ -d node_modules ]; then npm install; fi
+	@$(MAKE) install-browsers
+	@$(MAKE) -s local-env
+	npm run test-ci
 
 ###################### clean ######################
 
@@ -70,26 +96,8 @@ get-secrets: retrieve-each-secret
 
 retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
 $(ENV_VARS):
-	@if [ $@ = AWS_REGION ]; then \
-		B64_REGION=$$(echo $(REGION) | base64); \
-		echo "AWS_REGION=$${B64_REGION}" >> $(ENV_FILE); \
-	elif [ $@ = ENV ]; then \
-		echo "JEST_ENV=$(ENV)" >> $(ENV_FILE); \
-	elif [ $@ = ACCOUNT ]; then \
-		for account in $(TEST_ACCOUNTS); do \
-			echo "$$account=1" >> $(ENV_FILE); \
-		done; \
-	elif [ $@ = ENABLE_AUTH ]; then \
+	@if [ $@ = ENABLE_AUTH ]; then \
 		echo "ENABLE_AUTH=$(ENABLE_AUTH)" >> $(ENV_FILE); \
-	elif [ $@ = SECRET ]; then \
-		PARAM_NAME=$(shell jq -r ".env_var.$@.ssm" $(PROJECT_CONF)); \
-		SECRET=$$(aws ssm get-parameter \
-			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
-			--query 'Parameter.Value' \
-			--with-decryption \
-			--region $(REGION) \
-			--output text); \
-		echo "JEST_$@=$$SECRET" >> $(ENV_FILE); \
 	else \
 		PARAM_NAME=$(shell jq -r ".env_var.$@.ssm" $(PROJECT_CONF)); \
 		ENV_VAR=$$(aws ssm get-parameter \
@@ -123,7 +131,6 @@ sync:
 	@$(MAKE) -s test-env-arg
 	aws s3 sync $(BUILD_DIR)/ s3://$(ORIGIN_BUCKET) --delete
 
-# https://stackoverflow.com/a/58451831
 empty-cache:
 	@$(MAKE) -s test-env-arg
 	@CACHE_ID=$$(aws cloudfront list-distributions --output text \
@@ -138,16 +145,6 @@ ifeq ($(ENV), prod)
 	aws cloudfront create-invalidation --distribution-id $$WWW_CACHE_ID --paths "/*" --query '$(CLOUDFRONT_QUERY)'
 endif
 
-test-env-arg:
-ifndef ENV
-		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
-endif
-
-test-env-file:
-ifeq (,$(wildcard $(ENV_FILE)))
-	$(error no .env file, run 'make get-secrets ENV=dev')
-endif
-
 ###################### docker ######################
 
 up:
@@ -155,3 +152,15 @@ up:
 
 down:
 	docker compose -f ../docker/compose.client.yaml down
+
+###################### utils ######################
+
+date:
+	@NO_COLOR=1 node -e 'console.log(new Date());'
+
+###################### make ######################
+
+test-env-arg:
+ifndef ENV
+		$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+endif

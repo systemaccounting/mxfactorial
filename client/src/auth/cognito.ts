@@ -1,14 +1,10 @@
-import {
-	CognitoUserPool,
-	AuthenticationDetails,
-	CognitoUser,
-	ICognitoUserPoolData,
-} from 'amazon-cognito-identity-js';
+import { CognitoUserPool, AuthenticationDetails, CognitoUser} from 'amazon-cognito-identity-js';
+import type { ICognitoUserPoolData } from 'amazon-cognito-identity-js';
+import b64 from 'base-64';
 
 const poolData: ICognitoUserPoolData = {
-	// avoid atob when developing locally
-	UserPoolId: process.env.POOL_ID ? atob(process.env.POOL_ID).trim() : "",
-	ClientId: process.env.CLIENT_ID ? atob(process.env.CLIENT_ID).trim(): "",
+	UserPoolId: process.env.POOL_ID ? b64.decode(process.env.POOL_ID).trim() : "",
+	ClientId: process.env.CLIENT_ID ? b64.decode(process.env.CLIENT_ID).trim(): "",
 };
 
 let userPool: CognitoUserPool;
@@ -34,7 +30,7 @@ function signIn(account: string, password: string) {
 
 	return new Promise((res, rej) => {
 		cognitoUser.authenticateUser(authDetails, {
-			onSuccess: function (data) {
+			onSuccess: function () { // passes "data"
 				res({});
 			},
 			onFailure: function (err) {
@@ -66,7 +62,7 @@ function signUp(account: string, password: string) {
 	});
 };
 
-function getIdToken(cb: Function) {
+function getIdToken(cb) {
 	if (cognitoUser != null) {
 		cognitoUser.getSession(function(err, session) {
 			if (err) {

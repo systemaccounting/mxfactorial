@@ -1,9 +1,13 @@
-<main>
+<script lang="ts">
+	import '../app.css';
+</script>
+
+<div class="mobile-layout">
 	<slot />
-</main>
+</div>
 
 <style>
-	main {
+	.mobile-layout {
 		text-align: center;
 		max-width: 400px;
 		margin: auto;

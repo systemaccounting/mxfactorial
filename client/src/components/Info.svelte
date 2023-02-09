@@ -1,6 +1,7 @@
 <script lang="ts">
+	import type { Writable } from 'svelte/store';
 	export let label: string;
-	export let value: string;
+	export let value: Writable<string> | null;
 </script>
 
 <div class="info">

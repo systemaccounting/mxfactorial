@@ -1,9 +1,9 @@
 <script lang="ts">
-	import TopNav from "./TopNav.svelte";
-	import Hamburger from "./Hamburger.svelte";
-	import NavMenu from "./NavMenu.svelte";
-	import NavMenuDev from "./NavMenuDev.svelte";
-	import NavMask from "./NavMask.svelte";
+	import TopNav from './TopNav.svelte';
+	import Hamburger from './Hamburger.svelte';
+	import NavMenu from './NavMenu.svelte';
+	import NavMenuDev from './NavMenuDev.svelte';
+	import NavMask from './NavMask.svelte';
 	let isActive: boolean = false;
 </script>
 

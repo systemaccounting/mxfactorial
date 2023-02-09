@@ -12,6 +12,8 @@ FROM nginx:latest
 
 EXPOSE 80
 
-COPY --from=builder1 /app/public /usr/share/nginx/html
+COPY --from=builder1 /app/.svelte-kit/output/prerendered/pages/index.html /usr/share/nginx/html
 
-COPY client/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder1 /app/.svelte-kit/output/client/ /usr/share/nginx/html
+
+COPY --from=builder1 /app/nginx.conf /etc/nginx/conf.d/default.conf

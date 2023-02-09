@@ -1,26 +1,22 @@
 <script lang="ts">
-	import { useNavigate, useLocation } from "svelte-navigator";
-	import { signIn, signUp } from "../auth/cognito";
-	import { Pulse } from "svelte-loading-spinners";
-	import { setAccount } from "../stores/account";
+	import { goto } from '$app/navigation';
+	import { signIn, signUp } from '../auth/cognito';
+	import { Pulse } from 'svelte-loading-spinners';
+	import { setAccount } from '../stores/account';
 
 	let hasError: boolean = false;
 	let disabled: boolean = false;
 	let inactive: boolean = false;
-	let account: string = "";
-	let password: string = "";
+	let account: string = '';
+	let password: string = '';
 	let showLoading: boolean = false;
-
-	const navigate = useNavigate();
-	const location = useLocation();
 
 	function handleSignIn() {
 		signIn(account, password)
 			.then(() => {
 				setAccount(account);
-				navigate("/account", {
-					state: { from: $location.pathname },
-					replace: true,
+				goto('/account', {
+					replaceState: true
 				});
 			})
 			.catch((err) => {
@@ -34,9 +30,8 @@
 		signUp(account, password)
 			.then((newAccount) => {
 				setAccount(newAccount);
-				navigate("/account", {
-					state: { from: $location.pathname },
-					replace: true,
+				goto('/account', {
+					replaceState: true
 				});
 			})
 			.catch((err) => {
@@ -59,12 +54,7 @@
 	{#if !showLoading}
 		<form on:submit|preventDefault={handleSignIn}>
 			<input placeholder="account" bind:value={account} />
-			<input
-				placeholder="password"
-				type="password"
-				class:hasError
-				bind:value={password}
-			/>
+			<input placeholder="password" type="password" class:hasError bind:value={password} />
 			<button
 				class="base-button primary"
 				data-id="signInButton"
