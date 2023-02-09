@@ -72,7 +72,7 @@ test:
 
 test-ci:
 	if ! [ -d node_modules ]; then npm install; fi
-	@$(MAKE) install-browsers
+	@$(MAKE) -s install-browsers
 	@$(MAKE) -s local-env
 	npm run test-ci
 
