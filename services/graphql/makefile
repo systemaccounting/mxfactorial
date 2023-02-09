@@ -11,7 +11,6 @@ gen:
 	go generate ./...
 
 run:
-	$(MAKE) gen
 	$(MAKE) -s test-env-file
 	eval $$(cat .env) go run ./server.go
 
