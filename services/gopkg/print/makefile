@@ -1,4 +1,4 @@
-PKG_NAME=tools
+PKG_NAME=print
 RELATIVE_PROJECT_ROOT_PATH=../../..
 
 mock:

@@ -1,6 +1,6 @@
-package tools
+package print
 
-//go:generate mockgen -destination=./mock/tools.go -package=mock github.com/systemaccounting/mxfactorial/services/gopkg/tools Marshaler
+//go:generate mockgen -destination=./mock/print.go -package=mock github.com/systemaccounting/mxfactorial/services/gopkg/print Marshaler
 
 import (
 	"encoding/json"

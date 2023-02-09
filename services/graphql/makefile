@@ -1,35 +1,18 @@
 APP_NAME=graphql
-CMD_DIR=$(CURDIR)
 ARTIFACT_NAME=$(APP_NAME)-src.zip
 RELATIVE_PROJECT_ROOT_PATH=../..
 PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
-ENTRYPOINT=server.go
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/.env
 
-test-env-arg:
-ifndef ENV
-	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
-endif
+gen:
+	go generate ./...
 
 run:
-	$(MAKE) gen
 	$(MAKE) -s test-env-file
 	eval $$(cat .env) go run ./server.go
-
-run-reflex:
-	$(MAKE) -s test-env-file
-	eval $$(cat .env) go run ./server.go
-
-reflex:
-	$(MAKE) -s test-env-file
-	$(MAKE) gen
-	reflex --start-service -r '\.go$$' make run-reflex
-
-gen:
-	gqlgen generate
 
 open:
 	open http://localhost:8080/
@@ -37,9 +20,6 @@ open:
 openapi:
 	$(MAKE) -s test-env-file
 	eval $$(cat .env); open $$GRAPHQL_URI
-
-skeleton:
-	go run github.com/99designs/gqlgen init
 
 ###################### dependencies ######################
 
@@ -87,11 +67,6 @@ clean-artifact:
 
 ###################### secrets ######################
 
-test-env-file:
-ifeq (,$(wildcard $(ENV_FILE)))
-	$(error no .env file, run 'make get-secrets ENV=dev')
-endif
-
 clean-env:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/clean-env.sh \
@@ -104,6 +79,16 @@ get-secrets:
 		--app-name $(APP_NAME) \
 		--env $(ENV) \
 		--region $(REGION)
+
+test-env-file:
+ifeq (,$(wildcard $(ENV_FILE)))
+	$(error no .env file, run 'make get-secrets ENV=dev')
+endif
+
+test-env-arg:
+ifndef ENV
+	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+endif
 
 ###################### deploy ######################
 

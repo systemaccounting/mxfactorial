@@ -15,7 +15,8 @@
                 "REQUESTS_BY_ACCOUNT_URL",
                 "TRANSACTIONS_BY_ACCOUNT_URL",
                 "TRANSACTION_BY_ID_URL",
-                "BALANCE_BY_ACCOUNT_URL"
+                "BALANCE_BY_ACCOUNT_URL",
+                "READINESS_CHECK_PATH"
             ],
             "params": [
                 "AWS_REGION",
@@ -411,12 +412,12 @@
             "path": "services/gopkg/testdata",
             "dependents": []
         },
-        "tools": {
+        "print": {
             "runtime": "go1.x",
-            "path": "services/gopkg/tools",
+            "path": "services/gopkg/print",
             "dependents": [],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/tools": [
+                "github.com/systemaccounting/mxfactorial/services/gopkg/print": [
                     "Marshaler"
                 ]
             }

@@ -9,6 +9,8 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
 )
 
+//go:generate go run github.com/99designs/gqlgen generate
+
 // This file will not be regenerated automatically.
 //
 // It serves as dependency injection for your app, add any dependencies you require here.
@@ -28,9 +30,6 @@ type Resolver struct {
 	// todo: httpclient here
 }
 
-// IntraEvent is modified from
-// services/gopkg/types/transactionItem.go
-// for grqphql services/graphql/graph/model
 type IntraEvent struct {
 	AuthAccount *string            `json:"auth_account"`
 	Transaction *model.Transaction `json:"transaction`

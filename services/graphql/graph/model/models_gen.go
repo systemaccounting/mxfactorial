@@ -4,6 +4,26 @@ package model
 
 type ITransactionItem interface {
 	IsITransactionItem()
+	GetID() *string
+	GetTransactionID() *string
+	GetItemID() *string
+	GetPrice() *string
+	GetQuantity() *string
+	GetDebitorFirst() *bool
+	GetRuleInstanceID() *string
+	GetRuleExecIds() []*string
+	GetUnitOfMeasurement() *string
+	GetUnitsMeasured() *string
+	GetDebitor() *string
+	GetCreditor() *string
+	GetDebitorProfileID() *string
+	GetCreditorProfileID() *string
+	GetDebitorApprovalTime() *string
+	GetCreditorApprovalTime() *string
+	GetDebitorExpirationTime() *string
+	GetCreditorExpirationTime() *string
+	GetDebitorRejectionTime() *string
+	GetCreditorRejectionTime() *string
 }
 
 type Approval struct {
@@ -65,7 +85,36 @@ type TransactionItem struct {
 	Approvals              []*Approval `json:"approvals"`
 }
 
-func (TransactionItem) IsITransactionItem() {}
+func (TransactionItem) IsITransactionItem()             {}
+func (this TransactionItem) GetID() *string             { return this.ID }
+func (this TransactionItem) GetTransactionID() *string  { return this.TransactionID }
+func (this TransactionItem) GetItemID() *string         { return this.ItemID }
+func (this TransactionItem) GetPrice() *string          { return this.Price }
+func (this TransactionItem) GetQuantity() *string       { return this.Quantity }
+func (this TransactionItem) GetDebitorFirst() *bool     { return this.DebitorFirst }
+func (this TransactionItem) GetRuleInstanceID() *string { return this.RuleInstanceID }
+func (this TransactionItem) GetRuleExecIds() []*string {
+	if this.RuleExecIds == nil {
+		return nil
+	}
+	interfaceSlice := make([]*string, 0, len(this.RuleExecIds))
+	for _, concrete := range this.RuleExecIds {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this TransactionItem) GetUnitOfMeasurement() *string      { return this.UnitOfMeasurement }
+func (this TransactionItem) GetUnitsMeasured() *string          { return this.UnitsMeasured }
+func (this TransactionItem) GetDebitor() *string                { return this.Debitor }
+func (this TransactionItem) GetCreditor() *string               { return this.Creditor }
+func (this TransactionItem) GetDebitorProfileID() *string       { return this.DebitorProfileID }
+func (this TransactionItem) GetCreditorProfileID() *string      { return this.CreditorProfileID }
+func (this TransactionItem) GetDebitorApprovalTime() *string    { return this.DebitorApprovalTime }
+func (this TransactionItem) GetCreditorApprovalTime() *string   { return this.CreditorApprovalTime }
+func (this TransactionItem) GetDebitorExpirationTime() *string  { return this.DebitorExpirationTime }
+func (this TransactionItem) GetCreditorExpirationTime() *string { return this.CreditorExpirationTime }
+func (this TransactionItem) GetDebitorRejectionTime() *string   { return this.DebitorRejectionTime }
+func (this TransactionItem) GetCreditorRejectionTime() *string  { return this.CreditorRejectionTime }
 
 type TransactionItemInput struct {
 	ID                     *string `json:"id"`

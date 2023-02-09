@@ -11,7 +11,6 @@ import (
 	cors "github.com/rs/cors/wrapper/gin"
 
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph"
-	"github.com/systemaccounting/mxfactorial/services/graphql/graph/generated"
 )
 
 var (
@@ -22,7 +21,7 @@ var (
 
 // https://github.com/99designs/gqlgen/blob/9d22d98c792ba7214dc1aad4366e3f7eba0299f7/docs/content/recipes/gin.md
 func graphqlHandler() gin.HandlerFunc {
-	h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	h := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
 	}
