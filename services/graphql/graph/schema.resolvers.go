@@ -11,14 +11,44 @@ import (
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
 )
 
-// CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+// CreateRequest is the resolver for the createRequest field.
+func (r *mutationResolver) CreateRequest(ctx context.Context, transactionItems []*model.TransactionItemInput, authAccount string) (*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented: CreateRequest - createRequest"))
 }
 
-// Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+// ApproveRequest is the resolver for the approveRequest field.
+func (r *mutationResolver) ApproveRequest(ctx context.Context, transactionID string, accountName string, accountRole string, authAccount string) (*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented: ApproveRequest - approveRequest"))
+}
+
+// Rules is the resolver for the rules field.
+func (r *queryResolver) Rules(ctx context.Context, transactionItems []*model.TransactionItemInput) (*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented: Rules - rules"))
+}
+
+// RequestByID is the resolver for the requestByID field.
+func (r *queryResolver) RequestByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented: RequestByID - requestByID"))
+}
+
+// RequestsByAccount is the resolver for the requestsByAccount field.
+func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented: RequestsByAccount - requestsByAccount"))
+}
+
+// TransactionByID is the resolver for the transactionByID field.
+func (r *queryResolver) TransactionByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented: TransactionByID - transactionByID"))
+}
+
+// TransactionsByAccount is the resolver for the transactionsByAccount field.
+func (r *queryResolver) TransactionsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error) {
+	panic(fmt.Errorf("not implemented: TransactionsByAccount - transactionsByAccount"))
+}
+
+// Balance is the resolver for the balance field.
+func (r *queryResolver) Balance(ctx context.Context, accountName string, authAccount string) (*string, error) {
+	panic(fmt.Errorf("not implemented: Balance - balance"))
 }
 
 // Mutation returns MutationResolver implementation.

@@ -2,19 +2,138 @@
 
 package model
 
-type NewTodo struct {
-	Text   string `json:"text"`
-	UserID string `json:"userId"`
+type ITransactionItem interface {
+	IsITransactionItem()
+	GetID() *string
+	GetTransactionID() *string
+	GetItemID() *string
+	GetPrice() *string
+	GetQuantity() *string
+	GetDebitorFirst() *bool
+	GetRuleInstanceID() *string
+	GetRuleExecIds() []*string
+	GetUnitOfMeasurement() *string
+	GetUnitsMeasured() *string
+	GetDebitor() *string
+	GetCreditor() *string
+	GetDebitorProfileID() *string
+	GetCreditorProfileID() *string
+	GetDebitorApprovalTime() *string
+	GetCreditorApprovalTime() *string
+	GetDebitorExpirationTime() *string
+	GetCreditorExpirationTime() *string
+	GetDebitorRejectionTime() *string
+	GetCreditorRejectionTime() *string
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+type Approval struct {
+	ID                *string `json:"id"`
+	RuleInstanceID    *string `json:"rule_instance_id"`
+	TransactionID     *string `json:"transaction_id"`
+	TransactionItemID *string `json:"transaction_item_id"`
+	AccountName       *string `json:"account_name"`
+	AccountRole       *string `json:"account_role"`
+	DeviceID          *string `json:"device_id"`
+	DeviceLatlng      *string `json:"device_latlng"`
+	ApprovalTime      *string `json:"approval_time"`
+	RejectionTime     *string `json:"rejection_time"`
+	ExpirationTime    *string `json:"expiration_time"`
 }
 
-type User struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+type Transaction struct {
+	ID                 *string            `json:"id"`
+	RuleInstanceID     *string            `json:"rule_instance_id"`
+	Author             *string            `json:"author"`
+	AuthorDeviceID     *string            `json:"author_device_id"`
+	AuthorDeviceLatlng *string            `json:"author_device_latlng"`
+	AuthorRole         *string            `json:"author_role"`
+	EquilibriumTime    *string            `json:"equilibrium_time"`
+	SumValue           *string            `json:"sum_value"`
+	TransactionItems   []*TransactionItem `json:"transaction_items"`
+}
+
+type TransactionInput struct {
+	ID                 *string `json:"id"`
+	RuleInstanceID     *string `json:"rule_instance_id"`
+	Author             *string `json:"author"`
+	AuthorDeviceID     *string `json:"author_device_id"`
+	AuthorDeviceLatlng *string `json:"author_device_latlng"`
+	AuthorRole         *string `json:"author_role"`
+}
+
+type TransactionItem struct {
+	ID                     *string     `json:"id"`
+	TransactionID          *string     `json:"transaction_id"`
+	ItemID                 *string     `json:"item_id"`
+	Price                  *string     `json:"price"`
+	Quantity               *string     `json:"quantity"`
+	DebitorFirst           *bool       `json:"debitor_first"`
+	RuleInstanceID         *string     `json:"rule_instance_id"`
+	RuleExecIds            []*string   `json:"rule_exec_ids"`
+	UnitOfMeasurement      *string     `json:"unit_of_measurement"`
+	UnitsMeasured          *string     `json:"units_measured"`
+	Debitor                *string     `json:"debitor"`
+	Creditor               *string     `json:"creditor"`
+	DebitorProfileID       *string     `json:"debitor_profile_id"`
+	CreditorProfileID      *string     `json:"creditor_profile_id"`
+	DebitorApprovalTime    *string     `json:"debitor_approval_time"`
+	CreditorApprovalTime   *string     `json:"creditor_approval_time"`
+	DebitorExpirationTime  *string     `json:"debitor_expiration_time"`
+	CreditorExpirationTime *string     `json:"creditor_expiration_time"`
+	DebitorRejectionTime   *string     `json:"debitor_rejection_time"`
+	CreditorRejectionTime  *string     `json:"creditor_rejection_time"`
+	Approvals              []*Approval `json:"approvals"`
+}
+
+func (TransactionItem) IsITransactionItem()             {}
+func (this TransactionItem) GetID() *string             { return this.ID }
+func (this TransactionItem) GetTransactionID() *string  { return this.TransactionID }
+func (this TransactionItem) GetItemID() *string         { return this.ItemID }
+func (this TransactionItem) GetPrice() *string          { return this.Price }
+func (this TransactionItem) GetQuantity() *string       { return this.Quantity }
+func (this TransactionItem) GetDebitorFirst() *bool     { return this.DebitorFirst }
+func (this TransactionItem) GetRuleInstanceID() *string { return this.RuleInstanceID }
+func (this TransactionItem) GetRuleExecIds() []*string {
+	if this.RuleExecIds == nil {
+		return nil
+	}
+	interfaceSlice := make([]*string, 0, len(this.RuleExecIds))
+	for _, concrete := range this.RuleExecIds {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
+func (this TransactionItem) GetUnitOfMeasurement() *string      { return this.UnitOfMeasurement }
+func (this TransactionItem) GetUnitsMeasured() *string          { return this.UnitsMeasured }
+func (this TransactionItem) GetDebitor() *string                { return this.Debitor }
+func (this TransactionItem) GetCreditor() *string               { return this.Creditor }
+func (this TransactionItem) GetDebitorProfileID() *string       { return this.DebitorProfileID }
+func (this TransactionItem) GetCreditorProfileID() *string      { return this.CreditorProfileID }
+func (this TransactionItem) GetDebitorApprovalTime() *string    { return this.DebitorApprovalTime }
+func (this TransactionItem) GetCreditorApprovalTime() *string   { return this.CreditorApprovalTime }
+func (this TransactionItem) GetDebitorExpirationTime() *string  { return this.DebitorExpirationTime }
+func (this TransactionItem) GetCreditorExpirationTime() *string { return this.CreditorExpirationTime }
+func (this TransactionItem) GetDebitorRejectionTime() *string   { return this.DebitorRejectionTime }
+func (this TransactionItem) GetCreditorRejectionTime() *string  { return this.CreditorRejectionTime }
+
+type TransactionItemInput struct {
+	ID                     *string `json:"id"`
+	TransactionID          *string `json:"transaction_id"`
+	ItemID                 *string `json:"item_id"`
+	Price                  *string `json:"price"`
+	Quantity               *string `json:"quantity"`
+	DebitorFirst           *bool   `json:"debitor_first"`
+	RuleInstanceID         *string `json:"rule_instance_id"`
+	UnitOfMeasurement      *string `json:"unit_of_measurement"`
+	UnitsMeasured          *string `json:"units_measured"`
+	Debitor                *string `json:"debitor"`
+	Creditor               *string `json:"creditor"`
+	DebitorProfileID       *string `json:"debitor_profile_id"`
+	CreditorProfileID      *string `json:"creditor_profile_id"`
+	DebitorApprovalTime    *string `json:"debitor_approval_time"`
+	CreditorApprovalTime   *string `json:"creditor_approval_time"`
+	DebitorExpirationTime  *string `json:"debitor_expiration_time"`
+	CreditorExpirationTime *string `json:"creditor_expiration_time"`
+	DebitorRejectionTime   *string `json:"debitor_rejection_time"`
+	CreditorRejectionTime  *string `json:"creditor_rejection_time"`
 }
