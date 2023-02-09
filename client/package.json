@@ -6,7 +6,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"test-ci": "SILENCE_EXEC_LOGS=true playwright test --config playwright.config.ts",
+		"test-ci": "SILENCE_EXEC_LOGS=true playwright test --config playwright.config.ts --reporter=list",
 		"test": "SILENCE_EXEC_LOGS=true playwright test --config playwright.base.config.ts",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
