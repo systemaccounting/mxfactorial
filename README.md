@@ -20,6 +20,9 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** i dont find any words in here used by the media. what is this?  
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this payment application solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
 
+**q.** what does physics have to do with accounting?  
+**a.** recording transactions between users as debit-credit pairs enforces a conservation law on value  
+
 **q.** what is the equation?  
 **a.** *u* = transactions per second, *w<sub>i</sub>* = value conserved per transaction, *Mx!* = value visible in a combinatorial game  
 
