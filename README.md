@@ -20,6 +20,9 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** i dont find any words in here used by the media. what is this?  
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this payment application solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
 
+**q.** where will i bank?  
+**a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their [accounting](https://en.wikipedia.org/wiki/Earnings)  
+
 **q.** what does physics have to do with accounting?  
 **a.** recording transactions between users as debit-credit pairs enforces a conservation law on value  
 
@@ -35,7 +38,28 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** why is the code public if the license is private?  
 **a.** publicly used code is a public structure
 
-### use cases
+### how it works
+
+1. the united states treasury acquires an [aba routing number](https://en.wikipedia.org/wiki/ABA_routing_transit_number) to a single account it will manage for the public independently from banks
+1. the systemaccounting payment application is configured to perform subledger accounting *within* the united states treasury account by:
+    1. creating, increasing and decreasing account balances from user transfers
+    1. changing account balances between transacting users
+    1. realtime reporting
+1. a new `GroceryStore` systemaccount is created when the owner transfers, for example, `1,000` from their "Bank of America" account to the united states treasury account
+1. a new `JacobWebb` systemaccount is created when the owner transfers `1,000` from their "Chase" account to the united states treasury account
+1. `JacobWebb` visits the `GroceryStore` and brings a single `bottled water` priced at `1.000` to the cashier (3 digit decimals used)
+1. the `GroceryStore` cashier creates a list of `transaction_items` to be transacted, but first sends it to the `rules` service (see [request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/rules#request)) to check for any rules that apply to the proposed transaction (taxes, automated approvals, etc)
+1. the `GroceryStore` cashier then sends the rule-applied transaction request to the `request-create` service (see [request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-create#request))
+1. the `JacobWebb` customer receives a notification and sends their approval to the `request-approve` service (see [request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-approve#request))
+1. the single `1.000 bottled water + 0.090 sales tax = 1.090 total` transaction simultaneously:
+    1. decreases the `JacobWebb` account by `1.090`
+    1. increases the `GroceryStore` account by `1.000`
+    1. increases the `StateOfCalifornia` account by `0.090`
+1. all accounts **never** default from systemic risk, or experience "monetary" inflation
+1. the public has 24 hour access to realtime revenue and expense reporting from the `StateOfCalifornia` account
+1. the `GroceryStore` owner may publish account performance anytime to [signal](https://en.wikipedia.org/wiki/Signalling_(economics)) the demand for capital to investors with an **empirical** rate of return, i.e. NOT *pro forma*, or some other asset pricing method  
+
+### general use cases
 public demonstration of the following use cases through a systemaccounting function:
 * expressing a [conservation law](https://en.wikipedia.org/wiki/Conservation_law) through a [data structure](https://github.com/systemaccounting/mxfactorial/blob/develop/mxfactorial.ipynb) disambiguates *delivered* value from *expected* value, and replaces [committees](https://www.federalreserve.gov/financial-stability.htm) with an automated [financial stability criterion](https://en.wikipedia.org/wiki/BIBO_stability)
 * producing a [scientific measure](http://www.systemaccounting.org/how_does_systemaccounting_produce_a_scientific_measure_of_the_cost_of_capital) of the equilibrium price of capital signals the demand for capital with an empirical rate of return instead of a [government defined word](https://www.systemaccounting.org/what_is_a_bank), and removes the ability of a central authority to [manipulate](https://en.wikipedia.org/wiki/Federal_funds_rate) the price of credit
