@@ -35,7 +35,8 @@
 		},
 		"ghcr.io/devcontainers/features/go:1": {
 			"version": "1.19.5"
-		}
+		},
+		"ghcr.io/devcontainers/features/rust:1": "latest"
 	},
 	"remoteUser": "codespace",
 	"containerUser": "codespace",
