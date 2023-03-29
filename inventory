@@ -1,7 +1,7 @@
 services/wss-connect
 services/transactions-by-account
 services/transaction-by-id
-services/rules
+services/rule
 services/requests-by-account
 services/request-create
 services/request-by-id
