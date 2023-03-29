@@ -16,7 +16,7 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 var (
-	rulesUrl                 string = os.Getenv("RULES_URL")
+	ruleUrl                  string = os.Getenv("RULE_URL")
 	requestCreateUrl                = os.Getenv("REQUEST_CREATE_URL")
 	requestApproveUrl               = os.Getenv("REQUEST_APPROVE_URL")
 	requestByIDUrl                  = os.Getenv("REQUEST_BY_ID_URL")
@@ -32,7 +32,7 @@ type Resolver struct {
 
 type IntraEvent struct {
 	AuthAccount *string            `json:"auth_account"`
-	Transaction *model.Transaction `json:"transaction`
+	Transaction *model.Transaction `json:"transaction"`
 }
 
 type TransactionResponse struct {
@@ -65,16 +65,16 @@ func (r *Resolver) InvokeRules(
 		return nil, err
 	}
 
-	c := httpclient.NewHttpClient(rulesUrl)
+	c := httpclient.NewHttpClient(ruleUrl)
 
 	response, err := c.Post(payload)
 	if err != nil {
 		return nil, err
 	}
 
-	var rulesEvent IntraEvent
+	var ruleEvent IntraEvent
 
-	return rulesEvent.UnmarshalTransaction(response)
+	return ruleEvent.UnmarshalTransaction(response)
 }
 
 type TransactionItemsClientEvent struct {

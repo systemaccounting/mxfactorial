@@ -33,7 +33,7 @@ var (
 		pgPassword,
 		pgDatabase)
 	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
-	rulesUrl           = os.Getenv("RULES_URL")
+	ruleUrl            = os.Getenv("RULE_URL")
 )
 
 type SQLDB interface {
@@ -123,7 +123,7 @@ func testValues(
 	}
 
 	// create rules service
-	rulesService := rulesServiceConstructor(rulesUrl)
+	rulesService := rulesServiceConstructor(ruleUrl)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, "", types.Role(0), err
