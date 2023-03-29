@@ -20,7 +20,7 @@ resource "aws_lambda_function" "graphql" {
   environment {
     variables = {
       ENABLE_API_AUTH             = var.enable_api_auth
-      RULES_URL                   = aws_lambda_function_url.rules.function_url
+      RULE_URL                    = module.rule.lambda_function_url
       REQUEST_CREATE_URL          = module.request_create.lambda_function_url
       REQUEST_APPROVE_URL         = module.request_approve.lambda_function_url
       REQUEST_BY_ID_URL           = module.request_by_id.lambda_function_url
@@ -77,7 +77,7 @@ data "aws_iam_policy_document" "graphql_policy" {
       "lambda:InvokeFunction"
     ]
     resources = [
-      aws_lambda_function.rules.arn,
+      module.rule.lambda_arn,
       module.request_create.lambda_arn,
       module.request_approve.lambda_arn,
       module.request_by_id.lambda_arn,
