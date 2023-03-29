@@ -4,7 +4,7 @@ on:
   push:
     paths:
     - 'services/graphql/**'
-    - 'services/rules/**'
+    - 'services/rule/**'
     - 'services/request-create/**'
     - 'services/request-approve/**'
     - 'services/balance-by-account/**'
