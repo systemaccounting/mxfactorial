@@ -80,7 +80,7 @@
 			"onAutoForward": "silent"
 		},
 		"8081": {
-			"label": "rules",
+			"label": "rule",
 			"onAutoForward": "silent"
 		},
 		"8082": {

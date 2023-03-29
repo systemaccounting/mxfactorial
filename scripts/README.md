@@ -132,7 +132,7 @@ bash scripts/list-dependent-svcs.sh --app-name graphql --recursive --debug
 DEPENDENT_SVCS: 9
 request-create
 request-approve
-rules
+rule
 request-by-id
 requests-by-account
 transaction-by-id
