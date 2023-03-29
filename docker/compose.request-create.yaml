@@ -16,6 +16,6 @@ services:
       PG_IDLE_TIMEOUT: 10000
       PG_CONN_TIMEOUT: 500
       READINESS_CHECK_PATH: /healthz
-      RULES_URL: http://rules:8080
+      RULE_URL: http://rule:8080
     depends_on:
       - postgres
