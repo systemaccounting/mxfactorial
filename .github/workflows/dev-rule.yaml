@@ -1,0 +1,31 @@
+name: dev-rule
+
+on:
+  push:
+    paths:
+    - 'services/rule/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  test:
+    name: rule
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - uses: taiki-e/install-action@nextest
+      - name: linting
+        run: |
+          cargo fmt -- --check
+          cargo clippy -- -Dwarnings
+      - name: unit tests
+        run: cargo test
