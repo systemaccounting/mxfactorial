@@ -51,7 +51,7 @@ if [[ $ID_TOKEN_LINE_COUNT -eq 0 ]]; then
 	exit 1
 fi
 
-TEMPLATE_JSON_PATH=./services/gopkg/testdata/clearnotifications.json
+TEMPLATE_JSON_PATH=./pkg/testdata/clearnotifications.json
 
 source $ENV_FILE
 

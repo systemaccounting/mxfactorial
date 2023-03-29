@@ -13,10 +13,10 @@ import (
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 
-	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
+	"github.com/systemaccounting/mxfactorial/pkg/logger"
+	"github.com/systemaccounting/mxfactorial/pkg/postgres"
+	"github.com/systemaccounting/mxfactorial/pkg/service"
+	"github.com/systemaccounting/mxfactorial/pkg/types"
 )
 
 var (

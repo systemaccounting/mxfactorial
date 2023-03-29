@@ -6,7 +6,7 @@ PROJECT_CONF_FILE_NAME=project.json
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
-TEST_DATA_PATH=../gopkg/testdata/requestNotification.json
+TEST_DATA_PATH=$(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/requestNotification.json
 ENV_FILE=$(CURDIR)/.env
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \

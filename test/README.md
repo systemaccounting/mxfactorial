@@ -12,7 +12,7 @@ plain javascript keeps configuration cost low
 1. `make test`
 
 #### 1. rules, request & approve
-1. sends `services/gopkg/testdata/intRules.json` as `getRules` graphql query
+1. sends `pkg/testdata/intRules.json` as `getRules` graphql query
 1. sends `createRequest` graphql mutation
 1. sends `approveRequest` graphql mutation
 1. expects transaction with `equilibrium_time`

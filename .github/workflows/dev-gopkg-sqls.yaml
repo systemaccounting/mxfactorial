@@ -1,9 +1,9 @@
-name: dev-gopkg-sqls
+name: dev-pkg-sqls
 
 on:
   push:
     paths:
-    - 'services/gopkg/sqls/**'
+    - 'pkg/sqls/**'
     branches-ignore:
     - 'master'
 
@@ -17,4 +17,4 @@ jobs:
           go-version: '1.19.x'
       - name: unit test
         run: make test
-        working-directory: services/gopkg/sqls
+        working-directory: pkg/sqls

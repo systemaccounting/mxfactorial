@@ -49,7 +49,7 @@ CHANGED_PKGS=("$GO_PKG")
 declare -a IMPORTING_PKG_FILES
 
 # list files importing the initially changed package
-for i in $(grep -r \"$GO_PKG\" ./services/gopkg | awk '{print $1}' | sed 's/\.go.*/\.go/'); do
+for i in $(grep -r \"$GO_PKG\" ./pkg | awk '{print $1}' | sed 's/\.go.*/\.go/'); do
 	# exclude files created by mockgen
 	if [[ "$i" != *"$MOCK_FILE_SUFFIX" ]]; then
 		IMPORTING_PKG_FILES+=("$i")
@@ -60,7 +60,7 @@ done
 declare -a IMPORTING_PKG_DIRS
 
 # list go package directories affected by go package changes
-for i in $(printf '%s\n' "${IMPORTING_PKG_FILES[@]}" | grep ./services/gopkg | sed 's/\.\///' | xargs dirname); do
+for i in $(printf '%s\n' "${IMPORTING_PKG_FILES[@]}" | grep ./pkg | sed 's/\.\///' | xargs dirname); do
 
 	# loop through already listed go package directories affected by go package changes
 	for d in "${IMPORTING_PKG_DIRS[@]}"; do
@@ -104,7 +104,7 @@ while [[ $LOOPS_PENDING -gt 0 ]]; do
 	for d in "${IMPORTING_PKG_DIRS[@]}"; do
 
 		# prefix project go module path to importing go package directory, for example:
-		# "github.com/systemaccounting/mxfactorial" + "/" + "services/gopkg/request"
+		# "github.com/systemaccounting/mxfactorial" + "/" + "pkg/request"
 		IMPORTING_PKG=$GO_MOD/$d
 
 		# loop through listed go packages affected by a go package change
@@ -124,10 +124,10 @@ while [[ $LOOPS_PENDING -gt 0 ]]; do
 
 		# list all files importing changed go package
 		# for exmaple:
-		# 1. "github.com/systemaccounting/mxfactorial/services/gopkg/tools" was changed
-		# 2. "github.com/systemaccounting/mxfactorial/services/gopkg/request" imports "github.com/systemaccounting/mxfactorial/services/gopkg/tools"
-		# 3. these .go files import "github.com/systemaccounting/mxfactorial/services/gopkg/request"
-		ADDED_IMPORTING_PKG_FILES=$(grep -r \"$IMPORTING_PKG\" ./services/gopkg | awk '{print $1}' | sed 's/\.go.*/\.go/')
+		# 1. "github.com/systemaccounting/mxfactorial/pkg/tools" was changed
+		# 2. "github.com/systemaccounting/mxfactorial/pkg/request" imports "github.com/systemaccounting/mxfactorial/pkg/tools"
+		# 3. these .go files import "github.com/systemaccounting/mxfactorial/pkg/request"
+		ADDED_IMPORTING_PKG_FILES=$(grep -r \"$IMPORTING_PKG\" ./pkg | awk '{print $1}' | sed 's/\.go.*/\.go/')
 
 		# loop through newly detected .go files importing changed go package
 		for a in $ADDED_IMPORTING_PKG_FILES; do
@@ -148,7 +148,7 @@ while [[ $LOOPS_PENDING -gt 0 ]]; do
 			fi
 
 			# parse path of file in affected go package directory
-			ADDED_IMPORTING_PKG_DIRS=$(echo "$a" | grep ./services/gopkg | sed 's/\.\///' | xargs dirname)
+			ADDED_IMPORTING_PKG_DIRS=$(echo "$a" | grep ./pkg | sed 's/\.\///' | xargs dirname)
 
 			# loop through go package directories referenced in newly added .go files
 			for aipd in $ADDED_IMPORTING_PKG_DIRS; do

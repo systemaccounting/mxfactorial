@@ -13,8 +13,8 @@ import type {
 	IQueryByID,
 } from "./index.d"
 
-import nullFirstTrItemsNoAppr from "../services/gopkg/testdata/nullFirstTrItemsNoAppr.json"
-import transNoAppr from "../services/gopkg/testdata/transNoAppr.json"
+import nullFirstTrItemsNoAppr from "../pkg/testdata/nullFirstTrItemsNoAppr.json"
+import transNoAppr from "../pkg/testdata/transNoAppr.json"
 import config from "../project.json"
 
 import { GraphQLClient } from "graphql-request"
@@ -26,7 +26,7 @@ import { approveRequest } from "./mutation/approveRequest"
 import { getTransactionByID } from "./query/getTransactionByID"
 import { getRequestsByAccount } from "./query/getRequestsByAccount"
 import { getRequestByID } from "./query/getRequestByID"
-import intRules from "../services/gopkg/testdata/intRules.json"
+import intRules from "../pkg/testdata/intRules.json"
 
 // https://stackoverflow.com/a/3143231
 export const DateRegexISO8601 = new RegExp(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/)

@@ -13,7 +13,7 @@ RELEASE_DIR=$(CARGO_BUILD_DIR)/$(LAMBDA_TARGET)/release
 DOCKER_URL=$(shell jq -r ".env_var.RULE_URL.docker" $(PROJECT_CONF))
 
 TEST_DATA_FILE=preRuleTrItems.json
-TEST_DATA_DIR=../gopkg/testdata
+TEST_DATA_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata
 TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 
 # use "provided.al2" in lambda per https://github.com/awslabs/aws-lambda-rust-runtime/tree/a2386b9768974f4647582cdf6ec332cb090e440f#12-build-your-lambda-functions
@@ -47,7 +47,7 @@ run:
 		READINESS_CHECK_PATH=/healthz cargo run -p $(APP_NAME)
 
 water:
-	@REQ=$$(jq -c . ../gopkg/testdata/bottledWater.json); \
+	@REQ=$$(jq -c . $(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/bottledWater.json); \
 		curl -d "$$REQ" -H 'Content-Type: application/json' http://0.0.0.0:8081 \
 		| jq .
 

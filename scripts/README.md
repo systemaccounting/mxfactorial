@@ -66,7 +66,7 @@ invokes app lambdas locally from app directories with [aws lambda invoke](https:
 lists packages requiring test coverage by an internal package code change
 
 1. accepts an internal package name as an argument
-1. recursively loops through `services/gopkg` directories finding files importing the internal package
+1. recursively loops through `pkg` directories finding files importing the internal package
 1. creates a bash array of other internal packages importing it
 
 \**note: mock packages are excluded*
@@ -76,11 +76,11 @@ example:
 bash scripts/list-changed-pkgs.sh --pkg-name tools --debug
 
 IMPORTING_PKG_DIRS: 5
-services/gopkg/lambdapg
-services/gopkg/request
-services/gopkg/notify
-services/gopkg/websocket
-services/gopkg/data
+pkg/lambdapg
+pkg/request
+pkg/notify
+pkg/websocket
+pkg/data
 ```
 
 go packages were hastily written to import one another initially
@@ -205,7 +205,7 @@ example:
 ```
 "lambdapg": {
             "runtime": "go1.x",
-            "path": "services/gopkg/lambdapg",
+            "path": "pkg/lambdapg",
             "dependents": []
         }
 ```
@@ -214,7 +214,7 @@ example:
 ```
 "lambdapg": {
             "runtime": "go1.x",
-            "path": "services/gopkg/lambdapg",
+            "path": "pkg/lambdapg",
             "dependents": [
                 "notify",
                 "websocket",
@@ -281,7 +281,7 @@ adds a mix of requests and transactions in docker postgres (requires `cd migrati
 
 1. `cd migrations && make insert`
 1. drops and up migrates postgres in docker
-1. inserts requests from `services/gopkg/testdata/requests.json` using `services/request-create`
+1. inserts requests from `pkg/testdata/requests.json` using `services/request-create`
 1. converts every other request into a transaction using `services/request-approve`
 
 
@@ -315,7 +315,7 @@ creates go mocks from list of interfaces inside `mock` subdirectory using [gomoc
 
     ```json
     "mocked_interfaces": {
-        "github.com/systemaccounting/mxfactorial/services/gopkg/lambdapg": [
+        "github.com/systemaccounting/mxfactorial/pkg/lambdapg": [
             "Connector",
             "SQLDB"
         ],
@@ -324,12 +324,12 @@ creates go mocks from list of interfaces inside `mock` subdirectory using [gomoc
         ]
     }
     ```
-1. `make -C './services/gopkg/lambdapg' mock`
+1. `make -C './pkg/lambdapg' mock`
 
 creates:
 ```
-services/gopkg/lambdapg/lambdapg_mock/lambdapg_mock.go
-services/gopkg/lambdapg/lambdapg_mock/v4_mock.go
+pkg/lambdapg/lambdapg_mock/lambdapg_mock.go
+pkg/lambdapg/lambdapg_mock/v4_mock.go
 ```
 
 ##### `create-accounts.sh`

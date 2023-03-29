@@ -11,11 +11,11 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	cidp "github.com/systemaccounting/mxfactorial/services/gopkg/aws/cognitoidp"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
+	cidp "github.com/systemaccounting/mxfactorial/pkg/aws/cognitoidp"
+	"github.com/systemaccounting/mxfactorial/pkg/logger"
+	"github.com/systemaccounting/mxfactorial/pkg/postgres"
+	"github.com/systemaccounting/mxfactorial/pkg/service"
+	"github.com/systemaccounting/mxfactorial/pkg/types"
 )
 
 var (
