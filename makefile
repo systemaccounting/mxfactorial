@@ -64,7 +64,11 @@ install:
 	brew install golang-migrate
 	brew install jq
 	npm install -g eslint
+#   rust
+	curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
 #	https://www.docker.com/products/docker-desktop
+	cargo install cross --git https://github.com/cross-rs/cross
+	cargo install cargo-watch
 
 env-id:
 	(cd infrastructure/terraform/env-id; terraform init && terraform apply --auto-approve)
@@ -118,8 +122,8 @@ rebuild-db:
 		--force-recreate \
 		--renew-anon-volumes
 
-rebuild-rules:
-	@bash scripts/rebuild-service.sh --name rules
+rebuild-rule:
+	@bash scripts/rebuild-service.sh --name rule
 
 rebuild-request-create:
 	@bash scripts/rebuild-service.sh --name request-create
@@ -153,8 +157,8 @@ rebuild-client:
 bootcamp:
 	@bash scripts/bootcamp.sh
 
-rules:
-	@$(MAKE) -C ./services/rules demo-docker
+rule:
+	@$(MAKE) -C ./services/rule demo-docker
 
 request-create:
 	@$(MAKE) -C ./services/request-create demo-docker
