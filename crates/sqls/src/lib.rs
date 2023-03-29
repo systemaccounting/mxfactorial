@@ -1,11 +1,12 @@
 pub fn select_approvers() -> String {
-r#"SELECT DISTINCT coalesce(owner_account, '') || coalesce(owner_subaccount, '') as approver
+    r#"SELECT DISTINCT coalesce(owner_account, '') || coalesce(owner_subaccount, '') as approver
 FROM account_owner ao
-WHERE ao.owned_account = $1 OR ao.owned_subaccount = $1;"#.to_owned()
+WHERE ao.owned_account = $1 OR ao.owned_subaccount = $1;"#
+        .to_owned()
 }
 
 fn select_account_profile_base() -> &'static str {
-	r#"SELECT
+    r#"SELECT
 	id::text,
 	account_name,
 	description,
@@ -36,15 +37,15 @@ FROM account_profile
 }
 
 pub fn select_account_profile_by_account() -> String {
-	select_account_profile_base().to_owned() + "WHERE account_name = $1;"
+    select_account_profile_base().to_owned() + "WHERE account_name = $1;"
 }
 
 pub fn select_account_profiles_by_db_cr_accounts() -> String {
-	select_account_profile_base().to_owned() + "WHERE account_name = $1 OR account_name = $2;"
+    select_account_profile_base().to_owned() + "WHERE account_name = $1 OR account_name = $2;"
 }
 
 fn select_rule_instance_base() -> &'static str {
-	r#"SELECT
+    r#"SELECT
 	id::text,
 	rule_type,
 	rule_name,
@@ -85,9 +86,11 @@ FROM rule_instance
 }
 
 pub fn select_rule_instance_by_type_role_account() -> String {
-	select_rule_instance_base().to_owned() + "WHERE rule_type = $1 AND account_role = $2 AND account_name = $3;"
+    select_rule_instance_base().to_owned()
+        + "WHERE rule_type = $1 AND account_role = $2 AND account_name = $3;"
 }
 
 pub fn select_rule_instance_by_type_role_state() -> String {
-	select_rule_instance_base().to_owned() + "WHERE rule_type = $1 AND account_role = $2 AND state_name = $3;"
+    select_rule_instance_base().to_owned()
+        + "WHERE rule_type = $1 AND account_role = $2 AND state_name = $3;"
 }

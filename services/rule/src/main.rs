@@ -64,9 +64,7 @@ async fn apply_transaction_item_rules(
                             &mut current_tr_item,
                         )
                         .unwrap();
-                    added
-                        .0
-                        .append(&mut state_added_tr_item.0);
+                    added.0.append(&mut state_added_tr_item.0);
                 }
             }
 
@@ -84,9 +82,7 @@ async fn apply_transaction_item_rules(
                             &mut current_tr_item,
                         )
                         .unwrap();
-                    added
-                        .0
-                        .append(&mut account_added_tr_item.0);
+                    added.0.append(&mut account_added_tr_item.0);
                 }
             }
         }
@@ -104,9 +100,7 @@ async fn apply_transaction_item_rules(
         rule_added.0.push(current_tr_item);
 
         // add transaction items created by rules
-        rule_added
-            .0
-            .append(&mut added.0);
+        rule_added.0.append(&mut added.0);
     }
 
     rule_added

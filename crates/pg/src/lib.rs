@@ -6,13 +6,13 @@ use sqls::{
     select_account_profile_by_account, select_account_profiles_by_db_cr_accounts, select_approvers,
     select_rule_instance_by_type_role_account, select_rule_instance_by_type_role_state,
 };
+use std::error::Error;
 use tokio_postgres::{types::ToSql, NoTls};
 use types::{
     account::{AccountProfile, AccountProfiles},
     account_role::AccountRole,
     rule::RuleInstances,
 };
-use std::error::Error;
 
 pub struct DB;
 
@@ -51,7 +51,10 @@ impl ConnectionPool {
 pub struct DatabaseConnection(PooledConnection<'static, PostgresConnectionManager<NoTls>>);
 
 impl DatabaseConnection {
-    pub async fn get_account_profile(&self, account: String) -> Result<AccountProfile, Box<dyn Error>> {
+    pub async fn get_account_profile(
+        &self,
+        account: String,
+    ) -> Result<AccountProfile, Box<dyn Error>> {
         let row = self
             .0
             .query_one(select_account_profile_by_account().as_str(), &[&account])
@@ -65,7 +68,10 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn get_account_profiles(&self, accounts: Vec<String>) -> Result<AccountProfiles, Box<dyn Error>> {
+    pub async fn get_account_profiles(
+        &self,
+        accounts: Vec<String>,
+    ) -> Result<AccountProfiles, Box<dyn Error>> {
         // https://github.com/sfackler/rust-postgres/issues/133#issuecomment-659751392
         let mut params: Vec<&(dyn ToSql + Sync)> = Vec::new();
 
@@ -85,7 +91,7 @@ impl DatabaseConnection {
             Ok(rows) => {
                 let account_profiles = types::account::AccountProfiles::from_rows(rows);
                 Ok(account_profiles)
-            },
+            }
         }
     }
 

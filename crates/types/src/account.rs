@@ -128,20 +128,17 @@ fn it_deserializes_an_account_profile() {
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize, FromSql, ToSql)]
-pub struct AccountProfiles (pub Vec<AccountProfile>);
+pub struct AccountProfiles(pub Vec<AccountProfile>);
 
 impl AccountProfiles {
     pub fn from_rows(rows: Vec<Row>) -> Self {
-        Self (rows
-                .into_iter()
-                .map(AccountProfile::from_row)
-                .collect())
+        Self(rows.into_iter().map(AccountProfile::from_row).collect())
     }
 
     pub fn match_profile_by_account(&self, account_name: String) -> Option<AccountProfile> {
         for ap in self.0.iter() {
             if ap.account_name == account_name {
-                return Some(ap.clone())
+                return Some(ap.clone());
             }
         }
         None
@@ -158,20 +155,16 @@ impl AccountOwner {
     pub fn from_row(row: Row) -> Self {
         AccountOwner {
             owner: row.get("owner"),
-            account: row.get("account")
+            account: row.get("account"),
         }
     }
 }
-
 
 #[derive(Eq, PartialEq, Debug, Deserialize, FromSql, ToSql)]
 pub struct AccountOwners(Vec<AccountOwner>);
 
 impl AccountOwners {
     pub fn from_rows(rows: Vec<Row>) -> Self {
-        Self(rows
-                .into_iter()
-                .map(AccountOwner::from_row)
-                .collect())
+        Self(rows.into_iter().map(AccountOwner::from_row).collect())
     }
 }

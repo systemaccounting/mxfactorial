@@ -23,8 +23,6 @@ fn multiply_item_value(
     rule_instance: &RuleInstance,
     transaction_item: &mut TransactionItem,
 ) -> Result<TransactionItems, Box<dyn Error>> {
-
-
     let debitor = rule_instance.variable_values[0].clone();
     let creditor = rule_instance.variable_values[1].clone();
     let item_name = rule_instance.variable_values[2].clone();
@@ -55,7 +53,7 @@ fn multiply_item_value(
     };
 
     let post_token_creditor: String = match creditor.as_str() {
-		tokens::ANY => transaction_item.creditor.clone(),
+        tokens::ANY => transaction_item.creditor.clone(),
         _ => creditor.clone(),
     };
 
@@ -83,5 +81,5 @@ fn multiply_item_value(
         approvals: None,
     };
 
-    Ok(TransactionItems (vec![added_transaction_item]))
+    Ok(TransactionItems(vec![added_transaction_item]))
 }

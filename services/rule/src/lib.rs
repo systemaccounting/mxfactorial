@@ -1,9 +1,9 @@
 use types::{
     account_role::{AccountRole, RoleSequence},
+    request_response::IntraTransaction,
     time::TZTime,
     transaction::Transaction,
     transaction_item::TransactionItems,
-    request_response::IntraTransaction
 };
 
 pub fn test_request_values(tr_items: &TransactionItems) -> bool {
@@ -25,7 +25,7 @@ pub fn create_response(transtaction_items: TransactionItems) -> IntraTransaction
             equilibrium_time: None,
             sum_value: transtaction_items.sum_value(),
             transaction_items: transtaction_items,
-        }
+        },
     }
 }
 
