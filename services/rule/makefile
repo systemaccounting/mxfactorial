@@ -70,20 +70,20 @@ lint:
 ###################### build ######################
 
 build:
-	$(MAKE) -S clean
+	@$(MAKE) -S clean
 	$(MAKE) compile
 	$(MAKE) zip
 
 compile:
-	cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	cross build \
 		--manifest-path=$(APP_PATH)/Cargo.toml \
 		--target $(LAMBDA_TARGET) \
 		--release
 
 zip:
-	cp $(RELATIVE_PROJECT_ROOT_PATH)/$(RELEASE_DIR)/$(APP_NAME) $(EXECUTABLE_NAME)
-	cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	@cp $(RELATIVE_PROJECT_ROOT_PATH)/$(RELEASE_DIR)/$(APP_NAME) $(EXECUTABLE_NAME)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/zip-executable.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
@@ -103,7 +103,7 @@ clean-artifact:
 		--artifact-name $(ARTIFACT_NAME)
 
 clean-build:
-	cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	cargo clean -p $(APP_NAME)
 
 clean-log:
