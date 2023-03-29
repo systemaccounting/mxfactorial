@@ -1,0 +1,12 @@
+[package]
+name = "pg"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bb8 = "0.8.0"
+bb8-postgres = "0.8.1"
+tokio = "1.26.0"
+tokio-postgres = {version = "0.7.7", features = ["with-chrono-0_4"]}
+types = { path = "../types" }
+sqls = { path = "../sqls" }
