@@ -127,8 +127,7 @@ deploy-only:
 	$(MAKE) update-function
 
 now:
-	@$(MAKE) -s test-env-arg
 	@$(MAKE) -s clean
 	$(MAKE) compile
 	$(MAKE) zip
-	$(MAKE) deploy-only
+	$(MAKE) deploy-only ENV=dev
