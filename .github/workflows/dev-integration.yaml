@@ -21,6 +21,11 @@ jobs:
   integration:
     name: integration test
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
     steps:
       - uses: actions/checkout@v3
       - name: install latest psql client
@@ -38,6 +43,10 @@ jobs:
         run: make -C ./test test
       - name: docker e2e tests
         run: make -C ./client test-ci
+      - name: set current env-id for cloud
+        run: make resume-dev ENV_ID=${{ secrets.DEV_ENV_ID }}
+      - name: install cargo cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
       - name: deploy to cloud
         run: bash scripts/deploy-all.sh --env dev --transaction-services-only
       - name: cloud integration tests
