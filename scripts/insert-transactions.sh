@@ -12,11 +12,11 @@ MIGRATIONS_DIR=./migrations
 TEST_ENV=dev
 STARTING_TRANS_ID=3 # start from 3 since transaction id 1 & 2 are created by migrations/testseed
 
-export PGDATABASE=$(jq -r "env_var.PGDATABASE.docker" $PROJECT_CONFIG)
-export PGUSER=$(jq -r "env_var.PGUSER.docker" $PROJECT_CONFIG)
-export PGPASSWORD=$(jq -r "env_var.PGPASSWORD.docker" $PROJECT_CONFIG)
-export PGHOST=$(jq -r "env_var.PGHOST.docker" $PROJECT_CONFIG)
-export PGPORT=$(jq -r "env_var.PGPORT.docker" $PROJECT_CONFIG)
+export PGDATABASE=$(jq -r ".env_var.PGDATABASE.docker" $PROJECT_CONFIG)
+export PGUSER=$(jq -r ".env_var.PGUSER.docker" $PROJECT_CONFIG)
+export PGPASSWORD=$(jq -r ".env_var.PGPASSWORD.docker" $PROJECT_CONFIG)
+export PGHOST=$(jq -r ".env_var.PGHOST.docker" $PROJECT_CONFIG)
+export PGPORT=$(jq -r ".env_var.PGPORT.docker" $PROJECT_CONFIG)
 
 # reset postgres in docker
 (cd $MIGRATIONS_DIR; make resetdocker DB=test)
