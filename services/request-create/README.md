@@ -48,7 +48,7 @@ the `GroceryStore` cashier sends a `transaction_item` list to the request-create
 ### response
 
 the `request-create` service:
-1. repeats the `transaction_items` list to the `rules` service to test for any missing items required by `rules`
+1. repeats the `transaction_items` list to the `rule` service to test for any missing items required by `rule`
 1. creates the `transaction` request IF 0 missing `transaction_items` found
 1. returns a `transaction` object with approvals **pending** from the debitor
 

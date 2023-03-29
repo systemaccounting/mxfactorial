@@ -10,7 +10,7 @@ beforeAll(() => {
 	if (process.env.SILENCE_EXEC_LOGS != 'true') { console.log(stdout) }
 
 	process.env.GRAPHQL_URI = config.env_var.GRAPHQL_URI.docker
-	process.env.RULES_URL = config.env_var.RULES_URL.docker
+	process.env.RULE_URL = config.env_var.RULE_URL.docker
 	process.env.REQUEST_CREATE_URL = config.env_var.REQUEST_CREATE_URL.docker
 	process.env.REQUEST_APPROVE_URL = config.env_var.REQUEST_APPROVE_URL.docker
 	process.env.TRANSACTION_BY_ID_URL = config.env_var.TRANSACTION_BY_ID_URL.docker

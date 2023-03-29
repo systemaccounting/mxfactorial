@@ -9,7 +9,7 @@ module "request_create" {
   env_vars = merge(local.POSTGRES_VARS, {
     NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
     ENABLE_NOTIFICATIONS = var.enable_notifications
-    RULES_URL            = aws_lambda_function_url.rules.function_url
+    RULE_URL             = module.rule.lambda_function_url
   })
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
@@ -24,14 +24,6 @@ resource "aws_iam_policy" "invoke_rules" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      {
-        Sid = "LambdaInvoke"
-        Action = [
-          "lambda:InvokeFunction",
-        ]
-        Effect   = "Allow"
-        Resource = aws_lambda_function.rules.arn
-      },
       {
         Sid = "SNSPublish"
         Action = [
@@ -210,4 +202,24 @@ module "notifications_clear" {
   artifacts_bucket_name = var.artifacts_bucket_name
   invoke_arn_principals = ["apigateway.amazonaws.com"]
   attached_policy_arns  = [aws_iam_policy.wss.arn]
+}
+
+module "rule" {
+  source       = "../../web-adapter-lambda/v001"
+  service_name = "rule"
+  env          = var.env
+  ssm_prefix   = var.ssm_prefix
+  env_id       = var.env_id
+  env_vars = merge(local.POSTGRES_VARS, {
+    READINESS_CHECK_PATH = "/healthz"
+    RUST_LOG             = "info"
+  })
+  invoke_url_principals = [
+    aws_iam_role.graphql_role.arn,
+    module.request_create.lambda_role_arn,
+  ]
+  artifacts_bucket_name     = var.artifacts_bucket_name
+  attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
+  create_secret             = true // suppports local testing
+  web_adapter_layer_version = var.web_adapter_layer_version
 }

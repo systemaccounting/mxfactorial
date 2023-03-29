@@ -73,3 +73,9 @@ migrate.linux-amd64
 
 # psql
 migrations/dumps/*.sql
+
+# rust
+/target/
+
+# vscode
+test/thunder-tests/thunderActivity.json

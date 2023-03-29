@@ -3,8 +3,15 @@ import { SignatureV4 } from "@aws-sdk/signature-v4"
 import { defaultProvider } from "@aws-sdk/credential-provider-node"
 import { HttpRequest } from "@aws-sdk/protocol-http"
 import { Sha256 } from "@aws-crypto/sha256-js"
-import type { ITransaction, ITransactionItem, IApproval } from "../services/rules/src/index.d"
-import * as types from "./index.d"
+import type {
+	ITransaction,
+	ITransactionItem,
+	IApproval,
+	IIntraTransaction,
+	IRequestApprove,
+	IQueryByAccount,
+	IQueryByID,
+} from "./index.d"
 
 import nullFirstTrItemsNoAppr from "../services/gopkg/testdata/nullFirstTrItemsNoAppr.json"
 import transNoAppr from "../services/gopkg/testdata/transNoAppr.json"
@@ -25,7 +32,7 @@ import intRules from "../services/gopkg/testdata/intRules.json"
 export const DateRegexISO8601 = new RegExp(/\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)/)
 
 
-type Body = ITransactionItem[] | types.IIntraTransaction | types.IRequestApprove | types.IQueryByAccount | types.IQueryByID
+type Body = ITransactionItem[] | IIntraTransaction | IRequestApprove | IQueryByAccount | IQueryByID
 
 async function post(url: string, body: Body): Promise<AxiosResponse> {
 
@@ -88,17 +95,17 @@ async function createTransaction(): Promise<ITransaction> {
 }
 
 
-describe("rules", () => {
+describe("rule", () => {
 
 	it("adds 2 rule objects", async () => {
 
-		let { data } = await post(process.env.RULES_URL as string, nullFirstTrItemsNoAppr)
+		let { data } = await post(process.env.RULE_URL as string, nullFirstTrItemsNoAppr)
 		let ruleAdded: ITransactionItem[] = data.transaction.transaction_items.filter((x: ITransactionItem) => x.rule_instance_id)
 		expect(ruleAdded).toHaveLength(2)
 	})
 
 	it("tax price sums to 1.620", async () => {
-		let { data } = await post(process.env.RULES_URL as string, nullFirstTrItemsNoAppr)
+		let { data } = await post(process.env.RULE_URL as string, nullFirstTrItemsNoAppr)
 
 		let trItems: ITransactionItem[] = data.transaction.transaction_items;
 		const taxItems: ITransactionItem[] = trItems.filter(

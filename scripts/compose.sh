@@ -34,7 +34,7 @@ COMPOSE_DIR=$(jq -r ".docker.compose.dir" $PROJECT_CONFIG)
 INIT_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
 docker compose \\
   -f $COMPOSE_DIR/compose.bitnami-postgres.yaml \\
-  -f $COMPOSE_DIR/compose.rules.yaml \\
+  -f $COMPOSE_DIR/compose.rule.yaml \\
   -f $COMPOSE_DIR/compose.request-create.yaml \\
   -f $COMPOSE_DIR/compose.request-approve.yaml \\
   -f $COMPOSE_DIR/compose.transaction-by-id.yaml \\

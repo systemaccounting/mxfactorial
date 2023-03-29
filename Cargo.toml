@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+	"services/rule",
+	"crates/types",
+	"crates/sqls",
+	"crates/pg"
+]
+
+[workspace.package]
+rust-version = "1.56"

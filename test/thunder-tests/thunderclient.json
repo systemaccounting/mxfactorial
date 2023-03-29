@@ -8,7 +8,7 @@
     "method": "POST",
     "sortNum": 10000,
     "created": "2023-01-22T03:27:30.997Z",
-    "modified": "2023-01-22T03:28:03.649Z",
+    "modified": "2023-03-27T21:38:14.666Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -26,7 +26,7 @@
       "form": [],
       "graphql": {
         "query": "query getRules($transaction_items: [TransactionItemInput!]) {\n  rules(transaction_items: $transaction_items) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
-        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"milk\",\n      \"price\": \"2.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bread\",\n      \"price\": \"3.000\",\n      \"quantity\": \"2\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"eggs\",\n      \"price\": \"4.000\",\n      \"quantity\": \"3\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    }\n  ]\n}"
+        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"milk\",\n      \"price\": \"2.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": null,\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bread\",\n      \"price\": \"3.000\",\n      \"quantity\": \"2\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": null,\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"eggs\",\n      \"price\": \"4.000\",\n      \"quantity\": \"3\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": null,\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    }\n  ]\n}"
       }
     },
     "tests": []
@@ -40,7 +40,7 @@
     "method": "POST",
     "sortNum": 20000,
     "created": "2023-01-22T03:27:30.999Z",
-    "modified": "2023-01-22T03:29:55.816Z",
+    "modified": "2023-03-29T07:07:57.291Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -58,7 +58,7 @@
       "form": [],
       "graphql": {
         "query": "query getRules($transaction_items: [TransactionItemInput!]) {\n  rules(transaction_items: $transaction_items) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
-        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"milk\",\n      \"price\": \"2.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bread\",\n      \"price\": \"3.000\",\n      \"quantity\": \"2\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"eggs\",\n      \"price\": \"4.000\",\n      \"quantity\": \"3\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    }\n  ]\n}"
+        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"milk\",\n      \"price\": \"2.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": null,\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bread\",\n      \"price\": \"3.000\",\n      \"quantity\": \"2\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": null,\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    },\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"eggs\",\n      \"price\": \"4.000\",\n      \"quantity\": \"3\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": null,\n      \"units_measured\": null,\n      \"debitor\": \"JoeCarter\",\n      \"creditor\": \"GroceryCo\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    }\n  ]\n}"
       }
     },
     "tests": []
@@ -72,7 +72,7 @@
     "method": "POST",
     "sortNum": 30000,
     "created": "2023-01-22T03:27:31.000Z",
-    "modified": "2023-01-22T03:30:06.106Z",
+    "modified": "2023-03-29T07:08:41.072Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -90,7 +90,7 @@
       "form": [],
       "graphql": {
         "query": "query getRules($transaction_items: [TransactionItemInput!]) {\n  rules(transaction_items: $transaction_items) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
-        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bottled water\",\n      \"price\": \"1.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": \"\",\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": \"\",\n      \"creditor_approval_time\": \"NOW()\",\n      \"debitor_expiration_time\": \"\",\n      \"creditor_expiration_time\": \"\",\n      \"debitor_rejection_time\": \"\",\n      \"creditor_rejection_time\": \"\"\n    }\n  ]\n}"
+        "variables": "{\n  \"transaction_items\": [\n    {\n      \"id\": null,\n      \"transaction_id\": null,\n      \"item_id\": \"bottled water\",\n      \"price\": \"1.000\",\n      \"quantity\": \"1\",\n      \"debitor_first\": null,\n      \"rule_instance_id\": null,\n      \"unit_of_measurement\": null,\n      \"units_measured\": null,\n      \"debitor\": \"JacobWebb\",\n      \"creditor\": \"GroceryStore\",\n      \"debitor_profile_id\": null,\n      \"creditor_profile_id\": null,\n      \"debitor_approval_time\": null,\n      \"creditor_approval_time\": null,\n      \"debitor_expiration_time\": null,\n      \"creditor_expiration_time\": null,\n      \"debitor_rejection_time\": null,\n      \"creditor_rejection_time\": null\n    }\n  ]\n}"
       }
     },
     "tests": []
@@ -318,6 +318,60 @@
         "query": "query getTransactionByID($transaction_id: String!, $auth_account: String!) {\n  transactionByID(transaction_id: $transaction_id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
         "variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"transaction_id\": \"2\"\n}"
       }
+    },
+    "tests": []
+  },
+  {
+    "_id": "e57ac0f2-187a-46f8-965d-222b82fc7e2f",
+    "colId": "ad756c83-e4e1-4c6e-a602-fbaee6aaab6c",
+    "containerId": "",
+    "name": "rule healthcheck",
+    "url": "http://0.0.0.0:8080/healthz",
+    "method": "GET",
+    "sortNum": 20000,
+    "created": "2023-03-10T06:03:42.460Z",
+    "modified": "2023-03-10T06:03:42.460Z",
+    "headers": [
+      {
+        "name": "Accept",
+        "value": "*/*",
+        "isDisabled": true
+      },
+      {
+        "name": "User-Agent",
+        "value": "Thunder Client (https://www.thunderclient.com)",
+        "isDisabled": true
+      }
+    ],
+    "params": [],
+    "tests": []
+  },
+  {
+    "_id": "f8852af2-3a37-4866-ab37-7d65c374bc3f",
+    "colId": "ad756c83-e4e1-4c6e-a602-fbaee6aaab6c",
+    "containerId": "",
+    "name": "rule",
+    "url": "http://localhost:8081",
+    "method": "POST",
+    "sortNum": 30000,
+    "created": "2023-03-11T06:01:49.273Z",
+    "modified": "2023-03-27T18:29:47.087Z",
+    "headers": [
+      {
+        "name": "Content-Type",
+        "value": "application/json"
+      },
+      {
+        "name": "User-Agent",
+        "value": "Thunder Client (https://www.thunderclient.com)",
+        "isDisabled": true
+      }
+    ],
+    "params": [],
+    "body": {
+      "type": "json",
+      "raw": "[\n  {\n    \"id\": null,\n    \"transaction_id\": null,\n    \"item_id\": \"bottled water\",\n    \"price\": \"1.000\",\n    \"quantity\": \"1\",\n    \"debitor_first\": false,\n    \"rule_instance_id\": null,\n    \"rule_exec_ids\": [],\n    \"unit_of_measurement\": null,\n    \"units_measured\": null,\n    \"debitor\": \"JacobWebb\",\n    \"creditor\": \"GroceryStore\",\n    \"debitor_profile_id\": null,\n    \"creditor_profile_id\": null,\n    \"debitor_approval_time\": null,\n    \"creditor_approval_time\": null,\n    \"debitor_expiration_time\": null,\n    \"creditor_expiration_time\": null,\n    \"debitor_rejection_time\": null,\n    \"creditor_rejection_time\": null\n  }\n]",
+      "form": []
     },
     "tests": []
   }

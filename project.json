@@ -8,7 +8,7 @@
             "path": "services/graphql",
             "secrets": [
                 "GRAPHQL_URI",
-                "RULES_URL",
+                "RULE_URL",
                 "REQUEST_CREATE_URL",
                 "REQUEST_APPROVE_URL",
                 "REQUEST_BY_ID_URL",
@@ -30,7 +30,7 @@
             "dependents": [
                 "request-create",
                 "request-approve",
-                "rules",
+                "rule",
                 "request-by-id",
                 "requests-by-account",
                 "transaction-by-id",
@@ -46,7 +46,7 @@
                 "NOTIFY_TOPIC_ARN",
                 "READINESS_CHECK_PATH",
                 "REQUEST_CREATE_URL",
-                "RULES_URL"
+                "RULE_URL"
             ],
             "params": [
                 "AWS_REGION",
@@ -80,9 +80,9 @@
             "build_src_path": "cmd",
             "dependents": []
         },
-        "rules": {
-            "runtime": "nodejs18.x",
-            "path": "services/rules",
+        "rule": {
+            "runtime": "provided.al2",
+            "path": "services/rule",
             "secrets": [
                 "PGDATABASE",
                 "PGUSER",
@@ -92,15 +92,16 @@
                 "CLIENT_ID",
                 "POOL_ID",
                 "GRAPHQL_URI",
-                "RULES_URL"
+                "RULE_URL",
+                "READINESS_CHECK_PATH"
             ],
             "params": [
                 "AWS_REGION"
             ],
             "deploy": true,
-            "lambda_name_prefix": "rules",
+            "lambda_name_prefix": "rule",
             "lambda_invoke_log": "invoke.log",
-            "executable_name": null,
+            "executable_name": "index.handler",
             "build_src_path": null,
             "dependents": [
                 "request-create"
@@ -396,7 +397,7 @@
             "dependents": [],
             "secrets": [
                 "GRAPHQL_URI",
-                "RULES_URL",
+                "RULE_URL",
                 "REQUEST_CREATE_URL",
                 "REQUEST_APPROVE_URL",
                 "REQUEST_BY_ID_URL",
@@ -599,8 +600,8 @@
             "ssm": "service/lambda/readiness_check_path",
             "docker": null
         },
-        "RULES_URL": {
-            "ssm": "service/lambda/rules/url",
+        "RULE_URL": {
+            "ssm": "service/lambda/rule/url",
             "docker": "http://localhost:8081"
         },
         "REQUEST_CREATE_URL": {

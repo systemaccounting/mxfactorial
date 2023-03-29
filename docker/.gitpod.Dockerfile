@@ -15,4 +15,6 @@ RUN go install github.com/99designs/gqlgen@latest && \
 	brew install libpq && \
 	brew link --force libpq && \
 	brew install golang-migrate && \
-	npm install -g eslint
+	npm install -g eslint && \
+	cargo install cross --git https://github.com/cross-rs/cross && \
+	cargo install cargo-watch
