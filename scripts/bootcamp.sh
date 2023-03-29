@@ -19,13 +19,13 @@ eval_with_no_print_directory "$CMD"
 
 echo ""
 
-while [[ $CMD != "make rules" ]]; do
-	read -rep $'\e[32m"make rules" to see a request and response from services/rules\e[0m\n\n> ' CMD
+while [[ $CMD != "make rule" ]]; do
+	read -rep $'\e[32m"make rule" to see a request and response from services/rule\e[0m\n\n> ' CMD
 done
 
 eval_with_no_print_directory "$CMD"
 
-echo -e -n "\n${YELLOW}*** OBSERVE the additional \"9% state sales tax\" transaction_items returned by the rules service${RESET}\n"
+echo -e -n "\n${YELLOW}*** OBSERVE the additional \"9% state sales tax\" transaction_items returned by the rule service${RESET}\n"
 echo ""
 
 while [[ $CMD != "make request-create" ]]; do
