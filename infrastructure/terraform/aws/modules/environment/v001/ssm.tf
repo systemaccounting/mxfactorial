@@ -105,13 +105,6 @@ resource "aws_ssm_parameter" "postgres_user" {
   value       = local.POSTGRES_VARS.PGUSER
 }
 
-resource "aws_ssm_parameter" "rule_lambda_arn" {
-  name        = "/${var.ssm_prefix}/service/lambda/rules/arn"
-  description = "rule lambda arn in ${local.SPACED_ID_ENV}"
-  type        = "SecureString"
-  value       = aws_lambda_function.rules.arn
-}
-
 resource "aws_ssm_parameter" "db_reset_passphrase" {
   name        = "/${var.ssm_prefix}/tool/lambda/db_reset/passphrase"
   description = "db reset passphrase in ${local.SPACED_ID_ENV}"
@@ -125,11 +118,4 @@ resource "aws_ssm_parameter" "lambda_readiness_check_path" {
   description = "lambda web adapter readiness check path in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
   value       = var.readiness_check_path
-}
-
-resource "aws_ssm_parameter" "function_url" {
-  name        = "/${var.ssm_prefix}/service/lambda/rules/url"
-  description = "rules lambda function url in ${local.SPACED_ID_ENV}"
-  type        = "SecureString"
-  value       = aws_lambda_function_url.rules.function_url
 }
