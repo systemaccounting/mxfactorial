@@ -5,3 +5,4 @@
 **/index.handler
 client/public/build
 migrations/dumps/testseed.sql
+target
