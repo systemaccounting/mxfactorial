@@ -64,7 +64,8 @@
 				"dbaeumer.vscode-eslint",
 				"ms-vsliveshare.vsliveshare",
 				"mtxr.sqltools",
-				"mtxr.sqltools-driver-pg"
+				"mtxr.sqltools-driver-pg",
+				"rust-lang.rust-analyzer"
 			]
 		}
 	},

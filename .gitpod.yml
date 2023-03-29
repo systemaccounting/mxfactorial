@@ -71,3 +71,4 @@ vscode:
     - dbaeumer.vscode-eslint
     - mtxr.sqltools
     - mtxr.sqltools-driver-pg
+    - rust-lang.rust-analyzer
