@@ -1,9 +1,9 @@
-name: dev-gopkg-apigwma
+name: dev-pkg-apigwma
 
 on:
   push:
     paths:
-    - 'services/gopkg/aws/apigwma/**'
+    - 'pkg/aws/apigwma/**'
     branches-ignore:
     - 'master'
 
@@ -17,4 +17,4 @@ jobs:
           go-version: '1.19.x'
       - name: unit test
         run: make test
-        working-directory: services/gopkg/aws/apigwma
+        working-directory: pkg/aws/apigwma

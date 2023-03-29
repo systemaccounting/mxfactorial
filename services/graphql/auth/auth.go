@@ -10,7 +10,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/gin-gonic/gin"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/pkg/logger"
 )
 
 const ErrNotAuthorized string = "error: not authorized"

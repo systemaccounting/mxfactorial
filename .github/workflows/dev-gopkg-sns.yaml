@@ -1,9 +1,9 @@
-name: dev-gopkg-sns
+name: dev-pkg-sns
 
 on:
   push:
     paths:
-    - 'services/gopkg/aws/sns/**'
+    - 'pkg/aws/sns/**'
     branches-ignore:
     - 'master'
 
@@ -17,4 +17,4 @@ jobs:
           go-version: '1.19.x'
       - name: unit test
         run: make test
-        working-directory: services/gopkg/aws/sns
+        working-directory: pkg/aws/sns

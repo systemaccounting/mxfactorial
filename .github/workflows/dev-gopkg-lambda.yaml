@@ -1,9 +1,9 @@
-name: dev-gopkg-lambda
+name: dev-pkg-lambda
 
 on:
   push:
     paths:
-    - 'services/gopkg/aws/lambda/**'
+    - 'pkg/aws/lambda/**'
     branches-ignore:
     - 'master'
 
@@ -17,4 +17,4 @@ jobs:
           go-version: '1.19.x'
       - name: unit test
         run: make test
-        working-directory: services/gopkg/aws/lambda
+        working-directory: pkg/aws/lambda

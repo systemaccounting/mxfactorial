@@ -1,9 +1,9 @@
-name: dev-gopkg-cognitoidp
+name: dev-pkg-cognitoidp
 
 on:
   push:
     paths:
-    - 'services/gopkg/aws/cognitoidp/**'
+    - 'pkg/aws/cognitoidp/**'
     branches-ignore:
     - 'master'
 
@@ -17,4 +17,4 @@ jobs:
           go-version: '1.19.x'
       - name: unit test
         run: make test
-        working-directory: services/gopkg/aws/cognitoidp
+        working-directory: pkg/aws/cognitoidp

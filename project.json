@@ -327,10 +327,10 @@
     "pkgs": {
         "lambda": {
             "runtime": "go1.x",
-            "path": "services/gopkg/aws/lambda",
+            "path": "pkg/aws/lambda",
             "dependents": [],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/aws/lambda": [
+                "github.com/systemaccounting/mxfactorial/pkg/aws/lambda": [
                     "IAWSLambda",
                     "ILambdaService"
                 ]
@@ -338,7 +338,7 @@
         },
         "service": {
             "runtime": "go1.x",
-            "path": "services/gopkg/service",
+            "path": "pkg/service",
             "dependents": [
                 "request-create",
                 "request-approve",
@@ -354,7 +354,7 @@
                 "auto-confirm"
             ],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/service": [
+                "github.com/systemaccounting/mxfactorial/pkg/service": [
                     "IAccountService",
                     "IApproveService",
                     "IBalanceService",
@@ -369,12 +369,12 @@
         },
         "postgres": {
             "runtime": "go1.x",
-            "path": "services/gopkg/postgres",
+            "path": "pkg/postgres",
             "dependents": [
                 "service"
             ],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/postgres": [
+                "github.com/systemaccounting/mxfactorial/pkg/postgres": [
                     "Connector",
                     "SQLDB"
                 ],
@@ -386,7 +386,7 @@
         },
         "sqls": {
             "runtime": "go1.x",
-            "path": "services/gopkg/sqls",
+            "path": "pkg/sqls",
             "dependents": [
                 "postgres"
             ]
@@ -410,22 +410,22 @@
         },
         "testdata": {
             "runtime": "go1.x",
-            "path": "services/gopkg/testdata",
+            "path": "pkg/testdata",
             "dependents": []
         },
         "print": {
             "runtime": "go1.x",
-            "path": "services/gopkg/print",
+            "path": "pkg/print",
             "dependents": [],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/print": [
+                "github.com/systemaccounting/mxfactorial/pkg/print": [
                     "Marshaler"
                 ]
             }
         },
         "types": {
             "runtime": "go1.x",
-            "path": "services/gopkg/types",
+            "path": "pkg/types",
             "dependents": [
                 "testdata",
                 "postgres",
@@ -447,7 +447,7 @@
                 "auto-confirm"
             ],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/types": [
+                "github.com/systemaccounting/mxfactorial/pkg/types": [
                     "TrItemListHelper",
                     "IScanRow",
                     "IScanRows",
@@ -457,32 +457,32 @@
         },
         "sns": {
             "runtime": "go1.x",
-            "path": "services/gopkg/aws/sns",
+            "path": "pkg/aws/sns",
             "dependents": [
                 "notifications-send"
             ],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/aws/sns": [
+                "github.com/systemaccounting/mxfactorial/pkg/aws/sns": [
                     "ISNS"
                 ]
             }
         },
         "apigwma": {
             "runtime": "go1.x",
-            "path": "services/gopkg/aws/apigwma",
+            "path": "pkg/aws/apigwma",
             "dependents": [],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/aws/apigwma": [
+                "github.com/systemaccounting/mxfactorial/pkg/aws/apigwma": [
                     "IAWSAPIGWMA"
                 ]
             }
         },
         "cognitoidp": {
             "runtime": "go1.x",
-            "path": "services/gopkg/aws/cognitoidp",
+            "path": "pkg/aws/cognitoidp",
             "dependents": [],
             "mocked_interfaces": {
-                "github.com/systemaccounting/mxfactorial/services/gopkg/aws/cognitoidp": [
+                "github.com/systemaccounting/mxfactorial/pkg/aws/cognitoidp": [
                     "IJwtDeps",
                     "IGetClaimedKeyID",
                     "IIdpDeps",

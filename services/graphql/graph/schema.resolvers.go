@@ -7,7 +7,7 @@ package graph
 import (
 	"context"
 
-	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
+	"github.com/systemaccounting/mxfactorial/pkg/logger"
 	"github.com/systemaccounting/mxfactorial/services/graphql/auth"
 	"github.com/systemaccounting/mxfactorial/services/graphql/graph/model"
 )

@@ -10,7 +10,7 @@ ENV_FILE=$(CURDIR)/.env
 DOCKER_URL=$(shell jq -r ".env_var.REQUEST_CREATE_URL.docker" $(PROJECT_CONF))
 
 TEST_DATA_FILE=transNoAppr.json
-TEST_DATA_DIR=../gopkg/testdata
+TEST_DATA_DIR=../pkg/testdata
 TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \

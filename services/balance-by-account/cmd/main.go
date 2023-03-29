@@ -8,10 +8,10 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/logger"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/postgres"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/service"
-	"github.com/systemaccounting/mxfactorial/services/gopkg/types"
+	"github.com/systemaccounting/mxfactorial/pkg/logger"
+	"github.com/systemaccounting/mxfactorial/pkg/postgres"
+	"github.com/systemaccounting/mxfactorial/pkg/service"
+	"github.com/systemaccounting/mxfactorial/pkg/types"
 )
 
 var (
