@@ -19,7 +19,7 @@ TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 # use "provided.al2" in lambda per https://github.com/awslabs/aws-lambda-rust-runtime/tree/a2386b9768974f4647582cdf6ec332cb090e440f#12-build-your-lambda-functions
 
 dev:
-	$(MAKE) -s start-postgres-in-docker
+	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH)/migrations run
 	cd $(RELATIVE_PROJECT_ROOT_PATH); \
 		cargo watch \
 			-w $(APP_PATH)/src \
@@ -32,7 +32,7 @@ dev:
 			PGPORT=5432 \
 			RUST_LOG=info \
 			HOSTNAME_OR_IP=localhost \
-			PORT=8080 \
+			PORT=8050 \
 			cargo run -p $(APP_NAME)
 
 stop-dev:
