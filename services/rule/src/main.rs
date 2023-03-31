@@ -28,14 +28,14 @@ async fn apply_transaction_item_rules(
 
     let initial_account_profiles = conn.get_account_profiles(accounts).await.unwrap();
 
-    let mut rule_added: TransactionItems = TransactionItems::default();
+    let mut response: TransactionItems = TransactionItems::default();
 
     for tr_item in transaction_items.0.iter() {
         // create mutable transaction item to add profile ids
         let mut current_tr_item = tr_item.clone();
 
         // create mutable transaction item vec to add transaction items created by rules
-        let mut added: TransactionItems = TransactionItems::default();
+        let mut rule_added: TransactionItems = TransactionItems::default();
 
         // add rule items per user defined role sequence
         // i.e. execute rules in debitor, creditor OR creditor, debitor
@@ -56,16 +56,14 @@ async fn apply_transaction_item_rules(
                 .await;
 
             // apply state rules to transaction item
-            if !state_rules.0.is_empty() {
-                for ri in state_rules.clone().0.iter() {
-                    let mut state_added_tr_item =
-                        rules::transaction_item::match_transaction_item_rule(
-                            ri,
-                            &mut current_tr_item,
-                        )
-                        .unwrap();
-                    added.0.append(&mut state_added_tr_item.0);
-                }
+            for rule in state_rules.clone().0.iter() {
+                let mut state_added_tr_items =
+                    rules::transaction_item::match_transaction_item_rule(
+                        rule,
+                        &mut current_tr_item,
+                    )
+                    .unwrap();
+                rule_added.0.append(&mut state_added_tr_items.0);
             }
 
             // get rules matching account and rule
@@ -74,39 +72,36 @@ async fn apply_transaction_item_rules(
                 .await;
 
             // apply account rules to transaction item
-            if !account_rules.0.is_empty() {
-                for ri in account_rules.clone().0.iter() {
-                    let mut account_added_tr_item =
-                        rules::transaction_item::match_transaction_item_rule(
-                            ri,
-                            &mut current_tr_item,
-                        )
-                        .unwrap();
-                    added.0.append(&mut account_added_tr_item.0);
-                }
+            for rule in account_rules.clone().0.iter() {
+                let mut account_added_tr_item =
+                    rules::transaction_item::match_transaction_item_rule(
+                        rule,
+                        &mut current_tr_item,
+                    )
+                    .unwrap();
+                rule_added.0.append(&mut account_added_tr_item.0);
             }
         }
 
-        let added_accounts = added.list_accounts();
+        let added_accounts = rule_added.list_accounts();
 
         let added_profiles = conn.get_account_profiles(added_accounts).await.unwrap();
 
         // add account profile ids to rule added transaction items
         // todo: some profiles may be previously fetched when
         // assigning initial_account_profiles, avoid duplicate query
-        added.add_profile_ids(added_profiles);
+        rule_added.add_profile_ids(added_profiles);
 
         // add initial transaction item
-        rule_added.0.push(current_tr_item);
+        response.0.push(current_tr_item);
 
         // add transaction items created by rules
-        rule_added.0.append(&mut added.0);
+        response.0.append(&mut rule_added.0);
     }
 
-    rule_added
+    response
 }
 
-// not optimized but easy to read
 async fn apply_approval_rules(
     conn: &DatabaseConnection,
     role_sequence: RoleSequence,
