@@ -36,10 +36,7 @@ dev:
 			cargo run -p $(APP_NAME)
 
 stop-dev:
-	for p in "$$(ps aux | grep -e "cargo-watch" | grep -v 'grep' | awk '{print $$2}')"; do \
-		kill -9 "$$p"; \
-	done
-	kill -9 "$$(ps aux | grep -e 'target/debug/rule' | grep -v 'grep' | awk '{print $$2}')"
+	@for p in "$$(ps aux | grep -e "cargo-watch" | grep -v 'grep' | awk '{print $$2}')"; do kill $$p; done
 	$(MAKE) -C "$(RELATIVE_PROJECT_ROOT_PATH)/migrations" clean
 
 run:
