@@ -5,8 +5,9 @@ use axum::{
     Router,
 };
 use pg::{ConnectionPool, DatabaseConnection, DB};
-use rule::{create_response, label_approved_transaction_items, test_request_values};
+use rule::{create_response, expcted_values, label_approved_transaction_items};
 use std::{env, net::ToSocketAddrs};
+use tokio::signal;
 use types::approval::{Approval, Approvals};
 use types::{
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
@@ -171,7 +172,7 @@ async fn apply_rules(
     State(pool): State<ConnectionPool>,
     transaction_items: Json<TransactionItems>,
 ) -> Result<axum::Json<IntraTransaction>, StatusCode> {
-    if !test_request_values(&transaction_items) {
+    if !expcted_values(&transaction_items) {
         return Err(StatusCode::BAD_REQUEST);
     };
 
@@ -253,6 +254,34 @@ async fn main() {
 
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
+}
+
+// from axum/examples/graceful-shutdown
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    println!("signal received, starting graceful shutdown");
 }
