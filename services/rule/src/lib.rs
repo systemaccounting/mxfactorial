@@ -6,7 +6,7 @@ use types::{
     transaction_item::TransactionItems,
 };
 
-pub fn expcted_values(tr_items: &TransactionItems) -> bool {
+pub fn expected_values(tr_items: &TransactionItems) -> bool {
     // todo: test transaction item values in request
     let _ = tr_items;
     true

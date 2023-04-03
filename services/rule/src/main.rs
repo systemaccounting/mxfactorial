@@ -5,7 +5,7 @@ use axum::{
     Router,
 };
 use pg::{ConnectionPool, DatabaseConnection, DB};
-use rule::{create_response, expcted_values, label_approved_transaction_items};
+use rule::{create_response, expected_values, label_approved_transaction_items};
 use std::{env, net::ToSocketAddrs};
 use tokio::signal;
 use types::approval::{Approval, Approvals};
@@ -172,7 +172,7 @@ async fn apply_rules(
     State(pool): State<ConnectionPool>,
     transaction_items: Json<TransactionItems>,
 ) -> Result<axum::Json<IntraTransaction>, StatusCode> {
-    if !expcted_values(&transaction_items) {
+    if !expected_values(&transaction_items) {
         return Err(StatusCode::BAD_REQUEST);
     };
 
