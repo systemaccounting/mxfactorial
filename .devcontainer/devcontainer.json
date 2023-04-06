@@ -9,33 +9,8 @@
 		"storage": "32gb"
 	},
 	"updateContentCommand": "make compose-build",
-	"postCreateCommand": "bash ./scripts/rebuild-client-image.sh && make compose-up && gh codespace ports visibility 8080:public -c $CODESPACE_NAME",
+	"postCreateCommand": "bash ./scripts/setup-codespace.sh",
 	"features": {
-		"ghcr.io/devcontainers/features/common-utils:2": {
-			"installZsh": "true",
-			"username": "codespace",
-			"userUid": "1000",
-			"userGid": "1000",
-			"upgradePackages": "true"
-		},
-		"ghcr.io/devcontainers/features/node:1": {
-			"version": "19"
-		},
-		"ghcr.io/devcontainers/features/git-lfs:1": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/github-cli:1": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/go:1": {
-			"version": "1.19.5"
-		},
 		"ghcr.io/devcontainers/features/rust:1": "latest"
 	},
 	"remoteUser": "codespace",

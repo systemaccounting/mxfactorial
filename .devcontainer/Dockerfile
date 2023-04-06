@@ -4,6 +4,7 @@ ARG TF_VERSION=1.2.7
 
 RUN go install github.com/99designs/gqlgen@latest && \
 	go install github.com/golang/mock/mockgen@latest && \
+	chmod -R a+w /go/pkg && \
 	curl -fSsl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
 	unzip -qq awscliv2.zip && \
 	sudo ./aws/install --update && \
