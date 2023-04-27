@@ -1,7 +1,9 @@
 ENV_FILE=$(CURDIR)/.env
 LOG_ID_TOKEN=false
-REGION=us-east-1
+PROJECT_CONF_FILE_NAME=project.yaml
 RELATIVE_PROJECT_ROOT_PATH=../../..
+PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
+REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
 DIR_PATH=services/internal-tools/wss-demo-client
 
 ENV_VARS := CLIENT_ID \

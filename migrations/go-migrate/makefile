@@ -1,30 +1,23 @@
-APP_NAME = go-migrate
-ARTIFACT_NAME = $(APP_NAME)-src.zip
+APP_NAME=$(shell basename $(CURDIR))
+ARTIFACT_NAME=$(APP_NAME)-src.zip
 RELATIVE_PROJECT_ROOT_PATH=../..
-PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-BUCKET_PREFIX=$(shell jq -r '.artifacts_bucket_name_prefix' $(PROJECT_CONF))
-ifeq (prod,$(ENV))
-  ENV_ID=$(shell jq -r '.terraform.prod.env_id' $(PROJECT_CONF))
-else
-ifndef ENV_ID
-  ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
-endif
-endif
+BUCKET_PREFIX=$(shell yq '.infrastructure.terraform.aws.modules.["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default' $(PROJECT_CONF))
+ENV_ID=$(shell (cd $(RELATIVE_PROJECT_ROOT_PATH); ENV=$(ENV) PROJECT_CONF=$(PROJECT_CONF) . ./scripts/print-env-id.sh))
 LAMBDA_NAME=$(APP_NAME)-$(ENV_ID)-$(ENV)
 ARTIFACT_BUCKET=$(BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
-EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
+GO_MIGRATE_SCRIPT_NAME=$(shell yq '.migrations["go-migrate"].env_var.set.GO_MIGRATE_SCRIPT_NAME.default' $(PROJECT_CONF))
 RUNTIME=provided
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
+REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
 TMP_MIGRATE_REPO_DIR=./build
 LAMBDA_LAYER_ARCHIVE=$(APP_NAME)-layer.zip
 LAMBDA_LAYER_NAME=$(APP_NAME)-$(RUNTIME)-deps-$(ENV_ID)-$(ENV)
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
-DOCKER_USER=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.user" $(PROJECT_CONF))
-DOCKER_REPOSITORY=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.repository" $(PROJECT_CONF))
-DOCKER_TAG_VERSION=$(shell jq -r ".apps.\"$(APP_NAME)\".docker.image.tag_version" $(PROJECT_CONF))
-DOCKER_IMAGE_NAME=$(DOCKER_USER)/$(DOCKER_REPOSITORY):$(DOCKER_TAG_VERSION)
-DOCKER_CONTAINER_NAME=go-migrate
+DOCKER_USER=$(shell yq ".docker.env_var.set.DOCKER_USER.default" $(PROJECT_CONF))
+GO_MIGRATE_DOCKER_REPOSITORY=$(shell yq '.migrations["go-migrate"].env_var.set.GO_MIGRATE_DOCKER_REPOSITORY.default' $(PROJECT_CONF))
+DOCKER_TAG_VERSION=v1
+DOCKER_IMAGE_NAME=$(DOCKER_USER)/$(GO_MIGRATE_DOCKER_REPOSITORY):$(DOCKER_TAG_VERSION)
 
 test-env-arg:
 ifndef ENV
@@ -73,7 +66,7 @@ zip:
 	bash scripts/zip-executable.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-		--executable-name $(EXECUTABLE_NAME)
+		--executable-name $(GO_MIGRATE_SCRIPT_NAME)
 
 ###################### clean ######################
 
@@ -117,8 +110,7 @@ put-object:
 	bash scripts/put-object.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
+        --env $(ENV)
 
 update-function:
 	@$(MAKE) -s test-env-arg
@@ -126,14 +118,13 @@ update-function:
 	bash scripts/update-function.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
+        --env $(ENV)
 
 deploy-layer:
 	@$(MAKE) -s test-env-arg
 	$(MAKE) build-layer
 	$(MAKE) put-layer
-	$(MAKE) update-lambda-layer:
+	$(MAKE) update-lambda-layer
 
 put-layer:
 	@ETAG=$$(aws s3api put-object \

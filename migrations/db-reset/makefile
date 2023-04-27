@@ -1,11 +1,11 @@
-APP_NAME = db-reset
+APP_NAME=$(shell basename $(CURDIR))
 ARTIFACT_NAME=$(APP_NAME)-src.zip
 RELATIVE_PROJECT_ROOT_PATH=../..
-PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
+DB_RESET_SCRIPT_NAME=$(shell yq '.migrations["db-reset"].env_var.set.DB_RESET_SCRIPT_NAME.default' $(PROJECT_CONF))
 RUNTIME=provided
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
+REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
 BASH_LAYER_ARN=arn:aws:lambda:$(REGION):744348701589:layer:bash:8
 
 test-env-arg:
@@ -23,7 +23,7 @@ zip:
 	bash scripts/zip-executable.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-		--executable-name $(EXECUTABLE_NAME)
+		--executable-name $(DB_RESET_SCRIPT_NAME)
 
 ###################### clean ######################
 
@@ -55,8 +55,7 @@ put-object:
 	bash scripts/put-object.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
+        --env $(ENV)
 
 update-function:
 	@$(MAKE) -s test-env-arg
@@ -64,8 +63,7 @@ update-function:
 	bash scripts/update-function.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
+        --env $(ENV)
 
 # run before deploying terraform
 initial-deploy:

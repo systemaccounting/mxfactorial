@@ -1,9 +1,6 @@
 APP_NAME = delete-faker
 ARTIFACT_NAME=$(APP_NAME)-src.zip
 RELATIVE_PROJECT_ROOT_PATH=../..
-PROJECT_CONF_FILE_NAME=project.json
-PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
 
 test-env-arg:
 ifndef ENV
@@ -47,8 +44,7 @@ put-object:
 	bash scripts/put-object.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
+        --env $(ENV)
 
 update-function:
 	@$(MAKE) -s test-env-arg
@@ -56,5 +52,4 @@ update-function:
 	bash scripts/update-function.sh \
 		--app-name $(APP_NAME) \
 		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
+        --env $(ENV)
