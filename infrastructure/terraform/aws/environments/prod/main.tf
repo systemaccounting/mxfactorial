@@ -10,13 +10,15 @@ locals {
   APP              = "mxfactorial"
   ENV              = "prod"
   APP_ENV          = "${local.APP}-${local.ENV}"
-  PROJECT_JSON     = jsondecode(file("../../../../../project.json"))
-  ORIGIN_PREFIX    = local.PROJECT_JSON.client_origin_bucket_name_prefix
-  ARTIFACTS_PREFIX = local.PROJECT_JSON.artifacts_bucket_name_prefix
-  TFSTATE_PREFIX   = local.PROJECT_JSON.tfstate_bucket_name_prefix
-  RDS_PREFIX       = local.PROJECT_JSON.terraform.aws.rds.instance_name_prefix
-  REGION           = local.PROJECT_JSON.region
-  ENV_ID           = local.PROJECT_JSON.terraform.prod.env_id
+  PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
+  STORAGE_ENV_VAR = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
+  ORIGIN_PREFIX    = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
+  ARTIFACTS_PREFIX = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
+  TFSTATE_PREFIX   = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
+  INFRA_ENV_VAR    = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
+  RDS_PREFIX       = local.INFRA_ENV_VAR.RDS_PREFIX.default
+  REGION           = local.INFRA_ENV_VAR.REGION.default
+  ENV_ID           = local.PROJECT_CONF.infrastructure.terraform.env-id.prod.env_var.set.PROD_ENV_ID.default
   ID_ENV           = "${local.ENV_ID}-${local.ENV}"
   CUSTOM_DOMAIN    = "mxfactorial.io"
   SSM_VERSION      = "v1"
@@ -75,7 +77,7 @@ module "prod" {
   ############### api gateway ###############
 
   // change graphql_deployment_version when switching
-  enable_api_auth = local.PROJECT_JSON.enable_api_auth
+  enable_api_auth = local.INFRA_ENV_VAR.ENABLE_API_AUTH.default
 
   // change value to deploy api
   graphql_deployment_version     = 1
@@ -89,7 +91,7 @@ module "prod" {
 
   ############### notifications ###############
 
-  enable_notifications = local.PROJECT_JSON.enable_notifications
+  enable_notifications = local.INFRA_ENV_VAR.ENABLE_NOTIFICATIONS.default
 
   ############### client ###############
 

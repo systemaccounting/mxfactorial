@@ -25,7 +25,7 @@ resource "aws_lambda_function" "go_migrate" {
 }
 
 data "aws_lambda_layer_version" "go_migrate" {
-  layer_name = "${local.GO_MIGRATE_LAYER_SUFFIX}-${local.ID_ENV}"
+  layer_name = "${local.GO_MIGRATE_LAYER_PREFIX}-${local.ID_ENV}"
 }
 
 data "aws_s3_object" "go_migrate_layer" {

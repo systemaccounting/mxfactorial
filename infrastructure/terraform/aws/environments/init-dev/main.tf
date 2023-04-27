@@ -1,11 +1,13 @@
 locals {
-  ENV          = "dev"
-  PROJECT_JSON = jsondecode(file("../../../../../project.json"))
-  ENV_ID       = jsondecode(file("../../../env-id/terraform.tfstate")).outputs.env_id.value
+  ENV             = "dev"
+  PROJECT_CONF    = yamldecode(file("../../../../../project.yaml"))
+  INFRA_ENV_VAR   = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
+  ENV_ID          = jsondecode(file("../../../env-id/terraform.tfstate")).outputs.env_id.value
+  STORAGE_ENV_VAR = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
 }
 
 provider "aws" {
-  region = local.PROJECT_JSON.region
+  region = local.INFRA_ENV_VAR.REGION.default
   default_tags {
     tags = {
       env_id = local.ENV_ID
@@ -20,9 +22,9 @@ module "project_storage_dev" {
   force_destroy_tfstate            = true
   env                              = local.ENV
   env_id                           = local.ENV_ID
-  artifacts_bucket_name_prefix     = local.PROJECT_JSON.artifacts_bucket_name_prefix
-  client_origin_bucket_name_prefix = local.PROJECT_JSON.client_origin_bucket_name_prefix
-  tfstate_bucket_name_prefix       = local.PROJECT_JSON.tfstate_bucket_name_prefix
-  ddb_table_name_prefix            = local.PROJECT_JSON.github_workflows.dynamodb_table.name_prefix
-  ddb_table_hash_key               = local.PROJECT_JSON.github_workflows.dynamodb_table.hash_key
+  artifacts_bucket_name_prefix     = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
+  client_origin_bucket_name_prefix = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
+  tfstate_bucket_name_prefix       = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
+  ddb_table_name_prefix            = local.STORAGE_ENV_VAR.DDB_TABLE_NAME_PREFIX.default
+  ddb_table_hash_key               = local.STORAGE_ENV_VAR.DDB_TABLE_HASH_KEY.default
 }
