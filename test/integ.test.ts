@@ -15,7 +15,6 @@ import type {
 
 import nullFirstTrItemsNoAppr from "../pkg/testdata/nullFirstTrItemsNoAppr.json"
 import transNoAppr from "../pkg/testdata/transNoAppr.json"
-import config from "../project.json"
 
 import { GraphQLClient } from "graphql-request"
 import { getRules } from "./query/getRules"

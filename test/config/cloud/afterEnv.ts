@@ -1,5 +1,4 @@
 import { exec, ExecOptions } from "shelljs"
-import config from "../../../project.json"
 
 const execOpts: ExecOptions = { silent: (process.env.SILENCE_EXEC_LOGS === 'true') }
 
