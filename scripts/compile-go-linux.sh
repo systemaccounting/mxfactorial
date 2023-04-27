@@ -23,4 +23,4 @@ BUILD_SRC_PATH=$(yq "$APP_CONF_PATH.build_src_path" $PROJECT_CONF)
 
 cd $APP_DIR_PATH
 
-GOOS=linux go build -o $BINARY_NAME ./$BUILD_SRC_PATH
+GOOS=linux CGO_ENABLED=0 go build -o $BINARY_NAME ./$BUILD_SRC_PATH
