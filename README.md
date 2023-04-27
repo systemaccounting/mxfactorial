@@ -20,7 +20,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this payment application solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
 
 **q.** where will i bank?  
-**a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their [accounting](https://en.wikipedia.org/wiki/Earnings)  
+**a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their [accounting](https://en.wikipedia.org/wiki/Earnings), and then assume no one except you will own that risk after you consume it  
 
 **q.** what does physics have to do with accounting?  
 **a.** recording transactions between users as debit-credit pairs enforces a conservation law on value  
@@ -56,7 +56,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
     1. increases the `StateOfCalifornia` account by `0.090`
 1. all accounts **never** default from systemic risk, or experience "monetary" inflation
 1. the public has 24 hour access to realtime revenue and expense reporting from the `StateOfCalifornia` account
-1. the `GroceryStore` owner may publish account performance anytime to [signal](https://en.wikipedia.org/wiki/Signalling_(economics)) the demand for capital to investors with an **empirical** rate of return, i.e. NOT *pro forma*, or some other asset pricing method  
+1. the `GroceryStore` owner may publish account performance anytime to [signal](https://en.wikipedia.org/wiki/Signalling_(economics)) the demand for capital to investors with an **empirical** rate of return, i.e. NOT *pro forma*
 
 ### general use cases
 public demonstration of the following use cases through a systemaccounting function:
