@@ -30,19 +30,15 @@ done
 
 function error_exit() { printf '%s\n' "$*" >&2; exit 1; }
 
-PROJECT_CONFIG=project.json
+PROJECT_CONF=project.yaml
 
-# test if app or pkg in project.json
-IS_IN_PROJECT_JSON=$(jq "[.apps, .pkgs | keys] | flatten | any(. == \"$APP_OR_PKG_NAME\")" $PROJECT_CONFIG)
-
-# test for false value returned by jq any
-if [[ "$IS_IN_PROJECT_JSON" == 'false' ]]; then
-	# error and exit if jq any didnt find app or pkg in package.json
-	error_exit "\"$APP_OR_PKG_NAME\" NOT in $PROJECT_CONFIG. exiting"
+# test if app or pkg in project.yaml
+if [[ $(bash scripts/list-dir-paths.sh --type all | grep --color=never "$APP_OR_PKG_NAME$" >/dev/null 2>&1; echo $?) -ne 0 ]]; then
+  error_exit "\"$APP_OR_PKG_NAME\" NOT in $PROJECT_CONF. exiting."
 fi
 
-# get standard codecov flags from project.json
-TEST_TYPES=($(jq -r '.github_workflows.codecov.flags | .[]' $PROJECT_CONFIG | xargs))
+# get standard codecov flags from project.yaml
+TEST_TYPES=($(yq '.[".github"].codecov.flags | join(" ")' $PROJECT_CONF))
 
 # create counter for occurrences of standard codecov flags
 COUNT=0
@@ -59,7 +55,7 @@ done
 # test for 0 standard codecov flags found
 if [[ "$COUNT" -eq 0 ]]; then
 	# error and exit if 0 standard codecov flags found
-	error_exit "\"$TEST_TYPE\" not standard \"${TEST_TYPES[@]}\" codecov coverage flag set in $PROJECT_CONFIG. exiting"
+	error_exit "\"$TEST_TYPE\" not standard \"${TEST_TYPES[@]}\" codecov coverage flag set in $PROJECT_CONF. exiting"
 fi
 
 # test for github workflow environment variable

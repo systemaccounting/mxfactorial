@@ -13,8 +13,10 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
-APP_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
-INVOKE_LOG_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".lambda_invoke_log" $PROJECT_CONFIG)
+PROJECT_CONF=project.yaml
 
-rm -f "$APP_PATH/$INVOKE_LOG_FILE_NAME"
+APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type app | grep --color=never "$APP_NAME")
+
+INVOKE_LOG_FILE_NAME=$(yq '.services.env_var.set.LAMBDA_INVOKE_LOG.default' $PROJECT_CONF)
+
+rm -f "$APP_DIR_PATH/$INVOKE_LOG_FILE_NAME"

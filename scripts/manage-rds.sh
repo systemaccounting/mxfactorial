@@ -7,7 +7,7 @@ fi
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --env) ENVIRONMENT="$2"; shift ;;
+        --env) ENV="$2"; shift ;;
         --start) START=1;;
         --stop) STOP=1;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
@@ -15,10 +15,12 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
-REGION=$(jq -r '.region' $PROJECT_CONFIG)
-ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
-RDS_INSTANCE_NAME="$ENV_ID-$ENVIRONMENT-$(jq -r '.terraform.aws.rds.instance_name_prefix' $PROJECT_CONFIG)"
+PROJECT_CONF=project.yaml
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+
+ENV_ID=$(source scripts/print-env-id.sh)
+RDS_INSTANCE_NAME_PREFIX=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.RDS_INSTANCE_NAME_PREFIX.default' $PROJECT_CONF)
+RDS_INSTANCE_NAME="$RDS_INSTANCE_NAME_PREFIX-$ENV_ID-$ENV"
 
 if [[ "$START" -eq 1 ]]; then
 	aws rds start-db-instance \

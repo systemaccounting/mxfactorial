@@ -14,7 +14,6 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
-APP_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
+APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type app | grep --color=never "$APP_NAME")
 
-rm -f "$APP_PATH/$ARTIFACT_NAME"
+rm -f "$APP_DIR_PATH/$ARTIFACT_NAME"

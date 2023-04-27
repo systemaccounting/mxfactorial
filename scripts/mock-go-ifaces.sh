@@ -6,9 +6,9 @@ set -e
 if [[ "$#" -ne 2 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash scripts/mock-go-ifaces.sh --app-or-pkg-name sqlbuilder
+	bash scripts/mock-go-ifaces.sh --app-or-pkg-name sqls
 
-	*note: set mocked_ifaces list in project.json
+	*note: set mocked_ifaces list in project.yaml
 	EOF
 	exit 1
 fi
@@ -22,30 +22,30 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
-MOCK_PACKAGE_PREFIX=$(jq -r '.gomock.package_name_prefix' "$PROJECT_CONFIG")
-MOCK_FILE_SUFFIX=$(jq -r '.gomock.file_name_suffix' "$PROJECT_CONFIG")
+PROJECT_CONF=project.yaml
+GO_MOCK_PACKAGE_NAME_PREFIX=$(yq '.scripts.env_var.set.GO_MOCK_PACKAGE_NAME_PREFIX.default' "$PROJECT_CONF")
+GO_MOCK_FILE_NAME_SUFFIX=$(yq '.scripts.env_var.set.GO_MOCK_FILE_NAME_SUFFIX.default' "$PROJECT_CONF")
 
 # source commonly used functions
 source ./scripts/shared-error.sh
 
-# set PROJECT_JSON_PROPERTY variable
-source ./scripts/shared-set-property.sh
+if [[ $(bash scripts/list-dir-paths.sh --type all | grep --color=never "$APP_OR_PKG_NAME$" >/dev/null 2>&1; echo $?) -ne 0 ]]; then
+  error_exit "\"$APP_OR_PKG_NAME\" NOT in $PROJECT_CONF. exiting."
+fi
 
-# set DIR_PATH variable
-source ./scripts/shared-set-dir-path.sh
+APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type all | grep --color=never "$APP_OR_PKG_NAME$")
+
+CONF_PATH=$(source scripts/dir-to-conf-path.sh $APP_DIR_PATH)
 
 MOCKED_IFACES_PROPERTY='mocked_interfaces'
 
-# test if mocked_ifaces property set in project.json
-IS_MOCKED_IFACES_SET=$(jq "$PROJECT_JSON_PROPERTY | keys | any(. == \"$MOCKED_IFACES_PROPERTY\")" $PROJECT_CONFIG)
-if [[ "$IS_MOCKED_IFACES_SET" != 'true' ]]; then
-	# error when mocked_ifaces property not in project.json for app or pkg
-	error_exit "\"$MOCKED_IFACES_PROPERTY\" is NOT set in $PROJECT_CONFIG under $PROJECT_JSON_PROPERTY. exiting."
+if [[ $(yq "$CONF_PATH | has(\"$MOCKED_IFACES_PROPERTY\")" $PROJECT_CONF) == 'false' ]]; then
+  # error when mocked_ifaces property not in project.yaml for app or pkg
+  error_exit "\"$MOCKED_IFACES_PROPERTY\" is NOT set in $PROJECT_CONF under $CONF_PATH. exiting."
 fi
 
-# get list of packages to mock from project.json
-PKGS_TO_MOCK=($(jq -r "$PROJECT_JSON_PROPERTY.$MOCKED_IFACES_PROPERTY | keys | join (\" \")" "$PROJECT_CONFIG"))
+# get list of packages to mock from project.yaml
+PKGS_TO_MOCK=($(yq "$CONF_PATH.$MOCKED_IFACES_PROPERTY | keys | join (\" \")" $PROJECT_CONF))
 
 for p in "${PKGS_TO_MOCK[@]}"; do
 
@@ -54,12 +54,12 @@ for p in "${PKGS_TO_MOCK[@]}"; do
 
   # create comma separated list of package interfaces to mock and pass as arg to gomock
   # e.g InsertSQLBuilder,UpdateSQLBuilder,SelectSQLBuilder,DeleteSQLBuilder
-  IFACE_LIST=$(jq -r "$PROJECT_JSON_PROPERTY.$MOCKED_IFACES_PROPERTY.\"$p\" | join(\",\")" "$PROJECT_CONFIG")
+  IFACE_LIST=$(yq "$CONF_PATH.$MOCKED_IFACES_PROPERTY[\"$p\"] | join(\",\")" $PROJECT_CONF)
 
-  MOCK_PACKAGE_NAME="$MOCK_PACKAGE_PREFIX"_"$APP_OR_PKG_NAME"
+  MOCK_PACKAGE_NAME="$GO_MOCK_PACKAGE_NAME_PREFIX"_"$APP_OR_PKG_NAME"
   MOCK_FILE_PREFIX=$(basename "$GO_PKG_IMPORT_PATH")
-  MOCK_FILE_NAME="$MOCK_FILE_PREFIX"_"$MOCK_FILE_SUFFIX"
-  MOCK_FILE="./$DIR_PATH/$MOCK_PACKAGE_NAME/$MOCK_FILE_NAME"
+  MOCK_FILE_NAME="$MOCK_FILE_PREFIX"_"$GO_MOCK_FILE_NAME_SUFFIX"
+  MOCK_FILE="./$APP_DIR_PATH/$MOCK_PACKAGE_NAME/$MOCK_FILE_NAME"
 
   # create mock file of interfaces in subdirectory
   mockgen -package "$MOCK_PACKAGE_NAME" -destination "$MOCK_FILE" "$GO_PKG_IMPORT_PATH" "$IFACE_LIST"

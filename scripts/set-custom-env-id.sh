@@ -24,9 +24,9 @@ TFSTATE_ENV_ID=infrastructure/terraform/env-id/terraform.tfstate
 
 make env-id
 
-TFSTATE_TMP_1=$(jq --indent 4 ".outputs.env_id.value = \"$CUSTOM_ENV_ID\"" $TFSTATE_ENV_ID)
+TFSTATE_TMP_1=$(yq -I4 -o=json ".outputs.env_id.value = \"$CUSTOM_ENV_ID\"" $TFSTATE_ENV_ID)
 
-TFSTATE_NEW=$(echo $TFSTATE_TMP_1 | jq --indent 4 ".resources[0].instances[0].attributes.dec = \"$CUSTOM_ENV_ID\"")
+TFSTATE_NEW=$(echo $TFSTATE_TMP_1 | yq -I4 -o=json ".resources[0].instances[0].attributes.dec = \"$CUSTOM_ENV_ID\"")
 
 echo -E "${TFSTATE_NEW}" > $TFSTATE_ENV_ID
 

@@ -25,8 +25,10 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-ENV_FILE_NAME='.env'
+PROJECT_CONF=project.yaml
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE="$DIR_PATH/$ENV_FILE_NAME"
+
 TEMP_FILE=temp
 
 # test for .env file availability

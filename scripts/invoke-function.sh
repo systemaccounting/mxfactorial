@@ -2,14 +2,13 @@
 
 set -e
 
-if [[ "$#" -ne 8 ]]; then
+if [[ "$#" -ne 6 ]]; then
 	cat <<- 'EOF'
 	use:
 	bash scripts/invoke-function.sh \
 	        --app-name request-create \
 	        --payload "$(cat testEvent.json)" \
-	        --env dev \
-	        --region us-east-1
+	        --env dev
 	EOF
 	exit 1
 fi
@@ -18,24 +17,25 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --app-name) APP_NAME="$2"; shift ;;
         --payload) PAYLOAD="$2"; shift ;;
-        --env) ENVIRONMENT="$2"; shift ;;
-        --region) REGION="$2"; shift ;;
+        --env) ENV="$2"; shift ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
 	shift
 done
 
-PROJECT_CONFIG=project.json
-if [[ "$ENV" == 'prod' ]]; then # use configured prod env id
-	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
-elif [[ -z "$ENV_ID" ]]; then # use env id from terraform if not in environment
-	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
-fi
-LAMBDA_NAME_PREFIX=$(jq -r ".apps.\"$APP_NAME\".lambda_name_prefix" $PROJECT_CONFIG)
-LAMBDA_NAME="$LAMBDA_NAME_PREFIX-$ENV_ID-$ENVIRONMENT"
-LAMBDA_INVOKE_LOG_FILE_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
-LAMBDA_INVOKE_LOG_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".lambda_invoke_log" $PROJECT_CONFIG)
+PROJECT_CONF=project.yaml
+
+ENV_ID=$(source scripts/print-env-id.sh)
+
+LAMBDA_NAME="$APP_NAME-$ENV_ID-$ENV"
+
+LAMBDA_INVOKE_LOG_FILE_PATH=$(source scripts/list-dir-paths.sh --type app | grep --color=never "$APP_NAME")
+
+LAMBDA_INVOKE_LOG_FILE_NAME=$(yq '.services.env_var.set.LAMBDA_INVOKE_LOG.default' $PROJECT_CONF)
+
 LAMBDA_INVOKE_LOG="$LAMBDA_INVOKE_LOG_FILE_PATH/$LAMBDA_INVOKE_LOG_FILE_NAME"
+
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 aws lambda invoke \
 	--region $REGION \
@@ -48,9 +48,9 @@ aws lambda invoke \
 RESPONSE_FIRST_CHARACTER=$(head -c 1 $LAMBDA_INVOKE_LOG)
 case $RESPONSE_FIRST_CHARACTER in
 	'"') # when object returned as string
-		jq 'fromjson' $LAMBDA_INVOKE_LOG
+		yq 'fromjson' $LAMBDA_INVOKE_LOG
 		;;
 	*)
-		jq '.' $LAMBDA_INVOKE_LOG
+		yq -o=json -P $LAMBDA_INVOKE_LOG
 		;;
 esac

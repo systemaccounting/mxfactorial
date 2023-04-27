@@ -21,15 +21,17 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # filter prices from transaction_item list
-PRICES=($(jq \
-	-c \
-	'.transaction.transaction_items[].price | tonumber' \
+PRICES=($(yq \
+	-I0 \
+	-o=json \
+	'.transaction.transaction_items[].price | from_json | ... style=""' \
 	$FILE_PATH))
 
 # filter quantities from transaction_item list
-QUANTITIES=($(jq \
-	-c \
-	'.transaction.transaction_items[].quantity | tonumber' \
+QUANTITIES=($(yq \
+	-I0 \
+	-o=json \
+	'.transaction.transaction_items[].quantity | from_json | ... style=""' \
 	$FILE_PATH))
 
 # sum

@@ -53,12 +53,13 @@ TEMPLATE_JSON_PATH=./pkg/testdata/getnotifications.json
 
 source $ENV_FILE
 
-WEBSOCKET_MESSAGE=$(jq -rc ".token = \"$ID_TOKEN\"" $TEMPLATE_JSON_PATH)
+WEBSOCKET_MESSAGE=$(yq -I0 -o=json ".token = \"$ID_TOKEN\"" $TEMPLATE_JSON_PATH)
 
 RESPONSE=$(npx wscat -c $WEBSOCKET_CLIENT_URI -x "$WEBSOCKET_MESSAGE")
 
-echo $RESPONSE | jq .
-PENDING_NOTIFICATIONS=$(echo -n $RESPONSE | jq -r '[.pending[] | .notification_id] | join(",")')
+echo $RESPONSE | yq -o=json
+
+PENDING_NOTIFICATIONS=$(echo -n $RESPONSE | yq '[.pending[] | .notification_id] | join(",")')
 
 echo ""
 echo "pending notifications: $PENDING_NOTIFICATIONS"

@@ -6,22 +6,21 @@ YELLOW='\033[0;33m'
 NOCOLOR='\033[0m'
 BUILD_START_TIME=$(date +%s)
 
-ENVIRONMENT=dev
-PROJECT_CONFIG=project.json
-REGION=$(jq -r '.region' $PROJECT_CONFIG)
-TFSTATE_BUCKET_PREFIX=$(jq -r '.tfstate_bucket_name_prefix' $PROJECT_CONFIG)
+ENV=dev
+PROJECT_CONF=project.yaml
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+TFSTATE_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
 
 make env-id
-ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
 
-TFSTATE_EXT=$(jq -r '.terraform.tfstate.file_extension' $PROJECT_CONFIG)
-TFSTATE_APIGW_SUFFIX=$(jq -r '.terraform.tfstate.file_name_suffix.apigw_logging' $PROJECT_CONFIG)
+ENV_ID=$(source ./scripts/print-env-id.sh)
+TFSTATE_EXT=$(yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.default' $PROJECT_CONF)
+TFSTATE_APIGW_SUFFIX=$(yq '.infrastructure.terraform.aws.environments.region.env_var.set.TFSTATE_APIGW_SUFFIX.default' $PROJECT_CONF)
 TFSTATE_APIGW="$TFSTATE_APIGW_SUFFIX".$TFSTATE_EXT
-
-TFSTATE_ENV_SUFFIX=$(jq -r '.terraform.tfstate.file_name_suffix.env_infra' $PROJECT_CONFIG)
+TFSTATE_ENV_SUFFIX=$(yq '.infrastructure.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $PROJECT_CONF)
 TFSTATE_ENV="$TFSTATE_ENV_SUFFIX".$TFSTATE_EXT
 
-ID_ENV="$ENV_ID-$ENVIRONMENT"
+ID_ENV="$ENV_ID-$ENV"
 TFSTATE_BUCKET="$TFSTATE_BUCKET_PREFIX-$ID_ENV"
 TFPLAN_FILE=.tfplan
 
@@ -49,16 +48,16 @@ function apply_agigw_logging_perm() {
 }
 
 APIGW_ACCT=$(aws apigateway get-account --region "$REGION")
-ACCT_HAS_ROLE=$(echo $APIGW_ACCT | jq 'has("cloudwatchRoleArn")')
+ACCT_HAS_ROLE=$(echo $APIGW_ACCT | yq 'has("cloudwatchRoleArn")')
 
 # test for a cloudwatch role arn assignment to the regional api gateway account
 if [[ "$ACCT_HAS_ROLE" == "true" ]]; then
 
 	# get the currently assigned cloudwatch role arn to the api gateway account
-	ASSIGNED_ROLE_ARN=$(echo $APIGW_ACCT | jq -r '.cloudwatchRoleArn')
+	ASSIGNED_ROLE_ARN=$(echo $APIGW_ACCT | yq '.cloudwatchRoleArn')
 
 	# test for availability of assigned role in iam
-	ASSIGNED_ROLE_ARN_COUNT=$(aws iam list-roles --query "Roles[?contains(Arn, \`$ASSIGNED_ROLE_ARN\`) == \`true\`]" --region "$REGION" | jq 'length')
+	ASSIGNED_ROLE_ARN_COUNT=$(aws iam list-roles --query "Roles[?contains(Arn, \`$ASSIGNED_ROLE_ARN\`) == \`true\`]" --region "$REGION" | yq 'length')
 
 	# create a new cloudwatch role arn and assign to api gateway account
 	# IF currently assigned role was deleted in iam
@@ -101,10 +100,10 @@ select yn in "yes" "no"; do
     esac
 done
 
-if [[ $(jq -r '.terraform.aws.build_db' "../../../../../$PROJECT_CONFIG") == "false" ]]; then
+if [[ $(yq '.scripts.env_var.set.BUILD_DB.default' "../../../../../$PROJECT_CONF") == "false" ]]; then
 	echo "exiting after skipping db during terraform development
 
-*** enable terraform.aws.build_db in $PROJECT_CONFIG to build development environment"
+*** enable .scripts.env_var.set.BUILD_DB.default in $PROJECT_CONF to build development environment"
 	exit 0
 fi
 

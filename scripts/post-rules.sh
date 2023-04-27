@@ -32,9 +32,9 @@ read -r -d '' BODY <<-'EOF'
 EOF
 
 # format json body for curl
-PAYLOAD=$(echo "${BODY}" | jq -rcM .)
+PAYLOAD=$(echo "${BODY}" | yq -I0 .)
 
 curl -s \
   -d "${PAYLOAD}" \
   -H 'Content-Type: application/json' \
-  http://${HOST_ADDR}:${HOST_PORT}/ | jq .
+  http://${HOST_ADDR}:${HOST_PORT}/ | yq -o=json
