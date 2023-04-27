@@ -21,18 +21,19 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-ENVIRONMENT=dev
-PROJECT_CONFIG=project.json
-REGION=$(jq -r '.region' $PROJECT_CONFIG)
-TFSTATE_BUCKET_PREFIX=$(jq -r '.tfstate_bucket_name_prefix' $PROJECT_CONFIG)
+ENV=dev
+PROJECT_CONF=project.yaml
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+TFSTATE_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
 
-if [[ "$ENV" == 'prod' ]]; then # use configured prod env id
-	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
-elif [[ -z "$ENV_ID" ]]; then # use env id from terraform if not in environment
-	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
+if [[ -f infrastructure/terraform/env-id/terraform.tfstate ]]; then
+	ENV_ID=$(source scripts/print-env-id.sh)
+else
+	make env-id
+	ENV_ID=$(source scripts/print-env-id.sh)
 fi
 
-ID_ENV="$ENV_ID-$ENVIRONMENT"
+ID_ENV="$ENV_ID-$ENV"
 TFSTATE_BUCKET="$TFSTATE_BUCKET_PREFIX-$ID_ENV"
 
 pushd "$DIR"

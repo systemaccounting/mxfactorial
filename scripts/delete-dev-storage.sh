@@ -1,15 +1,15 @@
 #!/bin/bash
 
-ENVIRONMENT=dev # hardcoding intended
-PROJECT_CONFIG=project.json
-REGION=$(jq -r '.region' $PROJECT_CONFIG)
-ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
-ID_ENV="$ENV_ID-$ENVIRONMENT"
-
-ARTIFACTS_BUCKET_PREFIX=$(jq -r '.artifacts_bucket_name_prefix' $PROJECT_CONFIG)
-CLIENT_ORIGIN_BUCKET_PREFIX=$(jq -r '.client_origin_bucket_name_prefix' $PROJECT_CONFIG)
-TFSTATE_BUCKET_PREFIX=$(jq -r '.tfstate_bucket_name_prefix' $PROJECT_CONFIG)
-DDB_TABLE_NAME_PREFIX=$(jq -r '.github_workflows.dynamodb_table.name_prefix' $PROJECT_CONFIG)
+ENV=dev # hardcoding intended
+PROJECT_CONF=project.yaml
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+ENV_ID=$(source ./scripts/print-env-id.sh)
+ID_ENV="$ENV_ID-$ENV"
+ARTIFACTS_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default' $PROJECT_CONF)
+CLIENT_ORIGIN_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.CLIENT_ORIGIN_BUCKET_PREFIX.default' $PROJECT_CONF)
+TFSTATE_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
+DDB_TABLE_NAME_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.DDB_TABLE_NAME_PREFIX.default' $PROJECT_CONF)
+LOCAL_TFSTATE_FILE=terraform.tfstate
 
 ARTIFACTS_BUCKET="$ARTIFACTS_BUCKET_PREFIX-$ID_ENV"
 CLIENT_ORIGIN_BUCKET="$CLIENT_ORIGIN_BUCKET_PREFIX-$ID_ENV"
@@ -28,12 +28,7 @@ function delete_bucket() {
 	aws s3api delete-bucket --bucket "$bucket_name"
 }
 
-set +e
-terraform destroy --auto-approve 2>/dev/null
-
-if [[ "$?" -ne 0 ]]; then
-	echo "tfstate not found. manually deleting dev storage"
-
+function delete_dev_storage() {
 	# delete buckets
 	delete_bucket "$ARTIFACTS_BUCKET"
 	delete_bucket "$CLIENT_ORIGIN_BUCKET"
@@ -41,10 +36,26 @@ if [[ "$?" -ne 0 ]]; then
 
 	# delete ddb table
 	DEL_RESP=$(aws dynamodb delete-table --table-name "$DDB_TABLE" --query 'TableDescription.{ TableName: TableName, TableStatus: TableStatus }')
-	TABLE_NAME=$(echo $DEL_RESP | jq -r '.TableName')
-	TABLE_STATUS=$(echo $DEL_RESP | jq -r '.TableStatus')
+	TABLE_NAME=$(echo $DEL_RESP | yq '.TableName')
+	TABLE_STATUS=$(echo $DEL_RESP | yq '.TableStatus')
 
 	printf '%s %s dynamodb table\n' "$TABLE_STATUS" "$TABLE_NAME"
+}
+
+if ! [[ -f $LOCAL_TFSTATE_FILE ]]; then
+	echo "tfstate not found. manually deleting dev storage"
+	delete_dev_storage
+elif [[ $(yq '.resources | length' $LOCAL_TFSTATE_FILE) -eq 0 ]]; then
+	echo "resources not found in tfstate. manually deleting dev storage"
+	delete_dev_storage
+fi
+
+set +e
+terraform destroy --auto-approve 2>/dev/null
+
+if [[ "$?" -ne 0 ]]; then
+	echo "destroy incomplete. manually deleting dev storage"
+	delete_dev_storage
 fi
 
 popd

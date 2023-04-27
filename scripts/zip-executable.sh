@@ -21,9 +21,8 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
-APP_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONFIG)
+APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type app | grep --color=never "$APP_NAME")
 
-cd $APP_PATH
+cd $APP_DIR_PATH
 
 zip $ARTIFACT_NAME ./$EXECUTABLE_NAME

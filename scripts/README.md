@@ -4,21 +4,29 @@
 
 #### scripts reused in makefiles and workflows for consistency
 
-add and edit by assigning variables from root `project.json` to avoid reconciling variable assignments in terraform and elsewhere, for example:
+add and edit by assigning variables from root `project.yaml` to avoid reconciling variable assignments in terraform and elsewhere, for example:
 
-`project.json`
-```json
-"artifacts_bucket_name_prefix": "mxfactorial-artifacts"
+`project.yaml`
+```yaml
+infrastructure:
+  terraform:
+    aws:
+      modules:
+        project-storage:
+          env_var:
+            set:
+              ARTIFACTS_BUCKET_PREFIX:
+                default: mxfactorial-artifacts
 ```
 
 `infrastructure/terraform/aws/environments/prod/main.tf`
 ```
-ARTIFACTS_PREFIX = jsondecode(file("../../../../../project.json")).artifacts_bucket_name_prefix
+ARTIFACTS_BUCKET_PREFIX = jsondecode(file("../../../../../project.yaml")).infrastructure.terraform.aws.modules.project-storage.env_var.set.ARTIFACTS_BUCKET_PREFIX.default
 ```
 
 `scripts/put-object.sh`
 ```sh
-ARTIFACT_BUCKET_NAME_PREFIX=$(jq -r ".artifacts_bucket_name_prefix" project.json)
+ARTIFACTS_BUCKET_PREFIX=$(yq ".infrastructure.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default" project.yaml)
 ```
 
 \*scripts assume **project root** as initial current working directory
@@ -45,13 +53,21 @@ deletes `invoke.log` files created in app directories by local [aws lambda invok
 
 compiles linux binaries for lambda in app directories with `go build` command
 
-##### `create-env.sh`
+##### `create-env-file.sh`
 
-loops through an apps `secrets` in `project.json`, gets each secret value with [aws secretsmanager get-secret-value](https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/get-secret-value.html), and creates a `.env` file in the app directory
+loops through an apps `secrets` in `project.yaml`, gets each secret value with [aws secretsmanager get-secret-value](https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/get-secret-value.html), and creates a `.env` file in the app directory
+
+##### `create-inventory.sh`
+
+reads `project.yaml` and writes list of apps and libraries to project root as `inventory` plain text file
 
 ##### `deploy-all.sh`
 
 builds, zips and deploys each app from a loop through directories listed in root `inventory` file
+
+##### `dir-to-conf-path.sh`
+
+prints `services["request-create"]` when passed `services/request-create` for use in `yq`
 
 ##### `download-go-mod.sh`
 
@@ -61,207 +77,27 @@ downloads module dependencies
 
 invokes app lambdas locally from app directories with [aws lambda invoke](https://docs.aws.amazon.com/cli/latest/reference/lambda/invoke.html)
 
-##### `list-changed-pkgs.sh`
+##### `list-conf-paths.sh`
 
-lists packages requiring test coverage by an internal package code change
+lists yaml paths for apps in libs in `project.yaml` for use in `yq`, e.g. `services["request-create"]`
 
-1. accepts an internal package name as an argument
-1. recursively loops through `pkg` directories finding files importing the internal package
-1. creates a bash array of other internal packages importing it
+##### `list-dir-paths.sh`
 
-\**note: mock packages are excluded*
+lists apps and libs in `project.yaml`, e.g. `services/request-create`
 
-example:
-```sh
-bash scripts/list-changed-pkgs.sh --pkg-name tools --debug
+##### `list-env-vars.sh`
 
-IMPORTING_PKG_DIRS: 5
-pkg/lambdapg
-pkg/request
-pkg/notify
-pkg/websocket
-pkg/data
-```
-
-go packages were hastily written to import one another initially
-
-list size will decrease as imports are switched to executable command packages
-
-##### `list-changed-svcs.sh`
-
-lists services requiring test coverage by an internal package code change
-
-1. accepts an internal package name as an argument
-1. sources `list-changed-pkgs.sh` to create a bash array of other internal packages importing it
-1. loops through `package.json` app directories finding files importing all internal packages affected by package code change
-1. creates a bash array of services affected by go package change
-
-\**note: mock packages are excluded*
-
-example:
-```sh
-bash scripts/list-changed-svcs.sh --pkg-name tools --debug
-
-CHANGED_SVCS: 12
-services/request-create
-services/request-approve
-services/request-by-id
-services/requests-by-account
-services/transaction-by-id
-services/transactions-by-account
-services/notifications-send
-services/notifications-get
-services/notifications-clear
-services/balance-by-account
-services/wss-connect
-services/auto-confirm
-```
-
-##### `list-dependent-svcs.sh`
-
-lists services requiring test coverage by service code change
-
-1. accepts a service (app) name as an argument
-1. recursively loops through `package.json` app `dependents`
-1. creates a bash array of other services affected by service change
-
-example:
-```sh
-bash scripts/list-dependent-svcs.sh --app-name graphql --recursive --debug
-
-DEPENDENT_SVCS: 9
-request-create
-request-approve
-rule
-request-by-id
-requests-by-account
-transaction-by-id
-transactions-by-account
-balance-by-account
-client
-```
+prints list of environment variables set in `project.yaml`
 
 ##### `put-object.sh`
 
 puts artifact created in app directory in s3 bucket
-
-##### `remove-pending-test.sh`
-
-removes a package from `PendingTests` dynamodb item after test (see `set-pending-tests.sh`)
-
-example:
-
-1. `PendingTests` before
-```json
-[
-  "data",
-  "lambdapg",
-  "notify",
-  "request",
-  "websocket"
-]
-```
-
-
-2. 
-
-```sh
-bash scripts/remove-pending-test.sh \
-		--app-or-pkg-name lambdapg \
-		--sha 386e152bfb3d98830864775f43c08ed95f5e2ad9 \
-		--region us-east-1 \
-		--env dev
-```
-
-3. `PendingTests` after
-```json
-[
-  "data",
-  "notify",
-  "request",
-  "websocket"
-]
-```
 
 ##### `set-codecov-flags.sh`
 
 sets custom [CODECOV_FLAGS](https://docs.codecov.com/docs/flags) github workflow environment variable to 1) app or package name, and 2) one standard codecov flag listed in `package.json`
 
 example: `CODECOV_FLAGS=tools,unittest`
-
-##### `set-intra-dependents.sh`
-
-sets package and service dependents in `package.json`
-
-1. accepts an internal package name as an argument
-1. sources `list-changed-svcs.sh` to create a bash array of other packages importing it
-1. sets package `dependents` in `package.json`
-
-\**note: mock packages are excluded*
-
-example:
-
-1. `package.json` before:
-```
-"lambdapg": {
-            "runtime": "go1.x",
-            "path": "pkg/lambdapg",
-            "dependents": []
-        }
-```
-2. `bash scripts/set-intra-pkg-deps.sh --pkg-name lambdapg`
-3. `package.json` after:
-```
-"lambdapg": {
-            "runtime": "go1.x",
-            "path": "pkg/lambdapg",
-            "dependents": [
-                "notify",
-                "websocket",
-                "request",
-                "data"
-            ]
-        }
-```
-
-##### `set-pending-tests.sh`
-
-automates detecting the absence of test coverage by creating `PendingTests` from `list-changed-pkgs.sh` or `list-changed-svcs.sh`, and replaces verbose [job outputs](https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs) feature with dynamodb table
-
-1. accepts as arguments:
-    1. name of app or internal package
-    1. git sha
-    1. aws region
-    1. environment
-1. sources `list-changed-pkgs.sh` or `list-changed-svcs.sh` to create a bash array of affected directories
-1. adds a `PendingTests` [string set](https://github.com/awsdocs/amazon-dynamodb-developer-guide/blob/master/doc_source/HowItWorks.NamingRulesDataTypes.md#sets) to `github-workflows-$ENV` dynamodb table with [aws dynamodb put-item](https://docs.aws.amazon.com/cli/latest/reference/dynamodb/put-item.html)
-
-example:
-```sh
-bash scripts/set-pending-tests.sh \
-    --app-or-pkg-name tools \
-    --sha 386e152bfb3d98830864775f43c08ed95f5e2ad9 \
-    --region us-east-1 \
-    --env dev
-```
-
-<img width="519" alt="dynamodb-ss" src="https://user-images.githubusercontent.com/12200465/160259978-27b2dfa4-f88d-459d-a48d-25407af3600e.png">
-
-##### `test-zero-pending-tests.sh`
-
-avoids assuming comprehensive test coverage by github workflows
-
-tests 0 script-generated `PendingTests` in `github-workflows-$ENV` dynamodb table item (see `set-pending-tests.sh`) after parallel workflows finish
-
-example:
-```sh
-bash scripts/test-zero-pending-tests.sh \
-		--sha 386e152bfb3d98830864775f43c08ed95f5e2ad9 \
-		--region us-east-1 \
-		--env dev
-```
-
-<img width="1131" alt="go-pkg-workflow" src="https://user-images.githubusercontent.com/12200465/160260920-5b94809a-5240-4f69-a1a3-097074163975.png">
 
 ##### `update-function.sh`
 
@@ -270,10 +106,6 @@ deploys lambda function from s3 object created by `put-object.sh`
 ##### `zip-executable.sh`
 
 adds binaries and shell scripts to `*.zip` files for deployment in app directories
-
-##### `test-dependents.sh`
-
-tests for missing and unnecessary dependents in project.json and fails github workflows with message
 
 ##### `insert-transactions.sh`
 
@@ -297,21 +129,13 @@ restores postgres db from path passed as parameter
 
 script sourced to standardize error handling in other scripts
 
-##### `shared-set-dir-path.sh`
-
-script sourced to set DIR_PATH from project.json, for example:
-
-1. assigns `DIR_PATH` variable the `services/request-approve` value from the `.apps.\"request-approve\".path` property in `project.json`
-1. sourcing script then `cd $DIR_PATH`
-1. sourcing script performs some work in `$DIR_PATH`
-
 ##### `mock-go-ifaces.sh`
 
-creates go mocks from list of interfaces inside `mock` subdirectory using [gomock](https://github.com/golang/mock) and `project.json` assignments
+creates go mocks from list of interfaces inside `mock` subdirectory using [gomock](https://github.com/golang/mock) and `project.yaml` assignments
 
-`//go:generate mockgen...` not used, script and `project.json` preferred for convenient interface use and mock coverage audit
+`//go:generate mockgen...` not used, script and `project.yaml` preferred for convenient interface use and mock coverage audit
 
-1. set `.pkgs.lambdapg.mocked_interfaces` property under package or service in `project.json` to map of go package import paths and desired list of interfaces:
+1. set `.pkgs.lambdapg.mocked_interfaces` property under package or service in `project.yaml` to map of go package import paths and desired list of interfaces:
 
     ```json
     "mocked_interfaces": {
@@ -362,7 +186,7 @@ clears (deletes) pending notifications through websocket endpoint
 
 ##### `create-all-env-files.sh`
 
-loops through `project.json` apps and creates `.env` files in each directory requring secrets fetched from systems manager parameter store
+loops through `project.yaml` apps and creates `.env` files in each directory requring secrets fetched from systems manager parameter store
 
 ##### `manage-rds.sh`
 
@@ -427,3 +251,15 @@ sets `CLIENT_URI`, `GRAPHQL_URI` and `B64_GRAPHQL_URI` vars when sourced in othe
 ##### `rebuild-client-image.sh`
 
 rebuilds client image when the `B64_GRAPHQL_URI` var requires setting by a new devcontainer (gitpod, codespaces)
+
+##### `setup-codespace.sh`
+
+runs as [postCreateCommand](https://containers.dev/implementors/json_reference/) in codespace devcontainer
+
+##### `post-rules.sh`
+
+sends a `bottled water` transaction item in a POST request to a locally running rule service
+
+##### `print-env-id.sh`
+
+prints env id stored in `infrastructure/terraform/env-id/terraform.tfstate`

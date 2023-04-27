@@ -1,28 +1,25 @@
 #!/bin/bash
 
-if [[ "$#" -ne 4 ]] && [[ "$#" -ne 5 ]]; then
+if [[ "$#" -ne 2 ]] && [[ "$#" -ne 3 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash scripts/list-lambdas.sh --region us-east-1 --env dev # OPTIONAL: --with-urls
+	bash scripts/list-lambdas.sh --env dev # OPTIONAL: --with-urls
 	EOF
 	exit 1
 fi
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --env) ENVIRONMENT="$2"; shift ;;
-        --region) REGION="$2"; shift ;;
+        --env) ENV="$2"; shift ;;
         --with-urls) WITH_URLS=1; shift ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
 	shift
 done
 
-if [[ "$ENV" == 'prod' ]]; then # use configured prod env id
-	ENV_ID=$(jq -r '.terraform.prod.env_id' $PROJECT_CONFIG)
-elif [[ -z "$ENV_ID" ]]; then # use env id from terraform if not in environment
-	ENV_ID=$(jq -r '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate)
-fi
+PROJECT_CONF=project.yaml
+ENV_ID=$(source scripts/print-env-id.sh)
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 UNSORTED_FUNCTIONS=($(aws lambda list-functions \
 	--region $REGION \

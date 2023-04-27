@@ -1,9 +1,9 @@
-APP_NAME=test
+APP_NAME=$(shell basename $(CURDIR))
 RELATIVE_PROJECT_ROOT_PATH=..
-PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-ENV_FILE=$(CURDIR)/.env
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
+ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
+ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
 
 test-env-arg:
 ifndef ENV
@@ -44,7 +44,6 @@ clean-env:
 get-secrets:
 	@$(MAKE) -s test-env-arg
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/create-env.sh \
+	bash scripts/create-env-file.sh \
 		--app-name $(APP_NAME) \
-		--env $(ENV) \
-		--region $(REGION)
+		--env $(ENV)

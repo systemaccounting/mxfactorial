@@ -22,5 +22,5 @@ variable "ssm_prefix" {}
 variable "env_id" {}
 variable "build_db" { type = bool }
 variable "build_cache" { type = bool }
-variable "readiness_check_path" { default = "/healthz" } // todo: assign from root project.json
+variable "readiness_check_path" { default = "/healthz" } // todo: assign from root project.yaml
 variable "web_adapter_layer_version" {}

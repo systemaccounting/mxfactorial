@@ -3,14 +3,15 @@ SIZE=$(shell wc -l < "$(INVENTORY_FILE)" | awk '{print $$1}')
 ifeq (0,$(SIZE))
   SIZE = 1
 endif
-PROJECT_CONF=project.json
-SECRETS=$(shell jq '.secrets[]' $(PROJECT_CONF))
+PROJECT_CONF=project.yaml
+SECRETS=$(shell yq '.env_var.get[]' $(PROJECT_CONF))
 ENV_VARS=$(SECRETS)
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
-ENV_FILE=$(CURDIR)/.env
-TFSTATE_ENV_SUFFIX=$(shell jq -r '.terraform.tfstate.file_name_suffix.env_infra' $(PROJECT_CONF))
-TFSTATE_FILE_EXT=$(shell jq -r '.terraform.tfstate.file_extension' $(PROJECT_CONF))
-TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_FILE_EXT)
+REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
+ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
+ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
+TFSTATE_ENV_SUFFIX=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $(PROJECT_CONF))
+TFSTATE_EXT=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.default' $(PROJECT_CONF))
+TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_EXT)
 COMPOSE_DIR=./docker
 
 # approx 5 minutes
@@ -28,9 +29,11 @@ endif
 
 .PHONY: inventory
 inventory:
-	@rm -f $(INVENTORY_FILE)
-	@jq -r '.apps[] | select(.deploy==true) | .path' project.json | sort -r >> $(INVENTORY_FILE)
+	@bash scripts/create-inventory.sh
 	@echo "project inventory size: $$(wc -l < "$(INVENTORY_FILE)" | xargs)"
+
+list-env-vars:
+	@bash scripts/list-env-vars.sh
 
 size:
 	@$(MAKE) -s test-inv-file
@@ -62,7 +65,7 @@ install:
 	brew install libpq
 	brew link --force libpq
 	brew install golang-migrate
-	brew install jq
+	brew install yq
 	npm install -g eslint
 #   rust
 	curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
@@ -73,11 +76,20 @@ install:
 env-id:
 	(cd infrastructure/terraform/env-id; terraform init && terraform apply --auto-approve)
 
+delete-env-id:
+	(cd infrastructure/terraform/env-id; rm -rf .terraform*; rm terraform.tfstate)
+
+print-env-id:
+	@yq '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate
+
 build-dev:
 	bash scripts/build-dev-env.sh
 
 delete-dev:
 	bash scripts/delete-dev-env.sh
+
+delete-dev-state:
+	(cd infrastructure/terraform/aws/environments/dev; rm -rf .terraform* .tfplan*)
 
 init-dev:
 	bash scripts/terraform-init-dev.sh \
@@ -95,6 +107,9 @@ delete-iam:
 
 init:
 	go mod init github.com/systemaccounting/mxfactorial
+
+help:
+	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'
 
 ###################### docker ######################
 
@@ -201,7 +216,7 @@ endif
 
 get-secrets:
 	@$(MAKE) -s test-env-arg
-	@bash scripts/create-env.sh \
+	@bash scripts/create-env-file.sh \
 		--app-name root \
 		--env $(ENV) \
 		--region $(REGION)

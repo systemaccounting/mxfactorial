@@ -13,12 +13,14 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
+PROJECT_CONF=project.yaml
+APP_CONF_PATHS=($(source scripts/list-conf-paths.sh --type app))
 
-# https://stackoverflow.com/a/28617380
-DIRS_WITH_SECRETS=($(jq -r '.apps | with_entries(select(.value.secrets | length > 0)) | to_entries | .[].value.path' $PROJECT_CONFIG))
-
-for d in ${DIRS_WITH_SECRETS[@]}; do
-	echo "creating .env file in $d"
-	(cd $d; make get-secrets ENV=$ENV)
+for cp in "${APP_CONF_PATHS[@]}"; do
+	if [[ $(yq "$cp | has(\"env_var\")" $PROJECT_CONF) == 'true' ]]; then
+		if [[ $(yq "$cp.env_var | has(\"get\")" $PROJECT_CONF) == 'true' ]]; then
+			APP_DIR=$(yq "$cp | path | join(\"/\")" $PROJECT_CONF)
+			(cd $APP_DIR; make --no-print-directory get-secrets ENV=$ENV)
+		fi
+	fi
 done

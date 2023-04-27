@@ -1,24 +1,13 @@
 #!/bin/bash
 
-APP_OR_PKG_NAME=auto-confirm
+APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type app | grep --color=never auto-confirm)
 
-PROJECT_CONFIG=project.json
+TEST_ACCOUNTS_FILE=$(yq '.migrations.testseed.env_var.set.TEST_ACCOUNTS_FILE.default' project.yaml)
 
-# source commonly used functions
-source ./scripts/shared-error.sh
+ACCOUNT_LIST=($(grep 'insert into account (name, p' "$TEST_ACCOUNTS_FILE" | cut -d "'" -f 2))
 
-# set PROJECT_JSON_PROPERTY variable
-source ./scripts/shared-set-property.sh
-
-# set DIR_PATH variable
-source ./scripts/shared-set-dir-path.sh
-
-MIGRATION_FILE=$(jq -r '.cognito.test_accounts_file' "$PROJECT_CONFIG")
-
-ACCOUNT_LIST=($(grep 'insert into account (name, p' "$MIGRATION_FILE" | cut -d "'" -f 2))
-
-make -C "$DIR_PATH" get-secrets ENV=dev
+make -C "$APP_DIR_PATH" get-secrets ENV=dev
 
 for a in "${ACCOUNT_LIST[@]}"; do
-	make -C "$DIR_PATH" rmuser ACC="$a"
+	make -C "$APP_DIR_PATH" rmuser ACC="$a"
 done

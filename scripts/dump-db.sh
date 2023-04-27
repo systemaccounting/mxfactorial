@@ -20,9 +20,11 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
-DUMP_PATH=$(jq -r ".env_var.TESTSEED_DUMP_PATH.docker" $PROJECT_CONFIG)
-ENV_FILE=.env
+PROJECT_CONF=project.yaml
+DUMP_PATH=$(yq '.migrations.dumps.env_var.set.TESTSEED_DUMP_PATH.default' $PROJECT_CONF)
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
+ENV_FILE="$ENV_FILE_NAME"
+PG_CONF_PATH='.infrastructure.terraform.aws.modules.environment.env_var.set'
 
 if [[ $DUMP_RDS ]]; then
 	pushd migrations >/dev/null
@@ -34,10 +36,10 @@ if [[ $DUMP_RDS ]]; then
 	popd >/dev/null
 	pg_dump > "$DUMP_PATH"
 else
-	PGHOST=$(jq -r ".env_var.PGHOST.docker" $PROJECT_CONFIG) \
-	PGPORT=$(jq -r ".env_var.PGPORT.docker" $PROJECT_CONFIG) \
-	PGDATABASE=$(jq -r ".env_var.PGDATABASE.docker" $PROJECT_CONFIG) \
-	PGUSER=$(jq -r ".env_var.PGUSER.docker" $PROJECT_CONFIG) \
-	PGPASSWORD=$(jq -r ".env_var.PGPASSWORD.docker" $PROJECT_CONFIG) \
+	PGHOST=$(yq "$PG_CONF_PATH.PGHOST.default" $PROJECT_CONF) \
+	PGPORT=$(yq "$PG_CONF_PATH.PGPORT.default" $PROJECT_CONF) \
+	PGDATABASE=$(yq "$PG_CONF_PATH.PGDATABASE.default" $PROJECT_CONF) \
+	PGUSER=$(yq "$PG_CONF_PATH.PGUSER.default" $PROJECT_CONF) \
+	PGPASSWORD=$(yq "$PG_CONF_PATH.PGPASSWORD.default" $PROJECT_CONF) \
 		pg_dump > "$DUMP_PATH"
 fi

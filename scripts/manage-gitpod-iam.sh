@@ -14,10 +14,10 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONFIG=project.json
-REGION=$(jq -r '.region' $PROJECT_CONFIG)
-IAM_USER=$(jq -r '.gitpod.iam_user' $PROJECT_CONFIG)
-USER_POLICY_ARN=$(jq -r '.gitpod.user_policy_arn' $PROJECT_CONFIG)
+PROJECT_CONF=project.yaml
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+IAM_USER=$(yq '.scripts.env_var.set.IAM_USER.default' $PROJECT_CONF)
+USER_POLICY_ARN=$(yq '.scripts.env_var.set.USER_POLICY_ARN.default' $PROJECT_CONF)
 
 function new() {
     echo "creating $IAM_USER iam user with $USER_POLICY_ARN policy and access key"
@@ -27,8 +27,8 @@ function new() {
 
     ACCESS_KEY=$(aws iam create-access-key --user-name "$IAM_USER" --query 'AccessKey' --region "$REGION")
 
-    echo "AWS Access Key ID: $(echo $ACCESS_KEY | jq -cr .AccessKeyId)"
-    echo "AWS Secret Access Key: $(echo $ACCESS_KEY | jq -cr .SecretAccessKey)"
+    echo "AWS Access Key ID: $(echo $ACCESS_KEY | yq -I0 .AccessKeyId)"
+    echo "AWS Secret Access Key: $(echo $ACCESS_KEY | yq -I0 .SecretAccessKey)"
 }
 
 function delete() {
@@ -49,7 +49,7 @@ function delete() {
 
 if [[ "$NEW" -eq 1 ]]; then
     # test for current user
-    USER_COUNT=$(aws iam list-users --region "$REGION" --query "Users[?UserName==\`$IAM_USER\`]" | jq 'length')
+    USER_COUNT=$(aws iam list-users --region "$REGION" --query "Users[?UserName==\`$IAM_USER\`]" | yq 'length')
 
     # delete current user
     if [[ "$USER_COUNT" -gt 0 ]]; then

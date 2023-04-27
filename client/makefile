@@ -1,27 +1,22 @@
-APP_NAME=client
+APP_NAME=$(shell basename $(CURDIR))
 RELATIVE_PROJECT_ROOT_PATH=..
-PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-ORIGIN_BUCKET_PREFIX=$(shell jq -r '.client_origin_bucket_name_prefix' $(PROJECT_CONF))
-ifeq (prod,$(ENV))
-  ENV_ID=$(shell jq -r '.terraform.prod.env_id' $(PROJECT_CONF))
-else
-ifndef ENV_ID
-ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
-endif
-endif
-ORIGIN_BUCKET=$(ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
-ENABLE_AUTH=$(shell jq -r '.enable_api_auth' $(PROJECT_CONF))
-SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
+CLIENT_ORIGIN_BUCKET_PREFIX=$(shell yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.CLIENT_ORIGIN_BUCKET_PREFIX.default' $(PROJECT_CONF))
+ENV_ID=$(shell (cd $(RELATIVE_PROJECT_ROOT_PATH); ENV=$(ENV) PROJECT_CONF=$(PROJECT_CONF) . ./scripts/print-env-id.sh))
+ORIGIN_BUCKET=$(CLIENT_ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
+ENABLE_AUTH=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $(PROJECT_CONF))
+SSM_VERSION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $(PROJECT_CONF))
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
 BUILD_DIR=$(CURDIR)/build
 DEPS_DIR=$(CURDIR)/node_modules
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
-ENV_FILE=$(CURDIR)/.env
-PARAMS=$(shell jq -r '.apps.$(APP_NAME).params[]' $(PROJECT_CONF))
-SECRETS=$(shell jq -r '.apps.$(APP_NAME).secrets[]' $(PROJECT_CONF))
+REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
+ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
+ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
+PARAMS=$(shell yq '.["$(APP_NAME)"].params[]' $(PROJECT_CONF))
+SECRETS=$(shell yq '.["$(APP_NAME)"].env_var.get[]' $(PROJECT_CONF))
 ENV_VARS=$(PARAMS) $(SECRETS)
-GRAPHQL_URI=$(shell jq -r .env_var.GRAPHQL_URI.docker $(PROJECT_CONF))
+GRAPHQL_URI=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.GRAPHQL_URI.default' $(PROJECT_CONF))
 B64_GRAPHQL_URI=$(shell if [ `uname -s` == 'Darwin' ]; then printf $(GRAPHQL_URI) | base64; else printf $(GRAPHQL_URI) | base64 -w 0; fi)
 
 dev:
@@ -105,7 +100,7 @@ $(ENV_VARS):
 	@if [ $@ = ENABLE_AUTH ]; then \
 		echo "ENABLE_AUTH=$(ENABLE_AUTH)" >> $(ENV_FILE); \
 	else \
-		PARAM_NAME=$(shell jq -r ".env_var.$@.ssm" $(PROJECT_CONF)); \
+		PARAM_NAME=$(shell yq '... | select(has("$@")).$@.ssm' $(PROJECT_CONF)); \
 		ENV_VAR=$$(aws ssm get-parameter \
 			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
 			--query 'Parameter.Value' \
@@ -129,7 +124,7 @@ deploy:
 	$(MAKE) get-secrets
 	$(MAKE) build
 	$(MAKE) sync
-ifeq (true,$(shell jq -r '.terraform.aws.build_cache' $(PROJECT_CONF)))
+ifeq (true,$(shell yq '.scripts.env_var.set.BUILD_CACHE.default' $(PROJECT_CONF)))
 	$(MAKE) empty-cache
 endif
 

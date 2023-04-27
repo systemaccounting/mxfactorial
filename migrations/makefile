@@ -1,20 +1,17 @@
 SHELL=/bin/bash
 APP=mxfactorial
 RELATIVE_PROJECT_ROOT_PATH=..
-PROJECT_CONF_FILE_NAME=project.json
+PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-ifeq (prod,$(ENV))
-  ENV_ID=$(shell jq -r '.terraform.prod.env_id' $(PROJECT_CONF))
-else
-  ENV_ID=$(shell jq -r '.outputs.env_id.value' $(RELATIVE_PROJECT_ROOT_PATH)/infrastructure/terraform/env-id/terraform.tfstate)
-endif
-ENV_FILE=$(CURDIR)/.env
-SSM_VERSION=$(shell jq -r '.ssm_version' $(PROJECT_CONF))
+ENV_ID=$(shell (cd $(RELATIVE_PROJECT_ROOT_PATH); ENV=$(ENV) PROJECT_CONF=$(PROJECT_CONF) . ./scripts/print-env-id.sh))
+ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
+ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
+SSM_VERSION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $(PROJECT_CONF))
 GO_MIGRATE=github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 # migration lambda vars
 MIGRATION_LAMBDA_NAME=go-migrate-$(ENV_ID)-$(ENV)
-REGION=us-east-1
+REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
 
 RDS_ENV_VARS=DATABASE_TYPE \
 PGUSER \
@@ -23,12 +20,13 @@ PGHOST \
 PGPORT \
 PGDATABASE
 
+PG_CONF_PATH=.infrastructure.terraform.aws.modules.environment.env_var.set
 DATABASE_TYPE=postgres
-PGUSER=$(shell jq -r '.env_var.PGUSER.docker' $(PROJECT_CONF))
-PGPASSWORD=$(shell jq -r '.env_var.PGPASSWORD.docker' $(PROJECT_CONF))
-PGHOST=$(shell jq -r '.env_var.PGHOST.docker' $(PROJECT_CONF))
-PGPORT=$(shell jq -r '.env_var.PGPORT.docker' $(PROJECT_CONF))
-PGDATABASE=$(shell jq -r '.env_var.PGDATABASE.docker' $(PROJECT_CONF))
+PGHOST=$(shell yq "$(PG_CONF_PATH).PGHOST.default" $(PROJECT_CONF))
+PGPORT=$(shell yq "$(PG_CONF_PATH).PGPORT.default" $(PROJECT_CONF))
+PGDATABASE=$(shell yq "$(PG_CONF_PATH).PGDATABASE.default" $(PROJECT_CONF))
+PGUSER=$(shell yq "$(PG_CONF_PATH).PGUSER.default" $(PROJECT_CONF))
+PGPASSWORD=$(shell yq "$(PG_CONF_PATH).PGPASSWORD.default" $(PROJECT_CONF))
 CONTAINER_PORT=$(PGPORT)
 
 MIGRATIONS_CONN=$(DATABASE_TYPE)://$(PGUSER):$(PGPASSWORD)@$(PGHOST):$(PGPORT)/$(PGDATABASE)?sslmode=disable&x-migrations-table=migration_$(DIR)_version
@@ -47,7 +45,8 @@ run:
 		up \
 		-d \
 		--renew-anon-volumes \
-		--force-recreate --build
+		--force-recreate \
+		--build
 
 up:
 	@$(MAKE) run
@@ -306,7 +305,7 @@ $(RDS_ENV_VARS):
 	@if [ $@ = DATABASE_TYPE ]; then \
 		echo DATABASE_TYPE=$(DATABASE_TYPE) >> $(ENV_FILE); \
 	else \
-		PARAM_NAME=$(shell jq -r ".env_var.$@.ssm" $(PROJECT_CONF)); \
+		PARAM_NAME=$(shell yq '... | select(has("$@")).$@.ssm' $(PROJECT_CONF)); \
 		ENV_VAR=$$(aws ssm get-parameter \
 			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
 			--query 'Parameter.Value' \

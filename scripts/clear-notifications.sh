@@ -21,7 +21,7 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-ENV_FILE_NAME='.env'
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' project.yaml)
 ENV_FILE="$DIR_PATH/$ENV_FILE_NAME"
 
 # test for .env file availability
@@ -64,8 +64,9 @@ done
 # remove trailing comma
 IDS_TO_CLEAR=${IDS_TO_CLEAR%?}
 
-WEBSOCKET_MESSAGE=$(jq \
-	-rc \
+WEBSOCKET_MESSAGE=$(yq \
+	-I0 \
+	-o=json \
 	".token = \"$ID_TOKEN\" | .notification_ids = [$IDS_TO_CLEAR]" \
 	$TEMPLATE_JSON_PATH)
 

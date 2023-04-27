@@ -21,7 +21,7 @@ fi
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        --env) ENVIRONMENT="$2"; shift ;;
+        --env) ENV="$2"; shift ;;
         --initial) INITIAL='initial-' ;;
         --services-only) INVENTORY_LIST=$(cat inventory | grep services/) ;;
 		# for convenience, not currently referenced in makefiles
@@ -50,7 +50,7 @@ for app_dir in $INVENTORY_LIST; do
 	DEPLOY_START_TIME=$(date +%s)
 	DEPLOY_START_LAPSE=$(($DEPLOY_START_TIME - $SCRIPT_START_TIME))
 	echo "*** starting $MAKE_CMD of $app_dir after $(printf '%02dh:%02dm:%02ds\n' $(($DEPLOY_START_LAPSE/3600)) $(($DEPLOY_START_LAPSE%3600/60)) $(($DEPLOY_START_LAPSE%60)))"
-	(cd $app_dir; make $MAKE_CMD ENV=$ENVIRONMENT)
+	(cd $app_dir; make --no-print-directory $MAKE_CMD ENV=$ENV)
 done
 
 # store script exec end time

@@ -2,12 +2,14 @@ locals {
   APP              = "mxfactorial"
   ENV              = "dev"
   APP_ENV          = "${local.APP}-${local.ENV}"
-  PROJECT_JSON     = jsondecode(file("../../../../../project.json"))
-  ORIGIN_PREFIX    = local.PROJECT_JSON.client_origin_bucket_name_prefix
-  ARTIFACTS_PREFIX = local.PROJECT_JSON.artifacts_bucket_name_prefix
-  TFSTATE_PREFIX   = local.PROJECT_JSON.tfstate_bucket_name_prefix
-  RDS_PREFIX       = local.PROJECT_JSON.terraform.aws.rds.instance_name_prefix
-  REGION           = local.PROJECT_JSON.region
+  PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
+  STORAGE_ENV_VAR = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
+  ORIGIN_PREFIX    = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
+  ARTIFACTS_PREFIX = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
+  TFSTATE_PREFIX   = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
+  INFRA_ENV_VAR    = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
+  RDS_PREFIX       = local.INFRA_ENV_VAR.RDS_PREFIX.default
+  REGION           = local.INFRA_ENV_VAR.REGION.default
   ENV_ID           = jsondecode(file("../../../env-id/terraform.tfstate")).outputs.env_id.value
   ID_ENV           = "${local.ENV_ID}-${local.ENV}"
 }
@@ -35,12 +37,12 @@ module "dev" {
   env                   = local.ENV
   artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ID_ENV}"
   env_id                = local.ENV_ID
-  build_db              = local.PROJECT_JSON.terraform.aws.build_db    // false during terraform development
-  build_cache           = local.PROJECT_JSON.terraform.aws.build_cache // false during terraform development
+  build_db              = local.PROJECT_CONF.scripts.env_var.set.BUILD_DB.default    // false during terraform development
+  build_cache           = local.PROJECT_CONF.scripts.env_var.set.BUILD_CACHE.default // false during terraform development
 
   ############### ssm ###############
 
-  ssm_prefix = "${local.ENV_ID}/${local.PROJECT_JSON.ssm_version}/${local.ENV}"
+  ssm_prefix = "${local.ENV_ID}/${local.INFRA_ENV_VAR.SSM_VERSION.default}/${local.ENV}"
 
   ############### lambda ###############
 
@@ -54,14 +56,14 @@ module "dev" {
 
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
-  rds_parameter_group             = "default.postgres13"
+  rds_parameter_group             = "default.postgres14"
   rds_instance_name               = "${local.RDS_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
 
   ############### api gateway ###############
 
   // change graphql_deployment_version when switching
-  enable_api_auth = local.PROJECT_JSON.enable_api_auth
+  enable_api_auth = local.INFRA_ENV_VAR.ENABLE_API_AUTH.default
 
   // change value to deploy api
   graphql_deployment_version     = 1
@@ -72,7 +74,7 @@ module "dev" {
 
   ############### notifications ###############
 
-  enable_notifications = local.PROJECT_JSON.enable_notifications
+  enable_notifications = local.INFRA_ENV_VAR.ENABLE_NOTIFICATIONS.default
 
   ############### client ###############
 

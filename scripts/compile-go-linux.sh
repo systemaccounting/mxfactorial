@@ -13,11 +13,14 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONF=project.json
-APP_PATH=$(jq -r ".apps.\"$APP_NAME\".path" $PROJECT_CONF)
-BINARY_FILE_NAME=$(jq -r ".apps.\"$APP_NAME\".executable_name" $PROJECT_CONF)
-BUILD_SRC_PATH=$(jq -r ".apps.\"$APP_NAME\".build_src_path" $PROJECT_CONF)
+PROJECT_CONF=project.yaml
 
-cd $APP_PATH
+APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type app | grep --color=never "$APP_NAME")
+APP_CONF_PATH=$(source scripts/list-conf-paths.sh --type app | grep --color=never "$APP_NAME")
 
-GOOS=linux go build -o $BINARY_FILE_NAME ./$BUILD_SRC_PATH
+BINARY_NAME=$(yq '.services.env_var.set.BINARY_NAME.default' $PROJECT_CONF)
+BUILD_SRC_PATH=$(yq "$APP_CONF_PATH.build_src_path" $PROJECT_CONF)
+
+cd $APP_DIR_PATH
+
+GOOS=linux CGO_ENABLED=0 go build -o $BINARY_NAME ./$BUILD_SRC_PATH

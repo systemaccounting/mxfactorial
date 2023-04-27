@@ -1,24 +1,6 @@
-APP_NAME=notifications-get
-CMD_DIR=$(CURDIR)/cmd
-ARTIFACT_NAME=$(APP_NAME)-src.zip
-RELATIVE_PROJECT_ROOT_PATH=../..
-PROJECT_CONF_FILE_NAME=project.json
-PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-DIR_PATH=$(shell jq -r ".apps.\"$(APP_NAME)\".path" $(PROJECT_CONF))
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
-EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
-ENV_FILE=$(CURDIR)/.env
-
-DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
-PGUSER=test \
-PGPASSWORD=test \
-PGHOST=localhost \
-PGPORT=5432
-
-test-env-arg:
-ifndef ENV
-	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
-endif
+RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | grep project.yaml | wc -l | xargs) -eq 0 ]; do REL_PATH="$$REL_PATH./.."; done; printf '%s' "$$REL_PATH")
+include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
+include $(RELATIVE_PROJECT_ROOT_PATH)/make/go.mk
 
 test-username-arg:
 ifndef ACCT
@@ -42,138 +24,24 @@ run:
 		eval $$(cat $(ENV_FILE)) \
 		go run $(CMD_DIR)
 
-###################### dependencies ######################
-
-install:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/download-go-mod.sh
-
-###################### build ######################
-
-build:
-	@$(MAKE) -s clean
-	$(MAKE) install
-	$(MAKE) compile
-	$(MAKE) zip
-
-compile:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/compile-go-linux.sh \
-		--app-name $(APP_NAME)
-
-zip:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/zip-executable.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME) \
-		--executable-name $(EXECUTABLE_NAME)
-
-###################### clean ######################
-
-clean:
-	$(MAKE) clean-binary
-	$(MAKE) clean-artifact
-	$(MAKE) clean-log
-
-clean-binary:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/clean-binary.sh \
-		--app-name $(APP_NAME) \
-		--binary-name $(EXECUTABLE_NAME)
-
-clean-artifact:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/clean-artifact.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME)
-
-clean-log:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/clean-invoke-log.sh \
-		--app-name $(APP_NAME)
-
-###################### secrets ######################
-
-test-env-file:
-ifeq (,$(wildcard $(ENV_FILE)))
-	$(error no .env file, run 'make get-secrets ENV=dev')
-endif
-
-clean-env:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/clean-env.sh \
-		--app-name $(APP_NAME)
-
-get-secrets:
-	@$(MAKE) -s test-env-arg
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/create-env.sh \
-		--app-name $(APP_NAME) \
-		--env $(ENV) \
-		--region $(REGION)
-
 save-id-token:
 	@$(MAKE) -s test-username-arg
 	@$(MAKE) -s test-password-arg
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/save-id-token.sh \
-		--dir-path $(DIR_PATH) \
+		--dir-path $(SUB_PATH) \
 		--username $(ACCT) \
 		--password $(PASS) \
 		--region $(REGION)
 
-###################### notifications ######################
-
 get:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/get-notifications.sh \
-		--dir-path $(DIR_PATH)
+		--dir-path $(SUB_PATH)
 
 clear:
 	@$(MAKE) -s test-ids-arg
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/clear-notifications.sh \
-		--dir-path $(DIR_PATH) \
+		--dir-path $(SUB_PATH) \
 		--ids '$(IDS)'
-
-###################### deploy ######################
-
-put-object:
-	@$(MAKE) -s test-env-arg
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/put-object.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
-
-update-function:
-	@$(MAKE) -s test-env-arg
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/update-function.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
-
-initial-deploy:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) build
-	$(MAKE) put-object
-
-deploy:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) build
-	$(MAKE) put-object
-	$(MAKE) update-function
-
-deploy-only:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) put-object
-	$(MAKE) update-function
-
-now:
-	@$(MAKE) -s clean
-	$(MAKE) compile
-	$(MAKE) zip
-	$(MAKE) deploy-only ENV=dev

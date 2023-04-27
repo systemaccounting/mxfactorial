@@ -1,17 +1,18 @@
 locals {
-  PROJECT_JSON          = jsondecode(file("../../../../../project.json"))
-  DDB_TABLE_NAME_PREFIX = local.PROJECT_JSON.github_workflows.dynamodb_table.name_prefix
-  DDB_TABLE_HASH_KEY    = local.PROJECT_JSON.github_workflows.dynamodb_table.hash_key
+  PROJECT_CONF          = yamldecode(file("../../../../../project.yaml"))
+  STORAGE_ENV_VAR       = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
+  DDB_TABLE_NAME_PREFIX = local.STORAGE_ENV_VAR.DDB_TABLE_NAME_PREFIX.default
+  DDB_TABLE_HASH_KEY    = local.STORAGE_ENV_VAR.DDB_TABLE_HASH_KEY.default
 }
 
 // avoids dependency on github workflow job outputs when sharing values
 resource "aws_dynamodb_table" "github_workflows" {
-  name         = "${var.ddb_table_name_prefix}-${local.ID_ENV}"
+  name         = "${local.DDB_TABLE_NAME_PREFIX}-${local.ID_ENV}"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = var.ddb_table_hash_key
+  hash_key     = local.DDB_TABLE_HASH_KEY
 
   attribute {
-    name = var.ddb_table_hash_key
+    name = local.DDB_TABLE_HASH_KEY
     type = "S"
   }
 

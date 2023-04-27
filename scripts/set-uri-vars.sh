@@ -2,12 +2,12 @@
 
 # sourced in other scripts
 
-PROJECT_CONFIG=project.json
+PROJECT_CONF=project.yaml
 
 HOST=http://localhost
-
-CLIENT_PORT=$(jq -r .env_var.CLIENT_URI.docker $PROJECT_CONFIG | sed 's/http:\/\/localhost://')
-GRAPHQL_PORT=$(jq -r .env_var.GRAPHQL_URI.docker $PROJECT_CONFIG | sed 's/http:\/\/localhost://')
+CLIENT_PORT=$(yq '.client.env_var.set.CLIENT_URI.default' $PROJECT_CONF | sed 's/http:\/\/localhost://')
+ENV_VAR_PATH='.infrastructure.terraform.aws.modules.environment.env_var.set'
+GRAPHQL_PORT=$(yq "$ENV_VAR_PATH.GRAPHQL_URI.default" $PROJECT_CONF | sed 's/http:\/\/localhost://')
 
 CLIENT_URI="$HOST:$CLIENT_PORT"
 GRAPHQL_URI="$HOST:$GRAPHQL_PORT"
@@ -24,7 +24,7 @@ if [[ $CODESPACES ]]; then
 fi
 
 if [[ $(uname -s) == "Darwin" ]]; then
-  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64)
+  	B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64)
 else
-  B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64 -w 0)
+  	B64_GRAPHQL_URI=$(printf "$GRAPHQL_URI" | base64 -w 0)
 fi

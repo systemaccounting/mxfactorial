@@ -1,16 +1,8 @@
-APP_NAME=rule
-ARTIFACT_NAME=$(APP_NAME)-src.zip
-RELATIVE_PROJECT_ROOT_PATH=../..
-PROJECT_CONF_FILE_NAME=project.json
-PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-EXECUTABLE_NAME=$(shell jq -r ".apps.\"$(APP_NAME)\".executable_name" $(PROJECT_CONF))
-REGION=$(shell jq -r ".region" $(PROJECT_CONF))
-APP_PATH=$(shell jq -r ".apps.\"$(APP_NAME)\".path" $(PROJECT_CONF))
-ENV_FILE=.env
-CARGO_BUILD_DIR=target
-LAMBDA_TARGET=x86_64-unknown-linux-musl
-RELEASE_DIR=$(CARGO_BUILD_DIR)/$(LAMBDA_TARGET)/release
-DOCKER_URL=$(shell jq -r ".env_var.RULE_URL.docker" $(PROJECT_CONF))
+RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | grep project.yaml | wc -l | xargs) -eq 0 ]; do REL_PATH="$$REL_PATH./.."; done; printf '%s' "$$REL_PATH")
+include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
+include $(RELATIVE_PROJECT_ROOT_PATH)/make/rust.mk
+
+DOCKER_URL=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.RULE_URL.default' $(PROJECT_CONF))
 
 TEST_DATA_FILE=preRuleTrItems.json
 TEST_DATA_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata
@@ -44,161 +36,22 @@ run:
 		READINESS_CHECK_PATH=/healthz cargo run -p $(APP_NAME)
 
 water:
-	@REQ=$$(jq -c . $(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/bottledWater.json); \
+	@REQ=$$(yq -I0 $(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/bottledWater.json); \
 		curl -d "$$REQ" -H 'Content-Type: application/json' http://0.0.0.0:8081 \
-		| jq .
+		| yq -o=json
 
-###################### test ######################
-
-test:
-	$(MAKE) test-lint
-	$(MAKE) test-unit
-	$(MAKE) -C '../..' test-compose-up
-
-test-unit:
-	cargo test
-
-test-lint:
-	cargo clippy
-
-lint:
-	$(MAKE) test-lint
-
-###################### build ######################
-
-build:
-	@$(MAKE) -S clean
-	$(MAKE) compile
-	$(MAKE) zip
-
-compile:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	cross build \
-		--manifest-path=$(APP_PATH)/Cargo.toml \
-		--target $(LAMBDA_TARGET) \
-		--release
-
-zip:
-	@cp $(RELATIVE_PROJECT_ROOT_PATH)/$(RELEASE_DIR)/$(APP_NAME) $(EXECUTABLE_NAME)
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/zip-executable.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME) \
-		--executable-name $(EXECUTABLE_NAME)
-
-###################### clean ######################
-
-clean:
-	$(MAKE) clean-build
-	$(MAKE) clean-artifact
-	$(MAKE) clean-log
-
-clean-artifact:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/clean-artifact.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME)
-
-clean-build:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	cargo clean -p $(APP_NAME)
-
-clean-log:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/clean-invoke-log.sh \
-		--app-name $(APP_NAME)
-
-###################### secrets ######################
-
-test-env-file:
-ifeq (,$(wildcard $(ENV_FILE)))
-	$(error no .env file, run 'make get-secrets ENV=dev')
-endif
-
-clean-env:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/clean-env.sh \
-		--app-name $(APP_NAME)
-
-get-secrets:
-	@$(MAKE) -s test-env-arg
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/create-env.sh \
-		--app-name $(APP_NAME) \
-		--env $(ENV) \
-		--region $(REGION)
-
-###################### deploy ######################
-
-put-object:
-	@$(MAKE) -s test-env-arg
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/put-object.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
-
-update-function:
-	@$(MAKE) -s test-env-arg
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/update-function.sh \
-		--app-name $(APP_NAME) \
-		--artifact-name $(ARTIFACT_NAME) \
-        --env $(ENV) \
-        --region $(REGION)
-
-initial-deploy:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) build
-	$(MAKE) put-object
-
-deploy:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) build
-	$(MAKE) put-object
-	$(MAKE) update-function
-
-deploy-only:
-	@$(MAKE) -s test-env-arg
-	$(MAKE) put-object
-	$(MAKE) update-function
-
-now:
-	@$(MAKE) -s clean
-	$(MAKE) compile
-	$(MAKE) zip
-	$(MAKE) deploy-only ENV=dev
 
 ###################### invoke ######################
 
-invoke:
-	@$(MAKE) invoke-url
-
-invoke-url:
-	@$(MAKE) -s test-env-arg
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/invoke-function-url.sh \
-		--app-name $(APP_NAME) \
-		--payload $(TEST_EVENT) \
-        --env $(ENV) \
-        --region $(REGION)
-
 invoke-docker:
-	@curl -s -H 'Content-Type: application/json' -d $(TEST_EVENT) $(DOCKER_URL) | jq .
+	@curl -s -H 'Content-Type: application/json' -d $(TEST_EVENT) $(DOCKER_URL) | yq -o=json
 
 demo-docker:
 	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
-	@echo $(TEST_EVENT) | jq .
+	@echo $(TEST_EVENT) | yq -o=json
 	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
 	@$(MAKE) invoke-docker
 
-###################### make tests ######################
-
-test-env-arg:
-ifndef ENV
-	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
-endif
 
 ###################### docker ######################
 

@@ -229,18 +229,16 @@ func testLengthEquality(rule, client []preTestItem) error {
 }
 
 func testItemEquality(rule, client []preTestItem) error {
-	diff := rule
+	diff := make([]preTestItem, len(rule))
+	copy(diff, rule)
 	// avoid sort
-	for _, v := range rule {
-		for _, w := range client {
-			if v == w {
-				for k, x := range diff {
-					if w == x {
-						// 155.905µs of looping tested with 6 items
-						// todo: load test
-						// https://stackoverflow.com/a/37359662
-						diff[k] = diff[len(diff)-1]
-						diff = diff[:len(diff)-1]
+	for _, r := range rule {
+		for _, c := range client {
+			if r == c {
+				for i, d := range diff {
+					if c == d {
+						diff = append(diff[:i], diff[i+1:]...)
+						break
 					}
 				}
 			}

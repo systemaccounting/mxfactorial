@@ -6,13 +6,20 @@ set -e
 CYAN='\033[0;36m'
 NOCOLOR='\033[0m'
 
-ENVIRONMENT=dev
-PROJECT_CONFIG=project.json
-REGION=$(jq -r '.region' $PROJECT_CONFIG)
-IAM_USER=$(jq -r '.gitpod.iam_user' $PROJECT_CONFIG)
+ENV=dev
+PROJECT_CONF=project.yaml
+REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+IAM_USER=$(yq '.scripts.env_var.set.IAM_USER.default' $PROJECT_CONF)
 TFSTATE_ENV_ID=infrastructure/terraform/env-id/terraform.tfstate
 TFSTATE_INIT_DEV=infrastructure/terraform/aws/environments/init-dev/terraform.tfstate
-TFSTATE_DEV=infrastructure/terraform/aws/environments/dev/terraform.tfstate
+DEV_ENV_DIR=infrastructure/terraform/aws/environments/dev
+TFSTATE_DEV="$DEV_ENV_DIR/.terraform/terraform.tfstate"
+
+if [[ -f $TFSTATE_DEV ]]; then
+  DEV_DEPLOYED=$(cd $DEV_ENV_DIR; terraform state pull | yq '.resources | length > 0')
+  echo $DEV_DEPLOYED
+fi
+exit 0
 
 aws configure set default.region "$REGION"
 
@@ -22,19 +29,24 @@ function build_env() {
 }
 
 # exit when previously built env available
-if [[ -f "$TFSTATE_ENV_ID" ]] && [[ $(jq '.resources | length > 0' "$TFSTATE_ENV_ID") == "true" ]]; then
-  ENV_ID=$(jq -r '.outputs.env_id.value' "$TFSTATE_ENV_ID")
+if [[ -f $TFSTATE_ENV_ID ]] && [[ $(yq '.resources | length > 0' $TFSTATE_ENV_ID) == "true" ]]; then
+  ENV_ID=$(yq '.outputs.env_id.value' $TFSTATE_ENV_ID)
 
-  if [[ -f "$TFSTATE_INIT_DEV" ]] && [[ $(jq '.resources | length > 0' "$TFSTATE_INIT_DEV") == "true" ]]; then
+  if [[ -f $TFSTATE_INIT_DEV ]] && [[ $(yq '.resources | length > 0' $TFSTATE_INIT_DEV) == "true" ]]; then
 
-    if [[ -f "$TFSTATE_DEV" ]] && [[ $(jq '.resources | length > 0' "$TFSTATE_DEV") == "true" ]]; then
+    if [[ -f $TFSTATE_DEV ]]; then
 
-      echo "found previously built ${ENV_ID}-${ENVIRONMENT} env"
+      DEV_DEPLOYED=$(cd $DEV_ENV_DIR; terraform state pull | yq '.resources | length > 0')
 
-      aws configure
+      if [[ $DEV_DEPLOYED == 'true' ]]; then
 
-      exit 0
+        echo "found previously built ${ENV_ID}-${ENV} env"
 
+        aws configure
+
+        exit 0
+
+      fi
     fi
   fi
 fi
