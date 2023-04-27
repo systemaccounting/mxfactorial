@@ -1,0 +1,697 @@
+.github:
+  codecov:
+    flags:
+      - unittest
+      - integration
+      - ui
+client:
+  runtime: v8
+  type: app
+  deploy: true
+  env_var:
+    set:
+      CLIENT_URI:
+        ssm: client/uri
+        default: http://localhost:8090
+    get:
+      - POOL_ID
+      - CLIENT_ID
+      - GRAPHQL_URI
+  params:
+    - ENABLE_AUTH
+docker:
+  env_var:
+    set:
+      DOCKER_USER:
+        ssm: null
+        default: mxfactorial
+infrastructure:
+  terraform:
+    env_var:
+      set:
+        TFSTATE_EXT:
+          ssm: null
+          default: tfstate
+        TFSTATE_ENV_SUFFIX:
+          ssm: null
+          default: env_infra
+    env-id:
+      prod:
+        env_var:
+          set:
+            PROD_ENV_ID:
+              ssm: null
+              default: 0
+    aws:
+      environments:
+        region:
+          env_var:
+            set:
+              TFSTATE_APIGW_SUFFIX:
+                ssm: null
+                default: apigw_logging
+      modules:
+        environment:
+          env_var:
+            set:
+              NOTIFY_TOPIC_ARN:
+                ssm: notifications/sns/topic/arn
+                default: null
+              PGDATABASE:
+                ssm: database/sql/postgres/pgdatabase
+                default: mxfactorial
+              PGUSER:
+                ssm: database/sql/postgres/pguser
+                default: test
+              PGPASSWORD:
+                ssm: database/sql/postgres/pgpassword
+                default: test
+              PGHOST:
+                ssm: database/sql/postgres/pghost
+                default: localhost
+              PGPORT:
+                ssm: database/sql/postgres/pgport
+                default: 5432
+              CLIENT_ID:
+                ssm: auth/cognito/client_id
+                default: null
+              POOL_ID:
+                ssm: auth/cognito/pool_id
+                default: null
+              APIGW_CONNECTIONS_URI:
+                ssm: api/websocket/connections/uri
+                default: null
+              COGNITO_JWKS_URI:
+                ssm: auth/cognito/jwks/uri
+                default: null
+              NOTIFICATIONS_RETURN_LIMIT:
+                ssm: notifications/return_limit
+                default: null
+              SECRET:
+                ssm: auth/cognito/test_account/secret
+                default: null
+              WEBSOCKET_CLIENT_URI:
+                ssm: api/websocket/client/uri
+                default: null
+              ENABLE_API_AUTH:
+                ssm: null
+                default: false
+              ENABLE_NOTIFICATIONS:
+                ssm: null
+                default: false
+              DB_RESET_PASSPHRASE:
+                ssm: tool/lambda/db_reset/passphrase
+                default: null
+              REGION:
+                ssm: null
+                default: us-east-1
+              RDS_PREFIX:
+                ssm: null
+                default: mxfactorial
+              SSM_VERSION:
+                ssm: null
+                default: v1
+              GRAPHQL_URI:
+                ssm: api/graphql/uri
+                default: http://localhost:8080
+              REQUEST_CREATE_URL:
+                ssm: service/lambda/request_create/url
+                default: http://localhost:8082
+              REQUEST_APPROVE_URL:
+                ssm: service/lambda/request_approve/url
+                default: http://localhost:8083
+              RULE_URL:
+                ssm: service/lambda/rule/url
+                default: http://localhost:8081
+              REQUEST_BY_ID_URL:
+                ssm: service/lambda/request_by_id/url
+                default: http://localhost:8087
+              REQUESTS_BY_ACCOUNT_URL:
+                ssm: service/lambda/requests_by_account/url
+                default: http://localhost:8086
+              TRANSACTION_BY_ID_URL:
+                ssm: service/lambda/transaction_by_id/url
+                default: http://localhost:8089
+              TRANSACTIONS_BY_ACCOUNT_URL:
+                ssm: service/lambda/transactions_by_account/url
+                default: http://localhost:8088
+              BALANCE_BY_ACCOUNT_URL:
+                ssm: service/lambda/balance_by_account/url
+                default: http://localhost:8085
+              RDS_INSTANCE_NAME_PREFIX:
+                ssm: null
+                default: mxfactorial
+              GO_MIGRATE_LAYER_PREFIX:
+                ssm: null
+                default: go-migrate-provided-deps
+        project-storage:
+          env_var:
+            set:
+              DDB_TABLE_NAME_PREFIX:
+                ssm: null
+                default: github-workflows
+              DDB_TABLE_HASH_KEY:
+                ssm: null
+                default: GithubSha
+              DDB_TABLE_TTL_ATTR:
+                ssm: null
+                default: ttl
+              DYNAMODB_TTL_DAYS:
+                ssm: null
+                default: 1
+              DDB_TABLE_PENDING_TESTS_ATTR:
+                ssm: null
+                default: PendingTests
+              ARTIFACTS_BUCKET_PREFIX:
+                ssm: null
+                default: mxfactorial-artifacts
+              CLIENT_ORIGIN_BUCKET_PREFIX:
+                ssm: null
+                default: mxfactorial-client
+              TFSTATE_BUCKET_PREFIX:
+                ssm: null
+                default: mxfactorial-tfstate
+migrations:
+  db-reset:
+    type: app
+    deploy: true
+    env_var:
+      set:
+        DB_RESET_SCRIPT_NAME:
+          ssm: null
+          default: index.sh
+  dumps:
+    env_var:
+      set:
+        TESTSEED_DUMP_PATH:
+          ssm: null
+          default: ./migrations/dumps/testseed.sql
+  go-migrate:
+    type: app
+    deploy: true
+    env_var:
+      set:
+        GO_MIGRATE_DOCKER_REPOSITORY:
+          ssm: null
+          default: go-migrate-lambda-layer
+        GO_MIGRATE_SCRIPT_NAME:
+          ssm: null
+          default: index.sh
+  testseed:
+    env_var:
+      set:
+        TEST_ACCOUNTS_FILE:
+          ssm: null
+          default: ./migrations/testseed/000001_accounts.up.sql
+scripts:
+  env_var:
+    set:
+      IAM_USER:
+        ssm: null
+        default: mxgitpod
+      USER_POLICY_ARN:
+        ssm: null
+        default: arn:aws:iam::aws:policy/AdministratorAccess
+      COMPOSE_DIR:
+        ssm: null
+        default: ./docker
+      BUILD_DB:
+        ssm: null
+        default: true
+      BUILD_CACHE:
+        ssm: null
+        default: true
+      TEST_ACCOUNTS_MIGRATION_FILE:
+        ssm: null
+        default: ./migrations/testseed/000001_accounts.up.sql
+      GO_MOCK_PACKAGE_NAME_PREFIX:
+        ssm: null
+        default: mock
+      GO_MOCK_FILE_NAME_SUFFIX:
+        ssm: null
+        default: mock.go
+services:
+  env_var:
+    set:
+      BINARY_NAME:
+        ssm: null
+        default: index.handler
+      LAMBDA_INVOKE_LOG:
+        ssm: null
+        default: invoke.log
+  graphql:
+    runtime: go1.x
+    type: app
+    params:
+      - AWS_REGION
+    deploy: true
+    build_src_path: .
+    dependents:
+      - request-create
+      - request-approve
+      - rule
+      - request-by-id
+      - requests-by-account
+      - transaction-by-id
+      - transactions-by-account
+      - balance-by-account
+      - client
+    env_var:
+      set:
+        GRAPHQL_PORT:
+          ssm: null
+          default: 8080
+      get:
+        - GRAPHQL_URI
+        - RULE_URL
+        - REQUEST_CREATE_URL
+        - REQUEST_APPROVE_URL
+        - REQUEST_BY_ID_URL
+        - REQUESTS_BY_ACCOUNT_URL
+        - TRANSACTIONS_BY_ACCOUNT_URL
+        - TRANSACTION_BY_ID_URL
+        - BALANCE_BY_ACCOUNT_URL
+        - READINESS_CHECK_PATH
+  request-create:
+    runtime: go1.x
+    type: app
+    params:
+      - AWS_REGION
+      - ENABLE_NOTIFICATIONS
+    deploy: true
+    build_src_path: cmd
+    dependents:
+      - request-approve
+    env_var:
+      set:
+        REQUEST_CREATE_PORT:
+          ssm: null
+          default: 8082
+      get:
+        - NOTIFY_TOPIC_ARN
+        - READINESS_CHECK_PATH
+        - REQUEST_CREATE_URL
+        - RULE_URL
+  request-approve:
+    runtime: go1.x
+    type: app
+    params:
+      - AWS_REGION
+      - ENABLE_NOTIFICATIONS
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      set:
+        REQUEST_APPROVE_PORT:
+          ssm: null
+          default: 8083
+      get:
+        - NOTIFY_TOPIC_ARN
+        - READINESS_CHECK_PATH
+        - REQUEST_APPROVE_URL
+  rule:
+    runtime: provided.al2
+    type: app
+    params:
+      - AWS_REGION
+    deploy: true
+    build_src_path: null
+    dependents:
+      - request-create
+    env_var:
+      set:
+        RULE_PORT:
+          ssm: null
+          default: 8081
+        READINESS_CHECK_PATH:
+          ssm: service/lambda/readiness_check_path
+          default: null
+      get:
+        - PGDATABASE
+        - PGUSER
+        - PGPASSWORD
+        - PGHOST
+        - PGPORT
+        - CLIENT_ID
+        - POOL_ID
+        - GRAPHQL_URI
+        - RULE_URL
+        - READINESS_CHECK_PATH
+  request-by-id:
+    runtime: go1.x
+    type: app
+    params: []
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      set:
+        REQUEST_BY_ID_PORT:
+          ssm: null
+          default: 8087
+      get:
+        - REQUEST_BY_ID_URL
+  requests-by-account:
+    runtime: go1.x
+    type: app
+    params: []
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      set:
+        REQUESTS_BY_ACCOUNT_PORT:
+          ssm:
+          default: 8086
+      get:
+        - REQUESTS_BY_ACCOUNT_URL
+  transaction-by-id:
+    runtime: go1.x
+    type: app
+    params: []
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      set:
+        TRANSACTION_BY_ID_PORT:
+          ssm: null
+          default: 8089
+      get:
+        - TRANSACTION_BY_ID_URL
+  transactions-by-account:
+    runtime: go1.x
+    type: app
+    params: []
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      set:
+        TRANSACTIONS_BY_ACCOUNT_PORT:
+          ssm: null
+          default: 8088
+      get:
+        - TRANSACTIONS_BY_ACCOUNT_URL
+  notifications-send:
+    runtime: go1.x
+    type: app
+    params:
+      - AWS_REGION
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      get:
+        - NOTIFY_TOPIC_ARN
+        - APIGW_CONNECTIONS_URI
+  notifications-get:
+    runtime: go1.x
+    type: app
+    params:
+      - AWS_REGION
+      - ENABLE_API_AUTH
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      get:
+        - COGNITO_JWKS_URI
+        - NOTIFICATIONS_RETURN_LIMIT
+        - CLIENT_ID
+        - SECRET
+        - WEBSOCKET_CLIENT_URI
+  notifications-clear:
+    runtime: go1.x
+    type: app
+    params:
+      - AWS_REGION
+      - ENABLE_API_AUTH
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      get:
+        - COGNITO_JWKS_URI
+        - CLIENT_ID
+        - WEBSOCKET_CLIENT_URI
+  balance-by-account:
+    runtime: go1.x
+    type: app
+    params: []
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      set:
+        BALANCE_BY_ACCOUNT_PORT:
+          ssm: null
+          default: 8085
+      get:
+        - BALANCE_BY_ACCOUNT_URL
+  wss-connect:
+    runtime: go1.x
+    type: app
+    secrets: []
+    params: []
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      get: []
+  auto-confirm:
+    runtime: go1.x
+    type: app
+    params: []
+    deploy: true
+    build_src_path: cmd
+    dependents: []
+    env_var:
+      get:
+        - POOL_ID
+        - CLIENT_ID
+test:
+  runtime: nodejs18.x
+  type: tool
+  deploy: false
+  env_var:
+    get:
+      - GRAPHQL_URI
+      - RULE_URL
+      - REQUEST_CREATE_URL
+      - REQUEST_APPROVE_URL
+      - REQUEST_BY_ID_URL
+      - REQUESTS_BY_ACCOUNT_URL
+      - TRANSACTIONS_BY_ACCOUNT_URL
+      - TRANSACTION_BY_ID_URL
+      - BALANCE_BY_ACCOUNT_URL
+  params: []
+pkg:
+  lambda:
+    runtime: go1.x
+    type: lib
+    path: pkg/aws/lambda
+    dependents: []
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/aws/lambda:
+        - IAWSLambda
+        - ILambdaService
+  service:
+    runtime: go1.x
+    type: lib
+    path: pkg/service
+    dependents:
+      - request-create
+      - request-approve
+      - request-by-id
+      - requests-by-account
+      - transaction-by-id
+      - transactions-by-account
+      - notifications-send
+      - notifications-get
+      - notifications-clear
+      - balance-by-account
+      - wss-connect
+      - auto-confirm
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/service:
+        - IAccountService
+        - IApproveService
+        - IBalanceService
+        - ICreateAccountService
+        - ITransactionNotificationService
+        - IProfileService
+        - IRuleInstanceService
+        - ITransactionService
+        - IWebsocketService
+  postgres:
+    runtime: go1.x
+    type: lib
+    path: pkg/postgres
+    dependents:
+      - service
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/postgres:
+        - SQLDB
+      github.com/jackc/pgx/v4:
+        - Rows
+        - Row
+  sqls:
+    runtime: go1.x
+    type: lib
+    path: pkg/sqls
+    dependents:
+      - postgres
+  testdata:
+    runtime: go1.x
+    type: lib
+    path: pkg/testdata
+    dependents: []
+  print:
+    runtime: go1.x
+    type: lib
+    path: pkg/print
+    dependents: []
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/print:
+        - Marshaler
+  types:
+    runtime: go1.x
+    type: lib
+    path: pkg/types
+    dependents:
+      - testdata
+      - postgres
+      - service
+      - tools
+      - sqls
+      - lambdasdk
+      - request-create
+      - request-approve
+      - request-by-id
+      - requests-by-account
+      - transaction-by-id
+      - transactions-by-account
+      - notifications-send
+      - notifications-get
+      - notifications-clear
+      - balance-by-account
+      - wss-connect
+      - auto-confirm
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/types:
+        - TrItemListHelper
+        - IScanRow
+        - IScanRows
+        - IEncodingJSON
+  sns:
+    runtime: go1.x
+    type: lib
+    path: pkg/aws/sns
+    dependents:
+      - notifications-send
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/aws/sns:
+        - ISNS
+  apigwma:
+    runtime: go1.x
+    type: lib
+    path: pkg/aws/apigwma
+    dependents: []
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/aws/apigwma:
+        - IAWSAPIGWMA
+  cognitoidp:
+    runtime: go1.x
+    type: lib
+    path: pkg/aws/cognitoidp
+    dependents: []
+    mocked_interfaces:
+      github.com/systemaccounting/mxfactorial/pkg/aws/cognitoidp:
+        - IJwtDeps
+        - IGetClaimedKeyID
+        - IIdpDeps
+        - IJwToken
+env_var:
+  set:
+    ENV_FILE_NAME:
+      ssm: null
+      default: .env
+  get:
+    - CLIENT_URI
+    - GRAPHQL_URI
+# .tools as list to support sequenced install scripting
+.tools:
+  - name: docker
+    os:
+      osx:
+        install: 'if ! command docker -v >/dev/null 2>&1; then echo -e "\033[1;33minstall docker from https://docs.docker.com/desktop/install/mac-install/ before continuing\033[0m"; exit 1; fi'
+  - name: brew
+    os:
+      osx:
+        install: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+  - name: go
+    os:
+      osx:
+        install: 'brew install go'
+  - name: gqlgen
+    os:
+      osx:
+        install: 'go install github.com/99designs/gqlgen@latest'
+  - name: mockgen
+    os:
+      osx:
+        install: 'go install github.com/golang/mock/mockgen@latest'
+  - name: node
+    os:
+      osx:
+        install: 'brew install node'
+  - name: awscli
+    os:
+      osx:
+        install: 'brew install awscli'
+  - name: tfswitch
+    os:
+      osx:
+        install: 'brew install warrensbox/tap/tfswitch'
+  - name: tfswitch
+    os:
+      osx:
+        install: 'brew install warrensbox/tap/tfswitch'
+  - name: libpq
+    os:
+      osx:
+        install: 'brew install libpq && brew link --force libpq'
+  - name: golang-migrate
+    os:
+      osx:
+        install: 'brew install golang-migrate'
+    env_var:
+      set:
+        MOCK_FILE_SUFFIX:
+          ssm: null
+          default: mock.go
+        MOCK_PACKAGE_PREFIX:
+          ssm: null
+          default: mock
+  - name: yq
+    os:
+      osx:
+        install: 'brew install yq'
+  - name: eslint
+    os:
+      osx:
+        install: 'npm install -g eslint'
+  - name: rust
+    os:
+      osx:
+        install: "curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh"
+  - name: cross
+    os:
+      osx:
+        install: 'cargo install cross --git https://github.com/cross-rs/cross'
+  - name: cargo-watch
+    os:
+      osx:
+        install: 'cargo install cargo-watch'
