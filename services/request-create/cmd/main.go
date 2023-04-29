@@ -89,14 +89,14 @@ func testValues(
 	ctx context.Context,
 	e *types.IntraTransaction,
 	rulesServiceConstructor func(url string) IRulesService,
-) (*types.IntraTransaction, string, types.Role, error) {
+) (*types.IntraTransaction, types.Role, error) {
 
 	if e.AuthAccount == "" {
-		return nil, "", types.Role(0), errors.New("missing auth_account. exiting")
+		return nil, types.Role(0), errors.New("missing auth_account. exiting")
 	}
 
 	if e.Transaction == nil {
-		return nil, "", types.Role(0), errors.New("missing transaction. exiting")
+		return nil, types.Role(0), errors.New("missing transaction. exiting")
 	}
 
 	// match author_role from items to authenticated account
@@ -104,7 +104,7 @@ func testValues(
 	authorRole, err := e.Transaction.GetAuthorRole(e.AuthAccount)
 	if err != nil {
 		log.Printf("GetAuthorRole error: %v\n", err)
-		return nil, "", types.Role(0), err
+		return nil, types.Role(0), err
 	}
 
 	// overwrite transaction author role with authenticated role
@@ -126,7 +126,7 @@ func testValues(
 	rulesService := rulesServiceConstructor(ruleUrl)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
-		return nil, "", types.Role(0), err
+		return nil, types.Role(0), err
 	}
 
 	// reproduce rules service response
@@ -135,12 +135,8 @@ func testValues(
 		nonRuleClientItems,
 	)
 	if err != nil {
-		return nil, "", types.Role(0), err
+		return nil, types.Role(0), err
 	}
-
-	// add authenticated values to rule tested transaction
-	ruleTested.Transaction.Author = &e.AuthAccount
-	ruleTested.Transaction.AuthorRole = &role
 
 	// reduce items to simple structure and
 	// relevant values for equality testing
@@ -148,20 +144,24 @@ func testValues(
 	rulePreEqualityTest := testPrep(ruleTested.Transaction.TransactionItems)
 
 	// test length equality between client and rule tested items
-	err = testLengthEquality(rulePreEqualityTest, clientPreEqualityTest)
+	err = testLengthEquality(clientPreEqualityTest, rulePreEqualityTest)
 	if err != nil {
-		return nil, "", types.Role(0), err
+		return nil, types.Role(0), err
 	}
 
 	// test item equality between client and rule tested items
-	err = testItemEquality(rulePreEqualityTest, clientPreEqualityTest)
+	err = testItemEquality(clientPreEqualityTest, rulePreEqualityTest)
 	if err != nil {
-		return nil, "", types.Role(0), err
+		return nil, types.Role(0), err
 	}
 
-	log.Print("client items equal to rules")
+	log.Print("client request equal to rule response")
 
-	return ruleTested, e.AuthAccount, authorRole, nil
+	// add authenticated values to rule tested transaction
+	ruleTested.Transaction.Author = &e.AuthAccount
+	ruleTested.Transaction.AuthorRole = &role
+
+	return ruleTested, authorRole, nil
 }
 
 // simplifies transaction items before testing their
@@ -218,34 +218,28 @@ func nilBool(b *bool) bool {
 	return *b
 }
 
-func testLengthEquality(rule, client []preTestItem) error {
-	ruleLength := len(rule)
+func testLengthEquality(client, rule []preTestItem) error {
 	clientLength := len(client)
-	if ruleLength != clientLength {
+	ruleLength := len(rule)
+	if clientLength != ruleLength {
 		var errMsg error = fmt.Errorf("client item count not equal to rule, %d vs %d", clientLength, ruleLength)
 		return errMsg
 	}
 	return nil
 }
 
-func testItemEquality(rule, client []preTestItem) error {
-	diff := make([]preTestItem, len(rule))
-	copy(diff, rule)
+func testItemEquality(client, rule []preTestItem) error {
 	// avoid sort
-	for _, r := range rule {
-		for _, c := range client {
+	for _, c := range client {
+		for i, r := range rule {
 			if r == c {
-				for i, d := range diff {
-					if c == d {
-						diff = append(diff[:i], diff[i+1:]...)
-						break
-					}
-				}
+				rule = append(rule[:i], rule[i+1:]...)
+				break
 			}
 		}
 	}
-	if len(diff) > 0 {
-		return fmt.Errorf("different rule items received: %+v", diff)
+	if len(rule) > 0 {
+		return fmt.Errorf("client missing: %+v", rule)
 	}
 	return nil
 }
@@ -284,7 +278,7 @@ func createRequest(
 	return rcs.t.GetTransactionWithTrItemsAndApprovalsByID(*trID)
 }
 
-func run(
+func handleEvent(
 	ctx context.Context,
 	e *types.IntraTransaction,
 	dbConnector func(context.Context, string) (SQLDB, error),
@@ -294,7 +288,7 @@ func run(
 ) (string, error) {
 
 	// delay connecting to db until after client values tested
-	ruleTested, authAccount, authRole, err := testValues(ctx, e, rulesServiceConstructor)
+	ruleTested, authRole, err := testValues(ctx, e, rulesServiceConstructor)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return "", err
@@ -335,30 +329,13 @@ func run(
 	// 4. notify approvers
 	return apprService.Approve(
 		ctx,
-		authAccount,
+		e.AuthAccount,
 		authRole,
 		request,
 		notifyTopicArn,
 	)
 }
 
-// handleEvent wraps run with interface args for testability
-func handleEvent(
-	ctx context.Context,
-	e *types.IntraTransaction,
-) (string, error) {
-
-	return run(
-		ctx,
-		e,
-		newIDB,
-		newRequestCreateService,
-		newApproveService,
-		newRulesService,
-	)
-}
-
-// BEGIN: enables lambdaFn unit testing
 func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
 	return postgres.NewDB(ctx, dsn)
 }
@@ -391,8 +368,6 @@ func newApproveService(idb SQLDB) (IApproveService, error) {
 	return service.NewApproveService(db), nil
 }
 
-// END: enables lambdaFn unit testing
-
 func main() {
 
 	r := gin.Default()
@@ -408,7 +383,14 @@ func main() {
 
 		c.BindJSON(&intraTransaction)
 
-		resp, err := handleEvent(c.Request.Context(), intraTransaction)
+		resp, err := handleEvent(
+			c.Request.Context(),
+			intraTransaction,
+			newIDB,
+			newRequestCreateService,
+			newApproveService,
+			newRulesService,
+		)
 		if err != nil {
 			c.Status(http.StatusBadRequest)
 		}
