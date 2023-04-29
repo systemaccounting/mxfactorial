@@ -204,6 +204,9 @@ dump-testseed:
 restore-testseed:
 	@$(MAKE) -C ./migrations/dumps restore-testseed
 
+insert:
+	@$(MAKE) -C ./migrations insert
+
 ###################### secrets ######################
 
 clean-env:
