@@ -9,7 +9,7 @@
 		"storage": "32gb"
 	},
 	"updateContentCommand": "make compose-build",
-	"postCreateCommand": "bash ./scripts/setup-codespace.sh",
+	"postCreateCommand": "bash ./scripts/post-create-cmd.sh",
 	"features": {
 		"ghcr.io/devcontainers/features/rust:1": "latest"
 	},

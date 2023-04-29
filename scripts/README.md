@@ -252,9 +252,9 @@ sets `CLIENT_URI`, `GRAPHQL_URI` and `B64_GRAPHQL_URI` vars when sourced in othe
 
 rebuilds client image when the `B64_GRAPHQL_URI` var requires setting by a new devcontainer (gitpod, codespaces)
 
-##### `setup-codespace.sh`
+##### `post-create-cmd.sh`
 
-runs as [postCreateCommand](https://containers.dev/implementors/json_reference/) in codespace devcontainer
+runs as [postCreateCommand](https://containers.dev/implementors/json_reference/) in devcontainer
 
 ##### `post-rules.sh`
 
