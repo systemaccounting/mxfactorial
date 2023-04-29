@@ -67,7 +67,7 @@ resetdocker:
 	@TABLE_COUNT=$$(psql \
 		-At "host=$(PGHOST) port=$(CONTAINER_PORT) user=$(PGUSER) password=$(PGPASSWORD) dbname=$(PGDATABASE)" \
 		-tc "select count(*) from information_schema.tables where table_schema = 'public';"); \
-	if [[ "$$TABLE_COUNT" -gt 3 ]]; then \
+	if [ "$$TABLE_COUNT" -gt 3 ]; then \
 		echo "***down migrating docker"; \
 		$(MAKE) downdocker DB=test; \
 		$(MAKE) dropdocker DB=test; \
@@ -107,7 +107,7 @@ resetrds:
 	@while read -r i; do export "$$i"; done < $(ENV_FILE); \
 	TABLE_COUNT=$$(psql \
 		-tc "select count(*) from information_schema.tables where table_schema = 'public';"); \
-	if [[ "$$TABLE_COUNT" -gt 3 ]]; then \
+	if [ "$$TABLE_COUNT" -gt 3 ]; then \
 		echo "***down migrating rds"; \
 		$(MAKE) downrds DB=test; \
 		$(MAKE) droprds DB=test; \
