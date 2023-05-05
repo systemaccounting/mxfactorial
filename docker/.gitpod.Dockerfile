@@ -4,6 +4,7 @@ ARG TF_VERSION=1.2.7
 
 RUN go install github.com/99designs/gqlgen@latest && \
 	go install github.com/golang/mock/mockgen@latest && \
+	go install github.com/mikefarah/yq/v4@latest && \
 	curl -fSsl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
 	unzip -qq awscliv2.zip && \
 	sudo ./aws/install --update && \
@@ -16,5 +17,7 @@ RUN go install github.com/99designs/gqlgen@latest && \
 	brew link --force libpq && \
 	brew install golang-migrate && \
 	npm install -g eslint && \
+	npx playwright install-deps && \
+	(cd client; npx playwright install) && \
 	cargo install cross --git https://github.com/cross-rs/cross && \
 	cargo install cargo-watch

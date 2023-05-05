@@ -55,6 +55,9 @@ install:
 
 ###################### test ######################
 
+install-sys-deps:
+	npx playwright install-deps
+
 install-browsers:
 	npx playwright install
 
