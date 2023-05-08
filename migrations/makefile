@@ -40,19 +40,30 @@ test_down = testseed $(prod_down)
 
 # postgres docker
 run:
-	docker compose \
-		-f ../docker/compose.bitnami-postgres.yaml \
-		up \
-		-d \
-		--renew-anon-volumes \
-		--force-recreate \
-		--build
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose \
+			-f ../docker/compose.bitnami-postgres.yaml \
+			up \
+			-d \
+			--renew-anon-volumes \
+			--force-recreate \
+			--build
+
+reset:
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose \
+			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.bitnami-postgres.yaml \
+			up \
+			-d \
+			--renew-anon-volumes \
+			--force-recreate
 
 up:
 	@$(MAKE) run
 
 down:
-	docker compose -f ../docker/compose.bitnami-postgres.yaml down
+	docker compose \
+		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.bitnami-postgres.yaml down
 
 stop:
 	@$(MAKE) down

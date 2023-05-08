@@ -129,13 +129,10 @@ compose-down:
 	bash scripts/compose.sh --down
 
 rebuild-db:
-	@COMPOSE_IGNORE_ORPHANS=true \
-		docker compose \
-		-f ./docker/compose.bitnami-postgres.yaml \
-		up \
-		-d \
-		--force-recreate \
-		--renew-anon-volumes
+	@$(MAKE) -C migrations run
+
+reset-db:
+	@$(MAKE) -C migrations reset
 
 rebuild-rule:
 	@bash scripts/rebuild-service.sh --name rule
