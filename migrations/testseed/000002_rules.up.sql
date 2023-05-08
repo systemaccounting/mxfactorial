@@ -13,6 +13,3 @@ insert into rule_instance (rule_type, rule_name, rule_instance_name, account_rol
 -- GroceryCo ApproveAllGroceryCoCredit rule_instance
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approval', 'approveAnyCreditItem', 'ApproveAllGroceryCoCredit', 'creditor', 'MiriamLevy', '{ "GroceryCo", "creditor", "MiriamLevy" }');
 insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approval', 'approveAnyCreditItem', 'ApproveAllGroceryCoCredit', 'creditor', 'IgorPetrov', '{ "GroceryCo", "creditor", "IgorPetrov" }');
-
--- GroceryStore ApproveAllGroceryCoCredit rule_instance
-insert into rule_instance (rule_type, rule_name, rule_instance_name, account_role, account_name, variable_values) values ('approval', 'approveAnyCreditItem', 'ApproveAllGroceryStoreCredit', 'creditor', 'GroceryStore', '{ "GroceryStore", "creditor", "GroceryStore" }');
