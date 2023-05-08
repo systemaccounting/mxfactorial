@@ -72,8 +72,12 @@ BEGIN
 		WHERE transaction_id = tr_id AND account_name = acct_name AND account_role = acct_role AND approval_time IS NULL
 		RETURNING *
 	LOOP
-		IF apprvl.account_name = acct_name AND apprvl.account_role = acct_role THEN
-			UPDATE transaction_item SET debitor_approval_time = apprvl_time WHERE id = apprvl.transaction_item_id;
+		IF apprvl.account_name = acct_name THEN
+      IF apprvl.account_role = 'debitor' THEN
+			  UPDATE transaction_item SET debitor_approval_time = apprvl_time WHERE id = apprvl.transaction_item_id;
+      ELSE
+        UPDATE transaction_item SET creditor_approval_time = apprvl_time WHERE id = apprvl.transaction_item_id;
+      END IF;
 		END IF;
 	END LOOP;
 	FOR apprvl IN SELECT approval_time FROM approval WHERE transaction_id = tr_id
