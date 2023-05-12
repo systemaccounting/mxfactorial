@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -15,6 +16,7 @@ import (
 
 var (
 	readinessCheckPath string = os.Getenv("READINESS_CHECK_PATH")
+	port                      = os.Getenv("GRAPHQL_PORT")
 	rootRoute                 = "/"
 	queryRoute                = rootRoute + "query"
 )
@@ -71,5 +73,5 @@ func main() {
 
 	r.GET(rootRoute, playgroundHandler())
 
-	r.Run()
+	r.Run(fmt.Sprintf(":%s", port))
 }

@@ -34,6 +34,7 @@ var (
 		pgDatabase)
 	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
 	ruleUrl            = os.Getenv("RULE_URL")
+	port               = os.Getenv("REQUEST_CREATE_PORT")
 )
 
 type SQLDB interface {
@@ -398,5 +399,5 @@ func main() {
 		c.String(http.StatusOK, resp)
 	})
 
-	r.Run()
+	r.Run(fmt.Sprintf(":%s", port))
 }
