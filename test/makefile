@@ -21,6 +21,7 @@ test-compose-up:
 	if ! [ -d node_modules ]; then npm install; fi; npm run test:up
 
 test-docker:
+	@$(MAKE) --no-print-directory get-secrets ENV=local
 	if ! [ -d node_modules ]; then npm install; fi; npm run test:docker
 
 test-cloud:
