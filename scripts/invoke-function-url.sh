@@ -47,4 +47,4 @@ fi
 
 ENV_VAR_VAL=$(grep "$ENV_VAR_NAME" "$ENV_FILE" | cut -d '=' -f2)
 
-awscurl -XPOST --service lambda -d "$PAYLOAD" -H 'Content-Type: application/json' "$ENV_VAR_VAL" | yq -o=json -P .
+awscurl -XPOST --service lambda -d "$PAYLOAD" -H 'Content-Type: application/json' "$ENV_VAR_VAL" | yq -o=json

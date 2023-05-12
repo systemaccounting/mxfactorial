@@ -1,7 +1,5 @@
 FROM mxfactorial/go-base:v1 as builder
 
-EXPOSE 8080
-
 COPY . .
 
 WORKDIR /app/services/balance-by-account
@@ -13,5 +11,7 @@ FROM golang:alpine
 WORKDIR /app
 
 COPY --from=builder /app/services/balance-by-account/balance-by-account .
+
+EXPOSE 10004
 
 CMD ["/app/balance-by-account"]

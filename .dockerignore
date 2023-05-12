@@ -6,3 +6,4 @@
 client/public/build
 migrations/dumps/testseed.sql
 target
+nohup.out

@@ -28,11 +28,17 @@ clean-build:
 	cargo clean
 
 compile:
+	if ! command -v cross --version &> /dev/null; then cargo install cross --git https://github.com/cross-rs/cross; fi
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	cross build \
 		--manifest-path=$(SUB_PATH)/Cargo.toml \
 		--target $(LAMBDA_TARGET) \
 		--release
+
+compile-dev:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	cargo build \
+		--manifest-path=$(SUB_PATH)/Cargo.toml
 
 zip:
 	@cp $(RELATIVE_PROJECT_ROOT_PATH)/$(RELEASE_DIR)/$(APP_NAME) $(EXECUTABLE_NAME)

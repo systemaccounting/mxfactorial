@@ -1,7 +1,5 @@
 FROM mxfactorial/go-base:v1 as builder
 
-EXPOSE 8080
-
 COPY . .
 
 WORKDIR /app/services/transaction-by-id
@@ -13,5 +11,7 @@ FROM golang:alpine
 WORKDIR /app
 
 COPY --from=builder /app/services/transaction-by-id/transaction-by-id .
+
+EXPOSE 10007
 
 CMD ["/app/transaction-by-id"]

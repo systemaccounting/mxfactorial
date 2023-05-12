@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: ./docker/dev/rule.Dockerfile
     ports:
-      - "8081:8080"
+      - "10001:10001"
     environment:
       PGDATABASE: mxfactorial
       PGUSER: test
@@ -17,5 +17,6 @@ services:
       PG_CONN_TIMEOUT: 500
       READINESS_CHECK_PATH: /healthz
       RUST_LOG: info
+      RULE_PORT: 10001
     depends_on:
       - postgres

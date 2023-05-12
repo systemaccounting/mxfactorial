@@ -4,10 +4,11 @@
 
 PROJECT_CONF=project.yaml
 
-HOST=http://localhost
-CLIENT_PORT=$(yq '.client.env_var.set.CLIENT_URI.default' $PROJECT_CONF | sed 's/http:\/\/localhost://')
-ENV_VAR_PATH='.infrastructure.terraform.aws.modules.environment.env_var.set'
-GRAPHQL_PORT=$(yq "$ENV_VAR_PATH.GRAPHQL_URI.default" $PROJECT_CONF | sed 's/http:\/\/localhost://')
+LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)
+HOST="http://$LOCAL_ADDRESS"
+
+CLIENT_PORT=$(yq '.client.env_var.set.CLIENT_PORT.default' $PROJECT_CONF)
+GRAPHQL_PORT=$(yq '.services.graphql.env_var.set.GRAPHQL_PORT.default' $PROJECT_CONF)
 
 CLIENT_URI="$HOST:$CLIENT_PORT"
 GRAPHQL_URI="$HOST:$GRAPHQL_PORT"

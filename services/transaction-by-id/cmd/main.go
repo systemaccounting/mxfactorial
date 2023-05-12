@@ -27,6 +27,7 @@ var (
 		os.Getenv("PGPASSWORD"),
 		os.Getenv("PGDATABASE"))
 	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
+	port               = os.Getenv("TRANSACTION_BY_ID_PORT")
 )
 
 type SQLDB interface {
@@ -178,5 +179,5 @@ func main() {
 		c.String(http.StatusOK, resp)
 	})
 
-	r.Run()
+	r.Run(fmt.Sprintf(":%s", port))
 }

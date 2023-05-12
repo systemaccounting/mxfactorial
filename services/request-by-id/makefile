@@ -2,13 +2,14 @@ RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | gr
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/go.mk
 
+REQUEST_BY_ID_PORT=$(shell yq '.services["$(APP_NAME)"].env_var.set.REQUEST_BY_ID_PORT.default' $(PROJECT_CONF))
+REQUEST_BY_ID_URL=$(HOST):$(REQUEST_BY_ID_PORT)
+
 TEST_ACCOUNT=JacobWebb
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_TRANSACTION_ID=1
 TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","id":"$(TEST_TRANSACTION_ID)"}'
 TEST_SENDER_ACCOUNT=$(TEST_ACCOUNT)
-
-DOCKER_URL=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REQUEST_BY_ID_URL.default' $(PROJECT_CONF))
 
 run:
 	@$(DOCKER_ENV_VARS) \
@@ -16,10 +17,10 @@ run:
 		go run ./cmd/main.go
 
 invoke-docker:
-	@curl -s -d $(TEST_EVENT) $(DOCKER_URL) | yq -o=json
+	@curl -s -d $(TEST_EVENT) $(REQUEST_BY_ID_URL) | yq -o=json
 
 demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@printf "*** request to %s service at %s\n" $(APP_NAME) $(REQUEST_BY_ID_URL)
 	@echo $(TEST_EVENT) | yq -o=json
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@printf "*** response from %s service at %s\n" $(APP_NAME) $(REQUEST_BY_ID_URL)
 	@$(MAKE) invoke-docker

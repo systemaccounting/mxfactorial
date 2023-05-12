@@ -1,11 +1,15 @@
 locals {
-  ID_ENV             = "${var.env_id}-${var.env}"
-  TITLED_ID_ENV      = replace(title(local.ID_ENV), "-", "")
-  SPACED_ID_ENV      = replace(local.ID_ENV, "-", " ")
-  SERVICE_NAME_TITLE = replace(title(var.service_name), "-", "")
-  SERVICE_NAME_UPPER = replace(upper(var.service_name), "-", "_")
-  SERVICE_NAME_LOWER = replace(var.service_name, "-", "_")
-  LOG_GROUP_NAME     = "/aws/lambda/${aws_lambda_function.default.function_name}"
+  ID_ENV                    = "${var.env_id}-${var.env}"
+  TITLED_ID_ENV             = replace(title(local.ID_ENV), "-", "")
+  SPACED_ID_ENV             = replace(local.ID_ENV, "-", " ")
+  SERVICE_NAME_TITLE        = replace(title(var.service_name), "-", "")
+  SERVICE_NAME_UPPER        = replace(upper(var.service_name), "-", "_")
+  SERVICE_NAME_LOWER        = replace(var.service_name, "-", "_")
+  LOG_GROUP_NAME            = "/aws/lambda/${aws_lambda_function.default.function_name}"
+  PROJECT_CONF              = yamldecode(file("../../../../../project.yaml"))
+  WEB_ADAPTER_CONF          = local.PROJECT_CONF.infrastructure.terraform.aws.modules.web-adapter-lambda
+  READINESS_CHECK_PATH      = local.WEB_ADAPTER_CONF.env_var.set.READINESS_CHECK_PATH.default
+  WEB_ADAPTER_LAYER_VERSION = local.WEB_ADAPTER_CONF.env_var.set.WEB_ADAPTER_LAYER_VERSION.default
 }
 
 data "aws_s3_object" "default" {
@@ -31,14 +35,16 @@ resource "aws_lambda_function" "default" {
   environment {
     variables = merge(
       {
-        READINESS_CHECK_PATH = "/healthz"
+        READINESS_CHECK_PATH               = local.READINESS_CHECK_PATH
+        PORT                               = var.aws_lwa_port
+        "${local.SERVICE_NAME_UPPER}_PORT" = var.aws_lwa_port
       },
       var.env_vars,
     )
   }
 
   layers = [
-    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${var.web_adapter_layer_version}"
+    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${local.WEB_ADAPTER_LAYER_VERSION}"
   ]
 }
 

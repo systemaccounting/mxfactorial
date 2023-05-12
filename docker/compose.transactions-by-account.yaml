@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: ./docker/dev/transactions-by-account.Dockerfile
     ports:
-      - "8088:8080"
+      - "10008:10008"
     environment:
       PGDATABASE: mxfactorial
       PGUSER: test
@@ -17,5 +17,6 @@ services:
       PG_CONN_TIMEOUT: 500
       READINESS_CHECK_PATH: /healthz
       RETURN_RECORD_LIMIT: 20
+      TRANSACTIONS_BY_ACCOUNT_PORT: 10008
     depends_on:
       - postgres

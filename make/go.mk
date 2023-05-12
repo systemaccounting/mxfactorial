@@ -1,7 +1,12 @@
 # requires include shared.mk
-
 APP_CONF_PATH=$(shell cd $(RELATIVE_PROJECT_ROOT_PATH); . ./scripts/list-conf-paths.sh --type app | grep --color=never -E "$(APP_NAME)$$|$(APP_NAME)\"]$$")
 CMD_DIR=$(CURDIR)/$(shell yq '$(APP_CONF_PATH).build_src_path' $(PROJECT_CONF))
+WATCH=$(CMD_DIR)
+RUN=$(CMD_DIR)
+
+dev:
+	@$(MAKE) -s get-secrets ENV=local
+	nohup cargo watch -w $(WATCH) --env-file $(ENV_FILE) -s 'go run $(RUN)' >> $(NOHUP_LOG) &
 
 install:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \

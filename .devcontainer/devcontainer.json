@@ -46,47 +46,47 @@
 		}
 	},
 	"forwardPorts": [
-		8080,
-		8090
+		10000,
+		10009
 	],
 	"portsAttributes": {
-		"8080": {
+		"10000": {
 			"label": "graphql",
 			"onAutoForward": "silent"
 		},
-		"8081": {
+		"10001": {
 			"label": "rule",
 			"onAutoForward": "silent"
 		},
-		"8082": {
+		"10002": {
 			"label": "request-create",
 			"onAutoForward": "silent"
 		},
-		"8083": {
+		"10003": {
 			"label": "request-approve",
 			"onAutoForward": "silent"
 		},
-		"8085": {
+		"10004": {
 			"label": "balance-by-account",
 			"onAutoForward": "silent"
 		},
-		"8086": {
+		"10006": {
 			"label": "requests-by-account",
 			"onAutoForward": "silent"
 		},
-		"8087": {
+		"10005": {
 			"label": "request-by-id",
 			"onAutoForward": "silent"
 		},
-		"8088": {
+		"10008": {
 			"label": "transactions-by-account",
 			"onAutoForward": "silent"
 		},
-		"8089": {
+		"10007": {
 			"label": "transaction-by-id",
 			"onAutoForward": "silent"
 		},
-		"8090": {
+		"10009": {
 			"label": "client",
 			"onAutoForward": "silent"
 		},

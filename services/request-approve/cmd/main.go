@@ -34,6 +34,7 @@ var (
 		pgDatabase)
 	errReqValsMissing  error = errors.New("required values missing. exiting")
 	readinessCheckPath       = os.Getenv("READINESS_CHECK_PATH")
+	port                     = os.Getenv("REQUEST_APPROVE_PORT")
 )
 
 type SQLDB interface {
@@ -193,5 +194,5 @@ func main() {
 		c.String(http.StatusOK, resp)
 	})
 
-	r.Run()
+	r.Run(fmt.Sprintf(":%s", port))
 }

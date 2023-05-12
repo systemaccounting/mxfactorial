@@ -1,6 +1,8 @@
 FROM mcr.microsoft.com/devcontainers/universal:2
 
 ARG TF_VERSION=1.2.7
+ARG MIGRATE_VERSION=4.15.2
+ARG WATCH_VERSION=8.4.0
 
 RUN go install github.com/99designs/gqlgen@latest && \
 	go install github.com/golang/mock/mockgen@latest && \
@@ -14,12 +16,16 @@ RUN go install github.com/99designs/gqlgen@latest && \
 	unzip terraform_${TF_VERSION}_linux_amd64.zip && \
 	sudo mv terraform /usr/local/bin && \
 	rm terraform_${TF_VERSION}_linux_amd64.zip && \
+	wget https://github.com/watchexec/cargo-watch/releases/download/v${WATCH_VERSION}/cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu.tar.xz && \
+	tar -xf cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu.tar.xz && \
+	sudo mv cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu/cargo-watch /usr/local/bin && \
+	rm -rf cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu* && \
 	npm install -g eslint && \
 	sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
 	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && \
 	sudo apt-get update && \
 	sudo apt-get install --yes --no-install-recommends \
 	postgresql-client && \
-	curl -LO https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.deb && \
+	curl -LO https://github.com/golang-migrate/migrate/releases/download/v${MIGRATE_VERSION}/migrate.linux-amd64.deb && \
 	sudo dpkg -i migrate.linux-amd64.deb && \
 	rm migrate.linux-amd64.deb

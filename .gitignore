@@ -12,7 +12,8 @@ infrastructure/terraform/aws/environments/region/.terraform*
 infrastructure/terraform/aws/environments/init-dev/.terraform*
 infrastructure/terraform/aws/environments/dev/.terraform*
 
-## react
+## linux
+nohup.out
 
 # testing
 **/coverage

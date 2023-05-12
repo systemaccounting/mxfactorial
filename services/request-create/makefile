@@ -2,7 +2,8 @@ RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | gr
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/go.mk
 
-DOCKER_URL=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REQUEST_CREATE_URL.default' $(PROJECT_CONF))
+REQUEST_CREATE_PORT=$(shell yq '.services["$(APP_NAME)"].env_var.set.REQUEST_CREATE_PORT.default' $(PROJECT_CONF))
+REQUEST_CREATE_URL=$(HOST):$(REQUEST_CREATE_PORT)
 
 TEST_DATA_FILE=transNoAppr.json
 TEST_DATA_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata
@@ -15,10 +16,10 @@ run:
 		go run $(CMD_DIR)
 
 invoke-docker:
-	@curl -s -d $(TEST_EVENT) $(DOCKER_URL) | yq -o=json
+	@curl -s -d $(TEST_EVENT) $(REQUEST_CREATE_URL) | yq -o=json
 
 demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@printf "*** request to %s service at %s\n" $(APP_NAME) $(REQUEST_CREATE_URL)
 	@yq -o=json $(TEST_DATA_DIR)/$(TEST_DATA_FILE)
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@printf "*** response from %s service at %s\n" $(APP_NAME) $(REQUEST_CREATE_URL)
 	@$(MAKE) invoke-docker

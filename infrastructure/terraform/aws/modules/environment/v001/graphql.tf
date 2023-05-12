@@ -28,11 +28,13 @@ resource "aws_lambda_function" "graphql" {
       TRANSACTIONS_BY_ACCOUNT_URL = module.transactions_by_account.lambda_function_url
       TRANSACTION_BY_ID_URL       = module.transaction_by_id.lambda_function_url
       BALANCE_BY_ACCOUNT_URL      = module.balance_by_account.lambda_function_url
-      READINESS_CHECK_PATH        = "/healthz"
+      READINESS_CHECK_PATH        = local.READINESS_CHECK_PATH
+      PORT                        = local.GRAPHQL_PORT
+      GRAPHQL_PORT                = local.GRAPHQL_PORT
     }
   }
   layers = [
-    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${var.web_adapter_layer_version}"
+    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${local.WEB_ADAPTER_LAYER_VERSION}"
   ]
 }
 

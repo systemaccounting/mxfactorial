@@ -4,7 +4,7 @@ ARG GRAPHQL_URI
 
 COPY client .
 
-RUN printf "ENABLE_AUTH=false\nGRAPHQL_URI=$GRAPHQL_URI\n" > .env
+RUN printf "ENABLE_API_AUTH=false\nGRAPHQL_URI=$GRAPHQL_URI\n" > .env
 
 RUN npm run build
 

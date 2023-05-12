@@ -18,7 +18,7 @@ const clientOpts: ClientOptions = {
 	requestPolicy: 'cache-and-network'
 };
 
-if (process.env.ENABLE_AUTH == 'true') {
+if (process.env.ENABLE_API_AUTH == 'true') {
 	getIdToken(function (idToken: string) {
 		clientOpts.fetchOptions = {
 			...clientOpts.fetchOptions,

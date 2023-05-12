@@ -263,3 +263,15 @@ sends a `bottled water` transaction item in a POST request to a locally running 
 ##### `print-env-id.sh`
 
 prints env id stored in `infrastructure/terraform/env-id/terraform.tfstate`
+
+##### `encode-client-env.sh`
+
+base64 encodes client .env file
+
+##### `start-local.sh`
+
+starts transaction related services locally with restarts on file changes. logs written to nohup.out
+
+##### `stop-local.sh`
+
+stops services started by start-local.sh

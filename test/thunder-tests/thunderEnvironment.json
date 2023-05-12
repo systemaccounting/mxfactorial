@@ -9,39 +9,39 @@
     "data": [
       {
         "name": "GRAPHQL_URI",
-        "value": "http://localhost:8080"
+        "value": "http://localhost:10000"
       },
       {
-        "name": "RULES_URL",
-        "value": "http://localhost:8081"
+        "name": "RULE_URL",
+        "value": "http://localhost:10001"
       },
       {
         "name": "REQUEST_CREATE_URL",
-        "value": "http://localhost:8082"
+        "value": "http://localhost:10002"
       },
       {
         "name": "REQUEST_APPROVE_URL",
-        "value": "http://localhost:8083"
+        "value": "http://localhost:10003"
       },
       {
         "name": "REQUEST_BY_ID_URL",
-        "value": "http://localhost:8087"
+        "value": "http://localhost:10005"
       },
       {
         "name": "REQUESTS_BY_ACCOUNT_URL",
-        "value": "http://localhost:8086"
+        "value": "http://localhost:10006"
       },
       {
         "name": "TRANSACTIONS_BY_ACCOUNT_URL",
-        "value": "http://localhost:8088"
+        "value": "http://localhost:10008"
       },
       {
         "name": "TRANSACTION_BY_ID_URL",
-        "value": "http://localhost:8089"
+        "value": "http://localhost:10007"
       },
       {
         "name": "BALANCE_BY_ACCOUNT_URL",
-        "value": "http://localhost:8085"
+        "value": "http://localhost:10004"
       }
     ]
   }

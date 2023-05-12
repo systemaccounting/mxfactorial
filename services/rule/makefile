@@ -2,7 +2,9 @@ RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | gr
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/rust.mk
 
-DOCKER_URL=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.RULE_URL.default' $(PROJECT_CONF))
+RULE_PORT=$(shell yq '.services["$(APP_NAME)"].env_var.set.RULE_PORT.default' $(PROJECT_CONF))
+RULE_URL=$(HOST):$(RULE_PORT)
+NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 
 TEST_DATA_FILE=preRuleTrItems.json
 TEST_DATA_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata
@@ -11,45 +13,33 @@ TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 # use "provided.al2" in lambda per https://github.com/awslabs/aws-lambda-rust-runtime/tree/a2386b9768974f4647582cdf6ec332cb090e440f#12-build-your-lambda-functions
 
 dev:
-	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH)/migrations run
-	cd $(RELATIVE_PROJECT_ROOT_PATH); \
-		cargo watch \
-			-w $(APP_PATH)/src \
-			-- \
-			READINESS_CHECK_PATH=/healthz \
-			PGDATABASE=mxfactorial \
-			PGUSER=test \
-			PGPASSWORD=test \
-			PGHOST=localhost \
-			PGPORT=5432 \
-			RUST_LOG=info \
-			HOSTNAME_OR_IP=localhost \
-			PORT=8050 \
-			cargo run -p $(APP_NAME)
+	@$(MAKE) get-secrets ENV=local
+	nohup cargo watch --env-file $(ENV_FILE) -w src -x run >> $(NOHUP_LOG) &
 
 stop-dev:
-	@for p in "$$(ps aux | grep -e "cargo-watch" | grep -v 'grep' | awk '{print $$2}')"; do kill $$p; done
-	$(MAKE) -C "$(RELATIVE_PROJECT_ROOT_PATH)/migrations" clean
+	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH) stop-dev
 
 run:
-	cd $(RELATIVE_PROJECT_ROOT_PATH); \
-		READINESS_CHECK_PATH=/healthz cargo run -p $(APP_NAME)
+	@$(MAKE) -C ../../migrations run
+	@$(MAKE) get-secrets ENV=local
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+		cargo watch --env-file $(ENV_FILE) -w $(SUB_PATH)/src -x run -p $(SUB_PATH)
 
 water:
-	@REQ=$$(yq -I0 $(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/bottledWater.json); \
-		curl -d "$$REQ" -H 'Content-Type: application/json' http://0.0.0.0:8081 \
+	@REQ=$$(yq -o=json $(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/bottledWater.json); \
+		curl -s -d "$$REQ" -H 'Content-Type: application/json' $(RULE_URL) \
 		| yq -o=json
 
 
 ###################### invoke ######################
 
 invoke-docker:
-	@curl -s -H 'Content-Type: application/json' -d $(TEST_EVENT) $(DOCKER_URL) | yq -o=json
+	@curl -s -H 'Content-Type: application/json' -d $(TEST_EVENT) $(RULE_URL) | yq -o=json
 
 demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@printf "*** request to %s service at %s\n" $(APP_NAME) $(RULE_URL)
 	@echo $(TEST_EVENT) | yq -o=json
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(DOCKER_URL)
+	@printf "*** response from %s service at %s\n" $(APP_NAME) $(RULE_URL)
 	@$(MAKE) invoke-docker
 
 

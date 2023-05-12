@@ -46,11 +46,8 @@ module "dev" {
 
   ############### lambda ###############
 
-  requests_by_account_return_limit     = 20
-  transactions_by_account_return_limit = 20
   notifications_return_limit           = 20
   initial_account_balance              = 1000
-  web_adapter_layer_version            = "15"
 
   ############### rds ###############
 

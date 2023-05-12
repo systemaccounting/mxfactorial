@@ -23,6 +23,7 @@ var (
 		os.Getenv("PGPASSWORD"),
 		os.Getenv("PGDATABASE"))
 	readinessCheckPath = os.Getenv("READINESS_CHECK_PATH")
+	port               = os.Getenv("BALANCE_BY_ACCOUNT_PORT")
 )
 
 func run(
@@ -109,5 +110,5 @@ func main() {
 		c.String(http.StatusOK, resp)
 	})
 
-	r.Run()
+	r.Run(fmt.Sprintf(":%s", port))
 }
