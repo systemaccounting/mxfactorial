@@ -5,7 +5,7 @@ PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 CLIENT_ORIGIN_BUCKET_PREFIX=$(shell yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.CLIENT_ORIGIN_BUCKET_PREFIX.default' $(PROJECT_CONF))
 ENV_ID=$(shell (cd $(RELATIVE_PROJECT_ROOT_PATH); ENV=$(ENV) PROJECT_CONF=$(PROJECT_CONF) . ./scripts/print-env-id.sh))
 ORIGIN_BUCKET=$(CLIENT_ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
-ENABLE_AUTH=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $(PROJECT_CONF))
+ENABLE_API_AUTH=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $(PROJECT_CONF))
 SSM_VERSION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $(PROJECT_CONF))
 CLOUDFRONT_QUERY=Invalidation.{Status:Status,CreateTime:CreateTime}
 BUILD_DIR=$(CURDIR)/build
@@ -13,14 +13,20 @@ DEPS_DIR=$(CURDIR)/node_modules
 REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
 ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
-PARAMS=$(shell yq '.["$(APP_NAME)"].params[]' $(PROJECT_CONF))
-SECRETS=$(shell yq '.["$(APP_NAME)"].env_var.get[]' $(PROJECT_CONF))
-ENV_VARS=$(PARAMS) $(SECRETS)
-GRAPHQL_URI=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.GRAPHQL_URI.default' $(PROJECT_CONF))
+LOCAL_ADDRESS=$(shell yq '.env_var.set.LOCAL_ADDRESS.default' $(PROJECT_CONF))
+HOST=http://$(LOCAL_ADDRESS)
+GRAPHQL_URI=$(HOST):$(shell yq '.services.graphql.env_var.set.GRAPHQL_PORT.default' $(PROJECT_CONF))
 B64_GRAPHQL_URI=$(shell if [ `uname -s` == 'Darwin' ]; then printf $(GRAPHQL_URI) | base64; else printf $(GRAPHQL_URI) | base64 -w 0; fi)
+NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 
 dev:
-	if ! [ -f $(ENV_FILE) ]; then $(MAKE) local-env; fi
+	@$(MAKE) get-secrets ENV=local
+	if ! [ -d node_modules ]; then $(MAKE) install; fi
+	nohup npm run dev -- --open >> $(NOHUP_LOG) &
+
+run:
+	@$(MAKE) get-secrets ENV=local
+	if ! [ -d node_modules ]; then $(MAKE) install; fi
 	npm run dev -- --open
 
 preview:
@@ -42,7 +48,7 @@ build-artifact:
 build-env:
 	@$(MAKE) -s test-env-arg
 ifeq (local,$(ENV))
-	@$(MAKE) local-env
+	@$(MAKE) get-secrets ENV=local
 else
 	@$(MAKE) get-secrets ENV=dev
 endif
@@ -65,13 +71,13 @@ test:
 	if ! [ -d node_modules ]; then npm install; fi
 	@$(MAKE) install-browsers
 	@$(MAKE) -C .. rebuild-db
-	@$(MAKE) -s local-env
+	@$(MAKE) -s get-secrets ENV=local
 	npm run test
 
 test-ci:
 	if ! [ -d node_modules ]; then npm install; fi
 	@$(MAKE) -s install-browsers
-	@$(MAKE) -s local-env
+	@$(MAKE) -s get-secrets ENV=local
 	npm run test-ci
 
 ###################### clean ######################
@@ -90,31 +96,16 @@ clean:
 
 ###################### secrets ######################
 
-get-secrets: retrieve-each-secret
-	@if [ ! -s $(ENV_FILE) ]; then \
-		rm $(ENV_FILE); \
-		echo 'no env vars required'; \
-	else \
-		echo 'env vars retrieved'; \
-	fi
+env:
+	@$(MAKE) get-secrets
 
-retrieve-each-secret: test-env-arg clean-env $(ENV_VARS)
-$(ENV_VARS):
-	@if [ $@ = ENABLE_AUTH ]; then \
-		echo "ENABLE_AUTH=$(ENABLE_AUTH)" >> $(ENV_FILE); \
-	else \
-		PARAM_NAME=$(shell yq '... | select(has("$@")).$@.ssm' $(PROJECT_CONF)); \
-		ENV_VAR=$$(aws ssm get-parameter \
-			--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/$$PARAM_NAME \
-			--query 'Parameter.Value' \
-			--with-decryption \
-			--region $(REGION) \
-			--output text | base64); \
-		echo "$@=$$ENV_VAR" >> $(ENV_FILE); \
-	fi;
-
-local-env:
-	printf "ENABLE_AUTH=false\nGRAPHQL_URI=$(B64_GRAPHQL_URI)\n" > $(ENV_FILE)
+get-secrets:
+	@$(MAKE) -s test-env-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/create-env-file.sh \
+		--app-name $(APP_NAME) \
+		--env $(ENV); \
+	bash scripts/encode-client-env.sh
 
 ###################### deploy ######################
 
