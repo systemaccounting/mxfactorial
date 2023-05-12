@@ -8,17 +8,22 @@ client:
   runtime: v8
   type: app
   deploy: true
+  local_dev: true
   env_var:
     set:
       CLIENT_URI:
         ssm: client/uri
-        default: http://localhost:8090
+        default: null
+      CLIENT_PORT:
+        ssm: null
+        default: 10009
     get:
       - POOL_ID
       - CLIENT_ID
       - GRAPHQL_URI
+      - CLIENT_PORT
   params:
-    - ENABLE_AUTH
+    - ENABLE_API_AUTH
 docker:
   env_var:
     set:
@@ -113,31 +118,31 @@ infrastructure:
                 default: v1
               GRAPHQL_URI:
                 ssm: api/graphql/uri
-                default: http://localhost:8080
+                default: null
               REQUEST_CREATE_URL:
                 ssm: service/lambda/request_create/url
-                default: http://localhost:8082
+                default: null
               REQUEST_APPROVE_URL:
                 ssm: service/lambda/request_approve/url
-                default: http://localhost:8083
+                default: null
               RULE_URL:
                 ssm: service/lambda/rule/url
-                default: http://localhost:8081
+                default: null
               REQUEST_BY_ID_URL:
                 ssm: service/lambda/request_by_id/url
-                default: http://localhost:8087
+                default: null
               REQUESTS_BY_ACCOUNT_URL:
                 ssm: service/lambda/requests_by_account/url
-                default: http://localhost:8086
+                default: null
               TRANSACTION_BY_ID_URL:
                 ssm: service/lambda/transaction_by_id/url
-                default: http://localhost:8089
+                default: null
               TRANSACTIONS_BY_ACCOUNT_URL:
                 ssm: service/lambda/transactions_by_account/url
-                default: http://localhost:8088
+                default: null
               BALANCE_BY_ACCOUNT_URL:
                 ssm: service/lambda/balance_by_account/url
-                default: http://localhost:8085
+                default: null
               RDS_INSTANCE_NAME_PREFIX:
                 ssm: null
                 default: mxfactorial
@@ -171,6 +176,15 @@ infrastructure:
               TFSTATE_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-tfstate
+        web-adapter-lambda:
+          env_var:
+            set:
+              READINESS_CHECK_PATH:
+                ssm: service/lambda/readiness_check_path
+                default: /healthz
+              WEB_ADAPTER_LAYER_VERSION:
+                ssm:
+                default: 16
 migrations:
   db-reset:
     type: app
@@ -239,9 +253,13 @@ services:
       LAMBDA_INVOKE_LOG:
         ssm: null
         default: invoke.log
+      RETURN_RECORD_LIMIT:
+        ssm: null
+        default: 20
   graphql:
     runtime: go1.x
     type: app
+    local_dev: true
     params:
       - AWS_REGION
     deploy: true
@@ -260,7 +278,7 @@ services:
       set:
         GRAPHQL_PORT:
           ssm: null
-          default: 8080
+          default: 10000
       get:
         - GRAPHQL_URI
         - RULE_URL
@@ -272,9 +290,11 @@ services:
         - TRANSACTION_BY_ID_URL
         - BALANCE_BY_ACCOUNT_URL
         - READINESS_CHECK_PATH
+        - GRAPHQL_PORT
   request-create:
     runtime: go1.x
     type: app
+    local_dev: true
     params:
       - AWS_REGION
       - ENABLE_NOTIFICATIONS
@@ -286,15 +306,22 @@ services:
       set:
         REQUEST_CREATE_PORT:
           ssm: null
-          default: 8082
+          default: 10002
       get:
         - NOTIFY_TOPIC_ARN
         - READINESS_CHECK_PATH
         - REQUEST_CREATE_URL
         - RULE_URL
+        - REQUEST_CREATE_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
   request-approve:
     runtime: go1.x
     type: app
+    local_dev: true
     params:
       - AWS_REGION
       - ENABLE_NOTIFICATIONS
@@ -305,14 +332,21 @@ services:
       set:
         REQUEST_APPROVE_PORT:
           ssm: null
-          default: 8083
+          default: 10003
       get:
         - NOTIFY_TOPIC_ARN
         - READINESS_CHECK_PATH
         - REQUEST_APPROVE_URL
+        - REQUEST_APPROVE_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
   rule:
     runtime: provided.al2
     type: app
+    local_dev: true
     params:
       - AWS_REGION
     deploy: true
@@ -323,10 +357,13 @@ services:
       set:
         RULE_PORT:
           ssm: null
-          default: 8081
-        READINESS_CHECK_PATH:
-          ssm: service/lambda/readiness_check_path
-          default: null
+          default: 10001
+        HOSTNAME_OR_IP:
+          ssm: null
+          default: localhost
+        RUST_LOG:
+          ssm: null
+          default: info
       get:
         - PGDATABASE
         - PGUSER
@@ -338,9 +375,13 @@ services:
         - GRAPHQL_URI
         - RULE_URL
         - READINESS_CHECK_PATH
+        - RULE_PORT
+        - HOSTNAME_OR_IP
+        - RUST_LOG
   request-by-id:
     runtime: go1.x
     type: app
+    local_dev: true
     params: []
     deploy: true
     build_src_path: cmd
@@ -349,12 +390,20 @@ services:
       set:
         REQUEST_BY_ID_PORT:
           ssm: null
-          default: 8087
+          default: 10005
       get:
         - REQUEST_BY_ID_URL
+        - REQUEST_BY_ID_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - READINESS_CHECK_PATH
   requests-by-account:
     runtime: go1.x
     type: app
+    local_dev: true
     params: []
     deploy: true
     build_src_path: cmd
@@ -362,13 +411,22 @@ services:
     env_var:
       set:
         REQUESTS_BY_ACCOUNT_PORT:
-          ssm:
-          default: 8086
+          ssm: null
+          default: 10006
       get:
         - REQUESTS_BY_ACCOUNT_URL
+        - REQUESTS_BY_ACCOUNT_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - READINESS_CHECK_PATH
+        - RETURN_RECORD_LIMIT
   transaction-by-id:
     runtime: go1.x
     type: app
+    local_dev: true
     params: []
     deploy: true
     build_src_path: cmd
@@ -377,12 +435,20 @@ services:
       set:
         TRANSACTION_BY_ID_PORT:
           ssm: null
-          default: 8089
+          default: 10007
       get:
         - TRANSACTION_BY_ID_URL
+        - TRANSACTION_BY_ID_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - READINESS_CHECK_PATH
   transactions-by-account:
     runtime: go1.x
     type: app
+    local_dev: true
     params: []
     deploy: true
     build_src_path: cmd
@@ -391,9 +457,17 @@ services:
       set:
         TRANSACTIONS_BY_ACCOUNT_PORT:
           ssm: null
-          default: 8088
+          default: 10008
       get:
         - TRANSACTIONS_BY_ACCOUNT_URL
+        - TRANSACTIONS_BY_ACCOUNT_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - READINESS_CHECK_PATH
+        - RETURN_RECORD_LIMIT
   notifications-send:
     runtime: go1.x
     type: app
@@ -406,6 +480,11 @@ services:
       get:
         - NOTIFY_TOPIC_ARN
         - APIGW_CONNECTIONS_URI
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
   notifications-get:
     runtime: go1.x
     type: app
@@ -422,6 +501,11 @@ services:
         - CLIENT_ID
         - SECRET
         - WEBSOCKET_CLIENT_URI
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
   notifications-clear:
     runtime: go1.x
     type: app
@@ -436,9 +520,15 @@ services:
         - COGNITO_JWKS_URI
         - CLIENT_ID
         - WEBSOCKET_CLIENT_URI
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
   balance-by-account:
     runtime: go1.x
     type: app
+    local_dev: true
     params: []
     deploy: true
     build_src_path: cmd
@@ -447,9 +537,16 @@ services:
       set:
         BALANCE_BY_ACCOUNT_PORT:
           ssm: null
-          default: 8085
+          default: 10004
       get:
         - BALANCE_BY_ACCOUNT_URL
+        - BALANCE_BY_ACCOUNT_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - READINESS_CHECK_PATH
   wss-connect:
     runtime: go1.x
     type: app
@@ -618,9 +715,16 @@ env_var:
     ENV_FILE_NAME:
       ssm: null
       default: .env
+    LOCAL_ADDRESS:
+      ssm: null
+      default: localhost
+    NOHUP_LOG:
+      ssm: null
+      default: nohup.out
   get:
     - CLIENT_URI
     - GRAPHQL_URI
+params: []
 # .tools as list to support sequenced install scripting
 .tools:
   - name: docker
