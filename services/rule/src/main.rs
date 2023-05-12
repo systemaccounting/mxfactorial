@@ -238,7 +238,7 @@ async fn main() {
 
     let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
 
-    let port = env::var("PORT").unwrap_or("8080".to_string());
+    let port = env::var("RULE_PORT").unwrap_or("10001".to_string());
 
     let serve_addr = format!("{hostname_or_ip}:{port}");
 
