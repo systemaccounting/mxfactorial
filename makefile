@@ -111,6 +111,15 @@ init:
 help:
 	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'
 
+dev:
+	bash scripts/start-local.sh
+
+stop-dev:
+	bash scripts/stop-local.sh
+
+list-pids:
+	@ps aux | grep -e "cargo-watch" | grep -v 'grep' | awk '{len=split($$14, a, "/"); print $$2" "a[len-1]}'
+
 ###################### docker ######################
 
 test-up:
@@ -218,8 +227,7 @@ get-secrets:
 	@$(MAKE) -s test-env-arg
 	@bash scripts/create-env-file.sh \
 		--app-name root \
-		--env $(ENV) \
-		--region $(REGION)
+		--env $(ENV)
 
 ### arg tests
 test-env-arg:
