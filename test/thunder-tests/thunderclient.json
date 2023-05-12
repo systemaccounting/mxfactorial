@@ -8,7 +8,7 @@
     "method": "POST",
     "sortNum": 10000,
     "created": "2023-01-22T03:27:30.997Z",
-    "modified": "2023-03-27T21:38:14.666Z",
+    "modified": "2023-05-11T21:37:08.304Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -351,11 +351,11 @@
     "colId": "ad756c83-e4e1-4c6e-a602-fbaee6aaab6c",
     "containerId": "",
     "name": "rule",
-    "url": "http://localhost:8081",
+    "url": "{{RULE_URL}}",
     "method": "POST",
     "sortNum": 30000,
     "created": "2023-03-11T06:01:49.273Z",
-    "modified": "2023-03-27T18:29:47.087Z",
+    "modified": "2023-05-10T21:52:13.267Z",
     "headers": [
       {
         "name": "Content-Type",
