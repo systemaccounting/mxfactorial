@@ -5,8 +5,6 @@ variable "rds_instance_class" {}
 variable "rds_parameter_group" {}
 variable "rds_instance_name" {}
 variable "notifications_return_limit" {}
-variable "requests_by_account_return_limit" {}
-variable "transactions_by_account_return_limit" {}
 variable "apigw_authorization_header_key" {}
 variable "enable_api_auth" {}
 variable "enable_notifications" {}
@@ -23,4 +21,3 @@ variable "env_id" {}
 variable "build_db" { type = bool }
 variable "build_cache" { type = bool }
 variable "readiness_check_path" { default = "/healthz" } // todo: assign from root project.yaml
-variable "web_adapter_layer_version" {}
