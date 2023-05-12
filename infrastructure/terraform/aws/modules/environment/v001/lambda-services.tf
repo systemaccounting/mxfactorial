@@ -11,11 +11,11 @@ module "request_create" {
     ENABLE_NOTIFICATIONS = var.enable_notifications
     RULE_URL             = module.rule.lambda_function_url
   })
+  aws_lwa_port              = local.REQUEST_CREATE_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
   create_secret             = true // suppports local testing
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 resource "aws_iam_policy" "invoke_rules" {
@@ -48,11 +48,11 @@ module "request_approve" {
     NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
     ENABLE_NOTIFICATIONS = var.enable_notifications
   })
+  aws_lwa_port              = local.REQUEST_APPROVE_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   create_secret             = true
   attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "requests_by_account" {
@@ -62,12 +62,12 @@ module "requests_by_account" {
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
-    RETURN_RECORD_LIMIT = var.requests_by_account_return_limit
+    RETURN_RECORD_LIMIT = local.RETURN_RECORD_LIMIT
   })
+  aws_lwa_port              = local.REQUESTS_BY_ACCOUNT_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   create_secret             = true
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "request_by_id" {
@@ -77,10 +77,10 @@ module "request_by_id" {
   ssm_prefix                = var.ssm_prefix
   env_id                    = var.env_id
   env_vars                  = merge(local.POSTGRES_VARS, {})
+  aws_lwa_port              = local.REQUEST_BY_ID_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   create_secret             = true
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "transactions_by_account" {
@@ -89,13 +89,13 @@ module "transactions_by_account" {
   env          = var.env
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
+  aws_lwa_port = local.TRANSACTIONS_BY_ACCOUNT_PORT
   env_vars = merge(local.POSTGRES_VARS, {
-    RETURN_RECORD_LIMIT = var.transactions_by_account_return_limit
+    RETURN_RECORD_LIMIT = local.RETURN_RECORD_LIMIT
   })
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   create_secret             = true
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "transaction_by_id" {
@@ -105,10 +105,10 @@ module "transaction_by_id" {
   ssm_prefix                = var.ssm_prefix
   env_id                    = var.env_id
   env_vars                  = merge(local.POSTGRES_VARS, {})
+  aws_lwa_port              = local.TRANSACTION_BY_ID_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   create_secret             = true
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "balance_by_account" {
@@ -118,10 +118,10 @@ module "balance_by_account" {
   ssm_prefix                = var.ssm_prefix
   env_id                    = var.env_id
   env_vars                  = merge(local.POSTGRES_VARS, {})
+  aws_lwa_port              = local.BALANCE_BY_ACCOUNT_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   create_secret             = true
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
 
 module "auto_confirm" {
@@ -211,9 +211,9 @@ module "rule" {
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
-    READINESS_CHECK_PATH = "/healthz"
-    RUST_LOG             = "info"
+    RUST_LOG = "info"
   })
+  aws_lwa_port = local.RULE_PORT
   invoke_url_principals = [
     aws_iam_role.graphql_role.arn,
     module.request_create.lambda_role_arn,
@@ -221,5 +221,4 @@ module "rule" {
   artifacts_bucket_name     = var.artifacts_bucket_name
   attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
   create_secret             = true // suppports local testing
-  web_adapter_layer_version = var.web_adapter_layer_version
 }
