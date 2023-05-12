@@ -1,7 +1,5 @@
 FROM mxfactorial/go-base:v1 as builder
 
-EXPOSE 8080
-
 COPY . .
 
 WORKDIR /app/services/request-approve
@@ -13,5 +11,7 @@ FROM golang:alpine
 WORKDIR /app
 
 COPY --from=builder /app/services/request-approve/request-approve .
+
+EXPOSE 10003
 
 CMD ["/app/request-approve"]

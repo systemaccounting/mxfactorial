@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: ./docker/dev/balance-by-account.Dockerfile
     ports:
-      - "8085:8080"
+      - "10004:10004"
     environment:
       PGDATABASE: mxfactorial
       PGUSER: test
@@ -16,5 +16,6 @@ services:
       PG_IDLE_TIMEOUT: 10000
       PG_CONN_TIMEOUT: 500
       READINESS_CHECK_PATH: /healthz
+      BALANCE_BY_ACCOUNT_PORT: 10004
     depends_on:
       - postgres

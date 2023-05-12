@@ -5,14 +5,15 @@ services:
       context: ../
       dockerfile: ./docker/dev/graphql.Dockerfile
     ports:
-      - "8080:8080"
+      - "10000:10000"
     environment:
-      RULE_URL: "http://rule:8080"
-      REQUEST_CREATE_URL: "http://request-create:8080"
-      REQUEST_APPROVE_URL: "http://request-approve:8080"
-      REQUEST_BY_ID_URL: "http://request-by-id:8080"
-      REQUESTS_BY_ACCOUNT_URL: "http://requests-by-account:8080"
-      TRANSACTIONS_BY_ACCOUNT_URL: "http://transactions-by-account:8080"
-      TRANSACTION_BY_ID_URL: "http://transaction-by-id:8080"
-      BALANCE_BY_ACCOUNT_URL: "http://balance-by-account:8080"
+      RULE_URL: "http://rule:10001"
+      REQUEST_CREATE_URL: "http://request-create:10002"
+      REQUEST_APPROVE_URL: "http://request-approve:10003"
+      REQUEST_BY_ID_URL: "http://request-by-id:10005"
+      REQUESTS_BY_ACCOUNT_URL: "http://requests-by-account:10006"
+      TRANSACTIONS_BY_ACCOUNT_URL: "http://transactions-by-account:10008"
+      TRANSACTION_BY_ID_URL: "http://transaction-by-id:10007"
+      BALANCE_BY_ACCOUNT_URL: "http://balance-by-account:10004"
       READINESS_CHECK_PATH: "/healthz"
+      GRAPHQL_PORT: 10000

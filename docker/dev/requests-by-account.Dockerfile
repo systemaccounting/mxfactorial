@@ -1,7 +1,5 @@
 FROM mxfactorial/go-base:v1 as builder
 
-EXPOSE 8080
-
 COPY . .
 
 WORKDIR /app/services/requests-by-account
@@ -13,5 +11,7 @@ FROM golang:alpine
 WORKDIR /app
 
 COPY --from=builder /app/services/requests-by-account/requests-by-account .
+
+EXPOSE 10006
 
 CMD ["/app/requests-by-account"]

@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: ./docker/dev/request-create.Dockerfile
     ports:
-      - "8082:8080"
+      - "10002:10002"
     environment:
       PGDATABASE: mxfactorial
       PGUSER: test
@@ -16,6 +16,7 @@ services:
       PG_IDLE_TIMEOUT: 10000
       PG_CONN_TIMEOUT: 500
       READINESS_CHECK_PATH: /healthz
-      RULE_URL: http://rule:8080
+      RULE_URL: http://rule:10001
+      REQUEST_CREATE_PORT: 10002
     depends_on:
       - postgres

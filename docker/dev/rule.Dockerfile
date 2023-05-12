@@ -18,6 +18,6 @@ FROM rust:alpine3.17
 
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/debug/rule /usr/local/bin
 
-EXPOSE 8080
+EXPOSE 10001
 
 CMD [ "/usr/local/bin/rule" ]

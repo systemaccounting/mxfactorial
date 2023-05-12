@@ -7,4 +7,4 @@ services:
       args:
         - GRAPHQL_URI=${GRAPHQL_URI}
     ports:
-      - "8090:80"
+      - "10009:80"

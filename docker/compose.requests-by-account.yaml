@@ -5,7 +5,7 @@ services:
       context: ../
       dockerfile: ./docker/dev/requests-by-account.Dockerfile
     ports:
-      - "8086:8080"
+      - "10006:10006"
     environment:
       PGDATABASE: mxfactorial
       PGUSER: test
@@ -17,5 +17,6 @@ services:
       PG_CONN_TIMEOUT: 500
       READINESS_CHECK_PATH: /healthz
       RETURN_RECORD_LIMIT: 20
+      REQUESTS_BY_ACCOUNT_PORT: 10006
     depends_on:
       - postgres
