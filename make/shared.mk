@@ -9,6 +9,9 @@ ARTIFACT_NAME=$(APP_NAME)-src.zip
 LAMBDA_NAME=$(APP_NAME)-$(ENV)
 ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
+NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
+LOCAL_ADDRESS=$(shell yq '.env_var.set.LOCAL_ADDRESS.default' $(PROJECT_CONF))
+HOST=http://$(LOCAL_ADDRESS)
 
 DOCKER_ENV_VARS=PGDATABASE=mxfactorial \
 PGUSER=test \
