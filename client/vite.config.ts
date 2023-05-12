@@ -13,7 +13,10 @@ const config: UserConfig = {
 	},
 	optimizeDeps: {
 		exclude: ['@urql/svelte'],
-	  }
+	  },
+	server: {
+		port: vars.CLIENT_PORT
+	}
 };
 
 export default config;
