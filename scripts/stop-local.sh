@@ -3,7 +3,7 @@
 PATTERNS=(
 	'cargo-watch'
 	'npm run dev --open'
-	'vite dev --open'
+	'.bin/vite dev'
 	'tail -F'
 )
 
