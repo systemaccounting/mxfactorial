@@ -59,6 +59,9 @@ ENV_FILE="$APP_DIR_PATH/$ENV_FILE_NAME"
 LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)
 HOST="http://$LOCAL_ADDRESS"
 
+# set CLIENT_URI and GRAPHQL_URI vars
+source ./scripts/set-uri-vars.sh
+
 function test_env_file() {
 	if [[ ! -s $ENV_FILE ]]; then
 		rm -f $ENV_FILE
@@ -75,11 +78,24 @@ function set_default_values() {
 			PORT_ENV_VAR="$SVC_NAME"_PORT
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
 			echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
-		elif [[ "$s" == 'GRAPHQL_URI' ]] || [[ "$s" == 'CLIENT_URI' ]]; then # todo: change *_URI to *_URL
+		elif [[ "$s" == 'GRAPHQL_URI' ]]; then # todo: change GRAPHQL_URI to GRAPHQL_URL
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_URI//')
 			PORT_ENV_VAR="$SVC_NAME"_PORT
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
+			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+				echo "$s=$GRAPHQL_URI" >> $ENV_FILE
+			else
+				echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
+			fi
+		elif [[ "$s" == 'CLIENT_URI' ]]; then # todo: change CLIENT_URI to CLIENT_URL
+			SVC_NAME=$(printf '%s' "$s" | sed 's/_URI//')
+			PORT_ENV_VAR="$SVC_NAME"_PORT
+			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+				echo "$s=$CLIENT_URI" >> $ENV_FILE
+			else
+				echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
+			fi
 		else
 			ENV_VAR=$(yq "... | select(has(\"$s\")).$s.default" $PROJECT_CONF)
 			echo $s=$ENV_VAR >> $ENV_FILE
