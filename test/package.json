@@ -4,7 +4,7 @@
   "description": "mxfactorial docker integration tests",
   "main": "index.js",
   "scripts": {
-    "test:up": "SILENCE_EXEC_LOGS=true jest --config config/docker/jest.docker.config.ts --runInBand --detectOpenHandles",
+    "test:up": "eval $(cat .env) SILENCE_EXEC_LOGS=true jest --config config/docker/jest.docker.config.ts --runInBand --detectOpenHandles",
     "test:docker": "eval $(cat .env) SILENCE_EXEC_LOGS=true jest --config config/docker/jest.docker.base.config.ts --runInBand --detectOpenHandles",
     "test:cloud": "eval $(cat .env) SILENCE_EXEC_LOGS=true jest --config config/cloud/jest.cloud.config.ts --runInBand --detectOpenHandles"
   },
