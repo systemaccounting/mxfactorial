@@ -7,44 +7,44 @@ tasks:
 ports:
   - name: graphql
     description: api
-    port: 8080
+    port: 10000
     onOpen: ignore
     visibility: public
   - name: rule
     description: automates transactions
-    port: 8081
+    port: 10001
     onOpen: ignore
   - name: request-create
     description: creates transaction requests
-    port: 8082
+    port: 10002
     onOpen: ignore
   - name: request-approve
     description: approves transaction requests
-    port: 8083
+    port: 10003
     onOpen: ignore
   - name: balance-by-account
     description: queries a balance by account
-    port: 8085
+    port: 10004
     onOpen: ignore
   - name: requests-by-account
     description: queries transaction requests by account
-    port: 8086
+    port: 10006
     onOpen: ignore
   - name: request-by-id
     description: queries a transaction request by id
-    port: 8087
+    port: 10005
     onOpen: ignore
   - name: transactions-by-account
     description: queries transactions by account
-    port: 8088
+    port: 10008
     onOpen: ignore
   - name: transaction-by-id
     description: queries a transaction by id
-    port: 8089
+    port: 10007
     onOpen: ignore
   - name: client
     description: web client
-    port: 8090
+    port: 10009
     onOpen: ignore
   - name: postgres
     description: db
