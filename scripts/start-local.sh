@@ -19,9 +19,16 @@ for d in "${APP_DIRS[@]}"; do
 	fi
 
 	make --no-print-directory -C "$d" dev
-	
+
 	unset RUNTIME
 	unset CONF_PATH
 done
+
+if [[ $CODESPACES ]]; then
+	GRAPHQL_PORT=$(yq '.services.graphql.env_var.set.GRAPHQL_PORT.default' $PROJECT_CONF)
+	CLIENT_PORT=$(yq '.client.env_var.set.CLIENT_PORT.default' $PROJECT_CONF)
+	gh codespace ports visibility $GRAPHQL_PORT:public -c "$CODESPACE_NAME"
+	gh codespace ports visibility $CLIENT_PORT:public -c "$CODESPACE_NAME"
+fi
 
 tail -F $NOHUP_LOG
