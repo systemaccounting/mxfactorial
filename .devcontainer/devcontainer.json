@@ -40,7 +40,8 @@
 				"ms-vsliveshare.vsliveshare",
 				"mtxr.sqltools",
 				"mtxr.sqltools-driver-pg",
-				"rust-lang.rust-analyzer"
+				"rust-lang.rust-analyzer",
+				"ms-vscode-remote.remote-containers"
 			]
 		}
 	},

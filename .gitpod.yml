@@ -70,3 +70,4 @@ vscode:
     - mtxr.sqltools
     - mtxr.sqltools-driver-pg
     - rust-lang.rust-analyzer
+    - ms-vscode-remote.remote-containers
