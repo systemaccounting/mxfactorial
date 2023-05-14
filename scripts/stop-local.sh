@@ -1,9 +1,21 @@
 #!/bin/bash
 
+PROJECT_CONF=project.yaml
+GRAPHQL_PORT=$(yq '.services.graphql.env_var.set.GRAPHQL_PORT.default' $PROJECT_CONF)
+CLIENT_PORT=$(yq '.client.env_var.set.CLIENT_PORT.default' $PROJECT_CONF)
+source ./scripts/manage-cde-ports.sh
+
+disable_cde_ports
+
 PATTERNS=(
+	'debug/rule'
+	'go run'
+	'go-build'
 	'cargo-watch'
-	'npm run dev --open'
-	'.bin/vite dev'
+	'npm run dev'
+	'npm run build'
+	'.bin/vite'
+	'vite build'
 	'tail -F'
 )
 
