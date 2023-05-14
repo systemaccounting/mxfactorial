@@ -8,7 +8,6 @@
 		"memory": "8gb",
 		"storage": "32gb"
 	},
-	"updateContentCommand": "make compose-build",
 	"postCreateCommand": "bash ./scripts/post-create-cmd.sh",
 	"features": {
 		"ghcr.io/devcontainers/features/rust:1": "latest"
@@ -41,7 +40,8 @@
 				"ms-vsliveshare.vsliveshare",
 				"mtxr.sqltools",
 				"mtxr.sqltools-driver-pg",
-				"rust-lang.rust-analyzer"
+				"rust-lang.rust-analyzer",
+				"ms-vscode-remote.remote-containers"
 			]
 		}
 	},

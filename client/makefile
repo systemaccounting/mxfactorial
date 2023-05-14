@@ -22,12 +22,12 @@ NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.defau
 dev:
 	@$(MAKE) get-secrets ENV=local
 	if ! [ -d node_modules ]; then $(MAKE) install; fi
-	nohup npm run dev -- --open >> $(NOHUP_LOG) &
+	nohup npm run dev >> $(NOHUP_LOG) &
 
 run:
 	@$(MAKE) get-secrets ENV=local
 	if ! [ -d node_modules ]; then $(MAKE) install; fi
-	npm run dev -- --open
+	npm run dev
 
 preview:
 	npm run preview

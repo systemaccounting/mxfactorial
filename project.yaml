@@ -244,6 +244,24 @@ scripts:
       GO_MOCK_FILE_NAME_SUFFIX:
         ssm: null
         default: mock.go
+      REQUIRED_PID_COUNT:
+        ssm: null
+        default: 10
+      LOCAL_RESTART_LIMIT:
+        ssm: null
+        default: 3
+      RESTART_SLEEP_SECONDS:
+        ssm: null
+        default: 5
+      SERVICE_PROCESSES:
+        ssm: null
+        default:
+          - 'cargo-watch'
+          - 'go run '
+          - 'debug/rule'
+      CLIENT_PROCESS:
+        ssm: null
+        default: 'vite dev'
 services:
   env_var:
     set:

@@ -44,7 +44,7 @@ print:
 
 .PHONY: test
 test:
-	$(MAKE) test-compose-up
+	$(MAKE) test-local
 
 test-compose-up:
 	@$(MAKE) -C './test' test-compose-up
@@ -54,6 +54,9 @@ test-docker:
 
 test-cloud:
 	@$(MAKE) -C './test' test-cloud
+
+test-local:
+	@$(MAKE) -C './test' test-local
 
 install:
 	brew install go
@@ -112,13 +115,17 @@ help:
 	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'
 
 dev:
-	bash scripts/start-local.sh
+	bash scripts/restart-local.sh
 
 stop-dev:
 	bash scripts/stop-local.sh
 
+restart-dev:
+	$(MAKE) stop-dev
+	$(MAKE) dev
+
 list-pids:
-	@ps aux | grep -e "cargo-watch" | grep -v 'grep' | awk '{len=split($$14, a, "/"); print $$2" "a[len-1]}'
+	bash scripts/list-pids.sh
 
 ###################### docker ######################
 
