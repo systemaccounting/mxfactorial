@@ -283,3 +283,7 @@ sourced in other scripts. declares functions to publish and disable ports in clo
 ##### `restart-local.sh`
 
 restarts services locally if not all services started
+
+##### `list-pids.sh`
+
+print list of pids and apps
