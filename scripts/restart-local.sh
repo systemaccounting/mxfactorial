@@ -18,14 +18,15 @@ function restart() {
 	local REQ_PID_COUNT="$1"
 	while [[ "$(make --no-print-directory list-pids | wc -l | xargs)" -lt "$REQ_PID_COUNT" ]] && [[ "$RESTART_COUNT" -le "$LOCAL_RESTART_LIMIT" ]]; do
 		RESTARTS=$(($LOCAL_RESTART_LIMIT-$RESTART_COUNT+1))
-		echo -e -n  "\n${RED}*** not all apps were started. $RESTARTS restart(s) left before exiting${RESET}\n"
+		echo -e -n  "\n${RED}*** only "$(make --no-print-directory list-pids | wc -l | xargs)" apps started when $REQ_PID_COUNT were required. $RESTARTS restart(s) left before exiting. list of started apps:${RESET}\n"
+		make --no-print-directory list-pids
 		source ./scripts/stop-local.sh
 		source ./scripts/start-local.sh
 		sleep "$RESTART_SLEEP_SECONDS"
 		RESTART_COUNT=$(($RESTART_COUNT+1))
 	done
 	if [[ "$(make --no-print-directory list-pids | wc -l | xargs)" -lt "$REQ_PID_COUNT" ]]; then
-		echo -e -n  "\n${RED}*** only "$(make --no-print-directory list-pids | wc -l | xargs)" apps were started when were $REQ_PID_COUNT required. list of started apps:${RESET}\n\n"
+		echo -e -n  "\n${RED}*** only "$(make --no-print-directory list-pids | wc -l | xargs)" apps started when $REQ_PID_COUNT were required. list of started apps:${RESET}\n\n"
 		make --no-print-directory list-pids
 		echo -e -n  "\n${RED}*** \"make stop-dev && make dev\" in a separate shell to try again${RESET}\n"
 	fi
