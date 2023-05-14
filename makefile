@@ -125,8 +125,7 @@ restart-dev:
 	$(MAKE) dev
 
 list-pids:
-	@ps aux | grep -e "cargo-watch" | grep -v 'grep' | awk '{len=split($$14, a, "/"); print $$2" "a[len-1]}'
-	@ps aux | grep -e ".bin/vite dev" | grep -v 'grep' | awk '{print $$2" client"}'
+	bash scripts/list-pids.sh
 
 ###################### docker ######################
 
