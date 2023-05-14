@@ -253,6 +253,15 @@ scripts:
       RESTART_SLEEP_SECONDS:
         ssm: null
         default: 5
+      SERVICE_PROCESSES:
+        ssm: null
+        default:
+          - 'cargo-watch'
+          - 'go run '
+          - 'debug/rule'
+      CLIENT_PROCESS:
+        ssm: null
+        default: 'vite dev'
 services:
   env_var:
     set:
