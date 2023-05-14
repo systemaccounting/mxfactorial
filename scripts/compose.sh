@@ -28,6 +28,9 @@ fi
 # set B64_GRAPHQL_URI var
 source ./scripts/set-uri-vars.sh
 
+# source functions to manage cloud development environment ports
+source ./scripts/manage-cde-ports.sh
+
 COMPOSE_DIR=./docker
 
 INIT_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
@@ -55,6 +58,7 @@ if [[ $UP ]]; then
 	echo "$UP_CMD"
   echo ""
 	eval "$UP_CMD"
+  publish_cde_ports
   exit 0
 fi
 
@@ -74,4 +78,5 @@ if [[ $DOWN ]]; then
 	echo "$DOWN_CMD"
   echo ""
 	eval "${DOWN_CMD}"
+  disable_cde_ports
 fi
