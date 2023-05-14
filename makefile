@@ -125,7 +125,7 @@ restart-dev:
 	$(MAKE) dev
 
 list-pids:
-	bash scripts/list-pids.sh
+	@bash scripts/list-pids.sh
 
 ###################### docker ######################
 
