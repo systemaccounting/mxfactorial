@@ -14,7 +14,11 @@ endif
 
 .PHONY: test
 test:
-	$(MAKE) test-compose-up
+	$(MAKE) test-local
+
+test-local:
+	@$(MAKE) --no-print-directory get-secrets ENV=local
+	if ! [ -d node_modules ]; then npm install; fi; npm run test:local
 
 test-compose-up:
 	@echo "\n\033[0;33mfirst docker compose requires several minutes to build before testing...\033[0m"
