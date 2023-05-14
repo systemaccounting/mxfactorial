@@ -275,3 +275,11 @@ starts transaction related services locally with restarts on file changes. logs 
 ##### `stop-local.sh`
 
 stops services started by start-local.sh
+
+##### `manage-cde-ports.sh`
+
+sourced in other scripts. declares functions to publish and disable ports in cloud development environments (codespace, gitpod)
+
+##### `restart-local.sh`
+
+restarts services locally if not all services started
