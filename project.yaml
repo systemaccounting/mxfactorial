@@ -253,15 +253,29 @@ scripts:
       RESTART_SLEEP_SECONDS:
         ssm: null
         default: 5
+      CUSTOM_IFS:
+        ssm: null
+        default: '|'
       SERVICE_PROCESSES:
         ssm: null
         default:
           - 'cargo-watch'
+      CI_SERVICE_PROCESSES:
+        ssm: null
+        default:
           - 'go run '
           - 'debug/rule'
       CLIENT_PROCESS:
         ssm: null
-        default: 'vite dev'
+        default: 'bin/vite dev'
+      ADDED_PROCESSES_TO_TERM:
+        ssm: null
+        default:
+          - 'go-build'
+          - 'npm run dev'
+          - 'npm run build'
+          - 'vite build'
+          - 'tail -F'
 services:
   env_var:
     set:
