@@ -42,17 +42,13 @@ for d in "${APP_DIRS[@]}"; do
 
 	if [[ "$CI" ]]; then
 		make --no-print-directory -C "$d" get-secrets ENV=local > /dev/null
-		pushd "$d" > /dev/null
 		# &; \ disown fails in make so backgrounding kept in bash
 		if [[ "$RUNTIME" == 'provided.al2' ]]; then
-			eval $(cat $ENV_FILE_NAME) cargo run > /dev/null 2>&1 &
-			disown
+			(cd "$d"; eval $(cat $ENV_FILE_NAME) cargo run > /dev/null 2>&1 & disown $!)
 		fi
 		if [[ "$RUNTIME" == 'go1.x' ]]; then
-			eval $(cat $ENV_FILE_NAME) go run ./$BUILD_SRC_PATH > /dev/null 2>&1 &
-			disown
+			(cd "$d"; eval $(cat $ENV_FILE_NAME) go run ./$BUILD_SRC_PATH > /dev/null 2>&1 & disown $!)
 		fi
-		popd > /dev/null
 	else
 		make --no-print-directory -C "$d" dev
 	fi
