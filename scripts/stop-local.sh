@@ -27,7 +27,7 @@ declare -a PATTERNS
 if [[ $CI ]]; then
 	# add ci processes to PATTERNS
 	COUNT=1
-	while IFS='|' read -r -d '|' line; do
+	while IFS="$CUSTOM_IFS" read -r -d "$CUSTOM_IFS" line; do
 		ADJUSTED="$line"
 		if [[ $COUNT -eq $CI_SVC_LIST_SIZE ]]; then
 			ADJUSTED="${line::-1}"
@@ -35,20 +35,10 @@ if [[ $CI ]]; then
 		PATTERNS+=("'$ADJUSTED'")
 		COUNT=$(($COUNT+1))
 	done < <(echo "${CI_SERVICE_PROCESSES[@]}")
-
-	COUNT=1
-	while IFS='|' read -r -d '|' line; do
-		ADJUSTED="$line"
-		if [[ $COUNT -eq $ADDED_LIST_SIZE ]]; then
-			ADJUSTED="${line::-1}"
-		fi
-		PATTERNS+=("'$ADJUSTED'")
-		COUNT=$(($COUNT+1))
-	done < <(echo "${ADDED_PROCESSES_TO_TERM[@]}")
 else
 	# add cargo-watch processes to PATTERNS when local/devcontainer
 	COUNT=1
-	while IFS='|' read -r -d '|' line; do
+	while IFS="$CUSTOM_IFS" read -r -d "$CUSTOM_IFS" line; do
 		ADJUSTED="$line" # remove trailing whitespace from last index
 		if [[ $COUNT -eq $SVC_LIST_SIZE ]]; then
 			ADJUSTED="${line::-1}"
@@ -57,18 +47,18 @@ else
 		COUNT=$(($COUNT+1))
 	done < <(echo "${SERVICE_PROCESSES[@]}")
 
-	COUNT=1
-	while IFS='|' read -r -d '|' line; do
-		ADJUSTED="$line"
-		if [[ $COUNT -eq $ADDED_LIST_SIZE ]]; then
-			ADJUSTED="${line::-1}"
-		fi
-		PATTERNS+=("'$ADJUSTED'")
-		COUNT=$(($COUNT+1))
-	done < <(echo "${ADDED_PROCESSES_TO_TERM[@]}")
-
 	PATTERNS+=("'$CLIENT_PROCESS'") # add client process
 fi
+
+COUNT=1
+while IFS="$CUSTOM_IFS" read -r -d "$CUSTOM_IFS" line; do
+	ADJUSTED="$line"
+	if [[ $COUNT -eq $ADDED_LIST_SIZE ]]; then
+		ADJUSTED="${line::-1}"
+	fi
+	PATTERNS+=("'$ADJUSTED'")
+	COUNT=$(($COUNT+1))
+done < <(echo "${ADDED_PROCESSES_TO_TERM[@]}")
 
 source ./scripts/manage-cde-ports.sh
 disable_cde_ports
