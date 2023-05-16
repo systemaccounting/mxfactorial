@@ -170,7 +170,7 @@
     "method": "POST",
     "sortNum": 60000,
     "created": "2023-01-22T03:27:31.003Z",
-    "modified": "2023-01-22T03:30:19.560Z",
+    "modified": "2023-05-16T06:26:49.215Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -187,8 +187,8 @@
       "raw": "",
       "form": [],
       "graphql": {
-        "query": "mutation approveRequest($transaction_id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {\n  approveRequest(transaction_id: $transaction_id, account_name: $account_name, account_role: $account_role, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    equilibrium_time\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
-        "variables": "{\n    \"transaction_id\": \"3\",\n    \"account_name\": \"JacobWebb\",\n    \"account_role\": \"debitor\",\n    \"auth_account\": \"JacobWebb\"\n}"
+        "query": "mutation approveRequest($id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {\n  approveRequest(id: $id, account_name: $account_name, account_role: $account_role, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    equilibrium_time\n    sum_value\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time \n    }\n  }\n}",
+        "variables": "{\n    \"id\": \"3\",\n    \"account_name\": \"JacobWebb\",\n    \"account_role\": \"debitor\",\n    \"auth_account\": \"JacobWebb\"\n}"
       }
     },
     "tests": []
@@ -202,7 +202,7 @@
     "method": "POST",
     "sortNum": 70000,
     "created": "2023-01-22T03:27:31.004Z",
-    "modified": "2023-01-22T03:30:24.437Z",
+    "modified": "2023-05-16T06:27:14.135Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -219,8 +219,8 @@
       "raw": "",
       "form": [],
       "graphql": {
-        "query": "query getRequestByID($transaction_id: String!, $auth_account: String!) {\n  requestByID(transaction_id: $transaction_id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
-        "variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"transaction_id\": \"1\"\n}"
+        "query": "query getRequestByID($id: String!, $auth_account: String!) {\n  requestByID(id: $id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
+        "variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"id\": \"1\"\n}"
       }
     },
     "tests": []
@@ -298,7 +298,7 @@
     "method": "POST",
     "sortNum": 100000,
     "created": "2023-01-22T03:27:31.007Z",
-    "modified": "2023-01-22T03:30:39.345Z",
+    "modified": "2023-05-16T06:27:34.301Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -315,8 +315,8 @@
       "raw": "",
       "form": [],
       "graphql": {
-        "query": "query getTransactionByID($transaction_id: String!, $auth_account: String!) {\n  transactionByID(transaction_id: $transaction_id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
-        "variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"transaction_id\": \"2\"\n}"
+        "query": "query getTransactionByID($id: String!, $auth_account: String!) {\n  transactionByID(id: $id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
+        "variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"id\": \"2\"\n}"
       }
     },
     "tests": []

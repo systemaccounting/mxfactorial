@@ -37,7 +37,7 @@
 	function handleApproveClick() {
 		let queryVars = {
 			auth_account: $currentAccount,
-			transaction_id: $page.params.slug,
+			id: $page.params.slug,
 			account_name: $currentAccount,
 			account_role: isCreditor($currentAccount, rulesLastTrItems) ? 'creditor' : 'debitor'
 		};

@@ -12,12 +12,12 @@
 
 ### request
 
-the `JacobWebb` customer approves all `transaction_items` in the `transaction` by sending the following `transaction_id` to the request-approve service:
+the `JacobWebb` customer approves all `transaction_items` in the `transaction` by sending the following `id` to the request-approve service:
 
 ```json
 // graphql variable
 {
-    "transaction_id": "3",
+    "id": "3",
     "account_name": "JacobWebb",
     "account_role": "debitor",
 }

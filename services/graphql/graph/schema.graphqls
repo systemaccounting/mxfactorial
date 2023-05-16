@@ -104,16 +104,16 @@ input TransactionItemInput {
 
 type Query {
   rules(transaction_items: [TransactionItemInput!]): Transaction
-  requestByID(transaction_id: String!, auth_account: String!): Transaction
+  requestByID(id: String!, auth_account: String!): Transaction
   requestsByAccount(account_name: String!, auth_account: String!): [Transaction]
-  transactionByID(transaction_id: String!, auth_account: String!): Transaction
+  transactionByID(id: String!, auth_account: String!): Transaction
   transactionsByAccount(account_name: String!, auth_account: String!): [Transaction]
   balance(account_name: String!, auth_account: String!): String
 }
 
 type Mutation {
   createRequest(transaction_items: [TransactionItemInput!], auth_account: String!): Transaction
-  approveRequest(transaction_id: String!, account_name: String!, account_role: String!, auth_account: String!): Transaction
+  approveRequest(id: String!, account_name: String!, account_role: String!, auth_account: String!): Transaction
 }
 
 schema {

@@ -384,7 +384,7 @@ describe("graphql", () => {
         })
 
 		const approve = await client.request(approveRequest, {
-            transaction_id: create.createRequest.id,
+            id: create.createRequest.id,
             account_name: "JacobWebb",
             account_role: "debitor",
             auth_account: "JacobWebb"
@@ -456,7 +456,7 @@ describe("graphql", () => {
 
 		const { transactionByID } = await client.request(getTransactionByID, {
             auth_account: transaction.transaction_items[0].debitor,
-            transaction_id: transaction.id,
+            id: transaction.id,
         })
 
 		expect(transactionByID.id).toBe("3")
@@ -516,7 +516,7 @@ describe("graphql", () => {
 
 		const { requestByID } = await client.request(getRequestByID, {
             auth_account: data.transaction.transaction_items[0].debitor,
-            transaction_id: data.transaction.id,
+            id: data.transaction.id,
         })
 
 		expect(requestByID.id).toBe("3")

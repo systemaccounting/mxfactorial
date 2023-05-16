@@ -1,8 +1,8 @@
 import { gql } from "graphql-request"
 
 export const getTransactionByID = gql`
-query getTransactionByID($transaction_id: String!, $auth_account: String!) {
-  transactionByID(transaction_id: $transaction_id, auth_account: $auth_account) {
+query getTransactionByID($id: String!, $auth_account: String!) {
+  transactionByID(id: $id, auth_account: $auth_account) {
     id
     rule_instance_id
     equilibrium_time

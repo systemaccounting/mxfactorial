@@ -28,14 +28,14 @@ func (r *mutationResolver) CreateRequest(ctx context.Context, transactionItems [
 }
 
 // ApproveRequest is the resolver for the approveRequest field.
-func (r *mutationResolver) ApproveRequest(ctx context.Context, transactionID string, accountName string, accountRole string, authAccount string) (*model.Transaction, error) {
+func (r *mutationResolver) ApproveRequest(ctx context.Context, id string, accountName string, accountRole string, authAccount string) (*model.Transaction, error) {
 	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
 	tr, err := r.InvokeRequestApprove(
-		transactionID,
+		id,
 		accountName,
 		accountRole,
 		authAccount,
@@ -58,13 +58,13 @@ func (r *queryResolver) Rules(ctx context.Context, transactionItems []*model.Tra
 }
 
 // RequestByID is the resolver for the requestByID field.
-func (r *queryResolver) RequestByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) RequestByID(ctx context.Context, id string, authAccount string) (*model.Transaction, error) {
 	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
-	tr, err := r.InvokeRequestByID(transactionID, authAccount)
+	tr, err := r.InvokeRequestByID(id, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
@@ -88,13 +88,13 @@ func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName strin
 }
 
 // TransactionByID is the resolver for the transactionByID field.
-func (r *queryResolver) TransactionByID(ctx context.Context, transactionID string, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) TransactionByID(ctx context.Context, id string, authAccount string) (*model.Transaction, error) {
 	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
-	tr, err := r.InvokeTransactionByID(transactionID, authAccount)
+	tr, err := r.InvokeTransactionByID(id, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err

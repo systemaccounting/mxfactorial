@@ -1,8 +1,8 @@
 import { gql } from "graphql-request"
 
 export const approveRequest = gql`
-  mutation approveRequest($transaction_id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {
-	approveRequest(transaction_id: $transaction_id, account_name: $account_name, account_role: $account_role, auth_account: $auth_account) {
+  mutation approveRequest($id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {
+	approveRequest(id: $id, account_name: $account_name, account_role: $account_role, auth_account: $auth_account) {
 	  id
 	  rule_instance_id
 	  author
