@@ -28,7 +28,7 @@ function restart() {
 	if [[ "$(make --no-print-directory list-pids | wc -l | xargs)" -lt "$REQ_PID_COUNT" ]]; then
 		echo -e -n  "\n${RED}*** only "$(make --no-print-directory list-pids | wc -l | xargs)" apps started when $REQ_PID_COUNT required. list of started apps:${RESET}\n\n"
 		make --no-print-directory list-pids
-		echo -e -n  "\n${RED}*** \"make stop-dev && make dev\" in a separate shell to try again${RESET}\n"
+		echo -e -n  "\n${RED}*** \"make restart\" in a separate shell to try again${RESET}\n"
 	fi
 }
 
@@ -36,6 +36,6 @@ if [[ $CI ]]; then # -1, client not required in workflows
 	restart "$REQUIRED_CI_PID_COUNT"
 else
 	restart "$REQUIRED_PID_COUNT"
-	echo -e -n "\n${YELLOW}*** OPEN a shell and leave this one to follow logs in project root ${NOHUP_LOG}. \"make stop-dev\" in a separate shell to tear down${RESET}\n"
+	echo -e -n "\n${YELLOW}*** OPEN a shell and leave this one to follow logs in project root ${NOHUP_LOG}. \"make stop\" in a separate shell to tear down${RESET}\n"
 	tail -F "$NOHUP_LOG"
 fi
