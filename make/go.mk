@@ -4,9 +4,9 @@ CMD_DIR=$(CURDIR)/$(shell yq '$(APP_CONF_PATH).build_src_path' $(PROJECT_CONF))
 WATCH=$(CMD_DIR)
 RUN=$(CMD_DIR)
 
-dev:
+start:
 	@$(MAKE) -s get-secrets ENV=local
-	nohup cargo watch -w $(WATCH) --env-file $(ENV_FILE) -s 'go run $(RUN)' >> $(NOHUP_LOG) &
+	nohup cargo watch -w $(WATCH) -w pkg --env-file $(ENV_FILE) -s 'go run $(RUN)' >> $(NOHUP_LOG) &
 
 install:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \

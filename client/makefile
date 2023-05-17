@@ -20,13 +20,16 @@ B64_GRAPHQL_URI=$(shell if [ `uname -s` == 'Darwin' ]; then printf $(GRAPHQL_URI
 NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 
 dev:
+	@$(MAKE) start
+
+start:
 	@$(MAKE) get-secrets ENV=local
-	if ! [ -d node_modules ]; then $(MAKE) install; fi
+	@$(MAKE) install
 	nohup npm run dev >> $(NOHUP_LOG) &
 
 run:
 	@$(MAKE) get-secrets ENV=local
-	if ! [ -d node_modules ]; then $(MAKE) install; fi
+	@$(MAKE) install
 	npm run dev
 
 preview:
@@ -56,8 +59,13 @@ endif
 
 ###################### dependencies ######################
 
+# recipe avoids https://github.com/evanw/esbuild/issues/1819#issuecomment-1018771557
 install:
-	npm install
+	@PLATFORM="$$(echo `uname -s` | tr '[:upper:]' '[:lower:]')"; \
+	if [ "$$(npm list --depth=2 | grep -e "─ @esbuild/$$PLATFORM" | wc -l | xargs)" -eq 0 ]; then \
+		rm -rf node_modules; \
+	fi
+	if ! [ -d node_modules ]; then npm install; fi
 
 ###################### test ######################
 

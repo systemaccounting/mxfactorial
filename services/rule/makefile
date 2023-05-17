@@ -13,17 +13,20 @@ TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 # use "provided.al2" in lambda per https://github.com/awslabs/aws-lambda-rust-runtime/tree/a2386b9768974f4647582cdf6ec332cb090e440f#12-build-your-lambda-functions
 
 dev:
-	@$(MAKE) get-secrets ENV=local
-	nohup cargo watch --env-file $(ENV_FILE) -w src -x run >> $(NOHUP_LOG) &
+	@$(MAKE) start
 
-stop-dev:
+start:
+	@$(MAKE) get-secrets ENV=local
+	nohup cargo watch --env-file $(ENV_FILE) -w src -w $(RELATIVE_PROJECT_ROOT_PATH)/crates -x run >> $(NOHUP_LOG) &
+
+stop:
 	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH) stop-dev
 
 run:
 	@$(MAKE) -C ../../migrations run
 	@$(MAKE) get-secrets ENV=local
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-		cargo watch --env-file $(ENV_FILE) -w $(SUB_PATH)/src -x run -p $(SUB_PATH)
+		cargo watch --env-file $(ENV_FILE) -w $(SUB_PATH)/src -w crates -x run -p $(SUB_PATH)
 
 water:
 	@REQ=$$(yq -o=json $(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/bottledWater.json); \

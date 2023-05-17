@@ -38,8 +38,11 @@ prod_down = seed schema
 test_up = $(prod_up) testseed
 test_down = testseed $(prod_down)
 
-# postgres docker
 run:
+	@$(MAKE) start
+
+# postgres docker
+start:
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose \
 			-f ../docker/compose.bitnami-postgres.yaml \

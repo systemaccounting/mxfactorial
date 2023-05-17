@@ -8,10 +8,17 @@ ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 source ./scripts/manage-cde-ports.sh
 
 GREEN='\033[0;32m'
+RED='\033[1;31m'
 YELLOW='\033[0;33m'
 RESET='\033[0m'
 
-make --no-print-directory -C migrations run
+docker version > /dev/null 2>&1
+if [[ $? -ne 0 ]]; then
+	echo -e "${RED}docker required. start docker${RESET}"
+	exit 1
+fi
+
+make --no-print-directory -C migrations start
 
 rm -f $NOHUP_LOG
 
@@ -50,7 +57,7 @@ for d in "${APP_DIRS[@]}"; do
 			(cd "$d"; eval $(cat $ENV_FILE_NAME) go run ./$BUILD_SRC_PATH > /dev/null 2>&1 & disown $!)
 		fi
 	else
-		make --no-print-directory -C "$d" dev
+		make --no-print-directory -C "$d" start
 	fi
 
 	# publish graphql port when developing in cloud dev env

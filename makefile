@@ -114,13 +114,13 @@ init:
 help:
 	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'
 
-dev:
+start:
 	bash scripts/restart-local.sh
 
-stop-dev:
+stop:
 	bash scripts/stop-local.sh
 
-restart-dev:
+restart:
 	$(MAKE) stop-dev
 	$(MAKE) dev
 
