@@ -17,7 +17,7 @@ type Transaction struct {
 	Author             *string              `json:"author"`
 	AuthorDeviceID     *string              `json:"author_device_id"`
 	AuthorDeviceLatlng *LatLng              `json:"author_device_latlng"` // pg point type
-	AuthorRole         *string              `json:"author_role"`
+	AuthorRole         *Role                `json:"author_role"`
 	EquilibriumTime    *TZTime              `json:"equilibrium_time"`
 	SumValue           *decimal.NullDecimal `json:"sum_value"`
 	TransactionItems   TransactionItems     `json:"transaction_items"`
@@ -105,9 +105,7 @@ func (t Transaction) GetAuthorRole(author string) (Role, error) {
 
 	// test for rule added transaction author
 	if t.RuleInstanceID != nil && *t.RuleInstanceID != "" {
-		var authorRole *Role
-		authorRole.Set(*t.AuthorRole)
-		return *authorRole, nil
+		return *t.AuthorRole, nil
 	}
 
 	// if transaction is NOT rule generated

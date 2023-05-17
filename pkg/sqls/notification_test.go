@@ -12,7 +12,7 @@ func TestInsertTransactionNotificationsSQL(t *testing.T) {
 	testbuilder := NotificationSQLs{}
 	testid1 := types.ID("testid1")
 	testacct1 := "testacct1"
-	testrole1 := types.DB
+	testrole1 := types.Role(0)
 	testmsg1 := pgtype.JSONB{}
 
 	testnotifications := types.TransactionNotifications{

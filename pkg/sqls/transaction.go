@@ -47,7 +47,7 @@ func (t *TransactionSQLs) InsertTransactionSQL(
 		trAuthor,
 		trDeviceID,
 		trAuthorDeviceLatlng,
-		trAuthorRole.String(),
+		trAuthorRole,
 		trEquilibriumTime,
 		trSumValue,
 	)
@@ -134,14 +134,10 @@ func (t TransactionSQLs) buildWithSQL(trItems types.TransactionItems) (string, e
 
 func (t TransactionSQLs) CreateTransactionRequestSQL(tr *types.Transaction) (string, []interface{}, error) {
 
-	var role types.Role
-	err := role.Set(*tr.AuthorRole)
-	if err != nil {
-		return "", nil, err
-	}
-
 	// create transaction sql builder
 	insTr := TransactionSQLs{}
+
+	fmt.Println("*tr.AuthorRole", *tr.AuthorRole)
 
 	// create insert transaction sql
 	insTrBuilder := insTr.InsertTransactionSQL(
@@ -149,7 +145,7 @@ func (t TransactionSQLs) CreateTransactionRequestSQL(tr *types.Transaction) (str
 		tr.Author,
 		nil,
 		nil,
-		role,
+		*tr.AuthorRole,
 		nil,
 		tr.SumValue,
 	)

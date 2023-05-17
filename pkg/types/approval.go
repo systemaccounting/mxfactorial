@@ -14,7 +14,7 @@ type Approval struct {
 	TransactionID     *ID     `json:"transaction_id"`
 	TransactionItemID *ID     `json:"transaction_item_id"`
 	AccountName       *string `json:"account_name"`
-	AccountRole       *string `json:"account_role"`
+	AccountRole       *Role   `json:"account_role"`
 	DeviceID          *string `json:"device_id"`
 	DeviceLatlng      *LatLng `json:"device_latlng"`
 	ApprovalTime      *TZTime `json:"approval_time"`
@@ -70,7 +70,7 @@ func (apprvs Approvals) TestPendingRoleApproval(
 
 	for _, v := range apprvs {
 		if *v.AccountName == accountName &&
-			*v.AccountRole == accountRole.String() &&
+			*v.AccountRole == accountRole &&
 			v.ApprovalTime == nil {
 			approvalTimeStampsPending++
 		}

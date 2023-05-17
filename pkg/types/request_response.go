@@ -91,7 +91,7 @@ type RequestApprove struct {
 	IntraEvent
 	ID          *ID     `json:"id"`
 	AccountName *string `json:"account_name"`
-	AccountRole *string `json:"account_role"`
+	AccountRole *Role   `json:"account_role"`
 }
 
 type AccountProfileID struct {

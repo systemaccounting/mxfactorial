@@ -1,7 +1,6 @@
 package sqls
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -27,7 +26,7 @@ func TestInsertTransactionSQL(t *testing.T) {
 		&testauthor,
 		&testdeviceid,
 		&testauthdevicelatlng,
-		testauthrole.String(),
+		testauthrole,
 		&testequilibriumtime,
 		testsumvalue,
 	}
@@ -190,7 +189,7 @@ func TestCreateTransactionRequestSQL(t *testing.T) {
 	want1 := string(golden1)
 
 	if got1 != want1 {
-		t.Errorf("got %v, want %v", got1, want1)
+		t.Errorf("got1 %v, want1 %v", got1, want1)
 	}
 
 	var testauthordevicelatlng *string
@@ -246,31 +245,11 @@ func TestCreateTransactionRequestSQL(t *testing.T) {
 	}
 
 	if !cmp.Equal(got2, want2) {
-		t.Errorf("got %v, want %v", got2, want2)
+		t.Errorf("got2 %+v, want2 %+v", got2, want2)
 	}
 }
 
 func TestCreateTransactionRequestSQLErr1(t *testing.T) {
-	testdata := testdata.GetTestTransactions("../testdata/requests.json")
-	testtransaction := testdata[0].Transaction
-
-	testauthorrole := "doesntexist"
-	testtransaction.AuthorRole = &testauthorrole
-
-	want := fmt.Sprintf("%q neither debitor or creditor", testauthorrole)
-
-	testbuilder := TransactionSQLs{}
-	_, _, got := testbuilder.CreateTransactionRequestSQL(testtransaction)
-	if got == nil {
-		t.Errorf("got nil, want %v", want)
-	}
-
-	if got.Error() != want {
-		t.Errorf("got nil, want %v", want)
-	}
-}
-
-func TestCreateTransactionRequestSQLErr2(t *testing.T) {
 	testdata := testdata.GetTestTransactions("../testdata/requests.json")
 	testtransaction := testdata[0].Transaction
 

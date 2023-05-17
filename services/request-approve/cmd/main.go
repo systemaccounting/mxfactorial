@@ -65,7 +65,7 @@ type IApproveService interface {
 	Approve(ctx context.Context, authAccount string, approverRole types.Role, preApprovalTransaction *types.Transaction, notifyTopicArn string) (string, error)
 }
 
-func run(
+func handleEvent(
 	ctx context.Context,
 	e *types.RequestApprove,
 	dbConnector func(context.Context, string) (SQLDB, error),
@@ -73,16 +73,12 @@ func run(
 	approveServiceConstructor func(db SQLDB) (IApproveService, error),
 ) (string, error) {
 
-	// todo: more
 	if e.AuthAccount == "" ||
 		e.AccountName == nil ||
 		e.AccountRole == nil ||
 		e.ID == nil {
 		return "", errReqValsMissing
 	}
-
-	var accountRole types.Role
-	accountRole.Set(*e.AccountRole)
 
 	// connect to db
 	db, err := dbConnector(context.Background(), pgConn)
@@ -100,14 +96,14 @@ func run(
 	}
 
 	// get transaction request
-	preApprTr, err := tranService.GetTransactionWithTrItemsAndApprovalsByID(*e.ID)
+	request, err := tranService.GetTransactionWithTrItemsAndApprovalsByID(*e.ID)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return "", err
 	}
 
 	// fail approval if equilibrium_time set
-	if preApprTr.EquilibriumTime != nil && !preApprTr.EquilibriumTime.IsZero() {
+	if request.EquilibriumTime != nil && !request.EquilibriumTime.IsZero() {
 		var err = errors.New("equilibrium timestamp found. approval not pending")
 		log.Print(err)
 		return "", err
@@ -127,24 +123,9 @@ func run(
 	return apprService.Approve(
 		ctx,
 		e.AuthAccount,
-		accountRole,
-		preApprTr,
+		*e.AccountRole,
+		request,
 		notifyTopicArn,
-	)
-}
-
-// handleEvent wraps run with interface args for testability
-func handleEvent(
-	ctx context.Context,
-	e *types.RequestApprove,
-) (string, error) {
-
-	return run(
-		ctx,
-		e,
-		newIDB,
-		newTransactionService,
-		newApproveService,
 	)
 }
 
@@ -180,13 +161,19 @@ func main() {
 		c.Status(http.StatusOK)
 	})
 
-	var requestApprove *types.RequestApprove
+	var request *types.RequestApprove
 
 	r.POST("/", func(c *gin.Context) {
 
-		c.BindJSON(&requestApprove)
+		c.BindJSON(&request)
 
-		resp, err := handleEvent(c.Request.Context(), requestApprove)
+		resp, err := handleEvent(
+			c.Request.Context(),
+			request,
+			newIDB,
+			newTransactionService,
+			newApproveService,
+		)
 		if err != nil {
 			c.Status(http.StatusBadRequest)
 		}

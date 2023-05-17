@@ -109,8 +109,7 @@ func testValues(
 	}
 
 	// overwrite transaction author role with authenticated role
-	role := authorRole.String()
-	e.Transaction.AuthorRole = &role
+	e.Transaction.AuthorRole = &authorRole
 
 	// store transaction items received from client in var
 	fromClient := e.Transaction.TransactionItems.RemoveUnauthorizedValues()
@@ -160,7 +159,7 @@ func testValues(
 
 	// add authenticated values to rule tested transaction
 	ruleTested.Transaction.Author = &e.AuthAccount
-	ruleTested.Transaction.AuthorRole = &role
+	ruleTested.Transaction.AuthorRole = &authorRole
 
 	return ruleTested, authorRole, nil
 }
