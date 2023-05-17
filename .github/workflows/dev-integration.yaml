@@ -40,7 +40,7 @@ jobs:
           sudo dpkg -i migrate.linux-amd64.deb
           rm migrate.linux-amd64.deb
       - name: start services
-        run: make dev
+        run: make start
       - name: test service integration
         run: make -C ./test test-local
       - name: reset db
