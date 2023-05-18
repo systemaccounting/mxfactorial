@@ -18,7 +18,11 @@ if [[ $? -ne 0 ]]; then
 	exit 1
 fi
 
+set -e # exit when docker login not configured
+
 make --no-print-directory -C migrations start
+
+set +e
 
 rm -f $NOHUP_LOG
 
