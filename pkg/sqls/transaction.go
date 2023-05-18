@@ -137,8 +137,6 @@ func (t TransactionSQLs) CreateTransactionRequestSQL(tr *types.Transaction) (str
 	// create transaction sql builder
 	insTr := TransactionSQLs{}
 
-	fmt.Println("*tr.AuthorRole", *tr.AuthorRole)
-
 	// create insert transaction sql
 	insTrBuilder := insTr.InsertTransactionSQL(
 		nil,
