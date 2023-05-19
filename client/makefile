@@ -61,9 +61,11 @@ endif
 
 # recipe avoids https://github.com/evanw/esbuild/issues/1819#issuecomment-1018771557
 install:
-	@PLATFORM="$$(echo `uname -s` | tr '[:upper:]' '[:lower:]')"; \
-	if [ "$$(npm list --depth=2 | grep -e "─ @esbuild/$$PLATFORM" | wc -l | xargs)" -eq 0 ]; then \
-		rm -rf node_modules; \
+	@if [ -d node_modules ]; then \
+		PLATFORM="$$(echo `uname -s` | tr '[:upper:]' '[:lower:]')"; \
+		if [ "$$(npm list --depth=2 | grep -e "─ @esbuild/$$PLATFORM" | wc -l | xargs)" -eq 0 ]; then \
+			rm -rf node_modules; \
+		fi; \
 	fi
 	if ! [ -d node_modules ]; then npm install; fi
 
@@ -96,11 +98,12 @@ clean-env:
 		--app-name $(APP_NAME)
 
 clean-deps:
-	rm -rf $(DEPS_DIR)
+	@rm -rf $(DEPS_DIR)
 
 clean:
-	$(MAKE) clean-env
-	$(MAKE) clean-deps
+	@$(MAKE) clean-env
+	@$(MAKE) clean-deps
+	@rm -rf .svelte-kit build
 
 ###################### secrets ######################
 

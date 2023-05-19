@@ -1,3 +1,4 @@
+SHELL:=/bin/bash
 INVENTORY_FILE=$(CURDIR)/inventory
 SIZE=$(shell wc -l < "$(INVENTORY_FILE)" | awk '{print $$1}')
 ifeq (0,$(SIZE))
@@ -13,6 +14,7 @@ TFSTATE_ENV_SUFFIX=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_ENV
 TFSTATE_EXT=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.default' $(PROJECT_CONF))
 TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_EXT)
 COMPOSE_DIR=./docker
+NOHUP_LOG=$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 
 # approx 5 minutes
 all:
@@ -121,11 +123,19 @@ stop:
 	bash scripts/stop-local.sh
 
 restart:
-	$(MAKE) stop-dev
-	$(MAKE) dev
+	$(MAKE) stop
+	$(MAKE) start
 
 list-pids:
 	@bash scripts/list-pids.sh
+
+clean:
+	@APP_DIRS=($$(yq '.. | select(has("local_dev") and .local_dev == true) | path | join("/")' $(PROJECT_CONF))); \
+	for d in "$${APP_DIRS[@]}"; do \
+		$(MAKE) --no-print-directory -C "$$d" clean; \
+	done
+	@$(MAKE) --no-print-directory -C test clean
+	@rm -f ./$(NOHUP_LOG)
 
 ###################### docker ######################
 

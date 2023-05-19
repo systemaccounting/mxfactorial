@@ -10,6 +10,10 @@ ifndef ENV
 	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
 endif
 
+clean:
+	@$(MAKE) clean-env
+	@rm -rf node_modules
+
 ###################### test ######################
 
 .PHONY: test
