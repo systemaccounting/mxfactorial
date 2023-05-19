@@ -59,7 +59,7 @@ github:
     addBadge: false
 vscode:
   extensions:
-    - rangav.vscode-thunder-client
+    - rangav.vscode-thunder-client@2.6.2
     - hashicorp.terraform
     - golang.go
     - svelte.svelte-vscode
