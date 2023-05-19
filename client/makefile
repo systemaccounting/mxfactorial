@@ -1,3 +1,4 @@
+SHELL:=/bin/bash
 APP_NAME=$(shell basename $(CURDIR))
 RELATIVE_PROJECT_ROOT_PATH=..
 PROJECT_CONF_FILE_NAME=project.yaml
