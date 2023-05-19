@@ -4,7 +4,7 @@ RELATIVE_PROJECT_ROOT_PATH=..
 PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 CLIENT_ORIGIN_BUCKET_PREFIX=$(shell yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.CLIENT_ORIGIN_BUCKET_PREFIX.default' $(PROJECT_CONF))
-ENV_ID=$(shell (cd $(RELATIVE_PROJECT_ROOT_PATH); ENV=$(ENV) PROJECT_CONF=$(PROJECT_CONF) . ./scripts/print-env-id.sh))
+ENV_ID=$(shell (cd $(RELATIVE_PROJECT_ROOT_PATH); ENV=$(ENV) PROJECT_CONF=$(PROJECT_CONF_FILE_NAME) . ./scripts/print-env-id.sh))
 ORIGIN_BUCKET=$(CLIENT_ORIGIN_BUCKET_PREFIX)-$(ENV_ID)-$(ENV)
 ENABLE_API_AUTH=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $(PROJECT_CONF))
 SSM_VERSION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $(PROJECT_CONF))
