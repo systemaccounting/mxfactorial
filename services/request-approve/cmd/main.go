@@ -129,7 +129,7 @@ func handleEvent(
 	)
 }
 
-// enables run fn unit testing
+// enables unit testing
 func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
@@ -138,7 +138,6 @@ func newTransactionService(idb SQLDB) (ITransactionService, error) {
 	return service.NewTransactionService(db), nil
 }
 
-// enables unit testing
 func newApproveService(idb SQLDB) (IApproveService, error) {
 	db, ok := idb.(*postgres.DB)
 	if !ok {
@@ -147,7 +146,6 @@ func newApproveService(idb SQLDB) (IApproveService, error) {
 	return service.NewApproveService(db), nil
 }
 
-// enables unit testing
 func newIDB(ctx context.Context, dsn string) (SQLDB, error) {
 	return postgres.NewDB(ctx, dsn)
 }
