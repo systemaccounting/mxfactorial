@@ -1,16 +1,16 @@
 <script lang="ts">
 	import { disableButton, accountValuesPresent, filterUserAddedItems } from '../utils/transactions';
-	import request from '../stores/request';
+	import { requestCreate } from '../stores/requestCreate';
 	import QueryRules from './QueryRules.svelte';
 
 	const rulesRequestTimeBufferMs = 1000;
 
 	let minRequestTime: Date;
-	let reqItems: App.ITransactionItem[];
-	let render: boolean;
+	$: reqItems = [] as App.ITransactionItem[];
+	$: render = false;
 	let previouslySubmitted = ''; // used to send rules request only on diff
 
-	request.subscribe(function (requestItems: App.ITransactionItem[]): void {
+	requestCreate.subscribe(function (requestItems: App.ITransactionItem[]): void {
 		let userAdded = filterUserAddedItems(requestItems);
 
 		minRequestTime = new Date(new Date().getTime() + rulesRequestTimeBufferMs);
@@ -27,8 +27,7 @@
 				new Date().getTime() > minRequestTime.getTime() &&
 				previouslySubmitted != JSON.stringify(userAdded)
 			) {
-				// console.log('sending');
-				render = true;
+				render = !render;
 				reqItems = userAdded;
 				previouslySubmitted = JSON.stringify(userAdded); // store sent request for diff
 			}
