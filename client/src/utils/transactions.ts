@@ -155,7 +155,7 @@ export function getTransactionById(id: string, transactions: ITransaction[]): IT
 
 export function filterUserAddedItems(reqItems: ITransactionItem[]): ITransactionItem[] {
 	return reqItems.filter(
-		(x) => x.rule_instance_id == null || x.rule_instance_id == ""
+		(x) => !x.rule_instance_id || x.rule_instance_id == ""
 	);
 }
 
@@ -193,20 +193,53 @@ export function isRequestPending(
 	return false;
 }
 
-export function getContraAccount(
-	currentAcct: string | unknown,
+export function getTransContraAccount(
+	currentAccount: string | unknown, // todo: stores have unknown
 	transaction: ITransaction
-): string {
+): string | null {
 	for (const trItem of transaction.transaction_items) {
 		if (trItem.rule_instance_id) {
+			// todo: match currentAccount to debitor or creditor
+			// but requires first duplicating transactions
+			// where rule added currentAccount occurrence
+			// greater than 1
 			continue
 		}
-		if (trItem.creditor == currentAcct) {
+		if (trItem.creditor == currentAccount) {
 			return trItem.debitor
 		}
-		if (trItem.debitor == currentAcct) {
+		if (trItem.debitor == currentAccount) {
 			return trItem.creditor
 		}
 	}
+	console.log(`getTransContraAccount error: ${currentAccount} not found`)
+	// assumes currentAccount in rule added transaction item for now
 	return transaction.author
+}
+
+export function getTrItemsContraAccount(
+	currentAccount: string | unknown, // todo: stores have unknown
+	trItems: ITransactionItem[]
+): string | null {
+	if (!trItems) {
+		return null
+	}
+	if (trItems.length == 1) {
+		if (trItems[0].debitor == null || trItems[0].creditor == null) {
+			return null
+		}
+	}
+	for (const trItem of trItems) {
+		if (trItem.rule_instance_id) {
+			continue
+		}
+		if (trItem.creditor == currentAccount) {
+			return trItem.debitor
+		}
+		if (trItem.debitor == currentAccount) {
+			return trItem.creditor
+		}
+	}
+	console.error(`getTrItemsContraAccount error: ${currentAccount} not found`)
+	return null
 }
