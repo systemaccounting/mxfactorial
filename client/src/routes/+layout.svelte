@@ -1,8 +1,9 @@
 <script lang="ts">
 	import MobileLayout from '../containers/MobileLayout.svelte';
-	import client from '../client/graphql';
+	import client from '../graphql/client';
+	import c from '../utils/constants'
 	import { setContext } from 'svelte';
-	setContext('client', client);
+	setContext(c.CLIENT_CTX_KEY, client);
 </script>
 
 <MobileLayout>
