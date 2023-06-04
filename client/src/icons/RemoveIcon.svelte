@@ -1,13 +1,13 @@
 <script lang="ts">
 	export let size: number;
-	export let style: string;
+	export let style: string | null;
 	export let index: number;
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher } from 'svelte';
 
 	const dispatch = createEventDispatcher<{ index: number }>();
 
 	function handleRemove(): void {
-		dispatch("index", index);
+		dispatch('index', index);
 	}
 </script>
 

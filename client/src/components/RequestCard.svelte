@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Card from "./Card.svelte";
 	import { fromNow } from "../utils/date";
-	export let contraAccount: string;
+	export let contraAccount: string | null;
 	export let isCurrentAccountAuthor: boolean;
 	export let isCurrentAccountCreditor: boolean;
 	export let requestTime: Date;
