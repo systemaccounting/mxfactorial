@@ -9,7 +9,19 @@ on:
 
 jobs:
   test:
+    name: test client
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - uses: actions/checkout@v3
+      - name: start services
+        run: make start
+      - name: e2e test client
+        run: make -C ./client test-ci
+  deploy:
     name: deploy client
+    needs: test
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -17,7 +29,7 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       CI: true
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: install dependencies
         run: make install
         working-directory: client
