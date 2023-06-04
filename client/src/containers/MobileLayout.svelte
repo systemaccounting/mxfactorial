@@ -1,10 +1,13 @@
 <script lang="ts">
 	import '../app.css';
+	import Storage from './Storage.svelte';
 </script>
 
-<div class="mobile-layout">
-	<slot />
-</div>
+<Storage>
+	<div class="mobile-layout">
+		<slot />
+	</div>
+</Storage>
 
 <style>
 	.mobile-layout {
