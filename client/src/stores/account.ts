@@ -1,19 +1,16 @@
-import { persisted } from 'svelte-local-storage-store'
+import { writable } from 'svelte/store'
 import { get } from 'svelte/store'
 
-const key = 'mxfactorial:account'
+const account = writable('')
 
-const account = persisted(key, null, { storage: 'session' });
-
-const setAccount = acct => account.set(acct);
+const setAccount = acct => {
+	account.set(acct)
+};
 
 const getAccount = () => get(account);
-
-const removeAccount = () => sessionStorage.removeItem(key)
 
 export {
 	account,
 	getAccount,
 	setAccount,
-	removeAccount
 }
