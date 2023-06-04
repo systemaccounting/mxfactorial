@@ -1,36 +1,48 @@
 <script lang="ts">
 	import Card from './Card.svelte';
 	import Info from './Info.svelte';
-	import { account as currentAccount } from '../stores/account';
-	import BALANCE_QUERY from '../query/balance';
+	import { account } from '../stores/account';
+	import BALANCE_QUERY from '../graphql/query/balance';
 	import type { Client } from '@urql/core';
-	import { getContext } from 'svelte';
-	import { afterNavigate } from '$app/navigation';
+	import { getContext, onMount } from 'svelte';
+	import c from '../utils/constants'
 
-	let client: Client = getContext('client');
+	let client: Client = getContext(c.CLIENT_CTX_KEY);
 
-	let balance = '0.000';
-
-	afterNavigate(async () => {
+	async function getBalance(): Promise<string> {
 		let res = await client
 			.query(BALANCE_QUERY, {
-				auth_account: $currentAccount,
-				account_name: $currentAccount
+				auth_account: $account,
+				account_name: $account
 			})
 			.toPromise();
-		balance = res.data.balance;
-	});
+
+		return res.data.balance;
+	}
+
+	// wait for account if browser page refreshed
+	let mounted = false;
+	onMount(() => (mounted = true));
 </script>
 
-<div data-id="balance">
-	<Info label="account" value={$currentAccount} />
-	<Card minHeight="2rem">
-		<small>
-			<span> Balance </span>
-		</small>
-		<p data-id="accountBalance">{balance}</p>
-	</Card>
-</div>
+{#if mounted}
+	<div data-id="balance">
+		<Info label="account" value={$account} />
+		<Card minHeight="2rem">
+			<small>
+				<span> Balance </span>
+			</small>
+			{#await getBalance()}
+				<p data-id="accountBalance">0.000</p>
+			{:then balance}
+				<p data-id="accountBalance">{balance}</p>
+			{:catch error}
+				{alert(error.message)}
+				<p data-id="accountBalance">0.000</p>
+			{/await}
+		</Card>
+	</div>
+{/if}
 
 <style>
 	div {
