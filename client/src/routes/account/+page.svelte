@@ -17,36 +17,44 @@
 		filterUserAddedItems
 	} from '../../utils/transactions';
 
-	import request from '../../stores/request';
-	import { account as currentAccount } from '../../stores/account';
+	import {
+		requestCreate,
+		addRequestItem,
+		removeRequestItem,
+		reset,
+		addRecipient,
+		getRecipient
+	} from '../../stores/requestCreate';
+	import { account } from '../../stores/account';
 
-	import CREATE_REQUEST_MUTATION from '../../mutation/createRequest';
+	import CREATE_REQUEST_MUTATION from '../../graphql/mutation/createRequest';
 	import { Pulse } from 'svelte-loading-spinners';
 	import type { Client } from '@urql/core';
 	import { getContext, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import c from '../../utils/constants'
 
-	let client: Client = getContext('client');
+	let client: Client = getContext(c.CLIENT_CTX_KEY);
 
 	let reqItems: App.ITransactionItem[];
 	let rulesEventCount: number = 0;
 	let trItemHeight: number;
 	let prevReqItemsCount: number = 0;
-	let recipient: string = '';
+	// restore recipient saved in store if avail
+	let recipient = getRecipient($account) ? getRecipient($account) : '';
 	let showLoading: boolean = false;
 
-	request.subscribe(function (requestItems: App.ITransactionItem[]): void {
-		// console.log(requestItems);
+	requestCreate.subscribe(function (requestItems: App.ITransactionItem[]): void {
 		reqItems = requestItems;
 	});
 
 	function handleAddClick() {
-		request.addRequestItem();
+		addRequestItem();
 	}
 
 	function handleRemoveClick(e: CustomEvent): void {
 		let indexToRemove: number = e.detail;
-		request.removeRequestItem(indexToRemove);
+		removeRequestItem(indexToRemove);
 	}
 
 	function handleAutoScroll(requestItems: App.ITransactionItem[]) {
@@ -61,20 +69,18 @@
 
 	function handleChangeRecipient(e: CustomEvent) {
 		if (isCredit) {
-			// @ts-expect-error
-			request.addRecipient(e.detail.value, $currentAccount);
+			addRecipient(e.detail.value, $account);
 		} else {
-			// @ts-expect-error
-			request.addRecipient($currentAccount, e.detail.value);
+			addRecipient($account, e.detail.value);
 		}
 	}
 
 	function resetRecipient(requestItems: App.ITransactionItem[]) {
 		let single = requestItems.length == 1;
 		let propCount = Object.keys(requestItems[0]).length;
-		let nullCount = Object.values(requestItems[0]).filter((x) => x == null).length;
-		let nullCountPlusDebitorFirstBooleanProperty = nullCount + 1; // debitor_first default == false instead of null
-		if (single && propCount == nullCountPlusDebitorFirstBooleanProperty) {
+		let nullCount = Object.values(requestItems[0]).filter((x) => x === null).length;
+		let nonNulls = propCount - nullCount;
+		if (single && nonNulls <= 2) {
 			recipient = '';
 		}
 	}
@@ -83,14 +89,13 @@
 		if (!disableButton(reqItems) && accountValuesPresent(reqItems)) {
 			client
 				.mutation(CREATE_REQUEST_MUTATION, {
-					auth_account: $currentAccount,
+					auth_account: $account,
 					transaction_items: reqItems
 				})
 				.toPromise()
 				.then((result) => {
-					request.reset();
+					reset();
 					showLoading = false;
-					console.log('sent');
 					goto('/requests');
 				})
 				.catch((err) => {
@@ -101,9 +106,9 @@
 		}
 	}
 
-	let disableAddItem: boolean = false;
+	let disableAddItem = false;
 	let sumValue: string;
-	let isCredit: boolean = true;
+	let isCredit = true;
 
 	$: sumValue = sum(reqItems);
 	$: disableAddItem = disableButton(reqItems);
@@ -142,7 +147,7 @@
 	{#if !showLoading}
 		<div data-id="transactionItems" class="transaction-items">
 			{#each reqItems as item, i}
-				{#if item.rule_instance_id == null || item.rule_instance_id.length == 0}
+				{#if !item.rule_instance_id || item.rule_instance_id.length == 0}
 					<div
 						data-id="transactionItem"
 						data-id-index={i}
