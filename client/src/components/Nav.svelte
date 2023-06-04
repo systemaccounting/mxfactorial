@@ -2,7 +2,6 @@
 	import TopNav from './TopNav.svelte';
 	import Hamburger from './Hamburger.svelte';
 	import NavMenu from './NavMenu.svelte';
-	import NavMenuDev from './NavMenuDev.svelte';
 	import NavMask from './NavMask.svelte';
 	let isActive: boolean = false;
 </script>
@@ -12,11 +11,7 @@
 	<slot />
 	{#if isActive}
 		<NavMask bind:isActive />
-		{#if process.env.CLIENT_ID && process.env.POOL_ID}
-			<NavMenu bind:isActive />
-		{:else}
-			<NavMenuDev bind:isActive />
-		{/if}
+		<NavMenu bind:isActive />
 	{/if}
 	<Hamburger bind:isActive />
 </div>

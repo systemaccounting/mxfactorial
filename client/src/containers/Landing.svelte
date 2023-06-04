@@ -12,32 +12,38 @@
 	let showLoading: boolean = false;
 
 	function handleSignIn() {
-		signIn(account, password)
-			.then(() => {
-				setAccount(account);
-				goto('/account', {
-					replaceState: true
+		if (process.env.CLIENT_ID && process.env.POOL_ID) {
+			signIn(account, password)
+				.then(() => {
+					setAccount(account);
+					goto('/account');
+				})
+				.catch((err) => {
+					showLoading = false;
+					alert(err.message);
 				});
-			})
-			.catch((err) => {
-				showLoading = false;
-				alert(err.message);
-			});
+		} else {
+			setAccount(account);
+			goto('/account');
+		}
 		showLoading = true;
 	}
 
 	function handleSignUp() {
-		signUp(account, password)
-			.then((newAccount) => {
-				setAccount(newAccount);
-				goto('/account', {
-					replaceState: true
+		if (process.env.CLIENT_ID && process.env.POOL_ID) {
+			signUp(account, password)
+				.then((newAccount) => {
+					setAccount(newAccount);
+					goto('/account');
+				})
+				.catch((err) => {
+					showLoading = false;
+					alert(err.message);
 				});
-			})
-			.catch((err) => {
-				showLoading = false;
-				alert(err.message);
-			});
+		} else {
+			setAccount(account);
+			goto('/account');
+		}
 		showLoading = true;
 	}
 </script>

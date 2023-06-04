@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { removeAccount } from '../stores/account';
 	import { signOut } from '../auth/cognito';
+	import { browser } from '$app/environment';
+	import c from '../utils/constants';
 
 	export let isActive: boolean;
 
@@ -10,9 +11,16 @@
 	}
 
 	function handleSignOutClick() {
-		signOut();
+		if (process.env.CLIENT_ID && process.env.POOL_ID) {
+			signOut();
+		}
 		goto('/');
-		removeAccount();
+		if (browser) {
+			localStorage.removeItem(c.ACCOUNT_KEY);
+			localStorage.removeItem(c.REQUEST_CREATE_KEY);
+			localStorage.removeItem(c.REQUESTS_PENDING_KEY);
+			localStorage.removeItem(c.HISTORY_KEY);
+		}
 	}
 </script>
 
