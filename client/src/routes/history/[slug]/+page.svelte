@@ -4,23 +4,32 @@
 	import Card from '../../../components/Card.svelte';
 	import Icon from '../../../icons/Icon.svelte';
 	import { faArrowLeft, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-	import { requestTime, isCreditor } from '../../../utils/transactions';
+	import TRANSACTION_BY_ID_QUERY from '../../../graphql/query/transactionByID';
+	import { requestTime, isCreditor, getTransContraAccount } from '../../../utils/transactions';
 	import { fromNow } from '../../../utils/date';
 	import DisputeIcon from '../../../icons/DisputeIcon.svelte';
 	import { account as currentAccount } from '../../../stores/account';
 	import Nav from '../../../components/Nav.svelte';
 	import { page } from '$app/stores';
+	import client from '../../../graphql/client';
+	import { account } from '../../../stores/account';
 
-	let transactionsByAccount = $page.data.transactionsByAccount;
-	let transactionId = $page.params.slug;
-	let transaction = transactionsByAccount.filter((r: App.ITransaction) => r.id == transactionId)[0]; // todo: handle error;
-	let rulesLastTrItems = transaction.transaction_items.sort((a: App.ITransactionItem) => {
-		// show rule generated transaction items last
-		if (a.rule_instance_id == null) {
-			return -1;
+	let transactionID = $page.params.slug;
+
+	async function getTransactionByID(): Promise<App.ITransaction> {
+		const variables = {
+			id: transactionID,
+			auth_account: $account
+		};
+
+		const res = await client.query(TRANSACTION_BY_ID_QUERY, variables).toPromise();
+
+		if (!res.data || !res.data.transactionByID) {
+			return {} as App.ITransaction;
+		} else {
+			return res.data.transactionByID;
 		}
-		return 0;
-	});
+	}
 </script>
 
 <Nav>
@@ -37,62 +46,68 @@
 			>
 		</DetailHeader>
 	</div>
-	<div data-id="transactionAuthor" data-id-req-author={transaction.author} class="container">
-		<Card minHeight="2rem">
-			<strong>{transaction.author}</strong>
-		</Card>
-	</div>
-	<div data-id="sumValue" class="container">
-		<Card minHeight="2rem">
-			<strong
-				>{isCreditor($currentAccount, rulesLastTrItems) ? '' : '-'}{transaction.sum_value}</strong
-			>
-		</Card>
-	</div>
-	<div data-id="transactionTime" class="container">
-		<Card titleFontSize="0.8rem">
-			<small>
-				<p class="time-title">
-					<strong> Equilibrium time </strong>
-				</p>
-			</small>
-			<span class="time-content">
-				{fromNow(requestTime(rulesLastTrItems))}
-			</span>
-		</Card>
-	</div>
-	<hr />
-	<div class="container">
-		{#each rulesLastTrItems as trItem, i}
-			<div data-id="transaction-item" data-id-index={i} class="container">
-				<Card>
-					<p class="transaction-item-title">
-						{trItem.item_id}
+	{#await getTransactionByID() then transaction}
+		<div data-id="contraAccount" data-id-contra-account={getTransContraAccount($account, transaction)} class="container">
+			<Card minHeight="2rem">
+				<strong>{getTransContraAccount($account, transaction)}</strong>
+			</Card>
+		</div>
+		<div data-id="sumValue" class="container">
+			<Card minHeight="2rem">
+				<strong
+					>{isCreditor($currentAccount, transaction.transaction_items)
+						? ''
+						: '-'}{transaction.sum_value}</strong
+				>
+			</Card>
+		</div>
+		<div data-id="transactionTime" class="container">
+			<Card titleFontSize="0.8rem">
+				<small>
+					<p class="time-title">
+						<strong> Equilibrium time </strong>
 					</p>
-					{trItem.quantity} x {trItem.price}
-				</Card>
-			</div>
-		{/each}
-	</div>
-	<hr />
-	<div class="container">
-		<Card titleFontSize="0.8rem">
-			<div style="clear: both;">
-				<p class="left zeros">Transaction ID</p>
-				<p class="right zeros">
-					{transaction.id}
-				</p>
-			</div>
-		</Card>
-	</div>
-	<div class="btn-group">
-		<Button disabled={false} class="dispute-btn">
-			<DisputeIcon
-				style="transform: translate(-6px, 4px)
+				</small>
+				<span class="time-content">
+					{fromNow(requestTime(transaction.transaction_items))}
+				</span>
+			</Card>
+		</div>
+		<hr />
+		<div class="container">
+			{#each transaction.transaction_items as trItem, i}
+				<div data-id="transaction-item" data-id-index={i} class="container">
+					<Card>
+						<p class="transaction-item-title">
+							{trItem.item_id}
+						</p>
+						{trItem.quantity} x {trItem.price}
+					</Card>
+				</div>
+			{/each}
+		</div>
+		<hr />
+		<div class="container">
+			<Card titleFontSize="0.8rem">
+				<div style="clear: both;">
+					<p class="left zeros">Transaction ID</p>
+					<p class="right zeros">
+						{transaction.id}
+					</p>
+				</div>
+			</Card>
+		</div>
+		<div class="btn-group">
+			<Button disabled={false} class="dispute-btn">
+				<DisputeIcon
+					style="transform: translate(-6px, 4px)
 	;"
-			/><span class="dispute-btn-text"> Dispute</span>
-		</Button>
-	</div>
+				/><span class="dispute-btn-text"> Dispute</span>
+			</Button>
+		</div>
+	{:catch error}
+		<p>{error.message}</p>
+	{/await}
 </Nav>
 
 <style>

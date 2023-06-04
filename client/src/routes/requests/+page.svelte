@@ -2,27 +2,45 @@
 	import Nav from '../../components/Nav.svelte';
 	import SwitchButtons from '../../components/SwitchButtons.svelte';
 	import RequestCard from '../../components/RequestCard.svelte';
-	import { isCreditor, isRejected, requestTime, getContraAccount } from '../../utils/transactions';
-	import { account as currentAccount } from '../../stores/account';
+	import {
+		isCreditor,
+		isRejected,
+		requestTime,
+		getTransContraAccount
+	} from '../../utils/transactions';
+	import { account } from '../../stores/account';
 	import { duplicateRequestsPerRole } from '../../utils/transactions';
-	import type { PageData } from './$types';
+	import { requestsPending } from '../../stores/requestsPending';
+	import REQUESTS_BY_ACCOUNT_QUERY from '../../graphql/query/requestsByAccount';
+	import client from '../../graphql/client';
 
-	export let data: PageData;
+	async function getRequestsByAccount(): Promise<App.ITransaction[]> {
+		const variables = {
+			auth_account: $account,
+			account_name: $account
+		};
 
-	let requestsByAccount: App.ITransaction[];
+		const res = await client.query(REQUESTS_BY_ACCOUNT_QUERY, variables).toPromise();
 
-	if (data.requestsByAccount) {
-		const requestsPerRole = duplicateRequestsPerRole(
-			$currentAccount as unknown as string,
-			data.requestsByAccount
-		); // duplicate requests where account debitor and creditor
+		if (!res.data.requestsByAccount || res.data.requestsByAccount.length == 0) {
+			requestsPending.set([]);
+			return [];
+		} else {
+			let requestsByAccount: App.ITransaction[];
+			const requestsPerRole = duplicateRequestsPerRole(
+				$account as unknown as string,
+				res.data.requestsByAccount
+			); // duplicate transactions where account debitor and creditor
 
-		requestsByAccount = requestsPerRole.sort((a: App.ITransaction, b: App.ITransaction) => {
-			if (requestTime(a.transaction_items) < requestTime(b.transaction_items)) {
-				return 1;
-			}
-			return -1;
-		});
+			requestsByAccount = requestsPerRole.sort((a: App.ITransaction, b: App.ITransaction) => {
+				if (requestTime(a.transaction_items) < requestTime(b.transaction_items)) {
+					return 1;
+				}
+				return -1;
+			});
+			requestsPending.set(requestsByAccount);
+			return requestsByAccount;
+		}
 	}
 
 	let isActive: boolean = true;
@@ -35,7 +53,7 @@
 			<span slot="right">Active</span>
 		</SwitchButtons>
 	</div>
-	{#if requestsByAccount}
+	{#await getRequestsByAccount() then requestsByAccount}
 		<div class="requests">
 			<div class="container">
 				{#each requestsByAccount as req, i}
@@ -44,9 +62,9 @@
 							<a href={'/requests/' + req['id']}>
 								<div class="container" data-id-index={i} data-id-req={req['id']}>
 									<RequestCard
-										contraAccount={getContraAccount($currentAccount, req)}
-										isCurrentAccountAuthor={req['author'] == $currentAccount}
-										isCurrentAccountCreditor={isCreditor($currentAccount, req['transaction_items'])}
+										contraAccount={getTransContraAccount($account, req)}
+										isCurrentAccountAuthor={req['author'] == $account}
+										isCurrentAccountCreditor={isCreditor($account, req['transaction_items'])}
 										requestTime={requestTime(req['transaction_items'])}
 										sumValue={req['sum_value']}
 									/>
@@ -57,9 +75,9 @@
 						<a href={'/requests/' + req['id']}>
 							<div class="container" data-id-index={i} data-id-req={req['id']}>
 								<RequestCard
-									contraAccount={$currentAccount == req['author'] ? $currentAccount : req['author']}
-									isCurrentAccountAuthor={req['author'] == $currentAccount}
-									isCurrentAccountCreditor={isCreditor($currentAccount, req['transaction_items'])}
+									contraAccount={$account == req['author'] ? $account : req['author']}
+									isCurrentAccountAuthor={req['author'] == $account}
+									isCurrentAccountCreditor={isCreditor($account, req['transaction_items'])}
 									requestTime={requestTime(req['transaction_items'])}
 									sumValue={req['sum_value']}
 								/>
@@ -69,7 +87,9 @@
 				{/each}
 			</div>
 		</div>
-	{/if}
+	{:catch error}
+		<p>{error.message}</p>
+	{/await}
 </Nav>
 <slot />
 

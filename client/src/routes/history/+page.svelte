@@ -2,39 +2,59 @@
 	import Nav from '../../components/Nav.svelte';
 	import Balance from '../../components/Balance.svelte';
 	import HistoryCard from '../../components/HistoryCard.svelte';
-	import { duplicateTransactionsPerRole, isCreditor, requestTime } from '../../utils/transactions';
-	import { account as currentAccount } from '../../stores/account';
-	import type { PageData } from './$types';
+	import TRANSACTIONS_BY_ACCOUNT_QUERY from '../../graphql/query/transactionsByAccount';
+	import client from '../../graphql/client';
+	import {
+		duplicateTransactionsPerRole,
+		isCreditor,
+		requestTime,
+		getTransContraAccount
+	} from '../../utils/transactions';
+	import { account } from '../../stores/account';
+	import { history } from '../../stores/history';
 
-	export let data: PageData;
+	async function getTransactionsByAccount(): Promise<App.ITransaction[]> {
+		const variables = {
+			auth_account: $account,
+			account_name: $account
+		};
 
-	let transactionsByAccount: App.ITransaction[];
+		const res = await client.query(TRANSACTIONS_BY_ACCOUNT_QUERY, variables).toPromise();
 
-	if (data.transactionsByAccount) {
-		const transactionsPerRole = duplicateTransactionsPerRole(
-			$currentAccount as unknown as string,
-			data.transactionsByAccount
-		); // duplicate transactions where account debitor and creditor
+		if (!res.data.transactionsByAccount || res.data.transactionsByAccount.length == 0) {
+			history.set([]);
+			return [];
+		} else {
+			let transactionsByAccount: App.ITransaction[];
+			const transactionsPerRole = duplicateTransactionsPerRole(
+				$account as unknown as string,
+				res.data.transactionsByAccount
+			); // duplicate transactions where account debitor and creditor
 
-		transactionsByAccount = transactionsPerRole.sort((a: App.ITransaction, b: App.ITransaction) => {
-			if (requestTime(a.transaction_items) < requestTime(b.transaction_items)) {
-				return 1;
-			}
-			return -1;
-		});
+			transactionsByAccount = transactionsPerRole.sort(
+				(a: App.ITransaction, b: App.ITransaction) => {
+					if (requestTime(a.transaction_items) < requestTime(b.transaction_items)) {
+						return 1;
+					}
+					return -1;
+				}
+			);
+			history.set(transactionsByAccount);
+			return transactionsByAccount;
+		}
 	}
 </script>
 
 <Nav>
 	<Balance />
-	{#if transactionsByAccount}
+	{#await getTransactionsByAccount() then transactionsByAccount}
 		<div class="container">
 			{#each transactionsByAccount as tr, i}
 				<a href={'/history/' + tr['id']}>
 					<div class="history" data-id-index={i} data-id-tr={tr.id}>
 						<HistoryCard
-							contraAccount={$currentAccount == tr.author ? $currentAccount : tr.author}
-							isCurrentAccountCreditor={isCreditor($currentAccount, tr.transaction_items)}
+							contraAccount={getTransContraAccount($account, tr)}
+							isCurrentAccountCreditor={isCreditor($account, tr.transaction_items)}
 							equilibriumTime={requestTime(tr.transaction_items)}
 							sumValue={tr.sum_value}
 						/>
@@ -42,7 +62,9 @@
 				</a>
 			{/each}
 		</div>
-	{/if}
+	{:catch error}
+		<p>request failed: ${error.message}</p>
+	{/await}
 </Nav>
 
 <style>
