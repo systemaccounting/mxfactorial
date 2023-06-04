@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from "./Input.svelte";
 	import RemoveIcon from "../icons/RemoveIcon.svelte";
-	import request from "../stores/request";
+	import { changeRequestItem } from "../stores/requestCreate";
 	export let index: number;
 	export let nameValue: string;
 	export let priceValue: string;
@@ -15,15 +15,15 @@
 	const ITEM_QUANTITY: string = "quantity";
 
 	function handleName(e: CustomEvent) {
-		request.changeRequestItem(index, ITEM_NAME, e.detail.value);
+		changeRequestItem(index, ITEM_NAME, e.detail.value);
 	}
 
 	function handlePrice(e: CustomEvent) {
-		request.changeRequestItem(index, ITEM_PRICE, e.detail.value);
+		changeRequestItem(index, ITEM_PRICE, e.detail.value);
 	}
 
 	function handleQuantity(e: CustomEvent) {
-		request.changeRequestItem(index, ITEM_QUANTITY, e.detail.value);
+		changeRequestItem(index, ITEM_QUANTITY, e.detail.value);
 	}
 </script>
 

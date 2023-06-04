@@ -1,28 +1,24 @@
 <script lang="ts">
 	export let switchButtons: boolean;
 	export let dataId: string;
-	import request from "../stores/request";
+	import { switchRecipient } from '../stores/requestCreate';
 
 	function handleLeftButtonClick(): void {
 		switchButtons = false;
-		request.switchRecipient();
+		switchRecipient();
 	}
 
 	function handleRightButtonClick(): void {
 		switchButtons = true;
-		request.switchRecipient();
+		switchRecipient();
 	}
 </script>
 
 <div data-id={dataId} class="group">
-	<button
-		on:click={handleLeftButtonClick}
-		class={switchButtons ? "inactive" : "active"}
+	<button on:click={handleLeftButtonClick} class={switchButtons ? 'inactive' : 'active'}
 		><slot name="left" /></button
 	>
-	<button
-		on:click={handleRightButtonClick}
-		class={switchButtons ? "active" : "inactive"}
+	<button on:click={handleRightButtonClick} class={switchButtons ? 'active' : 'inactive'}
 		><slot name="right" /></button
 	>
 </div>

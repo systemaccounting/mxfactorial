@@ -3,11 +3,11 @@
 	import { page } from '$app/stores';
 	import Icon from '../icons/Icon.svelte';
 	import { faHome, faFlag } from '@fortawesome/free-solid-svg-icons';
-	import request from '../stores/request';
+	import { reset } from '../stores/requestCreate';
 
 	function handleNavigation() {
 		if ($page.url.pathname == '/account') {
-			request.reset();
+			reset();
 		}
 		goto('/account');
 	}
