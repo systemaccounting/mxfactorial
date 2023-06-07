@@ -17,6 +17,7 @@ const TRANSACTION_BY_ID_QUERY = gql`
 				price
 				quantity
 				debitor_first
+				rule_exec_ids
 				rule_instance_id
 				unit_of_measurement
 				units_measured

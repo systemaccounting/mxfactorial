@@ -202,7 +202,7 @@
     "method": "POST",
     "sortNum": 70000,
     "created": "2023-01-22T03:27:31.004Z",
-    "modified": "2023-05-16T06:27:14.135Z",
+    "modified": "2023-06-07T04:44:13.001Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -219,7 +219,7 @@
       "raw": "",
       "form": [],
       "graphql": {
-        "query": "query getRequestByID($id: String!, $auth_account: String!) {\n  requestByID(id: $id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
+        "query": "query getRequestByID($id: String!, $auth_account: String!) {\n  requestByID(id: $id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_exec_ids\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
         "variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"id\": \"1\"\n}"
       }
     },
@@ -298,7 +298,7 @@
     "method": "POST",
     "sortNum": 100000,
     "created": "2023-01-22T03:27:31.007Z",
-    "modified": "2023-05-16T06:27:34.301Z",
+    "modified": "2023-06-07T04:43:21.312Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -315,7 +315,7 @@
       "raw": "",
       "form": [],
       "graphql": {
-        "query": "query getTransactionByID($id: String!, $auth_account: String!) {\n  transactionByID(id: $id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
+        "query": "query getTransactionByID($id: String!, $auth_account: String!) {\n  transactionByID(id: $id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_exec_ids\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n        approvals {\n            id\n            rule_instance_id\n            transaction_id\n            transaction_item_id\n            account_name\n            account_role\n            device_id\n            device_latlng\n            approval_time\n            rejection_time\n            expiration_time\n        }\n    }\n  }\n}",
         "variables": "{\n  \"auth_account\": \"JoeCarter\",\n  \"id\": \"2\"\n}"
       }
     },
