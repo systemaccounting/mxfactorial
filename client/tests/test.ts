@@ -5,25 +5,65 @@ test('2 buttons on landing page', async ({ page }) => {
 	await expect(await page.getByRole('button')).toHaveCount(2);
 });
 
+test('request detail screen pairs transaction items with rule added items', async ({ page }) => {
+	await signIn(page, "JacobWebb")
+	await page.waitForSelector('css=.first')
+	await page.locator('css=.first').click();
+	await page.getByText('Requests').click();
+	await page.locator('css=[data-id-req="1"]').click();
+	await expect(await getFirstNTransactionItems(page, 6)).toEqual(
+		[
+			// migrations/testseed/000003_request.up.sql
+			{
+				item_id: "eggs",
+				quantity: "1",
+				price: "3",
+			},
+			{
+				item_id: salesTax,
+				quantity: "1",
+				price: "0.27",
+			},
+			{
+				item_id: "bread",
+				quantity: "2",
+				price: "2",
+			},
+			{
+				item_id: salesTax,
+				quantity: "2",
+				price: "0.18",
+			},
+			{
+				item_id: "milk",
+				quantity: "1",
+				price: "2",
+			},
+			{
+				item_id: salesTax,
+				quantity: "1",
+				price: "0.18",
+			},
+		]
+	);
+	await signOut(page);
+});
+
 test('JacobWebb transacts with GroceryStore', async ({ page }) => {
-	await page.goto('/');
-	await page.getByPlaceholder("account").fill("GroceryStore");
-	await page.getByRole('button', { name: 'Sign In' }).click();
+	await signIn(page, "GroceryStore")
 	await page.getByPlaceholder("Recipient").fill("JacobWebb");
 	await page.getByPlaceholder("item").fill("bread");
 	await page.getByPlaceholder("Price").fill("3.000");
 	await page.getByPlaceholder("Quantity").fill("3");
-	await page.locator('css=[data-id="ruleItem"]').waitFor();
+	await page.locator('[data-id="ruleItem"] >> [data-id-index="0"]').waitFor();;
 	await page.getByRole('button', { name: 'Request' }).click();
 
 	const secondBrowser = await chromium.launch();
 	const secondContext = await secondBrowser.newContext()
 	const secondPage = await secondContext.newPage()
 
-	await secondPage.goto('/')
-	await secondPage.getByPlaceholder("account").fill("JacobWebb");
-	await secondPage.getByRole('button', { name: 'Sign In' }).click();
-	await secondPage.waitForSelector('css=.first')
+	await signIn(secondPage, "JacobWebb")
+	await secondPage.waitForSelector('css=.first');
 	await secondPage.locator('css=.first').click();
 	await secondPage.getByText('Requests').click();
 	await secondPage.locator('css=[data-id-req="3"]').click();
@@ -38,6 +78,60 @@ test('JacobWebb transacts with GroceryStore', async ({ page }) => {
 	await expect(JacobWebbAccountBalance).toBe('990.190');
 	await expect(GroceryStoreAccountBalance).toBe('1009.000');
 
-	await secondContext.close()
-	await secondBrowser.close()
+	await signOut(page);
+	await signOut(secondPage);
+	await secondContext.close();
+	await secondBrowser.close();
 });
+
+test('history detail screen pairs transaction items with rule added items', async ({ page }) => {
+	await signIn(page, "JacobWebb")
+	await page.waitForSelector('css=.first')
+	await page.locator('css=.first').click();
+	await page.getByText('History').click();
+	await page.locator('css=[data-id-tr="3"]').click();
+	await expect(await getFirstNTransactionItems(page, 2)).toEqual(
+		[
+			{
+				item_id: "bread",
+				quantity: "3",
+				price: "3",
+			},
+			{
+				item_id: salesTax,
+				quantity: "3",
+				price: "0.27",
+			}
+		]
+	);
+	await signOut(page);
+});
+
+async function signIn(page, account) {
+	await page.goto('/')
+	await page.getByPlaceholder("account").fill(account);
+	await page.getByRole('button', { name: 'Sign In' }).click();
+}
+
+async function signOut(page) {
+	await page.waitForSelector('css=.first')
+	await page.locator('css=.first').click();
+	await page.getByText('Sign Out').click();
+}
+
+async function getFirstNTransactionItems(page, n) {
+	const transactionItems = [];
+	for (let i = 0; i < n; i++) {
+
+		transactionItems.push({
+			item_id: await page.locator(`css=[data-id-index="${i}"] .transaction-item-title`).innerText(),
+			quantity: await page.locator(`css=[data-id-index="${i}"] .transaction-item-quantity`).innerText(),
+			price: await page.locator(`css=[data-id-index="${i}"] .transaction-item-price`).innerText(),
+		})
+
+
+	}
+	return transactionItems
+}
+
+const salesTax = '9% state sales tax';
