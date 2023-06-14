@@ -5,7 +5,6 @@
 	import Input from '../../components/Input.svelte';
 	import SwitchButtons from '../../components/SwitchButtons.svelte';
 	import TransactionItem from '../../components/TransactionItem.svelte';
-	import RulesUrql from '../../containers/RulesUrql.svelte';
 	import RuleItem from '../../components/RuleItem.svelte';
 	import Button from '../../components/Button.svelte';
 	import AddIcon from '../../icons/AddIcon.svelte';
@@ -13,11 +12,11 @@
 	import {
 		sum,
 		disableButton,
-		accountValuesPresent,
-		filterUserAddedItems
+		filterUserAddedItems,
+		accountsAvailable
 	} from '../../utils/transactions';
-
 	import {
+		addRuleItems,
 		requestCreate,
 		addRequestItem,
 		removeRequestItem,
@@ -26,27 +25,62 @@
 		getRecipient
 	} from '../../stores/requestCreate';
 	import { account } from '../../stores/account';
-
 	import CREATE_REQUEST_MUTATION from '../../graphql/mutation/createRequest';
 	import { Pulse } from 'svelte-loading-spinners';
 	import type { Client } from '@urql/core';
 	import { getContext, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import c from '../../utils/constants'
+	import c from '../../utils/constants';
+	import RULES_QUERY from '../../graphql/query/rules';
+	import initialJSON from '../../data/initial.json';
+	const initial: App.ITransactionItem[] = JSON.parse(JSON.stringify(initialJSON));
 
 	let client: Client = getContext(c.CLIENT_CTX_KEY);
 
-	let reqItems: App.ITransactionItem[];
-	let rulesEventCount: number = 0;
 	let trItemHeight: number;
-	let prevReqItemsCount: number = 0;
+	let prevReqItemsCount = 0;
 	// restore recipient saved in store if avail
 	let recipient = getRecipient($account) ? getRecipient($account) : '';
-	let showLoading: boolean = false;
+	let showLoading = false;
+	let rulesEventCount = 0;
+	let previouslySubmitted = ''; // used to send rules request only on diff
+	const rulesRequestTimeBufferMs = 995; // 5 ms remainder added in setTimeout
+	let minRequestTime = new Date().getTime() + rulesRequestTimeBufferMs;
+	let sumValue: string;
+	let isCredit = true;
+
+	$: reqItems = initial;
+	$: sumValue = sum(reqItems);
+	$: disableAddItem = true;
+	$: handleAutoScroll(reqItems);
+	$: resetRecipient(reqItems);
 
 	requestCreate.subscribe(function (requestItems: App.ITransactionItem[]): void {
 		reqItems = requestItems;
+		minRequestTime = new Date().getTime() + rulesRequestTimeBufferMs;
+		disableAddItem = disableButton(reqItems);
+		if (!disableAddItem && accountsAvailable(reqItems)) {
+			rulesEventCount++;
+			let userAdded = filterUserAddedItems(requestItems);
+			if (previouslySubmitted != JSON.stringify(userAdded)) {
+				setTimeout(async () => {
+					if (new Date().getTime() > minRequestTime) {
+						getRuleItems(userAdded);
+					}
+				}, rulesRequestTimeBufferMs + 5);
+			}
+		}
 	});
+
+	async function getRuleItems(userAdded: App.ITransactionItem[]) {
+		previouslySubmitted = JSON.stringify(userAdded);
+		const res = await client.query(RULES_QUERY, { transaction_items: userAdded }).toPromise();
+		if (!res.data || !res.data.rules) {
+			addRuleItems([]);
+		} else {
+			addRuleItems(res.data.rules.transaction_items);
+		}
+	}
 
 	function handleAddClick() {
 		addRequestItem();
@@ -86,7 +120,7 @@
 	}
 
 	function handleRequestClick() {
-		if (!disableButton(reqItems) && accountValuesPresent(reqItems)) {
+		if (!disableButton(reqItems) && accountsAvailable(reqItems)) {
 			client
 				.mutation(CREATE_REQUEST_MUTATION, {
 					auth_account: $account,
@@ -105,16 +139,6 @@
 			showLoading = true;
 		}
 	}
-
-	let disableAddItem = false;
-	let sumValue: string;
-	let isCredit = true;
-
-	$: sumValue = sum(reqItems);
-	$: disableAddItem = disableButton(reqItems);
-	$: !disableAddItem && rulesEventCount++; // count when add button enabled
-	$: handleAutoScroll(reqItems);
-	$: resetRecipient(reqItems);
 </script>
 
 <Nav>
@@ -147,7 +171,7 @@
 	{#if !showLoading}
 		<div data-id="transactionItems" class="transaction-items">
 			{#each reqItems as item, i}
-				{#if !item.rule_instance_id || item.rule_instance_id.length == 0}
+				{#if !item.rule_instance_id || !item.rule_instance_id.length}
 					<div
 						data-id="transactionItem"
 						data-id-index={i}
@@ -180,20 +204,17 @@
 			</span>
 		</div>
 
-		{#if rulesEventCount > 0}
+		{#if rulesEventCount && reqItems.filter((r) => r.rule_instance_id).length}
 			<div data-id="ruleItems" class="container">
-				<RulesUrql />
-				{#each reqItems as item, i}
-					{#if item.rule_instance_id && item.rule_instance_id.length > 0}
-						<div data-id="ruleItem" data-id-index={i} class="container">
-							<RuleItem
-								nameValue={item.item_id}
-								priceValue={item.price}
-								quantityValue={item.quantity}
-								index={i}
-							/>
-						</div>
-					{/if}
+				{#each reqItems.filter((r) => r.rule_instance_id) as item, i}
+					<div data-id="ruleItem" data-id-index={i} class="container">
+						<RuleItem
+							nameValue={item.item_id}
+							priceValue={item.price}
+							quantityValue={item.quantity}
+							index={i}
+						/>
+					</div>
 				{/each}
 			</div>
 		{/if}
