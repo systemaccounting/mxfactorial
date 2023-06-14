@@ -61,6 +61,12 @@ reset:
 			--renew-anon-volumes \
 			--force-recreate
 
+rebuild:
+	docker compose \
+		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.bitnami-postgres.yaml \
+		build \
+		--no-cache
+
 up:
 	@$(MAKE) run
 

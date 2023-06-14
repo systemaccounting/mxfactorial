@@ -155,6 +155,7 @@ compose-down:
 	bash scripts/compose.sh --down
 
 rebuild-db:
+	@$(MAKE) -C migrations rebuild
 	@$(MAKE) -C migrations run
 
 reset-db:
