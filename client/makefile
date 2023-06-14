@@ -81,8 +81,7 @@ install-browsers:
 test:
 	if ! [ -d node_modules ]; then npm install; fi
 	@$(MAKE) install-browsers
-	@$(MAKE) -C .. rebuild-db
-	@$(MAKE) -s get-secrets ENV=local
+	@$(MAKE) -C .. reset-db
 	npm run test
 
 test-ci:
