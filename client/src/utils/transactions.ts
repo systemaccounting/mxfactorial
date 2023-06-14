@@ -85,13 +85,13 @@ export function sum(trIts: ITransactionItem[]): string {
 
 export function disableButton(trIts: ITransactionItem[]): boolean {
 	for (const i of trIts) {
-		if (i.rule_instance_id && i.rule_instance_id.length > 0) {
+		if (i.rule_instance_id && i.rule_instance_id.length) {
 			continue;
 		}
 		if (
-			(i.item_id && i.item_id.length > 0) &&
-			(i.price && i.price.length > 0) &&
-			(i.quantity && i.quantity.length > 0)
+			(i.item_id && i.item_id.length) &&
+			(i.price && i.price.length) &&
+			(i.quantity && i.quantity.length)
 		) {
 			const price = parseFloat(i.price);
 			const quantity = parseFloat(i.quantity);
@@ -106,6 +106,17 @@ export function disableButton(trIts: ITransactionItem[]): boolean {
 		}
 	}
 	return false;
+}
+
+export function accountsAvailable(trItems: ITransaction[]): boolean {
+	for (const trItem of trItems) {
+		if (trItem.debitor && trItem.debitor.length && trItem.creditor && trItem.creditor.length) {
+			continue
+		} else {
+			return false
+		}
+	}
+	return true
 }
 
 export function requestTime(trItems: ITransactionItem[]): Date {
@@ -163,17 +174,6 @@ export function filterRuleAddedItems(reqItems: ITransactionItem[]): ITransaction
 	return reqItems.filter((x) => {
 		return x.rule_instance_id || x.rule_instance_id?.length > 0
 	})
-}
-
-export function accountValuesPresent(reqItems: ITransactionItem[]): boolean {
-	const debitorsWithValue = reqItems.filter((x) => {
-		return x.debitor || x.debitor?.length > 0
-	});
-	const creditorsWithValue = reqItems.filter((x) => {
-		return x.creditor || x.creditor?.length > 0
-	});
-	const allItemsHaveRecipients: boolean = reqItems.length == debitorsWithValue.length && reqItems.length == creditorsWithValue.length;
-	return allItemsHaveRecipients;
 }
 
 export function isRequestPending(
@@ -242,4 +242,39 @@ export function getTrItemsContraAccount(
 	}
 	console.error(`getTrItemsContraAccount error: ${currentAccount} not found`)
 	return null
+}
+
+export function sortTrItems(trItems: ITransactionItem[]) {
+	// create list of rule_exec_ids
+	let ruleExecIDs: string[] = [];
+	for (const trItem of trItems) {
+		if (trItem.rule_exec_ids) {
+			ruleExecIDs = ruleExecIDs.concat(trItem.rule_exec_ids)
+		}
+	}
+	// dedupe list
+	const unique: string[] = [ ...new Set(ruleExecIDs) ];
+	// for each unique value in rule_exec_ids
+	for (const uid of unique) {
+		// user added transaction item first
+		trItems.sort(a => {
+			if (a.rule_exec_ids.includes(uid) && !a.rule_instance_id) {
+				return 1
+			}
+			if (a.rule_exec_ids.includes(uid)) {
+				return -1
+			}
+			return 0
+		})
+		// rule added transaction item after
+		trItems.sort(a => {
+			if (a.rule_exec_ids.includes(uid) && a.rule_instance_id) {
+				return 1
+			}
+			if (a.rule_exec_ids.includes(uid)) {
+				return -1
+			}
+			return 0
+		})
+	}
 }

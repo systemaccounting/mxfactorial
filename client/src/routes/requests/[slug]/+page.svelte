@@ -10,7 +10,8 @@
 		expirationTime,
 		isCreditor,
 		isRequestPending,
-		getTransContraAccount
+		getTransContraAccount,
+		sortTrItems
 	} from '../../../utils/transactions';
 	import REQUEST_BY_ID_QUERY from '../../../graphql/query/requestByID';
 	import { fromNow } from '../../../utils/date';
@@ -35,8 +36,9 @@
 		};
 		const res = await client.query(REQUEST_BY_ID_QUERY, variables).toPromise();
 		if (!res.data || !res.data.requestByID) {
-			return {} as App.ITransaction;
+			return {} as App.ITransaction; // todo: support empty object in component
 		} else {
+			sortTrItems(res.data.requestByID.transaction_items)
 			return res.data.requestByID;
 		}
 	}
@@ -143,7 +145,10 @@
 								<p class="transaction-item-title">
 									{trItem.item_id}
 								</p>
-								{trItem.quantity} x {trItem.price}
+								<p class="quantity-price">
+									<span class="transaction-item-quantity">{trItem.quantity}</span> x
+									<span class="transaction-item-price">{trItem.price}</span>
+								</p>
 							</Card>
 						</div>
 					{/each}
@@ -211,6 +216,11 @@
 		border: 0;
 		padding: 0;
 		font-weight: 600;
+	}
+	.quantity-price {
+		margin: 0 0 0 0;
+		border: 0;
+		padding: 0;
 	}
 	.left {
 		float: left;

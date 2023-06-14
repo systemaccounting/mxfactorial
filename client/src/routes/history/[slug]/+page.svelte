@@ -5,7 +5,12 @@
 	import Icon from '../../../icons/Icon.svelte';
 	import { faArrowLeft, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 	import TRANSACTION_BY_ID_QUERY from '../../../graphql/query/transactionByID';
-	import { requestTime, isCreditor, getTransContraAccount } from '../../../utils/transactions';
+	import {
+		requestTime,
+		isCreditor,
+		getTransContraAccount,
+		sortTrItems
+	} from '../../../utils/transactions';
 	import { fromNow } from '../../../utils/date';
 	import DisputeIcon from '../../../icons/DisputeIcon.svelte';
 	import { account as currentAccount } from '../../../stores/account';
@@ -27,6 +32,7 @@
 		if (!res.data || !res.data.transactionByID) {
 			return {} as App.ITransaction;
 		} else {
+			sortTrItems(res.data.transactionByID.transaction_items);
 			return res.data.transactionByID;
 		}
 	}
@@ -47,7 +53,11 @@
 		</DetailHeader>
 	</div>
 	{#await getTransactionByID() then transaction}
-		<div data-id="contraAccount" data-id-contra-account={getTransContraAccount($account, transaction)} class="container">
+		<div
+			data-id="contraAccount"
+			data-id-contra-account={getTransContraAccount($account, transaction)}
+			class="container"
+		>
 			<Card minHeight="2rem">
 				<strong>{getTransContraAccount($account, transaction)}</strong>
 			</Card>
@@ -81,7 +91,10 @@
 						<p class="transaction-item-title">
 							{trItem.item_id}
 						</p>
-						{trItem.quantity} x {trItem.price}
+						<p class="quantity-price">
+							<span class="transaction-item-quantity">{trItem.quantity}</span> x
+							<span class="transaction-item-price">{trItem.price}</span>
+						</p>
 					</Card>
 				</div>
 			{/each}
@@ -145,6 +158,11 @@
 		border: 0;
 		padding: 0;
 		font-weight: 600;
+	}
+	.quantity-price {
+		margin: 0 0 0 0;
+		border: 0;
+		padding: 0;
 	}
 	.left {
 		float: left;
