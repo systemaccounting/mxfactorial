@@ -3,6 +3,7 @@
 	import { signIn, signUp } from '../auth/cognito';
 	import { Pulse } from 'svelte-loading-spinners';
 	import { setAccount } from '../stores/account';
+	import c from '../utils/constants';
 
 	let hasError: boolean = false;
 	let disabled: boolean = false;
@@ -12,7 +13,7 @@
 	let showLoading: boolean = false;
 
 	function handleSignIn() {
-		if (process.env.CLIENT_ID && process.env.POOL_ID) {
+		if (c.ENABLE_AUTH) {
 			signIn(account, password)
 				.then(() => {
 					setAccount(account);
@@ -30,7 +31,7 @@
 	}
 
 	function handleSignUp() {
-		if (process.env.CLIENT_ID && process.env.POOL_ID) {
+		if (c.ENABLE_AUTH) {
 			signUp(account, password)
 				.then((newAccount) => {
 					setAccount(newAccount);

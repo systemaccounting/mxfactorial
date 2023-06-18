@@ -6,4 +6,5 @@ export default {
 	REQUESTS_PENDING_KEY: `${STORAGE_PREFIX}:requestsPending`,
 	HISTORY_KEY: `${STORAGE_PREFIX}:history`,
 	CLIENT_CTX_KEY: 'client',
+	ENABLE_AUTH: (process.env.POOL_ID && process.env.CLIENT_ID) ? true : false,
 }

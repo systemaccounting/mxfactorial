@@ -1,6 +1,7 @@
 import { CognitoUserPool, AuthenticationDetails, CognitoUser} from 'amazon-cognito-identity-js';
 import type { ICognitoUserPoolData } from 'amazon-cognito-identity-js';
 import b64 from 'base-64';
+import c from '../utils/constants';
 
 const poolData: ICognitoUserPoolData = {
 	UserPoolId: process.env.POOL_ID ? b64.decode(process.env.POOL_ID).trim() : "",
@@ -10,7 +11,7 @@ const poolData: ICognitoUserPoolData = {
 let userPool: CognitoUserPool;
 let cognitoUser: CognitoUser;
 
-if (process.env.POOL_ID && process.env.CLIENT_ID) {
+if (c.ENABLE_AUTH) {
 	userPool = new CognitoUserPool(poolData);
 	cognitoUser = userPool.getCurrentUser();
 }
