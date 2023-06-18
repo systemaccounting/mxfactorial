@@ -55,6 +55,11 @@
 		flex-flow: column nowrap;
 		justify-content: flex-end;
 		list-style-type: none;
+		scrollbar-width: none;
+	}
+
+	ul::-webkit-scrollbar {
+		display: none;
 	}
 
 	li {
