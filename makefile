@@ -101,6 +101,9 @@ init-dev:
 		--key $(TFSTATE_ENV_FILE) \
 		--dir infrastructure/terraform/aws/environments/dev
 
+set-env-id:
+	$(MAKE) resume-dev
+
 resume-dev:
 	$(MAKE) -C infrastructure/terraform/aws/environments/dev resume
 
