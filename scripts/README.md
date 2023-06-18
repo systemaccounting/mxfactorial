@@ -287,3 +287,7 @@ restarts services locally if not all services started
 ##### `list-pids.sh`
 
 print list of pids and apps
+
+##### `print-value.sh`
+
+print the value of an `env-var` in `project.yaml`
