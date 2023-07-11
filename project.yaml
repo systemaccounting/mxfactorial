@@ -118,7 +118,7 @@ infrastructure:
                 default: v1
               GRAPHQL_URI:
                 ssm: api/graphql/uri
-                default: null
+                default: null # script sets as localhost:$PORT
               REQUEST_CREATE_URL:
                 ssm: service/lambda/request_create/url
                 default: null
