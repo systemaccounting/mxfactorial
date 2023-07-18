@@ -50,17 +50,22 @@ mod milli_tz_format {
     }
 }
 
-#[test]
-fn it_deserializes_time() {
-    let date_str = "2023-02-28T04:21:08.363Z";
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    let want = TZTime(
-        DateTime::parse_from_rfc3339(date_str)
-            .unwrap()
-            .with_timezone(&Utc),
-    );
+    #[test]
+    fn it_deserializes_time() {
+        let date_str = "2023-02-28T04:21:08.363Z";
 
-    let got: TZTime = serde_json::from_str(&format!("\"{}\"", date_str)).unwrap();
+        let want = TZTime(
+            DateTime::parse_from_rfc3339(date_str)
+                .unwrap()
+                .with_timezone(&Utc),
+        );
 
-    assert_eq!(got, want);
+        let got: TZTime = serde_json::from_str(&format!("\"{}\"", date_str)).unwrap();
+
+        assert_eq!(got, want);
+    }
 }

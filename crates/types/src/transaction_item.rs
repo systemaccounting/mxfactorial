@@ -1,10 +1,6 @@
 #[allow(unused_imports)]
 use crate::{account::AccountProfiles, transaction};
-use crate::{
-    account_role::AccountRole,
-    approval::{Approval, Approvals},
-    time::TZTime,
-};
+use crate::{account_role::AccountRole, approval::Approvals, time::TZTime};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -57,50 +53,6 @@ impl TransactionItem {
     pub fn set_none_rule_exec_ids_as_empty(&mut self) {
         if self.rule_exec_ids.is_none() {
             self.rule_exec_ids = Some(vec![])
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-
-    use super::*;
-    use serde_json;
-
-    #[test]
-    fn it_deserializes_a_transaction_item() {
-        let got: TransactionItem = serde_json::from_str(
-            r#"
-        {
-            "id": null,
-            "transaction_id": null,
-            "item_id": "bottled water",
-            "price": "1.000",
-            "quantity": "2",
-            "debitor_first": false,
-            "rule_instance_id": null,
-            "rule_exec_ids": [],
-            "unit_of_measurement": null,
-            "units_measured": null,
-            "debitor": "JacobWebb",
-            "creditor": "GroceryStore",
-            "debitor_profile_id": null,
-            "creditor_profile_id": null,
-            "debitor_approval_time": null,
-            "creditor_approval_time": null,
-            "debitor_expiration_time": null,
-            "creditor_expiration_time": null,
-            "debitor_rejection_time": null,
-            "creditor_rejection_time": null,
-            "approvals": []
-        }"#,
-        )
-        .unwrap();
-
-        let want = create_test_transaction_item();
-
-        if got != want {
-            panic!("got {:#?}, want {:#?}", got, want);
         }
     }
 }
@@ -219,10 +171,55 @@ impl TransactionItems {
     }
 }
 
-#[test]
-fn it_deserializes_transaction_items() {
-    let got: TransactionItems = serde_json::from_str(
-        r#"
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use crate::approval::Approval;
+    use crate::transaction::tests::create_test_transaction;
+    use serde_json;
+
+    #[test]
+    fn it_deserializes_a_transaction_item() {
+        let got: TransactionItem = serde_json::from_str(
+            r#"
+        {
+            "id": null,
+            "transaction_id": null,
+            "item_id": "bottled water",
+            "price": "1.000",
+            "quantity": "2",
+            "debitor_first": false,
+            "rule_instance_id": null,
+            "rule_exec_ids": [],
+            "unit_of_measurement": null,
+            "units_measured": null,
+            "debitor": "JacobWebb",
+            "creditor": "GroceryStore",
+            "debitor_profile_id": null,
+            "creditor_profile_id": null,
+            "debitor_approval_time": null,
+            "creditor_approval_time": null,
+            "debitor_expiration_time": null,
+            "creditor_expiration_time": null,
+            "debitor_rejection_time": null,
+            "creditor_rejection_time": null,
+            "approvals": []
+        }"#,
+        )
+        .unwrap();
+
+        let want = create_test_transaction_item();
+
+        if got != want {
+            panic!("got {:#?}, want {:#?}", got, want);
+        }
+    }
+
+    #[test]
+    fn it_deserializes_transaction_items() {
+        let got: TransactionItems = serde_json::from_str(
+            r#"
 	[
 		{
 			"id": null,
@@ -326,76 +323,49 @@ fn it_deserializes_transaction_items() {
 		}
 	]
 	"#,
-    )
-    .unwrap();
-
-    let want: TransactionItems = create_test_transaction_items();
-
-    if got != want {
-        panic!("got {:#?}, want {:#?}", got, want)
-    }
-}
-
-#[test]
-fn it_returns_creditor_first() {
-    let test_transaction = transaction::create_test_transaction();
-    let got = test_transaction
-        .transaction_items
-        .is_debitor_first()
+        )
         .unwrap();
-    let want = false;
-    assert_eq!(got, want);
-}
 
-#[test]
-fn it_returns_debitor_first() {
-    let test_transaction = create_test_debitor_first_transaction_items();
-    let got = test_transaction.is_debitor_first().unwrap();
-    let want = true;
-    assert_eq!(got, want);
-}
+        let want: TransactionItems = create_test_transaction_items();
 
-#[test]
-fn it_returns_inconsistent_err() {
-    let test_transaction = create_test_inconsistent_err_transaction_items();
-    let got = test_transaction.is_debitor_first().map_err(|e| e);
-    let want = Err(InconsistentValueError);
-    assert_eq!(got, want);
-}
-
-pub fn create_test_transaction_item() -> TransactionItem {
-    TransactionItem {
-        id: None,
-        transaction_id: None,
-        item_id: String::from("bottled water"),
-        price: String::from("1.000"),
-        quantity: String::from("2"),
-        debitor_first: Some(false),
-        rule_instance_id: None,
-        rule_exec_ids: Some(vec![]),
-        unit_of_measurement: None,
-        units_measured: None,
-        debitor: String::from("JacobWebb"),
-        creditor: String::from("GroceryStore"),
-        debitor_profile_id: None,
-        creditor_profile_id: None,
-        debitor_approval_time: None,
-        creditor_approval_time: None,
-        debitor_rejection_time: None,
-        creditor_rejection_time: None,
-        debitor_expiration_time: None,
-        creditor_expiration_time: None,
-        approvals: Some(Approvals(vec![])),
+        if got != want {
+            panic!("got {:#?}, want {:#?}", got, want)
+        }
     }
-}
 
-pub fn create_test_transaction_items() -> TransactionItems {
-    TransactionItems(vec![
+    #[test]
+    fn it_returns_creditor_first() {
+        let test_transaction = create_test_transaction();
+        let got = test_transaction
+            .transaction_items
+            .is_debitor_first()
+            .unwrap();
+        let want = false;
+        assert_eq!(got, want);
+    }
+
+    #[test]
+    fn it_returns_debitor_first() {
+        let test_transaction = create_test_debitor_first_transaction_items();
+        let got = test_transaction.is_debitor_first().unwrap();
+        let want = true;
+        assert_eq!(got, want);
+    }
+
+    #[test]
+    fn it_returns_inconsistent_err() {
+        let test_transaction = create_test_inconsistent_err_transaction_items();
+        let got = test_transaction.is_debitor_first().map_err(|e| e);
+        let want = Err(InconsistentValueError);
+        assert_eq!(got, want);
+    }
+
+    pub fn create_test_transaction_item() -> TransactionItem {
         TransactionItem {
             id: None,
             transaction_id: None,
-            item_id: String::from("bread"),
-            price: String::from("3.000"),
+            item_id: String::from("bottled water"),
+            price: String::from("1.000"),
             quantity: String::from("2"),
             debitor_first: Some(false),
             rule_instance_id: None,
@@ -412,294 +382,322 @@ pub fn create_test_transaction_items() -> TransactionItems {
             creditor_rejection_time: None,
             debitor_expiration_time: None,
             creditor_expiration_time: None,
-            approvals: Some(Approvals(vec![
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("JacobWebb"),
-                    account_role: AccountRole::Debitor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("GroceryStore"),
-                    account_role: AccountRole::Creditor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-            ])),
-        },
-        TransactionItem {
-            id: None,
-            transaction_id: None,
-            item_id: String::from("milk"),
-            price: String::from("4.000"),
-            quantity: String::from("3"),
-            debitor_first: Some(false),
-            rule_instance_id: None,
-            rule_exec_ids: Some(vec![]),
-            unit_of_measurement: None,
-            units_measured: None,
-            debitor: String::from("JacobWebb"),
-            creditor: String::from("GroceryStore"),
-            debitor_profile_id: None,
-            creditor_profile_id: None,
-            debitor_approval_time: None,
-            creditor_approval_time: None,
-            debitor_rejection_time: None,
-            creditor_rejection_time: None,
-            debitor_expiration_time: None,
-            creditor_expiration_time: None,
-            approvals: Some(Approvals(vec![
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("JacobWebb"),
-                    account_role: AccountRole::Debitor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("GroceryStore"),
-                    account_role: AccountRole::Creditor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-            ])),
-        },
-    ])
-}
+            approvals: Some(Approvals(vec![])),
+        }
+    }
 
-pub fn create_test_debitor_first_transaction_items() -> TransactionItems {
-    TransactionItems(vec![
-        TransactionItem {
-            id: None,
-            transaction_id: None,
-            item_id: String::from("bread"),
-            price: String::from("3.000"),
-            quantity: String::from("2"),
-            debitor_first: Some(true),
-            rule_instance_id: None,
-            rule_exec_ids: Some(vec![]),
-            unit_of_measurement: None,
-            units_measured: None,
-            debitor: String::from("JacobWebb"),
-            creditor: String::from("GroceryStore"),
-            debitor_profile_id: None,
-            creditor_profile_id: None,
-            debitor_approval_time: None,
-            creditor_approval_time: None,
-            debitor_rejection_time: None,
-            creditor_rejection_time: None,
-            debitor_expiration_time: None,
-            creditor_expiration_time: None,
-            approvals: Some(Approvals(vec![
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("JacobWebb"),
-                    account_role: AccountRole::Debitor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("GroceryStore"),
-                    account_role: AccountRole::Creditor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-            ])),
-        },
-        TransactionItem {
-            id: None,
-            transaction_id: None,
-            item_id: String::from("milk"),
-            price: String::from("4.000"),
-            quantity: String::from("3"),
-            debitor_first: Some(true),
-            rule_instance_id: None,
-            rule_exec_ids: Some(vec![]),
-            unit_of_measurement: None,
-            units_measured: None,
-            debitor: String::from("JacobWebb"),
-            creditor: String::from("GroceryStore"),
-            debitor_profile_id: None,
-            creditor_profile_id: None,
-            debitor_approval_time: None,
-            creditor_approval_time: None,
-            debitor_rejection_time: None,
-            creditor_rejection_time: None,
-            debitor_expiration_time: None,
-            creditor_expiration_time: None,
-            approvals: Some(Approvals(vec![
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("JacobWebb"),
-                    account_role: AccountRole::Debitor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("GroceryStore"),
-                    account_role: AccountRole::Creditor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-            ])),
-        },
-    ])
-}
+    pub fn create_test_transaction_items() -> TransactionItems {
+        TransactionItems(vec![
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("bread"),
+                price: String::from("3.000"),
+                quantity: String::from("2"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("milk"),
+                price: String::from("4.000"),
+                quantity: String::from("3"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+        ])
+    }
 
-pub fn create_test_inconsistent_err_transaction_items() -> TransactionItems {
-    TransactionItems(vec![
-        TransactionItem {
-            id: None,
-            transaction_id: None,
-            item_id: String::from("bread"),
-            price: String::from("3.000"),
-            quantity: String::from("2"),
-            debitor_first: Some(true),
-            rule_instance_id: None,
-            rule_exec_ids: Some(vec![]),
-            unit_of_measurement: None,
-            units_measured: None,
-            debitor: String::from("JacobWebb"),
-            creditor: String::from("GroceryStore"),
-            debitor_profile_id: None,
-            creditor_profile_id: None,
-            debitor_approval_time: None,
-            creditor_approval_time: None,
-            debitor_rejection_time: None,
-            creditor_rejection_time: None,
-            debitor_expiration_time: None,
-            creditor_expiration_time: None,
-            approvals: Some(Approvals(vec![
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("JacobWebb"),
-                    account_role: AccountRole::Debitor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("GroceryStore"),
-                    account_role: AccountRole::Creditor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-            ])),
-        },
-        TransactionItem {
-            id: None,
-            transaction_id: None,
-            item_id: String::from("milk"),
-            price: String::from("4.000"),
-            quantity: String::from("3"),
-            debitor_first: Some(false),
-            rule_instance_id: None,
-            rule_exec_ids: Some(vec![]),
-            unit_of_measurement: None,
-            units_measured: None,
-            debitor: String::from("JacobWebb"),
-            creditor: String::from("GroceryStore"),
-            debitor_profile_id: None,
-            creditor_profile_id: None,
-            debitor_approval_time: None,
-            creditor_approval_time: None,
-            debitor_rejection_time: None,
-            creditor_rejection_time: None,
-            debitor_expiration_time: None,
-            creditor_expiration_time: None,
-            approvals: Some(Approvals(vec![
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("JacobWebb"),
-                    account_role: AccountRole::Debitor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-                Approval {
-                    id: None,
-                    rule_instance_id: None,
-                    transaction_id: None,
-                    transaction_item_id: None,
-                    account_name: String::from("GroceryStore"),
-                    account_role: AccountRole::Creditor,
-                    device_id: None,
-                    device_latlng: None,
-                    approval_time: None,
-                    rejection_time: None,
-                    expiration_time: None,
-                },
-            ])),
-        },
-    ])
+    pub fn create_test_debitor_first_transaction_items() -> TransactionItems {
+        TransactionItems(vec![
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("bread"),
+                price: String::from("3.000"),
+                quantity: String::from("2"),
+                debitor_first: Some(true),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("milk"),
+                price: String::from("4.000"),
+                quantity: String::from("3"),
+                debitor_first: Some(true),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+        ])
+    }
+
+    pub fn create_test_inconsistent_err_transaction_items() -> TransactionItems {
+        TransactionItems(vec![
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("bread"),
+                price: String::from("3.000"),
+                quantity: String::from("2"),
+                debitor_first: Some(true),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("milk"),
+                price: String::from("4.000"),
+                quantity: String::from("3"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+        ])
+    }
 }

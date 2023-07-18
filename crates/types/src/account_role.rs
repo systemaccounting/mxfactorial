@@ -56,34 +56,39 @@ pub const DEBITOR_FIRST: RoleSequence = [AccountRole::Debitor, AccountRole::Cred
 
 pub const CREDITOR_FIRST: RoleSequence = [AccountRole::Creditor, AccountRole::Debitor];
 
-#[test]
-fn it_deserializes_debitor() {
-    let want = String::from("debitor");
-    let got = AccountRole::Debitor.to_string();
-    assert_eq!(got, want)
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn it_deserializes_creditor() {
-    let want = String::from("creditor");
-    let got = AccountRole::Creditor.to_string();
-    assert_eq!(got, want)
-}
+    #[test]
+    fn it_deserializes_debitor() {
+        let want = String::from("debitor");
+        let got = AccountRole::Debitor.to_string();
+        assert_eq!(got, want)
+    }
 
-#[test]
-fn it_serializes_debitor() {
-    let account_role = "debitor";
-    let quoted = format!("\"{}\"", account_role);
-    let got: AccountRole = serde_json::from_str(&quoted).unwrap();
-    let want = AccountRole::Debitor;
-    assert_eq!(got, want)
-}
+    #[test]
+    fn it_deserializes_creditor() {
+        let want = String::from("creditor");
+        let got = AccountRole::Creditor.to_string();
+        assert_eq!(got, want)
+    }
 
-#[test]
-fn it_serializes_creditor() {
-    let account_role = "creditor";
-    let quoted = format!("\"{}\"", account_role);
-    let got: AccountRole = serde_json::from_str(&quoted).unwrap();
-    let want = AccountRole::Creditor;
-    assert_eq!(got, want)
+    #[test]
+    fn it_serializes_debitor() {
+        let account_role = "debitor";
+        let quoted = format!("\"{}\"", account_role);
+        let got: AccountRole = serde_json::from_str(&quoted).unwrap();
+        let want = AccountRole::Debitor;
+        assert_eq!(got, want)
+    }
+
+    #[test]
+    fn it_serializes_creditor() {
+        let account_role = "creditor";
+        let quoted = format!("\"{}\"", account_role);
+        let got: AccountRole = serde_json::from_str(&quoted).unwrap();
+        let want = AccountRole::Creditor;
+        assert_eq!(got, want)
+    }
 }
