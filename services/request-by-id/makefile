@@ -8,7 +8,7 @@ REQUEST_BY_ID_URL=$(HOST):$(REQUEST_BY_ID_PORT)
 TEST_ACCOUNT=JacobWebb
 TEST_AUTH_ACCOUNT=$(TEST_ACCOUNT)
 TEST_TRANSACTION_ID=1
-TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","id":"$(TEST_TRANSACTION_ID)"}'
+TEST_EVENT='{"auth_account":"$(TEST_AUTH_ACCOUNT)","account_name":"$(TEST_AUTH_ACCOUNT)","id":"$(TEST_TRANSACTION_ID)"}'
 TEST_SENDER_ACCOUNT=$(TEST_ACCOUNT)
 
 run:
@@ -16,11 +16,11 @@ run:
 		TEST_EVENT=$(TEST_EVENT) \
 		go run ./cmd/main.go
 
-invoke-docker:
+invoke-local:
 	@curl -s -d $(TEST_EVENT) $(REQUEST_BY_ID_URL) | yq -o=json
 
-demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(REQUEST_BY_ID_URL)
+demo:
+	@printf "*** request to %s at %s\n" $(SUB_PATH) $(REQUEST_BY_ID_URL)
 	@echo $(TEST_EVENT) | yq -o=json
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(REQUEST_BY_ID_URL)
-	@$(MAKE) invoke-docker
+	@printf "*** response from %s at %s\n" $(SUB_PATH) $(REQUEST_BY_ID_URL)
+	@$(MAKE) invoke-local

@@ -111,12 +111,16 @@ now:
 	$(MAKE) deploy-only ENV=dev
 
 invoke:
-	@$(MAKE) invoke-url
+	@$(MAKE) invoke-local
 
-invoke-url:
+invoke-function:
 	@$(MAKE) -s test-env-arg
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/invoke-function-url.sh \
 		--app-name $(APP_NAME) \
 		--payload $(TEST_EVENT) \
         --env $(ENV)
+
+# https://stackoverflow.com/a/32768048
+print-vars:
+	$(foreach v, $(.VARIABLES), $(info $(v) = $($(v))))

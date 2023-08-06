@@ -200,28 +200,28 @@ bootcamp:
 	@bash scripts/bootcamp.sh
 
 rule:
-	@$(MAKE) -C ./services/rule demo-docker
+	@$(MAKE) -C ./services/rule demo
 
 request-create:
-	@$(MAKE) -C ./services/request-create demo-docker
+	@$(MAKE) -C ./services/request-create demo
 
 request-approve:
-	@$(MAKE) -C ./services/request-approve demo-docker
+	@$(MAKE) -C ./services/request-approve demo
 
 balance-by-account:
-	@$(MAKE) -C ./services/balance-by-account demo-docker
+	@$(MAKE) -C ./services/balance-by-account demo
 
 request-by-id:
-	@$(MAKE) -C ./services/request-by-id demo-docker
+	@$(MAKE) -C ./services/request-by-id demo
 
 requests-by-account:
-	@$(MAKE) -C ./services/requests-by-account demo-docker
+	@$(MAKE) -C ./services/requests-by-account demo
 
 transaction-by-id:
-	@$(MAKE) -C ./services/transaction-by-id demo-docker
+	@$(MAKE) -C ./services/transaction-by-id demo
 
 transactions-by-account:
-	@$(MAKE) -C ./services/transactions-by-account demo-docker
+	@$(MAKE) -C ./services/transactions-by-account demo
 
 ###################### postgres ######################
 

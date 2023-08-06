@@ -17,11 +17,11 @@ run:
 		TEST_EVENT=$(TEST_EVENT) \
 		go run ./cmd/main.go
 
-invoke-docker:
+invoke-local:
 	@curl -s -d $(TEST_EVENT) $(TRANSACTIONS_BY_ACCOUNT_URL) | yq -o=json
 
-demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(TRANSACTIONS_BY_ACCOUNT_URL)
+demo:
+	@printf "*** request to %s at %s\n" $(SUB_PATH) $(TRANSACTIONS_BY_ACCOUNT_URL)
 	@echo $(TEST_EVENT) | yq -o=json
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(TRANSACTIONS_BY_ACCOUNT_URL)
-	@$(MAKE) invoke-docker
+	@printf "*** response from %s at %s\n" $(SUB_PATH) $(TRANSACTIONS_BY_ACCOUNT_URL)
+	@$(MAKE) invoke-local

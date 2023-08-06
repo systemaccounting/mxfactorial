@@ -36,14 +36,14 @@ water:
 
 ###################### invoke ######################
 
-invoke-docker:
+invoke-local:
 	@curl -s -H 'Content-Type: application/json' -d $(TEST_EVENT) $(RULE_URL) | yq -o=json
 
-demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(RULE_URL)
+demo:
+	@printf "*** request to %s at %s\n" $(SUB_PATH) $(RULE_URL)
 	@echo $(TEST_EVENT) | yq -o=json
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(RULE_URL)
-	@$(MAKE) invoke-docker
+	@printf "*** response from %s at %s\n" $(SUB_PATH) $(RULE_URL)
+	@$(MAKE) invoke-local
 
 
 ###################### docker ######################

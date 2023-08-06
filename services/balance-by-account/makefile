@@ -15,14 +15,14 @@ run:
 		TEST_EVENT=$(TEST_EVENT) \
 		go run ./cmd/main.go
 
-invoke-docker:
+invoke-local:
 	@curl -s -d $(TEST_EVENT) $(BALANCE_BY_ACCOUNT_URL)
 
-demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(BALANCE_BY_ACCOUNT_URL)
+demo:
+	@printf "*** request to %s at %s\n" $(SUB_PATH) $(BALANCE_BY_ACCOUNT_URL)
 	@echo $(TEST_EVENT) | yq -o=json
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(BALANCE_BY_ACCOUNT_URL)
-	@$(MAKE) invoke-docker
+	@printf "*** response from %s at %s\n" $(SUB_PATH) $(BALANCE_BY_ACCOUNT_URL)
+	@$(MAKE) invoke-local
 	@printf "\n\n\e[33m*** OBSERVE the following post-transaction conservation test ***\e[0m\n"
 	@printf "\ninitial balances: %s\n\n" 1000
 	@printf "GroceryStore new balance: %s\n" $$(curl -s -d '{"auth_account":"GroceryStore","account_name":"GroceryStore"}' $(BALANCE_BY_ACCOUNT_URL))

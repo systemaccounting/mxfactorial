@@ -15,11 +15,11 @@ run:
 		eval $$(cat $(ENV_FILE)) \
 		go run $(CMD_DIR)
 
-invoke-docker:
+invoke-local:
 	@curl -s -d $(TEST_EVENT) $(REQUEST_CREATE_URL) | yq -o=json
 
-demo-docker:
-	@printf "*** request to %s service at %s\n" $(APP_NAME) $(REQUEST_CREATE_URL)
+demo:
+	@printf "*** request to %s at %s\n" $(SUB_PATH) $(REQUEST_CREATE_URL)
 	@yq -o=json $(TEST_DATA_DIR)/$(TEST_DATA_FILE)
-	@printf "*** response from %s service at %s\n" $(APP_NAME) $(REQUEST_CREATE_URL)
-	@$(MAKE) invoke-docker
+	@printf "*** response from %s at %s\n" $(SUB_PATH) $(REQUEST_CREATE_URL)
+	@$(MAKE) invoke-local
