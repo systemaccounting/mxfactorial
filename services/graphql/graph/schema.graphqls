@@ -104,9 +104,9 @@ input TransactionItemInput {
 
 type Query {
   rules(transaction_items: [TransactionItemInput!]): Transaction
-  requestByID(id: String!, auth_account: String!): Transaction
+  requestByID(id: String!, account_name: String!, auth_account: String!): Transaction
   requestsByAccount(account_name: String!, auth_account: String!): [Transaction]
-  transactionByID(id: String!, auth_account: String!): Transaction
+  transactionByID(id: String!, account_name: String!, auth_account: String!): Transaction
   transactionsByAccount(account_name: String!, auth_account: String!): [Transaction]
   balance(account_name: String!, auth_account: String!): String
 }

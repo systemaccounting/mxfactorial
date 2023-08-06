@@ -99,12 +99,14 @@ func CreateIntraTransactionClientEvent(authAcct *string, trItems []*model.Transa
 
 type QueryByIDEvent struct {
 	AuthAccount *string `json:"auth_account"`
+	AccountName *string `json:"account_name"`
 	ID          *string `json:"id"`
 }
 
-func CreateQueryByIDEvent(authAcct *string, ID *string) *QueryByIDEvent {
+func CreateQueryByIDEvent(authAcct *string, accountName *string, ID *string) *QueryByIDEvent {
 	return &QueryByIDEvent{
 		AuthAccount: authAcct,
+		AccountName: accountName,
 		ID:          ID,
 	}
 }
@@ -217,11 +219,13 @@ func (r *Resolver) InvokeRequestApprove(
 
 func (r *Resolver) InvokeRequestByID(
 	transactionID,
+	accountName string,
 	authAccount string,
 ) (*model.Transaction, error) {
 
 	queryByIDEvent := CreateQueryByIDEvent(
 		&authAccount,
+		&accountName,
 		&transactionID,
 	)
 
@@ -285,11 +289,13 @@ func (r *Resolver) InvokeRequestsByAccount(
 
 func (r *Resolver) InvokeTransactionByID(
 	transactionID,
+	accountName string,
 	authAccount string,
 ) (*model.Transaction, error) {
 
 	queryByIDEvent := CreateQueryByIDEvent(
 		&authAccount,
+		&accountName,
 		&transactionID,
 	)
 

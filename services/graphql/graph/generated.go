@@ -65,10 +65,10 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Balance               func(childComplexity int, accountName string, authAccount string) int
-		RequestByID           func(childComplexity int, id string, authAccount string) int
+		RequestByID           func(childComplexity int, id string, accountName string, authAccount string) int
 		RequestsByAccount     func(childComplexity int, accountName string, authAccount string) int
 		Rules                 func(childComplexity int, transactionItems []*model.TransactionItemInput) int
-		TransactionByID       func(childComplexity int, id string, authAccount string) int
+		TransactionByID       func(childComplexity int, id string, accountName string, authAccount string) int
 		TransactionsByAccount func(childComplexity int, accountName string, authAccount string) int
 	}
 
@@ -115,9 +115,9 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Rules(ctx context.Context, transactionItems []*model.TransactionItemInput) (*model.Transaction, error)
-	RequestByID(ctx context.Context, id string, authAccount string) (*model.Transaction, error)
+	RequestByID(ctx context.Context, id string, accountName string, authAccount string) (*model.Transaction, error)
 	RequestsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error)
-	TransactionByID(ctx context.Context, id string, authAccount string) (*model.Transaction, error)
+	TransactionByID(ctx context.Context, id string, accountName string, authAccount string) (*model.Transaction, error)
 	TransactionsByAccount(ctx context.Context, accountName string, authAccount string) ([]*model.Transaction, error)
 	Balance(ctx context.Context, accountName string, authAccount string) (*string, error)
 }
@@ -260,7 +260,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.RequestByID(childComplexity, args["id"].(string), args["auth_account"].(string)), true
+		return e.complexity.Query.RequestByID(childComplexity, args["id"].(string), args["account_name"].(string), args["auth_account"].(string)), true
 
 	case "Query.requestsByAccount":
 		if e.complexity.Query.RequestsByAccount == nil {
@@ -296,7 +296,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.TransactionByID(childComplexity, args["id"].(string), args["auth_account"].(string)), true
+		return e.complexity.Query.TransactionByID(childComplexity, args["id"].(string), args["account_name"].(string), args["auth_account"].(string)), true
 
 	case "Query.transactionsByAccount":
 		if e.complexity.Query.TransactionsByAccount == nil {
@@ -727,14 +727,23 @@ func (ec *executionContext) field_Query_requestByID_args(ctx context.Context, ra
 	}
 	args["id"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["auth_account"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("auth_account"))
+	if tmp, ok := rawArgs["account_name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_name"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["auth_account"] = arg1
+	args["account_name"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["auth_account"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("auth_account"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["auth_account"] = arg2
 	return args, nil
 }
 
@@ -790,14 +799,23 @@ func (ec *executionContext) field_Query_transactionByID_args(ctx context.Context
 	}
 	args["id"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["auth_account"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("auth_account"))
+	if tmp, ok := rawArgs["account_name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("account_name"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["auth_account"] = arg1
+	args["account_name"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["auth_account"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("auth_account"))
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["auth_account"] = arg2
 	return args, nil
 }
 
@@ -1541,7 +1559,7 @@ func (ec *executionContext) _Query_requestByID(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().RequestByID(rctx, fc.Args["id"].(string), fc.Args["auth_account"].(string))
+		return ec.resolvers.Query().RequestByID(rctx, fc.Args["id"].(string), fc.Args["account_name"].(string), fc.Args["auth_account"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1683,7 +1701,7 @@ func (ec *executionContext) _Query_transactionByID(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().TransactionByID(rctx, fc.Args["id"].(string), fc.Args["auth_account"].(string))
+		return ec.resolvers.Query().TransactionByID(rctx, fc.Args["id"].(string), fc.Args["account_name"].(string), fc.Args["auth_account"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

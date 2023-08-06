@@ -58,13 +58,13 @@ func (r *queryResolver) Rules(ctx context.Context, transactionItems []*model.Tra
 }
 
 // RequestByID is the resolver for the requestByID field.
-func (r *queryResolver) RequestByID(ctx context.Context, id string, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) RequestByID(ctx context.Context, id string, accountName string, authAccount string) (*model.Transaction, error) {
 	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
-	tr, err := r.InvokeRequestByID(id, authAccount)
+	tr, err := r.InvokeRequestByID(id, accountName, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
@@ -88,13 +88,13 @@ func (r *queryResolver) RequestsByAccount(ctx context.Context, accountName strin
 }
 
 // TransactionByID is the resolver for the transactionByID field.
-func (r *queryResolver) TransactionByID(ctx context.Context, id string, authAccount string) (*model.Transaction, error) {
+func (r *queryResolver) TransactionByID(ctx context.Context, id string, accountName string, authAccount string) (*model.Transaction, error) {
 	authAccount, err := auth.GetAuthAccount(ctx, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
 	}
-	tr, err := r.InvokeTransactionByID(id, authAccount)
+	tr, err := r.InvokeTransactionByID(id, accountName, authAccount)
 	if err != nil {
 		logger.Log(logger.Trace(), err)
 		return nil, err
