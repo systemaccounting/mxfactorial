@@ -242,7 +242,7 @@ rebuilds image and container for docker compose service
 
 ##### `bootcamp.sh`
 
-trains user on docker compose commands, services and tests
+trains user on commands, services and tests
 
 ##### `set-uri-vars.sh`
 
