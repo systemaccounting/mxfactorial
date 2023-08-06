@@ -1,7 +1,5 @@
 package main
 
-// todo: testing
-
 import (
 	"context"
 	"errors"
