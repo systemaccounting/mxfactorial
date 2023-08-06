@@ -32,6 +32,7 @@
 	async function getRequestByID(): Promise<App.ITransaction> {
 		const variables = {
 			id: requestID,
+			account_name: $account,
 			auth_account: $account
 		};
 		const res = await client.query(REQUEST_BY_ID_QUERY, variables).toPromise();

@@ -24,6 +24,7 @@
 	async function getTransactionByID(): Promise<App.ITransaction> {
 		const variables = {
 			id: transactionID,
+			account_name: $account,
 			auth_account: $account
 		};
 

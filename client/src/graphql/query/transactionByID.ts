@@ -1,8 +1,8 @@
 import { gql } from "@urql/core";
 
 const TRANSACTION_BY_ID_QUERY = gql`
-	query getTransactionByID($id: String!, $auth_account: String!) {
-		transactionByID(id: $id, auth_account: $auth_account) {
+	query getTransactionByID($id: String!, $account_name: String!, $auth_account: String!) {
+		transactionByID(id: $id, account_name: $account_name, auth_account: $auth_account) {
 			id
 			rule_instance_id
 			author
