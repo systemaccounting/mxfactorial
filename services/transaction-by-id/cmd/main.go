@@ -65,7 +65,11 @@ func run(
 		return "", errors.New("missing auth_account. exiting")
 	}
 
-	if e.ID == nil {
+	if e.AccountName == nil || *e.AccountName == "" {
+		return "", errors.New("missing account_name. exiting")
+	}
+
+	if e.ID == nil || *e.ID == "" {
 		return "", errors.New("missing id. exiting")
 	}
 
