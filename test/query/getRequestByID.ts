@@ -1,8 +1,8 @@
 import { gql } from "graphql-request"
 
 export const getRequestByID = gql`
-query getRequestByID($id: String!, $auth_account: String!) {
-  requestByID(id: $id, auth_account: $auth_account) {
+query getRequestByID($id: String!, $account_name: String!, $auth_account: String!) {
+  requestByID(id: $id, account_name: $account_name, auth_account: $auth_account) {
     id
     rule_instance_id
     author

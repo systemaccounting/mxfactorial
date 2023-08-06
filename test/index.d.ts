@@ -18,6 +18,7 @@ export interface IQueryByAccount extends IIntraEvent {
 
 export interface IQueryByID extends IIntraEvent {
 	id: string;
+	account_name: string;
 }
 
 export interface IApproval {

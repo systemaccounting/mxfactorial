@@ -54,7 +54,7 @@ async function post(url: string, body: Body): Promise<AxiosResponse> {
 
 		let sigv4 = new SignatureV4({
 			credentials: defaultProvider(),
-			region: "us-east-1",
+			region: "us-east-1", // todo: assign from REGION env_var in project.yaml
 			service: "lambda",
 			sha256: Sha256,
 		})
@@ -219,8 +219,11 @@ describe("transaction-by-id", () => {
 		let transaction = await createTransaction()
 
 		await process.nextTick(() => {})
+
+		const accountName = transaction.transaction_items[0].debitor
 		let { data } = await post(process.env.TRANSACTION_BY_ID_URL as string, {
-			auth_account: transaction.transaction_items[0].debitor,
+			auth_account: accountName,
+			account_name: accountName,
 			id: transaction.id,
 		})
 
@@ -278,8 +281,11 @@ describe("request-by-id", () => {
 
 		let createRequest = await post(process.env.REQUEST_CREATE_URL as string, transNoAppr)
 
+		const accountName = createRequest.data.transaction.transaction_items[0].debitor
+
 		let { data } = await post(process.env.REQUEST_BY_ID_URL as string, {
-			auth_account: createRequest.data.transaction.transaction_items[0].debitor,
+			auth_account: accountName,
+			account_name: accountName,
 			id: createRequest.data.transaction.id,
 		})
 
@@ -452,10 +458,13 @@ describe("graphql", () => {
 
 		let transaction = await createTransaction()
 
+		const accountName = transaction.transaction_items[0].debitor
+
 		const client = new GraphQLClient(process.env.GRAPHQL_URI as string + "/query")
 
 		const { transactionByID } = await client.request(getTransactionByID, {
-            auth_account: transaction.transaction_items[0].debitor,
+            auth_account: accountName,
+			account_name: accountName,
             id: transaction.id,
         })
 
@@ -512,10 +521,13 @@ describe("graphql", () => {
 
 		const { data } = await post(process.env.REQUEST_CREATE_URL as string, transNoAppr)
 
+		const accountName = data.transaction.transaction_items[0].debitor
+
 		const client = new GraphQLClient(process.env.GRAPHQL_URI as string + "/query")
 
 		const { requestByID } = await client.request(getRequestByID, {
-            auth_account: data.transaction.transaction_items[0].debitor,
+            auth_account: accountName,
+			account_name: accountName,
             id: data.transaction.id,
         })
 
