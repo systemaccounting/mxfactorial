@@ -142,5 +142,6 @@ type QueryByAccount struct {
 
 type QueryByID struct {
 	IntraEvent
-	ID *ID `json:"id"`
+	AccountName *string `json:"account_name"`
+	ID          *ID     `json:"id"`
 }
