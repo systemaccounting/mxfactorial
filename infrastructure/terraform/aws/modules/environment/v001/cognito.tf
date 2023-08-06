@@ -5,6 +5,13 @@ locals {
 resource "aws_cognito_user_pool" "pool" {
   name = "mxfactorial-${local.ID_ENV}"
 
+  account_recovery_setting {
+    recovery_mechanism {
+      name     = "verified_email"
+      priority = 1
+    }
+  }
+
   lambda_config {
     pre_sign_up = module.auto_confirm.lambda_arn
   }
