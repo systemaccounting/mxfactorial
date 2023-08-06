@@ -96,6 +96,11 @@ read -n 1
 
 echo ""
 
+echo -e -n "${GREEN}navigate to $GRAPHQL_URI in a browser to view the graphiql explorer. press any key to continue${RESET}\n\n>"
+read -n 1
+
+echo ""
+
 while [[ $CMD != "make -C client test" ]]; do
 	read -rep $'\e[32m"make -C client test" to e2e test a transaction in a headless browser\e[0m\n\n> ' CMD
 done
@@ -109,11 +114,6 @@ while [[ $CMD != "make reset-db" ]]; do
 done
 
 eval_with_no_print_directory "$CMD"
-
-echo ""
-
-echo -e -n "${GREEN}navigate to $GRAPHQL_URI in a browser to view the graphiql explorer. press any key to continue${RESET}\n\n>"
-read -n 1
 
 echo ""
 
@@ -145,14 +145,14 @@ read -n 1
 
 echo ""
 
-while [[ $CMD != "make stop-dev" ]]; do
-	read -rep $'\e[32m"make stop-dev" to stop services locally\e[0m\n\n> ' CMD
+while [[ $CMD != "make stop" ]]; do
+	read -rep $'\e[32m"make stop" to stop services locally\e[0m\n\n> ' CMD
 done
 
 eval "$CMD"
 
 echo ""
 
-echo -e "\033[0;36m\"make dev\" to start services localy again. welcome to systemaccounting${RESET}"
+echo -e "\033[0;36m\"make start\" to start services again. welcome to systemaccounting${RESET}"
 
 echo ""
