@@ -202,7 +202,7 @@ the rule service returns a `transaction` object with `transaction_items` listing
 
 ### invoke lambda
 1. set desired values in `TEST_EVENT` makefile variable
-1. `make invoke ENV=dev`
+1. `make invoke-function ENV=dev`
 
 ### testing
 1. `make test-lint` for [clippy](https://github.com/rust-lang/rust-clippy)
