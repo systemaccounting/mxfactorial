@@ -37,6 +37,36 @@ impl DB {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use std::env;
+
+    #[test]
+    fn it_returns_a_conn_uri() {
+        env::set_var("PGUSER", "a");
+        env::set_var("PGPASSWORD", "b");
+        env::set_var("PGHOST", "c");
+        env::set_var("PGPORT", "d");
+        env::set_var("PGDATABASE", "e");
+        let got = DB::create_conn_uri_from_env_vars();
+        env::remove_var("PGUSER");
+        env::remove_var("PGPASSWORD");
+        env::remove_var("PGHOST");
+        env::remove_var("PGPORT");
+        env::remove_var("PGDATABASE");
+        let want = String::from("postgresql://a:b@c:d/e");
+        assert_eq!(got, want)
+    }
+
+    #[test]
+    #[should_panic]
+    fn it_panics_from_unset_env_var() {
+        DB::get_env_var("NOT_SET");
+    }
+}
+
 // https://github.com/tokio-rs/axum/blob/5793e75aacfeae16f02fea144ecc2ee7dcb12f55/examples/tokio-postgres/src/main.rs
 #[derive(Clone)]
 pub struct ConnectionPool(Pool<PostgresConnectionManager<NoTls>>);
