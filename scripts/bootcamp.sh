@@ -126,7 +126,7 @@ eval "$CMD"
 echo ""
 
 while [[ $CMD != "make list-pids" ]]; do
-	read -rep $'\e[32m"make list-pids" to print list of running services and their pids\e[0m\n\n> ' CMD
+	read -rep $'\e[32m"make list-pids" to print a list of running services and their pids\e[0m\n\n> ' CMD
 done
 
 eval_with_no_print_directory "$CMD"
