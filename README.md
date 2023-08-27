@@ -20,7 +20,10 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this payment application solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
 
 **q.** where will i bank?  
-**a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their [accounting](https://en.wikipedia.org/wiki/Earnings), then assume no one except you will own that risk after you consume it  
+**a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their accounting, then assume no one except you will own that risk after you consume it  
+
+**q.** what is money?  
+**a.** money is accounting. when someone has a 5 in their pocket, it's because they had a credit of 5 and someone else had a debit of 5  
 
 **q.** what does physics have to do with accounting?  
 **a.** recording transactions between users as debit-credit pairs enforces a conservation law on value  
