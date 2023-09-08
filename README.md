@@ -40,6 +40,9 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** why is the code public if the license is private?  
 **a.** publicly used code is a public structure
 
+**q.** can i invest?  
+**a.** contribute what you like. the dividend for believing in science is protection
+
 ### how it works
 
 1. the united states treasury acquires an [aba routing number](https://en.wikipedia.org/wiki/ABA_routing_transit_number) to a single account it will manage for the public independently from banks
