@@ -4,24 +4,25 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use pg::{ConnectionPool, DatabaseConnection, DB};
+use pg::{ConnectionPool, DB};
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use std::{env, net::ToSocketAddrs};
 use tokio::signal;
 use types::approval::{Approval, Approvals};
 use types::{
+    account::AccountStore,
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
     request_response::IntraTransaction,
+    rule::RuleInstanceStore,
     time::TZTime,
     transaction_item::TransactionItems,
 };
-
 mod rules;
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
-async fn apply_transaction_item_rules(
-    conn: &DatabaseConnection,
+async fn apply_transaction_item_rules<C: AccountStore + RuleInstanceStore>(
+    conn: C,
     role_sequence: RoleSequence,
     transaction_items: &TransactionItems,
 ) -> TransactionItems {
@@ -103,8 +104,8 @@ async fn apply_transaction_item_rules(
     response
 }
 
-async fn apply_approval_rules(
-    conn: &DatabaseConnection,
+async fn apply_approval_rules<C: AccountStore + RuleInstanceStore>(
+    conn: C,
     role_sequence: RoleSequence,
     transaction_items: &mut TransactionItems,
     approval_time: &TZTime,

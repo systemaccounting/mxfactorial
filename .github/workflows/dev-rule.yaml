@@ -4,6 +4,7 @@ on:
   push:
     paths:
     - 'services/rule/**'
+    - 'crates/**'
     branches-ignore:
     - 'master'
 

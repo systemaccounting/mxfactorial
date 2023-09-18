@@ -1,10 +1,30 @@
 use crate::account_role::AccountRole;
 use crate::time::TZTime;
+use async_trait::async_trait;
 #[allow(unused_imports)]
 use chrono::{DateTime, Utc};
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
 use tokio_postgres::Row;
+
+#[async_trait]
+pub trait RuleInstanceStore {
+    async fn get_profile_state_rule_instances(
+        &self,
+        account_role: AccountRole,
+        state_name: String,
+    ) -> RuleInstances;
+    async fn get_rule_instances_by_type_role_account(
+        &self,
+        account_role: AccountRole,
+        account: String,
+    ) -> RuleInstances;
+    async fn get_approval_rule_instances(
+        &self,
+        account_role: AccountRole,
+        account: String,
+    ) -> RuleInstances;
+}
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
 pub struct RuleInstance {
