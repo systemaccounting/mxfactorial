@@ -1,8 +1,8 @@
+use async_trait::async_trait;
 use postgres_types::{FromSql, ToSql};
 use serde::Deserialize;
-use tokio_postgres::Row;
-use async_trait::async_trait;
 use std::error::Error;
+use tokio_postgres::Row;
 
 #[async_trait]
 pub trait AccountStore {
