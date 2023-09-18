@@ -1,18 +1,17 @@
-use std::env;
+use async_trait::async_trait;
 use bb8::{Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
 use sqls::{
     select_account_profiles_by_db_cr_accounts, select_approvers,
     select_rule_instance_by_type_role_account, select_rule_instance_by_type_role_state,
 };
-use std::error::Error;
+use std::{env, error::Error};
 use tokio_postgres::{types::ToSql, NoTls};
 use types::{
     account::{AccountProfiles, AccountStore},
     account_role::AccountRole,
     rule::{RuleInstanceStore, RuleInstances},
 };
-use async_trait::async_trait;
 
 pub struct DB;
 
