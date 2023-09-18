@@ -1,6 +1,17 @@
 use postgres_types::{FromSql, ToSql};
 use serde::Deserialize;
 use tokio_postgres::Row;
+use async_trait::async_trait;
+use std::error::Error;
+
+#[async_trait]
+pub trait AccountStore {
+    async fn get_account_profiles(
+        &self,
+        accounts: Vec<String>,
+    ) -> Result<AccountProfiles, Box<dyn Error>>;
+    async fn get_approvers_for_account(&self, account: String) -> Vec<String>;
+}
 
 #[derive(Eq, PartialEq, Debug, Deserialize, ToSql, FromSql, Clone)]
 pub struct AccountProfile {
