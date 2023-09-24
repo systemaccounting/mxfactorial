@@ -17,7 +17,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **a.** no, and please use the word *replication*  
 
 **q.** i dont find any words in here used by the media. what is this?  
-**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling a currency as an electric current. this payment application solves current economic issues by replacing "monetary" policy with a natural physical law. encryption and replication are secondary  
+**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law. first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively. encryption and replication are secondary  
 
 **q.** where will i bank?  
 **a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their accounting, then assume no one except you will own that risk after you consume it  
@@ -30,6 +30,12 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 
 **q.** what is the equation?  
 **a.** *u* = transactions per second, *w<sub>i</sub>* = value conserved per transaction, *Mx!* = value visible in a combinatorial game  
+
+**q.** will a government hosted payment app reduce my freedom?  
+**a.** the government can already see your transactions. systemaccounting empowers you to see the transactions of your government. access to the realtime financial performance of your government helps protect you from electing individuals who exploit money printing, price manipulation and the absence of accountability to systematize the cost of their failures to everyone else  
+
+**q.** will a government hosted payment app reduce my privacy?  
+**a.** you dont need to publish your account activity. publishing account data is a feature primarily intended for 1) businesses owners who wish to signal the demand for capital with an empirical rate of return and 2) government officials who wish to keep citizens informed of the performance of fiscal policies with empirical data  
 
 **q.** do you have any demos?  
 **a.** watch the *economic policy as code* video series  
@@ -60,7 +66,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
     1. decreases the `JacobWebb` account by `1.090`
     1. increases the `GroceryStore` account by `1.000`
     1. increases the `StateOfCalifornia` account by `0.090`
-1. all accounts **never** default from systemic risk, or experience "monetary" inflation
+1. all accounts **never** default from systemic risk or experience "monetary" inflation
 1. the public has 24 hour access to realtime revenue and expense reporting from the `StateOfCalifornia` account
 1. the `GroceryStore` owner may publish account performance anytime to [signal](https://en.wikipedia.org/wiki/Signalling_(economics)) the demand for capital to investors with an **empirical** rate of return, i.e. NOT *pro forma*
 
@@ -84,6 +90,7 @@ public demonstration of the following use cases through a systemaccounting funct
                   "creditor": "Mary",                        "creditor": "Isaac",
                   "item": "bread",                           "item": "milk",
                   "price": "3.25",                           "price": "3.25",
+                  "quantity": "1",                           "quantity": "1",
                   "time": "2019-07-12T12:11:31",             "time": "2019-07-14T07:36:15",
                 }                                          }
 
