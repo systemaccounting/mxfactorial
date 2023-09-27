@@ -1,6 +1,7 @@
 use std::{error::Error, vec};
 
 use types::{
+    account_role::AccountRole,
     rule::RuleInstance,
     transaction_item::{TransactionItem, TransactionItems},
 };
@@ -12,10 +13,14 @@ pub fn match_transaction_item_rule(
     rule_instance: &RuleInstance,
     transaction_item: &mut TransactionItem,
 ) -> Result<TransactionItems, Box<dyn Error>> {
+    let account_role = rule_instance.account_role;
     let rule_name = rule_instance.rule_name.as_str();
-    match rule_name {
-        "multiplyItemValue" => multiply_item_value(rule_instance, transaction_item),
-        _ => Err("transaction_item rule not found".into()),
+    match account_role {
+        AccountRole::Debitor => Ok(TransactionItems(vec![])),
+        AccountRole::Creditor => match rule_name {
+            "multiplyItemValue" => multiply_item_value(rule_instance, transaction_item),
+            _ => Err("transaction_item rule not found".into()),
+        },
     }
 }
 
