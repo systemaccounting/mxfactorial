@@ -43,7 +43,6 @@ async fn apply_transaction_item_rules<C: AccountStore + RuleInstanceStore>(
         // i.e. execute rules in debitor, creditor OR creditor, debitor
         for role in role_sequence.into_iter() {
             let account = tr_item.get_account_by_role(role);
-
             // get account profile
             let account_profile = initial_account_profiles
                 .match_profile_by_account(account.clone())
@@ -58,10 +57,10 @@ async fn apply_transaction_item_rules<C: AccountStore + RuleInstanceStore>(
                 .await;
 
             // apply state rules to transaction item
-            for rule in state_rules.clone().0.iter() {
+            for rule_instance in state_rules.clone().0.iter() {
                 let mut state_added_tr_items =
                     rules::transaction_item::match_transaction_item_rule(
-                        rule,
+                        rule_instance,
                         &mut current_tr_item,
                     )
                     .unwrap();
@@ -74,10 +73,10 @@ async fn apply_transaction_item_rules<C: AccountStore + RuleInstanceStore>(
                 .await;
 
             // apply account rules to transaction item
-            for rule in account_rules.clone().0.iter() {
+            for rule_instance in account_rules.clone().0.iter() {
                 let mut account_added_tr_item =
                     rules::transaction_item::match_transaction_item_rule(
-                        rule,
+                        rule_instance,
                         &mut current_tr_item,
                     )
                     .unwrap();
@@ -85,14 +84,18 @@ async fn apply_transaction_item_rules<C: AccountStore + RuleInstanceStore>(
             }
         }
 
-        let added_accounts = rule_added.list_accounts();
+        // avoid fetching more account profiles
+        // when zero transaction items added
+        if !rule_added.0.is_empty() {
+            let added_accounts = rule_added.list_accounts();
 
-        let added_profiles = conn.get_account_profiles(added_accounts).await.unwrap();
+            let added_profiles = conn.get_account_profiles(added_accounts).await.unwrap();
 
-        // add account profile ids to rule added transaction items
-        // todo: some profiles may be previously fetched when
-        // assigning initial_account_profiles, avoid duplicate query
-        rule_added.add_profile_ids(added_profiles);
+            // add account profile ids to rule added transaction items
+            // todo: some profiles may be previously fetched when
+            // assigning initial_account_profiles, avoid duplicate query
+            rule_added.add_profile_ids(added_profiles);
+        }
 
         // add initial transaction item
         response.0.push(current_tr_item);
@@ -285,4 +288,321 @@ async fn shutdown_signal() {
     }
 
     println!("signal received, starting graceful shutdown");
+}
+
+#[cfg(test)]
+mod tests {
+    #[tokio::test]
+    async fn it_applies_transaction_item_rules() {
+        use super::*;
+        use axum::async_trait;
+        use chrono::{DateTime, Utc};
+        use std::error::Error;
+        use types::{
+            account::{AccountProfile, AccountProfiles},
+            account_role::{AccountRole, DEBITOR_FIRST},
+            rule::{RuleInstance, RuleInstances},
+            transaction_item::TransactionItem,
+        };
+        struct Stub();
+
+        #[async_trait]
+        impl AccountStore for &Stub {
+            async fn get_account_profiles(
+                &self,
+                _accounts: Vec<String>,
+            ) -> Result<AccountProfiles, Box<dyn Error>> {
+                Ok(AccountProfiles(vec![
+                    AccountProfile {
+                        id: Some(String::from("7")),
+                        account_name: String::from("JacobWebb"),
+                        description: Some(String::from("Soccer coach")),
+                        first_name: Some(String::from("Jacob")),
+                        middle_name: Some(String::from("Curtis")),
+                        last_name: Some(String::from("Webb")),
+                        country_name: String::from("United States of America"),
+                        street_number: Some(String::from("205")),
+                        street_name: Some(String::from("N Mccarran Blvd")),
+                        floor_number: None,
+                        unit_number: None,
+                        city_name: String::from("Sparks"),
+                        county_name: Some(String::from("Washoe County")),
+                        region_name: None,
+                        state_name: String::from("Nevada"),
+                        postal_code: String::from("89431"),
+                        latlng: Some(String::from("(39.534552,-119.737825)")),
+                        email_address: String::from("jacob@address.xz"),
+                        telephone_country_code: Some(String::from("1")),
+                        telephone_area_code: Some(String::from("775")),
+                        telephone_number: Some(String::from("5555555")),
+                        occupation_id: Some(String::from("7")),
+                        industry_id: Some(String::from("7")),
+                    },
+                    AccountProfile {
+                        id: Some(String::from("11")),
+                        account_name: String::from("GroceryStore"),
+                        description: Some(String::from("Sells groceries")),
+                        first_name: Some(String::from("Grocery")),
+                        middle_name: None,
+                        last_name: Some(String::from("Store")),
+                        country_name: String::from("United States of America"),
+                        street_number: Some(String::from("8701")),
+                        street_name: Some(String::from("Lincoln Blvd")),
+                        floor_number: None,
+                        unit_number: None,
+                        city_name: String::from("Los Angeles"),
+                        county_name: Some(String::from("Los Angeles County")),
+                        region_name: None,
+                        state_name: String::from("California"),
+                        postal_code: String::from("90045"),
+                        latlng: Some(String::from("(33.958050,-118.418388)")),
+                        email_address: String::from("grocerystore@address.xz"),
+                        telephone_country_code: Some(String::from("1")),
+                        telephone_area_code: Some(String::from("310")),
+                        telephone_number: Some(String::from("5555555")),
+                        occupation_id: None,
+                        industry_id: Some(String::from("8")),
+                    },
+                    AccountProfile {
+                        id: Some(String::from("27")),
+                        account_name: String::from("StateOfCalifornia"),
+                        description: Some(String::from("State of California")),
+                        first_name: None,
+                        middle_name: None,
+                        last_name: None,
+                        country_name: String::from("United States of America"),
+                        street_number: Some(String::from("450")),
+                        street_name: Some(String::from("N St")),
+                        floor_number: None,
+                        unit_number: None,
+                        city_name: String::from("Sacramento"),
+                        county_name: Some(String::from("Sacramento County")),
+                        region_name: None,
+                        state_name: String::from("California"),
+                        postal_code: String::from("95814"),
+                        latlng: Some(String::from("(38.5777292,-121.5027026)")),
+                        email_address: String::from("stateofcalifornia@address.xz"),
+                        telephone_country_code: Some(String::from("1")),
+                        telephone_area_code: Some(String::from("916")),
+                        telephone_number: Some(String::from("5555555")),
+                        occupation_id: None,
+                        industry_id: Some(String::from("11")),
+                    },
+                ]))
+            }
+            async fn get_approvers_for_account(&self, _account: String) -> Vec<String> {
+                vec!["".to_string()]
+            }
+        }
+        #[async_trait]
+        impl RuleInstanceStore for &Stub {
+            async fn get_profile_state_rule_instances(
+                &self,
+                account_role: AccountRole,
+                _state_name: String,
+            ) -> RuleInstances {
+                if account_role == AccountRole::Debitor {
+                    return RuleInstances(vec![]);
+                }
+                RuleInstances(vec![RuleInstance {
+                    id: Some(String::from("1")),
+                    rule_type: String::from("transaction_item"),
+                    rule_name: String::from("multiplyItemValue"),
+                    rule_instance_name: String::from("NinePercentSalesTax"),
+                    variable_values: vec![
+                        String::from("ANY"),
+                        String::from("StateOfCalifornia"),
+                        String::from("9% state sales tax"),
+                        String::from("0.09"),
+                    ],
+                    account_role: AccountRole::Creditor,
+                    item_id: None,
+                    price: None,
+                    quantity: None,
+                    unit_of_measurement: None,
+                    units_measured: None,
+                    account_name: None,
+                    first_name: None,
+                    middle_name: None,
+                    last_name: None,
+                    country_name: None,
+                    street_id: None,
+                    street_name: None,
+                    floor_number: None,
+                    unit_id: None,
+                    city_name: None,
+                    county_name: None,
+                    region_name: None,
+                    state_name: Some(String::from("California")),
+                    postal_code: None,
+                    latlng: None,
+                    email_address: None,
+                    telephone_country_code: None,
+                    telephone_area_code: None,
+                    telephone_number: None,
+                    occupation_id: None,
+                    industry_id: None,
+                    disabled_time: None,
+                    removed_time: None,
+                    created_at: Some(TZTime(
+                        DateTime::parse_from_rfc3339("2023-02-28T04:21:08.363Z")
+                            .unwrap()
+                            .with_timezone(&Utc),
+                    )),
+                }])
+            }
+            async fn get_rule_instances_by_type_role_account(
+                &self,
+                _account_role: AccountRole,
+                _account: String,
+            ) -> RuleInstances {
+                RuleInstances(vec![])
+            }
+            async fn get_approval_rule_instances(
+                &self,
+                _account_role: AccountRole,
+                _account: String,
+            ) -> RuleInstances {
+                RuleInstances(vec![])
+            }
+        }
+
+        let stub = Stub();
+        let tr_items = TransactionItems(vec![
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("bread"),
+                price: String::from("3.000"),
+                quantity: String::from("2"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("milk"),
+                price: String::from("4.000"),
+                quantity: String::from("3"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: None,
+                        transaction_item_id: None,
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+        ]);
+
+        // test function
+        let got = apply_transaction_item_rules(&stub, DEBITOR_FIRST, &tr_items).await;
+
+        // assert #1:
+        // save length of transaction items vec
+        let got_length = got.clone().0.len();
+        // want length of transaction items vec to be 4 (started with 2)
+        let want_length = 4;
+        assert_eq!(
+            got_length, want_length,
+            "want {}, got {}",
+            got_length, want_length
+        );
+
+        // assert #2:
+        // init float32 accumulator
+        let mut got_total: f32 = 0.0;
+        // loop through transaction items vec
+        for tr_item in got.0.into_iter() {
+            // parse price
+            let price: f32 = tr_item.price.clone().parse().unwrap();
+            // parse quantity
+            let quantity: f32 = tr_item.quantity.clone().parse().unwrap();
+            // add price * quantity from each transaction item to accumulator
+            got_total = got_total + (price * quantity);
+        }
+        // want total price across transaction items vec to be 19.63 (includes rule added taxes)
+        let want_total = 19.62;
+        assert_eq!(
+            got_total, want_total,
+            "want {}, got {}",
+            got_length, want_total
+        );
+    }
 }
