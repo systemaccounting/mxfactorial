@@ -1,4 +1,4 @@
-FROM bitnami/postgresql:latest
+FROM bitnami/postgresql:15.3.0
 
 USER root
 
@@ -11,7 +11,7 @@ COPY migrations /tmp/migrations
 
 RUN apt update && \
 	apt install curl -y && \
-	curl -LO https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.deb && \
+	curl -LO https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.deb && \
 	dpkg -i migrate.linux-amd64.deb && \
 	rm migrate.linux-amd64.deb && \
 	apt clean && \
