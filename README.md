@@ -17,7 +17,18 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **a.** no, and please use the word *replication*  
 
 **q.** i dont find any words in here used by the media. what is this?  
-**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law. first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively. encryption and replication are secondary  
+**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law. first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively. encryption and replication are secondary:
+```json
+{
+  "item": "bottled water",
+  "price": "1.000",
+  "quantity": "1",
+  "creditor": "GroceryStore", // positive value (+)
+  "debitor": "JacobWebb", // negative value (-)
+  "creditor_approval_time": "2023-03-20T04:58:27.771Z",
+  "debitor_approval_time": "2023-03-20T05:24:13.465Z"
+}
+```
 
 **q.** where will i bank?  
 **a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their accounting, then assume no one except you will own that risk after you consume it  
@@ -38,10 +49,10 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **a.** you dont need to publish your account activity. publishing account data is a feature primarily intended for 1) businesses owners who wish to signal the demand for capital with an empirical rate of return and 2) government officials who wish to keep citizens informed of the performance of fiscal policies with empirical data  
 
 **q.** do you have any demos?  
-**a.** watch the *economic policy as code* video series  
+**a.** watch the [economic policy as code](https://mxfactorial.video/) video series  
 
 **q.** how to explain this project to non engineers?  
-**a.** share the *economic policy as code* video series  
+**a.** share the [economic policy as code](https://mxfactorial.video/) video series  
 
 **q.** why is the code public if the license is private?  
 **a.** publicly used code is a public structure
@@ -56,19 +67,101 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
     1. creating, increasing and decreasing account balances from user transfers
     1. changing account balances between transacting users
     1. realtime reporting
-1. a new `GroceryStore` systemaccount is created when the owner transfers, for example, `1,000` from their "Bank of America" account to the united states treasury account
-1. a new `JacobWebb` systemaccount is created when the owner transfers `1,000` from their "Chase" account to the united states treasury account
-1. `JacobWebb` visits the `GroceryStore` and brings a single `bottled water` priced at `1.000` to the cashier (3 digit decimals used)
-1. the `GroceryStore` cashier creates a list of `transaction_items` to be transacted, but first sends it to the `rules` service (see [request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/rules#request)) to check for any rules that apply to the proposed transaction (taxes, automated approvals, etc)
-1. the `GroceryStore` cashier then sends the rule-applied transaction request to the `request-create` service (see [request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-create#request))
-1. the `JacobWebb` customer receives a notification and sends their approval to the `request-approve` service (see [request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-approve#request))
+1. new example accounts:
+    1. a `GroceryStore` systemaccount is created when the owner transfers, for example, `1,000` from their "Bank of America" account to the united states treasury account
+    1. a `JacobWebb` systemaccount is created when the owner transfers `1,000` from their "Chase" account to the united states treasury account
+1. `JacobWebb` visits the `GroceryStore` and brings a single `bottled water` priced at `1.000` (3 digit decimals used) to the cashier
+1. the `GroceryStore` cashier authors a single entry list of `transaction_items` to be transacted. the `GroceryStore` account is set as the **creditor** (+) and the `JacobWebb` account is set as as **debitor** (-):
+    ```json
+    [
+      { // authored by GroceryStore cashier
+        "item": "bottled water",
+        "price": "1.000",
+        "quantity": "1",
+        "creditor": "GroceryStore",
+        "debitor": "JacobWebb",
+        "creditor_approval_time": null,
+        "debitor_approval_time": null
+      }
+    ]
+    ```
+1. the `GroceryStore` cashier first sends the `transaction_items` list to the `rule` service (see [detailed request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/rule#request)) to check for any transaction automation rules that apply to the proposed transaction (taxes, approvals, etc) and receives a response with a creditor-approved state sales tax added to the `transaction_items` list:
+    ```json
+    [
+      {
+        "item": "bottled water",
+        "price": "1.000",
+        "quantity": "1",
+        "creditor": "GroceryStore",
+        "debitor": "JacobWebb",
+        "creditor_approval_time": null,
+        "debitor_approval_time": null
+      },
+      { // transaction_item added by rule service
+        "item": "9% state sales tax",
+        "price": "0.090",
+        "quantity": "1",
+        "creditor": "StateOfCalifornia",
+        "debitor": "JacobWebb",
+        "creditor_approval_time": "2023-03-20T03:01:55.812Z", // approval added by rule service
+        "debitor_approval_time": null
+      }
+    ]
+    ```
+1. the `GroceryStore` cashier then sends the rule-applied transaction request to the `request-create` service (see [detailed request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-create#request)) to 1) create a transaction request and 2) add an approval for the `GroceryStore` creditor:
+    ```json
+    [ // added to database by request-create service
+      {
+        "item": "bottled water",
+        "price": "1.000",
+        "quantity": "1",
+        "creditor": "GroceryStore",
+        "debitor": "JacobWebb",
+        "creditor_approval_time": "2023-03-20T04:58:27.771Z", // added by request-create service
+        "debitor_approval_time": null
+      },
+      {
+        "item": "9% state sales tax",
+        "price": "0.090",
+        "quantity": "1",
+        "creditor": "StateOfCalifornia",
+        "debitor": "JacobWebb",
+        "creditor_approval_time": "2023-03-20T03:01:55.812Z",
+        "debitor_approval_time": null
+      }
+    ]
+    ```
+1. the `JacobWebb` customer receives a notification and sends their approval to the `request-approve` service (see [detailed request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-approve#request))
+    ```json
+    [
+      {
+        "item": "bottled water",
+        "price": "1.000",
+        "quantity": "1",
+        "creditor": "GroceryStore",
+        "debitor": "JacobWebb",
+        "creditor_approval_time": "2023-03-20T04:58:27.771Z",
+        "debitor_approval_time": "2023-03-20T05:24:13.465Z" // added by request-approve service
+      },
+      {
+        "item": "9% state sales tax",
+        "price": "0.090",
+        "quantity": "1",
+        "creditor": "StateOfCalifornia",
+        "debitor": "JacobWebb",
+        "creditor_approval_time": "2023-03-20T03:01:55.812Z",
+        "debitor_approval_time": "2023-03-20T05:24:13.465Z" // added by request-approve service
+      }
+    ]
+    ```
 1. the single `1.000 bottled water + 0.090 sales tax = 1.090 total` transaction simultaneously:
     1. decreases the `JacobWebb` account by `1.090`
     1. increases the `GroceryStore` account by `1.000`
     1. increases the `StateOfCalifornia` account by `0.090`
-1. all accounts **never** default from systemic risk or experience "monetary" inflation
+1. all accounts **never** default from systemic risk or lose value from "monetary" inflation
 1. the public has 24 hour access to realtime revenue and expense reporting from the `StateOfCalifornia` account
 1. the `GroceryStore` owner may publish account performance anytime to [signal](https://en.wikipedia.org/wiki/Signalling_(economics)) the demand for capital to investors with an **empirical** rate of return, i.e. NOT *pro forma*
+1. capital in the financial market is now priced empirically and protected from manipulation by governments and committees
 
 ### general use cases
 public demonstration of the following use cases through a systemaccounting function:

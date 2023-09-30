@@ -20,7 +20,7 @@ start:
 	nohup cargo watch --env-file $(ENV_FILE) -w src -w $(RELATIVE_PROJECT_ROOT_PATH)/crates -x run >> $(NOHUP_LOG) &
 
 stop:
-	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH) stop-dev
+	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH) stop
 
 run:
 	@$(MAKE) -C ../../migrations run
