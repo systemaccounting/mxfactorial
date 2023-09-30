@@ -18,7 +18,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 
 **q.** i dont find any words in here used by the media. what is this?  
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law. first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively. encryption and replication are secondary:
-```json
+```json5
 {
   "item": "bottled water",
   "price": "1.000",
@@ -72,7 +72,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
     1. a `JacobWebb` systemaccount is created when the owner transfers `1,000` from their "Chase" account to the united states treasury account
 1. `JacobWebb` visits the `GroceryStore` and brings a single `bottled water` priced at `1.000` (3 digit decimals used) to the cashier
 1. the `GroceryStore` cashier authors a single entry list of `transaction_items` to be transacted. the `GroceryStore` account is set as the **creditor** (+) and the `JacobWebb` account is set as as **debitor** (-):
-    ```json
+    ```json5
     [
       { // authored by GroceryStore cashier
         "item": "bottled water",
@@ -86,7 +86,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
     ]
     ```
 1. the `GroceryStore` cashier first sends the `transaction_items` list to the `rule` service (see [detailed request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/rule#request)) to check for any transaction automation rules that apply to the proposed transaction (taxes, approvals, etc) and receives a response with a creditor-approved state sales tax added to the `transaction_items` list:
-    ```json
+    ```json5
     [
       {
         "item": "bottled water",
@@ -109,7 +109,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
     ]
     ```
 1. the `GroceryStore` cashier then sends the rule-applied transaction request to the `request-create` service (see [detailed request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-create#request)) to 1) create a transaction request and 2) add an approval for the `GroceryStore` creditor:
-    ```json
+    ```json5
     [ // added to database by request-create service
       {
         "item": "bottled water",
@@ -132,7 +132,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
     ]
     ```
 1. the `JacobWebb` customer receives a notification and sends their approval to the `request-approve` service (see [detailed request & response](https://github.com/systemaccounting/mxfactorial/tree/develop/services/request-approve#request))
-    ```json
+    ```json5
     [
       {
         "item": "bottled water",

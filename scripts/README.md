@@ -137,7 +137,7 @@ creates go mocks from list of interfaces inside `mock` subdirectory using [gomoc
 
 1. set `.pkgs.lambdapg.mocked_interfaces` property under package or service in `project.yaml` to map of go package import paths and desired list of interfaces:
 
-    ```json
+    ```json5
     "mocked_interfaces": {
         "github.com/systemaccounting/mxfactorial/pkg/lambdapg": [
             "Connector",

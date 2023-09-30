@@ -12,7 +12,7 @@
 1. the `JacobWebb` customer brings a single `bottled water` item priced at `1.000` to the `GroceryStore` cashier
 1. the `GroceryStore` cashier sends the following `transaction_item` list to the rule service to apply rules required by a transaction between the `debitor` and `creditor` accounts:
 
-```json
+```json5
 // graphql variable
 [
   {
@@ -35,7 +35,7 @@ the rule service returns a `transaction` object with `transaction_items` listing
 1. rule added `transaction_items` and `approvals`
 1. the initial `bottled water` transaction_item
 
-```json
+```json5
 {
   "auth_account": null,
   "transaction": {

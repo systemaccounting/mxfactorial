@@ -14,7 +14,7 @@
 
 the `JacobWebb` customer approves all `transaction_items` in the `transaction` by sending the following `id` to the request-approve service:
 
-```json
+```json5
 // graphql variable
 {
     "id": "3",
@@ -29,7 +29,7 @@ the `request-approve` service returns a `transaction` object with an `equilibriu
 
 all account balances referenced in `transaction_items` are changed when a `transaction` has an `equilibrium_time` value  
 
-```json
+```json5
 {
   "data": {
     "approveRequest": {

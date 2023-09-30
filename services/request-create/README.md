@@ -14,7 +14,7 @@
 
 the `GroceryStore` cashier sends a `transaction_item` list to the request-create service:
 
-```json
+```json5
 // graphql variable
 {
   "transaction_items": [
@@ -52,7 +52,7 @@ the `request-create` service:
 1. creates the `transaction` request IF 0 missing `transaction_items` found
 1. returns a `transaction` object with approvals **pending** from the debitor
 
-```json
+```json5
 {
   "data": {
     "createRequest": {
