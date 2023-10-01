@@ -32,11 +32,10 @@ pub fn create_response(transtaction_items: TransactionItems) -> IntraTransaction
 pub fn label_approved_transaction_items(
     role_sequence: &RoleSequence,
     transaction_items: TransactionItems,
-    approval_time: &TZTime,
 ) -> TransactionItems {
-    let mut approved = transaction_items;
+    let mut labeled = transaction_items;
 
-    for tr_item in approved.0.iter_mut() {
+    for tr_item in labeled.0.iter_mut() {
         for role in role_sequence {
             // get list of approvals per role (debitor or creditor)
             let approvals_per_role = tr_item
@@ -64,32 +63,172 @@ pub fn label_approved_transaction_items(
 
             // test for timestamps in all role approvals
             if approvals_per_role.clone().0.len() == approval_count {
-                // test for approval_times consistency
-                let initial_approval_time = approval_times[0].clone();
-                let mut same_as_initial = 0;
+                // test for latest approval time
+                let mut latest_approval_time = approval_times[0].clone();
                 for t in approval_times.clone().iter() {
-                    if t.0.eq(&initial_approval_time.0) {
-                        same_as_initial += 1
+                    if t.0.gt(&latest_approval_time.0) {
+                        latest_approval_time = TZTime(t.0)
                     }
                 }
 
                 // test for consistent approval times
-                if approval_times.len() == same_as_initial {
+                if approval_times.len() == approvals_per_role.0.len() {
                     if *role == AccountRole::Debitor {
                         // label transaction item for debitor as approved
                         // (all debitor approvals have timestamps)
-                        tr_item.debitor_approval_time = Some(approval_time.clone());
+                        tr_item.debitor_approval_time = Some(latest_approval_time.clone());
                     };
 
                     if *role == AccountRole::Creditor {
                         // label transaction item for creditor as approved
                         // (all creditor approvals have timestamps)
-                        tr_item.creditor_approval_time = Some(approval_time.clone());
+                        tr_item.creditor_approval_time = Some(latest_approval_time.clone());
                     };
                 }
                 // todo: else inconsistent approval time error
             }
         }
     }
-    approved
+    labeled
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::Duration;
+    use types::{
+        account_role::DEBITOR_FIRST,
+        approval::{Approval, Approvals},
+        transaction_item::TransactionItem,
+    };
+
+    #[test]
+    fn it_labels_approved_transaction_items() {
+        let test_approval_time = TZTime::now();
+        let tr_items = TransactionItems(vec![TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: String::from("9% state sales taxk"),
+            price: String::from("0.270"),
+            quantity: String::from("2.000"),
+            debitor_first: Some(false),
+            rule_instance_id: None,
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: String::from("JacobWebb"),
+            creditor: String::from("StateOfCalifornia"),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: Some(Approvals(vec![
+                Approval {
+                    id: None,
+                    rule_instance_id: None,
+                    transaction_id: None,
+                    transaction_item_id: None,
+                    account_name: String::from("JacobWebb"),
+                    account_role: AccountRole::Debitor,
+                    device_id: None,
+                    device_latlng: None,
+                    approval_time: None,
+                    rejection_time: None,
+                    expiration_time: None,
+                },
+                Approval {
+                    id: None,
+                    rule_instance_id: None,
+                    transaction_id: None,
+                    transaction_item_id: None,
+                    account_name: String::from("BenRoss"),
+                    account_role: AccountRole::Creditor,
+                    device_id: None,
+                    device_latlng: None,
+                    // latest approval time
+                    approval_time: Some(test_approval_time.clone()),
+                    rejection_time: None,
+                    expiration_time: None,
+                },
+                Approval {
+                    id: None,
+                    rule_instance_id: None,
+                    transaction_id: None,
+                    transaction_item_id: None,
+                    account_name: String::from("DanLee"),
+                    account_role: AccountRole::Creditor,
+                    device_id: None,
+                    device_latlng: None,
+                    // set 10s earlier
+                    approval_time: Some(TZTime(
+                        test_approval_time.clone().0 - Duration::seconds(10),
+                    )),
+                    rejection_time: None,
+                    expiration_time: None,
+                },
+                Approval {
+                    id: None,
+                    rule_instance_id: None,
+                    transaction_id: None,
+                    transaction_item_id: None,
+                    account_name: String::from("MiriamLevy"),
+                    account_role: AccountRole::Creditor,
+                    device_id: None,
+                    device_latlng: None,
+                    // set 20s earlier
+                    approval_time: Some(TZTime(
+                        test_approval_time.clone().0 - Duration::seconds(20),
+                    )),
+                    rejection_time: None,
+                    expiration_time: None,
+                },
+            ])),
+        }]);
+
+        // test function
+        let got = label_approved_transaction_items(&DEBITOR_FIRST, tr_items);
+
+        // assert #1
+        // save creditor_approval_time
+        let got_creditor_approval_time = got
+            .0
+            .clone()
+            .into_iter()
+            .nth(0)
+            .unwrap()
+            .creditor_approval_time
+            .unwrap();
+
+        // want latest creditor_approval_time
+        let want_creditor_approval_time = test_approval_time.clone();
+
+        assert_eq!(
+            got_creditor_approval_time, want_creditor_approval_time,
+            "got {:?}, want {:?}",
+            got_creditor_approval_time, want_creditor_approval_time
+        );
+
+        // assert #2
+        // save debitor_approval_time
+        let got_debitor_approval_time = got
+            .0
+            .clone()
+            .into_iter()
+            .nth(0)
+            .unwrap()
+            .debitor_approval_time;
+
+        // want latest debitor_approval_time
+        let want_debitor_approval_time = None;
+
+        assert_eq!(
+            got_debitor_approval_time, want_debitor_approval_time,
+            "got {:?}, want {:?}",
+            got_debitor_approval_time, want_debitor_approval_time
+        )
+    }
 }
