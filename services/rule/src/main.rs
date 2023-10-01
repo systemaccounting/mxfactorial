@@ -212,8 +212,7 @@ async fn apply_rules(
     )
     .await;
 
-    let labeled_approved =
-        label_approved_transaction_items(&role_sequence, rule_applied_tr_items, &approval_time);
+    let labeled_approved = label_approved_transaction_items(&role_sequence, rule_applied_tr_items);
 
     let transaction = create_response(labeled_approved);
 
