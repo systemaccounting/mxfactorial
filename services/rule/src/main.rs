@@ -4,9 +4,9 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use pg::{ConnectionPool, DB};
+use pg::{DynConnPool, DB};
 use rule::{create_response, expected_values, label_approved_transaction_items};
-use std::{env, net::ToSocketAddrs};
+use std::{env, net::ToSocketAddrs, sync::Arc};
 use tokio::signal;
 use types::approval::{Approval, Approvals};
 use types::{
@@ -173,7 +173,7 @@ async fn apply_approval_rules<C: AccountStore + RuleInstanceStore>(
 }
 
 async fn apply_rules(
-    State(pool): State<ConnectionPool>,
+    State(pool): State<DynConnPool>,
     transaction_items: Json<TransactionItems>,
 ) -> Result<axum::Json<IntraTransaction>, StatusCode> {
     if !expected_values(&transaction_items) {
@@ -233,7 +233,7 @@ async fn main() {
 
     let conn_uri = DB::create_conn_uri_from_env_vars();
 
-    let pool = DB::new_pool(&conn_uri).await;
+    let pool = Arc::new(DB::new_pool(&conn_uri).await) as DynConnPool;
 
     let service_route = Router::new().route("/", post(apply_rules)).with_state(pool);
 
