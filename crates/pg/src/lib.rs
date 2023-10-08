@@ -5,7 +5,7 @@ use sqls::{
     select_account_profiles_by_db_cr_accounts, select_approvers,
     select_rule_instance_by_type_role_account, select_rule_instance_by_type_role_state,
 };
-use std::{env, error::Error};
+use std::{env, error::Error, sync::Arc};
 use tokio_postgres::{types::ToSql, NoTls};
 use types::{
     account::{AccountProfiles, AccountStore},
@@ -65,12 +65,20 @@ mod tests {
     }
 }
 
+pub type DynConnPool = Arc<dyn ConnPoolTrait + Send + Sync>;
+
+#[async_trait]
+pub trait ConnPoolTrait {
+    async fn get_conn(&self) -> DatabaseConnection;
+}
+
 // https://github.com/tokio-rs/axum/blob/5793e75aacfeae16f02fea144ecc2ee7dcb12f55/examples/tokio-postgres/src/main.rs
 #[derive(Clone)]
 pub struct ConnectionPool(Pool<PostgresConnectionManager<NoTls>>);
 
-impl ConnectionPool {
-    pub async fn get_conn(&self) -> DatabaseConnection {
+#[async_trait]
+impl ConnPoolTrait for ConnectionPool {
+    async fn get_conn(&self) -> DatabaseConnection {
         let conn = self.0.get_owned().await.unwrap(); // todo: handle error
         DatabaseConnection(conn)
     }
