@@ -65,29 +65,35 @@ mod tests {
     }
 }
 
-pub type DynConnPool = Arc<dyn ConnPoolTrait + Send + Sync>;
+pub type DynConnPool = Arc<dyn DBConnPoolTrait + Send + Sync + 'static >;
+
+pub type DynDBConn = Arc<dyn DBConnTrait + Send + Sync + 'static >;
 
 #[async_trait]
-pub trait ConnPoolTrait {
-    async fn get_conn(&self) -> DatabaseConnection;
+pub trait DBConnPoolTrait {
+    async fn get_conn(&self) -> DynDBConn;
 }
+
+#[async_trait]
+pub trait DBConnTrait: AccountStore + RuleInstanceStore {}
+impl<T: AccountStore + RuleInstanceStore> DBConnTrait for T {}
 
 // https://github.com/tokio-rs/axum/blob/5793e75aacfeae16f02fea144ecc2ee7dcb12f55/examples/tokio-postgres/src/main.rs
 #[derive(Clone)]
 pub struct ConnectionPool(Pool<PostgresConnectionManager<NoTls>>);
 
 #[async_trait]
-impl ConnPoolTrait for ConnectionPool {
-    async fn get_conn(&self) -> DatabaseConnection {
+impl DBConnPoolTrait for ConnectionPool {
+    async fn get_conn(&self) -> DynDBConn {
         let conn = self.0.get_owned().await.unwrap(); // todo: handle error
-        DatabaseConnection(conn)
+        Arc::new(DatabaseConnection(conn))
     }
 }
 
 pub struct DatabaseConnection(PooledConnection<'static, PostgresConnectionManager<NoTls>>);
 
 #[async_trait]
-impl AccountStore for &DatabaseConnection {
+impl AccountStore for DatabaseConnection {
     async fn get_account_profiles(
         &self,
         accounts: Vec<String>,
@@ -106,6 +112,7 @@ impl AccountStore for &DatabaseConnection {
                 &params[..],
             )
             .await;
+        
         match rows {
             Err(rows) => Err(Box::new(rows)),
             Ok(rows) => {
@@ -127,7 +134,7 @@ impl AccountStore for &DatabaseConnection {
 }
 
 #[async_trait]
-impl RuleInstanceStore for &DatabaseConnection {
+impl RuleInstanceStore for DatabaseConnection {
     async fn get_profile_state_rule_instances(
         &self,
         account_role: AccountRole,
