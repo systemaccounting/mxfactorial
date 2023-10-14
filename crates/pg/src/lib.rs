@@ -65,9 +65,9 @@ mod tests {
     }
 }
 
-pub type DynConnPool = Arc<dyn DBConnPoolTrait + Send + Sync + 'static >;
+pub type DynConnPool = Arc<dyn DBConnPoolTrait + Send + Sync + 'static>;
 
-pub type DynDBConn = Arc<dyn DBConnTrait + Send + Sync + 'static >;
+pub type DynDBConn = Arc<dyn DBConnTrait + Send + Sync + 'static>;
 
 #[async_trait]
 pub trait DBConnPoolTrait {
@@ -112,7 +112,7 @@ impl AccountStore for DatabaseConnection {
                 &params[..],
             )
             .await;
-        
+
         match rows {
             Err(rows) => Err(Box::new(rows)),
             Ok(rows) => {
