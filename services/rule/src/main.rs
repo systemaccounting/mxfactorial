@@ -4,16 +4,14 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use pg::{DynConnPool, DB};
+use pg::{DynConnPool, DynDBConn, DB};
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use std::{env, net::ToSocketAddrs, sync::Arc};
 use tokio::signal;
 use types::approval::{Approval, Approvals};
 use types::{
-    account::AccountStore,
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
     request_response::IntraTransaction,
-    rule::RuleInstanceStore,
     time::TZTime,
     transaction_item::TransactionItems,
 };
@@ -21,8 +19,8 @@ mod rules;
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
-async fn apply_transaction_item_rules<C: AccountStore + RuleInstanceStore>(
-    conn: C,
+async fn apply_transaction_item_rules(
+    conn: &DynDBConn,
     role_sequence: RoleSequence,
     transaction_items: &TransactionItems,
 ) -> TransactionItems {
@@ -107,8 +105,8 @@ async fn apply_transaction_item_rules<C: AccountStore + RuleInstanceStore>(
     response
 }
 
-async fn apply_approval_rules<C: AccountStore + RuleInstanceStore>(
-    conn: C,
+async fn apply_approval_rules(
+    conn: &DynDBConn,
     role_sequence: RoleSequence,
     transaction_items: &mut TransactionItems,
     approval_time: &TZTime,
@@ -296,16 +294,16 @@ mod tests {
     use chrono::{DateTime, Utc};
     use std::error::Error;
     use types::{
-        account::{AccountProfile, AccountProfiles},
+        account::{AccountProfile, AccountProfiles, AccountStore},
         account_role::{AccountRole, DEBITOR_FIRST},
-        rule::{RuleInstance, RuleInstances},
+        rule::{RuleInstance, RuleInstanceStore, RuleInstances},
         transaction_item::TransactionItem,
     };
-    struct Stub();
+    struct DBConnStub();
     const TEST_TAX_APPROVERS: &[&str] = &["BenRoss", "DanLee", "MiriamLevy"];
 
     #[async_trait]
-    impl AccountStore for &Stub {
+    impl AccountStore for DBConnStub {
         async fn get_account_profiles(
             &self,
             _accounts: Vec<String>,
@@ -403,7 +401,7 @@ mod tests {
     }
 
     #[async_trait]
-    impl RuleInstanceStore for &Stub {
+    impl RuleInstanceStore for DBConnStub {
         async fn get_profile_state_rule_instances(
             &self,
             account_role: AccountRole,
@@ -525,7 +523,7 @@ mod tests {
 
     #[tokio::test]
     async fn it_applies_transaction_item_rules() {
-        let stub = Stub();
+        let db_conn_stub = Arc::new(DBConnStub()) as DynDBConn;
         let tr_items = TransactionItems(vec![
             TransactionItem {
                 id: None,
@@ -576,7 +574,7 @@ mod tests {
         ]);
 
         // test function
-        let got = apply_transaction_item_rules(&stub, DEBITOR_FIRST, &tr_items).await;
+        let got = apply_transaction_item_rules(&db_conn_stub, DEBITOR_FIRST, &tr_items).await;
 
         // assert #1:
         // save length of transaction items vec
@@ -585,7 +583,7 @@ mod tests {
         let want_length = 4;
         assert_eq!(
             got_length, want_length,
-            "want {}, got {}",
+            "got {}, want {}",
             got_length, want_length
         );
 
@@ -613,7 +611,7 @@ mod tests {
     #[tokio::test]
     async fn it_applies_approval_rules() {
         let test_approval_time = TZTime::now();
-        let stub = Stub();
+        let db_conn_stub = Arc::new(DBConnStub()) as DynDBConn;
         let mut got_tr_items = TransactionItems(vec![
             TransactionItem {
                 id: None,
@@ -710,7 +708,13 @@ mod tests {
         ]);
 
         // test function
-        apply_approval_rules(&stub, DEBITOR_FIRST, &mut got_tr_items, &test_approval_time).await;
+        apply_approval_rules(
+            &db_conn_stub,
+            DEBITOR_FIRST,
+            &mut got_tr_items,
+            &test_approval_time,
+        )
+        .await;
 
         // assert #1
         // save length of tax item approvals
@@ -754,5 +758,122 @@ mod tests {
             "got {:?}, want {:?}",
             got_approval_time, want_approval_time
         );
+    }
+
+    #[tokio::test]
+    async fn it_applies_rules() {
+        use axum::extract::{Json, State};
+        use pg::DBConnPoolTrait;
+        let test_tr_items = TransactionItems(vec![
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("bread"),
+                price: String::from("3.000"),
+                quantity: String::from("2"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            },
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("milk"),
+                price: String::from("4.000"),
+                quantity: String::from("3"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            },
+        ]);
+
+        struct DBPoolStub();
+
+        #[async_trait]
+        impl DBConnPoolTrait for DBPoolStub {
+            async fn get_conn(&self) -> DynDBConn {
+                return Arc::new(DBConnStub());
+            }
+        }
+
+        let db_pool_stub = Arc::new(DBPoolStub());
+
+        // test function
+        let got_response = apply_rules(State(db_pool_stub), Json(test_tr_items))
+            .await
+            .unwrap();
+        let got_transaction = got_response.0.transaction.clone();
+
+        // assert #1:
+        // save length of transaction items vec
+        let got_length = got_transaction.clone().transaction_items.0.len();
+        let want_length = 4;
+
+        // want length of transaction items vec to be 4 (started with 2)
+        assert_eq!(
+            got_length, want_length,
+            "got {}, want {}",
+            got_length, want_length
+        );
+
+        // assert #2
+        let mut got_tax_tr_item_count = 0;
+        for tr_item in got_transaction.clone().transaction_items.0.iter() {
+            if tr_item.item_id == "9% state sales tax".to_string() {
+                got_tax_tr_item_count = got_tax_tr_item_count + 1
+            }
+        }
+        let want_tax_tr_item_count = 2;
+        // want 2 rule added tax transaction items
+        assert_eq!(
+            got_tax_tr_item_count, want_tax_tr_item_count,
+            "got {}, want {}",
+            got_tax_tr_item_count, want_tax_tr_item_count
+        );
+
+        // assert #3
+        let mut got_creditor_approval_count = 0;
+        for tr_item in got_transaction.clone().transaction_items.0.iter() {
+            if tr_item.creditor_approval_time.is_some()
+                && tr_item.item_id == "9% state sales tax".to_string()
+            {
+                got_creditor_approval_count = got_creditor_approval_count + 1
+            }
+        }
+        let want_creditor_approval_count = 2;
+        // want 2 rule added creditor approvals
+        assert_eq!(
+            got_creditor_approval_count, want_creditor_approval_count,
+            "got {}, want {}",
+            got_creditor_approval_count, want_creditor_approval_count
+        );
+
+        // todo: more tests
     }
 }

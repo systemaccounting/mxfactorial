@@ -1,7 +1,7 @@
 use crate::{account_role::AccountRole, time::TZTime, transaction_item::TransactionItems};
 use serde::{Deserialize, Serialize};
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone)]
 pub struct Transaction {
     pub id: Option<String>,
     pub rule_instance_id: Option<String>,
