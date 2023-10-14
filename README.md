@@ -17,7 +17,8 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **a.** no, and please use the word *replication*  
 
 **q.** i dont find any words in here used by the media. what is this?  
-**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law. first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively. encryption and replication are secondary:
+**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law.
+first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively:
 ```json5
 {
   "item": "bottled water",
@@ -29,6 +30,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
   "debitor_approval_time": "2023-03-20T05:24:13.465Z"
 }
 ```
+encryption and replication are secondary
 
 **q.** where will i bank?  
 **a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their accounting, then assume no one except you will own that risk after you consume it  
