@@ -186,14 +186,6 @@ infrastructure:
                 ssm:
                 default: 16
 migrations:
-  db-reset:
-    type: app
-    deploy: true
-    env_var:
-      set:
-        DB_RESET_SCRIPT_NAME:
-          ssm: null
-          default: index.sh
   dumps:
     env_var:
       set:
@@ -201,16 +193,27 @@ migrations:
           ssm: null
           default: ./migrations/dumps/testseed.sql
   go-migrate:
+    runtime: go1.x
     type: app
+    local_dev: true
+    params:
+      - AWS_REGION
     deploy: true
+    build_src_path: cmd
+    dependents:
     env_var:
       set:
-        GO_MIGRATE_DOCKER_REPOSITORY:
+        GO_MIGRATE_PORT:
           ssm: null
-          default: go-migrate-lambda-layer
-        GO_MIGRATE_SCRIPT_NAME:
-          ssm: null
-          default: index.sh
+          default: 11000
+      get:
+        - READINESS_CHECK_PATH
+        - GO_MIGRATE_PORT
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
   testseed:
     env_var:
       set:

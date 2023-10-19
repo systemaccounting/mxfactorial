@@ -6,6 +6,10 @@ output "lambda_invoke_arn" {
   value = aws_lambda_function.default.invoke_arn
 }
 
+output "lambda_function_name" {
+  value = aws_lambda_function.default.function_name
+}
+
 output "lambda_function_url" {
   value = aws_lambda_function_url.default.function_url
 }

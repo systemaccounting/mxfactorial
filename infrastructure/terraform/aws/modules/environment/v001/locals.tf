@@ -3,7 +3,6 @@ locals {
   TITLED_ID_ENV                = replace(title(local.ID_ENV), "-", "")
   SPACED_ID_ENV                = replace(local.ID_ENV, "-", " ")
   PROJECT_CONF                 = yamldecode(file("../../../../../project.yaml"))
-  GO_MIGRATE_LAYER_PREFIX      = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set.GO_MIGRATE_LAYER_PREFIX.default
   SERVICES_CONF                = local.PROJECT_CONF.services
   RULE_PORT                    = local.SERVICES_CONF.rule.env_var.set.RULE_PORT.default
   GRAPHQL_PORT                 = local.SERVICES_CONF.graphql.env_var.set.GRAPHQL_PORT.default
@@ -17,4 +16,5 @@ locals {
   REQUEST_CREATE_PORT          = local.SERVICES_CONF.request-create.env_var.set.REQUEST_CREATE_PORT.default
   RETURN_RECORD_LIMIT          = local.SERVICES_CONF.env_var.set.RETURN_RECORD_LIMIT.default
   WEB_ADAPTER_LAYER_VERSION    = local.PROJECT_CONF.infrastructure.terraform.aws.modules.web-adapter-lambda.env_var.set.WEB_ADAPTER_LAYER_VERSION.default
+  GO_MIGRATE_PORT              = local.PROJECT_CONF.migrations.go-migrate.env_var.set.GO_MIGRATE_PORT.default
 }

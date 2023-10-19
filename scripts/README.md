@@ -208,10 +208,6 @@ configures machine with aws credentials, then builds a dev environment in aws
 
 creates and deletes an aws iam user for gitpod
 
-##### `delete-lambda-layers.sh`
-
-deletes lambda layer versions created by `build-dev-env.sh`
-
 ##### `terraform-init-dev.sh`
 
 inits terraform state for dev envs
@@ -291,3 +287,7 @@ print list of pids and apps
 ##### `print-value.sh`
 
 print the value of an `env-var` in `project.yaml`
+
+##### `post-go-migrate.sh`
+
+send a http request to the internal `migrations/go-migrate` tool

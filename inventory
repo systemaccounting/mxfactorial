@@ -13,5 +13,4 @@ services/graphql
 services/balance-by-account
 services/auto-confirm
 migrations/go-migrate
-migrations/db-reset
 client

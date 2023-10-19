@@ -26,8 +26,6 @@ terraform destroy --auto-approve && rm -rf .terraform* .tfplan*
 
 popd
 
-source scripts/delete-lambda-layers.sh --env "$ENV"
-
 pushd infrastructure/terraform/aws/environments/region
 
 # skip if api gateway logging permission not managed by local terraform

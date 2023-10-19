@@ -9,7 +9,7 @@ INVENTORY_LIST=$(cat inventory)
 if [[ "$#" -lt 2 ]] || [[ "$#" -gt 4 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash deploy-all.sh --env dev
+	bash scripts/deploy-all.sh --env dev
 
 	OPTIONAL ARGS:
 	"--initial", prepares for terraform apply
