@@ -105,11 +105,11 @@ resource "aws_ssm_parameter" "postgres_user" {
   value       = local.POSTGRES_VARS.PGUSER
 }
 
-resource "aws_ssm_parameter" "db_reset_passphrase" {
-  name        = "/${var.ssm_prefix}/tool/lambda/db_reset/passphrase"
+resource "aws_ssm_parameter" "go_migrate_passphrase" {
+  name        = "/${var.ssm_prefix}/tool/lambda/go_migrate/passphrase"
   description = "db reset passphrase in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
-  value       = random_password.db_reset.result
+  value       = random_password.go_migrate.result
 }
 
 resource "aws_ssm_parameter" "lambda_readiness_check_path" {
