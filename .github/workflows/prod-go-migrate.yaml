@@ -21,12 +21,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: '1.19.x'
-      - name: create zip for deployment
-        run: make zip
-        working-directory: migrations/go-migrate
-      - name: zip
-        run: ENV_ID=${{ secrets.PROD_ENV_ID }} make put-object ENV=prod
-        working-directory: migrations/go-migrate
       - name: deploy
-        run: ENV_ID=${{ secrets.PROD_ENV_ID }} make update-function ENV=prod
+        run: ENV_ID=${{ secrets.PROD_ENV_ID }} make deploy ENV=prod
         working-directory: migrations/go-migrate
