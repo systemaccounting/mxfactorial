@@ -1,0 +1,33 @@
+{
+	"info": {
+		"_postman_id": "bb33c26c-7773-4ab0-91e7-1653fb0cee07",
+		"name": "go-migrate-reset",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2381569"
+	},
+	"item": [
+		{
+			"name": "reset",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"branch\": \"develop\",\n    \"db_type\": \"test\",\n    \"command\": \"reset\",\n    \"passphrase\": \"{{GO_MIGRATE_PASSPHRASE}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{GO_MIGRATE_URL}}",
+					"host": [
+						"{{GO_MIGRATE_URL}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
