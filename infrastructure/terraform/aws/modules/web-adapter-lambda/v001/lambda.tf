@@ -29,7 +29,7 @@ resource "aws_lambda_function" "default" {
   s3_object_version = data.aws_s3_object.default.version_id
   handler           = "index.handler"
   runtime           = "provided.al2"
-  timeout           = 30
+  timeout           = var.lambda_timeout
   role              = aws_iam_role.default.arn
 
   environment {
@@ -50,7 +50,7 @@ resource "aws_lambda_function" "default" {
 
 resource "aws_lambda_function_url" "default" {
   function_name      = aws_lambda_function.default.function_name
-  authorization_type = "AWS_IAM"
+  authorization_type = var.lambda_url_authorization_type
 }
 
 resource "aws_cloudwatch_log_group" "default" {
