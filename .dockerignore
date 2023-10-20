@@ -2,7 +2,7 @@
 **/*.zip
 **/*.terraform
 **/.env
-**/index.handler
+**/bootstrap
 client/public/build
 migrations/dumps/testseed.sql
 target
