@@ -13,8 +13,8 @@ resource "aws_lambda_function" "graphql" {
   s3_bucket         = data.aws_s3_object.graphql.bucket
   s3_key            = data.aws_s3_object.graphql.key
   s3_object_version = data.aws_s3_object.graphql.version_id
-  handler           = "index.handler"
-  runtime           = "provided.al2"
+  handler           = local.BINARY_NAME
+  runtime           = local.LAMBDA_RUNTIME
   timeout           = 30
   role              = aws_iam_role.graphql_role.arn
   environment {

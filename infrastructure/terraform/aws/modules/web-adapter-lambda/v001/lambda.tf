@@ -10,6 +10,8 @@ locals {
   WEB_ADAPTER_CONF          = local.PROJECT_CONF.infrastructure.terraform.aws.modules.web-adapter-lambda
   READINESS_CHECK_PATH      = local.WEB_ADAPTER_CONF.env_var.set.READINESS_CHECK_PATH.default
   WEB_ADAPTER_LAYER_VERSION = local.WEB_ADAPTER_CONF.env_var.set.WEB_ADAPTER_LAYER_VERSION.default
+  BINARY_NAME               = local.PROJECT_CONF.services.env_var.set.BINARY_NAME.default
+  LAMBDA_RUNTIME            = local.PROJECT_CONF.infrastructure.terraform.aws.modules.env_var.set.LAMBDA_RUNTIME.default
 }
 
 data "aws_s3_object" "default" {
@@ -27,8 +29,8 @@ resource "aws_lambda_function" "default" {
   s3_bucket         = data.aws_s3_object.default.bucket
   s3_key            = data.aws_s3_object.default.key
   s3_object_version = data.aws_s3_object.default.version_id
-  handler           = "index.handler"
-  runtime           = "provided.al2"
+  handler           = local.BINARY_NAME
+  runtime           = local.LAMBDA_RUNTIME
   timeout           = var.lambda_timeout
   role              = aws_iam_role.default.arn
 

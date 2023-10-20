@@ -56,6 +56,11 @@ infrastructure:
                 ssm: null
                 default: apigw_logging
       modules:
+        env_var:
+          set:
+            LAMBDA_RUNTIME:
+              ssm: null
+              default: provided.al2
         environment:
           env_var:
             set:
@@ -284,7 +289,7 @@ services:
     set:
       BINARY_NAME:
         ssm: null
-        default: index.handler
+        default: bootstrap
       LAMBDA_INVOKE_LOG:
         ssm: null
         default: invoke.log
