@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ "$#" -ne 4 ]]; then
-	echo "use: bash scripts/clean-binary.sh --app-name request-create --binary-name index.handler"
+	echo "use: bash scripts/clean-binary.sh --app-name request-create --binary-name bootstrap"
 	exit 1
 fi
 

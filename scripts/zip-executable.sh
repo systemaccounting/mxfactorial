@@ -6,7 +6,7 @@ if [[ "$#" -ne 6 ]]; then
 	bash scripts/zip-executable.sh \
 	        --app-name request-create \
 	        --artifact-name request-create-src.zip \
-	        --executable-name index.handler
+	        --executable-name bootstrap
 	EOF
 	exit 1
 fi
