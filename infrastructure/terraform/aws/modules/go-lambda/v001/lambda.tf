@@ -6,6 +6,9 @@ locals {
   SERVICE_NAME_UPPER = replace(upper(var.service_name), "-", "_")
   SERVICE_NAME_LOWER = replace(var.service_name, "-", "_")
   LOG_GROUP_NAME     = "/aws/lambda/${aws_lambda_function.default.function_name}"
+  PROJECT_CONF       = yamldecode(file("../../../../../project.yaml"))
+  BINARY_NAME        = local.PROJECT_CONF.services.env_var.set.BINARY_NAME.default
+  LAMBDA_RUNTIME     = local.PROJECT_CONF.infrastructure.terraform.aws.modules.env_var.set.LAMBDA_RUNTIME.default
 }
 
 data "aws_s3_object" "default" {
@@ -23,13 +26,15 @@ resource "aws_lambda_function" "default" {
   s3_bucket         = data.aws_s3_object.default.bucket
   s3_key            = data.aws_s3_object.default.key
   s3_object_version = data.aws_s3_object.default.version_id
-  handler           = "index.handler"
-  runtime           = "go1.x"
+  handler           = local.BINARY_NAME
+  runtime           = local.LAMBDA_RUNTIME
   timeout           = 30
   role              = aws_iam_role.default.arn
-  dynamic "environment" {
-    for_each = var.env_vars == null ? [] : [1]
-    content { variables = var.env_vars }
+  environment {
+    variables = merge(
+      {},
+      var.env_vars,
+    )
   }
 }
 
