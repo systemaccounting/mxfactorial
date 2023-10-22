@@ -67,6 +67,12 @@ impl AccountProfiles {
     }
 }
 
+impl Default for AccountProfiles {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl FromIterator<AccountProfile> for AccountProfiles {
     fn from_iter<T: IntoIterator<Item = AccountProfile>>(iter: T) -> Self {
         let mut profiles = AccountProfiles::new();

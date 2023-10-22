@@ -77,6 +77,12 @@ impl FromIterator<RuleInstance> for RuleInstances {
     }
 }
 
+impl Default for RuleInstances {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RuleInstances {
     pub fn new() -> Self {
         Self(vec![])
