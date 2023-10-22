@@ -294,16 +294,16 @@ mod tests {
     use chrono::{DateTime, Utc};
     use std::error::Error;
     use types::{
-        account::{AccountProfile, AccountProfiles, AccountStore},
+        account::{AccountProfile, AccountProfiles, AccountTrait},
         account_role::{AccountRole, DEBITOR_FIRST},
-        rule::{RuleInstance, RuleInstanceStore, RuleInstances},
+        rule::{RuleInstance, RuleInstanceTrait, RuleInstances},
         transaction_item::TransactionItem,
     };
     struct DBConnStub();
     const TEST_TAX_APPROVERS: &[&str] = &["BenRoss", "DanLee", "MiriamLevy"];
 
     #[async_trait]
-    impl AccountStore for DBConnStub {
+    impl AccountTrait for DBConnStub {
         async fn get_account_profiles(
             &self,
             _accounts: Vec<String>,
@@ -401,7 +401,7 @@ mod tests {
     }
 
     #[async_trait]
-    impl RuleInstanceStore for DBConnStub {
+    impl RuleInstanceTrait for DBConnStub {
         async fn get_profile_state_rule_instances(
             &self,
             account_role: AccountRole,

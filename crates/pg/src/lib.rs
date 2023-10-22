@@ -6,11 +6,11 @@ use sqls::{
     select_rule_instance_by_type_role_account, select_rule_instance_by_type_role_state,
 };
 use std::{env, error::Error, sync::Arc};
-use tokio_postgres::{types::ToSql, NoTls};
+use tokio_postgres::{types::ToSql, NoTls, Row};
 use types::{
-    account::{AccountProfiles, AccountStore},
+    account::{AccountProfile, AccountProfiles, AccountTrait},
     account_role::AccountRole,
-    rule::{RuleInstanceStore, RuleInstances},
+    rule::{RuleInstance, RuleInstanceTrait, RuleInstances},
 };
 
 pub struct DB;
@@ -75,8 +75,8 @@ pub trait DBConnPoolTrait {
 }
 
 #[async_trait]
-pub trait DBConnTrait: AccountStore + RuleInstanceStore {}
-impl<T: AccountStore + RuleInstanceStore> DBConnTrait for T {}
+pub trait DBConnTrait: AccountTrait + RuleInstanceTrait {}
+impl<T: AccountTrait + RuleInstanceTrait> DBConnTrait for T {}
 
 // https://github.com/tokio-rs/axum/blob/5793e75aacfeae16f02fea144ecc2ee7dcb12f55/examples/tokio-postgres/src/main.rs
 #[derive(Clone)]
@@ -93,7 +93,7 @@ impl DBConnPoolTrait for ConnectionPool {
 pub struct DatabaseConnection(PooledConnection<'static, PostgresConnectionManager<NoTls>>);
 
 #[async_trait]
-impl AccountStore for DatabaseConnection {
+impl AccountTrait for DatabaseConnection {
     async fn get_account_profiles(
         &self,
         accounts: Vec<String>,
@@ -116,7 +116,7 @@ impl AccountStore for DatabaseConnection {
         match rows {
             Err(rows) => Err(Box::new(rows)),
             Ok(rows) => {
-                let account_profiles = types::account::AccountProfiles::from_rows(rows);
+                let account_profiles = DatabaseConnection::from_account_profile_rows(rows);
                 Ok(account_profiles)
             }
         }
@@ -134,7 +134,7 @@ impl AccountStore for DatabaseConnection {
 }
 
 #[async_trait]
-impl RuleInstanceStore for DatabaseConnection {
+impl RuleInstanceTrait for DatabaseConnection {
     async fn get_profile_state_rule_instances(
         &self,
         account_role: AccountRole,
@@ -148,7 +148,7 @@ impl RuleInstanceStore for DatabaseConnection {
             )
             .await
             .unwrap(); // todo: handle error
-        RuleInstances::from_rows(rows)
+        DatabaseConnection::from_rule_instance_rows(rows)
     }
 
     async fn get_rule_instances_by_type_role_account(
@@ -164,7 +164,7 @@ impl RuleInstanceStore for DatabaseConnection {
             )
             .await
             .unwrap(); // todo: handle error
-        RuleInstances::from_rows(rows)
+        DatabaseConnection::from_rule_instance_rows(rows)
     }
 
     async fn get_approval_rule_instances(
@@ -180,6 +180,86 @@ impl RuleInstanceStore for DatabaseConnection {
             )
             .await
             .unwrap(); // todo: handle error
-        RuleInstances::from_rows(rows)
+        DatabaseConnection::from_rule_instance_rows(rows)
+    }
+}
+
+impl DatabaseConnection {
+    pub fn from_account_profile_row(row: Row) -> AccountProfile {
+        AccountProfile {
+            id: row.get("id"),
+            account_name: row.get("account_name"),
+            description: row.get("description"),
+            first_name: row.get("first_name"),
+            middle_name: row.get("middle_name"),
+            last_name: row.get("last_name"),
+            country_name: row.get("country_name"),
+            street_number: row.get("street_number"),
+            street_name: row.get("street_name"),
+            floor_number: row.get("floor_number"),
+            unit_number: row.get("unit_number"),
+            city_name: row.get("city_name"),
+            county_name: row.get("county_name"),
+            region_name: row.get("region_name"),
+            state_name: row.get("state_name"),
+            postal_code: row.get("postal_code"),
+            latlng: row.get("latlng"),
+            email_address: row.get("email_address"),
+            telephone_country_code: row.get("telephone_country_code"),
+            telephone_area_code: row.get("telephone_area_code"),
+            telephone_number: row.get("telephone_number"),
+            occupation_id: row.get("occupation_id"),
+            industry_id: row.get("industry_id"),
+        }
+    }
+
+    pub fn from_account_profile_rows(rows: Vec<Row>) -> AccountProfiles {
+        rows.into_iter()
+            .map(Self::from_account_profile_row)
+            .collect()
+    }
+
+    pub fn from_rule_instance_row(row: Row) -> RuleInstance {
+        RuleInstance {
+            id: row.get("id"),
+            rule_type: row.get("rule_type"),
+            rule_name: row.get("rule_name"),
+            rule_instance_name: row.get("rule_instance_name"),
+            variable_values: row.get("variable_values"),
+            account_role: row.get("account_role"),
+            item_id: row.get("item_id"),
+            price: row.get("price"),
+            quantity: row.get("quantity"),
+            unit_of_measurement: row.get("unit_of_measurement"),
+            units_measured: row.get("units_measured"),
+            account_name: row.get("account_name"),
+            first_name: row.get("first_name"),
+            middle_name: row.get("middle_name"),
+            last_name: row.get("last_name"),
+            country_name: row.get("country_name"),
+            street_id: row.get("street_id"),
+            street_name: row.get("street_name"),
+            floor_number: row.get("floor_number"),
+            unit_id: row.get("unit_id"),
+            city_name: row.get("city_name"),
+            county_name: row.get("county_name"),
+            region_name: row.get("region_name"),
+            state_name: row.get("state_name"),
+            postal_code: row.get("postal_code"),
+            latlng: row.get("latlng"),
+            email_address: row.get("email_address"),
+            telephone_country_code: row.get("telephone_country_code"),
+            telephone_area_code: row.get("telephone_area_code"),
+            telephone_number: row.get("telephone_number"),
+            occupation_id: row.get("occupation_id"),
+            industry_id: row.get("industry_id"),
+            disabled_time: row.get("disabled_time"),
+            removed_time: row.get("removed_time"),
+            created_at: row.get("created_at"),
+        }
+    }
+
+    pub fn from_rule_instance_rows(rows: Vec<Row>) -> RuleInstances {
+        rows.into_iter().map(Self::from_rule_instance_row).collect()
     }
 }
