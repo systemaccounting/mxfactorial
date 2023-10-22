@@ -5,10 +5,9 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
-use tokio_postgres::Row;
 
 #[async_trait]
-pub trait RuleInstanceStore {
+pub trait RuleInstanceTrait {
     async fn get_profile_state_rule_instances(
         &self,
         account_role: AccountRole,
@@ -65,54 +64,26 @@ pub struct RuleInstance {
     pub created_at: Option<TZTime>,
 }
 
-impl RuleInstance {
-    pub fn from_row(row: Row) -> Self {
-        RuleInstance {
-            id: row.get("id"),
-            rule_type: row.get("rule_type"),
-            rule_name: row.get("rule_name"),
-            rule_instance_name: row.get("rule_instance_name"),
-            variable_values: row.get("variable_values"),
-            account_role: row.get("account_role"),
-            item_id: row.get("item_id"),
-            price: row.get("price"),
-            quantity: row.get("quantity"),
-            unit_of_measurement: row.get("unit_of_measurement"),
-            units_measured: row.get("units_measured"),
-            account_name: row.get("account_name"),
-            first_name: row.get("first_name"),
-            middle_name: row.get("middle_name"),
-            last_name: row.get("last_name"),
-            country_name: row.get("country_name"),
-            street_id: row.get("street_id"),
-            street_name: row.get("street_name"),
-            floor_number: row.get("floor_number"),
-            unit_id: row.get("unit_id"),
-            city_name: row.get("city_name"),
-            county_name: row.get("county_name"),
-            region_name: row.get("region_name"),
-            state_name: row.get("state_name"),
-            postal_code: row.get("postal_code"),
-            latlng: row.get("latlng"),
-            email_address: row.get("email_address"),
-            telephone_country_code: row.get("telephone_country_code"),
-            telephone_area_code: row.get("telephone_area_code"),
-            telephone_number: row.get("telephone_number"),
-            occupation_id: row.get("occupation_id"),
-            industry_id: row.get("industry_id"),
-            disabled_time: row.get("disabled_time"),
-            removed_time: row.get("removed_time"),
-            created_at: row.get("created_at"),
-        }
-    }
-}
-
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
 pub struct RuleInstances(pub Vec<RuleInstance>);
 
+impl FromIterator<RuleInstance> for RuleInstances {
+    fn from_iter<T: IntoIterator<Item = RuleInstance>>(iter: T) -> Self {
+        let mut rule_instances = RuleInstances::new();
+        for i in iter {
+            rule_instances.add(i)
+        }
+        rule_instances
+    }
+}
+
 impl RuleInstances {
-    pub fn from_rows(rows: Vec<Row>) -> Self {
-        Self(rows.into_iter().map(RuleInstance::from_row).collect())
+    pub fn new() -> Self {
+        Self(vec![])
+    }
+
+    pub fn add(&mut self, elem: RuleInstance) {
+        self.0.push(elem)
     }
 }
 

@@ -2,10 +2,9 @@ use async_trait::async_trait;
 use postgres_types::{FromSql, ToSql};
 use serde::Deserialize;
 use std::error::Error;
-use tokio_postgres::Row;
 
 #[async_trait]
-pub trait AccountStore {
+pub trait AccountTrait {
     async fn get_account_profiles(
         &self,
         accounts: Vec<String>,
@@ -41,34 +40,6 @@ pub struct AccountProfile {
 }
 
 impl AccountProfile {
-    pub fn from_row(row: Row) -> Self {
-        AccountProfile {
-            id: row.get("id"),
-            account_name: row.get("account_name"),
-            description: row.get("description"),
-            first_name: row.get("first_name"),
-            middle_name: row.get("middle_name"),
-            last_name: row.get("last_name"),
-            country_name: row.get("country_name"),
-            street_number: row.get("street_number"),
-            street_name: row.get("street_name"),
-            floor_number: row.get("floor_number"),
-            unit_number: row.get("unit_number"),
-            city_name: row.get("city_name"),
-            county_name: row.get("county_name"),
-            region_name: row.get("region_name"),
-            state_name: row.get("state_name"),
-            postal_code: row.get("postal_code"),
-            latlng: row.get("latlng"),
-            email_address: row.get("email_address"),
-            telephone_country_code: row.get("telephone_country_code"),
-            telephone_area_code: row.get("telephone_area_code"),
-            telephone_number: row.get("telephone_number"),
-            occupation_id: row.get("occupation_id"),
-            industry_id: row.get("industry_id"),
-        }
-    }
-
     pub fn get_id(&self) -> Option<String> {
         self.id.clone()
     }
@@ -78,10 +49,6 @@ impl AccountProfile {
 pub struct AccountProfiles(pub Vec<AccountProfile>);
 
 impl AccountProfiles {
-    pub fn from_rows(rows: Vec<Row>) -> Self {
-        Self(rows.into_iter().map(AccountProfile::from_row).collect())
-    }
-
     pub fn match_profile_by_account(&self, account_name: String) -> Option<AccountProfile> {
         for ap in self.0.iter() {
             if ap.account_name == account_name {
@@ -90,29 +57,23 @@ impl AccountProfiles {
         }
         None
     }
-}
 
-#[derive(Eq, PartialEq, Debug, Deserialize, FromSql, ToSql)]
-pub struct AccountOwner {
-    pub owner: String,
-    pub account: String,
-}
+    fn new() -> Self {
+        AccountProfiles(vec![])
+    }
 
-impl AccountOwner {
-    pub fn from_row(row: Row) -> Self {
-        AccountOwner {
-            owner: row.get("owner"),
-            account: row.get("account"),
-        }
+    fn add(&mut self, elem: AccountProfile) {
+        self.0.push(elem)
     }
 }
 
-#[derive(Eq, PartialEq, Debug, Deserialize, FromSql, ToSql)]
-pub struct AccountOwners(Vec<AccountOwner>);
-
-impl AccountOwners {
-    pub fn from_rows(rows: Vec<Row>) -> Self {
-        Self(rows.into_iter().map(AccountOwner::from_row).collect())
+impl FromIterator<AccountProfile> for AccountProfiles {
+    fn from_iter<T: IntoIterator<Item = AccountProfile>>(iter: T) -> Self {
+        let mut profiles = AccountProfiles::new();
+        for i in iter {
+            profiles.add(i);
+        }
+        profiles
     }
 }
 
