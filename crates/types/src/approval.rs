@@ -2,7 +2,6 @@ use crate::account_role::AccountRole;
 use crate::time::TZTime;
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
-use tokio_postgres::Row;
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
 pub struct Approval {
@@ -19,32 +18,10 @@ pub struct Approval {
     pub expiration_time: Option<TZTime>,
 }
 
-impl Approval {
-    pub fn from_row(row: Row) -> Self {
-        Approval {
-            id: row.get("id"),
-            rule_instance_id: row.get("rule_instance_id"),
-            transaction_id: row.get("transaction_id"),
-            transaction_item_id: row.get("transaction_item_id"),
-            account_name: row.get("account_name"),
-            account_role: row.get("account_role"),
-            device_id: row.get("device_id"),
-            device_latlng: row.get("device_latlng"),
-            approval_time: row.get("approval_time"),
-            rejection_time: row.get("rejection_time"),
-            expiration_time: row.get("expiration_time"),
-        }
-    }
-}
-
 #[derive(Default, Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
 pub struct Approvals(pub Vec<Approval>);
 
 impl Approvals {
-    pub fn from_rows(rows: Vec<Row>) -> Self {
-        Self(rows.into_iter().map(Approval::from_row).collect())
-    }
-
     pub fn get_approvals_per_role(&self, account_role: AccountRole) -> Self {
         Approvals(
             self.0
