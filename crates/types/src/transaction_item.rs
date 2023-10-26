@@ -85,21 +85,6 @@ impl TransactionItems {
         accounts
     }
 
-    pub fn list_role_accounts(&self) -> Vec<(AccountRole, String)> {
-        let mut role_accounts: Vec<(AccountRole, String)> = vec![];
-        for ti in self.0.iter() {
-            let debitor_account = (AccountRole::Debitor, ti.debitor.clone());
-            if !role_accounts.contains(&debitor_account) {
-                role_accounts.push(debitor_account)
-            }
-            let creditor_account = (AccountRole::Creditor, ti.creditor.clone());
-            if !role_accounts.contains(&creditor_account) {
-                role_accounts.push(creditor_account)
-            }
-        }
-        role_accounts
-    }
-
     pub fn add_profile_ids(&mut self, account_profiles: AccountProfiles) {
         for ti in self.0.iter_mut() {
             if ti.debitor_profile_id.is_none() {
@@ -175,9 +160,183 @@ impl TransactionItems {
 mod tests {
 
     use super::*;
+    use crate::account::AccountProfile;
     use crate::approval::Approval;
     use crate::transaction::tests::create_test_transaction;
     use serde_json;
+
+    #[test]
+    fn it_gets_creditor_account_by_role() {
+        let test_creditor_role = AccountRole::Creditor;
+        let test_tr_item = create_test_transaction_item();
+        let got = test_tr_item.get_account_by_role(test_creditor_role);
+        let want = String::from("GroceryStore");
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_gets_debitor_account_by_role() {
+        let test_creditor_role = AccountRole::Debitor;
+        let test_tr_item = create_test_transaction_item();
+        let got = test_tr_item.get_account_by_role(test_creditor_role);
+        let want = String::from("JacobWebb");
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_sets_creditor_profile_id() {
+        let test_creditor_role = AccountRole::Creditor;
+        let mut test_tr_item = create_test_transaction_item();
+        let test_id = String::from("1");
+        test_tr_item.set_profile_id(test_creditor_role, test_id.clone());
+        let got = test_tr_item.creditor_profile_id.unwrap();
+        let want = test_id;
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_sets_debitor_profile_id() {
+        let test_debitor_role = AccountRole::Debitor;
+        let mut test_tr_item = create_test_transaction_item();
+        let test_id = String::from("1");
+        test_tr_item.set_profile_id(test_debitor_role, test_id.clone());
+        let got = test_tr_item.debitor_profile_id.unwrap();
+        let want = test_id;
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_sets_debitor_first_as_false() {
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.set_none_debitor_first_as_false();
+        let got = test_tr_item.debitor_first.unwrap();
+        let want = false;
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_sets_none_rule_exec_ids_as_empty() {
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.rule_exec_ids = None;
+        test_tr_item.set_none_rule_exec_ids_as_empty();
+        let got = test_tr_item.rule_exec_ids.unwrap();
+        let want: Vec<String> = vec![];
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_adds_profile_ids() {
+        let mut test_tr_items = create_test_transaction_items();
+        let want_debitor_profile_id = Some(String::from("11"));
+        let want_creditor_profile_id = Some(String::from("7"));
+        let test_acct_profiles = AccountProfiles(vec![
+            AccountProfile {
+                id: want_debitor_profile_id.clone(),
+                account_name: String::from("JacobWebb"),
+                description: Some(String::from("Soccer coach")),
+                first_name: Some(String::from("Jacob")),
+                middle_name: Some(String::from("Curtis")),
+                last_name: Some(String::from("Webb")),
+                country_name: String::from("United States of America"),
+                street_number: Some(String::from("205")),
+                street_name: Some(String::from("N Mccarran Blvd")),
+                floor_number: None,
+                unit_number: None,
+                city_name: String::from("Sparks"),
+                county_name: Some(String::from("Washoe County")),
+                region_name: None,
+                state_name: String::from("Nevada"),
+                postal_code: String::from("89431"),
+                latlng: Some(String::from("(39.534552,-119.737825)")),
+                email_address: String::from("jacob@address.xz"),
+                telephone_country_code: Some(String::from("1")),
+                telephone_area_code: Some(String::from("775")),
+                telephone_number: Some(String::from("5555555")),
+                occupation_id: Some(String::from("7")),
+                industry_id: Some(String::from("7")),
+            },
+            AccountProfile {
+                id: want_creditor_profile_id.clone(),
+                account_name: String::from("GroceryStore"),
+                description: Some(String::from("Sells groceries")),
+                first_name: Some(String::from("Grocery")),
+                middle_name: None,
+                last_name: Some(String::from("Store")),
+                country_name: String::from("United States of America"),
+                street_number: Some(String::from("8701")),
+                street_name: Some(String::from("Lincoln Blvd")),
+                floor_number: None,
+                unit_number: None,
+                city_name: String::from("Los Angeles"),
+                county_name: Some(String::from("Los Angeles County")),
+                region_name: None,
+                state_name: String::from("California"),
+                postal_code: String::from("90045"),
+                latlng: Some(String::from("(33.958050,-118.418388)")),
+                email_address: String::from("grocerystore@address.xz"),
+                telephone_country_code: Some(String::from("1")),
+                telephone_area_code: Some(String::from("310")),
+                telephone_number: Some(String::from("5555555")),
+                occupation_id: Some(String::from("11")),
+                industry_id: Some(String::from("11")),
+            },
+        ]);
+        test_tr_items.add_profile_ids(test_acct_profiles);
+        for t in test_tr_items.0.iter() {
+            let got_debitor_profile_id = t.debitor_profile_id.clone();
+            assert_eq!(
+                got_debitor_profile_id,
+                want_debitor_profile_id.clone(),
+                "got {:?}, want {:?}",
+                got_debitor_profile_id,
+                want_debitor_profile_id
+            );
+            let got_creditor_profile_id = t.creditor_profile_id.clone();
+            assert_eq!(
+                got_creditor_profile_id,
+                want_creditor_profile_id.clone(),
+                "got {:?}, want {:?}",
+                got_creditor_profile_id,
+                want_creditor_profile_id
+            )
+        }
+    }
+
+    #[test]
+    fn it_sums_value() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.sum_value();
+        let want = String::from("18.000");
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_sets_debitor_first_default() {
+        let mut test_tr_items = create_test_transaction_items();
+        for t in test_tr_items.0.iter_mut() {
+            t.debitor_first = None
+        }
+        test_tr_items.set_debitor_first_default();
+        for t in test_tr_items.0.iter_mut() {
+            let got = t.debitor_first.clone();
+            let want = Some(false);
+            assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+        }
+    }
+
+    #[test]
+    fn it_sets_empty_rule_exec_ids() {
+        let mut test_tr_items = create_test_transaction_items();
+        for t in test_tr_items.0.iter_mut() {
+            t.rule_exec_ids = None
+        }
+        test_tr_items.set_empty_rule_exec_ids();
+        for t in test_tr_items.0.iter_mut() {
+            let got = t.rule_exec_ids.clone();
+            let want = Some(vec![]);
+            assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+        }
+    }
 
     #[test]
     fn it_deserializes_a_transaction_item() {
@@ -334,6 +493,14 @@ mod tests {
     }
 
     #[test]
+    fn it_lists_accounts() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.list_accounts();
+        let want = vec!["GroceryStore", "JacobWebb"];
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
     fn it_returns_creditor_first() {
         let test_transaction = create_test_transaction();
         let got = test_transaction
@@ -349,6 +516,17 @@ mod tests {
         let test_transaction = create_test_debitor_first_transaction_items();
         let got = test_transaction.is_debitor_first().unwrap();
         let want = true;
+        assert_eq!(got, want);
+    }
+
+    #[test]
+    fn it_returns_debitor_first_as_false_with_none() {
+        let mut test_tr_items = create_test_debitor_first_transaction_items();
+        for t in test_tr_items.0.iter_mut() {
+            t.debitor_first = None;
+        }
+        let got = test_tr_items.is_debitor_first().unwrap();
+        let want = false;
         assert_eq!(got, want);
     }
 
