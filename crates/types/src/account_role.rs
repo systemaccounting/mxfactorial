@@ -22,6 +22,7 @@ impl<'a> FromSql<'a> for AccountRole {
         }
     }
 
+    #[cfg(not(tarpaulin_include))]
     fn accepts(ty: &Type) -> bool {
         *ty == Type::TEXT
     }
@@ -43,6 +44,7 @@ impl ToSql for AccountRole {
     }
 
     #[allow(unused_variables)]
+    #[cfg(not(tarpaulin_include))]
     fn accepts(ty: &Type) -> bool {
         true
     }
@@ -59,6 +61,59 @@ pub const CREDITOR_FIRST: RoleSequence = [AccountRole::Creditor, AccountRole::De
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bytes::BytesMut;
+
+    #[test]
+    fn it_converts_to_debitor_account_role_from_sql() {
+        let test_pg_type = Type::TEXT;
+        let test_debitor = "debitor".as_bytes();
+        let got = AccountRole::from_sql(&test_pg_type, test_debitor).unwrap();
+        let want = AccountRole::Debitor;
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_converts_to_creditor_account_role_from_sql() {
+        let test_pg_type = Type::TEXT;
+        let test_creditor = "creditor".as_bytes();
+        let got = AccountRole::from_sql(&test_pg_type, test_creditor).unwrap();
+        let want = AccountRole::Creditor;
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_errs_on_not_debitor_or_creditor_from_sql() {
+        let test_pg_type = Type::TEXT;
+        let test_creditor = "doesntexist".as_bytes();
+        let got = AccountRole::from_sql(&test_pg_type, test_creditor);
+        assert!(got.is_err())
+    }
+
+    #[test]
+    fn it_converts_from_creditor_account_role_to_sql() {
+        let test_account_creditor_role = AccountRole::Creditor;
+        let test_pg_type = Type::TEXT;
+        let mut test_buf = BytesMut::new();
+        test_account_creditor_role
+            .to_sql(&test_pg_type, &mut test_buf)
+            .unwrap();
+        let got = &test_buf[..];
+        let want = b"creditor";
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_converts_from_debitor_account_role_to_sql() {
+        let test_account_debitor_role = AccountRole::Debitor;
+        let test_pg_type = Type::TEXT;
+        let mut test_buf = BytesMut::new();
+        test_account_debitor_role
+            .to_sql(&test_pg_type, &mut test_buf)
+            .unwrap();
+        let got = &test_buf[..];
+        let want = b"debitor";
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
 
     #[test]
     fn it_deserializes_debitor() {
