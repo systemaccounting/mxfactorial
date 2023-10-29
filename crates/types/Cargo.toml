@@ -14,3 +14,6 @@ strum = {version = "0.24.1", features = ["derive"]}
 strum_macros = "0.24.3"
 tokio-postgres = {version = "0.7.7", features = ["with-chrono-0_4"]}
 async-trait = "0.1.73"
+
+[dev-dependencies]
+bytes = "1.0"
