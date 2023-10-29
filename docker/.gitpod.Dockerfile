@@ -16,6 +16,7 @@ RUN go install github.com/99designs/gqlgen@latest && \
 	sudo mv terraform /usr/local/bin && \
 	rm terraform_${TF_VERSION}_linux_amd64.zip && \
 	cargo install cross --git https://github.com/cross-rs/cross && \
+	cargo install cargo-tarpaulin && \
 	brew install libpq && \
 	brew link --force libpq && \
 	brew install golang-migrate && \
