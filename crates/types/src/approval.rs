@@ -38,6 +38,46 @@ mod tests {
     use super::*;
 
     #[test]
+    fn it_gets_approvals_per_role() {
+        let want = Approvals(vec![Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("GroceryCo"),
+            account_role: AccountRole::Creditor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        }]);
+
+        let test_role = AccountRole::Creditor;
+
+        let test_approvals = Approvals(vec![
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JoeCarter"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            want.0[0].clone(),
+        ]);
+
+        let got = test_approvals.get_approvals_per_role(test_role);
+
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
     fn it_deserializes_an_approval() {
         let got: Approval = serde_json::from_str(
             r#"
