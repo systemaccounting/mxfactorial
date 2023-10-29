@@ -78,6 +78,7 @@ impl FromIterator<RuleInstance> for RuleInstances {
 }
 
 impl Default for RuleInstances {
+    #[cfg(not(tarpaulin_include))]
     fn default() -> Self {
         Self::new()
     }
@@ -384,7 +385,7 @@ mod tests {
     }
 
     #[test]
-    fn rule_instances_implement_from_iterator() {
+    fn it_implements_from_iterator_on_rule_instances() {
         let want = RuleInstances(vec![RuleInstance {
             id: Some(String::from("1")),
             rule_type: String::from("transaction_item"),
