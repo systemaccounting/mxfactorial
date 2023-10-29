@@ -382,4 +382,60 @@ mod tests {
             panic!("got {:#?}, want {:#?}", got, want)
         }
     }
+
+    #[test]
+    fn rule_instances_implement_from_iterator() {
+        let want = RuleInstances(vec![RuleInstance {
+            id: Some(String::from("1")),
+            rule_type: String::from("transaction_item"),
+            rule_name: String::from("multiplyItemValue"),
+            rule_instance_name: String::from("NinePercentSalesTax"),
+            variable_values: vec![
+                String::from("ANY"),
+                String::from("StateOfCalifornia"),
+                String::from("9% state sales tax"),
+                String::from("0.09"),
+            ],
+            account_role: AccountRole::Creditor,
+            item_id: None,
+            price: None,
+            quantity: None,
+            unit_of_measurement: None,
+            units_measured: None,
+            account_name: None,
+            first_name: None,
+            middle_name: None,
+            last_name: None,
+            country_name: None,
+            street_id: None,
+            street_name: None,
+            floor_number: None,
+            unit_id: None,
+            city_name: None,
+            county_name: None,
+            region_name: None,
+            state_name: Some(String::from("California")),
+            postal_code: None,
+            latlng: None,
+            email_address: None,
+            telephone_country_code: None,
+            telephone_area_code: None,
+            telephone_number: None,
+            occupation_id: None,
+            industry_id: None,
+            disabled_time: None,
+            removed_time: None,
+            created_at: Some(TZTime(
+                DateTime::parse_from_rfc3339("2023-02-28T04:21:08.363Z")
+                    .unwrap()
+                    .with_timezone(&Utc),
+            )),
+        }]);
+        // create iterator
+        let test_rule_instances = std::iter::repeat(want.0[0].clone()).take(1);
+        // test method
+        let got = RuleInstances::from_iter(test_rule_instances);
+        // assert
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
 }
