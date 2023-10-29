@@ -1,0 +1,36 @@
+name: dev-crates
+
+on:
+  push:
+    paths:
+    - 'crates/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  test:
+    name: crates
+    runs-on: ubuntu-latest
+    container:
+      image: xd009642/tarpaulin:develop-nightly
+      options: --security-opt seccomp=unconfined
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      CI: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - uses: taiki-e/install-action@nextest
+      - name: crates/types lint
+        run: |
+          cargo fmt -- --check
+          cargo clippy -- -Dwarnings
+        working-directory: crates/types
+      - name: crates/types unit tests and coverage report
+        run: cargo tarpaulin
+        working-directory: crates/types
