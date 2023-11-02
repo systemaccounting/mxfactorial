@@ -29,5 +29,5 @@ jobs:
           cargo clippy -- -Dwarnings
         working-directory: crates/types
       - name: crates/types unit tests and coverage report
-        run: cargo tarpaulin
+        run: cargo tarpaulin --fail-under 95
         working-directory: crates/types
