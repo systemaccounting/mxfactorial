@@ -1,16 +1,20 @@
-use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, Utc};
+use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, SecondsFormat, Utc};
 use postgres_protocol::types;
 use postgres_types::{FromSql, ToSql, Type};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::error::Error;
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, ToSql, Clone)]
+#[derive(Eq, PartialEq, Debug, Deserialize, ToSql, Clone)]
 
-pub struct TZTime(#[serde(serialize_with = "milli_tz_format::serialize")] pub DateTime<Utc>);
+pub struct TZTime(pub DateTime<Utc>);
 
 impl TZTime {
     pub fn now() -> Self {
         Self(chrono::offset::Utc::now())
+    }
+
+    pub fn to_milli_tz(&self) -> String {
+        self.0.to_rfc3339_opts(SecondsFormat::Millis, true)
     }
 }
 
@@ -37,22 +41,91 @@ impl<'a> FromSql<'a> for TZTime {
     }
 }
 
-mod milli_tz_format {
-    use chrono::{DateTime, SecondsFormat, Utc};
-    use serde::{self, Serializer};
-
-    pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+// todo: test timestamp created by rule service == timestamp value stored in db by request-create in
+// https://github.com/systemaccounting/mxfactorial/blob/fc7a27765bed840dce0876ce2fe75d8df6bc2dcf/services/request-create/cmd/main.go#L330-L336
+impl Serialize for TZTime {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let s = date.to_rfc3339_opts(SecondsFormat::Millis, true);
-        serializer.serialize_str(&s)
+        serializer.serialize_str(&self.to_milli_tz())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bytes::{BufMut, BytesMut};
+    use serde_assert;
+    use std::time::SystemTime;
+    use time::{format_description, OffsetDateTime};
+
+    #[test]
+    fn it_serializes() {
+        let test_tz_time = TZTime(
+            DateTime::parse_from_rfc3339("2023-10-30T04:56:56Z")
+                .unwrap()
+                .with_timezone(&Utc),
+        );
+        let test_serializer = serde_assert::Serializer::builder().build();
+
+        let got = test_tz_time.serialize(&test_serializer).unwrap();
+        let want = serde_assert::Tokens(vec![serde_assert::Token::Str(String::from(
+            "2023-10-30T04:56:56.000Z",
+        ))]);
+
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_returns_now() {
+        let test_chrono_now = TZTime::now().0;
+        let test_sys_time_now: OffsetDateTime = SystemTime::now().into();
+
+        let chrono_time_format = "%FT%H:%M";
+        let sys_time_format =
+            format_description::parse("[year]-[month]-[day]T[hour]:[minute]").unwrap();
+
+        let got = format!("{}", test_chrono_now.format(chrono_time_format));
+        let want = test_sys_time_now.format(&sys_time_format).unwrap();
+
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_returns_naive_date_time() {
+        let got = base();
+        let want = NaiveDate::from_ymd_opt(2000, 1, 1)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap();
+
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_converts_to_tztime_from_sql() {
+        let test_pg_type = Type::TIMESTAMPTZ;
+        let mut test_buf = BytesMut::new();
+        // https://github.com/sfackler/rust-postgres/blob/c5ff8cfd86e897b7c197f52684a37a4f17cecb75/postgres-types/src/lib.rs#L207
+        const TIME_SEC_CONVERSION: i64 = 946_684_800;
+        const USEC_PER_SEC: i64 = 1_000_000;
+        test_buf.put_i64((1_698_641_816 - TIME_SEC_CONVERSION) * USEC_PER_SEC);
+        let got = TZTime::from_sql(&test_pg_type, &mut test_buf).unwrap();
+        let want_date = "2023-10-30T04:56:56Z";
+        let want = TZTime(
+            DateTime::parse_from_rfc3339(want_date)
+                .unwrap()
+                .with_timezone(&Utc),
+        );
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_accepts_timestamptz_type_from_sql() {
+        let test_pg_type = Type::TIMESTAMPTZ;
+        assert!(<TZTime as postgres_types::FromSql>::accepts(&test_pg_type))
+    }
 
     #[test]
     fn it_deserializes_time() {
