@@ -6,14 +6,20 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.23"
 postgres-protocol = "0.6.4"
-postgres-types = {version = "0.2.4", features = ["derive", "array-impls", "with-chrono-0_4"]}
-serde = {version = "1.0.152", features = [ "derive" ]}
+postgres-types = { version = "0.2.4", features = [
+	"derive",
+	"array-impls",
+	"with-chrono-0_4",
+] }
+serde = { version = "1.0.152", features = ["derive"] }
 serde_json = "1.0.93"
-serde_with = {version = "2.2.0", features = ["chrono_0_4"]}
-strum = {version = "0.24.1", features = ["derive"]}
+serde_with = { version = "2.2.0", features = ["chrono_0_4"] }
+strum = { version = "0.24.1", features = ["derive"] }
 strum_macros = "0.24.3"
-tokio-postgres = {version = "0.7.7", features = ["with-chrono-0_4"]}
+tokio-postgres = { version = "0.7.7", features = ["with-chrono-0_4"] }
 async-trait = "0.1.73"
 
 [dev-dependencies]
 bytes = "1.0"
+time = { version = "0.3.30", features = ["formatting", "parsing"]}
+serde_assert = "0.5.0"
