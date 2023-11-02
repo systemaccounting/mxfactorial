@@ -77,6 +77,7 @@ migrations/dumps/*.sql
 
 # rust
 /target/
+**/*.profraw
 
 # vscode
 test/thunder-tests/thunderActivity.json

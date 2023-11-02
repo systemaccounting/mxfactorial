@@ -839,3 +839,7 @@ params: []
     os:
       osx:
         install: 'cargo install cargo-watch'
+  - name: tarpaulin
+    os:
+      osx:
+        install: 'cargo install tarpaulin'

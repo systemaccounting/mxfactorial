@@ -68,6 +68,7 @@ impl AccountProfiles {
 }
 
 impl Default for AccountProfiles {
+    #[cfg(not(tarpaulin_include))]
     fn default() -> Self {
         Self::new()
     }
@@ -86,6 +87,203 @@ impl FromIterator<AccountProfile> for AccountProfiles {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn it_matches_profile_by_account() {
+        let test_acct = String::from("GroceryStore");
+
+        let want = AccountProfile {
+            id: Some(String::from("7")),
+            account_name: test_acct.clone(),
+            description: Some(String::from("Sells groceries")),
+            first_name: Some(String::from("Grocery")),
+            middle_name: None,
+            last_name: Some(String::from("Store")),
+            country_name: String::from("United States of America"),
+            street_number: Some(String::from("8701")),
+            street_name: Some(String::from("Lincoln Blvd")),
+            floor_number: None,
+            unit_number: None,
+            city_name: String::from("Los Angeles"),
+            county_name: Some(String::from("Los Angeles County")),
+            region_name: None,
+            state_name: String::from("California"),
+            postal_code: String::from("90045"),
+            latlng: Some(String::from("(33.958050,-118.418388)")),
+            email_address: String::from("grocerystore@address.xz"),
+            telephone_country_code: Some(String::from("1")),
+            telephone_area_code: Some(String::from("310")),
+            telephone_number: Some(String::from("5555555")),
+            occupation_id: Some(String::from("11")),
+            industry_id: Some(String::from("11")),
+        };
+
+        let test_acct_profiles = AccountProfiles(vec![
+            AccountProfile {
+                id: Some(String::from("11")),
+                account_name: String::from("JacobWebb"),
+                description: Some(String::from("Soccer coach")),
+                first_name: Some(String::from("Jacob")),
+                middle_name: Some(String::from("Curtis")),
+                last_name: Some(String::from("Webb")),
+                country_name: String::from("United States of America"),
+                street_number: Some(String::from("205")),
+                street_name: Some(String::from("N Mccarran Blvd")),
+                floor_number: None,
+                unit_number: None,
+                city_name: String::from("Sparks"),
+                county_name: Some(String::from("Washoe County")),
+                region_name: None,
+                state_name: String::from("Nevada"),
+                postal_code: String::from("89431"),
+                latlng: Some(String::from("(39.534552,-119.737825)")),
+                email_address: String::from("jacob@address.xz"),
+                telephone_country_code: Some(String::from("1")),
+                telephone_area_code: Some(String::from("775")),
+                telephone_number: Some(String::from("5555555")),
+                occupation_id: Some(String::from("7")),
+                industry_id: Some(String::from("7")),
+            },
+            want.clone(),
+        ]);
+
+        let got = test_acct_profiles
+            .match_profile_by_account(test_acct)
+            .unwrap();
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_matches_profile_by_account_with_none() {
+        let test_acct_profiles = AccountProfiles(vec![
+            AccountProfile {
+                id: Some(String::from("11")),
+                account_name: String::from("JacobWebb"),
+                description: Some(String::from("Soccer coach")),
+                first_name: Some(String::from("Jacob")),
+                middle_name: Some(String::from("Curtis")),
+                last_name: Some(String::from("Webb")),
+                country_name: String::from("United States of America"),
+                street_number: Some(String::from("205")),
+                street_name: Some(String::from("N Mccarran Blvd")),
+                floor_number: None,
+                unit_number: None,
+                city_name: String::from("Sparks"),
+                county_name: Some(String::from("Washoe County")),
+                region_name: None,
+                state_name: String::from("Nevada"),
+                postal_code: String::from("89431"),
+                latlng: Some(String::from("(39.534552,-119.737825)")),
+                email_address: String::from("jacob@address.xz"),
+                telephone_country_code: Some(String::from("1")),
+                telephone_area_code: Some(String::from("775")),
+                telephone_number: Some(String::from("5555555")),
+                occupation_id: Some(String::from("7")),
+                industry_id: Some(String::from("7")),
+            },
+            AccountProfile {
+                id: Some(String::from("7")),
+                account_name: String::from("GroceryStore"),
+                description: Some(String::from("Sells groceries")),
+                first_name: Some(String::from("Grocery")),
+                middle_name: None,
+                last_name: Some(String::from("Store")),
+                country_name: String::from("United States of America"),
+                street_number: Some(String::from("8701")),
+                street_name: Some(String::from("Lincoln Blvd")),
+                floor_number: None,
+                unit_number: None,
+                city_name: String::from("Los Angeles"),
+                county_name: Some(String::from("Los Angeles County")),
+                region_name: None,
+                state_name: String::from("California"),
+                postal_code: String::from("90045"),
+                latlng: Some(String::from("(33.958050,-118.418388)")),
+                email_address: String::from("grocerystore@address.xz"),
+                telephone_country_code: Some(String::from("1")),
+                telephone_area_code: Some(String::from("310")),
+                telephone_number: Some(String::from("5555555")),
+                occupation_id: Some(String::from("11")),
+                industry_id: Some(String::from("11")),
+            },
+        ]);
+
+        let got = test_acct_profiles.match_profile_by_account(String::from("DoesntExist"));
+        let want = None;
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_creates_new_account_profiles() {
+        assert_eq!(AccountProfiles::new(), AccountProfiles(vec![]))
+    }
+
+    #[test]
+    fn it_adds_account_profile() {
+        let mut got = AccountProfiles::new();
+        let want = AccountProfiles(vec![AccountProfile {
+            id: Some(String::from("7")),
+            account_name: String::from("GroceryStore"),
+            description: Some(String::from("Sells groceries")),
+            first_name: Some(String::from("Grocery")),
+            middle_name: None,
+            last_name: Some(String::from("Store")),
+            country_name: String::from("United States of America"),
+            street_number: Some(String::from("8701")),
+            street_name: Some(String::from("Lincoln Blvd")),
+            floor_number: None,
+            unit_number: None,
+            city_name: String::from("Los Angeles"),
+            county_name: Some(String::from("Los Angeles County")),
+            region_name: None,
+            state_name: String::from("California"),
+            postal_code: String::from("90045"),
+            latlng: Some(String::from("(33.958050,-118.418388)")),
+            email_address: String::from("grocerystore@address.xz"),
+            telephone_country_code: Some(String::from("1")),
+            telephone_area_code: Some(String::from("310")),
+            telephone_number: Some(String::from("5555555")),
+            occupation_id: Some(String::from("11")),
+            industry_id: Some(String::from("11")),
+        }]);
+        got.add(want.0[0].clone());
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_implements_from_iterator_on_account_profiles() {
+        let want = AccountProfiles(vec![AccountProfile {
+            id: Some(String::from("7")),
+            account_name: String::from("GroceryStore"),
+            description: Some(String::from("Sells groceries")),
+            first_name: Some(String::from("Grocery")),
+            middle_name: None,
+            last_name: Some(String::from("Store")),
+            country_name: String::from("United States of America"),
+            street_number: Some(String::from("8701")),
+            street_name: Some(String::from("Lincoln Blvd")),
+            floor_number: None,
+            unit_number: None,
+            city_name: String::from("Los Angeles"),
+            county_name: Some(String::from("Los Angeles County")),
+            region_name: None,
+            state_name: String::from("California"),
+            postal_code: String::from("90045"),
+            latlng: Some(String::from("(33.958050,-118.418388)")),
+            email_address: String::from("grocerystore@address.xz"),
+            telephone_country_code: Some(String::from("1")),
+            telephone_area_code: Some(String::from("310")),
+            telephone_number: Some(String::from("5555555")),
+            occupation_id: Some(String::from("11")),
+            industry_id: Some(String::from("11")),
+        }]);
+        // create iterator
+        let test_account_profiles = std::iter::repeat(want.0[0].clone()).take(1);
+        // test method
+        let got = AccountProfiles::from_iter(test_account_profiles);
+        // assert
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
 
     #[test]
     fn it_deserializes_an_account_profile() {

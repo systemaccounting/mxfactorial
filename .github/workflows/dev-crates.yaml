@@ -1,16 +1,15 @@
-name: dev-rule
+name: dev-crates
 
 on:
   push:
     paths:
-    - 'services/rule/**'
     - 'crates/**'
     branches-ignore:
     - 'master'
 
 jobs:
   test:
-    name: rule
+    name: crates
     runs-on: ubuntu-latest
     container:
       image: xd009642/tarpaulin:develop-nightly
@@ -24,9 +23,11 @@ jobs:
           toolchain: stable
           components: clippy, rustfmt
       - uses: taiki-e/install-action@nextest
-      - name: linting
+      - name: crates/types lint
         run: |
           cargo fmt -- --check
           cargo clippy -- -Dwarnings
-      - name: unit tests and coverage
-        run: cargo tarpaulin
+        working-directory: crates/types
+      - name: crates/types unit tests and coverage report
+        run: cargo tarpaulin --fail-under 95
+        working-directory: crates/types
