@@ -194,6 +194,7 @@ async fn apply_rules(
         }
     }
 
+    // get connection from pool
     let conn = pool.get_conn().await;
 
     let mut rule_applied_tr_items =
