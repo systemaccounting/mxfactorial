@@ -21,8 +21,8 @@ RUN go install github.com/99designs/gqlgen@latest && \
 	tar -xf cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu.tar.xz && \
 	sudo mv cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu/cargo-watch /usr/local/bin && \
 	rm -rf cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu* && \
-	wget https://github.com/taiki-e/cargo-llvm-cov/releases/download/v${CARGO_LLVM_COV_VERSION}/cargo-llvm-cov-aarch64-unknown-linux-gnu.tar.gz && \
-	tar -xf cargo-llvm-cov-aarch64-unknown-linux-gnu.tar.gz && \
+	wget https://github.com/taiki-e/cargo-llvm-cov/releases/download/v${CARGO_LLVM_COV_VERSION}/cargo-llvm-cov-x86_64-unknown-linux-gnu.tar.gz && \
+	tar -xf cargo-llvm-cov-x86_64-unknown-linux-gnu.tar.gz && \
 	sudo mv cargo-llvm-cov /usr/local/bin && \
 	rm -rf cargo-llvm-cov* && \
 	npm install -g eslint && \
