@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/devcontainers/universal:2
 ARG TF_VERSION=1.2.7
 ARG MIGRATE_VERSION=4.15.2
 ARG WATCH_VERSION=8.4.0
-ARG TARPAULIN_VERSION=0.27.1
+ARG CARGO_LLVM_COV_VERSION=0.5.36
 
 RUN go install github.com/99designs/gqlgen@latest && \
 	go install github.com/golang/mock/mockgen@latest && \
@@ -21,10 +21,10 @@ RUN go install github.com/99designs/gqlgen@latest && \
 	tar -xf cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu.tar.xz && \
 	sudo mv cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu/cargo-watch /usr/local/bin && \
 	rm -rf cargo-watch-v${WATCH_VERSION}-x86_64-unknown-linux-gnu* && \
-	wget https://github.com/xd009642/tarpaulin/releases/download/${TARPAULIN_VERSION}/cargo-tarpaulin-x86_64-unknown-linux-gnu.tar.gz && \
-	tar -xf cargo-tarpaulin-x86_64-unknown-linux-gnu.tar.gz && \
-	sudo mv cargo-tarpaulin /usr/local/bin && \
-	rm -rf cargo-tarpaulin* && \
+	wget https://github.com/taiki-e/cargo-llvm-cov/releases/download/v${CARGO_LLVM_COV_VERSION}/cargo-llvm-cov-aarch64-unknown-linux-gnu.tar.gz && \
+	tar -xf cargo-llvm-cov-aarch64-unknown-linux-gnu.tar.gz && \
+	sudo mv cargo-llvm-cov /usr/local/bin && \
+	rm -rf cargo-llvm-cov* && \
 	npm install -g eslint && \
 	sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
 	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && \
