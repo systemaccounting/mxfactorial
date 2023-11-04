@@ -22,7 +22,6 @@ impl<'a> FromSql<'a> for AccountRole {
         }
     }
 
-    #[cfg(not(tarpaulin_include))]
     fn accepts(ty: &Type) -> bool {
         *ty == Type::TEXT
     }
@@ -44,7 +43,6 @@ impl ToSql for AccountRole {
     }
 
     #[allow(unused_variables)]
-    #[cfg(not(tarpaulin_include))]
     fn accepts(ty: &Type) -> bool {
         true
     }
