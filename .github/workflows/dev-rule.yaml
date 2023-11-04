@@ -4,19 +4,17 @@ on:
   push:
     paths:
     - 'services/rule/**'
-    - 'crates/**'
     branches-ignore:
     - 'master'
+  workflow_run:
+    workflows: [dev-crates]
+    types:
+      - completed
 
 jobs:
   test:
     name: rule
     runs-on: ubuntu-latest
-    container:
-      image: xd009642/tarpaulin:develop-nightly
-      options: --security-opt seccomp=unconfined
-    env:
-      CI: true
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
@@ -28,5 +26,17 @@ jobs:
         run: |
           cargo fmt -- --check
           cargo clippy -- -Dwarnings
-      - name: unit tests and coverage
-        run: cargo tarpaulin
+        working-directory: services/rule
+      - name: install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: services/rule unit tests
+        run: cargo test
+        working-directory: services/rule
+      - name: services/rule coverage report
+        run: make rust-coverage RUST_PKG=rule
+      - name: fail services/rule coverage under 66%
+        run: |
+          if [[ $(make rust-coverage-percent RUST_PKG=rule) -lt 66 ]]; then
+            echo 'coverage dropped below 66%'
+            exit 1
+          fi

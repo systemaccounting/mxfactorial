@@ -60,6 +60,18 @@ test-cloud:
 test-local:
 	@$(MAKE) -C './test' test-local
 
+rust-coverage:
+ifndef RUST_PKG
+	@cargo llvm-cov >/dev/null 2>&1
+	@cargo llvm-cov report 2>/dev/null
+else
+	@cargo llvm-cov -p $(RUST_PKG) >/dev/null 2>&1
+	@cargo llvm-cov report -p $(RUST_PKG) 2>/dev/null
+endif
+
+rust-coverage-percent:
+	@$(MAKE) rust-coverage | grep TOTAL | awk '{print $$10}' | cut -d '.' -f1
+
 install:
 	brew install go
 	go install github.com/99designs/gqlgen@latest
@@ -73,10 +85,12 @@ install:
 	brew install yq
 	npm install -g eslint
 #   rust
-	curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+	curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
+	rustup component add llvm-tools-preview --toolchain stable-x86_64-apple-darwin
 #	https://www.docker.com/products/docker-desktop
 	cargo install cross --git https://github.com/cross-rs/cross
 	cargo install cargo-watch
+	cargo install cargo-llvm-cov
 
 env-id:
 	(cd infrastructure/terraform/env-id; terraform init && terraform apply --auto-approve)

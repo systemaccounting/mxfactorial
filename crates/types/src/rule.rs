@@ -78,7 +78,6 @@ impl FromIterator<RuleInstance> for RuleInstances {
 }
 
 impl Default for RuleInstances {
-    #[cfg(not(tarpaulin_include))]
     fn default() -> Self {
         Self::new()
     }

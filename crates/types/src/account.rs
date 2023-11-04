@@ -68,7 +68,6 @@ impl AccountProfiles {
 }
 
 impl Default for AccountProfiles {
-    #[cfg(not(tarpaulin_include))]
     fn default() -> Self {
         Self::new()
     }

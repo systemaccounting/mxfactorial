@@ -4,4 +4,6 @@
 
 go mod download
 
+rustup component add llvm-tools-preview --toolchain stable-x86_64-unknown-linux-gnu
+
 make --no-print-directory start

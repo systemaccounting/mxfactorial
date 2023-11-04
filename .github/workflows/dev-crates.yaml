@@ -11,11 +11,6 @@ jobs:
   test:
     name: crates
     runs-on: ubuntu-latest
-    container:
-      image: xd009642/tarpaulin:develop-nightly
-      options: --security-opt seccomp=unconfined
-    env:
-      CI: true
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
@@ -28,6 +23,16 @@ jobs:
           cargo fmt -- --check
           cargo clippy -- -Dwarnings
         working-directory: crates/types
-      - name: crates/types unit tests and coverage report
-        run: cargo tarpaulin --fail-under 95
+      - name: install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: crates/types unit tests
+        run: cargo test
         working-directory: crates/types
+      - name: crates/types coverage report
+        run: make rust-coverage RUST_PKG=types
+      - name: fail crates/types coverage under 97%
+        run: |
+          if [[ $(make rust-coverage-percent RUST_PKG=types) -lt 97 ]]; then
+            echo 'coverage dropped below 97%'
+            exit 1
+          fi
