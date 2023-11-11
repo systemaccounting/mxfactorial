@@ -6,10 +6,6 @@ on:
     - 'services/rule/**'
     branches-ignore:
     - 'master'
-  workflow_run:
-    workflows: [dev-crates]
-    types:
-      - completed
 
 jobs:
   test:
