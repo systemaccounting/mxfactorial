@@ -6,6 +6,7 @@
       - ui
 client:
   runtime: v8
+  min_code_cov: null
   type: app
   deploy: true
   local_dev: true
@@ -24,6 +25,27 @@ client:
       - CLIENT_PORT
   params:
     - ENABLE_API_AUTH
+crates:
+  env_var: null
+  params: []
+  pg:
+    runtime: rust1.x
+    min_code_cov: null
+    type: lib
+    env_var: null
+    params: []
+  sqls:
+    runtime: rust1.x
+    min_code_cov: null
+    type: lib
+    env_var: null
+    params: []
+  types:
+    runtime: rust1.x
+    min_code_cov: 97
+    type: lib
+    env_var: null
+    params: []
 docker:
   env_var:
     set:
@@ -199,6 +221,7 @@ migrations:
           default: ./migrations/dumps/testseed.sql
   go-migrate:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params:
@@ -298,6 +321,7 @@ services:
         default: 20
   graphql:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params:
@@ -333,6 +357,7 @@ services:
         - GRAPHQL_PORT
   request-create:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params:
@@ -360,6 +385,7 @@ services:
         - PGDATABASE
   request-approve:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params:
@@ -385,6 +411,7 @@ services:
         - PGDATABASE
   rule:
     runtime: provided.al2
+    min_code_cov: 66
     type: app
     local_dev: true
     params:
@@ -420,6 +447,7 @@ services:
         - RUST_LOG
   request-by-id:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params: []
@@ -442,6 +470,7 @@ services:
         - READINESS_CHECK_PATH
   requests-by-account:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params: []
@@ -465,6 +494,7 @@ services:
         - RETURN_RECORD_LIMIT
   transaction-by-id:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params: []
@@ -487,6 +517,7 @@ services:
         - READINESS_CHECK_PATH
   transactions-by-account:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params: []
@@ -510,6 +541,7 @@ services:
         - RETURN_RECORD_LIMIT
   notifications-send:
     runtime: go1.x
+    min_code_cov: null
     type: app
     params:
       - AWS_REGION
@@ -527,6 +559,7 @@ services:
         - PGDATABASE
   notifications-get:
     runtime: go1.x
+    min_code_cov: null
     type: app
     params:
       - AWS_REGION
@@ -548,6 +581,7 @@ services:
         - PGDATABASE
   notifications-clear:
     runtime: go1.x
+    min_code_cov: null
     type: app
     params:
       - AWS_REGION
@@ -567,6 +601,7 @@ services:
         - PGDATABASE
   balance-by-account:
     runtime: go1.x
+    min_code_cov: null
     type: app
     local_dev: true
     params: []
@@ -590,6 +625,7 @@ services:
   wss-connect:
     runtime: go1.x
     type: app
+    min_code_cov: null
     secrets: []
     params: []
     deploy: true
@@ -599,6 +635,7 @@ services:
       get: []
   auto-confirm:
     runtime: go1.x
+    min_code_cov: null
     type: app
     params: []
     deploy: true
