@@ -326,16 +326,15 @@
     "colId": "ad756c83-e4e1-4c6e-a602-fbaee6aaab6c",
     "containerId": "",
     "name": "rule healthcheck",
-    "url": "http://0.0.0.0:8080/healthz",
+    "url": "http://[::1]:10001/healthz",
     "method": "GET",
     "sortNum": 20000,
     "created": "2023-03-10T06:03:42.460Z",
-    "modified": "2023-03-10T06:03:42.460Z",
+    "modified": "2023-12-17T23:57:13.678Z",
     "headers": [
       {
-        "name": "Accept",
-        "value": "*/*",
-        "isDisabled": true
+        "name": "content-length",
+        "value": "0"
       },
       {
         "name": "User-Agent",
@@ -351,11 +350,11 @@
     "colId": "ad756c83-e4e1-4c6e-a602-fbaee6aaab6c",
     "containerId": "",
     "name": "rule",
-    "url": "{{RULE_URL}}",
+    "url": "http://[::1]:10001",
     "method": "POST",
     "sortNum": 30000,
     "created": "2023-03-11T06:01:49.273Z",
-    "modified": "2023-05-10T21:52:13.267Z",
+    "modified": "2023-12-17T23:57:55.243Z",
     "headers": [
       {
         "name": "Content-Type",
