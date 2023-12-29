@@ -158,6 +158,7 @@ func testValues(
 	log.Print("client request equal to rule response")
 
 	// add authenticated values to rule tested transaction
+	// cadet todo: add AddAuthValues method to Transaction
 	ruleTested.Transaction.Author = &e.AuthAccount
 	ruleTested.Transaction.AuthorRole = &authorRole
 
