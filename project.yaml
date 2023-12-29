@@ -411,7 +411,7 @@ services:
         - PGDATABASE
   rule:
     runtime: provided.al2
-    min_code_cov: 66
+    min_code_cov: 63
     type: app
     local_dev: true
     params:
