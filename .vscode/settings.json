@@ -4,7 +4,7 @@
 	"files.insertFinalNewline": false,
 	"files.trimFinalNewlines": false,
 	"editor.codeActionsOnSave": {
-		"source.fixAll.eslint": true
+		"source.fixAll.eslint": "explicit"
 	},
 	"eslint.workingDirectories": [
 		"./client",
@@ -78,5 +78,6 @@
 		"unused-export-let": "ignore",
 		"a11y-click-events-have-key-events": "ignore",
 		"a11y-no-noninteractive-tabindex": "ignore",
-	}
+	},
+	"editor.inlineSuggest.showToolbar": "onHover"
 }

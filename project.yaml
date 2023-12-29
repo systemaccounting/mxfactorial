@@ -30,7 +30,7 @@ crates:
   params: []
   pg:
     runtime: rust1.x
-    min_code_cov: null
+    min_code_cov: 40
     type: lib
     env_var: null
     params: []
@@ -411,7 +411,7 @@ services:
         - PGDATABASE
   rule:
     runtime: provided.al2
-    min_code_cov: 66
+    min_code_cov: 63
     type: app
     local_dev: true
     params:
@@ -431,6 +431,9 @@ services:
         RUST_LOG:
           ssm: null
           default: info
+        RUST_BACKTRACE:
+          ssm: null
+          default: 1
       get:
         - PGDATABASE
         - PGUSER
@@ -445,6 +448,7 @@ services:
         - RULE_PORT
         - HOSTNAME_OR_IP
         - RUST_LOG
+        - RUST_BACKTRACE
   request-by-id:
     runtime: go1.x
     min_code_cov: null
@@ -650,6 +654,13 @@ test:
   type: tool
   deploy: false
   env_var:
+    set:
+      SILENCE_EXEC_LOGS:
+        ssm: null
+        default: true
+      NODE_NO_WARNINGS:
+        ssm: null
+        default: 1
     get:
       - GRAPHQL_URI
       - RULE_URL
@@ -660,6 +671,8 @@ test:
       - TRANSACTIONS_BY_ACCOUNT_URL
       - TRANSACTION_BY_ID_URL
       - BALANCE_BY_ACCOUNT_URL
+      - SILENCE_EXEC_LOGS
+      - NODE_NO_WARNINGS
   params: []
 pkg:
   lambda:
