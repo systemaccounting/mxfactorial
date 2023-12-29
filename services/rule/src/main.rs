@@ -20,7 +20,7 @@ mod rules;
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
 async fn apply_transaction_item_rules(
-    conn: &DynDBConn,
+    conn: DynDBConn,
     role_sequence: RoleSequence,
     transaction_items: &TransactionItems,
 ) -> TransactionItems {
@@ -106,7 +106,7 @@ async fn apply_transaction_item_rules(
 }
 
 async fn apply_approval_rules(
-    conn: &DynDBConn,
+    conn: DynDBConn,
     role_sequence: RoleSequence,
     transaction_items: &mut TransactionItems,
     approval_time: &TZTime,
@@ -195,16 +195,16 @@ async fn apply_rules(
     }
 
     // get connection from pool
-    let conn = pool.get_conn().await;
+    let conn = pool.get_conn().await as DynDBConn;
 
     let mut rule_applied_tr_items =
-        apply_transaction_item_rules(&conn, role_sequence, &transaction_items).await;
+        apply_transaction_item_rules(conn.clone(), role_sequence, &transaction_items).await;
 
     // create an approval time to be used for all automated approvals
     let approval_time = TZTime::now();
 
     apply_approval_rules(
-        &conn,
+        conn,
         role_sequence,
         &mut rule_applied_tr_items,
         &approval_time,
@@ -575,7 +575,7 @@ mod tests {
         ]);
 
         // test function
-        let got = apply_transaction_item_rules(&db_conn_stub, DEBITOR_FIRST, &tr_items).await;
+        let got = apply_transaction_item_rules(db_conn_stub, DEBITOR_FIRST, &tr_items).await;
 
         // assert #1:
         // save length of transaction items vec
@@ -710,7 +710,7 @@ mod tests {
 
         // test function
         apply_approval_rules(
-            &db_conn_stub,
+            db_conn_stub,
             DEBITOR_FIRST,
             &mut got_tr_items,
             &test_approval_time,
