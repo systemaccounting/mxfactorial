@@ -12,6 +12,8 @@ RED='\033[1;31m'
 YELLOW='\033[0;33m'
 RESET='\033[0m'
 
+RUST_RUNTIME='rust1.x'
+
 docker version > /dev/null 2>&1
 if [[ $? -ne 0 ]]; then
 	echo -e "${RED}docker required. start docker${RESET}"
@@ -39,7 +41,7 @@ for d in "${APP_DIRS[@]}"; do
 	BUILD_SRC_PATH=$(yq "$CONF_PATH.build_src_path" $PROJECT_CONF)
 
 	# use non shared make target to avoid cross build for rust
-	if [[ "$RUNTIME" == 'provided.al2' ]]; then
+	if [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
 		echo -e -n "\n${GREEN}*** compiling $d${RESET}\n"
 		make --no-print-directory -C "$d" compile-dev
 	fi
@@ -54,7 +56,7 @@ for d in "${APP_DIRS[@]}"; do
 	if [[ "$CI" ]]; then
 		make --no-print-directory -C "$d" get-secrets ENV=local > /dev/null
 		# &; \ disown fails in make so backgrounding kept in bash
-		if [[ "$RUNTIME" == 'provided.al2' ]]; then
+		if [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
 			(cd "$d"; eval $(cat $ENV_FILE_NAME) cargo run > /dev/null 2>&1 & disown $!)
 		fi
 		if [[ "$RUNTIME" == 'go1.x' ]]; then
