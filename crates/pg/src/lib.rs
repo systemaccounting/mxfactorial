@@ -505,10 +505,6 @@ mod tests {
         }
     }
 
-    // struct TestDB;
-
-    // impl DatabaseConnectionTrait for TestDB {}
-
     #[test]
     #[serial]
     fn from_account_profile_row_called_with_args() {
