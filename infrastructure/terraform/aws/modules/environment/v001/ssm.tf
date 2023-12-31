@@ -11,7 +11,6 @@ resource "aws_ssm_parameter" "cache_client_uri" {
   name        = "/${var.ssm_prefix}/client/uri"
   description = "client address in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
-  overwrite   = true
   // store cloudfront dns if no custom dns
   value = var.custom_domain_name == "" ? "https://${aws_cloudfront_distribution.s3_client_distribution[0].domain_name}" : ("https://${var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}"}")
 }
@@ -21,7 +20,6 @@ resource "aws_ssm_parameter" "s3_client_uri" {
   name        = "/${var.ssm_prefix}/client/uri"
   description = "client address in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
-  overwrite   = true
   value       = "http://${var.client_origin_bucket_name}.s3-website-${data.aws_region.current.name}.amazonaws.com"
 }
 

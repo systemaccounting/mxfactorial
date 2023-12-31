@@ -8,14 +8,17 @@ data "aws_route53_zone" "default" {
 }
 
 resource "aws_s3_bucket" "www_mxfactorial_client" {
-  bucket = "www-${local.ORIGIN_PREFIX}-${local.ID_ENV}"
-
-  website {
-    # aws parses https prefix and bucket name when creating redirect rule
-    redirect_all_requests_to = "https://${local.CUSTOM_DOMAIN}"
-  }
-
+  bucket        = "www-${local.ORIGIN_PREFIX}-${local.ID_ENV}"
   force_destroy = true
+}
+
+resource "aws_s3_bucket_website_configuration" "www_mxfactorial_client" {
+  bucket = aws_s3_bucket.www_mxfactorial_client.id
+  # aws parses https prefix and bucket name when creating redirect rule
+  redirect_all_requests_to {
+    host_name = local.CUSTOM_DOMAIN
+    protocol  = "https"
+  }
 }
 
 resource "aws_cloudfront_distribution" "www_s3_client_distribution" {
@@ -31,7 +34,7 @@ resource "aws_cloudfront_distribution" "www_s3_client_distribution" {
       origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
     }
 
-    domain_name = aws_s3_bucket.www_mxfactorial_client.website_endpoint
+    domain_name = aws_s3_bucket_website_configuration.www_mxfactorial_client.website_endpoint
     origin_id   = aws_s3_bucket.www_mxfactorial_client.id
   }
 

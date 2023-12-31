@@ -82,7 +82,7 @@ infrastructure:
           set:
             LAMBDA_RUNTIME:
               ssm: null
-              default: provided.al2
+              default: provided.al2023
         environment:
           env_var:
             set:
@@ -211,7 +211,7 @@ infrastructure:
                 default: /healthz
               WEB_ADAPTER_LAYER_VERSION:
                 ssm:
-                default: 16
+                default: 17
 migrations:
   dumps:
     env_var:
@@ -410,7 +410,7 @@ services:
         - PGPASSWORD
         - PGDATABASE
   rule:
-    runtime: provided.al2
+    runtime: rust1.x
     min_code_cov: 63
     type: app
     local_dev: true
