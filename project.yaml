@@ -82,7 +82,7 @@ infrastructure:
           set:
             LAMBDA_RUNTIME:
               ssm: null
-              default: provided.al2
+              default: provided.al2023
         environment:
           env_var:
             set:
