@@ -410,7 +410,7 @@ services:
         - PGPASSWORD
         - PGDATABASE
   rule:
-    runtime: provided.al2
+    runtime: rust1.x
     min_code_cov: 63
     type: app
     local_dev: true
