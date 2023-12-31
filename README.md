@@ -17,7 +17,8 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **a.** no, and please use the word *replication*  
 
 **q.** i dont find any words in here used by the media. what is this?  
-**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law.
+**a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law
+
 first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively:
 ```json5
 {
@@ -39,13 +40,14 @@ encryption and replication are secondary
 **a.** money is accounting. when someone has a 5 in their pocket, it's because they had a credit of 5 and someone else had a debit of 5  
 
 **q.** what does physics have to do with accounting?  
-**a.** recording transactions between users as debit-credit pairs enforces a conservation law on value  
+**a.** recording transactions between users as debit-credit pairs enforces a conservation law on value. since *macroaccounting* requires economic resources to be described as *conserved*, and not just "scarce", individuals stay clear of the many [schools of thought](https://en.wikipedia.org/wiki/Schools_of_economic_thought) indulged by the convenient handwaving of "macroeconomics". treating *'how to define and optimize the flow of goods and services?'* as a problem for physics & data science separates away the "social" from the *science*, and removes the academic community from serving as a source of confusion, instability and justification for government failure
 
 **q.** what is the equation?  
 **a.** *u* = transactions per second, *w<sub>i</sub>* = value conserved per transaction, *Mx!* = value visible in a combinatorial game  
 
 **q.** how does standardizing financial value as a conserved quantity protect individuals?  
-**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d, consumer wealth increases. but government printing money, and government chartered "bankers" expecting money, are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services. so when government authority is used to violate conservation by defining money as something you can just print, and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the purchasing power created by producers, the increased wealth of consumers, and the value of all property owned by individuals  
+**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d, consumer wealth increases. but government printing money, and government chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the 1) purchasing power created by producers, the 2) increased wealth of consumers, and the 3) value of all property owned by individuals  
+
 government is not above failure, nor is it entitled to steal from the private sector to conceal its failure. improving government depends on failure [predicting](https://en.wikipedia.org/wiki/Time_travel_debugging) the individuals and laws that must be replaced. flying a flag and demanding loyalty before this step is just misdirection  
 
 **q.** will a government hosted payment app reduce my freedom?  
