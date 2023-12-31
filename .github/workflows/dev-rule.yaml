@@ -32,9 +32,10 @@ jobs:
         run: |
           make rust-coverage RUST_PKG=rule
           echo "MIN_CODE_COV=$(yq .services.rule.min_code_cov project.yaml)" >> $GITHUB_ENV
+          echo "CURR_CODE_COV=$(make rust-coverage-percent RUST_PKG=rule)" >> $GITHUB_ENV
       - name: fail services/rule coverage under ${{ env.MIN_CODE_COV }}%
         run: |
-          if [[ $(make rust-coverage-percent RUST_PKG=rule) -lt ${{ env.MIN_CODE_COV }} ]]; then
-            echo 'coverage dropped below ${{ env.MIN_CODE_COV }}%'
+          if [[ ${{ env.CURR_CODE_COV }} -lt ${{ env.MIN_CODE_COV }} ]]; then
+            echo 'coverage dropped below ${{ env.MIN_CODE_COV }}: ${{ env.CURR_CODE_COV }}%'
             exit 1
           fi
