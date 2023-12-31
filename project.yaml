@@ -211,7 +211,7 @@ infrastructure:
                 default: /healthz
               WEB_ADAPTER_LAYER_VERSION:
                 ssm:
-                default: 16
+                default: 17
 migrations:
   dumps:
     env_var:
