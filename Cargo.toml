@@ -5,8 +5,9 @@ members = [
 	"services/rule",
 	"crates/types",
 	"crates/sqls",
-	"crates/pg"
+	"crates/pg",
+	"crates/httpclient",
 ]
 
 [workspace.package]
-rust-version = "1.56"
+rust-version = "1.75"
