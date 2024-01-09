@@ -6,12 +6,12 @@ publish = false
 
 [dependencies]
 axum = "0.6.2"
-serde = {version = "1.0.189", features = ["derive"]}
-tokio = {version = "1.33.0", features = [ "full" ]}
+serde = { version = "1.0.189", features = ["derive"] }
+tokio = { version = "1.33.0", features = ["full"] }
 tower = "0.4.13"
 tower-http = "0.4.4"
 tracing = "0.1.37"
-tracing-subscriber = {version = "0.3.16", features = ["env-filter"]}
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 types = { path = "../../crates/types" }
 sqls = { path = "../../crates/sqls" }
 pg = { path = "../../crates/pg" }

@@ -5,8 +5,6 @@ const execOpts: ExecOptions = { silent: (process.env.SILENCE_EXEC_LOGS === 'true
 // dump migrations/dumps/testseed.sql to reset db after each test
 beforeAll(done => {
 
-	process.env.SIGN_AWS_REQUESTS = "1"
-
 	exec(`make --no-print-directory -C ../migrations resetrds ENV=dev DB=test`, execOpts, (code1, stdout1, stderr1) => {
 
 		if (process.env.SILENCE_EXEC_LOGS != 'true') { console.log(stdout1) }

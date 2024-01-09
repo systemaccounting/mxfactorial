@@ -50,7 +50,7 @@ async function post(url: string, body: Body): Promise<AxiosResponse> {
 		},
 	  })
 
-	  if (process.env.SIGN_AWS_REQUESTS) {
+	  if (process.env.AWS_LAMBDA_FUNCTION_NAME) { // mimic lambda environment
 
 		let sigv4 = new SignatureV4({
 			credentials: defaultProvider(),

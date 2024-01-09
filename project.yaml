@@ -28,6 +28,12 @@ client:
 crates:
   env_var: null
   params: []
+  httpclient:
+    runtime: rust1.x
+    min_code_cov: 55
+    type: lib
+    env_var: null
+    params: []
   pg:
     runtime: rust1.x
     min_code_cov: 40
@@ -661,6 +667,9 @@ test:
       NODE_NO_WARNINGS:
         ssm: null
         default: 1
+      AWS_LAMBDA_FUNCTION_NAME:
+        ssm: null
+        default: null # switched to non null by scripts/create-env-file.sh when testing lambdas
     get:
       - GRAPHQL_URI
       - RULE_URL
@@ -673,6 +682,7 @@ test:
       - BALANCE_BY_ACCOUNT_URL
       - SILENCE_EXEC_LOGS
       - NODE_NO_WARNINGS
+      - AWS_LAMBDA_FUNCTION_NAME # used when testing cloud envs
   params: []
 pkg:
   lambda:

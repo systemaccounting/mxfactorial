@@ -20,8 +20,8 @@ done
 PROJECT_CONF=project.yaml
 
 if [[ $APP_NAME != 'root' ]]; then
-	APP_CONF_PATH=$(source scripts/list-conf-paths.sh --type all | grep --color=never -E "$APP_NAME$|$APP_NAME\"]$")
-	APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type all | grep --color=never "$APP_NAME$")
+	APP_CONF_PATH=$(source scripts/list-conf-paths.sh --type all | grep --color=never -E "\.$APP_NAME$|$APP_NAME\"]$")
+	APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type all | grep --color=never -E "^$APP_NAME$|^.*/$APP_NAME$")
 else
 	APP_CONF_PATH=
 	APP_DIR_PATH=.
@@ -98,6 +98,9 @@ function set_default_values() {
 			fi
 		else
 			ENV_VAR=$(yq "... | select(has(\"$s\")).$s.default" $PROJECT_CONF)
+			if [[ $ENV_VAR == 'null' ]]; then
+				ENV_VAR=
+			fi
 			echo $s=$ENV_VAR >> $ENV_FILE
 		fi
 	done
@@ -116,6 +119,12 @@ function set_secrets() {
 				--output text)
 		else
 			ENV_VAR=$(echo "$CONF_OBJ" | yq ".default")
+		fi
+		# lambdas sign their requests when a function name is detected
+		# so this env var is set to 1 while integration testing from
+		# a local machine or workflow
+		if [[ $s == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
+			ENV_VAR=1
 		fi
 		echo $s=$ENV_VAR >> $ENV_FILE
 		unset ENV_VAR
