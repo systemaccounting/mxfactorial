@@ -28,6 +28,8 @@ impl HttpClient {
             )
             .body(body)
             .unwrap();
+
+        // sign request if running in lambda
         if env::var("AWS_LAMBDA_FUNCTION_NAME").ok().is_some() {
             HttpClient::sign(&mut http_request).await;
         }

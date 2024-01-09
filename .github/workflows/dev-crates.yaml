@@ -48,12 +48,12 @@ jobs:
             echo 'coverage dropped below ${{ env.MIN_CODE_COV }}: ${{ env.CURR_CODE_COV }}%'
             exit 1
           fi
-      - name: crates/httpcrate coverage report
+      - name: crates/httpclient coverage report
         run: |
-          make rust-coverage RUST_PKG=httpcrate
-          echo "MIN_CODE_COV=$(yq .crates.httpcrate.min_code_cov project.yaml)" >> $GITHUB_ENV
-          echo "CURR_CODE_COV=$(make rust-coverage-percent RUST_PKG=httpcrate)" >> $GITHUB_ENV
-      - name: fail crates/httpcrate coverage under ${{ env.MIN_CODE_COV }}%
+          make rust-coverage RUST_PKG=httpclient
+          echo "MIN_CODE_COV=$(yq .crates.httpclient.min_code_cov project.yaml)" >> $GITHUB_ENV
+          echo "CURR_CODE_COV=$(make rust-coverage-percent RUST_PKG=httpclient)" >> $GITHUB_ENV
+      - name: fail crates/httpclient coverage under ${{ env.MIN_CODE_COV }}%
         run: |
           if [[ ${{ env.CURR_CODE_COV }} -lt ${{ env.MIN_CODE_COV }} ]]; then
             echo 'coverage dropped below ${{ env.MIN_CODE_COV }}: ${{ env.CURR_CODE_COV }}%'
