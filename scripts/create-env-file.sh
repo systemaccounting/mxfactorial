@@ -20,8 +20,8 @@ done
 PROJECT_CONF=project.yaml
 
 if [[ $APP_NAME != 'root' ]]; then
-	APP_CONF_PATH=$(source scripts/list-conf-paths.sh --type all | grep --color=never -E "$APP_NAME$|$APP_NAME\"]$")
-	APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type all | grep --color=never "$APP_NAME$")
+	APP_CONF_PATH=$(source scripts/list-conf-paths.sh --type all | grep --color=never -E "\.$APP_NAME$|$APP_NAME\"]$")
+	APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type all | grep --color=never -E "^$APP_NAME$|^.*/$APP_NAME$")
 else
 	APP_CONF_PATH=
 	APP_DIR_PATH=.
