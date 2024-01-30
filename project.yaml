@@ -655,18 +655,12 @@ services:
       get:
         - POOL_ID
         - CLIENT_ID
-test:
-  runtime: nodejs18.x
+tests:
+  runtime: rust1.x
   type: tool
   deploy: false
   env_var:
     set:
-      SILENCE_EXEC_LOGS:
-        ssm: null
-        default: true
-      NODE_NO_WARNINGS:
-        ssm: null
-        default: 1
       AWS_LAMBDA_FUNCTION_NAME:
         ssm: null
         default: null # switched to non null by scripts/create-env-file.sh when testing lambdas
@@ -680,8 +674,6 @@ test:
       - TRANSACTIONS_BY_ACCOUNT_URL
       - TRANSACTION_BY_ID_URL
       - BALANCE_BY_ACCOUNT_URL
-      - SILENCE_EXEC_LOGS
-      - NODE_NO_WARNINGS
       - AWS_LAMBDA_FUNCTION_NAME # used when testing cloud envs
   params: []
 pkg:
