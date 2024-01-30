@@ -117,8 +117,8 @@ eval_with_no_print_directory "$CMD"
 
 echo ""
 
-while [[ $CMD != "make -C test test-local" ]]; do
-	read -rep $'\e[32m"make -C test test-local" to test service integration locally\e[0m\n\n> ' CMD
+while [[ $CMD != "make -C tests test-local" ]]; do
+	read -rep $'\e[32m"make -C tests test-local" to test service integration locally\e[0m\n\n> ' CMD
 done
 
 eval "$CMD"

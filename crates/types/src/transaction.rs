@@ -14,6 +14,22 @@ pub struct Transaction {
     pub transaction_items: TransactionItems,
 }
 
+impl Transaction {
+    pub fn new(author: String, transaction_items: TransactionItems) -> Self {
+        Self {
+            id: None,
+            rule_instance_id: None,
+            author: Some(author),
+            author_device_id: None,
+            author_device_latlng: None,
+            author_role: None,
+            equilibrium_time: None,
+            sum_value: "0.000".to_string(), // used in integration tests for now
+            transaction_items,
+        }
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
 
@@ -732,5 +748,5 @@ pub mod tests {
     }
 }
 
-#[derive(Eq, PartialEq, Debug, Deserialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize)]
 pub struct Transactions(pub Vec<Transaction>);

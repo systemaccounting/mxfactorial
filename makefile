@@ -49,16 +49,16 @@ test:
 	$(MAKE) test-local
 
 test-compose-up:
-	@$(MAKE) -C './test' test-compose-up
+	@$(MAKE) -C './tests' test-compose-up
 
 test-docker:
-	@$(MAKE) -C './test' test-docker
+	@$(MAKE) -C './tests' test-docker
 
 test-cloud:
-	@$(MAKE) -C './test' test-cloud
+	@$(MAKE) -C './tests' test-cloud
 
 test-local:
-	@$(MAKE) -C './test' test-local
+	@$(MAKE) -C './tests' test-local
 
 rust-coverage:
 ifndef RUST_PKG
@@ -151,7 +151,7 @@ clean:
 	for d in "$${APP_DIRS[@]}"; do \
 		$(MAKE) --no-print-directory -C "$$d" clean; \
 	done
-	@$(MAKE) --no-print-directory -C test clean
+	@$(MAKE) --no-print-directory -C tests clean
 	@rm -f ./$(NOHUP_LOG)
 
 ###################### docker ######################

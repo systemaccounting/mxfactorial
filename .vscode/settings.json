@@ -42,7 +42,7 @@
 		"editor.defaultFormatter": "svelte.svelte-vscode"
 	},
 	"thunder-client.saveToWorkspace": true,
-	"thunder-client.workspaceRelativePath": "test",
+	"thunder-client.workspaceRelativePath": "tests",
 	"sqltools.connections": [
 		{
 			"name": "mxfactorial-docker",

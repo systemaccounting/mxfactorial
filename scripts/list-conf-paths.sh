@@ -35,6 +35,15 @@ for cp in "${CONF_PATHS[@]}"; do
 		fi
 	done
 
+	# if CONF_PATH begins with [", then remove enclosing brackets and quotes
+	if [[ $CONF_PATH == "[\""* ]]; then
+		CONF_PATH="${CONF_PATH:2}"
+		CONF_PATH="${CONF_PATH::-2}"
+		CONF_PATH=".${CONF_PATH}"
+	fi
+
+	# todo: test removing quoted keys with dashes
+
 	QUOTED+=("$CONF_PATH")
 	unset CONF_PATH
 
