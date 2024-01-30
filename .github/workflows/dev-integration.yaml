@@ -42,7 +42,7 @@ jobs:
       - name: start services
         run: make start
       - name: test service integration
-        run: make -C ./test test-local
+        run: make -C ./tests test-local
       - name: reset db
         run: make reset-db
       - name: e2e test client
@@ -53,5 +53,11 @@ jobs:
         run: cargo install cross --git https://github.com/cross-rs/cross
       - name: deploy to cloud
         run: bash scripts/deploy-all.sh --env dev --transaction-services-only
-      - name: cloud integration tests
-        run: make -C ./test test-cloud ENV=dev
+      - name: reset rds database for integration tests
+        run: make --no-print-directory -C ./migrations resetrds ENV=dev DB=test
+      - name: dump rds database locally for restore between integration tests
+        run: make --no-print-directory -C ./migrations/dumps dump-rds-testseed
+      - name: get secrets for dev integration tests
+        run: make --no-print-directory -C ./tests get-secrets ENV=dev
+      - name: run dev cloud integration tests
+        run: cargo test --manifest-path ./tests/Cargo.toml --features integration_tests -- --test-threads=1
