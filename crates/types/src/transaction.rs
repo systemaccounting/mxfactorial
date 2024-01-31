@@ -39,7 +39,7 @@ impl Transaction {
             author_device_latlng: None,
             author_role: None,
             equilibrium_time: None,
-            sum_value: "0.000".to_string(), // used in integration tests for now
+            sum_value: "0.000".to_string(), // used in integration tests
             transaction_items,
         }
     }

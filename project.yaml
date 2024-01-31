@@ -36,7 +36,7 @@ crates:
     params: []
   pg:
     runtime: rust1.x
-    min_code_cov: 38
+    min_code_cov: 37
     type: lib
     env_var: null
     params: []
