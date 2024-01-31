@@ -2,11 +2,12 @@
 resolver = "2"
 
 members = [
-	"services/rule",
-	"crates/types",
-	"crates/sqls",
-	"crates/pg",
 	"crates/httpclient",
+	"crates/pg",
+	"crates/sqls",
+	"crates/types",
+	"services/graphql",
+	"services/rule",
 	"tests",
 ]
 

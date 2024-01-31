@@ -1,3 +1,4 @@
+use async_graphql::scalar;
 use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, SecondsFormat, Utc};
 use postgres_protocol::types;
 use postgres_types::{FromSql, ToSql, Type};
@@ -18,6 +19,8 @@ impl TZTime {
     }
 }
 
+scalar!(TZTime);
+
 // https://github.com/sfackler/rust-postgres/blob/7cd7b187a5cb990ceb0ea9531cd3345b1e2799c3/postgres-types/src/chrono_04.rs
 fn base() -> NaiveDateTime {
     NaiveDate::from_ymd_opt(2000, 1, 1)
@@ -33,7 +36,10 @@ impl<'a> FromSql<'a> for TZTime {
         let naive_date_time = base()
             .checked_add_signed(Duration::microseconds(t))
             .unwrap();
-        Ok(TZTime(DateTime::from_utc(naive_date_time, Utc)))
+        Ok(TZTime(DateTime::from_naive_utc_and_offset(
+            naive_date_time,
+            Utc,
+        )))
     }
 
     fn accepts(ty: &Type) -> bool {
@@ -49,6 +55,22 @@ impl Serialize for TZTime {
         S: Serializer,
     {
         serializer.serialize_str(&self.to_milli_tz())
+    }
+}
+
+impl From<String> for TZTime {
+    fn from(s: String) -> Self {
+        Self(
+            DateTime::parse_from_rfc3339(&s)
+                .unwrap()
+                .with_timezone(&Utc),
+        )
+    }
+}
+
+impl From<&str> for TZTime {
+    fn from(s: &str) -> Self {
+        Self(DateTime::parse_from_rfc3339(s).unwrap().with_timezone(&Utc))
     }
 }
 

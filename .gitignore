@@ -80,4 +80,4 @@ migrations/dumps/*.sql
 **/*.profraw
 
 # vscode
-test/thunder-tests/thunderActivity.json
+tests/thunder-tests/thunderActivity.json

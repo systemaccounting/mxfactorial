@@ -1,8 +1,6 @@
 use crate::helpers as h;
 use dotenvy::dotenv;
 
-// todo: compose, cloud and workflows
-
 fn _before_each() {
     h::restore_testseed();
     dotenv().expect(".env file not found");

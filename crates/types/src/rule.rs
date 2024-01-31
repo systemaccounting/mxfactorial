@@ -1,5 +1,6 @@
 use crate::account_role::AccountRole;
 use crate::time::TZTime;
+use async_graphql::SimpleObject;
 use async_trait::async_trait;
 #[allow(unused_imports)]
 use chrono::{DateTime, Utc};
@@ -25,7 +26,8 @@ pub trait RuleInstanceTrait {
     ) -> RuleInstances;
 }
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone, SimpleObject)]
+#[graphql(rename_fields = "snake_case")]
 pub struct RuleInstance {
     pub id: Option<String>,
     pub rule_type: String,

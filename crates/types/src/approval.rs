@@ -1,9 +1,11 @@
 use crate::account_role::AccountRole;
 use crate::time::TZTime;
+use async_graphql::{Object, SimpleObject};
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone, SimpleObject)]
+#[graphql(rename_fields = "snake_case")]
 pub struct Approval {
     pub id: Option<String>,
     pub rule_instance_id: Option<String>,
@@ -30,6 +32,13 @@ impl Approvals {
                 .filter(|a| a.account_role == account_role)
                 .collect(),
         )
+    }
+}
+
+#[Object]
+impl Approvals {
+    async fn approvals(&self) -> Vec<Approval> {
+        self.0.clone()
     }
 }
 

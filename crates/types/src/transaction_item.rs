@@ -1,10 +1,16 @@
-#[allow(unused_imports)]
-use crate::{account::AccountProfiles, transaction};
-use crate::{account_role::AccountRole, approval::Approvals, time::TZTime};
+#![allow(unused_imports)]
+use crate::account::AccountProfiles;
+use crate::{
+    account_role::AccountRole,
+    approval::{Approval, Approvals},
+    time::TZTime,
+};
+use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, InputObject)]
+#[graphql(input_name = "TransactionItemInput", rename_fields = "snake_case")]
 pub struct TransactionItem {
     pub id: Option<String>,
     pub transaction_id: Option<String>,
@@ -26,7 +32,82 @@ pub struct TransactionItem {
     pub creditor_rejection_time: Option<TZTime>,
     pub debitor_expiration_time: Option<TZTime>,
     pub creditor_expiration_time: Option<TZTime>,
+    #[graphql(skip)]
     pub approvals: Option<Approvals>,
+}
+
+// TransactionItem is both a graphql input and output type but the
+// approvals field is not an input field so 1) InputObject derived
+// on struct TransactionItem with 2) #[graphql(skip)] added above approvals,
+// and 3) #[Object] added to impl TransactionItem
+// https://async-graphql.github.io/async-graphql/en/define_complex_object.html
+// Object must have a resolver defined for each field in its impl
+
+#[Object(rename_fields = "snake_case")]
+impl TransactionItem {
+    async fn id(&self) -> Option<String> {
+        self.id.clone()
+    }
+    async fn transaction_id(&self) -> Option<String> {
+        self.transaction_id.clone()
+    }
+    async fn item_id(&self) -> String {
+        self.item_id.clone()
+    }
+    async fn price(&self) -> String {
+        self.price.clone()
+    }
+    async fn quantity(&self) -> String {
+        self.quantity.clone()
+    }
+    async fn debitor_first(&self) -> Option<bool> {
+        self.debitor_first
+    }
+    async fn rule_instance_id(&self) -> Option<String> {
+        self.rule_instance_id.clone()
+    }
+    async fn rule_exec_ids(&self) -> Option<Vec<String>> {
+        self.rule_exec_ids.clone()
+    }
+    async fn unit_of_measurement(&self) -> Option<String> {
+        self.unit_of_measurement.clone()
+    }
+    async fn units_measured(&self) -> Option<String> {
+        self.units_measured.clone()
+    }
+    async fn debitor(&self) -> String {
+        self.debitor.clone()
+    }
+    async fn creditor(&self) -> String {
+        self.creditor.clone()
+    }
+    async fn debitor_profile_id(&self) -> Option<String> {
+        self.debitor_profile_id.clone()
+    }
+    async fn creditor_profile_id(&self) -> Option<String> {
+        self.creditor_profile_id.clone()
+    }
+    async fn debitor_approval_time(&self) -> Option<TZTime> {
+        self.debitor_approval_time.clone()
+    }
+    async fn creditor_approval_time(&self) -> Option<TZTime> {
+        self.creditor_approval_time.clone()
+    }
+    async fn debitor_rejection_time(&self) -> Option<TZTime> {
+        self.debitor_rejection_time.clone()
+    }
+    async fn creditor_rejection_time(&self) -> Option<TZTime> {
+        self.creditor_rejection_time.clone()
+    }
+    async fn debitor_expiration_time(&self) -> Option<TZTime> {
+        self.debitor_expiration_time.clone()
+    }
+    async fn creditor_expiration_time(&self) -> Option<TZTime> {
+        self.creditor_expiration_time.clone()
+    }
+    async fn approvals(&self) -> Vec<Approval> {
+        self.approvals.clone().unwrap().0
+    }
 }
 
 impl TransactionItem {
@@ -66,6 +147,12 @@ pub struct InconsistentValueError;
 impl fmt::Display for InconsistentValueError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "inconsistent debitor_first values")
+    }
+}
+
+impl From<Vec<TransactionItem>> for TransactionItems {
+    fn from(transaction_items: Vec<TransactionItem>) -> Self {
+        Self(transaction_items)
     }
 }
 

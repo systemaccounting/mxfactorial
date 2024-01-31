@@ -16,4 +16,5 @@ services:
       TRANSACTION_BY_ID_URL: "http://transaction-by-id:10007"
       BALANCE_BY_ACCOUNT_URL: "http://balance-by-account:10004"
       READINESS_CHECK_PATH: "/healthz"
+      RUST_LOG: info
       GRAPHQL_PORT: 10000

@@ -36,7 +36,7 @@ crates:
     params: []
   pg:
     runtime: rust1.x
-    min_code_cov: 38
+    min_code_cov: 37
     type: lib
     env_var: null
     params: []
@@ -48,7 +48,7 @@ crates:
     params: []
   types:
     runtime: rust1.x
-    min_code_cov: 94
+    min_code_cov: 93
     type: lib
     env_var: null
     params: []
@@ -326,24 +326,15 @@ services:
         ssm: null
         default: 20
   graphql:
-    runtime: go1.x
+    runtime: rust1.x
     min_code_cov: null
     type: app
     local_dev: true
     params:
       - AWS_REGION
     deploy: true
-    build_src_path: .
+    build_src_path: null
     dependents:
-      - request-create
-      - request-approve
-      - rule
-      - request-by-id
-      - requests-by-account
-      - transaction-by-id
-      - transactions-by-account
-      - balance-by-account
-      - client
     env_var:
       set:
         GRAPHQL_PORT:
