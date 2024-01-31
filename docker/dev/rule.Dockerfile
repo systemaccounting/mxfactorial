@@ -1,23 +1,39 @@
-FROM mxfactorial/rule-base:v1 as builder
+FROM rust:latest as builder
 
 WORKDIR /app
 
-COPY Cargo.lock ./
+COPY . ./
 
-COPY crates crates/
+RUN rustup target add x86_64-unknown-linux-musl
+RUN apt update && \
+	apt install -y musl-tools perl make
+RUN update-ca-certificates
 
-COPY services/rule services/rule/
+ENV USER=rule
+ENV UID=10001
 
-RUN touch services/rule/src/main.rs
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    "${USER}"
 
 RUN USER=root cargo build \
-	--manifest-path=services/rule/Cargo.toml \
-	--target x86_64-unknown-linux-musl
+		--manifest-path=services/rule/Cargo.toml \
+		--target x86_64-unknown-linux-musl \
+		--release
 
-FROM rust:alpine3.17
+FROM alpine
 
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/debug/rule /usr/local/bin
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/rule /usr/local/bin
 
 EXPOSE 10001
+
+USER rule:rule
 
 CMD [ "/usr/local/bin/rule" ]
