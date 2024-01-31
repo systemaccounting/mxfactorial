@@ -1,0 +1,313 @@
+use ::types::{
+    account_role::AccountRole,
+    request_response::{IntraTransaction, IntraTransactions, RequestApprove},
+    transaction::Transaction,
+    transaction_item::{TransactionItem, TransactionItems},
+};
+use async_graphql::*;
+use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use aws_lambda_events::event::apigw::ApiGatewayV2httpRequestContext;
+use axum::{
+    extract::State,
+    http::{HeaderMap, StatusCode},
+    response::{self, IntoResponse},
+    routing::{get, post},
+    Router,
+};
+use httpclient::HttpClient as Client;
+use serde_json::json;
+use std::{env, net::ToSocketAddrs, result::Result};
+use tokio::{net::TcpListener, signal};
+use tower_http::cors::CorsLayer;
+
+const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
+const GRAPHQL_RESOURCE: &str = "query";
+
+struct Query;
+
+#[Object]
+impl Query {
+    async fn balance(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(name = "account_name")] account_name: String,
+        #[graphql(name = "auth_account")] auth_account: String,
+    ) -> String {
+        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+        let uri = env::var("BALANCE_BY_ACCOUNT_URL").unwrap();
+        let body = account_auth(account_name, account_from_token);
+        let client = Client::new();
+        let response = client.post(uri, body).await.unwrap();
+        response.text().await.unwrap()
+    }
+
+    #[graphql(name = "transactionsByAccount")]
+    async fn transactions_by_account(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(name = "account_name")] account_name: String,
+        #[graphql(name = "auth_account")] auth_account: String,
+    ) -> Vec<Transaction> {
+        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+        let uri = env::var("TRANSACTIONS_BY_ACCOUNT_URL").unwrap();
+        let body = account_auth(account_name, account_from_token);
+        let client = Client::new();
+        let response = client.post(uri, body).await.unwrap();
+        let response_body = response.text().await.unwrap();
+        let response_body: IntraTransactions = serde_json::from_str(&response_body).unwrap();
+        response_body.transactions.0
+    }
+
+    #[graphql(name = "transactionByID")]
+    async fn transaction_by_id(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(name = "id")] id: String,
+        #[graphql(name = "account_name")] account_name: String,
+        #[graphql(name = "auth_account")] auth_account: String,
+    ) -> Transaction {
+        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+        let uri = env::var("TRANSACTION_BY_ID_URL").unwrap();
+        let body = id_account_auth(id, account_name, account_from_token);
+        let client = Client::new();
+        let response = client.post(uri, body).await.unwrap();
+        let response_body = response.text().await.unwrap();
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
+        intra_transaction.transaction
+    }
+
+    #[graphql(name = "requestsByAccount")]
+    async fn requests_by_account(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(name = "account_name")] account_name: String,
+        #[graphql(name = "auth_account")] auth_account: String,
+    ) -> Vec<Transaction> {
+        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+        let uri = env::var("REQUESTS_BY_ACCOUNT_URL").unwrap();
+        let client = Client::new();
+        let body = account_auth(account_name, account_from_token);
+        let response = client.post(uri, body).await.unwrap();
+        let response_body = response.text().await.unwrap();
+        let response_body: IntraTransactions = serde_json::from_str(&response_body).unwrap();
+        response_body.transactions.0
+    }
+
+    #[graphql(name = "requestByID")]
+    async fn request_by_id(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(name = "id")] id: String,
+        #[graphql(name = "account_name")] account_name: String,
+        #[graphql(name = "auth_account")] auth_account: String,
+    ) -> Transaction {
+        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+        let uri = env::var("REQUEST_BY_ID_URL").unwrap();
+        let body = id_account_auth(id, account_name, account_from_token);
+        let client = Client::new();
+        let response = client.post(uri, body).await.unwrap();
+        let response_body = response.text().await.unwrap();
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
+        intra_transaction.transaction
+    }
+
+    #[graphql(name = "rules")]
+    async fn rules(
+        &self,
+        #[graphql(name = "transaction_items")] transaction_items: Vec<TransactionItem>,
+    ) -> Transaction {
+        let uri = env::var("RULE_URL").unwrap();
+        let client = Client::new();
+        let body = json!(transaction_items).to_string();
+        let response = client.post(uri, body).await.unwrap();
+        let response_body = response.text().await.unwrap();
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
+        intra_transaction.transaction
+    }
+}
+
+struct Mutation;
+
+#[Object]
+impl Mutation {
+    async fn create_request(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(name = "transaction_items")] transaction_items: Vec<TransactionItem>,
+        #[graphql(name = "auth_account")] auth_account: String,
+    ) -> Transaction {
+        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+        let uri = env::var("REQUEST_CREATE_URL").unwrap();
+        let client = Client::new();
+        let request = IntraTransaction::new(
+            account_from_token.clone(),
+            Transaction::new(
+                account_from_token,
+                TransactionItems::from(transaction_items),
+            ),
+        );
+        let body = json!(request).to_string();
+        let response = client.post(uri, body).await.unwrap();
+        let response_body = response.text().await.unwrap();
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
+        intra_transaction.transaction
+    }
+
+    async fn approve_request(
+        &self,
+        ctx: &Context<'_>,
+        #[graphql(name = "id")] transaction_id: String,
+        #[graphql(name = "account_name")] account_name: String,
+        #[graphql(name = "account_role")] account_role: AccountRole,
+        #[graphql(name = "auth_account")] auth_account: String,
+    ) -> Transaction {
+        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+        let uri = env::var("REQUEST_APPROVE_URL").unwrap();
+        let client = Client::new();
+        let request = RequestApprove::new(
+            account_from_token,
+            transaction_id,
+            account_name,
+            account_role,
+        );
+        let body = json!(request).to_string();
+        let response = client.post(uri, body).await.unwrap();
+        let response_body = response.text().await.unwrap();
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
+        intra_transaction.transaction
+    }
+}
+
+fn account_auth(account_name: String, auth_account: String) -> String {
+    json!({
+        "account_name": account_name,
+        "auth_account": auth_account
+    })
+    .to_string()
+}
+
+fn id_account_auth(id: String, account_name: String, auth_account: String) -> String {
+    json!({
+        "id": id,
+        "account_name": account_name,
+        "auth_account": auth_account,
+    })
+    .to_string()
+}
+
+fn get_auth_account(ctx: &Context<'_>, account_from_request: String) -> Result<String, Error> {
+    if env::var("ENABLE_API_AUTH") == Ok("true".to_string()) {
+        let headers = ctx.data::<HeaderMap>().unwrap();
+        let amzn_ctx = get_amzn_ctx_from_headers(headers);
+        match amzn_ctx.authorizer {
+            Some(authorizer) => Ok(authorizer
+                .jwt
+                .unwrap()
+                .claims
+                .get("cognito:username")
+                .unwrap()
+                .to_string()),
+            None => {
+                tracing::error!("error: missing authorizer");
+                Err("error: missing authorizer".into())
+            }
+        }
+    } else {
+        Ok(account_from_request)
+    }
+}
+
+fn get_amzn_ctx_from_headers(headers: &HeaderMap) -> ApiGatewayV2httpRequestContext {
+    headers
+        .get("x-amzn-request-context")
+        .and_then(|value| serde_json::from_str(value.to_str().unwrap()).ok())
+        .unwrap()
+}
+
+async fn graphiql() -> impl IntoResponse {
+    response::Html(
+        http::GraphiQLSource::build()
+            .endpoint(format!("/{}", GRAPHQL_RESOURCE).as_str())
+            .finish(),
+    )
+}
+
+async fn graphql_handler(
+    State(schema): State<Schema<Query, Mutation, EmptySubscription>>,
+    headers: HeaderMap,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    let mut req = req.into_inner();
+    req = req.data(headers.clone());
+    schema.execute(req).await.into()
+}
+
+#[tokio::main]
+async fn main() {
+    tracing_subscriber::fmt().with_ansi(false).init();
+
+    let readiness_check_path = env::var(READINESS_CHECK_PATH)
+        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+
+    let schema = Schema::build(Query, Mutation, EmptySubscription).finish();
+
+    let app = Router::new()
+        .route("/", get(graphiql))
+        .route(
+            format!("/{}", GRAPHQL_RESOURCE).as_str(),
+            post(graphql_handler),
+        )
+        .route(
+            readiness_check_path.as_str(), // absolute path so format not used
+            get(|| async { StatusCode::OK }),
+        )
+        .layer(CorsLayer::permissive())
+        .with_state(schema);
+
+    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
+
+    let port = env::var("GRAPHQL_PORT").unwrap_or("10000".to_string());
+
+    let serve_addr = format!("{hostname_or_ip}:{port}");
+
+    let mut addrs_iter = serve_addr.to_socket_addrs().unwrap_or(
+        format!("{hostname_or_ip}:{port}")
+            .to_socket_addrs()
+            .unwrap(),
+    );
+
+    let addr = addrs_iter.next().unwrap();
+
+    tracing::info!("listening on {}", addr);
+
+    axum::serve(TcpListener::bind(addr).await.unwrap(), app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap();
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+
+    println!("signal received, starting graceful shutdown");
+}
