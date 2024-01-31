@@ -5,13 +5,8 @@ use aws_smithy_runtime_api::client::identity::Identity;
 use reqwest::{Client, Error, Response};
 use std::{env, time::SystemTime};
 
+#[derive(Default)]
 pub struct HttpClient(Client);
-
-impl Default for HttpClient {
-    fn default() -> Self {
-        Self(Client::new())
-    }
-}
 
 impl HttpClient {
     pub fn new() -> Self {
