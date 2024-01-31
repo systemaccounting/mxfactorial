@@ -62,15 +62,21 @@ func run(
 ) (string, error) {
 
 	if e.AuthAccount == "" {
-		return "", errors.New("missing auth_account. exiting")
+		err := errors.New("missing auth_account. exiting")
+		logger.Log(logger.Trace(), err)
+		return "", err
 	}
 
 	if e.AccountName == nil || *e.AccountName == "" {
-		return "", errors.New("missing account_name. exiting")
+		err := errors.New("missing account_name. exiting")
+		logger.Log(logger.Trace(), err)
+		return "", err
 	}
 
 	if e.ID == nil || *e.ID == "" {
-		return "", errors.New("missing id. exiting")
+		err := errors.New("missing id. exiting")
+		logger.Log(logger.Trace(), err)
+		return "", err
 	}
 
 	// connect to db
