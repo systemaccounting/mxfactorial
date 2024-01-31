@@ -1,3 +1,4 @@
+use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use postgres_types::{FromSql, ToSql};
 use serde::Deserialize;
@@ -12,7 +13,8 @@ pub trait AccountTrait {
     async fn get_approvers_for_account(&self, account: String) -> Vec<String>;
 }
 
-#[derive(Eq, PartialEq, Debug, Deserialize, ToSql, FromSql, Clone)]
+#[derive(Eq, PartialEq, Debug, Deserialize, ToSql, FromSql, Clone, SimpleObject)]
+#[graphql(rename_fields = "snake_case")]
 pub struct AccountProfile {
     pub id: Option<String>,
     pub account_name: String,

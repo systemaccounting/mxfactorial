@@ -1,3 +1,4 @@
+use async_graphql::scalar;
 use postgres_protocol::types;
 use postgres_types::{to_sql_checked, FromSql, IsNull, ToSql, Type};
 use serde::{Deserialize, Serialize};
@@ -11,6 +12,8 @@ pub enum AccountRole {
     Debitor,
     Creditor,
 }
+
+scalar!(AccountRole);
 
 impl<'a> FromSql<'a> for AccountRole {
     #[allow(unused_variables)]
@@ -48,6 +51,16 @@ impl ToSql for AccountRole {
     }
 
     to_sql_checked!();
+}
+
+impl From<String> for AccountRole {
+    fn from(s: String) -> Self {
+        match s.as_str() {
+            "debitor" => AccountRole::Debitor,
+            "creditor" => AccountRole::Creditor,
+            _ => panic!("{} is not an account role", s),
+        }
+    }
 }
 
 pub type RoleSequence = [AccountRole; 2];

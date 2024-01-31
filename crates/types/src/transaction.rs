@@ -1,7 +1,13 @@
-use crate::{account_role::AccountRole, time::TZTime, transaction_item::TransactionItems};
+use crate::{
+    account_role::AccountRole,
+    time::TZTime,
+    transaction_item::{TransactionItem, TransactionItems},
+};
+use async_graphql::{ComplexObject, Object, SimpleObject};
 use serde::{Deserialize, Serialize};
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
+#[graphql(rename_fields = "snake_case", complex)]
 pub struct Transaction {
     pub id: Option<String>,
     pub rule_instance_id: Option<String>,
@@ -11,7 +17,16 @@ pub struct Transaction {
     pub author_role: Option<AccountRole>,
     pub equilibrium_time: Option<TZTime>,
     pub sum_value: String,
+    #[graphql(skip)]
     pub transaction_items: TransactionItems,
+}
+
+#[ComplexObject]
+impl Transaction {
+    #[graphql(name = "transaction_items")]
+    async fn transaction_items(&self) -> Vec<TransactionItem> {
+        self.transaction_items.clone().0
+    }
 }
 
 impl Transaction {
@@ -748,5 +763,12 @@ pub mod tests {
     }
 }
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize)] // clone, default
 pub struct Transactions(pub Vec<Transaction>);
+
+#[Object]
+impl Transactions {
+    async fn transactions(&self) -> Vec<Transaction> {
+        self.0.clone()
+    }
+}
