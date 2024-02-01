@@ -24,7 +24,7 @@ jobs:
           cargo clippy -p pg -p types -p httpclient -- -Dwarnings
       - name: install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
-      - name: crates/types unit tests
+      - name: crates unit tests
         run: cargo test -p pg -p types -p httpclient -p sqls
       - name: crates/types coverage report
         run: |
