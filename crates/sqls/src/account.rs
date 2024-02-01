@@ -11,13 +11,13 @@ pub fn insert_account_sql(account: String) -> (String, Values) {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
+    use super::*;
 
-	#[test]
-	fn test_insert_account_sql() {
-		let account = "test_account".to_string();
-		let (sql, values) = insert_account_sql(account);
-		assert_eq!(sql, r#"INSERT INTO "account" ("name") VALUES ($1)"#);
-		assert_eq!(values, Values(vec!["test_account".into()]));
-	}
+    #[test]
+    fn test_insert_account_sql() {
+        let account = "test_account".to_string();
+        let (sql, values) = insert_account_sql(account);
+        assert_eq!(sql, r#"INSERT INTO "account" ("name") VALUES ($1)"#);
+        assert_eq!(values, Values(vec!["test_account".into()]));
+    }
 }
