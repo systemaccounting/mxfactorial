@@ -18,7 +18,7 @@ jobs:
           toolchain: stable
           components: clippy, rustfmt
       - uses: taiki-e/install-action@nextest
-      - name: crates/types lint
+      - name: crates lint
         run: |
           cargo fmt -p pg -p types -p httpclient -p sqls -- --check
           cargo clippy -p pg -p types -p httpclient -p sqls -- -Dwarnings
