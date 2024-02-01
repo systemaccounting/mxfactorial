@@ -1,8 +1,18 @@
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use postgres_types::{FromSql, ToSql};
-use serde::Deserialize;
+use sea_query::enum_def;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
+
+#[derive(Debug, Serialize)]
+#[enum_def]
+pub struct Account {
+    pub name: String,
+    pub password: String,
+    pub created_by: String,
+    pub created_at: String,
+}
 
 #[async_trait]
 pub trait AccountTrait {
