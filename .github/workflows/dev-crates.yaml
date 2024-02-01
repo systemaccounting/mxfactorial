@@ -20,8 +20,8 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - name: crates/types lint
         run: |
-          cargo fmt -p pg -p types -p httpclient -- --check
-          cargo clippy -p pg -p types -p httpclient -- -Dwarnings
+          cargo fmt -p pg -p types -p httpclient -p sqls -- --check
+          cargo clippy -p pg -p types -p httpclient -p sqls -- -Dwarnings
       - name: install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: crates unit tests
