@@ -4,6 +4,7 @@ use postgres_types::{FromSql, ToSql};
 use sea_query::enum_def;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use crate::time::TZTime;
 
 #[derive(Debug, Serialize)]
 #[enum_def]
@@ -11,7 +12,7 @@ pub struct Account {
     pub name: String,
     pub password: String,
     pub created_by: String,
-    pub created_at: String,
+    pub created_at: TZTime,
 }
 
 #[async_trait]
@@ -93,6 +94,19 @@ impl FromIterator<AccountProfile> for AccountProfiles {
         }
         profiles
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[enum_def]
+pub struct AccountOwner {
+    pub id:  Option<String>,
+    pub owner_account: Option<String>,
+    pub owned_account: Option<String>,
+    pub owner_subaccount: Option<String>,
+    pub owned_subaccount: Option<String>,
+    pub removed_by: Option<String>,
+    pub removed_time: Option<TZTime>,
+    pub created_at: TZTime,
 }
 
 #[cfg(test)]
