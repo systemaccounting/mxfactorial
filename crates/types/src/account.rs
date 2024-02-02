@@ -1,10 +1,10 @@
+use crate::time::TZTime;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use postgres_types::{FromSql, ToSql};
 use sea_query::enum_def;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
-use crate::time::TZTime;
 
 #[derive(Debug, Serialize)]
 #[enum_def]
@@ -99,7 +99,7 @@ impl FromIterator<AccountProfile> for AccountProfiles {
 #[derive(Debug, Serialize, Deserialize)]
 #[enum_def]
 pub struct AccountOwner {
-    pub id:  Option<String>,
+    pub id: Option<String>,
     pub owner_account: Option<String>,
     pub owned_account: Option<String>,
     pub owner_subaccount: Option<String>,
