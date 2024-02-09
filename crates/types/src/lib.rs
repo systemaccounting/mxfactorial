@@ -6,3 +6,4 @@ pub mod rule;
 pub mod time;
 pub mod transaction;
 pub mod transaction_item;
+pub mod balance;
