@@ -19,9 +19,6 @@ strum_macros = "0.24.3"
 tokio-postgres = { version = "0.7.7", features = ["with-chrono-0_4"] }
 async-trait = "0.1.73"
 async-graphql = { version = "7.0.0", features = ["chrono"] }
-sea-query = { version = "0.30.7", default-features = false, features = [
-	"attr",
-] }
 
 [dev-dependencies]
 bytes = "1.0"
