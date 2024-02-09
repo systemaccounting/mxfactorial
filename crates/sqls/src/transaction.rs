@@ -50,10 +50,13 @@ impl TransactionTable {
     fn aux_stmt(stmt_name: &str, sql: &str) -> String {
         format!("{} AS ({})", stmt_name, sql)
     }
-	// todo: convert to postgres function accepting a composite type
-	// note: "Whenever you create a table, a composite type is also automatically created, with the same name as the table"
-	// https://www.postgresql.org/docs/current/rowtypes.html
-    pub fn insert_transaction_cte_sql(&self, tr_items: TransactionItems) -> Result<String, Box<dyn Error>> {
+    // todo: convert to postgres function accepting a composite type
+    // note: "Whenever you create a table, a composite type is also automatically created, with the same name as the table"
+    // https://www.postgresql.org/docs/current/rowtypes.html
+    pub fn insert_transaction_cte_sql(
+        &self,
+        tr_items: TransactionItems,
+    ) -> Result<String, Box<dyn Error>> {
         let mut cte = String::new();
         cte.push_str(format!("{} {} {}", WITH, TR_ALIAS, AS).as_str());
 
@@ -198,7 +201,9 @@ mod tests {
         let test_table = TransactionTable::new();
 
         assert_eq!(
-            test_table.insert_transaction_cte_sql(test_transaction_items).unwrap(),
+            test_table
+                .insert_transaction_cte_sql(test_transaction_items)
+                .unwrap(),
             expected
         )
     }
