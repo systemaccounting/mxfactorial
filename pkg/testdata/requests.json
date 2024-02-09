@@ -9940,10 +9940,10 @@
 		"transaction": {
 			"id": null,
 			"rule_instance_id": null,
-			"author": null,
+			"author": "GroceryCo",
 			"author_device_id": null,
 			"author_device_latlng": null,
-			"author_role": null,
+			"author_role": "creditor",
 			"equilibrium_time": null,
 			"sum_value": "15.260",
 			"transaction_items": [
@@ -14692,7 +14692,7 @@
 		"transaction": {
 			"id": null,
 			"rule_instance_id": null,
-			"author": null,
+			"author": "GroceryCo",
 			"author_device_id": null,
 			"author_device_latlng": null,
 			"author_role": "creditor",
