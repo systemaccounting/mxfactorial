@@ -23,6 +23,15 @@ pub struct Approval {
 #[derive(Default, Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
 pub struct Approvals(pub Vec<Approval>);
 
+impl IntoIterator for Approvals {
+    type Item = Approval;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 impl Approvals {
     pub fn get_approvals_per_role(&self, account_role: AccountRole) -> Self {
         Approvals(
