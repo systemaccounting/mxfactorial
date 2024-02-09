@@ -3,7 +3,7 @@ use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, SecondsFormat, Utc};
 use postgres_protocol::types;
 use postgres_types::{FromSql, ToSql, Type};
 use serde::{Deserialize, Serialize, Serializer};
-use std::error::Error;
+use std::{error::Error, string::ToString};
 
 #[derive(Eq, PartialEq, Debug, Deserialize, ToSql, Clone)]
 
@@ -16,6 +16,12 @@ impl TZTime {
 
     pub fn to_milli_tz(&self) -> String {
         self.0.to_rfc3339_opts(SecondsFormat::Millis, true)
+    }
+}
+
+impl ToString for TZTime {
+    fn to_string(&self) -> String {
+        self.to_milli_tz()
     }
 }
 
