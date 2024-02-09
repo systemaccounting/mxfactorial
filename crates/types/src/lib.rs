@@ -1,6 +1,7 @@
 pub mod account;
 pub mod account_role;
 pub mod approval;
+pub mod balance;
 pub mod request_response;
 pub mod rule;
 pub mod time;

@@ -156,6 +156,15 @@ impl From<Vec<TransactionItem>> for TransactionItems {
     }
 }
 
+impl IntoIterator for TransactionItems {
+    type Item = TransactionItem;
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
 const FIXED_DECIMAL_PLACES: usize = 3;
 
 impl TransactionItems {

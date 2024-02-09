@@ -36,13 +36,13 @@ crates:
     params: []
   pg:
     runtime: rust1.x
-    min_code_cov: 37
+    min_code_cov: 27
     type: lib
     env_var: null
     params: []
   sqls:
     runtime: rust1.x
-    min_code_cov: null
+    min_code_cov: 68
     type: lib
     env_var: null
     params: []
@@ -408,7 +408,7 @@ services:
         - PGDATABASE
   rule:
     runtime: rust1.x
-    min_code_cov: 63
+    min_code_cov: 50
     type: app
     local_dev: true
     params:

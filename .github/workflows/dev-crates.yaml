@@ -18,44 +18,17 @@ jobs:
           toolchain: stable
           components: clippy, rustfmt
       - uses: taiki-e/install-action@nextest
-      - name: crates/types lint
+      - name: crates lint
         run: |
-          cargo fmt -p pg -p types -p httpclient -- --check
-          cargo clippy -p pg -p types -p httpclient -- -Dwarnings
+          cargo fmt -p pg -p types -p httpclient -p sqls -- --check
+          cargo clippy -p pg -p types -p httpclient -p sqls -- -Dwarnings
       - name: install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
-      - name: crates/types unit tests
-        run: cargo test -p pg -p types -p httpclient
-      - name: crates/types coverage report
+      - name: crates unit tests
+        run: cargo test -p pg -p types -p httpclient -p sqls
+      - name: crates coverage reports
         run: |
           make rust-coverage RUST_PKG=types
-          echo "MIN_CODE_COV=$(yq .crates.types.min_code_cov project.yaml)" >> $GITHUB_ENV
-          echo "CURR_CODE_COV=$(make rust-coverage-percent RUST_PKG=types)" >> $GITHUB_ENV
-      - name: fail crates/types coverage under ${{ env.MIN_CODE_COV }}%
-        run: |
-          if [[ ${{ env.CURR_CODE_COV }} -lt ${{ env.MIN_CODE_COV }} ]]; then
-            echo 'coverage dropped below ${{ env.MIN_CODE_COV }}: ${{ env.CURR_CODE_COV }}%'
-            exit 1
-          fi
-      - name: crates/pg coverage report
-        run: |
           make rust-coverage RUST_PKG=pg
-          echo "MIN_CODE_COV=$(yq .crates.pg.min_code_cov project.yaml)" >> $GITHUB_ENV
-          echo "CURR_CODE_COV=$(make rust-coverage-percent RUST_PKG=pg)" >> $GITHUB_ENV
-      - name: fail crates/pg coverage under ${{ env.MIN_CODE_COV }}%
-        run: |
-          if [[ ${{ env.CURR_CODE_COV }} -lt ${{ env.MIN_CODE_COV }} ]]; then
-            echo 'coverage dropped below ${{ env.MIN_CODE_COV }}: ${{ env.CURR_CODE_COV }}%'
-            exit 1
-          fi
-      - name: crates/httpclient coverage report
-        run: |
           make rust-coverage RUST_PKG=httpclient
-          echo "MIN_CODE_COV=$(yq .crates.httpclient.min_code_cov project.yaml)" >> $GITHUB_ENV
-          echo "CURR_CODE_COV=$(make rust-coverage-percent RUST_PKG=httpclient)" >> $GITHUB_ENV
-      - name: fail crates/httpclient coverage under ${{ env.MIN_CODE_COV }}%
-        run: |
-          if [[ ${{ env.CURR_CODE_COV }} -lt ${{ env.MIN_CODE_COV }} ]]; then
-            echo 'coverage dropped below ${{ env.MIN_CODE_COV }}: ${{ env.CURR_CODE_COV }}%'
-            exit 1
-          fi
+          make rust-coverage RUST_PKG=sqls

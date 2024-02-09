@@ -2,3 +2,11 @@
 name = "sqls"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+serde-aux = { version = "4.4.0", default-features = false }
+types = { path = "../types" }
+serde = { version = "1.0.152", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1.0.113"
