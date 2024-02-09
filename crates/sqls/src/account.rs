@@ -1,28 +1,37 @@
-use sea_query::{Expr, OnConflict, PostgresQueryBuilder, Query, Values};
-use types::account::AccountIden as Account;
-use types::account::AccountOwnerIden as AccountOwner;
+use crate::common::*;
 
-pub fn insert_account_sql(account: String) -> (String, Values) {
-    Query::insert()
-        .into_table(Account::Table)
-        .columns([Account::Name])
-        .values_panic([account.into()])
-        .on_conflict(OnConflict::column(Account::Name).do_nothing().to_owned())
-        .build(PostgresQueryBuilder)
+const ACCOUNT_TABLE: &str = "account";
+const ACCOUNT_OWNER_TABLE: &str = "account_owner";
+
+pub fn insert_account_sql() -> String {
+    let columns = ["name".to_owned()];
+    let values = values_params(&columns, 1, &mut 1);
+    format!(
+        "{} {} ({}) {} {} {} {}",
+        INSERT_INTO,
+        ACCOUNT_TABLE,
+        columns.join(", "),
+        VALUES,
+        values,
+        ON_CONFLICT,
+        DO_NOTHING,
+    )
 }
 
-pub fn delete_owner_account_sql(account: String) -> (String, Values) {
-    Query::delete()
-        .from_table(AccountOwner::Table)
-        .and_where(Expr::col(AccountOwner::OwnerAccount).eq(account))
-        .build(PostgresQueryBuilder)
+pub fn delete_owner_account_sql() -> String {
+    let column = "owner_account";
+    format!(
+        "{} {} {} {} {} $1",
+        DELETE_FROM, ACCOUNT_OWNER_TABLE, WHERE, column, EQUAL
+    )
 }
 
-pub fn delete_account_sql(account: String) -> (String, Values) {
-    Query::delete()
-        .from_table(Account::Table)
-        .and_where(Expr::col(Account::Name).eq(account))
-        .build(PostgresQueryBuilder)
+pub fn delete_account_sql() -> String {
+    let column = "name";
+    format!(
+        "{} {} {} {} {} $1",
+        DELETE_FROM, ACCOUNT_TABLE, WHERE, column, EQUAL
+    )
 }
 
 #[cfg(test)]
@@ -30,32 +39,23 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_insert_account_sql() {
-        let account = "test_account".to_string();
-        let (sql, values) = insert_account_sql(account);
+    fn it_creates_an_insert_account_sql() {
         assert_eq!(
-            sql,
-            r#"INSERT INTO "account" ("name") VALUES ($1) ON CONFLICT ("name") DO NOTHING"#
+            insert_account_sql(),
+            "INSERT INTO account (name) VALUES ($1) ON CONFLICT DO NOTHING"
         );
-        assert_eq!(values, Values(vec!["test_account".into()]));
     }
 
     #[test]
-    fn test_delete_owner_account_sql() {
-        let account = "test_account".to_string();
-        let (sql, values) = delete_owner_account_sql(account);
+    fn it_creates_a_delete_owner_account_sql() {
         assert_eq!(
-            sql,
-            r#"DELETE FROM "account_owner" WHERE "owner_account" = $1"#
+            delete_owner_account_sql(),
+            "DELETE FROM account_owner WHERE owner_account = $1"
         );
-        assert_eq!(values, Values(vec!["test_account".into()]));
     }
 
     #[test]
-    fn test_delete_account_sql() {
-        let account = "test_account".to_string();
-        let (sql, values) = delete_account_sql(account);
-        assert_eq!(sql, r#"DELETE FROM "account" WHERE "name" = $1"#);
-        assert_eq!(values, Values(vec!["test_account".into()]));
+    fn it_creates_a_delete_account_sql() {
+        assert_eq!(delete_account_sql(), "DELETE FROM account WHERE name = $1");
     }
 }
