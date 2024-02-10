@@ -4,7 +4,6 @@ resolver = "2"
 members = [
 	"crates/httpclient",
 	"crates/pg",
-	"crates/sqls",
 	"crates/types",
 	"services/graphql",
 	"services/rule",

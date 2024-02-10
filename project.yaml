@@ -40,12 +40,6 @@ crates:
     type: lib
     env_var: null
     params: []
-  sqls:
-    runtime: rust1.x
-    min_code_cov: 68
-    type: lib
-    env_var: null
-    params: []
   types:
     runtime: rust1.x
     min_code_cov: 93
