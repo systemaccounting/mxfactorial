@@ -2607,8 +2607,10 @@ dependencies = [
  "async-trait",
  "bb8",
  "bb8-postgres",
+ "serde",
+ "serde-aux",
+ "serde_json",
  "serial_test",
- "sqls",
  "tokio",
  "tokio-postgres",
  "types",
@@ -2991,7 +2993,6 @@ dependencies = [
  "pg",
  "regex",
  "serde",
- "sqls",
  "tokio",
  "tower",
  "tower-http 0.4.4",
@@ -3384,16 +3385,6 @@ name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6980e8d7511241f8acf4aebddbb1ff938df5eebe98691418c4468d0b72a96a67"
-
-[[package]]
-name = "sqls"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde-aux",
- "serde_json",
- "types",
-]
 
 [[package]]
 name = "static_assertions"
