@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::sqls::common::*;
 use types::approval::Approval;
 
 const APPROVAL_TABLE: &str = "approval";

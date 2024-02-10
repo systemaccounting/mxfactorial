@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::sqls::common::*;
 use types::account::AccountProfile;
 
 const ACCOUNT_PROFILE_TABLE: &str = "account_profile";

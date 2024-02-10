@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::sqls::common::*;
 use types::transaction_item::TransactionItem;
 
 const TRANSACTION_ITEM_TABLE: &str = "transaction_item";

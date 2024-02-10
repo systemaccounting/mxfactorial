@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::sqls::common::*;
 
 const ACCOUNT_TABLE: &str = "account";
 const ACCOUNT_OWNER_TABLE: &str = "account_owner";

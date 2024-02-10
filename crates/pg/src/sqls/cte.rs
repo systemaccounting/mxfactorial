@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::sqls::common::*;
 
 pub fn select_id_from_insert_transaction_cte_aux_stmt_sql() -> String {
     let column = "id";

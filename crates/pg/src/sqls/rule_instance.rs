@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::sqls::common::*;
 use types::rule::RuleInstance;
 
 const RULE_INSTANCE_TABLE: &str = "rule_instance";

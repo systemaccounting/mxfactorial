@@ -1,7 +1,7 @@
 use std::error::Error;
 
-use crate::common::*;
-use crate::{approval::ApprovalTable, transaction_item::TransactionItemTable};
+use crate::sqls::common::*;
+use crate::sqls::{approval::ApprovalTable, transaction_item::TransactionItemTable};
 use types::{transaction::Transaction, transaction_item::TransactionItems};
 
 const TRANSACTION_TABLE: &str = "transaction";

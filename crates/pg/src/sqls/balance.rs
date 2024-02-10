@@ -1,4 +1,4 @@
-use crate::common::*;
+use crate::sqls::common::*;
 use types::balance::AccountBalance;
 
 const ACCOUNT_BALANCE_TABLE: &str = "account_balance";
