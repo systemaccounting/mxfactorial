@@ -20,6 +20,7 @@ use types::{
 };
 mod rules;
 
+// used by lambda to test for service availability
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
 async fn apply_transaction_item_rules(

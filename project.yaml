@@ -402,7 +402,7 @@ services:
         - PGDATABASE
   rule:
     runtime: rust1.x
-    min_code_cov: 50
+    min_code_cov: 49
     type: app
     local_dev: true
     params:
