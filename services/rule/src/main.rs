@@ -4,7 +4,10 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use pg::{DynConnPool, DynDBConn, DB};
+use pg::{
+    model::{DynConnPool, DynDBConn},
+    postgres::DB,
+};
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use std::{env, net::ToSocketAddrs, sync::Arc};
 use tokio::signal;
@@ -764,7 +767,7 @@ mod tests {
     #[tokio::test]
     async fn it_applies_rules() {
         use axum::extract::{Json, State};
-        use pg::DBConnPoolTrait;
+        use pg::model::DBConnPoolTrait;
         let test_tr_items = TransactionItems(vec![
             TransactionItem {
                 id: None,
