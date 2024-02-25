@@ -15,7 +15,8 @@ test-unit:
 	cargo test
 
 test-lint:
-	cargo clippy
+	cargo fmt -- --check
+	cargo clippy -- -Dwarnings
 
 lint:
 	$(MAKE) test-lint
