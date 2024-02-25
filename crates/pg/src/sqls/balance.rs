@@ -8,15 +8,19 @@ pub struct AccountBalanceTable {
     inner: Table,
 }
 
-impl TableTrait<AccountBalanceTable> for AccountBalanceTable {
+impl TableTrait for AccountBalanceTable {
     fn new() -> AccountBalanceTable {
         Self {
             inner: Table::new::<AccountBalance>(ACCOUNT_BALANCE_TABLE),
         }
     }
 
-    fn get_column(&self, column: &str) -> String {
+    fn get_column(&self, column: &str) -> Column {
         self.inner.get_column(column)
+    }
+
+    fn get_column_name(&self, column: &str) -> String {
+        self.inner.get_column(column).name().to_owned()
     }
 
     fn name(&self) -> &str {
@@ -25,32 +29,32 @@ impl TableTrait<AccountBalanceTable> for AccountBalanceTable {
 }
 
 impl AccountBalanceTable {
-    fn select_columns(&self) -> [String; 2] {
-        [
+    fn select_columns(&self) -> Columns {
+        Columns(vec![
             self.get_column("account_name"),
             self.get_column("current_balance"),
-        ]
+        ])
     }
 
-    fn insert_columns(&self) -> [String; 3] {
-        [
+    fn insert_columns(&self) -> Columns {
+        Columns(vec![
             self.get_column("account_name"),
             self.get_column("current_balance"),
             self.get_column("current_transaction_item_id"),
-        ]
+        ])
     }
 
     pub fn select_account_balances_sql(&self, accounts_count: usize) -> String {
-        let columns = self.select_columns();
-        let params = in_params(accounts_count);
+        let columns = self.select_columns().join();
+        let params = create_params(accounts_count);
         format!(
-            "{} {} {} {} {} {} {} {}",
+            "{} {} {} {} {} {} {} ({})",
             SELECT,
-            columns.join(", "),
+            columns,
             FROM,
             self.name(),
             WHERE,
-            self.get_column("account_name"),
+            self.get_column("account_name").name(),
             IN,
             params
         )
@@ -60,44 +64,65 @@ impl AccountBalanceTable {
         format!(
             "{} {} {} {} {} {} {} $1",
             SELECT,
-            self.get_column("current_balance"),
+            self.get_column("current_balance").name(),
             FROM,
             self.name(),
             WHERE,
-            self.get_column("account_name"),
+            self.get_column("account_name").name(),
             EQUAL
         )
     }
 
     pub fn insert_account_balance_sql(&self) -> String {
         let columns = self.insert_columns();
-        let values = values_params(&columns, 1, &mut 1);
+        let values = create_value_params(columns.clone(), 1, &mut 1);
         format!(
             "{} {} ({}) {} {}",
             INSERT_INTO,
             self.name(),
-            columns.join(", "),
+            columns.join(),
             VALUES,
             values
         )
     }
 
+    // todo: add casting for current_transaction_item_id
     pub fn update_account_balance_sql(&self) -> String {
         format!(
             "{} {} {} {} = $1, {} = $2 {} {} = $3",
             UPDATE,
             self.name(),
             SET,
-            self.get_column("current_balance"),
-            self.get_column("current_transaction_item_id"),
+            self.get_column("current_balance").name(),
+            self.get_column("current_transaction_item_id").name(),
             WHERE,
-            self.get_column("account_name")
+            self.get_column("account_name").name()
         )
     }
 
-    pub fn update_account_balances_sql(transaction_item_count: usize) -> String {
-        let values = balance_change_params(transaction_item_count);
-        format!("{} {}({})", SELECT, CHANGE_ACCOUNT_BALANCES, values)
+    pub fn update_account_balances_sql(&self, transaction_item_count: usize) -> String {
+        let row_count = transaction_item_count * 2; // x 2 = 1 creditor + 1 debtor
+        let mut positional_parameter = 1;
+        let mut values = String::new();
+        for i in 0..row_count {
+            values.push_str(&format!("{}(", ROW));
+            for c in 0..3 {
+                values.push_str(&format!("${}", positional_parameter));
+                if c == 1 {
+                    values.push_str(format!("::{}", TEXT).as_str());
+                }
+                positional_parameter += 1;
+                if c < 2 {
+                    values.push_str(", ");
+                }
+            }
+            values.push_str(format!(", {}, {}", NULL, NULL).as_str()); // add nulls for the last two columns (created_at, updated_at
+            values.push_str(format!(")::{}", self.name()).as_str());
+            if i < row_count - 1 {
+                values.push_str(", ");
+            }
+        }
+        format!("{} {}({})", SELECT, CHANGE_BALANCES, values)
     }
 }
 
@@ -144,10 +169,11 @@ mod tests {
 
     #[test]
     fn it_creates_an_update_account_balances_sql() {
-        let transaction_item_count = 2;
+        let transaction_item_count = 1;
+        let test_table = AccountBalanceTable::new();
         assert_eq!(
-            AccountBalanceTable::update_account_balances_sql(transaction_item_count),
-            "SELECT change_account_balances(($1, $2, $3), ($4, $5, $6))"
+            test_table.update_account_balances_sql(transaction_item_count),
+            "SELECT change_balances(ROW($1, $2::text, $3, NULL, NULL)::account_balance, ROW($4, $5::text, $6, NULL, NULL)::account_balance)"
         );
     }
 }

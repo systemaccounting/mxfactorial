@@ -1,8 +1,8 @@
-use std::error::Error;
-
 use crate::sqls::common::*;
 use crate::sqls::{approval::ApprovalTable, transaction_item::TransactionItemTable};
-use types::{transaction::Transaction, transaction_item::TransactionItems};
+use std::error::Error;
+use tokio_postgres::types::Type;
+use types::transaction::Transaction;
 
 const TRANSACTION_TABLE: &str = "transaction";
 const TR_ITEM_ALIAS_PREFIX: &str = "i";
@@ -14,15 +14,19 @@ pub struct TransactionTable {
     inner: Table,
 }
 
-impl TableTrait<TransactionTable> for TransactionTable {
+impl TableTrait for TransactionTable {
     fn new() -> TransactionTable {
         Self {
             inner: Table::new::<Transaction>(TRANSACTION_TABLE),
         }
     }
 
-    fn get_column(&self, column: &str) -> String {
+    fn get_column(&self, column: &str) -> Column {
         self.inner.get_column(column)
+    }
+
+    fn get_column_name(&self, column: &str) -> String {
+        self.inner.get_column(column).name().to_owned()
     }
 
     fn name(&self) -> &str {
@@ -31,16 +35,32 @@ impl TableTrait<TransactionTable> for TransactionTable {
 }
 
 impl TransactionTable {
-    fn insert_columns(&self) -> [String; 7] {
-        [
+    fn insert_columns_with_casting(&self) -> Columns {
+        Columns(vec![
             self.get_column("rule_instance_id"),
             self.get_column("author"),
             self.get_column("author_device_id"),
-            self.get_column("author_device_latlng"),
+            self.get_column("author_device_latlng")
+                .cast_value_as(Type::POINT),
             self.get_column("author_role"),
             self.get_column("equilibrium_time"),
-            self.get_column("sum_value"),
-        ]
+            self.get_column("sum_value").cast_value_as(Type::NUMERIC),
+        ])
+    }
+
+    fn select_all_with_casting(&self) -> Columns {
+        Columns(vec![
+            self.get_column("id").cast_column_as(Type::TEXT),
+            self.get_column("rule_instance_id")
+                .cast_column_as(Type::TEXT),
+            self.get_column("author"),
+            self.get_column("author_device_id"),
+            self.get_column("author_device_latlng")
+                .cast_column_as(Type::TEXT),
+            self.get_column("author_role"),
+            self.get_column("equilibrium_time"),
+            self.get_column("sum_value").cast_column_as(Type::TEXT),
+        ])
     }
 
     fn aux_stmt_name(prefix: &str, idx: usize) -> String {
@@ -55,7 +75,7 @@ impl TransactionTable {
     // https://www.postgresql.org/docs/current/rowtypes.html
     pub fn insert_transaction_cte_sql(
         &self,
-        tr_items: TransactionItems,
+        transaction: Transaction,
     ) -> Result<String, Box<dyn Error>> {
         let mut cte = String::new();
         cte.push_str(format!("{} {} {}", WITH, TR_ALIAS, AS).as_str());
@@ -68,12 +88,12 @@ impl TransactionTable {
         cte.push_str(format!("({})", insert_transaction_sql).as_str());
 
         // loop through transaction items with index
-        for (i, tr_item) in tr_items.into_iter().enumerate() {
+        for (i, tr_item) in transaction.transaction_items.into_iter().enumerate() {
             let tr_item_aux_stmt_name = Self::aux_stmt_name(TR_ITEM_ALIAS_PREFIX, i); // i_0, i_1, i_2, ...
             let tr_item_table = TransactionItemTable::new();
             let tr_item_insert_sql = tr_item_table.insert_transaction_item_with_sql(
                 TR_ALIAS,
-                self.get_column("id").as_str(),
+                self.get_column_name("id").as_str(),
                 &mut positional_parameter,
             );
             let tr_item_aux_stmt =
@@ -91,9 +111,9 @@ impl TransactionTable {
 
             let appr_insert_sql = appr_table.insert_approval_cte_sql(
                 TR_ALIAS,
-                self.get_column("id").as_str(),
+                self.get_column_name("id").as_str(),
                 tr_item_aux_stmt_name.as_str(),
-                tr_item_table.get_column("id").as_str(),
+                tr_item_table.get_column_name("id").as_str(),
                 tr_item.clone().approvals.unwrap().0.len(),
                 &mut positional_parameter,
             );
@@ -108,20 +128,29 @@ impl TransactionTable {
         cte.push(' '); // space before SELECT
 
         cte.push_str(
-            format!("{} {} {} {}", SELECT, self.get_column("id"), FROM, TR_ALIAS).as_str(),
+            format!(
+                "{} {} {} {}",
+                SELECT,
+                self.get_column("id")
+                    .cast_column_as(Type::TEXT)
+                    .name_with_casting(),
+                FROM,
+                TR_ALIAS
+            )
+            .as_str(),
         );
 
         Ok(cte)
     }
 
     pub fn insert_transaction_sql(&self, positional_parameter: &mut i32) -> String {
-        let columns = self.insert_columns();
-        let values = values_params(&columns, 1, positional_parameter);
+        let columns = self.insert_columns_with_casting();
+        let values = create_value_params(columns.clone(), 1, positional_parameter);
         format!(
             "{} {} ({}) {} {} {} {}",
             INSERT_INTO,
             self.name(),
-            columns.join(", "),
+            columns.join_with_casting(),
             VALUES,
             values,
             RETURNING,
@@ -130,32 +159,80 @@ impl TransactionTable {
     }
 
     pub fn select_transaction_by_id_sql(&self) -> String {
+        let columns = self.select_all_with_casting().join_with_casting();
         format!(
             "{} {} {} {} {} {} {} $1",
             SELECT,
-            STAR,
+            columns,
             FROM,
             self.name(),
             WHERE,
-            self.get_column("id"),
+            self.get_column("id").name(),
             EQUAL,
         )
     }
 
+    pub fn select_transactions_by_ids_sql(&self, id_count: usize) -> String {
+        let columns = self.select_all_with_casting().join_with_casting();
+        let values = create_params(id_count);
+        format!(
+            "{} {} {} {} {} {} {} ({})",
+            SELECT,
+            columns,
+            FROM,
+            self.name(),
+            WHERE,
+            self.get_column("id").name(),
+            IN,
+            values
+        )
+    }
+
     pub fn update_transaction_by_id_sql(&self) -> String {
-        // return string like: UPDATE transaction SET equilibrium_time = $1 WHERE id = $2 returning *
         format!(
             "{} {} {} {} {} $1 {} {} {} $2 {} {}",
             UPDATE,
             self.name(),
             SET,
-            self.get_column("equilibrium_time"),
+            self.get_column("equilibrium_time").name(),
             EQUAL,
             WHERE,
-            self.get_column("id"),
+            self.get_column("id").name(),
             EQUAL,
             RETURNING,
             STAR
+        )
+    }
+
+    pub fn select_last_n_reqs_or_trans_by_account_sql(&self, all_approved: bool) -> String {
+        let columns = self.select_all_with_casting().join_with_casting();
+        let mut is_transaction = "TRUE";
+        if !all_approved {
+            is_transaction = "FALSE";
+        }
+        format!(
+            r#"WITH transactions AS (
+                SELECT transaction_id, every(approval_time IS NOT NULL) AS all_approved
+                FROM approval
+                WHERE transaction_id IN (
+                    SELECT DISTINCT(transaction_id)
+                    FROM approval
+                    WHERE account_name = $1
+                    ORDER BY transaction_id
+                    DESC
+                )
+                GROUP BY transaction_id
+                ORDER BY transaction_id
+                DESC
+            )
+            SELECT {} FROM transaction
+            WHERE id IN (
+                SELECT transaction_id
+                FROM transactions
+                WHERE all_approved IS {}
+                LIMIT $2
+            );"#,
+            columns, is_transaction
         )
     }
 }
@@ -163,8 +240,10 @@ impl TransactionTable {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::BufReader;
-    use std::{fs::File, io::BufRead};
+    use std::{
+        fs::File,
+        io::{BufRead, BufReader},
+    };
     use types::{approval::Approvals, request_response::IntraTransaction};
 
     #[test]
@@ -192,7 +271,7 @@ mod tests {
         let input_reader = BufReader::new(input_file);
         let test_transactions: Vec<IntraTransaction> =
             serde_json::from_reader(input_reader).unwrap();
-        let test_transaction_items = test_transactions[0].transaction.transaction_items.clone();
+        let test_transaction = test_transactions[0].transaction.clone();
 
         let output_file = File::open("./testdata/transaction_insert.golden").unwrap();
         let output_reader = BufReader::new(output_file);
@@ -202,7 +281,7 @@ mod tests {
 
         assert_eq!(
             test_table
-                .insert_transaction_cte_sql(test_transaction_items)
+                .insert_transaction_cte_sql(test_transaction)
                 .unwrap(),
             expected
         )
@@ -214,12 +293,12 @@ mod tests {
         let file = File::open("../../pkg/testdata/transWTimes.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
-        let mut test_transaction_items = test_intra_transaction.transaction.transaction_items;
-        test_transaction_items.0[0].approvals = None;
+        let mut test_transaction = test_intra_transaction.transaction.clone();
+        test_transaction.transaction_items.0[0].approvals = None;
         let test_table = TransactionTable::new();
         assert_eq!(
             test_table
-                .insert_transaction_cte_sql(test_transaction_items)
+                .insert_transaction_cte_sql(test_transaction)
                 .unwrap_err()
                 .to_string(),
             "approvals in transaction item is None"
@@ -232,12 +311,12 @@ mod tests {
         let file = File::open("../../pkg/testdata/transWTimes.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
-        let mut test_transaction_items = test_intra_transaction.transaction.transaction_items;
-        test_transaction_items.0[0].approvals = Some(Approvals { 0: vec![] });
+        let mut test_transaction = test_intra_transaction.transaction;
+        test_transaction.transaction_items.0[0].approvals = Some(Approvals { 0: vec![] });
         let test_table = TransactionTable::new();
         assert_eq!(
             test_table
-                .insert_transaction_cte_sql(test_transaction_items)
+                .insert_transaction_cte_sql(test_transaction)
                 .unwrap_err()
                 .to_string(),
             "approvals in transaction item is empty"
@@ -246,7 +325,7 @@ mod tests {
 
     #[test]
     fn it_creates_an_insert_transaction_sql() {
-        let expected = "INSERT INTO transaction (rule_instance_id, author, author_device_id, author_device_latlng, author_role, equilibrium_time, sum_value) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *";
+        let expected = "INSERT INTO transaction (rule_instance_id, author, author_device_id, author_device_latlng, author_role, equilibrium_time, sum_value) VALUES ($1, $2, $3, $4::point, $5, $6, $7::numeric) RETURNING *";
         assert_eq!(
             TransactionTable::new().insert_transaction_sql(&mut 1),
             expected
@@ -255,9 +334,18 @@ mod tests {
 
     #[test]
     fn it_creates_a_select_transaction_by_id_sql() {
-        let expected = "SELECT * FROM transaction WHERE id = $1";
+        let expected = "SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, sum_value::text FROM transaction WHERE id = $1";
         assert_eq!(
             TransactionTable::new().select_transaction_by_id_sql(),
+            expected
+        );
+    }
+
+    #[test]
+    fn it_creates_a_select_transactions_by_ids_sql() {
+        let expected = "SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, sum_value::text FROM transaction WHERE id IN ($1, $2, $3)";
+        assert_eq!(
+            TransactionTable::new().select_transactions_by_ids_sql(3),
             expected
         );
     }
@@ -268,6 +356,35 @@ mod tests {
         assert_eq!(
             TransactionTable::new().update_transaction_by_id_sql(),
             expected
+        );
+    }
+
+    #[test]
+    fn it_creates_a_select_last_n_reqs_or_trans_by_account_sql() {
+        let expected = r#"WITH transactions AS (
+                SELECT transaction_id, every(approval_time IS NOT NULL) AS all_approved
+                FROM approval
+                WHERE transaction_id IN (
+                    SELECT DISTINCT(transaction_id)
+                    FROM approval
+                    WHERE account_name = $1
+                    ORDER BY transaction_id
+                    DESC
+                )
+                GROUP BY transaction_id
+                ORDER BY transaction_id
+                DESC
+            )
+            SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, sum_value::text FROM transaction
+            WHERE id IN (
+                SELECT transaction_id
+                FROM transactions
+                WHERE all_approved IS FALSE
+                LIMIT $2
+            );"#;
+        assert_eq!(
+            TransactionTable::new().select_last_n_reqs_or_trans_by_account_sql(false),
+            expected,
         );
     }
 }

@@ -1,5 +1,6 @@
 use bb8::{Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
+use rust_decimal::Decimal;
 use std::env;
 use tokio_postgres::{types::ToSql, NoTls, Row};
 use types::{account_role::AccountRole, time::TZTime};
@@ -39,6 +40,7 @@ pub trait RowTrait {
     fn get_vec_string(&self, idx: &str) -> Vec<String>;
     fn get_account_role(&self, idx: &str) -> AccountRole;
     fn get_opt_tztime(&self, idx: &str) -> Option<TZTime>;
+    fn get_decimal(&self, idx: &str) -> Decimal;
 }
 
 impl RowTrait for Row {
@@ -57,11 +59,15 @@ impl RowTrait for Row {
     fn get_opt_tztime(&self, idx: &str) -> Option<TZTime> {
         self.get(idx)
     }
+    fn get_decimal(&self, idx: &str) -> Decimal {
+        self.get(idx)
+    }
 }
 
 // isolate tokio-postgres query dependency in this impl
 impl DatabaseConnection {
-    pub async fn query(
+    // old
+    pub async fn q(
         &self,
         sql_stmt: String,
         params: &[&(dyn ToSql + Sync)],
@@ -71,5 +77,35 @@ impl DatabaseConnection {
                 .map(|row| Box::new(row) as Box<dyn RowTrait>)
                 .collect()
         })
+    }
+
+    pub async fn query(
+        &self,
+        sql_stmt: String,
+        values: Vec<Box<(dyn ToSql + Sync)>>,
+    ) -> Result<Vec<Row>, tokio_postgres::Error> {
+        let unboxed_values: Vec<&(dyn ToSql + Sync)> = values.iter().map(|p| &**p).collect();
+        self.0.query(sql_stmt.as_str(), &unboxed_values).await
+    }
+
+    pub async fn execute(
+        &self,
+        sql_stmt: String,
+        values: Vec<Box<(dyn ToSql + Sync)>>,
+    ) -> Result<u64, tokio_postgres::Error> {
+        let unboxed_values: Vec<&(dyn ToSql + Sync)> = values.iter().map(|p| &**p).collect();
+        self.0.execute(sql_stmt.as_str(), &unboxed_values).await
+    }
+
+    pub async fn tx(
+        &mut self,
+        sql_stmt: String,
+        values: Vec<Box<(dyn ToSql + Sync)>>,
+    ) -> Result<Vec<Row>, tokio_postgres::Error> {
+        let unboxed_values: Vec<&(dyn ToSql + Sync)> = values.iter().map(|p| &**p).collect();
+        let tx = self.0.transaction().await.unwrap();
+        let rows = tx.query(sql_stmt.as_str(), &unboxed_values).await.unwrap();
+        tx.commit().await.unwrap();
+        Ok(rows)
     }
 }

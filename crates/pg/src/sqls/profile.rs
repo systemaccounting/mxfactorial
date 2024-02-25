@@ -1,4 +1,5 @@
 use crate::sqls::common::*;
+use tokio_postgres::types::Type;
 use types::account::AccountProfile;
 
 const ACCOUNT_PROFILE_TABLE: &str = "account_profile";
@@ -7,15 +8,19 @@ pub struct AccountProfileTable {
     inner: Table,
 }
 
-impl TableTrait<AccountProfileTable> for AccountProfileTable {
+impl TableTrait for AccountProfileTable {
     fn new() -> AccountProfileTable {
         Self {
             inner: Table::new::<AccountProfile>(ACCOUNT_PROFILE_TABLE),
         }
     }
 
-    fn get_column(&self, column: &str) -> String {
+    fn get_column(&self, column: &str) -> Column {
         self.inner.get_column(column)
+    }
+
+    fn get_column_name(&self, column: &str) -> String {
+        self.inner.get_column_name(column)
     }
 
     fn name(&self) -> &str {
@@ -24,13 +29,9 @@ impl TableTrait<AccountProfileTable> for AccountProfileTable {
 }
 
 impl AccountProfileTable {
-    fn cast_as_text(&self, column: &str) -> String {
-        format!("{}::text", self.get_column(column))
-    }
-
-    fn select_all_with_text_casting(&self) -> [String; 23] {
-        [
-            self.cast_as_text("id"),
+    fn select_all_with_text_casting(&self) -> Columns {
+        Columns(vec![
+            self.get_column("id").cast_column_as(Type::TEXT),
             self.get_column("account_name"),
             self.get_column("description"),
             self.get_column("first_name"),
@@ -46,47 +47,124 @@ impl AccountProfileTable {
             self.get_column("region_name"),
             self.get_column("state_name"),
             self.get_column("postal_code"),
-            self.cast_as_text("latlng"),
+            self.get_column("latlng").cast_column_as(Type::TEXT),
             self.get_column("email_address"),
-            self.cast_as_text("telephone_country_code"),
-            self.cast_as_text("telephone_area_code"),
-            self.cast_as_text("telephone_number"),
-            self.cast_as_text("occupation_id"),
-            self.cast_as_text("industry_id"),
-        ]
+            self.get_column("telephone_country_code")
+                .cast_column_as(Type::TEXT),
+            self.get_column("telephone_area_code")
+                .cast_column_as(Type::TEXT),
+            self.get_column("telephone_number")
+                .cast_column_as(Type::TEXT),
+            self.get_column("occupation_id").cast_column_as(Type::TEXT),
+            self.get_column("industry_id").cast_column_as(Type::TEXT),
+        ])
+    }
+
+    fn select_in_with_casting(&self) -> Columns {
+        Columns(vec![
+            self.get_column("id").cast_column_as(Type::TEXT),
+            self.get_column("account_name"),
+        ])
+    }
+
+    fn insert_with_casting(&self) -> Columns {
+        Columns(vec![
+            self.get_column("account_name"),
+            self.get_column("description"),
+            self.get_column("first_name"),
+            self.get_column("middle_name"),
+            self.get_column("last_name"),
+            self.get_column("country_name"),
+            self.get_column("street_number"),
+            self.get_column("street_name"),
+            self.get_column("floor_number"),
+            self.get_column("unit_number"),
+            self.get_column("city_name"),
+            self.get_column("county_name"),
+            self.get_column("region_name"),
+            self.get_column("state_name"),
+            self.get_column("postal_code"),
+            self.get_column("latlng").cast_value_as(Type::POINT),
+            self.get_column("email_address"),
+            self.get_column("telephone_country_code"),
+            self.get_column("telephone_area_code"),
+            self.get_column("telephone_number"),
+            self.get_column("occupation_id"),
+            self.get_column("industry_id"),
+        ])
+    }
+
+    pub fn insert_account_profile_sql(&self) -> String {
+        let columns = self.insert_with_casting();
+        let values = create_value_params(columns.clone(), 1, &mut 1);
+        format!(
+            "{} {} ({}) {} {} {} {}",
+            INSERT_INTO,
+            self.name(),
+            columns.join_with_casting(),
+            VALUES,
+            values,
+            RETURNING,
+            self.get_column("id")
+                .cast_column_as(Type::TEXT)
+                .name_with_casting()
+        )
     }
 
     pub fn select_account_profile_by_account_sql(&self) -> String {
+        let columns = self.select_all_with_text_casting().join_with_casting();
         format!(
             "{} {} {} {} {} {} {} $1;",
             SELECT,
-            self.select_all_with_text_casting().join(", "),
+            columns,
             FROM,
             self.name(),
             WHERE,
-            self.get_column("account_name"),
+            self.get_column("account_name").name(),
             EQUAL
         )
     }
 
     pub fn select_account_profiles_by_db_cr_accounts_sql(&self) -> String {
+        let columns = self.select_all_with_text_casting().join_with_casting();
         format!(
             "{} {} {} {} {} {} {} $1 {} {} {} $2;",
             SELECT,
-            self.select_all_with_text_casting().join(", "),
+            columns,
             FROM,
             self.name(),
             WHERE,
-            self.get_column("account_name"),
+            self.get_column("account_name").name(),
             EQUAL,
             OR,
-            self.get_column("account_name"),
+            self.get_column("account_name").name(),
             EQUAL
         )
     }
 
+    pub fn select_profile_ids_by_account_names_sql(&self, account_name_count: usize) -> String {
+        let columns = self.select_in_with_casting().join_with_casting();
+        let in_values = create_params(account_name_count);
+        // create sql like: "SELECT id::text, account_name FROM account_profile WHERE account_name IN ($1, $2) AND removal_time IS NULL"
+        format!(
+            "{} {} {} {} {} {} {} ({}) {} {} {} {}",
+            SELECT,
+            columns,
+            FROM,
+            self.name(),
+            WHERE,
+            self.get_column("account_name").name(),
+            IN,
+            in_values,
+            AND,
+            self.get_column("removal_time").name(),
+            IS,
+            NULL
+        )
+    }
+
+    // todo: add account_owner type and AccountOwnerTable
     pub fn select_approvers() -> String {
-        // todo: add account_owner type and AccountOwnerTable
         let column_alias = "approver";
         let table = "account_owner";
         let table_alias = "ao";
@@ -132,6 +210,13 @@ mod tests {
     }
 
     #[test]
+    fn it_creates_an_insert_account_profile_sql() {
+        let test_table = AccountProfileTable::new();
+        let expected = "INSERT INTO account_profile (account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng, email_address, telephone_country_code, telephone_area_code, telephone_number, occupation_id, industry_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16::point, $17, $18, $19, $20, $21, $22) RETURNING id::text";
+        assert_eq!(test_table.insert_account_profile_sql(), expected);
+    }
+
+    #[test]
     fn it_creates_a_select_account_profiles_by_db_cr_accounts_sql() {
         let test_table = AccountProfileTable::new();
         let expected = "SELECT id::text, account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng::text, email_address, telephone_country_code::text, telephone_area_code::text, telephone_number::text, occupation_id::text, industry_id::text FROM account_profile WHERE account_name = $1 OR account_name = $2;";
@@ -142,9 +227,13 @@ mod tests {
     }
 
     #[test]
-    fn it_creates_a_select_approvers_sql() {
-        let expected = "SELECT DISTINCT coalesce(owner_account, '') || coalesce(owner_subaccount, '') AS approver FROM account_owner ao WHERE ao.owned_account = $1 OR ao.owned_subaccount = $1";
-        assert_eq!(AccountProfileTable::select_approvers(), expected);
+    fn it_creates_a_select_profile_ids_by_account_names_sql() {
+        let test_table = AccountProfileTable::new();
+        let expected = "SELECT id::text, account_name FROM account_profile WHERE account_name IN ($1, $2) AND removal_time IS NULL";
+        assert_eq!(
+            test_table.select_profile_ids_by_account_names_sql(2),
+            expected
+        );
     }
 }
 
