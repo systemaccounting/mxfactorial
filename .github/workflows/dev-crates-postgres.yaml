@@ -1,0 +1,27 @@
+name: dev-crates-postgres
+
+on:
+  push:
+    paths:
+    - 'crates/pg/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  test:
+    name: crates/pg
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - name: crates/pg lint tests
+        run: make -C ./crates/pg test-lint
+      - name: crates/pg unit tests
+        run: make -C ./crates/pg test-unit
+      - name: crates/pg db_tests
+        run: make -C ./crates/pg test-db
+      - name: crates/pg clean up
+        run: make -C ./crates/pg stop
