@@ -64,7 +64,7 @@ pub fn create_value_params(
     let mut values = String::new();
     for i in 0..row_count {
         values.push('(');
-        for (j, c) in columns.clone().into_iter().enumerate() {
+        for (j, c) in columns.clone().enumerate() {
             values.push_str(&format!("${}", *positional_parameter));
             if c.cast_value_as.is_some() {
                 values.push_str(&format!("::{}", c.cast_value_as.unwrap()));
