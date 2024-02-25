@@ -1,3 +1,5 @@
+DROP FUNCTION change_balances;
+
 DROP FUNCTION change_account_balances;
 
 DROP TYPE balance_change;
