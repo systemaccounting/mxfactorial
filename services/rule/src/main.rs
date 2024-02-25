@@ -338,6 +338,7 @@ mod tests {
                     telephone_number: Some(String::from("5555555")),
                     occupation_id: Some(String::from("7")),
                     industry_id: Some(String::from("7")),
+                    removal_time: None,
                 },
                 AccountProfile {
                     id: Some(String::from("11")),
@@ -363,6 +364,7 @@ mod tests {
                     telephone_number: Some(String::from("5555555")),
                     occupation_id: None,
                     industry_id: Some(String::from("8")),
+                    removal_time: None,
                 },
                 AccountProfile {
                     id: Some(String::from("27")),
@@ -388,6 +390,7 @@ mod tests {
                     telephone_number: Some(String::from("5555555")),
                     occupation_id: None,
                     industry_id: Some(String::from("11")),
+                    removal_time: None,
                 },
             ]))
         }

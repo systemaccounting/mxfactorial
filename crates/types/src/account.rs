@@ -1,8 +1,9 @@
+use crate::time::TZTime;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
-use postgres_types::{FromSql, ToSql};
 use serde::Deserialize;
 use std::error::Error;
+use tokio_postgres::types::{FromSql, ToSql};
 
 #[async_trait]
 pub trait AccountTrait {
@@ -39,6 +40,7 @@ pub struct AccountProfile {
     pub telephone_number: Option<String>,
     pub occupation_id: Option<String>,
     pub industry_id: Option<String>,
+    pub removal_time: Option<TZTime>,
 }
 
 impl AccountProfile {
@@ -117,6 +119,7 @@ mod tests {
             telephone_number: Some(String::from("5555555")),
             occupation_id: Some(String::from("11")),
             industry_id: Some(String::from("11")),
+            removal_time: None,
         };
 
         let test_acct_profiles = AccountProfiles(vec![
@@ -144,6 +147,7 @@ mod tests {
                 telephone_number: Some(String::from("5555555")),
                 occupation_id: Some(String::from("7")),
                 industry_id: Some(String::from("7")),
+                removal_time: None,
             },
             want.clone(),
         ]);
@@ -181,6 +185,7 @@ mod tests {
                 telephone_number: Some(String::from("5555555")),
                 occupation_id: Some(String::from("7")),
                 industry_id: Some(String::from("7")),
+                removal_time: None,
             },
             AccountProfile {
                 id: Some(String::from("7")),
@@ -206,6 +211,7 @@ mod tests {
                 telephone_number: Some(String::from("5555555")),
                 occupation_id: Some(String::from("11")),
                 industry_id: Some(String::from("11")),
+                removal_time: None,
             },
         ]);
 
@@ -246,6 +252,7 @@ mod tests {
             telephone_number: Some(String::from("5555555")),
             occupation_id: Some(String::from("11")),
             industry_id: Some(String::from("11")),
+            removal_time: None,
         }]);
         got.add(want.0[0].clone());
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
@@ -277,6 +284,7 @@ mod tests {
             telephone_number: Some(String::from("5555555")),
             occupation_id: Some(String::from("11")),
             industry_id: Some(String::from("11")),
+            removal_time: None,
         }]);
         // create iterator
         let test_account_profiles = std::iter::repeat(want.0[0].clone()).take(1);
@@ -343,10 +351,22 @@ mod tests {
             telephone_number: Some(String::from("5555555")),
             occupation_id: Some(String::from("4")),
             industry_id: Some(String::from("4")),
+            removal_time: None,
         };
 
         if got != want {
             panic!("got {:#?}, want {:#?}", got, want);
         }
     }
+}
+
+#[derive(Eq, PartialEq, Debug, Deserialize)]
+pub struct AccountOwner {
+    id: String,
+    owner_account: String,
+    owned_account: String,
+    owner_subaccount: String,
+    owned_subaccount: String,
+    removed_by: String,
+    removed_time: Option<TZTime>,
 }
