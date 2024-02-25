@@ -6,6 +6,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use postgres_types::{FromSql, ToSql};
 use serde::{Deserialize, Serialize};
+use tokio_postgres::Row;
 
 #[async_trait]
 pub trait RuleInstanceTrait {
@@ -66,6 +67,48 @@ pub struct RuleInstance {
     pub created_at: Option<TZTime>,
 }
 
+impl From<&Row> for RuleInstance {
+    fn from(row: &Row) -> Self {
+        Self {
+            id: row.get(0),
+            rule_type: row.get(1),
+            rule_name: row.get(2),
+            rule_instance_name: row.get(3),
+            variable_values: row.get(4),
+            account_role: row.get(5),
+            item_id: row.get(6),
+            price: row.get(7),
+            quantity: row.get(8),
+            unit_of_measurement: row.get(9),
+            units_measured: row.get(10),
+            account_name: row.get(11),
+            first_name: row.get(12),
+            middle_name: row.get(13),
+            last_name: row.get(14),
+            country_name: row.get(15),
+            street_id: row.get(16),
+            street_name: row.get(17),
+            floor_number: row.get(18),
+            unit_id: row.get(19),
+            city_name: row.get(20),
+            county_name: row.get(21),
+            region_name: row.get(22),
+            state_name: row.get(23),
+            postal_code: row.get(24),
+            latlng: row.get(25),
+            email_address: row.get(26),
+            telephone_country_code: row.get(27),
+            telephone_area_code: row.get(28),
+            telephone_number: row.get(29),
+            occupation_id: row.get(30),
+            industry_id: row.get(31),
+            disabled_time: row.get(32),
+            removed_time: row.get(33),
+            created_at: row.get(34),
+        }
+    }
+}
+
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone)]
 pub struct RuleInstances(pub Vec<RuleInstance>);
 
@@ -74,6 +117,16 @@ impl FromIterator<RuleInstance> for RuleInstances {
         let mut rule_instances = RuleInstances::new();
         for i in iter {
             rule_instances.add(i)
+        }
+        rule_instances
+    }
+}
+
+impl From<Vec<Row>> for RuleInstances {
+    fn from(rows: Vec<Row>) -> Self {
+        let mut rule_instances = RuleInstances::new();
+        for row in rows {
+            rule_instances.add(RuleInstance::from(&row))
         }
         rule_instances
     }
