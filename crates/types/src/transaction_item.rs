@@ -6,8 +6,10 @@ use crate::{
     time::TZTime,
 };
 use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
+use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use tokio_postgres::Row;
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, InputObject)]
 #[graphql(input_name = "TransactionItemInput", rename_fields = "snake_case")]
@@ -136,6 +138,56 @@ impl TransactionItem {
             self.rule_exec_ids = Some(vec![])
         }
     }
+
+    pub fn price_times_quantity(&self) -> Decimal {
+        let price: Decimal = self.price.parse().unwrap();
+        let quantity: Decimal = self.quantity.parse().unwrap();
+        price * quantity
+    }
+
+    pub fn revenue(&self) -> Decimal {
+        self.price_times_quantity()
+    }
+
+    pub fn expense(&self) -> Decimal {
+        self.price_times_quantity() * Decimal::from_f32(-1.0).unwrap()
+    }
+
+    pub fn revenue_string(&self) -> String {
+        format!("{:.FIXED_DECIMAL_PLACES$}", self.revenue())
+    }
+
+    pub fn expense_string(&self) -> String {
+        format!("{:.FIXED_DECIMAL_PLACES$}", self.expense())
+    }
+}
+
+impl From<Row> for TransactionItem {
+    fn from(row: Row) -> Self {
+        Self {
+            id: row.get(0),
+            transaction_id: row.get(1),
+            item_id: row.get(2),
+            price: row.get(3),
+            quantity: row.get(4),
+            debitor_first: row.get(5),
+            rule_instance_id: row.get(6),
+            rule_exec_ids: row.get(7),
+            unit_of_measurement: row.get(8),
+            units_measured: row.get(9),
+            debitor: row.get(10),
+            creditor: row.get(11),
+            debitor_profile_id: row.get(12),
+            creditor_profile_id: row.get(13),
+            debitor_approval_time: row.get(14),
+            creditor_approval_time: row.get(15),
+            debitor_rejection_time: row.get(16),
+            creditor_rejection_time: row.get(17),
+            debitor_expiration_time: row.get(18),
+            creditor_expiration_time: row.get(19),
+            approvals: Some(Approvals(vec![])),
+        }
+    }
 }
 
 #[derive(Default, Eq, PartialEq, Debug, Deserialize, Serialize, Clone)]
@@ -250,6 +302,24 @@ impl TransactionItems {
             Err(InconsistentValueError)
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+impl From<Vec<Row>> for TransactionItems {
+    fn from(rows: Vec<Row>) -> Self {
+        let mut transaction_items: Vec<TransactionItem> = vec![];
+        for row in rows {
+            transaction_items.push(TransactionItem::from(row))
+        }
+        Self(transaction_items)
+    }
 }
 
 #[cfg(test)]
@@ -350,6 +420,7 @@ mod tests {
                 telephone_number: Some(String::from("5555555")),
                 occupation_id: Some(String::from("7")),
                 industry_id: Some(String::from("7")),
+                removal_time: None,
             },
             AccountProfile {
                 id: want_creditor_profile_id.clone(),
@@ -375,6 +446,7 @@ mod tests {
                 telephone_number: Some(String::from("5555555")),
                 occupation_id: Some(String::from("11")),
                 industry_id: Some(String::from("11")),
+                removal_time: None,
             },
         ]);
         test_tr_items.add_profile_ids(test_acct_profiles);

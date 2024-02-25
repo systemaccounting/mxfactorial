@@ -4,7 +4,10 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use pg::{DynConnPool, DynDBConn, DB};
+use pg::{
+    model::{DynConnPool, DynDBConn},
+    postgres::DB,
+};
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use std::{env, net::ToSocketAddrs, sync::Arc};
 use tokio::signal;
@@ -17,6 +20,7 @@ use types::{
 };
 mod rules;
 
+// used by lambda to test for service availability
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
 async fn apply_transaction_item_rules(
@@ -334,6 +338,7 @@ mod tests {
                     telephone_number: Some(String::from("5555555")),
                     occupation_id: Some(String::from("7")),
                     industry_id: Some(String::from("7")),
+                    removal_time: None,
                 },
                 AccountProfile {
                     id: Some(String::from("11")),
@@ -359,6 +364,7 @@ mod tests {
                     telephone_number: Some(String::from("5555555")),
                     occupation_id: None,
                     industry_id: Some(String::from("8")),
+                    removal_time: None,
                 },
                 AccountProfile {
                     id: Some(String::from("27")),
@@ -384,6 +390,7 @@ mod tests {
                     telephone_number: Some(String::from("5555555")),
                     occupation_id: None,
                     industry_id: Some(String::from("11")),
+                    removal_time: None,
                 },
             ]))
         }
@@ -764,7 +771,7 @@ mod tests {
     #[tokio::test]
     async fn it_applies_rules() {
         use axum::extract::{Json, State};
-        use pg::DBConnPoolTrait;
+        use pg::model::DBConnPoolTrait;
         let test_tr_items = TransactionItems(vec![
             TransactionItem {
                 id: None,

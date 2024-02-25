@@ -42,7 +42,7 @@ CREATE TABLE account_profile (
   telephone_number int,
   occupation_id int,
   industry_id int,
-  removal_time timestamptz, -- most recent == null
+  removal_time timestamptz, -- most recent == null, todo: removed_time vs removal_time
   created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_account_name
     FOREIGN KEY(account_name)

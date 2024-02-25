@@ -5,6 +5,8 @@ use crate::{
 };
 use async_graphql::{ComplexObject, Object, SimpleObject};
 use serde::{Deserialize, Serialize};
+use std::vec;
+use tokio_postgres::Row;
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
 #[graphql(rename_fields = "snake_case", complex)]
@@ -41,6 +43,38 @@ impl Transaction {
             equilibrium_time: None,
             sum_value: "0.000".to_string(), // used in integration tests
             transaction_items,
+        }
+    }
+}
+
+impl From<Row> for Transaction {
+    fn from(row: Row) -> Self {
+        Self {
+            id: row.get(0),
+            rule_instance_id: row.get(1),
+            author: row.get(2),
+            author_device_id: row.get(3),
+            author_device_latlng: row.get(4),
+            author_role: row.get(5),
+            equilibrium_time: row.get(6),
+            sum_value: row.get(7),
+            transaction_items: TransactionItems(vec![]),
+        }
+    }
+}
+
+impl From<&Row> for Transaction {
+    fn from(row: &Row) -> Self {
+        Self {
+            id: row.get(0),
+            rule_instance_id: row.get(1),
+            author: row.get(2),
+            author_device_id: row.get(3),
+            author_device_latlng: row.get(4),
+            author_role: row.get(5),
+            equilibrium_time: row.get(6),
+            sum_value: row.get(7),
+            transaction_items: TransactionItems(vec![]),
         }
     }
 }
@@ -766,9 +800,34 @@ pub mod tests {
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize)] // clone, default
 pub struct Transactions(pub Vec<Transaction>);
 
+impl Transactions {
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
 #[Object]
 impl Transactions {
     async fn transactions(&self) -> Vec<Transaction> {
         self.0.clone()
+    }
+}
+
+impl IntoIterator for Transactions {
+    type Item = Transaction;
+    type IntoIter = vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl From<Vec<Row>> for Transactions {
+    fn from(rows: Vec<Row>) -> Self {
+        Self(rows.into_iter().map(Transaction::from).collect())
     }
 }
