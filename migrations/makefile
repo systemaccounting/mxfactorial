@@ -80,6 +80,9 @@ stop:
 clean:
 	-@$(MAKE) stop
 
+prune-builder:
+	docker builder prune -f
+
 # looped go migrate targets for docker postgres
 # 2022-07-12: down migrate required until 9 month old pr merged:
 # https://github.com/golang-migrate/migrate/pull/627
