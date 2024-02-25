@@ -58,7 +58,7 @@ CREATE TABLE rule_instance (
   industry_id int,
   -- ***
   disabled_time timestamptz,
-  removed_time timestamptz,
+  removed_time timestamptz, -- todo: removed_time vs removal_time
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_rule_name
     FOREIGN KEY(rule_name)
