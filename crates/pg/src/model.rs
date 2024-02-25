@@ -336,7 +336,7 @@ impl DatabaseConnection {
         let mut values: Vec<Box<dyn ToSql + Sync>> = vec![
             Box::new(transaction_rule_instance_id),
             Box::new(transaction.author),
-            Box::new(None::<String>),                   // author_device_id
+            Box::new(None::<String>), // author_device_id
             Box::new(transaction_author_device_latlng),
             Box::new(transaction.author_role),
             Box::new(transaction_equilibrium_time),

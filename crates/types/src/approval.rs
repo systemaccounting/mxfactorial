@@ -2,7 +2,10 @@ use crate::account_role::AccountRole;
 use crate::time::TZTime;
 use async_graphql::{Object, SimpleObject};
 use serde::{Deserialize, Serialize};
-use tokio_postgres::{Row, types::{FromSql, ToSql}};
+use tokio_postgres::{
+    types::{FromSql, ToSql},
+    Row,
+};
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone, SimpleObject)]
 #[graphql(rename_fields = "snake_case")]

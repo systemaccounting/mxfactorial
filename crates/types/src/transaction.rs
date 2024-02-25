@@ -1,4 +1,3 @@
-use std::vec;
 use crate::{
     account_role::AccountRole,
     time::TZTime,
@@ -6,6 +5,7 @@ use crate::{
 };
 use async_graphql::{ComplexObject, Object, SimpleObject};
 use serde::{Deserialize, Serialize};
+use std::vec;
 use tokio_postgres::Row;
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
