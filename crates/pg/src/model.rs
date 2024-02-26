@@ -36,10 +36,7 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn delete_owner_account_query(
-        &self,
-        account: String,
-    ) -> Result<(), Box<dyn Error>> {
+    pub async fn delete_owner_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
         let sql = crate::sqls::account::delete_owner_account_sql();
         let values: Vec<Box<(dyn ToSql + Sync)>> = vec![Box::new(account)];
         let result = self.execute(sql, values).await;
