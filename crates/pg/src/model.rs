@@ -26,31 +26,39 @@ use types::{
 const FIXED_DECIMAL_PLACES: usize = 3;
 
 impl DatabaseConnection {
-    pub async fn insert_account_query(&self, account: String) -> Result<(), tokio_postgres::Error> {
+    pub async fn insert_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
         let sql = crate::sqls::account::insert_account_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account)];
-        self.execute(sql, values).await.map(|_| ())
+        let result = self.execute(sql, values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
     }
 
     pub async fn delete_owner_account_query(
         &self,
         account: String,
-    ) -> Result<(), tokio_postgres::Error> {
+    ) -> Result<(), Box<dyn Error>> {
         let sql = crate::sqls::account::delete_owner_account_sql();
         let values: Vec<Box<(dyn ToSql + Sync)>> = vec![Box::new(account)];
-        self.execute(sql.to_string(), values).await.map(|_| ())
+        let result = self.execute(sql, values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
     }
 
     pub async fn select_account_balance_query(
         &self,
         account: String,
-    ) -> Result<String, tokio_postgres::Error> {
+    ) -> Result<String, Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.select_current_account_balance_by_account_name_sql();
         let values: Vec<Box<(dyn ToSql + Sync)>> = vec![Box::new(account)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let balance: Decimal = rows[0].get_decimal("current_balance");
                 Ok(format!("{:.FIXED_DECIMAL_PLACES$}", balance))
@@ -61,7 +69,7 @@ impl DatabaseConnection {
     pub async fn select_account_balances_query(
         &self,
         accounts: Vec<String>,
-    ) -> Result<Vec<(String, String)>, tokio_postgres::Error> {
+    ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.select_account_balances_sql(accounts.len());
         let mut values: Vec<Box<(dyn ToSql + Sync)>> = Vec::new();
@@ -70,7 +78,7 @@ impl DatabaseConnection {
         }
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let account_balances: Vec<(String, String)> = rows
                     .into_iter()
@@ -92,7 +100,7 @@ impl DatabaseConnection {
     pub async fn update_account_balances_query(
         &self,
         transaction_items: Vec<TransactionItem>,
-    ) -> Result<(), tokio_postgres::Error> {
+    ) -> Result<(), Box<dyn Error>> {
         // create a vector of values to pass to the query
         let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
         for tr_item in transaction_items.clone().into_iter() {
@@ -117,7 +125,11 @@ impl DatabaseConnection {
 
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.update_account_balances_sql(transaction_items.len());
-        self.execute(sql.to_string(), values).await.map(|_| ())
+        let result = self.execute(sql.to_string(), values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
     }
 
     pub async fn insert_account_balance_query(
@@ -125,7 +137,7 @@ impl DatabaseConnection {
         account: String,
         balance: Decimal,
         curr_tr_item_id: i32,
-    ) -> Result<(), tokio_postgres::Error> {
+    ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.insert_account_balance_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![
@@ -133,19 +145,23 @@ impl DatabaseConnection {
             Box::new(balance),
             Box::new(curr_tr_item_id),
         ];
-        self.execute(sql.to_string(), values).await.map(|_| ())
+        let result = self.execute(sql.to_string(), values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
     }
 
     pub async fn select_approvals_by_transaction_id_query(
         &self,
         transaction_id: i32,
-    ) -> Result<Approvals, tokio_postgres::Error> {
+    ) -> Result<Approvals, Box<dyn Error>> {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.select_approvals_by_transaction_id_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(transaction_id)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(rows) => Err(Box::new(rows)),
             Ok(rows) => Ok(Approvals::from(rows)),
         }
     }
@@ -153,7 +169,7 @@ impl DatabaseConnection {
     pub async fn select_approvals_by_transaction_ids_query(
         &self,
         transaction_ids: Vec<i32>,
-    ) -> Result<Approvals, tokio_postgres::Error> {
+    ) -> Result<Approvals, Box<dyn Error>> {
         let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
         for t in transaction_ids.clone().into_iter() {
             values.push(Box::new(t))
@@ -162,7 +178,7 @@ impl DatabaseConnection {
         let sql = table.select_approvals_by_transaction_ids_sql(transaction_ids.len());
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => Ok(Approvals::from(rows)),
         }
     }
@@ -172,18 +188,22 @@ impl DatabaseConnection {
         transaction_id: i32,
         account: String,
         role: AccountRole,
-    ) -> Result<(), tokio_postgres::Error> {
+    ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.update_approvals_by_account_and_role_sql();
         let values: Vec<Box<dyn ToSql + Sync>> =
             vec![Box::new(transaction_id), Box::new(account), Box::new(role)];
-        self.execute(sql.to_string(), values).await.map(|_| ())
+        let result = self.execute(sql.to_string(), values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
     }
 
     pub async fn insert_account_profile_query(
         &self,
         account_profile: AccountProfile,
-    ) -> Result<String, tokio_postgres::Error> {
+    ) -> Result<String, Box<dyn Error>> {
         let table = crate::sqls::profile::AccountProfileTable::new();
         let sql = table.insert_account_profile_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![
@@ -236,7 +256,7 @@ impl DatabaseConnection {
         ];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let row = &rows[0];
                 let profile_id = row.get(0);
@@ -248,7 +268,7 @@ impl DatabaseConnection {
     pub async fn select_profile_ids_by_account_names_query(
         &self,
         accounts: Vec<String>,
-    ) -> Result<Vec<(String, String)>, tokio_postgres::Error> {
+    ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
         let table = crate::sqls::profile::AccountProfileTable::new();
         let sql = table.select_profile_ids_by_account_names_sql(accounts.len());
         let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
@@ -257,7 +277,7 @@ impl DatabaseConnection {
         }
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let profile_ids: Vec<(String, String)> = rows
                     .into_iter()
@@ -271,13 +291,13 @@ impl DatabaseConnection {
     pub async fn select_transaction_items_by_transaction_id_query(
         &self,
         transaction_id: i32,
-    ) -> Result<TransactionItems, tokio_postgres::Error> {
+    ) -> Result<TransactionItems, Box<dyn Error>> {
         let table = crate::sqls::transaction_item::TransactionItemTable::new();
         let sql = table.select_transaction_items_by_transaction_id_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(transaction_id)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => Ok(TransactionItems::from(rows)),
         }
     }
@@ -285,7 +305,7 @@ impl DatabaseConnection {
     pub async fn select_transaction_items_by_transaction_ids_query(
         &self,
         transaction_ids: Vec<i32>,
-    ) -> Result<TransactionItems, tokio_postgres::Error> {
+    ) -> Result<TransactionItems, Box<dyn Error>> {
         let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
         for t in transaction_ids.clone().into_iter() {
             values.push(Box::new(t))
@@ -294,7 +314,7 @@ impl DatabaseConnection {
         let sql = table.select_transaction_items_by_transaction_ids_sql(transaction_ids.len());
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => Ok(TransactionItems::from(rows)),
         }
     }
@@ -302,13 +322,13 @@ impl DatabaseConnection {
     pub async fn select_transaction_by_id_query(
         &self,
         transaction_id: i32,
-    ) -> Result<Transaction, tokio_postgres::Error> {
+    ) -> Result<Transaction, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_transaction_by_id_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(transaction_id)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let row = &rows[0];
                 let transaction = Transaction::from(row);
@@ -320,7 +340,7 @@ impl DatabaseConnection {
     pub async fn insert_transaction_tx_query(
         &mut self,
         transaction: Transaction,
-    ) -> Result<String, tokio_postgres::Error> {
+    ) -> Result<String, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table
             .insert_transaction_cte_sql(transaction.clone())
@@ -413,7 +433,7 @@ impl DatabaseConnection {
 
         let rows = self.tx(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let row = &rows[0];
                 let transaction_id = row.get(0);
@@ -426,13 +446,13 @@ impl DatabaseConnection {
         &self,
         account: String,
         n: i64,
-    ) -> Result<Transactions, tokio_postgres::Error> {
+    ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_last_n_reqs_or_trans_by_account_sql(true);
         let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account), Box::new(n)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let transactions: Transactions = Transactions::from(rows);
                 Ok(transactions)
@@ -444,13 +464,13 @@ impl DatabaseConnection {
         &self,
         account: String,
         n: i64,
-    ) -> Result<Transactions, tokio_postgres::Error> {
+    ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_last_n_reqs_or_trans_by_account_sql(false);
         let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account), Box::new(n)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let requests: Transactions = Transactions::from(rows);
                 Ok(requests)
@@ -461,7 +481,7 @@ impl DatabaseConnection {
     pub async fn select_transactions_by_ids_query(
         &self,
         transaction_ids: Vec<i32>,
-    ) -> Result<Transactions, tokio_postgres::Error> {
+    ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_transactions_by_ids_sql(transaction_ids.len());
         let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
@@ -470,7 +490,7 @@ impl DatabaseConnection {
         }
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let transactions: Transactions = Transactions::from(rows);
                 Ok(transactions)
@@ -486,7 +506,7 @@ impl DatabaseConnection {
         account_role: AccountRole,
         account_name: String,
         variable_values: Vec<String>,
-    ) -> Result<bool, tokio_postgres::Error> {
+    ) -> Result<bool, Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.select_rule_instance_exists_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![
@@ -499,7 +519,7 @@ impl DatabaseConnection {
         ];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let exists: bool = rows[0].get(0);
                 Ok(exists)
@@ -515,7 +535,7 @@ impl DatabaseConnection {
         account_role: AccountRole,
         account_name: String,
         variable_values: Vec<String>,
-    ) -> Result<(), tokio_postgres::Error> {
+    ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.insert_rule_instance_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![
@@ -526,18 +546,22 @@ impl DatabaseConnection {
             Box::new(account_name),
             Box::new(variable_values),
         ];
-        self.execute(sql.to_string(), values).await.map(|_| ())
+        let result = self.execute(sql.to_string(), values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
     }
 
     pub async fn select_approvers_query(
         &self,
         account: String,
-    ) -> Result<Vec<String>, tokio_postgres::Error> {
+    ) -> Result<Vec<String>, Box<dyn Error>> {
         let sql = select_approvers();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
-            Err(rows) => Err(rows),
+            Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let approvers: Vec<String> = rows.into_iter().map(|row| row.get(0)).collect();
                 Ok(approvers)
