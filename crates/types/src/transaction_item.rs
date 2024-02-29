@@ -8,6 +8,7 @@ use crate::{
 use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fmt;
 use tokio_postgres::Row;
 
@@ -313,6 +314,24 @@ impl TransactionItems {
         debit_accounts
     }
 
+    pub fn map_required_funds_from_debitors(&self) -> HashMap<String, Decimal> {
+        let mut required_funds: HashMap<String, Decimal> = HashMap::new();
+        for ti in self.0.iter() {
+            let debitor = ti.debitor.clone();
+            let price: Decimal = ti.price.parse().unwrap();
+            let quantity: Decimal = ti.quantity.parse().unwrap();
+            let value = price * quantity;
+            if required_funds.contains_key(&debitor) {
+                let current_value = required_funds.get(&debitor).unwrap();
+                let new_value = current_value + value;
+                required_funds.insert(debitor, new_value);
+            } else {
+                required_funds.insert(debitor, value);
+            }
+        }
+        required_funds
+    }
+
     pub fn len(&self) -> usize {
         self.0.len()
     }
@@ -521,6 +540,15 @@ mod tests {
         let test_tr_items = create_test_transaction_items();
         let got = test_tr_items.list_unique_debitors();
         let want = vec!["JacobWebb"];
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_maps_required_funds_from_debitors() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.map_required_funds_from_debitors();
+        let mut want = HashMap::new();
+        want.insert(String::from("JacobWebb"), Decimal::from_f32(18.0).unwrap());
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
     }
 
