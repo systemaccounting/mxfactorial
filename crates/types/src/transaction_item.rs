@@ -317,6 +317,10 @@ impl TransactionItems {
     pub fn map_required_funds_from_debitors(&self) -> HashMap<String, Decimal> {
         let mut required_funds: HashMap<String, Decimal> = HashMap::new();
         for ti in self.0.iter() {
+            // skip debitors who already paid
+            if ti.debitor_approval_time.is_some() {
+                continue;
+            }
             let debitor = ti.debitor.clone();
             let price: Decimal = ti.price.parse().unwrap();
             let quantity: Decimal = ti.quantity.parse().unwrap();
@@ -544,11 +548,22 @@ mod tests {
     }
 
     #[test]
-    fn it_maps_required_funds_from_debitors() {
+    fn it_maps_required_funds_from_pending_debitors() {
         let test_tr_items = create_test_transaction_items();
         let got = test_tr_items.map_required_funds_from_debitors();
         let mut want = HashMap::new();
         want.insert(String::from("JacobWebb"), Decimal::from_f32(18.0).unwrap());
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_does_not_map_required_funds_from_paid_debitors() {
+        let mut test_tr_items = create_test_transaction_items();
+        for t in test_tr_items.0.iter_mut() {
+            t.debitor_approval_time = Some(TZTime::now());
+        }
+        let got = test_tr_items.map_required_funds_from_debitors();
+        let want = HashMap::new();
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
     }
 
