@@ -303,6 +303,16 @@ impl TransactionItems {
         }
     }
 
+    pub fn list_unique_debitors(&self) -> Vec<String> {
+        let mut debit_accounts: Vec<String> = vec![];
+        for ti in self.0.iter() {
+            if !debit_accounts.contains(&ti.debitor) {
+                debit_accounts.push(ti.debitor.clone())
+            }
+        }
+        debit_accounts
+    }
+
     pub fn len(&self) -> usize {
         self.0.len()
     }
@@ -504,6 +514,14 @@ mod tests {
             let want = Some(vec![]);
             assert_eq!(got, want, "got {:?}, want {:?}", got, want)
         }
+    }
+
+    #[test]
+    fn it_lists_unique_debitors() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.list_unique_debitors();
+        let want = vec!["JacobWebb"];
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
     }
 
     #[test]
