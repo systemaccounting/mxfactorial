@@ -21,6 +21,12 @@ impl From<Row> for AccountBalance {
     }
 }
 
+impl AccountBalance {
+    pub fn sufficient_balance(&self, payment: Decimal) -> bool {
+        self.current_balance >= payment
+    }
+}
+
 #[derive(Debug, Deserialize, Clone, Default)]
 pub struct AccountBalances(Vec<AccountBalance>);
 
@@ -31,6 +37,20 @@ impl AccountBalances {
 
     pub fn push(&mut self, account_balance: AccountBalance) {
         self.0.push(account_balance);
+    }
+
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    pub fn get_account_balance(&self, account_name: &str) -> Option<&AccountBalance> {
+        self.0
+            .iter()
+            .find(|account_balance| account_balance.account_name == account_name)
     }
 }
 
