@@ -161,6 +161,10 @@ impl TransactionItem {
     pub fn expense_string(&self) -> String {
         format!("{:.FIXED_DECIMAL_PLACES$}", self.expense())
     }
+
+    pub fn test_unique_contra_accounts(&self) -> bool {
+        self.debitor != self.creditor
+    }
 }
 
 impl From<Row> for TransactionItem {
@@ -342,6 +346,15 @@ impl TransactionItems {
 
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+
+    pub fn test_unique_contra_accounts(&self) -> bool {
+        for ti in self.0.iter() {
+            if !ti.test_unique_contra_accounts() {
+                return false;
+            }
+        }
+        true
     }
 }
 
@@ -565,6 +578,22 @@ mod tests {
         let got = test_tr_items.map_required_funds_from_debitors();
         let want = HashMap::new();
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_tests_unique_contra_accounts_on_a_transaction_item() {
+        let test_tr_item = create_test_transaction_item();
+        let got = test_tr_item.test_unique_contra_accounts();
+        let want = true;
+        assert_eq!(got, want, "got {}, want {}", got, want)
+    }
+
+    #[test]
+    fn it_tests_unique_contra_accounts_on_transaction_items() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.test_unique_contra_accounts();
+        let want = true;
+        assert_eq!(got, want, "got {}, want {}", got, want)
     }
 
     #[test]

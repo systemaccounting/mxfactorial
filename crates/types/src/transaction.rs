@@ -45,6 +45,10 @@ impl Transaction {
             transaction_items,
         }
     }
+
+    pub fn test_unique_contra_accounts(&self) -> bool {
+        self.transaction_items.test_unique_contra_accounts()
+    }
 }
 
 impl From<Row> for Transaction {
@@ -87,6 +91,12 @@ pub mod tests {
         approval::{Approval, Approvals},
         transaction_item::{TransactionItem, TransactionItems},
     };
+
+    #[test]
+    fn it_tests_unique_contra_accounts_on_a_transaction() {
+        let transaction = create_test_transaction();
+        assert_eq!(transaction.test_unique_contra_accounts(), true);
+    }
 
     #[test]
     fn it_deserializes_a_transaction() {
