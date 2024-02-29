@@ -5,7 +5,7 @@ use crate::{
 };
 use async_graphql::{ComplexObject, Object, SimpleObject};
 use serde::{Deserialize, Serialize};
-use std::vec;
+use std::{error::Error, vec};
 use tokio_postgres::Row;
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
@@ -46,7 +46,7 @@ impl Transaction {
         }
     }
 
-    pub fn test_unique_contra_accounts(&self) -> bool {
+    pub fn test_unique_contra_accounts(&self) -> Result<(), Box<dyn Error>> {
         self.transaction_items.test_unique_contra_accounts()
     }
 }
@@ -95,7 +95,8 @@ pub mod tests {
     #[test]
     fn it_tests_unique_contra_accounts_on_a_transaction() {
         let transaction = create_test_transaction();
-        assert_eq!(transaction.test_unique_contra_accounts(), true);
+        let got = transaction.test_unique_contra_accounts().unwrap();
+        assert_eq!(got, ())
     }
 
     #[test]

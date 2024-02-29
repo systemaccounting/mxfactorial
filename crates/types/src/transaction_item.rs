@@ -9,6 +9,7 @@ use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::error::Error;
 use std::fmt;
 use tokio_postgres::Row;
 
@@ -162,8 +163,15 @@ impl TransactionItem {
         format!("{:.FIXED_DECIMAL_PLACES$}", self.expense())
     }
 
-    pub fn test_unique_contra_accounts(&self) -> bool {
-        self.debitor != self.creditor
+    pub fn test_unique_contra_accounts(&self) -> Result<(), std::io::Error> {
+        if self.debitor != self.creditor {
+            Ok(())
+        } else {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                &*format!("self payment detected for {} account", self.debitor),
+            ))
+        }
     }
 }
 
@@ -348,13 +356,11 @@ impl TransactionItems {
         self.0.is_empty()
     }
 
-    pub fn test_unique_contra_accounts(&self) -> bool {
+    pub fn test_unique_contra_accounts(&self) -> Result<(), Box<dyn Error>> {
         for ti in self.0.iter() {
-            if !ti.test_unique_contra_accounts() {
-                return false;
-            }
+            ti.test_unique_contra_accounts()?
         }
-        true
+        Ok(())
     }
 }
 
@@ -581,19 +587,20 @@ mod tests {
     }
 
     #[test]
-    fn it_tests_unique_contra_accounts_on_a_transaction_item() {
-        let test_tr_item = create_test_transaction_item();
-        let got = test_tr_item.test_unique_contra_accounts();
-        let want = true;
-        assert_eq!(got, want, "got {}, want {}", got, want)
-    }
+    fn it_errors_when_a_transaction_item_detects_self_payment() {
+        let mut test_tr_items = create_test_transaction_items();
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.debitor = String::from("GroceryStore");
+        test_tr_item.creditor = String::from("GroceryStore");
+        test_tr_items.0.push(test_tr_item);
 
-    #[test]
-    fn it_tests_unique_contra_accounts_on_transaction_items() {
-        let test_tr_items = create_test_transaction_items();
-        let got = test_tr_items.test_unique_contra_accounts();
-        let want = true;
-        assert_eq!(got, want, "got {}, want {}", got, want)
+        assert_eq!(
+            test_tr_items
+                .clone()
+                .test_unique_contra_accounts()
+                .map_err(|e| e.to_string()),
+            Err("self payment detected for GroceryStore account".to_string())
+        )
     }
 
     #[test]
