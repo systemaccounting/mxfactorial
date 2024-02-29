@@ -17,6 +17,7 @@ use types::{
     account::{AccountProfile, AccountProfiles, AccountTrait},
     account_role::AccountRole,
     approval::Approvals,
+    balance::AccountBalances,
     rule::{RuleInstance, RuleInstanceTrait, RuleInstances},
     time::TZTime,
     transaction::{Transaction, Transactions},
@@ -66,7 +67,7 @@ impl DatabaseConnection {
     pub async fn select_account_balances_query(
         &self,
         accounts: Vec<String>,
-    ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
+    ) -> Result<AccountBalances, Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.select_account_balances_sql(accounts.len());
         let mut values: Vec<Box<(dyn ToSql + Sync)>> = Vec::new();
@@ -77,18 +78,7 @@ impl DatabaseConnection {
         match rows {
             Err(e) => Err(Box::new(e)),
             Ok(rows) => {
-                let account_balances: Vec<(String, String)> = rows
-                    .into_iter()
-                    .map(|row| {
-                        (
-                            row.get_string("account_name"),
-                            format!(
-                                "{:.FIXED_DECIMAL_PLACES$}",
-                                row.get_decimal("current_balance")
-                            ),
-                        )
-                    })
-                    .collect();
+                let account_balances = AccountBalances::from(rows);
                 Ok(account_balances)
             }
         }
@@ -613,9 +603,9 @@ mod integration_tests {
     use bb8::PooledConnection;
     use bb8_postgres::PostgresConnectionManager;
     use dotenvy::dotenv;
-    use std::{fs::File, io::BufReader, process::Command, str::FromStr};
+    use std::{fs::File, io::BufReader, ops::Index, process::Command, str::FromStr};
     use tokio_postgres::NoTls;
-    use types::request_response::IntraTransaction;
+    use types::{balance::AccountBalance, request_response::IntraTransaction};
 
     // underscore prefix for test helpers
     fn _before_each() {
@@ -752,11 +742,20 @@ mod integration_tests {
             .unwrap();
 
         assert_eq!(
-            test_balances,
-            vec![
-                (test_accounts[0].clone(), "1000.000".to_string()),
-                (test_accounts[1].clone(), "1000.000".to_string())
-            ]
+            test_balances.clone().index(0),
+            &AccountBalance {
+                account_name: "JoeCarter".to_string(),
+                current_balance: Decimal::from_str("1000.000").unwrap(),
+                current_transaction_item_id: None,
+            }
+        );
+        assert_eq!(
+            test_balances.clone().index(1),
+            &AccountBalance {
+                account_name: "JacobWebb".to_string(),
+                current_balance: Decimal::from_str("1000.000").unwrap(),
+                current_transaction_item_id: None,
+            }
         );
     }
 
