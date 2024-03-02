@@ -175,15 +175,18 @@ impl DatabaseConnection {
         transaction_id: i32,
         account: String,
         role: AccountRole,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<TZTime, Box<dyn Error>> {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.update_approvals_by_account_and_role_sql();
         let values: Vec<Box<dyn ToSql + Sync>> =
             vec![Box::new(transaction_id), Box::new(account), Box::new(role)];
-        let result = self.execute(sql.to_string(), values).await;
+        let result = self.query(sql.to_string(), values).await;
         match result {
             Err(e) => Err(Box::new(e)),
-            Ok(_) => Ok(()),
+            Ok(rows) => {
+                let approval_time = rows[0].get::<usize, TZTime>(0);
+                Ok(approval_time)
+            }
         }
     }
 
@@ -862,17 +865,25 @@ mod integration_tests {
         let test_conn = _get_conn().await;
         let api_conn = DatabaseConnection(test_conn);
 
+        const DATE_RE: &str =
+            r"\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)";
         let test_transaction_id = 1;
         let test_account = "JacobWebb".to_string();
         let test_role = AccountRole::Debitor;
-        let _ = api_conn
+        let got_equilibrium_time = api_conn
             .update_approvals_by_account_and_role_query(
                 test_transaction_id,
                 test_account.clone(),
                 test_role,
             )
-            .await;
+            .await
+            .unwrap();
 
+        // 1. test for transaction equilbrium_time
+        let iso8601: ::regex::Regex = ::regex::Regex::new(DATE_RE).unwrap();
+        assert!(iso8601.is_match(&got_equilibrium_time.to_string()));
+
+        // 2. test for approval_time on approvals
         let got_sql = &format!(
             "SELECT COUNT(id)::TEXT FROM approval WHERE transaction_id = CAST ({} AS INTEGER) AND approval_time IS NOT NULL;",
             test_transaction_id,
