@@ -92,22 +92,22 @@ impl TransactionItem {
         self.creditor_profile_id.clone()
     }
     async fn debitor_approval_time(&self) -> Option<TZTime> {
-        self.debitor_approval_time.clone()
+        self.debitor_approval_time
     }
     async fn creditor_approval_time(&self) -> Option<TZTime> {
-        self.creditor_approval_time.clone()
+        self.creditor_approval_time
     }
     async fn debitor_rejection_time(&self) -> Option<TZTime> {
-        self.debitor_rejection_time.clone()
+        self.debitor_rejection_time
     }
     async fn creditor_rejection_time(&self) -> Option<TZTime> {
-        self.creditor_rejection_time.clone()
+        self.creditor_rejection_time
     }
     async fn debitor_expiration_time(&self) -> Option<TZTime> {
-        self.debitor_expiration_time.clone()
+        self.debitor_expiration_time
     }
     async fn creditor_expiration_time(&self) -> Option<TZTime> {
-        self.creditor_expiration_time.clone()
+        self.creditor_expiration_time
     }
     async fn approvals(&self) -> Vec<Approval> {
         self.approvals.clone().unwrap().0
@@ -171,6 +171,27 @@ impl TransactionItem {
                 std::io::ErrorKind::Other,
                 &*format!("self payment detected for {} account", self.debitor),
             ))
+        }
+    }
+
+    pub fn list_approvals(&self) -> Result<Approvals, std::io::Error> {
+        match &self.approvals {
+            Some(approvals) => Ok(approvals.clone()),
+            None => Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "no approvals found",
+            )),
+        }
+    }
+
+    pub fn test_pending_role_approval(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> Result<(), std::io::Error> {
+        match &self.approvals {
+            Some(approvals) => approvals.test_pending_role_approval(auth_account, account_role),
+            None => Ok(()),
         }
     }
 }
@@ -359,6 +380,28 @@ impl TransactionItems {
     pub fn test_unique_contra_accounts(&self) -> Result<(), Box<dyn Error>> {
         for ti in self.0.iter() {
             ti.test_unique_contra_accounts()?
+        }
+        Ok(())
+    }
+
+    pub fn list_approvals(&self) -> Result<Approvals, Box<dyn Error>> {
+        let mut approvals: Vec<Approval> = vec![];
+        for ti in self.0.iter() {
+            let ti_approvals = ti.list_approvals()?;
+            for a in ti_approvals.0.iter() {
+                approvals.push(a.clone())
+            }
+        }
+        Ok(Approvals(approvals))
+    }
+
+    pub fn test_pending_role_approval(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> Result<(), Box<dyn Error>> {
+        for ti in self.0.iter() {
+            ti.test_pending_role_approval(auth_account, account_role)?
         }
         Ok(())
     }
@@ -601,6 +644,75 @@ mod tests {
                 .map_err(|e| e.to_string()),
             Err("self payment detected for GroceryStore account".to_string())
         )
+    }
+
+    #[test]
+    fn it_lists_approvals_from_a_transaction_item() {
+        let test_tr_item = create_test_transaction_item();
+        let got = test_tr_item.list_approvals().unwrap();
+        let want = Approvals(vec![]);
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_lists_approvals_from_transaction_items() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.list_approvals().unwrap();
+        let want = Approvals(vec![
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
     }
 
     #[test]

@@ -23,6 +23,24 @@ pub struct Approval {
     pub expiration_time: Option<TZTime>,
 }
 
+impl Approval {
+    pub fn test_pending_role_approval(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> bool {
+        self.account_name == auth_account
+            && self.account_role == account_role
+            && self.approval_time.is_none()
+            && self.rejection_time.is_none()
+            && self.expiration_time_not_lapsed()
+    }
+
+    pub fn expiration_time_not_lapsed(&self) -> bool {
+        self.expiration_time.is_none() || self.expiration_time.unwrap().not_lapsed()
+    }
+}
+
 impl From<Row> for Approval {
     fn from(row: Row) -> Self {
         Self {
@@ -81,6 +99,25 @@ impl Approvals {
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
+
+    pub fn test_pending_role_approval(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> Result<(), std::io::Error> {
+        if self
+            .0
+            .iter()
+            .any(|a| a.test_pending_role_approval(auth_account, account_role))
+        {
+            Ok(())
+        } else {
+            Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "zero pending role approvals",
+            ))
+        }
+    }
 }
 
 #[Object]
@@ -132,6 +169,121 @@ mod tests {
         let got = test_approvals.get_approvals_per_role(test_role);
 
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_tests_expiration_time_not_lapsed() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: Some(TZTime::from("2053-10-30T04:56:56Z")),
+        };
+
+        assert!(test_approval.expiration_time_not_lapsed());
+    }
+
+    #[test]
+    fn it_tests_expiration_time_lapsed() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
+        };
+
+        assert_eq!(test_approval.expiration_time_not_lapsed(), false);
+    }
+
+    #[test]
+    fn it_tests_positive_for_pending_role_approval() {
+        let test_approvals = Approvals(vec![
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JoeCarter"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryCo"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+        assert_eq!(
+            test_approvals
+                .test_pending_role_approval("GroceryCo", AccountRole::Creditor)
+                .unwrap(),
+            ()
+        );
+    }
+
+    #[test]
+    fn it_tests_negative_for_pending_role_approval() {
+        let test_approvals = Approvals(vec![
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JoeCarter"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryCo"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+        assert_eq!(
+            test_approvals
+                .test_pending_role_approval("JoeCarter", AccountRole::Debitor)
+                .unwrap_err()
+                .to_string(),
+            "zero pending role approvals"
+        );
     }
 
     #[test]

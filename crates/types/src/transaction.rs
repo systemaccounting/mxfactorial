@@ -1,5 +1,6 @@
 use crate::{
     account_role::AccountRole,
+    approval::Approvals,
     time::TZTime,
     transaction_item::{TransactionItem, TransactionItems},
 };
@@ -49,6 +50,19 @@ impl Transaction {
     pub fn test_unique_contra_accounts(&self) -> Result<(), Box<dyn Error>> {
         self.transaction_items.test_unique_contra_accounts()
     }
+
+    pub fn list_approvals(&self) -> Result<Approvals, Box<dyn Error>> {
+        self.transaction_items.list_approvals()
+    }
+
+    pub fn test_pending_role_approval(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> Result<(), Box<dyn Error>> {
+        self.transaction_items
+            .test_pending_role_approval(auth_account, account_role)
+    }
 }
 
 impl From<Row> for Transaction {
@@ -97,6 +111,89 @@ pub mod tests {
         let transaction = create_test_transaction();
         let got = transaction.test_unique_contra_accounts().unwrap();
         assert_eq!(got, ())
+    }
+
+    #[test]
+    fn it_lists_approvals_from_a_transaction() {
+        let transaction = create_test_transaction();
+        let got = transaction.list_approvals().unwrap();
+        let want = Approvals(vec![
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+        assert_eq!(got, want)
+    }
+
+    #[test]
+    fn it_tests_positive_for_pending_role_approvals() {
+        let transaction = create_test_transaction();
+        let got = transaction
+            .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
+            .unwrap();
+        assert_eq!(got, ())
+    }
+
+    #[test]
+    fn it_tests_negative_for_pending_role_approvals() {
+        let transaction = create_test_transaction();
+        transaction.transaction_items.0[0]
+            .approvals
+            .clone()
+            .unwrap()
+            .0[0]
+            .approval_time = Some(TZTime::from("2023-10-30T04:56:56Z".to_string()));
+        let got = transaction.test_pending_role_approval("JacobWebb", AccountRole::Creditor);
+        assert!(got.is_err())
     }
 
     #[test]
