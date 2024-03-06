@@ -543,6 +543,27 @@ impl DatabaseConnection {
         }
     }
 
+    pub async fn insert_approve_all_credit_rule_instance_query(
+        &self,
+        account_name: String,
+    ) -> Result<(), Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
+        let sql = table.insert_rule_instance_sql();
+        let values: Vec<Box<dyn ToSql + Sync>> = vec![
+            Box::new("approval".to_string()), // rule_type
+            Box::new("approveAnyCreditItem".to_string()), // rule_name
+            Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
+            Box::new(AccountRole::Creditor), // account_role
+            Box::new(account_name.clone()), // account_name
+            Box::new(vec![account_name.clone(), AccountRole::Creditor.to_string(), account_name]), // variable_values
+        ];
+        let result = self.execute(sql.to_string(), values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
+    }
+
     pub async fn select_approvers_query(
         &self,
         account: String,
@@ -1214,6 +1235,28 @@ mod integration_tests {
             test_rule_name,
             test_rule_instance_name,
             test_account_role,
+            test_account_name,
+        );
+        _row_exists(got_sql).await;
+    }
+
+    #[cfg_attr(not(feature = "db_tests"), ignore)]
+    #[tokio::test]
+    async fn it_creates_an_insert_approve_all_credit_rule_instance_query() {
+        _before_each();
+
+        let test_conn = _get_conn().await;
+        let api_conn = DatabaseConnection(test_conn);
+
+        let test_account_name = "JacobWebb".to_string();
+
+        let _ = api_conn
+            .insert_approve_all_credit_rule_instance_query(test_account_name.clone())
+            .await
+            .unwrap();
+
+        let got_sql = &format!(
+            "SELECT EXISTS(SELECT 1 FROM rule_instance WHERE rule_type = 'approval' AND rule_name = 'approveAnyCreditItem' AND rule_instance_name = 'ApprovalAllCreditRequests' AND account_role = 'creditor' AND account_name = '{}' AND variable_values = '{{\"JacobWebb\",\"creditor\",\"JacobWebb\"}}');",
             test_account_name,
         );
         _row_exists(got_sql).await;
