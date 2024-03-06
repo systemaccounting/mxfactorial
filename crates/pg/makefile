@@ -2,6 +2,7 @@ RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | gr
 APP_NAME=$(shell basename $(CURDIR))
 PROJECT_CONF_FILE_NAME=project.yaml
 TEST_NAME?=model::integration_tests::
+MIGRATIONS_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/migrations
 
 test-unit:
 	cargo test
@@ -23,9 +24,9 @@ watch-db:
 test-db:
 	@$(MAKE) get-secrets
 	@if [[ $$(pg_isready -h localhost) ]]; then \
-		$(MAKE) -C ../../migrations reset; \
+		$(MAKE) -C $(MIGRATIONS_DIR) reset; \
 	else \
-		$(MAKE) -C ../../migrations start; \
+		$(MAKE) -C $(MIGRATIONS_DIR) start; \
 	fi
 	@until pg_isready -h localhost; do sleep 1; done
 	cargo test $(TEST_NAME) --features db_tests -- --test-threads=1
