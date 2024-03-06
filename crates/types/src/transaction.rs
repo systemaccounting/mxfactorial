@@ -1,13 +1,22 @@
 use crate::{
     account_role::AccountRole,
-    approval::Approvals,
+    approval::{ApprovalError, Approvals},
     time::TZTime,
     transaction_item::{TransactionItem, TransactionItems},
 };
 use async_graphql::{ComplexObject, Object, SimpleObject};
 use serde::{Deserialize, Serialize};
 use std::{error::Error, vec};
+use thiserror::Error;
 use tokio_postgres::Row;
+
+#[derive(Error, Debug)]
+pub enum TransactionError {
+    #[error("adding to non empty transaction items")]
+    AddingToNonEmptyTransactionItems,
+    #[error("missing transaction id")]
+    MissingTransactionId,
+}
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
 #[graphql(rename_fields = "snake_case", complex)]
@@ -59,9 +68,37 @@ impl Transaction {
         &self,
         auth_account: &str,
         account_role: AccountRole,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), ApprovalError> {
         self.transaction_items
             .test_pending_role_approval(auth_account, account_role)
+    }
+
+    pub fn add_transaction_items(
+        &mut self,
+        transaction_items: TransactionItems,
+    ) -> Result<(), TransactionError> {
+        if self.id.is_none() {
+            return Err(TransactionError::MissingTransactionId);
+        }
+        if !self.transaction_items.is_empty() {
+            return Err(TransactionError::AddingToNonEmptyTransactionItems);
+        }
+        let transaction_id = self.id.clone().unwrap().parse::<i32>().unwrap();
+        let filtered = transaction_items
+            .filter_by_transaction(transaction_id)
+            .unwrap();
+        self.transaction_items = filtered;
+        Ok(())
+    }
+
+    pub fn build(
+        &mut self,
+        mut transaction_items: TransactionItems,
+        approvals: Approvals,
+    ) -> Result<(), Box<dyn Error>> {
+        transaction_items.add_approvals(approvals)?;
+        self.add_transaction_items(transaction_items)?;
+        Ok(())
     }
 }
 
@@ -116,8 +153,40 @@ pub mod tests {
     #[test]
     fn it_lists_approvals_from_a_transaction() {
         let transaction = create_test_transaction();
+        let test_approvals_0 = transaction.transaction_items.0[0]
+            .approvals
+            .clone()
+            .unwrap()
+            .0;
+        let test_approvals_1 = transaction.transaction_items.0[1]
+            .approvals
+            .clone()
+            .unwrap()
+            .0;
         let got = transaction.list_approvals().unwrap();
-        let want = Approvals(vec![
+
+        let mut all_approvals = vec![];
+        all_approvals.extend(test_approvals_0);
+        all_approvals.extend(test_approvals_1);
+        let want = Approvals(all_approvals);
+
+        assert_eq!(got, want)
+    }
+
+    #[test]
+    fn it_tests_positive_for_pending_role_approvals() {
+        let transaction = create_test_transaction();
+        let got = transaction
+            .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
+            .unwrap();
+        assert_eq!(got, ())
+    }
+
+    #[test]
+    fn it_tests_positive_for_previously_approved_approval_on_transaction() {
+        let mut test_transaction = create_test_transaction();
+        let test_approval_time = TZTime::from("2023-10-30T04:56:56Z".to_string());
+        let test_approvals = Approvals(vec![
             Approval {
                 id: None,
                 rule_instance_id: None,
@@ -127,33 +196,7 @@ pub mod tests {
                 account_role: AccountRole::Debitor,
                 device_id: None,
                 device_latlng: None,
-                approval_time: None,
-                rejection_time: None,
-                expiration_time: None,
-            },
-            Approval {
-                id: None,
-                rule_instance_id: None,
-                transaction_id: None,
-                transaction_item_id: None,
-                account_name: String::from("GroceryStore"),
-                account_role: AccountRole::Creditor,
-                device_id: None,
-                device_latlng: None,
-                approval_time: None,
-                rejection_time: None,
-                expiration_time: None,
-            },
-            Approval {
-                id: None,
-                rule_instance_id: None,
-                transaction_id: None,
-                transaction_item_id: None,
-                account_name: String::from("JacobWebb"),
-                account_role: AccountRole::Debitor,
-                device_id: None,
-                device_latlng: None,
-                approval_time: None,
+                approval_time: Some(test_approval_time),
                 rejection_time: None,
                 expiration_time: None,
             },
@@ -171,11 +214,17 @@ pub mod tests {
                 expiration_time: None,
             },
         ]);
-        assert_eq!(got, want)
+        test_transaction.transaction_items.0[0].approvals = Some(test_approvals);
+
+        let got = test_transaction
+            .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
+            .unwrap_err();
+
+        assert_eq!(got, ApprovalError::PreviouslyApproved(test_approval_time))
     }
 
     #[test]
-    fn it_tests_positive_for_pending_role_approvals() {
+    fn it_tests_positive_for_pending_role_approval() {
         let transaction = create_test_transaction();
         let got = transaction
             .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
@@ -184,24 +233,44 @@ pub mod tests {
     }
 
     #[test]
-    fn it_tests_negative_for_pending_role_approvals() {
-        let transaction = create_test_transaction();
-        transaction.transaction_items.0[0]
-            .approvals
-            .clone()
-            .unwrap()
-            .0[0]
-            .approval_time = Some(TZTime::from("2023-10-30T04:56:56Z".to_string()));
-        let got = transaction.test_pending_role_approval("JacobWebb", AccountRole::Creditor);
-        assert!(got.is_err())
+    fn it_adds_transaction_items() {
+        let mut test_transaction = create_test_transaction();
+        test_transaction.transaction_items = TransactionItems(vec![]);
+        let test_transaction_items = create_test_transaction().transaction_items;
+        test_transaction
+            .add_transaction_items(test_transaction_items)
+            .unwrap();
+        assert_eq!(test_transaction.transaction_items.len(), 2)
     }
 
+    #[test]
+    fn it_will_build_a_transaction() {
+        let mut test_transaction = create_test_transaction();
+        test_transaction.transaction_items = TransactionItems(vec![]);
+        let mut test_transaction_items = create_test_transaction().transaction_items;
+        for transaction_item in test_transaction_items.0.iter_mut() {
+            transaction_item.approvals = None;
+        }
+        let test_approvals = create_test_transaction()
+            .transaction_items
+            .list_approvals()
+            .unwrap();
+        test_transaction
+            .build(test_transaction_items, test_approvals)
+            .unwrap();
+        assert_eq!(test_transaction.transaction_items.len(), 2);
+        for transaction_item in test_transaction.transaction_items.0 {
+            assert_eq!(transaction_item.approvals.unwrap().len(), 2);
+        }
+    }
+
+    // resume here
     #[test]
     fn it_deserializes_a_transaction() {
         let got: Transaction = serde_json::from_str(
             r#"
             {
-                "id": null,
+                "id": "1",
                 "rule_instance_id": null,
                 "author": "GroceryCo",
                 "author_device_id": null,
@@ -211,8 +280,8 @@ pub mod tests {
                 "sum_value": "21.800",
                 "transaction_items": [
                     {
-                        "id": null,
-                        "transaction_id": null,
+                        "id": "2",
+                        "transaction_id": "1",
                         "item_id": "bread",
                         "price": "3.000",
                         "quantity": "2",
@@ -235,8 +304,8 @@ pub mod tests {
                             {
                                 "id": null,
                                 "rule_instance_id": null,
-                                "transaction_id": null,
-                                "transaction_item_id": null,
+                                "transaction_id": "1",
+                                "transaction_item_id": "2",
                                 "account_name": "JacobWebb",
                                 "account_role": "debitor",
                                 "device_id": null,
@@ -248,8 +317,8 @@ pub mod tests {
                             {
                                 "id": null,
                                 "rule_instance_id": null,
-                                "transaction_id": null,
-                                "transaction_item_id": null,
+                                "transaction_id": "1",
+                                "transaction_item_id": "2",
                                 "account_name": "GroceryStore",
                                 "account_role": "creditor",
                                 "device_id": null,
@@ -261,8 +330,8 @@ pub mod tests {
                         ]
                     },
                     {
-                        "id": null,
-                        "transaction_id": null,
+                        "id": "3",
+                        "transaction_id": "1",
                         "item_id": "milk",
                         "price": "4.000",
                         "quantity": "3",
@@ -285,8 +354,8 @@ pub mod tests {
                             {
                                 "id": null,
                                 "rule_instance_id": null,
-                                "transaction_id": null,
-                                "transaction_item_id": null,
+                                "transaction_id": "1",
+                                "transaction_item_id": "3",
                                 "account_name": "JacobWebb",
                                 "account_role": "debitor",
                                 "device_id": null,
@@ -298,8 +367,8 @@ pub mod tests {
                             {
                                 "id": null,
                                 "rule_instance_id": null,
-                                "transaction_id": null,
-                                "transaction_item_id": null,
+                                "transaction_id": "1",
+                                "transaction_item_id": "3",
                                 "account_name": "GroceryStore",
                                 "account_role": "creditor",
                                 "device_id": null,
@@ -562,7 +631,7 @@ pub mod tests {
 
     pub fn create_test_transaction() -> Transaction {
         Transaction {
-            id: None,
+            id: Some(String::from("1")),
             rule_instance_id: None,
             author: Some(String::from("GroceryCo")),
             author_device_id: None,
@@ -572,8 +641,8 @@ pub mod tests {
             sum_value: String::from("21.800"),
             transaction_items: TransactionItems(vec![
                 TransactionItem {
-                    id: None,
-                    transaction_id: None,
+                    id: Some(String::from("2")),
+                    transaction_id: Some(String::from("1")),
                     item_id: String::from("bread"),
                     price: String::from("3.000"),
                     quantity: String::from("2"),
@@ -596,8 +665,8 @@ pub mod tests {
                         Approval {
                             id: None,
                             rule_instance_id: None,
-                            transaction_id: None,
-                            transaction_item_id: None,
+                            transaction_id: Some(String::from("1")),
+                            transaction_item_id: Some(String::from("2")),
                             account_name: String::from("JacobWebb"),
                             account_role: AccountRole::Debitor,
                             device_id: None,
@@ -609,8 +678,8 @@ pub mod tests {
                         Approval {
                             id: None,
                             rule_instance_id: None,
-                            transaction_id: None,
-                            transaction_item_id: None,
+                            transaction_id: Some(String::from("1")),
+                            transaction_item_id: Some(String::from("2")),
                             account_name: String::from("GroceryStore"),
                             account_role: AccountRole::Creditor,
                             device_id: None,
@@ -622,8 +691,8 @@ pub mod tests {
                     ])),
                 },
                 TransactionItem {
-                    id: None,
-                    transaction_id: None,
+                    id: Some(String::from("3")),
+                    transaction_id: Some(String::from("1")),
                     item_id: String::from("milk"),
                     price: String::from("4.000"),
                     quantity: String::from("3"),
@@ -646,8 +715,8 @@ pub mod tests {
                         Approval {
                             id: None,
                             rule_instance_id: None,
-                            transaction_id: None,
-                            transaction_item_id: None,
+                            transaction_id: Some(String::from("1")),
+                            transaction_item_id: Some(String::from("3")),
                             account_name: String::from("JacobWebb"),
                             account_role: AccountRole::Debitor,
                             device_id: None,
@@ -659,8 +728,8 @@ pub mod tests {
                         Approval {
                             id: None,
                             rule_instance_id: None,
-                            transaction_id: None,
-                            transaction_item_id: None,
+                            transaction_id: Some(String::from("1")),
+                            transaction_item_id: Some(String::from("3")),
                             account_name: String::from("GroceryStore"),
                             account_role: AccountRole::Creditor,
                             device_id: None,

@@ -2,10 +2,29 @@ use crate::account_role::AccountRole;
 use crate::time::TZTime;
 use async_graphql::{Object, SimpleObject};
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 use tokio_postgres::{
     types::{FromSql, ToSql},
     Row,
 };
+
+#[derive(Error, Debug, Eq, PartialEq)]
+pub enum ApprovalError {
+    #[error("expiration time lapsed")]
+    ExpirationTimeLapsed,
+    #[error("previously approved")]
+    PreviouslyApproved(TZTime),
+    #[error("previously rejected")]
+    PreviouslyRejected,
+    #[error("zero approvals")] // transaction items always have at least one approval
+    ZeroApprovals,
+    #[error("incomplete previous approval")]
+    IncompletePreviousApproval,
+    #[error("missing transaction_id in approval")]
+    MissingTransactionId,
+    #[error("missing transaction_item_id in approval")]
+    MissingTransactionItemId,
+}
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, FromSql, ToSql, Clone, SimpleObject)]
 #[graphql(rename_fields = "snake_case")]
@@ -24,20 +43,37 @@ pub struct Approval {
 }
 
 impl Approval {
-    pub fn test_pending_role_approval(
-        &self,
-        auth_account: &str,
-        account_role: AccountRole,
-    ) -> bool {
-        self.account_name == auth_account
-            && self.account_role == account_role
-            && self.approval_time.is_none()
-            && self.rejection_time.is_none()
-            && self.expiration_time_not_lapsed()
+    pub fn test_pending(&self) -> Result<(), ApprovalError> {
+        self.expiration_time_not_lapsed()?;
+        self.previously_approved()?;
+        self.previously_rejected()?;
+        Ok(())
     }
 
-    pub fn expiration_time_not_lapsed(&self) -> bool {
-        self.expiration_time.is_none() || self.expiration_time.unwrap().not_lapsed()
+    pub fn previously_approved(&self) -> Result<(), ApprovalError> {
+        if self.approval_time.is_some() {
+            Err(ApprovalError::PreviouslyApproved(
+                self.approval_time.unwrap(),
+            ))
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn expiration_time_not_lapsed(&self) -> Result<(), ApprovalError> {
+        if self.expiration_time.is_none() || self.expiration_time.unwrap().not_lapsed() {
+            Ok(())
+        } else {
+            Err(ApprovalError::ExpirationTimeLapsed)
+        }
+    }
+
+    pub fn previously_rejected(&self) -> Result<(), ApprovalError> {
+        if self.rejection_time.is_some() {
+            Err(ApprovalError::PreviouslyRejected)
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -92,6 +128,23 @@ impl Approvals {
         )
     }
 
+    pub fn account_role_approvals(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> Result<Self, ApprovalError> {
+        if self.0.is_empty() {
+            return Err(ApprovalError::ZeroApprovals);
+        }
+        Ok(Approvals(
+            self.0
+                .clone()
+                .into_iter()
+                .filter(|a| a.account_name == auth_account && a.account_role == account_role)
+                .collect(),
+        ))
+    }
+
     pub fn len(&self) -> usize {
         self.0.len()
     }
@@ -104,19 +157,76 @@ impl Approvals {
         &self,
         auth_account: &str,
         account_role: AccountRole,
-    ) -> Result<(), std::io::Error> {
-        if self
-            .0
-            .iter()
-            .any(|a| a.test_pending_role_approval(auth_account, account_role))
-        {
-            Ok(())
-        } else {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::Other,
-                "zero pending role approvals",
-            ))
+    ) -> Result<(), ApprovalError> {
+        let mut previously_approved = 0;
+        let mut approval_count = 0;
+
+        let account_role_approvals = self.account_role_approvals(auth_account, account_role)?;
+
+        for approval in account_role_approvals.0.iter() {
+            approval_count += 1;
+
+            let result = approval.test_pending();
+
+            match result {
+                Ok(_) => (),
+                Err(e) => match e {
+                    ApprovalError::ExpirationTimeLapsed => return Err(e),
+                    ApprovalError::PreviouslyApproved(_) => {
+                        previously_approved += 1;
+                    }
+                    ApprovalError::PreviouslyRejected => return Err(e),
+                    _ => (),
+                },
+            }
         }
+
+        if previously_approved == 0 {
+            Ok(())
+        } else if previously_approved == approval_count {
+            let previously_approved_time = account_role_approvals.0[0].approval_time.unwrap();
+            return Err(ApprovalError::PreviouslyApproved(previously_approved_time));
+        } else {
+            return Err(ApprovalError::IncompletePreviousApproval);
+        }
+    }
+
+    pub fn filter_by_transaction_and_transaction_item(
+        &self,
+        transaction_id: i32,
+        transaction_item_id: i32,
+    ) -> Result<Self, ApprovalError> {
+        let mut filtered = Approvals(Vec::new());
+
+        for approval in self.0.iter() {
+            if approval.transaction_id.is_none() {
+                return Err(ApprovalError::MissingTransactionId);
+            }
+            if approval.transaction_item_id.is_none() {
+                return Err(ApprovalError::MissingTransactionItemId);
+            }
+
+            let approval_transaction_id = approval
+                .clone()
+                .transaction_id
+                .unwrap()
+                .parse::<i32>()
+                .unwrap();
+            let approval_transaction_item_id = approval
+                .clone()
+                .transaction_item_id
+                .unwrap()
+                .parse::<i32>()
+                .unwrap();
+
+            if approval_transaction_id == transaction_id
+                && approval_transaction_item_id == transaction_item_id
+            {
+                filtered.0.push(approval.clone());
+            }
+        }
+
+        Ok(filtered)
     }
 }
 
@@ -130,6 +240,172 @@ impl Approvals {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn it_tests_positive_for_expired_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
+        };
+
+        assert_eq!(
+            test_approval
+                .expiration_time_not_lapsed()
+                .unwrap_err()
+                .to_string(),
+            "expiration time lapsed"
+        );
+    }
+
+    #[test]
+    fn it_tests_negative_for_expired_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: Some(TZTime::from("3023-01-01T04:56:56Z")),
+        };
+
+        assert_eq!(test_approval.expiration_time_not_lapsed(), Ok(()));
+    }
+
+    #[test]
+    fn it_tests_positive_for_previously_approved_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
+            rejection_time: None,
+            expiration_time: None,
+        };
+
+        assert_eq!(
+            test_approval.previously_approved().unwrap_err().to_string(),
+            "previously approved"
+        );
+    }
+
+    #[test]
+    fn it_tests_negative_for_previously_approved_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        };
+
+        assert_eq!(test_approval.previously_approved(), Ok(()));
+    }
+
+    #[test]
+    fn it_tests_positive_for_previously_rejected_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
+            expiration_time: None,
+        };
+
+        assert_eq!(
+            test_approval.previously_rejected().unwrap_err().to_string(),
+            "previously rejected"
+        );
+    }
+
+    #[test]
+    fn it_tests_negative_for_previously_rejected_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        };
+
+        assert_eq!(test_approval.previously_rejected(), Ok(()));
+    }
+
+    #[test]
+    fn it_returns_account_role_approvals() {
+        let want = Approvals(vec![Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        }]);
+
+        let test_approvals = Approvals(vec![
+            want.0[0].clone(),
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryCo"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+
+        let got = test_approvals
+            .account_role_approvals("JoeCarter", AccountRole::Debitor)
+            .unwrap();
+
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
 
     #[test]
     fn it_gets_approvals_per_role() {
@@ -172,7 +448,7 @@ mod tests {
     }
 
     #[test]
-    fn it_tests_expiration_time_not_lapsed() {
+    fn it_tests_positive_for_expiration_time_not_lapsed_on_an_approval() {
         let test_approval = Approval {
             id: None,
             rule_instance_id: None,
@@ -184,14 +460,14 @@ mod tests {
             device_latlng: None,
             approval_time: None,
             rejection_time: None,
-            expiration_time: Some(TZTime::from("2053-10-30T04:56:56Z")),
+            expiration_time: Some(TZTime::from("3023-01-01T04:56:56Z")),
         };
 
-        assert!(test_approval.expiration_time_not_lapsed());
+        assert_eq!(test_approval.expiration_time_not_lapsed(), Ok(()));
     }
 
     #[test]
-    fn it_tests_expiration_time_lapsed() {
+    fn it_tests_negative_for_expiration_time_not_lapsed_on_an_approval() {
         let test_approval = Approval {
             id: None,
             rule_instance_id: None,
@@ -206,11 +482,56 @@ mod tests {
             expiration_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
         };
 
-        assert_eq!(test_approval.expiration_time_not_lapsed(), false);
+        assert_eq!(
+            test_approval
+                .expiration_time_not_lapsed()
+                .unwrap_err()
+                .to_string(),
+            "expiration time lapsed"
+        );
     }
 
     #[test]
-    fn it_tests_positive_for_pending_role_approval() {
+    fn it_tests_positive_for_pending_role_approval_on_an_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        };
+        assert_eq!(test_approval.test_pending().unwrap(), ());
+    }
+
+    #[test]
+    fn it_tests_positive_for_previously_approved_approval_on_an_approval() {
+        let test_approval = Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
+            rejection_time: None,
+            expiration_time: None,
+        };
+        assert_eq!(
+            test_approval.test_pending().unwrap_err().to_string(),
+            "previously approved"
+        );
+    }
+
+    #[test]
+    fn it_tests_positive_for_pending_role_approval_on_approvals() {
         let test_approvals = Approvals(vec![
             Approval {
                 id: None,
@@ -248,7 +569,8 @@ mod tests {
     }
 
     #[test]
-    fn it_tests_negative_for_pending_role_approval() {
+    fn it_tests_positive_for_previously_approved_on_approvals() {
+        let test_approval_time = TZTime::from("2023-10-30T04:56:56Z");
         let test_approvals = Approvals(vec![
             Approval {
                 id: None,
@@ -259,8 +581,8 @@ mod tests {
                 account_role: AccountRole::Debitor,
                 device_id: None,
                 device_latlng: None,
-                approval_time: None,
-                rejection_time: Some(TZTime::from("2023-10-30T04:56:56Z")),
+                approval_time: Some(test_approval_time),
+                rejection_time: None,
                 expiration_time: None,
             },
             Approval {
@@ -278,11 +600,98 @@ mod tests {
             },
         ]);
         assert_eq!(
+            test_approvals.test_pending_role_approval("JoeCarter", AccountRole::Debitor),
+            Err(ApprovalError::PreviouslyApproved(test_approval_time)),
+        );
+    }
+
+    #[test]
+    fn it_will_filter_by_transaction_and_transaction_item() {
+        let want = Approvals(vec![Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: Some(String::from("1")),
+            transaction_item_id: Some(String::from("1")),
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        }]);
+
+        let test_approvals = Approvals(vec![
+            want.0[0].clone(),
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("2")),
+                account_name: String::from("JoeCarter"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+
+        let got = test_approvals
+            .filter_by_transaction_and_transaction_item(1, 1)
+            .unwrap();
+
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_will_error_on_missing_transaction_id_in_approval() {
+        let test_approvals = Approvals(vec![Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: Some(String::from("1")),
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        }]);
+
+        assert_eq!(
             test_approvals
-                .test_pending_role_approval("JoeCarter", AccountRole::Debitor)
+                .filter_by_transaction_and_transaction_item(1, 1)
                 .unwrap_err()
                 .to_string(),
-            "zero pending role approvals"
+            "missing transaction_id in approval"
+        );
+    }
+
+    #[test]
+    fn it_will_error_on_missing_transaction_item_id_in_approval() {
+        let test_approvals = Approvals(vec![Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: Some(String::from("1")),
+            transaction_item_id: None,
+            account_name: String::from("JoeCarter"),
+            account_role: AccountRole::Debitor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        }]);
+
+        assert_eq!(
+            test_approvals
+                .filter_by_transaction_and_transaction_item(1, 1)
+                .unwrap_err()
+                .to_string(),
+            "missing transaction_item_id in approval"
         );
     }
 
