@@ -550,12 +550,16 @@ impl DatabaseConnection {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.insert_rule_instance_sql();
         let values: Vec<Box<dyn ToSql + Sync>> = vec![
-            Box::new("approval".to_string()), // rule_type
-            Box::new("approveAnyCreditItem".to_string()), // rule_name
+            Box::new("approval".to_string()),                  // rule_type
+            Box::new("approveAnyCreditItem".to_string()),      // rule_name
             Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
-            Box::new(AccountRole::Creditor), // account_role
-            Box::new(account_name.clone()), // account_name
-            Box::new(vec![account_name.clone(), AccountRole::Creditor.to_string(), account_name]), // variable_values
+            Box::new(AccountRole::Creditor),                   // account_role
+            Box::new(account_name.clone()),                    // account_name
+            Box::new(vec![
+                account_name.clone(),
+                AccountRole::Creditor.to_string(),
+                account_name,
+            ]), // variable_values
         ];
         let result = self.execute(sql.to_string(), values).await;
         match result {
