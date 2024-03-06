@@ -161,7 +161,7 @@ mod tests {
     #[test]
     fn it_reports_not_lapsed() {
         let test_tz_time = TZTime(
-            DateTime::parse_from_rfc3339("2053-10-30T04:56:56Z")
+            DateTime::parse_from_rfc3339("3023-01-01T04:56:56Z")
                 .unwrap()
                 .with_timezone(&Utc),
         );
