@@ -21,7 +21,7 @@ use types::{
     rule::{RuleInstance, RuleInstanceTrait, RuleInstances},
     time::TZTime,
     transaction::{Transaction, Transactions},
-    transaction_item::{TransactionItem, TransactionItems},
+    transaction_item::TransactionItems,
 };
 
 const FIXED_DECIMAL_PLACES: usize = 3;
@@ -86,7 +86,7 @@ impl DatabaseConnection {
 
     pub async fn update_account_balances_query(
         &self,
-        transaction_items: Vec<TransactionItem>,
+        transaction_items: TransactionItems,
     ) -> Result<(), Box<dyn Error>> {
         // create a vector of values to pass to the query
         let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
@@ -773,7 +773,7 @@ mod integration_tests {
         let file = File::open("../../pkg/testdata/transWTimes.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
-        let test_transaction_items = test_intra_transaction.transaction.transaction_items.0;
+        let test_transaction_items = test_intra_transaction.transaction.transaction_items;
         let _ = api_conn
             .update_account_balances_query(test_transaction_items.clone())
             .await
