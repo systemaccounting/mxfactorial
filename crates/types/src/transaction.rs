@@ -264,6 +264,42 @@ pub mod tests {
         }
     }
 
+    #[test]
+    fn it_will_build_transactions() {
+        let mut test_transactions = create_test_transactions();
+
+        let mut test_transaction_items = TransactionItems(vec![]);
+
+        for transaction in test_transactions.0.iter_mut() {
+            // add transaction items to test_transaction_items
+            test_transaction_items
+                .0
+                .extend(transaction.transaction_items.0.clone());
+            // then clear transaction items on the transaction
+            transaction.transaction_items = TransactionItems(vec![]);
+        }
+
+        let mut test_approvals = Approvals(vec![]);
+
+        for test_transaction_item in test_transaction_items.0.iter_mut() {
+            // add approvals to test_approvals
+            test_approvals
+                .0
+                .extend(test_transaction_item.approvals.clone().unwrap());
+            // then clear approvals on the transaction item
+            test_transaction_item.approvals = None;
+        }
+
+        test_transactions.build(test_transaction_items, test_approvals);
+
+        for transaction in test_transactions.0 {
+            assert_eq!(transaction.transaction_items.len(), 2);
+            for transaction_item in transaction.transaction_items.0 {
+                assert_eq!(transaction_item.approvals.unwrap().len(), 2);
+            }
+        }
+    }
+
     // resume here
     #[test]
     fn it_deserializes_a_transaction() {
@@ -398,7 +434,7 @@ pub mod tests {
             r#"
     [
         {
-			"id": null,
+			"id": "1",
 			"rule_instance_id": null,
 			"author": "GroceryCo",
 			"author_device_id": null,
@@ -408,8 +444,8 @@ pub mod tests {
 			"sum_value": "21.800",
 			"transaction_items": [
                 {
-                    "id": null,
-                    "transaction_id": null,
+                    "id": "2",
+                    "transaction_id": "1",
                     "item_id": "bread",
                     "price": "3.000",
                     "quantity": "2",
@@ -432,8 +468,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "1",
+                            "transaction_item_id": "2",
                             "account_name": "JacobWebb",
                             "account_role": "debitor",
                             "device_id": null,
@@ -445,8 +481,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "1",
+                            "transaction_item_id": "2",
                             "account_name": "GroceryStore",
                             "account_role": "creditor",
                             "device_id": null,
@@ -458,8 +494,8 @@ pub mod tests {
                     ]
                 },
                 {
-                    "id": null,
-                    "transaction_id": null,
+                    "id": "3",
+                    "transaction_id": "1",
                     "item_id": "milk",
                     "price": "4.000",
                     "quantity": "3",
@@ -482,8 +518,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "1",
+                            "transaction_item_id": "3",
                             "account_name": "JacobWebb",
                             "account_role": "debitor",
                             "device_id": null,
@@ -495,8 +531,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "1",
+                            "transaction_item_id": "3",
                             "account_name": "GroceryStore",
                             "account_role": "creditor",
                             "device_id": null,
@@ -510,7 +546,7 @@ pub mod tests {
             ]
 		},
         {
-			"id": null,
+			"id": "2",
 			"rule_instance_id": null,
 			"author": "GroceryCo",
 			"author_device_id": null,
@@ -520,8 +556,8 @@ pub mod tests {
 			"sum_value": "21.800",
 			"transaction_items": [
                 {
-                    "id": null,
-                    "transaction_id": null,
+                    "id": "4",
+                    "transaction_id": "2",
                     "item_id": "bread",
                     "price": "3.000",
                     "quantity": "2",
@@ -544,8 +580,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "2",
+                            "transaction_item_id": "4",
                             "account_name": "JacobWebb",
                             "account_role": "debitor",
                             "device_id": null,
@@ -557,8 +593,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "2",
+                            "transaction_item_id": "4",
                             "account_name": "GroceryStore",
                             "account_role": "creditor",
                             "device_id": null,
@@ -570,8 +606,8 @@ pub mod tests {
                     ]
                 },
                 {
-                    "id": null,
-                    "transaction_id": null,
+                    "id": "5",
+                    "transaction_id": "2",
                     "item_id": "milk",
                     "price": "4.000",
                     "quantity": "3",
@@ -594,8 +630,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "2",
+                            "transaction_item_id": "5",
                             "account_name": "JacobWebb",
                             "account_role": "debitor",
                             "device_id": null,
@@ -607,8 +643,8 @@ pub mod tests {
                         {
                             "id": null,
                             "rule_instance_id": null,
-                            "transaction_id": null,
-                            "transaction_item_id": null,
+                            "transaction_id": "2",
+                            "transaction_item_id": "5",
                             "account_name": "GroceryStore",
                             "account_role": "creditor",
                             "device_id": null,
@@ -747,7 +783,7 @@ pub mod tests {
     pub fn create_test_transactions() -> Transactions {
         Transactions(vec![
             Transaction {
-                id: None,
+                id: Some(String::from("1")),
                 rule_instance_id: None,
                 author: Some(String::from("GroceryCo")),
                 author_device_id: None,
@@ -757,8 +793,8 @@ pub mod tests {
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
                     TransactionItem {
-                        id: None,
-                        transaction_id: None,
+                        id: Some(String::from("2")),
+                        transaction_id: Some(String::from("1")),
                         item_id: String::from("bread"),
                         price: String::from("3.000"),
                         quantity: String::from("2"),
@@ -781,8 +817,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("1")),
+                                transaction_item_id: Some(String::from("2")),
                                 account_name: String::from("JacobWebb"),
                                 account_role: AccountRole::Debitor,
                                 device_id: None,
@@ -794,8 +830,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("1")),
+                                transaction_item_id: Some(String::from("2")),
                                 account_name: String::from("GroceryStore"),
                                 account_role: AccountRole::Creditor,
                                 device_id: None,
@@ -807,8 +843,8 @@ pub mod tests {
                         ])),
                     },
                     TransactionItem {
-                        id: None,
-                        transaction_id: None,
+                        id: Some(String::from("3")),
+                        transaction_id: Some(String::from("1")),
                         item_id: String::from("milk"),
                         price: String::from("4.000"),
                         quantity: String::from("3"),
@@ -831,8 +867,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("1")),
+                                transaction_item_id: Some(String::from("3")),
                                 account_name: String::from("JacobWebb"),
                                 account_role: AccountRole::Debitor,
                                 device_id: None,
@@ -844,8 +880,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("1")),
+                                transaction_item_id: Some(String::from("3")),
                                 account_name: String::from("GroceryStore"),
                                 account_role: AccountRole::Creditor,
                                 device_id: None,
@@ -859,7 +895,7 @@ pub mod tests {
                 ]),
             },
             Transaction {
-                id: None,
+                id: Some(String::from("2")),
                 rule_instance_id: None,
                 author: Some(String::from("GroceryCo")),
                 author_device_id: None,
@@ -869,8 +905,8 @@ pub mod tests {
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
                     TransactionItem {
-                        id: None,
-                        transaction_id: None,
+                        id: Some(String::from("4")),
+                        transaction_id: Some(String::from("2")),
                         item_id: String::from("bread"),
                         price: String::from("3.000"),
                         quantity: String::from("2"),
@@ -893,8 +929,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("2")),
+                                transaction_item_id: Some(String::from("4")),
                                 account_name: String::from("JacobWebb"),
                                 account_role: AccountRole::Debitor,
                                 device_id: None,
@@ -906,8 +942,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("2")),
+                                transaction_item_id: Some(String::from("4")),
                                 account_name: String::from("GroceryStore"),
                                 account_role: AccountRole::Creditor,
                                 device_id: None,
@@ -919,8 +955,8 @@ pub mod tests {
                         ])),
                     },
                     TransactionItem {
-                        id: None,
-                        transaction_id: None,
+                        id: Some(String::from("5")),
+                        transaction_id: Some(String::from("2")),
                         item_id: String::from("milk"),
                         price: String::from("4.000"),
                         quantity: String::from("3"),
@@ -943,8 +979,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("2")),
+                                transaction_item_id: Some(String::from("5")),
                                 account_name: String::from("JacobWebb"),
                                 account_role: AccountRole::Debitor,
                                 device_id: None,
@@ -956,8 +992,8 @@ pub mod tests {
                             Approval {
                                 id: None,
                                 rule_instance_id: None,
-                                transaction_id: None,
-                                transaction_item_id: None,
+                                transaction_id: Some(String::from("2")),
+                                transaction_item_id: Some(String::from("5")),
                                 account_name: String::from("GroceryStore"),
                                 account_role: AccountRole::Creditor,
                                 device_id: None,
@@ -984,6 +1020,14 @@ impl Transactions {
 
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+
+    pub fn build(&mut self, transaction_items: TransactionItems, approvals: Approvals) {
+        for transaction in self.0.iter_mut() {
+            transaction
+                .build(transaction_items.clone(), approvals.clone())
+                .unwrap();
+        }
     }
 }
 
