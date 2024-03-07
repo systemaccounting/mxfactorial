@@ -300,6 +300,29 @@ pub mod tests {
         }
     }
 
+    #[test]
+    fn it_will_add_transaction_items_to_transactions() {
+        let mut test_transactions = create_test_transactions();
+        let mut test_transaction_items = TransactionItems(vec![]);
+
+        for transaction in test_transactions.0.iter_mut() {
+            // add transaction items to test_transaction_items
+            test_transaction_items
+                .0
+                .extend(transaction.transaction_items.0.clone());
+            // then clear transaction items on the transaction
+            transaction.transaction_items = TransactionItems(vec![]);
+        }
+
+        test_transactions
+            .add_transaction_items(test_transaction_items)
+            .unwrap();
+
+        for transaction in test_transactions.0 {
+            assert_eq!(transaction.transaction_items.len(), 2);
+        }
+    }
+
     // resume here
     #[test]
     fn it_deserializes_a_transaction() {
@@ -1028,6 +1051,29 @@ impl Transactions {
                 .build(transaction_items.clone(), approvals.clone())
                 .unwrap();
         }
+    }
+
+    // cadet todo: add test
+    pub fn list_ids(&self) -> Result<Vec<i32>, TransactionError> {
+        let mut ids: Vec<i32> = vec![];
+        for transaction in self.0.iter() {
+            if transaction.id.is_none() {
+                return Err(TransactionError::MissingTransactionId);
+            }
+            let id = transaction.id.clone().unwrap().parse::<i32>().unwrap();
+            ids.push(id);
+        }
+        Ok(ids)
+    }
+
+    pub fn add_transaction_items(
+        &mut self,
+        transaction_items: TransactionItems,
+    ) -> Result<(), TransactionError> {
+        for transaction in self.0.iter_mut() {
+            transaction.add_transaction_items(transaction_items.clone())?;
+        }
+        Ok(())
     }
 }
 
