@@ -64,6 +64,8 @@ impl RowTrait for Row {
     }
 }
 
+pub type ToSqlVec = Vec<Box<(dyn ToSql + Sync + Send)>>;
+
 // isolate tokio-postgres query dependency in this impl
 impl DatabaseConnection {
     // old
@@ -82,30 +84,38 @@ impl DatabaseConnection {
     pub async fn query(
         &self,
         sql_stmt: String,
-        values: Vec<Box<(dyn ToSql + Sync)>>,
+        values: ToSqlVec,
     ) -> Result<Vec<Row>, tokio_postgres::Error> {
-        let unboxed_values: Vec<&(dyn ToSql + Sync)> = values.iter().map(|p| &**p).collect();
+        let unboxed_values = DatabaseConnection::unbox_values(&values);
         self.0.query(sql_stmt.as_str(), &unboxed_values).await
     }
 
     pub async fn execute(
         &self,
         sql_stmt: String,
-        values: Vec<Box<(dyn ToSql + Sync)>>,
+        values: ToSqlVec,
     ) -> Result<u64, tokio_postgres::Error> {
-        let unboxed_values: Vec<&(dyn ToSql + Sync)> = values.iter().map(|p| &**p).collect();
+        let unboxed_values = DatabaseConnection::unbox_values(&values);
         self.0.execute(sql_stmt.as_str(), &unboxed_values).await
     }
 
     pub async fn tx(
         &mut self,
         sql_stmt: String,
-        values: Vec<Box<(dyn ToSql + Sync)>>,
+        values: ToSqlVec,
     ) -> Result<Vec<Row>, tokio_postgres::Error> {
-        let unboxed_values: Vec<&(dyn ToSql + Sync)> = values.iter().map(|p| &**p).collect();
+        let unboxed_values = DatabaseConnection::unbox_values(&values);
         let tx = self.0.transaction().await.unwrap();
         let rows = tx.query(sql_stmt.as_str(), &unboxed_values).await.unwrap();
         tx.commit().await.unwrap();
         Ok(rows)
+    }
+
+    fn unbox_values(values: &[Box<(dyn ToSql + Sync + Send)>]) -> Vec<&(dyn ToSql + Sync)> {
+        values
+            .iter()
+            // https://github.com/sfackler/rust-postgres/issues/712#issuecomment-743456104
+            .map(|p| p.as_ref() as &(dyn ToSql + Sync))
+            .collect()
     }
 }
