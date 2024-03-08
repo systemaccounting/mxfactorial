@@ -26,8 +26,12 @@ jobs:
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: crates unit tests
         run: cargo test -p pg -p types -p httpclient
-      - name: crates coverage reports
+      - name: crates/types coverage report
         run: |
           make rust-coverage RUST_PKG=types
+      - name: crates/pg coverage report
+        run: |
           make rust-coverage RUST_PKG=pg
+      - name: crates/httpclient coverage report
+        run: |
           make rust-coverage RUST_PKG=httpclient

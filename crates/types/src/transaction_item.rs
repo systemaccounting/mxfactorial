@@ -2,14 +2,31 @@
 use crate::account::AccountProfiles;
 use crate::{
     account_role::AccountRole,
-    approval::{Approval, Approvals},
+    approval::{Approval, ApprovalError, Approvals},
     time::TZTime,
 };
 use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::error::Error;
 use std::fmt;
+use thiserror::Error;
 use tokio_postgres::Row;
+
+#[derive(Error, Debug, PartialEq, Eq)]
+pub enum TransactionItemError {
+    #[error("inconsistent debitor_first values")]
+    InconsistentValue,
+    #[error("self payment detected for {} account", .0)]
+    SelfPayment(String),
+    #[error("adding to non empty approvals")]
+    AddingToNonEmptyApprovals,
+    #[error("missing transaction_id in transaction item")]
+    MissingTransactionId,
+    #[error("missing id in transaction item")]
+    MissingTransactionItemId,
+}
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, InputObject)]
 #[graphql(input_name = "TransactionItemInput", rename_fields = "snake_case")]
@@ -90,22 +107,22 @@ impl TransactionItem {
         self.creditor_profile_id.clone()
     }
     async fn debitor_approval_time(&self) -> Option<TZTime> {
-        self.debitor_approval_time.clone()
+        self.debitor_approval_time
     }
     async fn creditor_approval_time(&self) -> Option<TZTime> {
-        self.creditor_approval_time.clone()
+        self.creditor_approval_time
     }
     async fn debitor_rejection_time(&self) -> Option<TZTime> {
-        self.debitor_rejection_time.clone()
+        self.debitor_rejection_time
     }
     async fn creditor_rejection_time(&self) -> Option<TZTime> {
-        self.creditor_rejection_time.clone()
+        self.creditor_rejection_time
     }
     async fn debitor_expiration_time(&self) -> Option<TZTime> {
-        self.debitor_expiration_time.clone()
+        self.debitor_expiration_time
     }
     async fn creditor_expiration_time(&self) -> Option<TZTime> {
-        self.creditor_expiration_time.clone()
+        self.creditor_expiration_time
     }
     async fn approvals(&self) -> Vec<Approval> {
         self.approvals.clone().unwrap().0
@@ -160,6 +177,58 @@ impl TransactionItem {
     pub fn expense_string(&self) -> String {
         format!("{:.FIXED_DECIMAL_PLACES$}", self.expense())
     }
+
+    pub fn test_unique_contra_accounts(&self) -> Result<(), TransactionItemError> {
+        if self.debitor != self.creditor {
+            Ok(())
+        } else {
+            Err(TransactionItemError::SelfPayment(self.debitor.clone()))
+        }
+    }
+
+    pub fn list_approvals(&self) -> Result<Approvals, ApprovalError> {
+        if self.approvals.is_none() {
+            return Err(ApprovalError::ZeroApprovals);
+        }
+        Ok(self.approvals.clone().unwrap())
+    }
+
+    pub fn test_pending_role_approval(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> Result<(), ApprovalError> {
+        if self.approvals.is_none() {
+            return Err(ApprovalError::ZeroApprovals);
+        }
+        self.approvals
+            .clone()
+            .unwrap()
+            .test_pending_role_approval(auth_account, account_role)
+    }
+
+    pub fn add_approvals(&mut self, approvals: Approvals) -> Result<(), TransactionItemError> {
+        if self.approvals.is_some() {
+            return Err(TransactionItemError::AddingToNonEmptyApprovals);
+        }
+        if self.id.is_none() {
+            return Err(TransactionItemError::MissingTransactionItemId);
+        }
+        if self.transaction_id.is_none() {
+            return Err(TransactionItemError::MissingTransactionId);
+        }
+
+        let transaction_id = self.transaction_id.clone().unwrap().parse::<i32>().unwrap();
+        let transaction_item_id = self.id.clone().unwrap().parse::<i32>().unwrap();
+
+        let filtered = approvals
+            .filter_by_transaction_and_transaction_item(transaction_id, transaction_item_id)
+            .unwrap();
+
+        self.approvals = Some(filtered);
+
+        Ok(())
+    }
 }
 
 impl From<Row> for TransactionItem {
@@ -192,15 +261,6 @@ impl From<Row> for TransactionItem {
 
 #[derive(Default, Eq, PartialEq, Debug, Deserialize, Serialize, Clone)]
 pub struct TransactionItems(pub Vec<TransactionItem>);
-
-#[derive(Debug, Clone, PartialEq)]
-pub struct InconsistentValueError;
-
-impl fmt::Display for InconsistentValueError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "inconsistent debitor_first values")
-    }
-}
 
 impl From<Vec<TransactionItem>> for TransactionItems {
     fn from(transaction_items: Vec<TransactionItem>) -> Self {
@@ -274,7 +334,7 @@ impl TransactionItems {
         }
     }
 
-    pub fn is_debitor_first(&self) -> std::result::Result<bool, InconsistentValueError> {
+    pub fn is_debitor_first(&self) -> Result<bool, TransactionItemError> {
         let mut true_count = 0;
         let mut false_count = 0;
 
@@ -299,8 +359,40 @@ impl TransactionItems {
         } else if true_count == length {
             Ok(true)
         } else {
-            Err(InconsistentValueError)
+            Err(TransactionItemError::InconsistentValue)
         }
+    }
+
+    pub fn list_unique_debitors(&self) -> Vec<String> {
+        let mut debit_accounts: Vec<String> = vec![];
+        for ti in self.0.iter() {
+            if !debit_accounts.contains(&ti.debitor) {
+                debit_accounts.push(ti.debitor.clone())
+            }
+        }
+        debit_accounts
+    }
+
+    pub fn map_required_funds_from_debitors(&self) -> HashMap<String, Decimal> {
+        let mut required_funds: HashMap<String, Decimal> = HashMap::new();
+        for ti in self.0.iter() {
+            // skip debitors who already paid
+            if ti.debitor_approval_time.is_some() {
+                continue;
+            }
+            let debitor = ti.debitor.clone();
+            let price: Decimal = ti.price.parse().unwrap();
+            let quantity: Decimal = ti.quantity.parse().unwrap();
+            let value = price * quantity;
+            if required_funds.contains_key(&debitor) {
+                let current_value = required_funds.get(&debitor).unwrap();
+                let new_value = current_value + value;
+                required_funds.insert(debitor, new_value);
+            } else {
+                required_funds.insert(debitor, value);
+            }
+        }
+        required_funds
     }
 
     pub fn len(&self) -> usize {
@@ -309,6 +401,64 @@ impl TransactionItems {
 
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+
+    pub fn test_unique_contra_accounts(&self) -> Result<(), Box<dyn Error>> {
+        for ti in self.0.iter() {
+            ti.test_unique_contra_accounts()?
+        }
+        Ok(())
+    }
+
+    pub fn list_approvals(&self) -> Result<Approvals, Box<dyn Error>> {
+        let mut approvals: Vec<Approval> = vec![];
+        for ti in self.0.iter() {
+            let ti_approvals = ti.list_approvals()?;
+            for a in ti_approvals.0.iter() {
+                approvals.push(a.clone())
+            }
+        }
+        Ok(Approvals(approvals))
+    }
+
+    pub fn test_pending_role_approval(
+        &self,
+        auth_account: &str,
+        account_role: AccountRole,
+    ) -> Result<(), ApprovalError> {
+        for ti in self.0.iter() {
+            ti.test_pending_role_approval(auth_account, account_role)?
+        }
+        Ok(())
+    }
+
+    pub fn filter_by_transaction(
+        &self,
+        transaction_id: i32,
+    ) -> Result<TransactionItems, TransactionItemError> {
+        let mut filtered: Vec<TransactionItem> = vec![];
+        for ti in self.0.iter() {
+            if ti.transaction_id.is_none() {
+                return Err(TransactionItemError::MissingTransactionId);
+            }
+            let tr_item_tr_id = ti.transaction_id.clone().unwrap().parse::<i32>().unwrap();
+            if tr_item_tr_id == transaction_id {
+                filtered.push(ti.clone())
+            }
+        }
+        Ok(TransactionItems(filtered))
+    }
+
+    pub fn add_approvals(&mut self, approvals: Approvals) -> Result<(), TransactionItemError> {
+        for ti in self.0.iter_mut() {
+            ti.add_approvals(approvals.clone())?
+        }
+        Ok(())
+    }
+
+    // cadet todo: unit test
+    pub fn to_json_string(&self) -> String {
+        serde_json::to_string(&self).unwrap()
     }
 }
 
@@ -507,12 +657,270 @@ mod tests {
     }
 
     #[test]
+    fn it_lists_unique_debitors() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.list_unique_debitors();
+        let want = vec!["JacobWebb"];
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_maps_required_funds_from_pending_debitors() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.map_required_funds_from_debitors();
+        let mut want = HashMap::new();
+        want.insert(String::from("JacobWebb"), Decimal::from_f32(18.0).unwrap());
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_does_not_map_required_funds_from_paid_debitors() {
+        let mut test_tr_items = create_test_transaction_items();
+        for t in test_tr_items.0.iter_mut() {
+            t.debitor_approval_time = Some(TZTime::now());
+        }
+        let got = test_tr_items.map_required_funds_from_debitors();
+        let want = HashMap::new();
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_errors_when_a_transaction_item_detects_self_payment() {
+        let mut test_tr_items = create_test_transaction_items();
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.debitor = String::from("GroceryStore");
+        test_tr_item.creditor = String::from("GroceryStore");
+        test_tr_items.0.push(test_tr_item);
+
+        assert_eq!(
+            test_tr_items
+                .clone()
+                .test_unique_contra_accounts()
+                .unwrap_err()
+                .to_string(),
+            "self payment detected for GroceryStore account".to_string()
+        )
+    }
+
+    #[test]
+    fn it_lists_approvals_from_a_transaction_item() {
+        let test_tr_item = create_test_transaction_item();
+        let got = test_tr_item.list_approvals().unwrap();
+        let want = Approvals(vec![]);
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_errors_with_zero_approvals_when_listing_transaction_item_approvals() {
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.approvals = None;
+        assert_eq!(
+            test_tr_item.list_approvals().unwrap_err().to_string(),
+            "zero approvals".to_string()
+        )
+    }
+
+    #[test]
+    fn it_adds_approvals_to_a_transaction_item() {
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.approvals = None;
+        let test_approvals = create_test_approvals();
+        let mut with_unmatched = test_approvals.clone();
+        with_unmatched.0.append(&mut vec![
+            // add an approval with an unmatched transaction_item_id
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("3")),
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+        test_tr_item.add_approvals(with_unmatched.clone()).unwrap();
+        let got = test_tr_item.approvals.clone().unwrap();
+        let want = test_approvals; // without unmatched
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_errors_with_adding_to_non_empty_approvals_on_a_transaction_item() {
+        let mut test_tr_item = create_test_transaction_item();
+        let test_approvals = create_test_approvals();
+        assert_eq!(
+            test_tr_item
+                .add_approvals(test_approvals)
+                .unwrap_err()
+                .to_string(),
+            "adding to non empty approvals".to_string()
+        )
+    }
+
+    #[test]
+    fn it_errors_with_missing_transaction_id() {
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.transaction_id = None;
+        test_tr_item.approvals = None;
+        let test_approvals = create_test_approvals();
+        assert_eq!(
+            test_tr_item
+                .add_approvals(test_approvals)
+                .unwrap_err()
+                .to_string(),
+            "missing transaction_id in transaction item".to_string()
+        )
+    }
+
+    #[test]
+    fn it_errors_with_missing_id() {
+        let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.id = None;
+        test_tr_item.approvals = None;
+        let test_approvals = create_test_approvals();
+        assert_eq!(
+            test_tr_item
+                .add_approvals(test_approvals)
+                .unwrap_err()
+                .to_string(),
+            "missing id in transaction item".to_string()
+        )
+    }
+
+    #[test]
+    fn it_lists_approvals_from_transaction_items() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.list_approvals().unwrap();
+        let want = Approvals(vec![
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("2")),
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("2")),
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("3")),
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("3")),
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_will_filter_by_transaction() {
+        let test_tr_items = create_test_transaction_items();
+        let mut with_unmatched = test_tr_items.clone();
+        with_unmatched.0.append(&mut vec![
+            // add an unmatched transaction_id
+            TransactionItem {
+                id: Some(String::from("3")),
+                transaction_id: Some(String::from("2")),
+                item_id: String::from("eggs"),
+                price: String::from("2.500"),
+                quantity: String::from("2"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: Some(vec![]),
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: Some(Approvals(vec![
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: Some(String::from("2")),
+                        transaction_item_id: Some(String::from("3")),
+                        account_name: String::from("JacobWebb"),
+                        account_role: AccountRole::Debitor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                    Approval {
+                        id: None,
+                        rule_instance_id: None,
+                        transaction_id: Some(String::from("2")),
+                        transaction_item_id: Some(String::from("3")),
+                        account_name: String::from("GroceryStore"),
+                        account_role: AccountRole::Creditor,
+                        device_id: None,
+                        device_latlng: None,
+                        approval_time: None,
+                        rejection_time: None,
+                        expiration_time: None,
+                    },
+                ])),
+            },
+        ]);
+        let got = with_unmatched.filter_by_transaction(1).unwrap();
+        let want = create_test_transaction_items();
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
     fn it_deserializes_a_transaction_item() {
         let got: TransactionItem = serde_json::from_str(
             r#"
         {
-            "id": null,
-            "transaction_id": null,
+            "id": "2",
+            "transaction_id": "1",
             "item_id": "bottled water",
             "price": "1.000",
             "quantity": "2",
@@ -549,8 +957,8 @@ mod tests {
             r#"
 	[
 		{
-			"id": null,
-			"transaction_id": null,
+			"id": "2",
+			"transaction_id": "1",
 			"item_id": "bread",
 			"price": "3.000",
 			"quantity": "2",
@@ -573,8 +981,8 @@ mod tests {
                 {
                     "id": null,
                     "rule_instance_id": null,
-                    "transaction_id": null,
-                    "transaction_item_id": null,
+                    "transaction_id": "1",
+                    "transaction_item_id": "2",
                     "account_name": "JacobWebb",
                     "account_role": "debitor",
                     "device_id": null,
@@ -586,8 +994,8 @@ mod tests {
                 {
                     "id": null,
                     "rule_instance_id": null,
-                    "transaction_id": null,
-                    "transaction_item_id": null,
+                    "transaction_id": "1",
+                    "transaction_item_id": "2",
                     "account_name": "GroceryStore",
                     "account_role": "creditor",
                     "device_id": null,
@@ -599,8 +1007,8 @@ mod tests {
             ]
 		},
 		{
-			"id": null,
-			"transaction_id": null,
+			"id": "3",
+			"transaction_id": "1",
 			"item_id": "milk",
 			"price": "4.000",
 			"quantity": "3",
@@ -623,8 +1031,8 @@ mod tests {
                 {
                     "id": null,
                     "rule_instance_id": null,
-                    "transaction_id": null,
-                    "transaction_item_id": null,
+                    "transaction_id": "1",
+                    "transaction_item_id": "3",
                     "account_name": "JacobWebb",
                     "account_role": "debitor",
                     "device_id": null,
@@ -636,8 +1044,8 @@ mod tests {
                 {
                     "id": null,
                     "rule_instance_id": null,
-                    "transaction_id": null,
-                    "transaction_item_id": null,
+                    "transaction_id": "1",
+                    "transaction_item_id": "3",
                     "account_name": "GroceryStore",
                     "account_role": "creditor",
                     "device_id": null,
@@ -702,14 +1110,44 @@ mod tests {
     fn it_returns_inconsistent_err() {
         let test_transaction = create_test_inconsistent_err_transaction_items();
         let got = test_transaction.is_debitor_first().map_err(|e| e);
-        let want = Err(InconsistentValueError);
-        assert_eq!(got, want);
+        assert_eq!(got, Err(TransactionItemError::InconsistentValue));
+    }
+
+    pub fn create_test_approvals() -> Approvals {
+        Approvals(vec![
+            Approval {
+                id: Some(String::from("3")),
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("2")),
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: Some(String::from("4")),
+                rule_instance_id: None,
+                transaction_id: Some(String::from("1")),
+                transaction_item_id: Some(String::from("2")),
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ])
     }
 
     pub fn create_test_transaction_item() -> TransactionItem {
         TransactionItem {
-            id: None,
-            transaction_id: None,
+            id: Some(String::from("2")),
+            transaction_id: Some(String::from("1")),
             item_id: String::from("bottled water"),
             price: String::from("1.000"),
             quantity: String::from("2"),
@@ -735,8 +1173,8 @@ mod tests {
     pub fn create_test_transaction_items() -> TransactionItems {
         TransactionItems(vec![
             TransactionItem {
-                id: None,
-                transaction_id: None,
+                id: Some(String::from("2")),
+                transaction_id: Some(String::from("1")),
                 item_id: String::from("bread"),
                 price: String::from("3.000"),
                 quantity: String::from("2"),
@@ -759,8 +1197,8 @@ mod tests {
                     Approval {
                         id: None,
                         rule_instance_id: None,
-                        transaction_id: None,
-                        transaction_item_id: None,
+                        transaction_id: Some(String::from("1")),
+                        transaction_item_id: Some(String::from("2")),
                         account_name: String::from("JacobWebb"),
                         account_role: AccountRole::Debitor,
                         device_id: None,
@@ -772,8 +1210,8 @@ mod tests {
                     Approval {
                         id: None,
                         rule_instance_id: None,
-                        transaction_id: None,
-                        transaction_item_id: None,
+                        transaction_id: Some(String::from("1")),
+                        transaction_item_id: Some(String::from("2")),
                         account_name: String::from("GroceryStore"),
                         account_role: AccountRole::Creditor,
                         device_id: None,
@@ -785,8 +1223,8 @@ mod tests {
                 ])),
             },
             TransactionItem {
-                id: None,
-                transaction_id: None,
+                id: Some(String::from("3")),
+                transaction_id: Some(String::from("1")),
                 item_id: String::from("milk"),
                 price: String::from("4.000"),
                 quantity: String::from("3"),
@@ -809,8 +1247,8 @@ mod tests {
                     Approval {
                         id: None,
                         rule_instance_id: None,
-                        transaction_id: None,
-                        transaction_item_id: None,
+                        transaction_id: Some(String::from("1")),
+                        transaction_item_id: Some(String::from("3")),
                         account_name: String::from("JacobWebb"),
                         account_role: AccountRole::Debitor,
                         device_id: None,
@@ -822,8 +1260,8 @@ mod tests {
                     Approval {
                         id: None,
                         rule_instance_id: None,
-                        transaction_id: None,
-                        transaction_item_id: None,
+                        transaction_id: Some(String::from("1")),
+                        transaction_item_id: Some(String::from("3")),
                         account_name: String::from("GroceryStore"),
                         account_role: AccountRole::Creditor,
                         device_id: None,

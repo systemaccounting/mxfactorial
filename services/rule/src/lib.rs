@@ -64,7 +64,7 @@ pub fn label_approved_transaction_items(
             // test for timestamps in all role approvals
             if approvals_per_role.clone().0.len() == approval_count {
                 // test for latest approval time
-                let mut latest_approval_time = approval_times[0].clone();
+                let mut latest_approval_time = approval_times[0];
                 for t in approval_times.clone().iter() {
                     if t.0.gt(&latest_approval_time.0) {
                         latest_approval_time = TZTime(t.0)
@@ -76,13 +76,13 @@ pub fn label_approved_transaction_items(
                     if *role == AccountRole::Debitor {
                         // label transaction item for debitor as approved
                         // (all debitor approvals have timestamps)
-                        tr_item.debitor_approval_time = Some(latest_approval_time.clone());
+                        tr_item.debitor_approval_time = Some(latest_approval_time);
                     };
 
                     if *role == AccountRole::Creditor {
                         // label transaction item for creditor as approved
                         // (all creditor approvals have timestamps)
-                        tr_item.creditor_approval_time = Some(latest_approval_time.clone());
+                        tr_item.creditor_approval_time = Some(latest_approval_time);
                     };
                 }
                 // todo: else inconsistent approval time error

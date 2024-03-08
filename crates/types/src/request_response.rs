@@ -19,6 +19,11 @@ impl IntraTransaction {
             transaction,
         }
     }
+
+    // cadet todo: unit test
+    pub fn from_json_string(json_string: &str) -> Result<Self, serde_json::Error> {
+        serde_json::from_str(json_string)
+    }
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize)]

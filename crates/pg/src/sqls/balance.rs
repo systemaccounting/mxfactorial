@@ -1,4 +1,5 @@
 use crate::sqls::common::*;
+use tokio_postgres::types::Type;
 use types::balance::AccountBalance;
 
 const ACCOUNT_BALANCE_TABLE: &str = "account_balance";
@@ -29,10 +30,12 @@ impl TableTrait for AccountBalanceTable {
 }
 
 impl AccountBalanceTable {
-    fn select_columns(&self) -> Columns {
+    fn select_columns_with_casting(&self) -> Columns {
         Columns(vec![
             self.get_column("account_name"),
             self.get_column("current_balance"),
+            self.get_column("current_transaction_item_id")
+                .cast_column_as(Type::TEXT),
         ])
     }
 
@@ -45,7 +48,7 @@ impl AccountBalanceTable {
     }
 
     pub fn select_account_balances_sql(&self, accounts_count: usize) -> String {
-        let columns = self.select_columns().join();
+        let columns = self.select_columns_with_casting().join_with_casting();
         let params = create_params(accounts_count);
         format!(
             "{} {} {} {} {} {} {} ({})",
@@ -136,7 +139,7 @@ mod tests {
         let test_table = AccountBalanceTable::new();
         assert_eq!(
 			test_table.select_account_balances_sql(account_count),
-			"SELECT account_name, current_balance FROM account_balance WHERE account_name IN ($1, $2)"
+			"SELECT account_name, current_balance, current_transaction_item_id::text FROM account_balance WHERE account_name IN ($1, $2)"
 		);
     }
 

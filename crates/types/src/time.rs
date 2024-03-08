@@ -5,7 +5,7 @@ use postgres_types::{FromSql, ToSql, Type};
 use serde::{Deserialize, Serialize, Serializer};
 use std::{error::Error, string::ToString};
 
-#[derive(Eq, PartialEq, Debug, Deserialize, ToSql, Clone)]
+#[derive(Eq, PartialEq, Debug, Deserialize, ToSql, Clone, Copy)]
 
 pub struct TZTime(pub DateTime<Utc>);
 
@@ -16,6 +16,10 @@ impl TZTime {
 
     pub fn to_milli_tz(&self) -> String {
         self.0.to_rfc3339_opts(SecondsFormat::Millis, true)
+    }
+
+    pub fn not_lapsed(&self) -> bool {
+        self.0 > TZTime::now().0
     }
 }
 
@@ -152,6 +156,26 @@ mod tests {
     fn it_accepts_timestamptz_type_from_sql() {
         let test_pg_type = Type::TIMESTAMPTZ;
         assert!(<TZTime as postgres_types::FromSql>::accepts(&test_pg_type))
+    }
+
+    #[test]
+    fn it_reports_not_lapsed() {
+        let test_tz_time = TZTime(
+            DateTime::parse_from_rfc3339("3023-01-01T04:56:56Z")
+                .unwrap()
+                .with_timezone(&Utc),
+        );
+        assert!(test_tz_time.not_lapsed())
+    }
+
+    #[test]
+    fn it_reports_lapsed() {
+        let test_tz_time = TZTime(
+            DateTime::parse_from_rfc3339("2013-10-30T04:56:56Z")
+                .unwrap()
+                .with_timezone(&Utc),
+        );
+        assert!(!test_tz_time.not_lapsed())
     }
 
     #[test]

@@ -39,7 +39,7 @@ fn approve_any_credit_item(
         approval.transaction_item_id = transaction_item_id;
         approval.account_name = approver_account;
         approval.account_role = approver_role;
-        approval.approval_time = Some(approval_time.clone());
+        approval.approval_time = Some(*approval_time);
         Ok(())
     } else {
         Err("unmatched approver rule instance from db".into())

@@ -24,6 +24,7 @@ dotenvy = "0.15.7"
 serde_json = "1.0.113"
 serial_test = "*"
 tokio = { version = "1.35.1", default-features = false, features = ["macros"] }
+regex = "1.5.4"
 
 [features]
 db_tests = []
