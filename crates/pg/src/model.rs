@@ -1,4 +1,5 @@
-use crate::postgres::{ConnectionPool, DatabaseConnection, RowTrait};
+#![allow(async_fn_in_trait)]
+use crate::postgres::{ConnectionPool, DatabaseConnection, RowTrait, ToSqlVec};
 use crate::sqls::common::TableTrait;
 use crate::sqls::{
     profile::{select_account_profiles_by_db_cr_accounts, select_approvers},
@@ -26,10 +27,93 @@ use types::{
 
 const FIXED_DECIMAL_PLACES: usize = 3;
 
-impl DatabaseConnection {
-    pub async fn insert_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
+// todo: add future boilerplate
+// https://doc.rust-lang.org/beta/rustc/lints/listing/warn-by-default.html#async-fn-in-trait
+pub trait ModelTrait {
+    async fn insert_account_query(&self, account: String) -> Result<(), Box<dyn Error>>;
+    async fn delete_owner_account_query(&self, account: String) -> Result<(), Box<dyn Error>>;
+    async fn select_account_balance_query(&self, account: String)
+        -> Result<String, Box<dyn Error>>;
+    async fn select_account_balances_query(
+        &self,
+        accounts: Vec<String>,
+    ) -> Result<AccountBalances, Box<dyn Error>>;
+    async fn update_account_balances_query(
+        &self,
+        transaction_items: TransactionItems,
+    ) -> Result<(), Box<dyn Error>>;
+    async fn insert_account_balance_query(
+        &self,
+        account: String,
+        balance: Decimal,
+        curr_tr_item_id: i32,
+    ) -> Result<(), Box<dyn Error>>;
+    async fn select_approvals_by_transaction_id_query(
+        &self,
+        transaction_id: i32,
+    ) -> Result<Approvals, Box<dyn Error>>;
+    async fn select_approvals_by_transaction_ids_query(
+        &self,
+        transaction_ids: Vec<i32>,
+    ) -> Result<Approvals, Box<dyn Error>>;
+    async fn update_approvals_by_account_and_role_query(
+        &self,
+        transaction_id: i32,
+        account: String,
+        role: AccountRole,
+    ) -> Result<TZTime, Box<dyn Error>>;
+    async fn insert_account_profile_query(
+        &self,
+        account_profile: AccountProfile,
+    ) -> Result<String, Box<dyn Error>>;
+    async fn select_profile_ids_by_account_names_query(
+        &self,
+        accounts: Vec<String>,
+    ) -> Result<Vec<(String, String)>, Box<dyn Error>>;
+    async fn select_transaction_items_by_transaction_id_query(
+        &self,
+        transaction_id: i32,
+    ) -> Result<TransactionItems, Box<dyn Error>>;
+    async fn select_transaction_items_by_transaction_ids_query(
+        &self,
+        transaction_ids: Vec<i32>,
+    ) -> Result<TransactionItems, Box<dyn Error>>;
+    async fn select_transaction_by_id_query(
+        &self,
+        transaction_id: i32,
+    ) -> Result<Transaction, Box<dyn Error>>;
+    async fn insert_transaction_tx_query(
+        &mut self,
+        transaction: Transaction,
+    ) -> Result<String, Box<dyn Error>>;
+    async fn select_last_n_transactions_query(
+        &self,
+        account: String,
+        n: i64,
+    ) -> Result<Transactions, Box<dyn Error>>;
+    async fn select_last_n_requests_query(
+        &self,
+        account: String,
+        n: i64,
+    ) -> Result<Transactions, Box<dyn Error>>;
+    async fn select_transactions_by_ids_query(
+        &self,
+        transaction_ids: Vec<i32>,
+    ) -> Result<Transactions, Box<dyn Error>>;
+    async fn select_approve_all_credit_rule_instance_exists_query(
+        &self,
+        account_name: String,
+    ) -> Result<bool, Box<dyn Error>>;
+    async fn insert_approve_all_credit_rule_instance_query(
+        &self,
+        account_name: String,
+    ) -> Result<(), Box<dyn Error>>;
+}
+
+impl ModelTrait for DatabaseConnection {
+    async fn insert_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
         let sql = crate::sqls::account::insert_account_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account)];
+        let values: ToSqlVec = vec![Box::new(account)];
         let result = self.execute(sql, values).await;
         match result {
             Err(e) => Err(Box::new(e)),
@@ -37,9 +121,9 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn delete_owner_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
+    async fn delete_owner_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
         let sql = crate::sqls::account::delete_owner_account_sql();
-        let values: Vec<Box<(dyn ToSql + Sync)>> = vec![Box::new(account)];
+        let values: ToSqlVec = vec![Box::new(account)];
         let result = self.execute(sql, values).await;
         match result {
             Err(e) => Err(Box::new(e)),
@@ -47,13 +131,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_account_balance_query(
+    async fn select_account_balance_query(
         &self,
         account: String,
     ) -> Result<String, Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.select_current_account_balance_by_account_name_sql();
-        let values: Vec<Box<(dyn ToSql + Sync)>> = vec![Box::new(account)];
+        let values: ToSqlVec = vec![Box::new(account)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -64,13 +148,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_account_balances_query(
+    async fn select_account_balances_query(
         &self,
         accounts: Vec<String>,
     ) -> Result<AccountBalances, Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.select_account_balances_sql(accounts.len());
-        let mut values: Vec<Box<(dyn ToSql + Sync)>> = Vec::new();
+        let mut values: ToSqlVec = Vec::new();
         for a in accounts.into_iter() {
             values.push(Box::new(a))
         }
@@ -84,12 +168,12 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn update_account_balances_query(
+    async fn update_account_balances_query(
         &self,
         transaction_items: TransactionItems,
     ) -> Result<(), Box<dyn Error>> {
         // create a vector of values to pass to the query
-        let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
+        let mut values: ToSqlVec = Vec::new();
         for tr_item in transaction_items.clone().into_iter() {
             // add creditor account as first param
             values.push(Box::new(tr_item.clone().creditor));
@@ -119,7 +203,7 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn insert_account_balance_query(
+    async fn insert_account_balance_query(
         &self,
         account: String,
         balance: Decimal,
@@ -127,7 +211,7 @@ impl DatabaseConnection {
     ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.insert_account_balance_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![
+        let values: ToSqlVec = vec![
             Box::new(account),
             Box::new(balance),
             Box::new(curr_tr_item_id),
@@ -139,13 +223,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_approvals_by_transaction_id_query(
+    async fn select_approvals_by_transaction_id_query(
         &self,
         transaction_id: i32,
     ) -> Result<Approvals, Box<dyn Error>> {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.select_approvals_by_transaction_id_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(transaction_id)];
+        let values: ToSqlVec = vec![Box::new(transaction_id)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(rows) => Err(Box::new(rows)),
@@ -153,11 +237,11 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_approvals_by_transaction_ids_query(
+    async fn select_approvals_by_transaction_ids_query(
         &self,
         transaction_ids: Vec<i32>,
     ) -> Result<Approvals, Box<dyn Error>> {
-        let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
+        let mut values: ToSqlVec = Vec::new();
         for t in transaction_ids.clone().into_iter() {
             values.push(Box::new(t))
         }
@@ -170,7 +254,7 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn update_approvals_by_account_and_role_query(
+    async fn update_approvals_by_account_and_role_query(
         &self,
         transaction_id: i32,
         account: String,
@@ -178,8 +262,7 @@ impl DatabaseConnection {
     ) -> Result<TZTime, Box<dyn Error>> {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.update_approvals_by_account_and_role_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> =
-            vec![Box::new(transaction_id), Box::new(account), Box::new(role)];
+        let values: ToSqlVec = vec![Box::new(transaction_id), Box::new(account), Box::new(role)];
         let result = self.query(sql.to_string(), values).await;
         match result {
             Err(e) => Err(Box::new(e)),
@@ -190,13 +273,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn insert_account_profile_query(
+    async fn insert_account_profile_query(
         &self,
         account_profile: AccountProfile,
     ) -> Result<String, Box<dyn Error>> {
         let table = crate::sqls::profile::AccountProfileTable::new();
         let sql = table.insert_account_profile_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![
+        let values: ToSqlVec = vec![
             Box::new(account_profile.account_name),
             Box::new(account_profile.description),
             Box::new(account_profile.first_name),
@@ -255,13 +338,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_profile_ids_by_account_names_query(
+    async fn select_profile_ids_by_account_names_query(
         &self,
         accounts: Vec<String>,
     ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
         let table = crate::sqls::profile::AccountProfileTable::new();
         let sql = table.select_profile_ids_by_account_names_sql(accounts.len());
-        let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
+        let mut values: ToSqlVec = Vec::new();
         for a in accounts.into_iter() {
             values.push(Box::new(a))
         }
@@ -278,13 +361,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_transaction_items_by_transaction_id_query(
+    async fn select_transaction_items_by_transaction_id_query(
         &self,
         transaction_id: i32,
     ) -> Result<TransactionItems, Box<dyn Error>> {
         let table = crate::sqls::transaction_item::TransactionItemTable::new();
         let sql = table.select_transaction_items_by_transaction_id_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(transaction_id)];
+        let values: ToSqlVec = vec![Box::new(transaction_id)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -292,11 +375,11 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_transaction_items_by_transaction_ids_query(
+    async fn select_transaction_items_by_transaction_ids_query(
         &self,
         transaction_ids: Vec<i32>,
     ) -> Result<TransactionItems, Box<dyn Error>> {
-        let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
+        let mut values: ToSqlVec = Vec::new();
         for t in transaction_ids.clone().into_iter() {
             values.push(Box::new(t))
         }
@@ -309,13 +392,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_transaction_by_id_query(
+    async fn select_transaction_by_id_query(
         &self,
         transaction_id: i32,
     ) -> Result<Transaction, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_transaction_by_id_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(transaction_id)];
+        let values: ToSqlVec = vec![Box::new(transaction_id)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -327,7 +410,7 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn insert_transaction_tx_query(
+    async fn insert_transaction_tx_query(
         &mut self,
         transaction: Transaction,
     ) -> Result<String, Box<dyn Error>> {
@@ -343,7 +426,7 @@ impl DatabaseConnection {
             parse_pg_timestamp(transaction.equilibrium_time).unwrap();
         let transaction_sum_value = parse_pg_numeric(Some(transaction.sum_value)).unwrap();
 
-        let mut values: Vec<Box<dyn ToSql + Sync>> = vec![
+        let mut values: ToSqlVec = vec![
             Box::new(transaction_rule_instance_id),
             Box::new(transaction.author),
             Box::new(None::<String>), // author_device_id
@@ -432,14 +515,14 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_last_n_transactions_query(
+    async fn select_last_n_transactions_query(
         &self,
         account: String,
         n: i64,
     ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_last_n_reqs_or_trans_by_account_sql(true);
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account), Box::new(n)];
+        let values: ToSqlVec = vec![Box::new(account), Box::new(n)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -450,14 +533,14 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_last_n_requests_query(
+    async fn select_last_n_requests_query(
         &self,
         account: String,
         n: i64,
     ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_last_n_reqs_or_trans_by_account_sql(false);
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account), Box::new(n)];
+        let values: ToSqlVec = vec![Box::new(account), Box::new(n)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -468,13 +551,13 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn select_transactions_by_ids_query(
+    async fn select_transactions_by_ids_query(
         &self,
         transaction_ids: Vec<i32>,
     ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_transactions_by_ids_sql(transaction_ids.len());
-        let mut values: Vec<Box<dyn ToSql + Sync>> = Vec::new();
+        let mut values: ToSqlVec = Vec::new();
         for t in transaction_ids.into_iter() {
             values.push(Box::new(t))
         }
@@ -488,6 +571,62 @@ impl DatabaseConnection {
         }
     }
 
+    // todo: merge with insert_approve_all_credit_rule_instance_query as cte
+    async fn select_approve_all_credit_rule_instance_exists_query(
+        &self,
+        account_name: String,
+    ) -> Result<bool, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
+        let sql = table.select_rule_instance_exists_sql();
+        let values: ToSqlVec = vec![
+            Box::new("approval".to_string()),                  // rule_type
+            Box::new("approveAnyCreditItem".to_string()),      // rule_name
+            Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
+            Box::new(AccountRole::Creditor),                   // account_role
+            Box::new(account_name.clone()),                    // account_name
+            Box::new(vec![
+                account_name.clone(),
+                AccountRole::Creditor.to_string(),
+                account_name,
+            ]), // variable_values
+        ];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let exists: bool = rows[0].get(0);
+                Ok(exists)
+            }
+        }
+    }
+
+    async fn insert_approve_all_credit_rule_instance_query(
+        &self,
+        account_name: String,
+    ) -> Result<(), Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
+        let sql = table.insert_rule_instance_sql();
+        let values: ToSqlVec = vec![
+            Box::new("approval".to_string()),                  // rule_type
+            Box::new("approveAnyCreditItem".to_string()),      // rule_name
+            Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
+            Box::new(AccountRole::Creditor),                   // account_role
+            Box::new(account_name.clone()),                    // account_name
+            Box::new(vec![
+                account_name.clone(),
+                AccountRole::Creditor.to_string(),
+                account_name,
+            ]), // variable_values
+        ];
+        let result = self.execute(sql.to_string(), values).await;
+        match result {
+            Err(e) => Err(Box::new(e)),
+            Ok(_) => Ok(()),
+        }
+    }
+}
+
+impl DatabaseConnection {
     pub async fn select_rule_instance_exists_query(
         &self,
         rule_type: String,
@@ -499,7 +638,7 @@ impl DatabaseConnection {
     ) -> Result<bool, Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.select_rule_instance_exists_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![
+        let values: ToSqlVec = vec![
             Box::new(rule_type),
             Box::new(rule_name),
             Box::new(rule_instance_name),
@@ -528,7 +667,7 @@ impl DatabaseConnection {
     ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.insert_rule_instance_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![
+        let values: ToSqlVec = vec![
             Box::new(rule_type),
             Box::new(rule_name),
             Box::new(rule_instance_name),
@@ -543,66 +682,12 @@ impl DatabaseConnection {
         }
     }
 
-    // todo: merge with insert_approve_all_credit_rule_instance_query as cte
-    pub async fn select_approve_all_credit_rule_instance_exists_query(
-        &self,
-        account_name: String,
-    ) -> Result<bool, Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.select_rule_instance_exists_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![
-            Box::new("approval".to_string()),                  // rule_type
-            Box::new("approveAnyCreditItem".to_string()),      // rule_name
-            Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
-            Box::new(AccountRole::Creditor),                   // account_role
-            Box::new(account_name.clone()),                    // account_name
-            Box::new(vec![
-                account_name.clone(),
-                AccountRole::Creditor.to_string(),
-                account_name,
-            ]), // variable_values
-        ];
-        let rows = self.query(sql.to_string(), values).await;
-        match rows {
-            Err(e) => Err(Box::new(e)),
-            Ok(rows) => {
-                let exists: bool = rows[0].get(0);
-                Ok(exists)
-            }
-        }
-    }
-
-    pub async fn insert_approve_all_credit_rule_instance_query(
-        &self,
-        account_name: String,
-    ) -> Result<(), Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.insert_rule_instance_sql();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![
-            Box::new("approval".to_string()),                  // rule_type
-            Box::new("approveAnyCreditItem".to_string()),      // rule_name
-            Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
-            Box::new(AccountRole::Creditor),                   // account_role
-            Box::new(account_name.clone()),                    // account_name
-            Box::new(vec![
-                account_name.clone(),
-                AccountRole::Creditor.to_string(),
-                account_name,
-            ]), // variable_values
-        ];
-        let result = self.execute(sql.to_string(), values).await;
-        match result {
-            Err(e) => Err(Box::new(e)),
-            Ok(_) => Ok(()),
-        }
-    }
-
     pub async fn select_approvers_query(
         &self,
         account: String,
     ) -> Result<Vec<String>, Box<dyn Error>> {
         let sql = select_approvers();
-        let values: Vec<Box<dyn ToSql + Sync>> = vec![Box::new(account)];
+        let values: ToSqlVec = vec![Box::new(account)];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
