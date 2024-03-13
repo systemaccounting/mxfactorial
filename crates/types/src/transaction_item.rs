@@ -490,6 +490,16 @@ impl TransactionItems {
         }
         Self(authrorized)
     }
+
+    pub fn filter_user_added(&self) -> Self {
+        let mut filtered: Vec<TransactionItem> = vec![];
+        for ti in self.0.iter() {
+            if ti.rule_instance_id.is_none() {
+                filtered.push(ti.clone())
+            }
+        }
+        Self(filtered)
+    }
 }
 
 impl From<Vec<Row>> for TransactionItems {
@@ -996,6 +1006,37 @@ mod tests {
             },
         ]);
         let got = test_tr_items.remove_unauthorized_values();
+        assert_eq!(got, want, "got {:#?}, want {:#?}", got, want)
+    }
+
+    #[test]
+    fn it_will_filter_user_added_transaction_items() {
+        let mut test_tr_items = create_test_transaction_items();
+        test_tr_items.0.push(TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: String::from("9% state sales tax"),
+            price: String::from("0.270"),
+            quantity: String::from("2.000"),
+            debitor_first: Some(false),
+            rule_instance_id: Some(String::from("9% state sales tax")),
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: String::from("JacobWebb"),
+            creditor: String::from("StateOfCalifornia"),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        });
+        let want = create_test_transaction_items();
+        let got = test_tr_items.filter_user_added();
         assert_eq!(got, want, "got {:#?}, want {:#?}", got, want)
     }
 
