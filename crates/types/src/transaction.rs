@@ -16,6 +16,10 @@ pub enum TransactionError {
     AddingToNonEmptyTransactionItems,
     #[error("missing transaction id")]
     MissingTransactionId,
+    #[error("missing author in transaction items")]
+    MissingAuthorInTransactionItems,
+    #[error("missing author in transaction")]
+    MissingAuthorInTransaction,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
@@ -99,6 +103,30 @@ impl Transaction {
         transaction_items.add_approvals(approvals)?;
         self.add_transaction_items(transaction_items)?;
         Ok(())
+    }
+
+    pub fn get_author_role(&self) -> Result<AccountRole, Box<dyn Error>> {
+        if self.author_role.is_none() {
+            return Err(Box::new(TransactionError::MissingAuthorInTransaction));
+        }
+
+        let auth_account = self.author.clone().unwrap();
+
+        // test for rule added transaction author
+        if self.rule_instance_id.is_some() && self.rule_instance_id.clone().unwrap() != "" {
+            return Ok(self.author_role.unwrap());
+        }
+        // test author role in transaction items if transaction is NOT rule generated
+        for ti in self.transaction_items.0.iter() {
+            if ti.debitor == auth_account {
+                return Ok(AccountRole::Debitor);
+            }
+            if ti.creditor == auth_account {
+                return Ok(AccountRole::Creditor);
+            }
+        }
+
+        Err(Box::new(TransactionError::MissingAuthorInTransactionItems))
     }
 }
 
@@ -323,7 +351,14 @@ pub mod tests {
         }
     }
 
-    // resume here
+    // cadet todo: test remaining branches of get_author_role
+    #[test]
+    fn it_returns_author_role_found_in_transaction_items() {
+        let test_transaction = create_test_transaction();
+        let got = test_transaction.get_author_role().unwrap();
+        assert_eq!(got, AccountRole::Creditor)
+    }
+
     #[test]
     fn it_deserializes_a_transaction() {
         let got: Transaction = serde_json::from_str(
@@ -331,7 +366,7 @@ pub mod tests {
             {
                 "id": "1",
                 "rule_instance_id": null,
-                "author": "GroceryCo",
+                "author": "GroceryStore",
                 "author_device_id": null,
                 "author_device_latlng": null,
                 "author_role": "creditor",
@@ -459,7 +494,7 @@ pub mod tests {
         {
 			"id": "1",
 			"rule_instance_id": null,
-			"author": "GroceryCo",
+			"author": "GroceryStore",
 			"author_device_id": null,
 			"author_device_latlng": null,
 			"author_role": "creditor",
@@ -571,7 +606,7 @@ pub mod tests {
         {
 			"id": "2",
 			"rule_instance_id": null,
-			"author": "GroceryCo",
+			"author": "GroceryStore",
 			"author_device_id": null,
 			"author_device_latlng": null,
 			"author_role": "creditor",
@@ -692,7 +727,7 @@ pub mod tests {
         Transaction {
             id: Some(String::from("1")),
             rule_instance_id: None,
-            author: Some(String::from("GroceryCo")),
+            author: Some(String::from("GroceryStore")),
             author_device_id: None,
             author_device_latlng: None,
             author_role: Some(AccountRole::Creditor),
@@ -808,7 +843,7 @@ pub mod tests {
             Transaction {
                 id: Some(String::from("1")),
                 rule_instance_id: None,
-                author: Some(String::from("GroceryCo")),
+                author: Some(String::from("GroceryStore")),
                 author_device_id: None,
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
@@ -920,7 +955,7 @@ pub mod tests {
             Transaction {
                 id: Some(String::from("2")),
                 rule_instance_id: None,
-                author: Some(String::from("GroceryCo")),
+                author: Some(String::from("GroceryStore")),
                 author_device_id: None,
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
