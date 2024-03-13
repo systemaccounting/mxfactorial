@@ -460,6 +460,36 @@ impl TransactionItems {
     pub fn to_json_string(&self) -> String {
         serde_json::to_string(&self).unwrap()
     }
+
+    pub fn remove_unauthorized_values(&self) -> Self {
+        let mut authrorized: Vec<TransactionItem> = vec![];
+        for ti in self.0.iter() {
+            authrorized.push(TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: ti.item_id.clone(),
+                price: ti.price.clone(),
+                quantity: ti.quantity.clone(),
+                debitor_first: ti.debitor_first,
+                rule_instance_id: ti.rule_instance_id.clone(),
+                rule_exec_ids: None,
+                unit_of_measurement: ti.unit_of_measurement.clone(),
+                units_measured: ti.units_measured.clone(),
+                debitor: ti.debitor.clone(),
+                creditor: ti.creditor.clone(),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            })
+        }
+        Self(authrorized)
+    }
 }
 
 impl From<Vec<Row>> for TransactionItems {
@@ -912,6 +942,61 @@ mod tests {
         let got = with_unmatched.filter_by_transaction(1).unwrap();
         let want = create_test_transaction_items();
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_will_remove_unauthorized_values() {
+        let test_tr_items = create_test_transaction_items();
+        let want = TransactionItems(vec![
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("bread"),
+                price: String::from("3.000"),
+                quantity: String::from("2"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: None,
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            },
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("milk"),
+                price: String::from("4.000"),
+                quantity: String::from("3"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: None,
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            },
+        ]);
+        let got = test_tr_items.remove_unauthorized_values();
+        assert_eq!(got, want, "got {:#?}, want {:#?}", got, want)
     }
 
     #[test]
