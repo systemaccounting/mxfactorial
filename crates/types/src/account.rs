@@ -3,7 +3,10 @@ use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use serde::Deserialize;
 use std::error::Error;
-use tokio_postgres::types::{FromSql, ToSql};
+use tokio_postgres::{
+    types::{FromSql, ToSql},
+    Row,
+};
 
 #[async_trait]
 pub trait AccountTrait {
@@ -49,6 +52,37 @@ impl AccountProfile {
     }
 }
 
+impl From<&Row> for AccountProfile {
+    fn from(row: &Row) -> Self {
+        AccountProfile {
+            id: row.get(0),
+            account_name: row.get(1),
+            description: row.get(2),
+            first_name: row.get(3),
+            middle_name: row.get(4),
+            last_name: row.get(5),
+            country_name: row.get(6),
+            street_number: row.get(7),
+            street_name: row.get(8),
+            floor_number: row.get(9),
+            unit_number: row.get(10),
+            city_name: row.get(11),
+            county_name: row.get(12),
+            region_name: row.get(13),
+            state_name: row.get(14),
+            postal_code: row.get(15),
+            latlng: row.get(16),
+            email_address: row.get(17),
+            telephone_country_code: row.get(18),
+            telephone_area_code: row.get(19),
+            telephone_number: row.get(20),
+            occupation_id: row.get(21),
+            industry_id: row.get(22),
+            removal_time: row.get(23),
+        }
+    }
+}
+
 #[derive(Eq, PartialEq, Debug, Deserialize, FromSql, ToSql)]
 pub struct AccountProfiles(pub Vec<AccountProfile>);
 
@@ -82,6 +116,16 @@ impl FromIterator<AccountProfile> for AccountProfiles {
         let mut profiles = AccountProfiles::new();
         for i in iter {
             profiles.add(i);
+        }
+        profiles
+    }
+}
+
+impl From<Vec<Row>> for AccountProfiles {
+    fn from(rows: Vec<Row>) -> Self {
+        let mut profiles = AccountProfiles::new();
+        for row in rows {
+            profiles.add(AccountProfile::from(&row));
         }
         profiles
     }

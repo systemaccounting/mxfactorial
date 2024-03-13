@@ -7,7 +7,6 @@ edition = "2021"
 bb8 = "0.8.0"
 bb8-postgres = "0.8.1"
 tokio = "1.26.0"
-async-trait = "0.1.73"
 tokio-postgres = { version = "0.7.7", features = [
 	"with-chrono-0_4",
 	"with-geo-types-0_7",
