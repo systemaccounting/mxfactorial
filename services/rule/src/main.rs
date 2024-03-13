@@ -231,16 +231,14 @@ async fn main() {
     let readiness_check_path = env::var(READINESS_CHECK_PATH)
         .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
 
-    let health_check_route =
-        Router::new().route(&readiness_check_path, get(|| async { StatusCode::OK }));
-
     let conn_uri = DB::create_conn_uri_from_env_vars();
 
     let pool = Arc::new(DB::new_pool(&conn_uri).await) as DynConnPool;
 
-    let service_route = Router::new().route("/", post(apply_rules)).with_state(pool);
-
-    let app = Router::new().merge(health_check_route).merge(service_route);
+    let app = Router::new()
+        .route("/", post(apply_rules))
+        .route(readiness_check_path.as_str(), get(|| async { StatusCode::OK }))
+        .with_state(pool);
 
     let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
 
