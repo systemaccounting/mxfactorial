@@ -1,13 +1,15 @@
+use cognitoidp::CognitoJwkSet;
 use httpclient::HttpClient as Client;
 use pg::model::ModelTrait;
 use rust_decimal::Decimal;
 use std::{env, error::Error};
 use types::{
-    account::AccountProfile,
+    account::{AccountProfile, AccountProfiles},
     account_role::AccountRole,
     approval::{ApprovalError, Approvals},
     balance::AccountBalances,
     request_response::IntraTransaction,
+    rule::RuleInstances,
     time::TZTime,
     transaction::{Transaction, Transactions},
     transaction_item::TransactionItems,
@@ -40,7 +42,11 @@ impl<T: ModelTrait> Service<T> {
         &self,
         account_profile: AccountProfile,
     ) -> Result<String, Box<dyn Error>> {
-        match self.conn.insert_account_profile_query(account_profile).await {
+        match self
+            .conn
+            .insert_account_profile_query(account_profile)
+            .await
+        {
             Ok(account) => Ok(account),
             Err(e) => Err(e),
         }
@@ -52,7 +58,8 @@ impl<T: ModelTrait> Service<T> {
     ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
         match self
             .conn
-            .select_profile_ids_by_account_names_query(account_names).await
+            .select_profile_ids_by_account_names_query(account_names)
+            .await
         {
             Ok(profile_ids) => Ok(profile_ids), // [(id, account_name),...]
             Err(e) => Err(e),
@@ -67,7 +74,8 @@ impl<T: ModelTrait> Service<T> {
     ) -> Result<(), Box<dyn Error>> {
         match self
             .conn
-            .insert_account_balance_query(account, balance, curr_tr_item_id).await
+            .insert_account_balance_query(account, balance, curr_tr_item_id)
+            .await
         {
             Ok(_) => Ok(()),
             Err(e) => Err(e),
@@ -104,7 +112,9 @@ impl<T: ModelTrait> Service<T> {
         &self,
         transaction_items: TransactionItems,
     ) -> Result<(), Box<dyn Error>> {
-        self.conn.update_account_balances_query(transaction_items).await
+        self.conn
+            .update_account_balances_query(transaction_items)
+            .await
     }
 
     async fn test_sufficient_debitor_funds(
@@ -138,7 +148,8 @@ impl<T: ModelTrait> Service<T> {
         role: AccountRole,
     ) -> Result<TZTime, Box<dyn Error>> {
         self.conn
-            .update_approvals_by_account_and_role_query(transaction_id, account, role).await
+            .update_approvals_by_account_and_role_query(transaction_id, account, role)
+            .await
     }
 
     // todo: convert to postgres function to avoid 3 db queries
@@ -146,7 +157,10 @@ impl<T: ModelTrait> Service<T> {
         &self,
         transaction_id: i32,
     ) -> Result<Transaction, Box<dyn Error>> {
-        let mut transaction = self.conn.select_transaction_by_id_query(transaction_id).await?;
+        let mut transaction = self
+            .conn
+            .select_transaction_by_id_query(transaction_id)
+            .await?;
 
         let transaction_items = self
             .get_transaction_items_by_transaction_id(transaction_id)
@@ -166,7 +180,8 @@ impl<T: ModelTrait> Service<T> {
     ) -> Result<Transactions, Box<dyn Error>> {
         let mut transactions = self
             .conn
-            .select_transactions_by_ids_query(transaction_ids.clone()).await?;
+            .select_transactions_by_ids_query(transaction_ids.clone())
+            .await?;
 
         let transaction_items = self
             .get_transaction_items_by_transaction_ids(transaction_ids.clone())
@@ -251,10 +266,12 @@ impl<T: ModelTrait> Service<T> {
     ) -> Result<(), Box<dyn Error>> {
         let exists = self
             .conn
-            .select_approve_all_credit_rule_instance_exists_query(account_name.clone()).await?;
+            .select_approve_all_credit_rule_instance_exists_query(account_name.clone())
+            .await?;
         if !exists {
             self.conn
-                .insert_approve_all_credit_rule_instance_query(account_name.clone()).await?;
+                .insert_approve_all_credit_rule_instance_query(account_name.clone())
+                .await?;
         }
         Ok(())
     }
@@ -330,7 +347,10 @@ impl<T: ModelTrait> Service<T> {
         account: String,
         n: i64,
     ) -> Result<Transactions, Box<dyn Error>> {
-        let mut transactions = self.conn.select_last_n_transactions_query(account, n).await?;
+        let mut transactions = self
+            .conn
+            .select_last_n_transactions_query(account, n)
+            .await?;
         let transaction_ids = transactions.list_ids()?;
         if transaction_ids.is_empty() {
             return Ok(transactions);
@@ -364,7 +384,8 @@ impl<T: ModelTrait> Service<T> {
         transaction_id: i32,
     ) -> Result<TransactionItems, Box<dyn Error>> {
         self.conn
-            .select_transaction_items_by_transaction_id_query(transaction_id).await
+            .select_transaction_items_by_transaction_id_query(transaction_id)
+            .await
     }
 
     pub async fn get_transaction_items_by_transaction_ids(
@@ -372,7 +393,8 @@ impl<T: ModelTrait> Service<T> {
         transaction_ids: Vec<i32>,
     ) -> Result<TransactionItems, Box<dyn Error>> {
         self.conn
-            .select_transaction_items_by_transaction_ids_query(transaction_ids).await
+            .select_transaction_items_by_transaction_ids_query(transaction_ids)
+            .await
     }
 
     pub async fn get_approvals_by_transaction_id(
@@ -380,7 +402,8 @@ impl<T: ModelTrait> Service<T> {
         transaction_id: i32,
     ) -> Result<Approvals, Box<dyn Error>> {
         self.conn
-            .select_approvals_by_transaction_id_query(transaction_id).await
+            .select_approvals_by_transaction_id_query(transaction_id)
+            .await
     }
 
     pub async fn get_approvals_by_transaction_ids(
@@ -388,6 +411,92 @@ impl<T: ModelTrait> Service<T> {
         transaction_ids: Vec<i32>,
     ) -> Result<Approvals, Box<dyn Error>> {
         self.conn
-            .select_approvals_by_transaction_ids_query(transaction_ids).await
+            .select_approvals_by_transaction_ids_query(transaction_ids)
+            .await
+    }
+
+    pub async fn get_json_web_key_set(&self) -> Result<Option<CognitoJwkSet>, Box<dyn Error>> {
+        if env::var("ENABLE_API_AUTH") == Ok("true".to_string()) {
+            let uri = env::var("COGNITO_JWKS_URI").expect("msg: COGNITO_JWKS_URI not set");
+            let jwks = CognitoJwkSet::new(uri.as_str()).await;
+            match jwks {
+                Ok(jwks) => Ok(Some(jwks)),
+                Err(e) => Err(Box::new(e)),
+            }
+        } else {
+            Ok(None)
+        }
+    }
+
+    pub fn get_auth_account(
+        &self,
+        jwks: CognitoJwkSet,
+        token: &str,
+        temp_account: &str,
+    ) -> Result<String, Box<dyn Error>> {
+        if env::var("ENABLE_API_AUTH") == Ok("true".to_string()) {
+            let account = jwks.cognito_user(token)?;
+            Ok(account)
+        } else {
+            Ok(temp_account.to_string())
+        }
+    }
+
+    pub async fn get_account_approvers(
+        &self,
+        account: String,
+    ) -> Result<Vec<String>, Box<dyn Error>> {
+        self.conn.select_approvers_query(account).await
+    }
+
+    pub async fn get_tr_item_rule_instances_by_role_account(
+        &self,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>> {
+        self.conn
+            .select_rule_instance_by_type_role_account_query(
+                "transaction_item".to_string(),
+                account_role,
+                account_name,
+            )
+            .await
+    }
+
+    pub async fn get_account_profiles(
+        &self,
+        account_names: Vec<String>,
+    ) -> Result<AccountProfiles, Box<dyn Error>> {
+        self.conn
+            .select_account_profiles_by_account_names_query(account_names)
+            .await
+    }
+
+    pub async fn get_state_tr_item_rule_instances(
+        &self,
+        account_role: AccountRole,
+        state_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>> {
+        self.conn
+            .select_rule_instance_by_type_role_state_query(
+                "transaction_item".to_string(),
+                account_role,
+                state_name,
+            )
+            .await
+    }
+
+    pub async fn get_approval_rule_instances(
+        &self,
+        account_role: AccountRole,
+        approver_account: String,
+    ) -> Result<RuleInstances, Box<dyn Error>> {
+        self.conn
+            .select_rule_instance_by_type_role_account_query(
+                "approval".to_string(),
+                account_role,
+                approver_account,
+            )
+            .await
     }
 }
