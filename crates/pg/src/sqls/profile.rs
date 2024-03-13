@@ -57,6 +57,7 @@ impl AccountProfileTable {
                 .cast_column_as(Type::TEXT),
             self.get_column("occupation_id").cast_column_as(Type::TEXT),
             self.get_column("industry_id").cast_column_as(Type::TEXT),
+            self.get_column("removal_time"),
         ])
     }
 
@@ -163,6 +164,26 @@ impl AccountProfileTable {
         )
     }
 
+    pub fn select_profiles_by_account_names_sql(&self, account_name_count: usize) -> String {
+        let columns = self.select_all_with_text_casting().join_with_casting();
+        let in_values = create_params(account_name_count);
+        format!(
+            "{} {} {} {} {} {} {} ({}) {} {} {} {}",
+            SELECT,
+            columns,
+            FROM,
+            self.name(),
+            WHERE,
+            self.get_column("account_name").name(),
+            IN,
+            in_values,
+            AND,
+            self.get_column("removal_time").name(),
+            IS,
+            NULL
+        )
+    }
+
     // todo: add account_owner type and AccountOwnerTable
     pub fn select_approvers() -> String {
         let column_alias = "approver";
@@ -205,7 +226,7 @@ mod tests {
     #[test]
     fn it_creates_a_select_account_profile_by_account_sql() {
         let test_table = AccountProfileTable::new();
-        let expected = "SELECT id::text, account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng::text, email_address, telephone_country_code::text, telephone_area_code::text, telephone_number::text, occupation_id::text, industry_id::text FROM account_profile WHERE account_name = $1;";
+        let expected = "SELECT id::text, account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng::text, email_address, telephone_country_code::text, telephone_area_code::text, telephone_number::text, occupation_id::text, industry_id::text, removal_time FROM account_profile WHERE account_name = $1;";
         assert_eq!(test_table.select_account_profile_by_account_sql(), expected);
     }
 
@@ -219,11 +240,18 @@ mod tests {
     #[test]
     fn it_creates_a_select_account_profiles_by_db_cr_accounts_sql() {
         let test_table = AccountProfileTable::new();
-        let expected = "SELECT id::text, account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng::text, email_address, telephone_country_code::text, telephone_area_code::text, telephone_number::text, occupation_id::text, industry_id::text FROM account_profile WHERE account_name = $1 OR account_name = $2;";
+        let expected = "SELECT id::text, account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng::text, email_address, telephone_country_code::text, telephone_area_code::text, telephone_number::text, occupation_id::text, industry_id::text, removal_time FROM account_profile WHERE account_name = $1 OR account_name = $2;";
         assert_eq!(
             test_table.select_account_profiles_by_db_cr_accounts_sql(),
             expected
         );
+    }
+
+    #[test]
+    fn it_creates_a_select_profiles_by_account_names_sql() {
+        let test_table = AccountProfileTable::new();
+        let expected = "SELECT id::text, account_name, description, first_name, middle_name, last_name, country_name, street_number, street_name, floor_number, unit_number, city_name, county_name, region_name, state_name, postal_code, latlng::text, email_address, telephone_country_code::text, telephone_area_code::text, telephone_number::text, occupation_id::text, industry_id::text, removal_time FROM account_profile WHERE account_name IN ($1, $2) AND removal_time IS NULL";
+        assert_eq!(test_table.select_profiles_by_account_names_sql(2), expected);
     }
 
     #[test]

@@ -70,6 +70,10 @@ pub trait ModelTrait {
         &self,
         accounts: Vec<String>,
     ) -> Result<Vec<(String, String)>, Box<dyn Error>>;
+    async fn select_account_profiles_by_account_names_query(
+        &self,
+        accounts: Vec<String>,
+    ) -> Result<AccountProfiles, Box<dyn Error>>;
     async fn select_transaction_items_by_transaction_id_query(
         &self,
         transaction_id: i32,
@@ -108,6 +112,25 @@ pub trait ModelTrait {
         &self,
         account_name: String,
     ) -> Result<(), Box<dyn Error>>;
+    async fn select_approvers_query(&self, account: String) -> Result<Vec<String>, Box<dyn Error>>;
+    async fn select_rule_instance_by_type_role_state_query(
+        &self,
+        rule_type: String,
+        account_role: AccountRole,
+        state_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>>;
+    async fn select_rule_instance_by_type_role_account_query(
+        &self,
+        rule_type: String,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>>;
+    // uses above query
+    async fn select_approval_rule_instance_by_role_account_query(
+        &self,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>>;
 }
 
 impl ModelTrait for DatabaseConnection {
@@ -358,6 +381,26 @@ impl ModelTrait for DatabaseConnection {
                     .collect();
                 Ok(profile_ids)
             }
+        }
+    }
+
+    async fn select_account_profiles_by_account_names_query(
+        &self,
+        accounts: Vec<String>,
+    ) -> Result<AccountProfiles, Box<dyn Error>> {
+        let mut deduped = accounts;
+        deduped.sort_unstable();
+        deduped.dedup();
+        let table = crate::sqls::profile::AccountProfileTable::new();
+        let sql = table.select_profiles_by_account_names_sql(deduped.len());
+        let mut values: ToSqlVec = Vec::new();
+        for a in deduped.into_iter() {
+            values.push(Box::new(a))
+        }
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => Ok(AccountProfiles::from(rows)),
         }
     }
 
@@ -624,6 +667,86 @@ impl ModelTrait for DatabaseConnection {
             Ok(_) => Ok(()),
         }
     }
+
+    async fn select_approvers_query(&self, account: String) -> Result<Vec<String>, Box<dyn Error>> {
+        let sql = select_approvers();
+        let values: ToSqlVec = vec![Box::new(account)];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let approvers: Vec<String> = rows.into_iter().map(|row| row.get(0)).collect();
+                Ok(approvers)
+            }
+        }
+    }
+
+    async fn select_rule_instance_by_type_role_state_query(
+        &self,
+        rule_type: String,
+        account_role: AccountRole,
+        state_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>> {
+        let sql = select_rule_instance_by_type_role_state();
+        let values: ToSqlVec = vec![
+            Box::new(rule_type),
+            Box::new(account_role),
+            Box::new(state_name),
+        ];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let rule_instances: RuleInstances = RuleInstances::from(rows);
+                Ok(rule_instances)
+            }
+        }
+    }
+
+    async fn select_approval_rule_instance_by_role_account_query(
+        &self,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
+        let sql = table.select_rule_instance_by_type_role_account_sql();
+        let values: ToSqlVec = vec![
+            Box::new("approval".to_string()),
+            Box::new(account_role),
+            Box::new(account_name),
+        ];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let rule_instances: RuleInstances = RuleInstances::from(rows);
+                Ok(rule_instances)
+            }
+        }
+    }
+
+    async fn select_rule_instance_by_type_role_account_query(
+        &self,
+        rule_type: String,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<RuleInstances, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
+        let sql = table.select_rule_instance_by_type_role_account_sql();
+        let values: ToSqlVec = vec![
+            Box::new(rule_type),
+            Box::new(account_role),
+            Box::new(account_name),
+        ];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let rule_instances: RuleInstances = RuleInstances::from(rows);
+                Ok(rule_instances)
+            }
+        }
+    }
 }
 
 impl DatabaseConnection {
@@ -679,22 +802,6 @@ impl DatabaseConnection {
         match result {
             Err(e) => Err(Box::new(e)),
             Ok(_) => Ok(()),
-        }
-    }
-
-    pub async fn select_approvers_query(
-        &self,
-        account: String,
-    ) -> Result<Vec<String>, Box<dyn Error>> {
-        let sql = select_approvers();
-        let values: ToSqlVec = vec![Box::new(account)];
-        let rows = self.query(sql.to_string(), values).await;
-        match rows {
-            Err(e) => Err(Box::new(e)),
-            Ok(rows) => {
-                let approvers: Vec<String> = rows.into_iter().map(|row| row.get(0)).collect();
-                Ok(approvers)
-            }
         }
     }
 }
@@ -1110,6 +1217,83 @@ mod integration_tests {
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]
     #[tokio::test]
+    async fn it_creates_a_select_account_profiles_by_account_names_query() {
+        _before_each();
+
+        let test_conn = _get_conn().await;
+        let api_conn = DatabaseConnection(test_conn);
+
+        let test_accounts = vec![
+            "JacobWebb".to_string(),
+            "JacobWebb".to_string(), // duplicate
+            "GroceryStore".to_string(),
+        ];
+
+        let got = api_conn
+            .select_account_profiles_by_account_names_query(test_accounts.clone().to_vec())
+            .await
+            .unwrap();
+
+        let want = AccountProfiles(vec![
+            AccountProfile {
+                id: Some(String::from("7")),
+                account_name: String::from("JacobWebb"),
+                description: Some(String::from("Soccer coach")),
+                first_name: Some(String::from("Jacob")),
+                middle_name: Some(String::from("Curtis")),
+                last_name: Some(String::from("Webb")),
+                country_name: String::from("United States of America"),
+                street_number: Some(String::from("205")),
+                street_name: Some(String::from("N Mccarran Blvd")),
+                floor_number: None,
+                unit_number: None,
+                city_name: String::from("Sparks"),
+                county_name: Some(String::from("Washoe County")),
+                region_name: None,
+                state_name: String::from("Nevada"),
+                postal_code: String::from("89431"),
+                latlng: Some(String::from("(39.534552,-119.737825)")),
+                email_address: String::from("jacob@address.xz"),
+                telephone_country_code: Some(String::from("1")),
+                telephone_area_code: Some(String::from("775")),
+                telephone_number: Some(String::from("5555555")),
+                occupation_id: Some(String::from("7")),
+                industry_id: Some(String::from("7")),
+                removal_time: None,
+            },
+            AccountProfile {
+                id: Some(String::from("11")),
+                account_name: String::from("GroceryStore"),
+                description: Some(String::from("Sells groceries")),
+                first_name: Some(String::from("Grocery")),
+                middle_name: None,
+                last_name: Some(String::from("Store")),
+                country_name: String::from("United States of America"),
+                street_number: Some(String::from("8701")),
+                street_name: Some(String::from("Lincoln Blvd")),
+                floor_number: None,
+                unit_number: None,
+                city_name: String::from("Los Angeles"),
+                county_name: Some(String::from("Los Angeles County")),
+                region_name: None,
+                state_name: String::from("California"),
+                postal_code: String::from("90045"),
+                latlng: Some(String::from("(33.95805,-118.418388)")),
+                email_address: String::from("grocerystore@address.xz"),
+                telephone_country_code: Some(String::from("1")),
+                telephone_area_code: Some(String::from("310")),
+                telephone_number: Some(String::from("5555555")),
+                occupation_id: Some(String::from("11")),
+                industry_id: Some(String::from("11")),
+                removal_time: None,
+            },
+        ]);
+
+        assert_eq!(got, want);
+    }
+
+    #[cfg_attr(not(feature = "db_tests"), ignore)]
+    #[tokio::test]
     async fn it_creates_a_select_transaction_items_by_transaction_id_query() {
         _before_each();
 
@@ -1416,6 +1600,65 @@ mod integration_tests {
             .unwrap();
 
         assert_eq!(rows.len(), 3);
+    }
+
+    #[cfg_attr(not(feature = "db_tests"), ignore)]
+    #[tokio::test]
+    async fn it_creates_a_select_rule_instance_by_type_role_state_query() {
+        _before_each();
+
+        let test_conn = _get_conn().await;
+        let api_conn = DatabaseConnection(test_conn);
+
+        let rows = api_conn
+            .select_rule_instance_by_type_role_state_query(
+                "transaction_item".to_string(),
+                AccountRole::Creditor,
+                "California".to_string(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(rows.len(), 1);
+    }
+
+    #[cfg_attr(not(feature = "db_tests"), ignore)]
+    #[tokio::test]
+    async fn it_creates_a_select_approval_rule_instance_by_role_account_query() {
+        _before_each();
+
+        let test_conn = _get_conn().await;
+        let api_conn = DatabaseConnection(test_conn);
+
+        let rows = api_conn
+            .select_approval_rule_instance_by_role_account_query(
+                AccountRole::Creditor,
+                "MiriamLevy".to_string(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(rows.len(), 2);
+    }
+
+    #[cfg_attr(not(feature = "db_tests"), ignore)]
+    #[tokio::test]
+    async fn it_creates_a_select_rule_instance_by_type_role_account_query() {
+        _before_each();
+
+        let test_conn = _get_conn().await;
+        let api_conn = DatabaseConnection(test_conn);
+
+        let rows = api_conn
+            .select_rule_instance_by_type_role_account_query(
+                "approval".to_string(),
+                AccountRole::Creditor,
+                "MiriamLevy".to_string(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(rows.len(), 2);
     }
 }
 pub type DynConnPool = Arc<dyn DBConnPoolTrait + Send + Sync + 'static>;
