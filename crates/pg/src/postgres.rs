@@ -1,9 +1,7 @@
 use bb8::{Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
-use rust_decimal::Decimal;
 use std::env;
 use tokio_postgres::{types::ToSql, NoTls, Row};
-use types::{account_role::AccountRole, time::TZTime};
 
 pub struct DB;
 
@@ -32,55 +30,19 @@ impl DB {
 #[derive(Clone)]
 pub struct ConnectionPool(pub Pool<PostgresConnectionManager<NoTls>>);
 
+impl ConnectionPool {
+    pub async fn get_conn(&self) -> DatabaseConnection {
+        let conn = self.0.get_owned().await.unwrap(); // todo: handle error
+        DatabaseConnection(conn)
+    }
+}
+
 pub struct DatabaseConnection(pub PooledConnection<'static, PostgresConnectionManager<NoTls>>);
-
-pub trait RowTrait {
-    fn get_opt_string(&self, idx: &str) -> Option<String>;
-    fn get_string(&self, idx: &str) -> String;
-    fn get_vec_string(&self, idx: &str) -> Vec<String>;
-    fn get_account_role(&self, idx: &str) -> AccountRole;
-    fn get_opt_tztime(&self, idx: &str) -> Option<TZTime>;
-    fn get_decimal(&self, idx: &str) -> Decimal;
-}
-
-impl RowTrait for Row {
-    fn get_opt_string(&self, idx: &str) -> Option<String> {
-        self.get(idx)
-    }
-    fn get_string(&self, idx: &str) -> String {
-        self.get(idx)
-    }
-    fn get_vec_string(&self, idx: &str) -> Vec<String> {
-        self.get(idx)
-    }
-    fn get_account_role(&self, idx: &str) -> AccountRole {
-        self.get(idx)
-    }
-    fn get_opt_tztime(&self, idx: &str) -> Option<TZTime> {
-        self.get(idx)
-    }
-    fn get_decimal(&self, idx: &str) -> Decimal {
-        self.get(idx)
-    }
-}
 
 pub type ToSqlVec = Vec<Box<(dyn ToSql + Sync + Send)>>;
 
-// isolate tokio-postgres query dependency in this impl
+// tokio_postgres deps here
 impl DatabaseConnection {
-    // old
-    pub async fn q(
-        &self,
-        sql_stmt: String,
-        params: &[&(dyn ToSql + Sync)],
-    ) -> Result<Vec<Box<dyn RowTrait>>, tokio_postgres::Error> {
-        self.0.query(sql_stmt.as_str(), params).await.map(|rows| {
-            rows.into_iter()
-                .map(|row| Box::new(row) as Box<dyn RowTrait>)
-                .collect()
-        })
-    }
-
     pub async fn query(
         &self,
         sql_stmt: String,
