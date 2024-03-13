@@ -3,7 +3,10 @@ use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use serde::Deserialize;
 use std::error::Error;
-use tokio_postgres::{Row, types::{FromSql, ToSql}};
+use tokio_postgres::{
+    types::{FromSql, ToSql},
+    Row,
+};
 
 #[async_trait]
 pub trait AccountTrait {
