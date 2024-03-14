@@ -4,7 +4,7 @@ use pg::model::ModelTrait;
 use rust_decimal::Decimal;
 use std::{env, error::Error};
 use types::{
-    account::{AccountProfile, AccountProfiles},
+    account::{AccountProfile, AccountProfiles, ProfileIds},
     account_role::AccountRole,
     approval::{ApprovalError, Approvals},
     balance::AccountBalances,
@@ -55,13 +55,16 @@ impl<T: ModelTrait> Service<T> {
     pub async fn get_profile_ids_by_account_names(
         &self,
         account_names: Vec<String>,
-    ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
+    ) -> Result<ProfileIds, Box<dyn Error>> {
         match self
             .conn
             .select_profile_ids_by_account_names_query(account_names)
             .await
         {
-            Ok(profile_ids) => Ok(profile_ids), // [(id, account_name),...]
+            Ok(profile_ids) => {
+                let map = ProfileIds::from(profile_ids);
+                Ok(map)
+            }
             Err(e) => Err(e),
         }
     }
@@ -297,6 +300,7 @@ impl<T: ModelTrait> Service<T> {
     }
 
     pub async fn get_rule_applied_transaction(
+        &self,
         transaction_items: TransactionItems,
     ) -> Result<IntraTransaction, Box<dyn Error>> {
         let uri = env::var("RULE_URL").unwrap();
