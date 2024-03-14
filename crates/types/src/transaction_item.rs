@@ -26,6 +26,10 @@ pub enum TransactionItemError {
     MissingTransactionId,
     #[error("missing id in transaction item")]
     MissingTransactionItemId,
+    #[error("unmatched transaction items: {:?}", .0)]
+    UnmatchedTransactionItems(Vec<TransactionItem>),
+    #[error("missing transaction items: {:?}", .0)]
+    MissingTransactionItems(Vec<TransactionItem>),
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, InputObject)]
@@ -228,6 +232,18 @@ impl TransactionItem {
         self.approvals = Some(filtered);
 
         Ok(())
+    }
+
+    pub fn test_equality(&self, other: &TransactionItem) -> bool {
+        self.item_id == other.item_id
+            && self.price == other.price
+            && self.quantity == other.quantity
+            && self.debitor_first == other.debitor_first
+            && self.rule_instance_id == other.rule_instance_id
+            && self.unit_of_measurement == other.unit_of_measurement
+            && self.units_measured == other.units_measured
+            && self.debitor == other.debitor
+            && self.creditor == other.creditor
     }
 }
 
@@ -499,6 +515,45 @@ impl TransactionItems {
             }
         }
         Self(filtered)
+    }
+
+    pub fn test_equality(&self, other: TransactionItems) -> Result<(), TransactionItemError> {
+        let mut missing_items = Vec::new();
+        let mut unmatched_items = Vec::new();
+
+        for item in &self.0 {
+            if other
+                .0
+                .iter()
+                .any(|other_item| item.test_equality(other_item))
+            {
+                // do nothing for matching item
+            } else {
+                // add to missing_items for when item missing
+                missing_items.push(item.clone());
+            }
+        }
+
+        for item in &other.0 {
+            if self.0.iter().any(|self_item| item.test_equality(self_item)) {
+                // do nothing for matching item
+            } else {
+                // add to unmatched_items when item unmatched
+                unmatched_items.push(item.clone());
+            }
+        }
+
+        if !missing_items.is_empty() {
+            return Err(TransactionItemError::MissingTransactionItems(missing_items));
+        }
+
+        if !unmatched_items.is_empty() {
+            return Err(TransactionItemError::UnmatchedTransactionItems(
+                unmatched_items,
+            ));
+        }
+
+        Ok(())
     }
 }
 
@@ -832,6 +887,33 @@ mod tests {
     }
 
     #[test]
+    fn it_will_test_equality_as_negative_on_a_transaction_item() {
+        let test_tr_item = create_test_transaction_item();
+        let mut test_other = create_test_transaction_item();
+        test_other.item_id = String::from("eggs");
+        assert_eq!(
+            test_tr_item.test_equality(&test_other),
+            false,
+            "got {}, want {}",
+            test_tr_item.test_equality(&test_other),
+            false
+        )
+    }
+
+    #[test]
+    fn it_will_test_equality_as_positive_on_a_transaction_item() {
+        let test_tr_item = create_test_transaction_item();
+        let test_other = create_test_transaction_item();
+        assert_eq!(
+            test_tr_item.test_equality(&test_other),
+            true,
+            "got {}, want {}",
+            test_tr_item.test_equality(&test_other),
+            true
+        )
+    }
+
+    #[test]
     fn it_lists_approvals_from_transaction_items() {
         let test_tr_items = create_test_transaction_items();
         let got = test_tr_items.list_approvals().unwrap();
@@ -1038,6 +1120,79 @@ mod tests {
         let want = create_test_transaction_items();
         let got = test_tr_items.filter_user_added();
         assert_eq!(got, want, "got {:#?}, want {:#?}", got, want)
+    }
+
+    #[test]
+    fn it_will_test_equality_and_error_with_missing_transaction_items() {
+        let mut test_tr_items = create_test_transaction_items();
+        let test_other = create_test_transaction_items();
+        test_tr_items.0.push(TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: String::from("eggs"),
+            price: String::from("2.500"),
+            quantity: String::from("2"),
+            debitor_first: Some(false),
+            rule_instance_id: None,
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: String::from("JacobWebb"),
+            creditor: String::from("GroceryStore"),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        });
+        assert_eq!(
+            test_tr_items.test_equality(test_other).unwrap_err().to_string(),
+            "missing transaction items: [TransactionItem { id: None, transaction_id: None, item_id: \"eggs\", price: \"2.500\", quantity: \"2\", debitor_first: Some(false), rule_instance_id: None, rule_exec_ids: Some([]), unit_of_measurement: None, units_measured: None, debitor: \"JacobWebb\", creditor: \"GroceryStore\", debitor_profile_id: None, creditor_profile_id: None, debitor_approval_time: None, creditor_approval_time: None, debitor_rejection_time: None, creditor_rejection_time: None, debitor_expiration_time: None, creditor_expiration_time: None, approvals: None }]".to_string()
+        )
+    }
+
+    #[test]
+    fn it_will_test_equality_and_error_with_unmatched_transaction_items() {
+        let test_tr_items = create_test_transaction_items();
+        let mut test_other = create_test_transaction_items();
+        test_other.0.push(TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: String::from("eggs"),
+            price: String::from("2.500"),
+            quantity: String::from("2"),
+            debitor_first: Some(false),
+            rule_instance_id: None,
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: String::from("JacobWebb"),
+            creditor: String::from("GroceryStore"),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        });
+        assert_eq!(
+            test_tr_items.test_equality(test_other).unwrap_err().to_string(),
+            "unmatched transaction items: [TransactionItem { id: None, transaction_id: None, item_id: \"eggs\", price: \"2.500\", quantity: \"2\", debitor_first: Some(false), rule_instance_id: None, rule_exec_ids: Some([]), unit_of_measurement: None, units_measured: None, debitor: \"JacobWebb\", creditor: \"GroceryStore\", debitor_profile_id: None, creditor_profile_id: None, debitor_approval_time: None, creditor_approval_time: None, debitor_rejection_time: None, creditor_rejection_time: None, debitor_expiration_time: None, creditor_expiration_time: None, approvals: None }]".to_string()
+        )
+    }
+
+    #[test]
+    fn it_will_test_equality_as_positive_on_transaction_items() {
+        let test_tr_items = create_test_transaction_items();
+        let test_other = create_test_transaction_items();
+        assert_eq!(test_tr_items.test_equality(test_other).unwrap(), ())
     }
 
     #[test]
