@@ -5,7 +5,7 @@ use crate::{
 use async_graphql::SimpleObject;
 use serde::{Deserialize, Serialize};
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, SimpleObject)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
 #[graphql(rename_fields = "snake_case")]
 pub struct IntraTransaction {
     pub auth_account: Option<String>,
