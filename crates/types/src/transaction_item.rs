@@ -1,16 +1,14 @@
-#![allow(unused_imports)]
-use crate::account::AccountProfiles;
 use crate::{
+    account::ProfileIds,
     account_role::AccountRole,
     approval::{Approval, ApprovalError, Approvals},
     time::TZTime,
 };
-use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
+use async_graphql::{InputObject, Object};
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
-use std::fmt;
 use thiserror::Error;
 use tokio_postgres::Row;
 
@@ -309,20 +307,16 @@ impl TransactionItems {
         accounts
     }
 
-    pub fn add_profile_ids(&mut self, account_profiles: AccountProfiles) {
+    pub fn add_profile_ids(&mut self, profile_ids: ProfileIds) {
         for ti in self.0.iter_mut() {
             if ti.debitor_profile_id.is_none() {
-                let debitor_profile = account_profiles
-                    .match_profile_by_account(ti.debitor.clone())
-                    .unwrap();
-                ti.debitor_profile_id = debitor_profile.get_id();
+                let debitor_profile_id = profile_ids.get_id(ti.debitor.clone()).unwrap();
+                ti.debitor_profile_id = Some(format!("{}", debitor_profile_id));
             }
 
             if ti.creditor_profile_id.is_none() {
-                let creditor_profile = account_profiles
-                    .match_profile_by_account(ti.creditor.clone())
-                    .unwrap();
-                ti.creditor_profile_id = creditor_profile.get_id();
+                let creditor_profile_id = profile_ids.get_id(ti.creditor.clone()).unwrap();
+                ti.creditor_profile_id = Some(format!("{}", creditor_profile_id));
             }
         }
     }
@@ -571,7 +565,6 @@ impl From<Vec<Row>> for TransactionItems {
 mod tests {
 
     use super::*;
-    use crate::account::AccountProfile;
     use crate::approval::Approval;
     use crate::transaction::tests::create_test_transaction;
     use serde_json;
@@ -638,63 +631,19 @@ mod tests {
     #[test]
     fn it_adds_profile_ids() {
         let mut test_tr_items = create_test_transaction_items();
-        let want_debitor_profile_id = Some(String::from("11"));
-        let want_creditor_profile_id = Some(String::from("7"));
-        let test_acct_profiles = AccountProfiles(vec![
-            AccountProfile {
-                id: want_debitor_profile_id.clone(),
-                account_name: String::from("JacobWebb"),
-                description: Some(String::from("Soccer coach")),
-                first_name: Some(String::from("Jacob")),
-                middle_name: Some(String::from("Curtis")),
-                last_name: Some(String::from("Webb")),
-                country_name: String::from("United States of America"),
-                street_number: Some(String::from("205")),
-                street_name: Some(String::from("N Mccarran Blvd")),
-                floor_number: None,
-                unit_number: None,
-                city_name: String::from("Sparks"),
-                county_name: Some(String::from("Washoe County")),
-                region_name: None,
-                state_name: String::from("Nevada"),
-                postal_code: String::from("89431"),
-                latlng: Some(String::from("(39.534552,-119.737825)")),
-                email_address: String::from("jacob@address.xz"),
-                telephone_country_code: Some(String::from("1")),
-                telephone_area_code: Some(String::from("775")),
-                telephone_number: Some(String::from("5555555")),
-                occupation_id: Some(String::from("7")),
-                industry_id: Some(String::from("7")),
-                removal_time: None,
-            },
-            AccountProfile {
-                id: want_creditor_profile_id.clone(),
-                account_name: String::from("GroceryStore"),
-                description: Some(String::from("Sells groceries")),
-                first_name: Some(String::from("Grocery")),
-                middle_name: None,
-                last_name: Some(String::from("Store")),
-                country_name: String::from("United States of America"),
-                street_number: Some(String::from("8701")),
-                street_name: Some(String::from("Lincoln Blvd")),
-                floor_number: None,
-                unit_number: None,
-                city_name: String::from("Los Angeles"),
-                county_name: Some(String::from("Los Angeles County")),
-                region_name: None,
-                state_name: String::from("California"),
-                postal_code: String::from("90045"),
-                latlng: Some(String::from("(33.958050,-118.418388)")),
-                email_address: String::from("grocerystore@address.xz"),
-                telephone_country_code: Some(String::from("1")),
-                telephone_area_code: Some(String::from("310")),
-                telephone_number: Some(String::from("5555555")),
-                occupation_id: Some(String::from("11")),
-                industry_id: Some(String::from("11")),
-                removal_time: None,
-            },
-        ]);
-        test_tr_items.add_profile_ids(test_acct_profiles);
+
+        let jw_profile_id = 11;
+        let gs_profile_id = 7;
+
+        let mut test_profile_ids = ProfileIds::new();
+        test_profile_ids.insert("JacobWebb".to_string(), jw_profile_id);
+        test_profile_ids.insert("GroceryStore".to_string(), gs_profile_id);
+
+        let want_debitor_profile_id = Some(format!("{}", jw_profile_id));
+        let want_creditor_profile_id = Some(format!("{}", gs_profile_id));
+
+        test_tr_items.add_profile_ids(test_profile_ids);
+
         for t in test_tr_items.0.iter() {
             let got_debitor_profile_id = t.debitor_profile_id.clone();
             assert_eq!(
