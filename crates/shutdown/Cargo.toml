@@ -1,0 +1,8 @@
+[package]
+name = "shutdown"
+version = "0.1.0"
+edition = "2021"
+rust-version.workspace = true
+
+[dependencies]
+tokio = { version = "1.33.0", default-features = false, features = ["signal"] }

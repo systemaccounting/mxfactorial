@@ -8,7 +8,6 @@ use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use service::Service;
 use std::{env, net::ToSocketAddrs};
-use tokio::signal;
 use types::approval::{Approval, Approvals};
 use types::{
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
@@ -16,6 +15,7 @@ use types::{
     time::TZTime,
     transaction_item::TransactionItems,
 };
+use shutdown::shutdown_signal;
 mod rules;
 
 // used by lambda to test for service availability
@@ -268,31 +268,4 @@ async fn main() {
         .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
-}
-
-// from axum/examples/graceful-shutdown
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-
-    println!("signal received, starting graceful shutdown");
 }
