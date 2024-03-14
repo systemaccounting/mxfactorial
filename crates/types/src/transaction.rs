@@ -128,6 +128,11 @@ impl Transaction {
 
         Err(Box::new(TransactionError::MissingAuthorInTransactionItems))
     }
+
+    pub fn add_auth_values(&mut self, auth_account: &str, author_role: AccountRole) {
+        self.author = Some(auth_account.to_string());
+        self.author_role = Some(author_role);
+    }
 }
 
 impl From<Row> for Transaction {
@@ -357,6 +362,14 @@ pub mod tests {
         let test_transaction = create_test_transaction();
         let got = test_transaction.get_author_role().unwrap();
         assert_eq!(got, AccountRole::Creditor)
+    }
+
+    #[test]
+    fn it_will_add_auth_values_to_transaction() {
+        let mut test_transaction = create_test_transaction();
+        test_transaction.add_auth_values("JacobWebb", AccountRole::Debitor);
+        assert_eq!(test_transaction.author.unwrap(), "JacobWebb");
+        assert_eq!(test_transaction.author_role.unwrap(), AccountRole::Debitor);
     }
 
     #[test]
