@@ -7,6 +7,7 @@ use axum::{
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use service::Service;
+use shutdown::shutdown_signal;
 use std::{env, net::ToSocketAddrs};
 use types::approval::{Approval, Approvals};
 use types::{
@@ -15,7 +16,6 @@ use types::{
     time::TZTime,
     transaction_item::TransactionItems,
 };
-use shutdown::shutdown_signal;
 mod rules;
 
 // used by lambda to test for service availability
@@ -91,7 +91,10 @@ async fn apply_transaction_item_rules(
         if !rule_added.0.is_empty() {
             let added_accounts = rule_added.list_accounts();
 
-            let added_profile_ids = svc.get_profile_ids_by_account_names(added_accounts).await.unwrap();
+            let added_profile_ids = svc
+                .get_profile_ids_by_account_names(added_accounts)
+                .await
+                .unwrap();
 
             // add account profile ids to rule added transaction items
             // todo: some profiles may be previously fetched when
