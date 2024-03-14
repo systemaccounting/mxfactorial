@@ -2,7 +2,7 @@ use crate::time::TZTime;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
 use serde::Deserialize;
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 use tokio_postgres::{
     types::{FromSql, ToSql},
     Row,
@@ -128,6 +128,33 @@ impl From<Vec<Row>> for AccountProfiles {
             profiles.add(AccountProfile::from(&row));
         }
         profiles
+    }
+}
+
+#[derive(Eq, PartialEq, Debug, Clone, Default)]
+pub struct ProfileIds(HashMap<String, i32>);
+
+impl From<Vec<(String, String)>> for ProfileIds {
+    fn from(vec: Vec<(String, String)>) -> Self {
+        let mut map = HashMap::new();
+        for (k, v) in vec {
+            map.insert(v, k.parse::<i32>().unwrap());
+        }
+        ProfileIds(map)
+    }
+}
+
+impl ProfileIds {
+    pub fn new() -> Self {
+        ProfileIds::default()
+    }
+
+    pub fn insert(&mut self, account: String, id: i32) {
+        self.0.insert(account, id);
+    }
+
+    pub fn get_id(&self, account: String) -> Option<i32> {
+        self.0.get(&account).cloned()
     }
 }
 
