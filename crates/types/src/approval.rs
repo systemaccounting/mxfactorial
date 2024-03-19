@@ -18,6 +18,8 @@ pub enum ApprovalError {
     PreviouslyRejected,
     #[error("zero approvals")] // transaction items always have at least one approval
     ZeroApprovals,
+    #[error("zero approvals for {}", .0)]
+    ZeroApprovalsForAccount(String),
     #[error("incomplete previous approval")]
     IncompletePreviousApproval,
     #[error("missing transaction_id in approval")]
@@ -133,16 +135,21 @@ impl Approvals {
         auth_account: &str,
         account_role: AccountRole,
     ) -> Result<Self, ApprovalError> {
-        if self.0.is_empty() {
-            return Err(ApprovalError::ZeroApprovals);
+        if self.is_empty() {
+            return Err(ApprovalError::ZeroApprovalsForAccount(
+                auth_account.to_string(),
+            ));
         }
-        Ok(Approvals(
+
+        let account_role_approvals = Approvals(
             self.0
                 .clone()
                 .into_iter()
                 .filter(|a| a.account_name == auth_account && a.account_role == account_role)
                 .collect(),
-        ))
+        );
+
+        Ok(account_role_approvals)
     }
 
     pub fn len(&self) -> usize {
@@ -159,31 +166,30 @@ impl Approvals {
         account_role: AccountRole,
     ) -> Result<(), ApprovalError> {
         let mut previously_approved = 0;
-        let mut approval_count = 0;
 
         let account_role_approvals = self.account_role_approvals(auth_account, account_role)?;
 
+        if account_role_approvals.is_empty() {
+            return Err(ApprovalError::ZeroApprovalsForAccount(
+                auth_account.to_string(),
+            ));
+        }
+
         for approval in account_role_approvals.0.iter() {
-            approval_count += 1;
-
-            let result = approval.test_pending();
-
-            match result {
+            match approval.test_pending() {
                 Ok(_) => (),
                 Err(e) => match e {
-                    ApprovalError::ExpirationTimeLapsed => return Err(e),
                     ApprovalError::PreviouslyApproved(_) => {
                         previously_approved += 1;
                     }
-                    ApprovalError::PreviouslyRejected => return Err(e),
-                    _ => (),
+                    _ => return Err(e),
                 },
             }
         }
 
         if previously_approved == 0 {
             Ok(())
-        } else if previously_approved == approval_count {
+        } else if previously_approved == account_role_approvals.len() {
             let previously_approved_time = account_role_approvals.0[0].approval_time.unwrap();
             return Err(ApprovalError::PreviouslyApproved(previously_approved_time));
         } else {
