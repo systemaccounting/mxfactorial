@@ -1768,6 +1768,7 @@ dependencies = [
  "httpclient",
  "openssl",
  "serde_json",
+ "shutdown",
  "tokio",
  "tower-http 0.5.1",
  "tracing",
@@ -3164,6 +3165,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71fe3824f5629716b1589be05dacd749f6aa084c87e00e016714a8cdfccc997c"
 dependencies = [
  "bytecheck",
+]
+
+[[package]]
+name = "request-create"
+version = "0.1.0"
+dependencies = [
+ "axum 0.7.4",
+ "httpclient",
+ "openssl",
+ "pg",
+ "service",
+ "shutdown",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "types",
 ]
 
 [[package]]
