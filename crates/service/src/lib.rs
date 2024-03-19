@@ -1,10 +1,9 @@
 use cognitoidp::CognitoJwkSet;
-use httpclient::HttpClient as Client;
 use pg::model::ModelTrait;
 use rust_decimal::Decimal;
 use std::{env, error::Error};
 use types::{
-    account::{AccountProfile, AccountProfiles},
+    account::{AccountProfile, AccountProfiles, ProfileIds},
     account_role::AccountRole,
     approval::{ApprovalError, Approvals},
     balance::AccountBalances,
@@ -55,13 +54,16 @@ impl<T: ModelTrait> Service<T> {
     pub async fn get_profile_ids_by_account_names(
         &self,
         account_names: Vec<String>,
-    ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
+    ) -> Result<ProfileIds, Box<dyn Error>> {
         match self
             .conn
             .select_profile_ids_by_account_names_query(account_names)
             .await
         {
-            Ok(profile_ids) => Ok(profile_ids), // [(id, account_name),...]
+            Ok(profile_ids) => {
+                let map = ProfileIds::from(profile_ids);
+                Ok(map)
+            }
             Err(e) => Err(e),
         }
     }
@@ -146,7 +148,7 @@ impl<T: ModelTrait> Service<T> {
         transaction_id: i32,
         account: String,
         role: AccountRole,
-    ) -> Result<TZTime, Box<dyn Error>> {
+    ) -> Result<Option<TZTime>, Box<dyn Error>> {
         self.conn
             .update_approvals_by_account_and_role_query(transaction_id, account, role)
             .await
@@ -202,6 +204,8 @@ impl<T: ModelTrait> Service<T> {
         approver_role: AccountRole,
         request: Transaction,
     ) -> Result<IntraTransaction, Box<dyn Error>> {
+        // todo: test auth_account == account_owner (approver)
+
         // test debitors for sufficient funds
         self.test_sufficient_debitor_funds(request.clone().transaction_items)
             .await?;
@@ -224,25 +228,25 @@ impl<T: ModelTrait> Service<T> {
                 ApprovalError::PreviouslyApproved(t) => {
                     approval_time = Some(t);
                 }
-                _ => return Err(e.into()),
+                _ => return Err(Box::new(e)),
             },
         }
+
+        let transaction_id = request.clone().id.unwrap().parse::<i32>().unwrap();
 
         // add approval time to transaction if not previously approved
         if approval_time.is_none() {
             self.add_approval_times_by_account_and_role(
-                request.clone().id.unwrap().parse::<i32>().unwrap(),
+                transaction_id,
                 auth_account.clone(),
                 approver_role,
             )
             .await?;
         }
 
-        let id = request.clone().id.unwrap().parse::<i32>().unwrap();
-
         // get transaction with transaction items and approvals
         let post_approval_transaction = self
-            .get_transaction_with_transaction_items_and_approvals_by_id(id)
+            .get_transaction_with_transaction_items_and_approvals_by_id(transaction_id)
             .await?;
 
         // change account balances if equilibrium time is set
@@ -294,18 +298,6 @@ impl<T: ModelTrait> Service<T> {
         self.add_approve_all_credit_rule_instance_if_not_exists(account_profile.account_name)
             .await?;
         Ok(())
-    }
-
-    pub async fn get_rule_applied_transaction(
-        transaction_items: TransactionItems,
-    ) -> Result<IntraTransaction, Box<dyn Error>> {
-        let uri = env::var("RULE_URL").unwrap();
-        let client = Client::new();
-        let body = transaction_items.to_json_string();
-        let response = client.post(uri, body).await?;
-        let rule_tested = response.text().await.unwrap();
-        let intra_transaction = IntraTransaction::from_json_string(rule_tested.as_str())?;
-        Ok(intra_transaction)
     }
 
     pub async fn get_transaction_by_id(

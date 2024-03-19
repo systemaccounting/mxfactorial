@@ -6,8 +6,10 @@ members = [
 	"crates/httpclient",
 	"crates/pg",
 	"crates/service",
+	"crates/shutdown",
 	"crates/types",
 	"services/graphql",
+	"services/request-create",
 	"services/rule",
 	"tests",
 ]

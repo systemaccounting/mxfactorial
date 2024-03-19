@@ -7,8 +7,8 @@ use axum::{
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use service::Service;
+use shutdown::shutdown_signal;
 use std::{env, net::ToSocketAddrs};
-use tokio::signal;
 use types::approval::{Approval, Approvals};
 use types::{
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
@@ -91,12 +91,15 @@ async fn apply_transaction_item_rules(
         if !rule_added.0.is_empty() {
             let added_accounts = rule_added.list_accounts();
 
-            let added_profiles = svc.get_account_profiles(added_accounts).await.unwrap();
+            let added_profile_ids = svc
+                .get_profile_ids_by_account_names(added_accounts)
+                .await
+                .unwrap();
 
             // add account profile ids to rule added transaction items
             // todo: some profiles may be previously fetched when
             // assigning initial_account_profiles, avoid duplicate query
-            rule_added.add_profile_ids(added_profiles);
+            rule_added.add_profile_ids(added_profile_ids);
         }
 
         // add initial transaction item
@@ -268,31 +271,4 @@ async fn main() {
         .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
-}
-
-// from axum/examples/graceful-shutdown
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-
-    println!("signal received, starting graceful shutdown");
 }

@@ -16,8 +16,9 @@ use axum::{
 };
 use httpclient::HttpClient as Client;
 use serde_json::json;
+use shutdown::shutdown_signal;
 use std::{env, net::ToSocketAddrs, result::Result};
-use tokio::{net::TcpListener, signal};
+use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
@@ -143,6 +144,7 @@ impl Mutation {
             account_from_token.clone(),
             Transaction::new(
                 account_from_token,
+                None,
                 TransactionItems::from(transaction_items),
             ),
         );
@@ -284,30 +286,4 @@ async fn main() {
         .with_graceful_shutdown(shutdown_signal())
         .await
         .unwrap();
-}
-
-async fn shutdown_signal() {
-    let ctrl_c = async {
-        signal::ctrl_c()
-            .await
-            .expect("failed to install Ctrl+C handler");
-    };
-
-    #[cfg(unix)]
-    let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
-            .expect("failed to install signal handler")
-            .recv()
-            .await;
-    };
-
-    #[cfg(not(unix))]
-    let terminate = std::future::pending::<()>();
-
-    tokio::select! {
-        _ = ctrl_c => {},
-        _ = terminate => {},
-    }
-
-    println!("signal received, starting graceful shutdown");
 }

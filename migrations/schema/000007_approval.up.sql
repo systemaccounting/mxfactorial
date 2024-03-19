@@ -14,6 +14,9 @@ CREATE TABLE approval (
   rule_instance_id int,
   transaction_id INTEGER NOT NULL,
   transaction_item_id INTEGER,
+  -- todo: an approver can appear for multiple accounts listed in transaction items
+  -- 1.rename account_name to owner_account
+  -- 2.add owned_subaccount
   account_name character varying(255) NOT NULL,
   account_role text NOT NULL, -- todo: switch to enum after above noted go-migrate feature deployed
   device_id character varying(255), -- todo: inventory devices in separate table similar to items

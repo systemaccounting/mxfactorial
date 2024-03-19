@@ -26,7 +26,6 @@ clean-build:
 	bash scripts/clean-binary.sh \
 		--app-name $(APP_NAME) \
 		--binary-name $(EXECUTABLE_NAME); \
-	cargo clean
 
 compile:
 	if ! command -v cross --version &> /dev/null; then cargo install cross --git https://github.com/cross-rs/cross; fi

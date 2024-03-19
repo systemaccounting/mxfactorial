@@ -1768,6 +1768,7 @@ dependencies = [
  "httpclient",
  "openssl",
  "serde_json",
+ "shutdown",
  "tokio",
  "tower-http 0.5.1",
  "tracing",
@@ -3167,6 +3168,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "request-create"
+version = "0.1.0"
+dependencies = [
+ "axum 0.7.4",
+ "httpclient",
+ "openssl",
+ "pg",
+ "service",
+ "shutdown",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "types",
+]
+
+[[package]]
 name = "reqwest"
 version = "0.11.25"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3260,6 +3278,7 @@ dependencies = [
  "pg",
  "regex",
  "service",
+ "shutdown",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -3622,6 +3641,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "900fba806f70c630b0a382d0d825e17a0f19fcd059a2ade1ff237bcddf446b31"
 dependencies = [
  "lazy_static",
+]
+
+[[package]]
+name = "shutdown"
+version = "0.1.0"
+dependencies = [
+ "tokio",
 ]
 
 [[package]]

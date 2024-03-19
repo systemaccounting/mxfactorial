@@ -601,10 +601,8 @@ pub async fn create_request_http(
     auth_account: String,
     transaction_items: TransactionItems,
 ) -> Transaction {
-    let body = IntraTransaction::new(
-        auth_account.clone(),
-        Transaction::new(auth_account, transaction_items),
-    );
+    let transaction = Transaction::new(auth_account.clone(), None, transaction_items);
+    let body = IntraTransaction::new(auth_account.clone(), transaction);
     let body_json = json!(body).to_string();
     let client = Client::new();
     let uri = env::var("REQUEST_CREATE_URL").unwrap();

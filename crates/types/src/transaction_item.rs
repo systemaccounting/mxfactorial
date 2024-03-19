@@ -1,16 +1,14 @@
-#![allow(unused_imports)]
-use crate::account::AccountProfiles;
 use crate::{
+    account::ProfileIds,
     account_role::AccountRole,
     approval::{Approval, ApprovalError, Approvals},
     time::TZTime,
 };
-use async_graphql::{ComplexObject, InputObject, Object, SimpleObject};
+use async_graphql::{InputObject, Object};
 use rust_decimal::{prelude::FromPrimitive, Decimal};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
-use std::fmt;
 use thiserror::Error;
 use tokio_postgres::Row;
 
@@ -26,6 +24,14 @@ pub enum TransactionItemError {
     MissingTransactionId,
     #[error("missing id in transaction item")]
     MissingTransactionItemId,
+    #[error("unmatched transaction items: {:?}", .0)]
+    UnmatchedTransactionItems(Vec<TransactionItem>),
+    #[error("missing transaction items: {:?}", .0)]
+    MissingTransactionItems(Vec<TransactionItem>),
+    #[error("unequal transaction items count")]
+    UnequalTransactionItemsCount,
+    #[error("stated sum_value: {}, computed: {}", stated, computed)]
+    SumValueFailure { stated: String, computed: String },
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, InputObject)]
@@ -208,7 +214,7 @@ impl TransactionItem {
     }
 
     pub fn add_approvals(&mut self, approvals: Approvals) -> Result<(), TransactionItemError> {
-        if self.approvals.is_some() {
+        if self.approvals.is_some() && !self.approvals.clone().unwrap().is_empty() {
             return Err(TransactionItemError::AddingToNonEmptyApprovals);
         }
         if self.id.is_none() {
@@ -228,6 +234,25 @@ impl TransactionItem {
         self.approvals = Some(filtered);
 
         Ok(())
+    }
+
+    pub fn test_equality(&self, other: &TransactionItem) -> bool {
+        // avoid varying precision in values set by different sources
+        let self_price: Decimal = self.price.parse().unwrap();
+        let other_price: Decimal = other.price.parse().unwrap();
+        let self_quantity: Decimal = self.quantity.parse().unwrap();
+        let other_quantity: Decimal = other.quantity.parse().unwrap();
+
+        self.item_id == other.item_id
+            && self_price == other_price
+            && self_quantity == other_quantity
+            && self.debitor_first == other.debitor_first
+            // return when test data is consistent
+            // && self.rule_instance_id == other.rule_instance_id
+            && self.unit_of_measurement == other.unit_of_measurement
+            && self.units_measured == other.units_measured
+            && self.debitor == other.debitor
+            && self.creditor == other.creditor
     }
 }
 
@@ -293,20 +318,16 @@ impl TransactionItems {
         accounts
     }
 
-    pub fn add_profile_ids(&mut self, account_profiles: AccountProfiles) {
+    pub fn add_profile_ids(&mut self, profile_ids: ProfileIds) {
         for ti in self.0.iter_mut() {
             if ti.debitor_profile_id.is_none() {
-                let debitor_profile = account_profiles
-                    .match_profile_by_account(ti.debitor.clone())
-                    .unwrap();
-                ti.debitor_profile_id = debitor_profile.get_id();
+                let debitor_profile_id = profile_ids.get_id(ti.debitor.clone()).unwrap();
+                ti.debitor_profile_id = Some(format!("{}", debitor_profile_id));
             }
 
             if ti.creditor_profile_id.is_none() {
-                let creditor_profile = account_profiles
-                    .match_profile_by_account(ti.creditor.clone())
-                    .unwrap();
-                ti.creditor_profile_id = creditor_profile.get_id();
+                let creditor_profile_id = profile_ids.get_id(ti.creditor.clone()).unwrap();
+                ti.creditor_profile_id = Some(format!("{}", creditor_profile_id));
             }
         }
     }
@@ -426,10 +447,38 @@ impl TransactionItems {
         auth_account: &str,
         account_role: AccountRole,
     ) -> Result<(), ApprovalError> {
+        let mut previously_approved = 0;
+        let mut prev_err = ApprovalError::PreviouslyApproved(TZTime::now());
+
+        let mut zero_approvals = 0;
+        let mut zero_err = ApprovalError::ZeroApprovalsForAccount("".to_string());
+
         for ti in self.0.iter() {
-            ti.test_pending_role_approval(auth_account, account_role)?
+            match ti.test_pending_role_approval(auth_account, account_role) {
+                Ok(_) => (),
+                Err(e) => match e {
+                    ApprovalError::PreviouslyApproved(_) => {
+                        previously_approved += 1;
+                        prev_err = e;
+                    }
+                    ApprovalError::ZeroApprovalsForAccount(_) => {
+                        zero_approvals += 1;
+                        zero_err = e;
+                    }
+                    _ => return Err(e),
+                },
+            }
         }
-        Ok(())
+
+        if previously_approved == 0 {
+            Ok(())
+        } else if previously_approved == self.len() {
+            Err(prev_err)
+        } else if zero_approvals == self.len() {
+            Err(zero_err)
+        } else {
+            Err(ApprovalError::IncompletePreviousApproval)
+        }
     }
 
     pub fn filter_by_transaction(
@@ -460,6 +509,69 @@ impl TransactionItems {
     pub fn to_json_string(&self) -> String {
         serde_json::to_string(&self).unwrap()
     }
+
+    pub fn remove_unauthorized_values(&self) -> Self {
+        let mut authrorized: Vec<TransactionItem> = vec![];
+        for ti in self.0.iter() {
+            authrorized.push(TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: ti.item_id.clone(),
+                price: ti.price.clone(),
+                quantity: ti.quantity.clone(),
+                debitor_first: ti.debitor_first,
+                rule_instance_id: ti.rule_instance_id.clone(),
+                rule_exec_ids: None,
+                unit_of_measurement: ti.unit_of_measurement.clone(),
+                units_measured: ti.units_measured.clone(),
+                debitor: ti.debitor.clone(),
+                creditor: ti.creditor.clone(),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            })
+        }
+        Self(authrorized)
+    }
+
+    pub fn filter_user_added(&self) -> Self {
+        let mut filtered: Vec<TransactionItem> = vec![];
+        for ti in self.0.iter() {
+            if ti.rule_instance_id.is_none() {
+                filtered.push(ti.clone())
+            }
+        }
+        Self(filtered)
+    }
+
+    pub fn test_equality(&self, other: TransactionItems) -> Result<(), TransactionItemError> {
+        let mut missing_items = self.0.clone();
+
+        if self.len() != other.len() {
+            return Err(TransactionItemError::UnequalTransactionItemsCount);
+        }
+
+        for item in &self.0 {
+            for other_item in &other.0 {
+                if item.test_equality(other_item) {
+                    missing_items.retain(|x| x != item);
+                }
+            }
+        }
+
+        if !missing_items.is_empty() {
+            println!("missing items: {:#?}", missing_items);
+            return Err(TransactionItemError::MissingTransactionItems(missing_items));
+        }
+
+        Ok(())
+    }
 }
 
 impl From<Vec<Row>> for TransactionItems {
@@ -476,7 +588,6 @@ impl From<Vec<Row>> for TransactionItems {
 mod tests {
 
     use super::*;
-    use crate::account::AccountProfile;
     use crate::approval::Approval;
     use crate::transaction::tests::create_test_transaction;
     use serde_json;
@@ -543,63 +654,19 @@ mod tests {
     #[test]
     fn it_adds_profile_ids() {
         let mut test_tr_items = create_test_transaction_items();
-        let want_debitor_profile_id = Some(String::from("11"));
-        let want_creditor_profile_id = Some(String::from("7"));
-        let test_acct_profiles = AccountProfiles(vec![
-            AccountProfile {
-                id: want_debitor_profile_id.clone(),
-                account_name: String::from("JacobWebb"),
-                description: Some(String::from("Soccer coach")),
-                first_name: Some(String::from("Jacob")),
-                middle_name: Some(String::from("Curtis")),
-                last_name: Some(String::from("Webb")),
-                country_name: String::from("United States of America"),
-                street_number: Some(String::from("205")),
-                street_name: Some(String::from("N Mccarran Blvd")),
-                floor_number: None,
-                unit_number: None,
-                city_name: String::from("Sparks"),
-                county_name: Some(String::from("Washoe County")),
-                region_name: None,
-                state_name: String::from("Nevada"),
-                postal_code: String::from("89431"),
-                latlng: Some(String::from("(39.534552,-119.737825)")),
-                email_address: String::from("jacob@address.xz"),
-                telephone_country_code: Some(String::from("1")),
-                telephone_area_code: Some(String::from("775")),
-                telephone_number: Some(String::from("5555555")),
-                occupation_id: Some(String::from("7")),
-                industry_id: Some(String::from("7")),
-                removal_time: None,
-            },
-            AccountProfile {
-                id: want_creditor_profile_id.clone(),
-                account_name: String::from("GroceryStore"),
-                description: Some(String::from("Sells groceries")),
-                first_name: Some(String::from("Grocery")),
-                middle_name: None,
-                last_name: Some(String::from("Store")),
-                country_name: String::from("United States of America"),
-                street_number: Some(String::from("8701")),
-                street_name: Some(String::from("Lincoln Blvd")),
-                floor_number: None,
-                unit_number: None,
-                city_name: String::from("Los Angeles"),
-                county_name: Some(String::from("Los Angeles County")),
-                region_name: None,
-                state_name: String::from("California"),
-                postal_code: String::from("90045"),
-                latlng: Some(String::from("(33.958050,-118.418388)")),
-                email_address: String::from("grocerystore@address.xz"),
-                telephone_country_code: Some(String::from("1")),
-                telephone_area_code: Some(String::from("310")),
-                telephone_number: Some(String::from("5555555")),
-                occupation_id: Some(String::from("11")),
-                industry_id: Some(String::from("11")),
-                removal_time: None,
-            },
-        ]);
-        test_tr_items.add_profile_ids(test_acct_profiles);
+
+        let jw_profile_id = 11;
+        let gs_profile_id = 7;
+
+        let mut test_profile_ids = ProfileIds::new();
+        test_profile_ids.insert("JacobWebb".to_string(), jw_profile_id);
+        test_profile_ids.insert("GroceryStore".to_string(), gs_profile_id);
+
+        let want_debitor_profile_id = Some(format!("{}", jw_profile_id));
+        let want_creditor_profile_id = Some(format!("{}", gs_profile_id));
+
+        test_tr_items.add_profile_ids(test_profile_ids);
+
         for t in test_tr_items.0.iter() {
             let got_debitor_profile_id = t.debitor_profile_id.clone();
             assert_eq!(
@@ -751,6 +818,7 @@ mod tests {
     #[test]
     fn it_errors_with_adding_to_non_empty_approvals_on_a_transaction_item() {
         let mut test_tr_item = create_test_transaction_item();
+        test_tr_item.approvals = Some(create_test_approvals());
         let test_approvals = create_test_approvals();
         assert_eq!(
             test_tr_item
@@ -788,6 +856,33 @@ mod tests {
                 .unwrap_err()
                 .to_string(),
             "missing id in transaction item".to_string()
+        )
+    }
+
+    #[test]
+    fn it_will_test_equality_as_negative_on_a_transaction_item() {
+        let test_tr_item = create_test_transaction_item();
+        let mut test_other = create_test_transaction_item();
+        test_other.item_id = String::from("eggs");
+        assert_eq!(
+            test_tr_item.test_equality(&test_other),
+            false,
+            "got {}, want {}",
+            test_tr_item.test_equality(&test_other),
+            false
+        )
+    }
+
+    #[test]
+    fn it_will_test_equality_as_positive_on_a_transaction_item() {
+        let test_tr_item = create_test_transaction_item();
+        let test_other = create_test_transaction_item();
+        assert_eq!(
+            test_tr_item.test_equality(&test_other),
+            true,
+            "got {}, want {}",
+            test_tr_item.test_equality(&test_other),
+            true
         )
     }
 
@@ -912,6 +1007,169 @@ mod tests {
         let got = with_unmatched.filter_by_transaction(1).unwrap();
         let want = create_test_transaction_items();
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_will_remove_unauthorized_values() {
+        let test_tr_items = create_test_transaction_items();
+        let want = TransactionItems(vec![
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("bread"),
+                price: String::from("3.000"),
+                quantity: String::from("2"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: None,
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            },
+            TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: String::from("milk"),
+                price: String::from("4.000"),
+                quantity: String::from("3"),
+                debitor_first: Some(false),
+                rule_instance_id: None,
+                rule_exec_ids: None,
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: String::from("JacobWebb"),
+                creditor: String::from("GroceryStore"),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            },
+        ]);
+        let got = test_tr_items.remove_unauthorized_values();
+        assert_eq!(got, want, "got {:#?}, want {:#?}", got, want)
+    }
+
+    #[test]
+    fn it_will_filter_user_added_transaction_items() {
+        let mut test_tr_items = create_test_transaction_items();
+        test_tr_items.0.push(TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: String::from("9% state sales tax"),
+            price: String::from("0.270"),
+            quantity: String::from("2.000"),
+            debitor_first: Some(false),
+            rule_instance_id: Some(String::from("9% state sales tax")),
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: String::from("JacobWebb"),
+            creditor: String::from("StateOfCalifornia"),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        });
+        let want = create_test_transaction_items();
+        let got = test_tr_items.filter_user_added();
+        assert_eq!(got, want, "got {:#?}, want {:#?}", got, want)
+    }
+
+    #[test]
+    fn it_will_test_equality_and_error_with_missing_transaction_items() {
+        let mut test_tr_items = create_test_transaction_items();
+        test_tr_items.0.pop();
+        test_tr_items.0.push(TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: String::from("eggs"),
+            price: String::from("2.500"),
+            quantity: String::from("2"),
+            debitor_first: Some(false),
+            rule_instance_id: None,
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: String::from("JacobWebb"),
+            creditor: String::from("GroceryStore"),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        });
+        let test_other = create_test_transaction_items();
+        assert_eq!(
+            test_tr_items.test_equality(test_other).unwrap_err().to_string(),
+            "missing transaction items: [TransactionItem { id: None, transaction_id: None, item_id: \"eggs\", price: \"2.500\", quantity: \"2\", debitor_first: Some(false), rule_instance_id: None, rule_exec_ids: Some([]), unit_of_measurement: None, units_measured: None, debitor: \"JacobWebb\", creditor: \"GroceryStore\", debitor_profile_id: None, creditor_profile_id: None, debitor_approval_time: None, creditor_approval_time: None, debitor_rejection_time: None, creditor_rejection_time: None, debitor_expiration_time: None, creditor_expiration_time: None, approvals: None }]".to_string()
+        )
+    }
+
+    #[test]
+    fn it_will_test_equality_and_error_with_unequal_transaction_items_count() {
+        let test_tr_items = create_test_transaction_items();
+        let mut test_other = create_test_transaction_items();
+        test_other.0.push(TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: String::from("eggs"),
+            price: String::from("2.500"),
+            quantity: String::from("2"),
+            debitor_first: Some(false),
+            rule_instance_id: None,
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: String::from("JacobWebb"),
+            creditor: String::from("GroceryStore"),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        });
+        assert_eq!(
+            test_tr_items
+                .test_equality(test_other)
+                .unwrap_err()
+                .to_string(),
+            "unequal transaction items count".to_string()
+        )
+    }
+
+    #[test]
+    fn it_will_test_equality_as_positive_on_transaction_items() {
+        let test_tr_items = create_test_transaction_items();
+        let test_other = create_test_transaction_items();
+        assert_eq!(test_tr_items.test_equality(test_other).unwrap(), ())
     }
 
     #[test]

@@ -6,6 +6,7 @@ fn _before_each() {
     dotenv().expect(".env file not found");
 }
 
+// cadet todo: assert all response values
 #[cfg(test)]
 mod tests {
     use super::*;

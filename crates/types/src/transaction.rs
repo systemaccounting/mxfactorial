@@ -2,9 +2,10 @@ use crate::{
     account_role::AccountRole,
     approval::{ApprovalError, Approvals},
     time::TZTime,
-    transaction_item::{TransactionItem, TransactionItems},
+    transaction_item::{TransactionItem, TransactionItemError, TransactionItems},
 };
 use async_graphql::{ComplexObject, Object, SimpleObject};
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, vec};
 use thiserror::Error;
@@ -16,6 +17,10 @@ pub enum TransactionError {
     AddingToNonEmptyTransactionItems,
     #[error("missing transaction id")]
     MissingTransactionId,
+    #[error("missing author in transaction items")]
+    MissingAuthorInTransactionItems,
+    #[error("missing author in transaction")]
+    MissingAuthorInTransaction,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
@@ -42,18 +47,25 @@ impl Transaction {
 }
 
 impl Transaction {
-    pub fn new(author: String, transaction_items: TransactionItems) -> Self {
-        Self {
+    pub fn new(
+        author: String,
+        equilibrium_time: Option<TZTime>,
+        transaction_items: TransactionItems,
+    ) -> Self {
+        let mut transaction = Transaction {
             id: None,
             rule_instance_id: None,
             author: Some(author),
             author_device_id: None,
             author_device_latlng: None,
             author_role: None,
-            equilibrium_time: None,
-            sum_value: "0.000".to_string(), // used in integration tests
+            equilibrium_time,
+            sum_value: transaction_items.sum_value(),
             transaction_items,
-        }
+        };
+        // temp until value added in test data
+        transaction.set_author_role().unwrap();
+        transaction
     }
 
     pub fn test_unique_contra_accounts(&self) -> Result<(), Box<dyn Error>> {
@@ -69,8 +81,16 @@ impl Transaction {
         auth_account: &str,
         account_role: AccountRole,
     ) -> Result<(), ApprovalError> {
-        self.transaction_items
+        match self
+            .transaction_items
             .test_pending_role_approval(auth_account, account_role)
+        {
+            Ok(()) => Ok(()),
+            Err(e) => {
+                println!("error: {:?}", e);
+                Err(e)
+            }
+        }
     }
 
     pub fn add_transaction_items(
@@ -98,6 +118,43 @@ impl Transaction {
     ) -> Result<(), Box<dyn Error>> {
         transaction_items.add_approvals(approvals)?;
         self.add_transaction_items(transaction_items)?;
+        Ok(())
+    }
+
+    pub fn set_author_role(&mut self) -> Result<(), Box<dyn Error>> {
+        if self.author.is_none() {
+            return Err(Box::new(TransactionError::MissingAuthorInTransaction));
+        }
+
+        let author = self.author.clone().unwrap();
+
+        // test author role in transaction items if transaction is NOT rule generated
+        for ti in self.transaction_items.0.iter() {
+            if ti.debitor == author {
+                self.author_role = Some(AccountRole::Debitor);
+                return Ok(());
+            } else if ti.creditor == author {
+                self.author_role = Some(AccountRole::Creditor);
+                return Ok(());
+            }
+        }
+
+        Err(Box::new(TransactionError::MissingAuthorInTransactionItems))
+    }
+
+    pub fn get_sum_value(&self) -> String {
+        self.transaction_items.sum_value()
+    }
+
+    pub fn test_sum_value(&self) -> Result<(), TransactionItemError> {
+        let stated: Decimal = self.sum_value.parse().unwrap();
+        let computed: Decimal = self.transaction_items.sum_value().parse().unwrap();
+        if stated != computed {
+            return Err(TransactionItemError::SumValueFailure {
+                stated: stated.to_string(),
+                computed: computed.to_string(),
+            });
+        }
         Ok(())
     }
 }
@@ -214,13 +271,55 @@ pub mod tests {
                 expiration_time: None,
             },
         ]);
-        test_transaction.transaction_items.0[0].approvals = Some(test_approvals);
+        test_transaction.transaction_items.0[0].approvals = Some(test_approvals.clone());
+        test_transaction.transaction_items.0[1].approvals = Some(test_approvals);
 
         let got = test_transaction
             .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
             .unwrap_err();
 
         assert_eq!(got, ApprovalError::PreviouslyApproved(test_approval_time))
+    }
+
+    #[test]
+    fn it_tests_positive_for_incomplete_previous_approval_on_transaction() {
+        let mut test_transaction = create_test_transaction();
+        let test_approval_time = TZTime::from("2023-10-30T04:56:56Z".to_string());
+        let test_approvals = Approvals(vec![
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("JacobWebb"),
+                account_role: AccountRole::Debitor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: Some(test_approval_time),
+                rejection_time: None,
+                expiration_time: None,
+            },
+            Approval {
+                id: None,
+                rule_instance_id: None,
+                transaction_id: None,
+                transaction_item_id: None,
+                account_name: String::from("GroceryStore"),
+                account_role: AccountRole::Creditor,
+                device_id: None,
+                device_latlng: None,
+                approval_time: None,
+                rejection_time: None,
+                expiration_time: None,
+            },
+        ]);
+        test_transaction.transaction_items.0[0].approvals = Some(test_approvals.clone());
+
+        let got = test_transaction
+            .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
+            .unwrap_err();
+
+        assert_eq!(got, ApprovalError::IncompletePreviousApproval)
     }
 
     #[test]
@@ -323,7 +422,14 @@ pub mod tests {
         }
     }
 
-    // resume here
+    // cadet todo: test remaining branches of get_author_role
+    #[test]
+    fn it_returns_author_role_found_in_transaction_items() {
+        let mut test_transaction = create_test_transaction();
+        test_transaction.set_author_role().unwrap();
+        assert_eq!(test_transaction.author_role, Some(AccountRole::Creditor))
+    }
+
     #[test]
     fn it_deserializes_a_transaction() {
         let got: Transaction = serde_json::from_str(
@@ -331,7 +437,7 @@ pub mod tests {
             {
                 "id": "1",
                 "rule_instance_id": null,
-                "author": "GroceryCo",
+                "author": "GroceryStore",
                 "author_device_id": null,
                 "author_device_latlng": null,
                 "author_role": "creditor",
@@ -459,7 +565,7 @@ pub mod tests {
         {
 			"id": "1",
 			"rule_instance_id": null,
-			"author": "GroceryCo",
+			"author": "GroceryStore",
 			"author_device_id": null,
 			"author_device_latlng": null,
 			"author_role": "creditor",
@@ -571,7 +677,7 @@ pub mod tests {
         {
 			"id": "2",
 			"rule_instance_id": null,
-			"author": "GroceryCo",
+			"author": "GroceryStore",
 			"author_device_id": null,
 			"author_device_latlng": null,
 			"author_role": "creditor",
@@ -692,7 +798,7 @@ pub mod tests {
         Transaction {
             id: Some(String::from("1")),
             rule_instance_id: None,
-            author: Some(String::from("GroceryCo")),
+            author: Some(String::from("GroceryStore")),
             author_device_id: None,
             author_device_latlng: None,
             author_role: Some(AccountRole::Creditor),
@@ -808,7 +914,7 @@ pub mod tests {
             Transaction {
                 id: Some(String::from("1")),
                 rule_instance_id: None,
-                author: Some(String::from("GroceryCo")),
+                author: Some(String::from("GroceryStore")),
                 author_device_id: None,
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
@@ -920,7 +1026,7 @@ pub mod tests {
             Transaction {
                 id: Some(String::from("2")),
                 rule_instance_id: None,
-                author: Some(String::from("GroceryCo")),
+                author: Some(String::from("GroceryStore")),
                 author_device_id: None,
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),

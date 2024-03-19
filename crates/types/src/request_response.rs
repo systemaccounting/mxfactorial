@@ -5,7 +5,7 @@ use crate::{
 use async_graphql::SimpleObject;
 use serde::{Deserialize, Serialize};
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, SimpleObject)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
 #[graphql(rename_fields = "snake_case")]
 pub struct IntraTransaction {
     pub auth_account: Option<String>,
@@ -18,6 +18,12 @@ impl IntraTransaction {
             auth_account: Some(auth_account),
             transaction,
         }
+    }
+
+    pub fn add_rule_tested_values(&mut self, rule_tested: IntraTransaction) {
+        self.transaction.set_author_role().unwrap(); // temp until value added in test data
+        self.transaction.sum_value = rule_tested.transaction.sum_value;
+        self.transaction.transaction_items = rule_tested.transaction.transaction_items;
     }
 
     // cadet todo: unit test
