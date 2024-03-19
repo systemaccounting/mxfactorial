@@ -144,6 +144,7 @@ impl Mutation {
             account_from_token.clone(),
             Transaction::new(
                 account_from_token,
+                None,
                 TransactionItems::from(transaction_items),
             ),
         );
