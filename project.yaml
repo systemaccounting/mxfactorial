@@ -354,15 +354,14 @@ services:
         - READINESS_CHECK_PATH
         - GRAPHQL_PORT
   request-create:
-    runtime: go1.x
+    runtime: rust1.x
     min_code_cov: null
     type: app
     local_dev: true
     params:
       - AWS_REGION
-      - ENABLE_NOTIFICATIONS
     deploy: true
-    build_src_path: cmd
+    build_src_path: null
     dependents:
       - request-approve
     env_var:
@@ -371,7 +370,6 @@ services:
           ssm: null
           default: 10002
       get:
-        - NOTIFY_TOPIC_ARN
         - READINESS_CHECK_PATH
         - REQUEST_CREATE_URL
         - RULE_URL
