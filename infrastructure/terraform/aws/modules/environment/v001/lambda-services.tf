@@ -7,33 +7,13 @@ module "request_create" {
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
-    NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
-    ENABLE_NOTIFICATIONS = var.enable_notifications
     RULE_URL             = module.rule.lambda_function_url
   })
   aws_lwa_port              = local.REQUEST_CREATE_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
-  attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
+  attached_policy_arns      = []
   create_secret             = true // suppports local testing
-}
-
-resource "aws_iam_policy" "invoke_rules" {
-  name        = "allow-rules-invoke-${local.ID_ENV}"
-  description = "added perms for request-create lambda in ${local.SPACED_ID_ENV}"
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid = "SNSPublish"
-        Action = [
-          "sns:Publish",
-        ]
-        Effect   = "Allow"
-        Resource = aws_sns_topic.notifications.arn
-      },
-    ]
-  })
 }
 
 ##########################
@@ -44,15 +24,12 @@ module "request_approve" {
   env          = var.env
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
-  env_vars = merge(local.POSTGRES_VARS, {
-    NOTIFY_TOPIC_ARN     = aws_sns_topic.notifications.arn,
-    ENABLE_NOTIFICATIONS = var.enable_notifications
-  })
+  env_vars = merge(local.POSTGRES_VARS, {})
   aws_lwa_port              = local.REQUEST_APPROVE_PORT
   invoke_url_principals     = [aws_iam_role.graphql_role.arn]
   artifacts_bucket_name     = var.artifacts_bucket_name
   create_secret             = true
-  attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
+  attached_policy_arns      = []
 }
 
 module "requests_by_account" {
@@ -219,6 +196,6 @@ module "rule" {
     module.request_create.lambda_role_arn,
   ]
   artifacts_bucket_name     = var.artifacts_bucket_name
-  attached_policy_arns      = [aws_iam_policy.invoke_rules.arn]
+  attached_policy_arns      = []
   create_secret             = true // suppports local testing
 }

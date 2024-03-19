@@ -10,7 +10,7 @@ module "go_migrate" {
   aws_lwa_port                  = local.GO_MIGRATE_PORT
   artifacts_bucket_name         = var.artifacts_bucket_name
   create_secret                 = true
-  attached_policy_arns          = [aws_iam_policy.invoke_rules.arn]
+  attached_policy_arns          = []
   lambda_url_authorization_type = "NONE"
 }
 
