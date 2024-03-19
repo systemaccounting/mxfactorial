@@ -20,6 +20,12 @@ impl IntraTransaction {
         }
     }
 
+    pub fn add_rule_tested_values(&mut self, rule_tested: IntraTransaction) {
+        self.transaction.set_author_role().unwrap(); // temp until value added in test data
+        self.transaction.sum_value = rule_tested.transaction.sum_value;
+        self.transaction.transaction_items = rule_tested.transaction.transaction_items;
+    }
+
     // cadet todo: unit test
     pub fn from_json_string(json_string: &str) -> Result<Self, serde_json::Error> {
         serde_json::from_str(json_string)
