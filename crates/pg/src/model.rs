@@ -52,7 +52,7 @@ pub trait ModelTrait {
         transaction_id: i32,
         account: String,
         role: AccountRole,
-    ) -> Result<TZTime, Box<dyn Error>>;
+    ) -> Result<Option<TZTime>, Box<dyn Error>>;
     async fn insert_account_profile_query(
         &self,
         account_profile: AccountProfile,
@@ -267,15 +267,16 @@ impl ModelTrait for DatabaseConnection {
         transaction_id: i32,
         account: String,
         role: AccountRole,
-    ) -> Result<TZTime, Box<dyn Error>> {
+    ) -> Result<Option<TZTime>, Box<dyn Error>> {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.update_approvals_by_account_and_role_sql();
+        // sql values: tr_id int, acct_name text, acct_role text
         let values: ToSqlVec = vec![Box::new(transaction_id), Box::new(account), Box::new(role)];
         let result = self.query(sql.to_string(), values).await;
         match result {
             Err(e) => Err(Box::new(e)),
             Ok(rows) => {
-                let approval_time = rows[0].get::<usize, TZTime>(0);
+                let approval_time: Option<TZTime> = rows[0].get(0);
                 Ok(approval_time)
             }
         }
@@ -1092,7 +1093,7 @@ mod integration_tests {
 
         // 1. test for transaction equilbrium_time
         let iso8601: ::regex::Regex = ::regex::Regex::new(DATE_RE).unwrap();
-        assert!(iso8601.is_match(&got_equilibrium_time.to_string()));
+        assert!(iso8601.is_match(&got_equilibrium_time.unwrap().to_string()));
 
         // 2. test for approval_time on approvals
         let got_sql = &format!(
