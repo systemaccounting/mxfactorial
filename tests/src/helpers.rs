@@ -19,8 +19,8 @@ pub fn restore_testseed() {
                 .expect("failed to execute process");
 
             // cargo test -- --show-output
-            let restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-            println!("{}", restore_output_str);
+            let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
+            // println!("{}", _restore_output_str); // comment in to print db restore output
         } else {
             let restore_output = Command::new("make")
                 .arg("-C")
