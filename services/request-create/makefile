@@ -23,9 +23,6 @@ start-alone:
 stop:
 	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH) stop
 
-echo:
-	echo $(TEST_EVENT)
-
 invoke-local:
 	@curl -s -H 'Content-Type: application/json' -d $(TEST_EVENT) $(REQUEST_CREATE_URL) | yq -o=json
 

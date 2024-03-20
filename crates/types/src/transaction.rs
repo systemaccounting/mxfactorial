@@ -21,6 +21,10 @@ pub enum TransactionError {
     MissingAuthorInTransactionItems,
     #[error("missing author in transaction")]
     MissingAuthorInTransaction,
+    #[error("missing auth_account in transaction")]
+    MissingAuthAccountInTransaction,
+    #[error("missing author role in transaction")]
+    MissingAuthorRoleInTransaction,
 }
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
