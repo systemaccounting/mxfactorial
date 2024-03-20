@@ -40,10 +40,10 @@ pub struct IntraTransactions {
 
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize)]
 pub struct RequestApprove {
-    auth_account: String,
-    id: String,
-    account_name: String,
-    account_role: AccountRole,
+    pub auth_account: String,
+    pub id: String,
+    pub account_name: String,
+    pub account_role: AccountRole,
 }
 
 impl RequestApprove {
