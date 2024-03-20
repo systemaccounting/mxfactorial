@@ -380,15 +380,14 @@ services:
         - PGPASSWORD
         - PGDATABASE
   request-approve:
-    runtime: go1.x
+    runtime: rust1.x
     min_code_cov: null
     type: app
     local_dev: true
     params:
       - AWS_REGION
-      - ENABLE_NOTIFICATIONS
     deploy: true
-    build_src_path: cmd
+    build_src_path: null
     dependents: []
     env_var:
       set:
@@ -396,7 +395,6 @@ services:
           ssm: null
           default: 10003
       get:
-        - NOTIFY_TOPIC_ARN
         - READINESS_CHECK_PATH
         - REQUEST_APPROVE_URL
         - REQUEST_APPROVE_PORT

@@ -9,6 +9,7 @@ members = [
 	"crates/shutdown",
 	"crates/types",
 	"services/graphql",
+	"services/request-approve",
 	"services/request-create",
 	"services/rule",
 	"tests",
