@@ -10,6 +10,7 @@ members = [
 	"crates/types",
 	"services/graphql",
 	"services/request-approve",
+	"services/request-by-id",
 	"services/request-create",
 	"services/rule",
 	"tests",
