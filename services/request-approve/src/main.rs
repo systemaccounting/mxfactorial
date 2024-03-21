@@ -24,10 +24,13 @@ async fn handle_event(
 
     let request_id = client_request.id.parse::<i32>().unwrap();
 
-    let transaction_request = svc.get_transaction_by_id(request_id).await.map_err(|e| {
-        tracing::error!("error: {}", e);
-        StatusCode::INTERNAL_SERVER_ERROR
-    })?;
+    let transaction_request = svc
+        .get_full_transaction_by_id(request_id)
+        .await
+        .map_err(|e| {
+            tracing::error!("error: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
     if transaction_request.equilibrium_time.is_some() {
         println!("transaction previously approved");

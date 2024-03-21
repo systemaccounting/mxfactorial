@@ -125,7 +125,7 @@ async fn create_request(
 
     let id = transaction_id.parse::<i32>().unwrap();
 
-    let inserted_transaction_request = svc.get_transaction_by_id(id).await.unwrap();
+    let inserted_transaction_request = svc.get_full_transaction_by_id(id).await.unwrap();
 
     Ok(inserted_transaction_request)
 }
