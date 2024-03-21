@@ -12,37 +12,37 @@ test('request detail screen pairs transaction items with rule added items', asyn
 	await page.getByText('Requests').click();
 	await page.locator('css=[data-id-req="1"]').click();
 	await expect(await getFirstNTransactionItems(page, 6)).toEqual(
+		// migrations/testseed/000003_request.up.sql
 		[
-			// migrations/testseed/000003_request.up.sql
 			{
 				item_id: "eggs",
 				quantity: "1",
-				price: "3",
+				price: "3.000",
 			},
 			{
 				item_id: salesTax,
 				quantity: "1",
-				price: "0.27",
+				price: "0.270",
 			},
 			{
 				item_id: "bread",
 				quantity: "2",
-				price: "2",
+				price: "2.000",
 			},
 			{
 				item_id: salesTax,
 				quantity: "2",
-				price: "0.18",
+				price: "0.180",
 			},
 			{
 				item_id: "milk",
 				quantity: "1",
-				price: "2",
+				price: "2.000",
 			},
 			{
 				item_id: salesTax,
 				quantity: "1",
-				price: "0.18",
+				price: "0.180",
 			},
 		]
 	);

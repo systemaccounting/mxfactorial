@@ -9,14 +9,14 @@ use service::Service;
 use shutdown::shutdown_signal;
 use std::{env, net::ToSocketAddrs};
 use tokio::net::TcpListener;
-use types::request_response::{IntraTransaction, RequestApprove};
+use types::request_response::{IntraTransaction, QueryById};
 
 // used by lambda to test for service availability
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
 async fn handle_event(
     State(pool): State<ConnectionPool>,
-    event: Json<RequestApprove>,
+    event: Json<QueryById>,
 ) -> Result<axum::Json<IntraTransaction>, StatusCode> {
     let client_request = event.0;
 
@@ -24,28 +24,47 @@ async fn handle_event(
 
     let request_id = client_request.id.parse::<i32>().unwrap();
 
-    let transaction_request = svc
-        .get_full_transaction_by_id(request_id)
+    let approvals = svc
+        .get_approvals_by_transaction_id(request_id)
         .await
         .map_err(|e| {
             tracing::error!("error: {}", e);
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    if transaction_request.equilibrium_time.is_some() {
-        println!("transaction previously approved");
+    if approvals
+        .clone()
+        .0
+        .into_iter()
+        .filter(|a| a.account_name == client_request.auth_account && a.approval_time.is_none())
+        .count()
+        == 0
+    {
+        tracing::error!("transaction request not found");
         return Err(StatusCode::BAD_REQUEST);
     }
 
-    let auth_account = client_request.auth_account;
-    let approver_role = client_request.account_role;
-
-    let approved_transaction_request = svc
-        .approve(auth_account, approver_role, transaction_request)
+    let transaction_items = svc
+        .get_transaction_items_by_transaction_id(request_id)
         .await
-        .unwrap(); // todo: handle error
+        .map_err(|e| {
+            tracing::error!("error: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
-    Ok(axum::Json(approved_transaction_request))
+    let mut transaction_request = svc.get_transaction_by_id(request_id).await.map_err(|e| {
+        tracing::error!("error: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    transaction_request
+        .build(transaction_items, approvals)
+        .unwrap();
+
+    let intra_transaction_request =
+        IntraTransaction::new(client_request.auth_account, transaction_request);
+
+    Ok(axum::Json(intra_transaction_request))
 }
 
 #[tokio::main]
@@ -69,7 +88,7 @@ async fn main() {
 
     let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
 
-    let port = env::var("REQUEST_APPROVE_PORT").unwrap_or("10003".to_string());
+    let port = env::var("REQUEST_BY_ID_PORT").unwrap_or("10005".to_string());
 
     let serve_addr = format!("{hostname_or_ip}:{port}");
 

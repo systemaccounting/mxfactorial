@@ -61,3 +61,10 @@ impl RequestApprove {
         }
     }
 }
+
+#[derive(Debug, Deserialize)]
+pub struct QueryById {
+    pub auth_account: String,
+    pub account_name: String,
+    pub id: String,
+}

@@ -272,16 +272,19 @@ mod tests {
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 
+        // create a test transaction request
         let create_request = r::create_request_http(
             test_intra_transaction.auth_account.unwrap(),
             test_intra_transaction.transaction.transaction_items.clone(),
         )
         .await;
 
+        // get the debitor account from the transaction request
         let debitor = test_intra_transaction.transaction.transaction_items.0[0]
             .debitor
             .clone();
 
+        // get the debitors transaction request by id
         let got =
             r::get_request_by_id_http(debitor.clone(), debitor, create_request.id.unwrap()).await;
 

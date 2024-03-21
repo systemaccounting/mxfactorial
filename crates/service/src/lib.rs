@@ -304,6 +304,15 @@ impl<T: ModelTrait> Service<T> {
         &self,
         transaction_id: i32,
     ) -> Result<Transaction, Box<dyn Error>> {
+        self.conn
+            .select_transaction_by_id_query(transaction_id)
+            .await
+    }
+
+    pub async fn get_full_transaction_by_id(
+        &self,
+        transaction_id: i32,
+    ) -> Result<Transaction, Box<dyn Error>> {
         let transaction = self
             .get_transaction_with_transaction_items_and_approvals_by_id(transaction_id)
             .await?;
