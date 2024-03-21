@@ -302,7 +302,7 @@ scripts:
         ssm: null
         default:
           - 'go run '
-          - 'debug/rule'
+          - 'target/debug'
       CLIENT_PROCESS:
         ssm: null
         default: 'bin/vite dev'
@@ -444,7 +444,7 @@ services:
         - RUST_LOG
         - RUST_BACKTRACE
   request-by-id:
-    runtime: rust.x
+    runtime: rust1.x
     min_code_cov: null
     type: app
     local_dev: true

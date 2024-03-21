@@ -12,8 +12,8 @@ test('request detail screen pairs transaction items with rule added items', asyn
 	await page.getByText('Requests').click();
 	await page.locator('css=[data-id-req="1"]').click();
 	await expect(await getFirstNTransactionItems(page, 6)).toEqual(
+		// migrations/testseed/000003_request.up.sql
 		[
-			// migrations/testseed/000003_request.up.sql
 			{
 				item_id: "eggs",
 				quantity: "1",
