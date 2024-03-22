@@ -38,6 +38,15 @@ pub struct IntraTransactions {
     pub transactions: Transactions,
 }
 
+impl IntraTransactions {
+    pub fn new(auth_account: String, transactions: Transactions) -> Self {
+        Self {
+            auth_account: Some(auth_account),
+            transactions,
+        }
+    }
+}
+
 #[derive(Eq, PartialEq, Debug, Deserialize, Serialize)]
 pub struct RequestApprove {
     pub auth_account: String,
@@ -67,4 +76,10 @@ pub struct QueryById {
     pub auth_account: String,
     pub account_name: String,
     pub id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct QueryByAccount {
+    pub auth_account: String,
+    pub account_name: String,
 }
