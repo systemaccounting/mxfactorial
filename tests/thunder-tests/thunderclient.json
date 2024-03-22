@@ -202,7 +202,7 @@
     "method": "POST",
     "sortNum": 70000,
     "created": "2023-01-22T03:27:31.004Z",
-    "modified": "2023-06-07T04:44:13.001Z",
+    "modified": "2024-03-22T02:43:46.234Z",
     "headers": [
       {
         "name": "Content-Type",
@@ -219,8 +219,8 @@
       "raw": "",
       "form": [],
       "graphql": {
-        "query": "query getRequestByID($id: String!, $auth_account: String!) {\n  requestByID(id: $id, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_exec_ids\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
-        "variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"id\": \"1\"\n}"
+        "query": "query getRequestByID($id: String!, $account_name: String!, $auth_account: String!) {\n  requestByID(id: $id, account_name: $account_name, auth_account: $auth_account) {\n    id\n    rule_instance_id\n    author\n    author_device_id\n    author_device_latlng\n    author_role\n    transaction_items {\n        id\n        transaction_id\n        item_id\n        price\n        quantity\n        debitor_first\n        rule_exec_ids\n        rule_instance_id\n        unit_of_measurement\n        units_measured\n        debitor\n        creditor\n        debitor_profile_id\n        creditor_profile_id\n        debitor_approval_time\n        creditor_approval_time\n        debitor_expiration_time\n        creditor_expiration_time\n        debitor_rejection_time\n        creditor_rejection_time\n    }\n  }\n}",
+        "variables": "{\n  \"auth_account\": \"JacobWebb\",\n  \"account_name\": \"JacobWebb\",\n  \"id\": \"1\"\n}"
       }
     },
     "tests": []
