@@ -94,13 +94,13 @@ test('history detail screen pairs transaction items with rule added items', asyn
 		[
 			{
 				item_id: "bread",
-				quantity: "3",
-				price: "3",
+				quantity: "3.000",
+				price: "3.000",
 			},
 			{
 				item_id: salesTax,
-				quantity: "3",
-				price: "0.27",
+				quantity: "3.000",
+				price: "0.270",
 			}
 		]
 	);
