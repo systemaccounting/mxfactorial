@@ -12,6 +12,7 @@ members = [
 	"services/request-approve",
 	"services/request-by-id",
 	"services/request-create",
+	"services/requests-by-account",
 	"services/rule",
 	"tests",
 ]
