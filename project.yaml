@@ -491,13 +491,13 @@ services:
         - READINESS_CHECK_PATH
         - RETURN_RECORD_LIMIT
   transaction-by-id:
-    runtime: go1.x
+    runtime: rust1.x
     min_code_cov: null
     type: app
     local_dev: true
     params: []
     deploy: true
-    build_src_path: cmd
+    build_src_path: null
     dependents: []
     env_var:
       set:
