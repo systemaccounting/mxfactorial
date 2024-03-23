@@ -15,6 +15,7 @@ members = [
 	"services/requests-by-account",
 	"services/rule",
 	"services/transaction-by-id",
+	"services/transactions-by-account",
 	"tests",
 ]
 
