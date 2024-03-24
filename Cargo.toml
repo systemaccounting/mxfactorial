@@ -8,6 +8,7 @@ members = [
 	"crates/service",
 	"crates/shutdown",
 	"crates/types",
+	"services/balance-by-account",
 	"services/graphql",
 	"services/request-approve",
 	"services/request-by-id",

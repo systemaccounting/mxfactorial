@@ -1,0 +1,18 @@
+[package]
+name = "balance-by-account"
+version = "0.1.0"
+edition = "2021"
+rust-version.workspace = true
+
+[dependencies]
+axum = "0.7.4"
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread"] }
+shutdown = { path = "../../crates/shutdown" }
+pg = { path = "../../crates/pg" }
+service = { path = "../../crates/service" }
+types = { path = "../../crates/types" }
+
+[target.x86_64-unknown-linux-musl.dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
