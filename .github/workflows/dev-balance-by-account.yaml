@@ -8,8 +8,8 @@ on:
     - 'master'
 
 jobs:
-  test:
-    name: balance-by-account in dev
+  build:
+    name: balance-by-account
     runs-on: ubuntu-latest
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -17,10 +17,17 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       CI: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
         with:
-          go-version: '1.19.x'
+          toolchain: stable
+          components: clippy, rustfmt
+      - uses: taiki-e/install-action@nextest
+      - name: linting
+        run: |
+          cargo fmt -- --check
+          cargo clippy -- -Dwarnings
+        working-directory: services/balance-by-account
       - name: compile
         run: make compile
         working-directory: services/balance-by-account
