@@ -790,9 +790,10 @@ fn parse_pg_point(s: Option<String>) -> Result<Option<Point<f64>>, Box<dyn Error
     // create point from "(39.534552,-119.737825)"
     let stripped_parens = s.unwrap().replace(['(', ')'], "");
     let coords: Vec<&str> = stripped_parens.split(',').collect();
-    let lat = coords[0].parse::<f64>().unwrap();
-    let lng = coords[1].parse::<f64>().unwrap();
-    Ok(Some(Point::new(lat, lng)))
+    let lat = coords[0].trim().parse::<f64>().unwrap();
+    let lng = coords[1].trim().parse::<f64>().unwrap();
+    let point = Point::new(lat, lng);
+    Ok(Some(point))
 }
 
 fn parse_pg_timestamp(time: Option<TZTime>) -> Result<Option<DateTime<Utc>>, Box<dyn Error>> {
