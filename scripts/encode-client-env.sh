@@ -35,7 +35,7 @@ for l in "${ROWS[@]}"; do
 		VAL="${PAIR[1]}"
 	fi
 
-	if [[ $ENABLE_API_AUTH == 'false' ]]; then
+	if [[ $ENV == 'local' ]]; then
 		if [[ $VAR == 'POOL_ID' ]]; then
 			VAL=
 		fi

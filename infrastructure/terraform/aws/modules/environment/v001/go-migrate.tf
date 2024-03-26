@@ -1,5 +1,5 @@
 module "go_migrate" {
-  source       = "../../web-adapter-lambda/v001"
+  source       = "../../provided-lambda/v001"
   service_name = "go-migrate"
   env          = var.env
   ssm_prefix   = var.ssm_prefix

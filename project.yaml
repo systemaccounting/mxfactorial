@@ -183,6 +183,12 @@ infrastructure:
               GO_MIGRATE_LAYER_PREFIX:
                 ssm: null
                 default: go-migrate-provided-deps
+              READINESS_CHECK_PATH:
+                ssm: service/lambda/readiness_check_path
+                default: /healthz
+              WEB_ADAPTER_LAYER_VERSION:
+                ssm:
+                default: 17
         project-storage:
           env_var:
             set:
@@ -210,15 +216,6 @@ infrastructure:
               TFSTATE_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-tfstate
-        web-adapter-lambda:
-          env_var:
-            set:
-              READINESS_CHECK_PATH:
-                ssm: service/lambda/readiness_check_path
-                default: /healthz
-              WEB_ADAPTER_LAYER_VERSION:
-                ssm:
-                default: 17
 migrations:
   dumps:
     env_var:
@@ -632,15 +629,15 @@ services:
     env_var:
       get: []
   auto-confirm:
-    runtime: go1.x
+    runtime: rust1.x
     min_code_cov: null
     type: app
     params: []
     deploy: true
-    build_src_path: cmd
+    build_src_path: null
     dependents: []
     env_var:
-      get:
+      get: # used by make targets
         - POOL_ID
         - CLIENT_ID
 tests:
