@@ -814,17 +814,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "598e2ade8447dce8d3a15b6159b73354db34257851344b232fb1920c272acc61"
 dependencies = [
  "base64 0.21.5",
- "bytes",
- "chrono",
- "flate2",
- "http 1.0.0",
- "http-body 1.0.0",
- "http-serde",
- "query_map",
  "serde",
- "serde_dynamo",
  "serde_json",
- "serde_with 3.7.0",
 ]
 
 [[package]]
@@ -1278,15 +1269,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "crc32fast"
-version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3855a8a784b474f333699ef2bbca9db2c4a1f6d9088a90a2d25b1eb53111eaa"
-dependencies = [
- "cfg-if",
-]
-
-[[package]]
 name = "crossbeam-utils"
 version = "0.8.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1633,16 +1615,6 @@ name = "fixedbitset"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ce7134b9999ecaf8bcd65542e436736ef32ddca1b3e06094cb6ec5755203b80"
-
-[[package]]
-name = "flate2"
-version = "1.0.28"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "46303f565772937ffe1d394a4fac6f411c6013172fadde9dcdb1e147a086940e"
-dependencies = [
- "crc32fast",
- "miniz_oxide",
-]
 
 [[package]]
 name = "fnv"
@@ -3858,16 +3830,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_dynamo"
-version = "4.2.13"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b652e4dd5549c24a4ec779981278cccae2f85b4d5649441c745d58866e20283"
-dependencies = [
- "base64 0.21.5",
- "serde",
-]
-
-[[package]]
 name = "serde_json"
 version = "1.0.114"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3922,25 +3884,7 @@ dependencies = [
  "indexmap 1.9.2",
  "serde",
  "serde_json",
- "serde_with_macros 2.2.0",
- "time",
-]
-
-[[package]]
-name = "serde_with"
-version = "3.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ee80b0e361bbf88fd2f6e242ccd19cfda072cb0faa6ae694ecee08199938569a"
-dependencies = [
- "base64 0.21.5",
- "chrono",
- "hex",
- "indexmap 1.9.2",
- "indexmap 2.1.0",
- "serde",
- "serde_derive",
- "serde_json",
- "serde_with_macros 3.7.0",
+ "serde_with_macros",
  "time",
 ]
 
@@ -3954,18 +3898,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "serde_with_macros"
-version = "3.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6561dc161a9224638a31d876ccdfefbc1df91d3f3a8342eddb35f055d48c7655"
-dependencies = [
- "darling 0.20.3",
- "proc-macro2",
- "quote",
- "syn 2.0.48",
 ]
 
 [[package]]
@@ -4768,7 +4700,7 @@ dependencies = [
  "serde",
  "serde_assert",
  "serde_json",
- "serde_with 2.2.0",
+ "serde_with",
  "strum 0.24.1",
  "strum_macros 0.24.3",
  "thiserror",
