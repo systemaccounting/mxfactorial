@@ -25,6 +25,10 @@ variable "create_secret" {
 variable "artifacts_bucket_name" {}
 variable "ssm_prefix" {}
 variable "env_id" {}
-variable "aws_lwa_port" {}
 variable "lambda_timeout" { default = 30 }
 variable "lambda_url_authorization_type" { default = "AWS_IAM" }
+variable "aws_lwa_port" { default = null }
+variable "lambda_layer_arns" {
+  type    = list(string)
+  default = []
+}

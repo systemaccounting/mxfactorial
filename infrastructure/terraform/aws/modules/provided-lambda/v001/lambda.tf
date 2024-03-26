@@ -7,9 +7,9 @@ locals {
   SERVICE_NAME_LOWER        = replace(var.service_name, "-", "_")
   LOG_GROUP_NAME            = "/aws/lambda/${aws_lambda_function.default.function_name}"
   PROJECT_CONF              = yamldecode(file("../../../../../project.yaml"))
-  WEB_ADAPTER_CONF          = local.PROJECT_CONF.infrastructure.terraform.aws.modules.web-adapter-lambda
-  READINESS_CHECK_PATH      = local.WEB_ADAPTER_CONF.env_var.set.READINESS_CHECK_PATH.default
-  WEB_ADAPTER_LAYER_VERSION = local.WEB_ADAPTER_CONF.env_var.set.WEB_ADAPTER_LAYER_VERSION.default
+  ENVIRONMENT_CONF          = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
+  READINESS_CHECK_PATH      = local.ENVIRONMENT_CONF.READINESS_CHECK_PATH.default
+  WEB_ADAPTER_LAYER_VERSION = local.ENVIRONMENT_CONF.WEB_ADAPTER_LAYER_VERSION.default
   BINARY_NAME               = local.PROJECT_CONF.services.env_var.set.BINARY_NAME.default
   LAMBDA_RUNTIME            = local.PROJECT_CONF.infrastructure.terraform.aws.modules.env_var.set.LAMBDA_RUNTIME.default
 }
@@ -36,18 +36,20 @@ resource "aws_lambda_function" "default" {
 
   environment {
     variables = merge(
-      {
+      // add lambda web adapter env vars if aws_lwa_port set
+      var.aws_lwa_port != null ? {
         READINESS_CHECK_PATH               = local.READINESS_CHECK_PATH
         PORT                               = var.aws_lwa_port
         "${local.SERVICE_NAME_UPPER}_PORT" = var.aws_lwa_port
-      },
+      } : {},
       var.env_vars,
     )
   }
 
-  layers = [
+  // add lambda web adapter layer if aws_lwa_port set
+  layers = concat(var.lambda_layer_arns, var.aws_lwa_port != null ? [
     "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${local.WEB_ADAPTER_LAYER_VERSION}"
-  ]
+  ] : [])
 }
 
 resource "aws_lambda_function_url" "default" {
