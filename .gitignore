@@ -39,7 +39,7 @@ react/screenshot.png
 
 # deploy faas
 **/*.zip
-**/bootstrap
+services/**/bootstrap
 
 # Editors and IDEs
 .idea
