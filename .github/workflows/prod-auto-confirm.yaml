@@ -6,7 +6,7 @@ on:
     - 'services/auto-confirm/**'
     branches:
     - 'master'
-
+# todo: promote artifacts with s3 cp instead of rebuilding
 jobs:
   build:
     name: auto-confirm
@@ -17,10 +17,11 @@ jobs:
       AWS_DEFAULT_REGION: us-east-1
       CI: true
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
         with:
-          go-version: '1.19.x'
+          toolchain: stable
+          components: clippy, rustfmt
       - name: compile
         run: make compile
         working-directory: services/auto-confirm
