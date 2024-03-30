@@ -5,15 +5,12 @@
 
 ### go-migrate
 
-deploys pushed migrations in `/mxfactorial/migrations/$DESIRED_MIGRATION_DIRECTORY` to postgres rds through lambda
+deploys migrations in `/mxfactorial/migrations/$DESIRED_MIGRATION_DIRECTORY` to local or rds postgres
 
 #### build & deploy FAST
-* `make deploy ENV=dev` to build and deploy lambda
+* `make deploy ENV=dev` to build image and deploy to lambda
 
 #### deploy migrations
 1. see `/mxfactorial/migrations/README.md`
-
-#### clean
-1. `make clean`
 
 terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infrastructure/terraform/aws/modules/environment/v001/go-migrate.tf
