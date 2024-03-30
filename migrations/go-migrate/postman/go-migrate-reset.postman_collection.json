@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"branch\": \"develop\",\n    \"db_type\": \"test\",\n    \"command\": \"reset\",\n    \"passphrase\": \"{{GO_MIGRATE_PASSPHRASE}}\"\n}",
+					"raw": "{\n    \"branch\": \"develop\",\n    \"db_type\": \"test\",\n    \"cmd\": \"reset\",\n    \"passphrase\": \"{{GO_MIGRATE_PASSPHRASE}}\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
