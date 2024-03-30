@@ -53,7 +53,6 @@ REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGIO
 SECRETS=($(yq "$APP_CONF_PATH.env_var.get | join(\" \")" $PROJECT_CONF))
 PARAMS=($(yq "$APP_CONF_PATH.params | join(\" \")" $PROJECT_CONF))
 ENABLE_API_AUTH=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $PROJECT_CONF)
-ENABLE_NOTIFICATIONS=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_NOTIFICATIONS.default' $PROJECT_CONF)
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE="$APP_DIR_PATH/$ENV_FILE_NAME"
 LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)
@@ -137,8 +136,6 @@ function set_params() {
 			echo $p=$REGION >> $ENV_FILE
 		elif [[ $p == 'ENABLE_API_AUTH' ]]; then
 			echo ENABLE_API_AUTH=$ENABLE_API_AUTH >> $ENV_FILE
-		elif [[ $p == 'ENABLE_NOTIFICATIONS' ]]; then
-			echo ENABLE_NOTIFICATIONS=$ENABLE_NOTIFICATIONS >> $ENV_FILE
 		fi
 	done
 }
