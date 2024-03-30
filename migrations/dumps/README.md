@@ -19,7 +19,7 @@ replaces 2 minute running time to create test db using migrations and service ca
 `make -C './migrations' insert` - **2 minutes**:
   1. drops test db
   1. up migrates postgres with `./migrations/schema`, `./migrations/seed` and `./migrations/testseed` directories
-  1. inserts mix of approximately 40 requests and transactions from `./pkg/testdata/requests.json` by calling `services/request-create` and `services/request-approve`
+  1. inserts mix of approximately 40 requests and transactions from `./tests/testdata/requests.json` by calling `services/request-create` and `services/request-approve`
 
 `make -C './migrations/dumps' restore-testseed` - **5 seconds**:
   1. down migrates test db to drop functions
@@ -31,7 +31,7 @@ replaces 2 minute running time to create test db using migrations and service ca
       1. `./migrations/schema`
       1. `./migrations/seed`
       1. `./migrations/testseed`
-      1. `./pkg/testdata/requests.json`
+      1. `./tests/testdata/requests.json`
   1. rebuild test db with `make -C './migrations' insert`
   1. `make -C './migrations/dumps' dump-testseed` to create new `./migrations/dumps/testseed.sql`
   1. commit & push `./migrations/dumps/testseed.sql` change

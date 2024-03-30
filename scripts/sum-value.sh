@@ -6,7 +6,7 @@ set -e
 if [[ "$#" -ne 2 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash scripts/sum-value.sh --file-path pkg/testdata/transMultipleRules.json
+	bash scripts/sum-value.sh --file-path tests/testdata/transMultipleRules.json
 	EOF
 	exit 1
 fi

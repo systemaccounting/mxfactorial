@@ -267,7 +267,7 @@ mod tests {
 
     #[test]
     fn it_creates_a_with_sql() {
-        let input_file = File::open("../../pkg/testdata/requests.json").unwrap();
+        let input_file = File::open("../../tests/testdata/requests.json").unwrap();
         let input_reader = BufReader::new(input_file);
         let test_transactions: Vec<IntraTransaction> =
             serde_json::from_reader(input_reader).unwrap();
@@ -290,7 +290,7 @@ mod tests {
     // test error when approvals in transaction item is None
     #[test]
     fn it_returns_error_when_approvals_in_transaction_item_is_none() {
-        let file = File::open("../../pkg/testdata/transWTimes.json").unwrap();
+        let file = File::open("../../tests/testdata/transWTimes.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
         let mut test_transaction = test_intra_transaction.transaction.clone();
@@ -308,7 +308,7 @@ mod tests {
     // test error when approvals in transaction item is empty
     #[test]
     fn it_returns_error_when_approvals_in_transaction_item_is_empty() {
-        let file = File::open("../../pkg/testdata/transWTimes.json").unwrap();
+        let file = File::open("../../tests/testdata/transWTimes.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
         let mut test_transaction = test_intra_transaction.transaction;

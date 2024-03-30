@@ -33,7 +33,7 @@ mod tests {
     async fn http_rule_adds_2_objects() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/nullFirstTrItemsNoAppr.json").unwrap();
+        let file = File::open("../tests/testdata/nullFirstTrItemsNoAppr.json").unwrap();
         let reader = BufReader::new(file);
         let test_transaction_items: Vec<TransactionItem> = serde_json::from_reader(reader).unwrap();
 
@@ -64,7 +64,7 @@ mod tests {
     async fn http_request_create_creates_a_request() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/transNoAppr.json").unwrap();
+        let file = File::open("../tests/testdata/transNoAppr.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 
@@ -105,7 +105,7 @@ mod tests {
     async fn http_request_approve_approves_a_request() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/transNoAppr.json").unwrap();
+        let file = File::open("../tests/testdata/transNoAppr.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 
@@ -268,7 +268,7 @@ mod tests {
     async fn http_request_by_id_returns_a_request_by_id() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/transNoAppr.json").unwrap();
+        let file = File::open("../tests/testdata/transNoAppr.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 
@@ -313,7 +313,7 @@ mod tests {
     async fn http_requests_by_account_returns_requests_by_account() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/transNoAppr.json").unwrap();
+        let file = File::open("../tests/testdata/transNoAppr.json").unwrap();
         let reader = BufReader::new(file);
         let mut test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 
@@ -366,7 +366,7 @@ mod tests {
     async fn graphql_creates_a_request() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/intRules.json").unwrap();
+        let file = File::open("../tests/testdata/intRules.json").unwrap();
         let reader = BufReader::new(file);
         let test_transaction_items: TransactionItemsBody = serde_json::from_reader(reader).unwrap();
 
@@ -390,7 +390,7 @@ mod tests {
     async fn graphql_approves_a_request() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/intRules.json").unwrap();
+        let file = File::open("../tests/testdata/intRules.json").unwrap();
         let reader = BufReader::new(file);
         let test_transaction_items: TransactionItemsBody = serde_json::from_reader(reader).unwrap();
 
@@ -540,7 +540,7 @@ mod tests {
     async fn graphql_returns_requests_by_account() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/transNoAppr.json").unwrap();
+        let file = File::open("../tests/testdata/transNoAppr.json").unwrap();
         let reader = BufReader::new(file);
         let mut test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 
@@ -593,7 +593,7 @@ mod tests {
     async fn graphql_returns_a_request_by_id() {
         _before_each();
 
-        let file = File::open("../pkg/testdata/transNoAppr.json").unwrap();
+        let file = File::open("../tests/testdata/transNoAppr.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 
