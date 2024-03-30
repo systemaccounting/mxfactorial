@@ -6,6 +6,6 @@ shared test data
 
 add using https://marketplace.visualstudio.com/items?itemName=nextfaze.json-parse-stringify
 
-makefile use: `TEST_EVENT=$(shell cat ./pkg/testdata/testItems.json)`
+makefile use: `TEST_EVENT=$(shell cat ./tests/testdata/testItems.json)`
 
 test all dependent services when editing
