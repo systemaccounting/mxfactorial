@@ -17,7 +17,7 @@ locals {
   RETURN_RECORD_LIMIT          = local.SERVICES_CONF.env_var.set.RETURN_RECORD_LIMIT.default
   WEB_ADAPTER_LAYER_VERSION    = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set.WEB_ADAPTER_LAYER_VERSION.default
   WEB_ADAPTER_LAYER_ARN        = "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${local.WEB_ADAPTER_LAYER_VERSION}"
-  GO_MIGRATE_PORT              = local.PROJECT_CONF.migrations.go-migrate.env_var.set.GO_MIGRATE_PORT.default
   BINARY_NAME                  = local.SERVICES_CONF.env_var.set.BINARY_NAME.default
   LAMBDA_RUNTIME               = local.PROJECT_CONF.infrastructure.terraform.aws.modules.env_var.set.LAMBDA_RUNTIME.default
+  SQL_TYPE                     = local.PROJECT_CONF.migrations.env_var.set.SQL_TYPE.default
 }
