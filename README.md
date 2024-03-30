@@ -220,20 +220,23 @@ private, receiving added value is sustained & acknowledged by sending value
 
 ```
 client (typescript, svelte, cloudfront/s3: demo web client targeting graphql)
-  ├── graphql (go, api gateway/lambda: public interface for below services)
-  │   ├── balance-by-account (go, lambda: returns account balances)
-  │   ├── request-approve (go, lambda: approves a transaction request)
-  │   ├── request-by-id (go, lambda: returns a transaction request by id)
-  │   ├── request-create (go, lambda: creates a transaction request between a buyer and seller)
-  │   ├── requests-by-account (go, lambda: returns transaction requests by account)
-  │   ├── rule (rust, lambda: returns transactions with user defined rules applied, e.g. taxes, dividends, etc.)
-  │   ├── transaction-by-id (go, lambda: returns a transaction by id)
-  │   └── transactions-by-account (go, lambda: returns transactions by account)
-  └── websockets (api-gatewayv2: creates websockets and delivers client notifications through below services)
-      ├── notifications-clear (go, lambda: deletes delivered notifications)
-      ├── notifications-get (go, lambda: returns pending notifications)
-      ├── notifications-send (go, lambda: sends notifications)
-      └── wss-connect (go, lambda: stores and clears websocket connections managed by api gateway)
+  └── graphql (rust, api gateway/lambda: public interface for below services)
+      ├── balance-by-account (rust, lambda: returns account balances)
+      │   └── postgres
+      ├── request-approve (rust, lambda: approves a transaction request)
+      │   └── postgres
+      ├── request-by-id (rust, lambda: returns a transaction request by id)
+      │   └── postgres
+      ├── request-create (rust, lambda: creates a transaction request between a buyer and seller)
+      │   └── postgres
+      ├── requests-by-account (rust, lambda: returns transaction requests by account)
+      │   └── postgres
+      ├── rule (rust, lambda: returns transactions with user defined rules applied, e.g. taxes, dividends, etc.)
+      │   └── postgres
+      ├── transaction-by-id (rust, lambda: returns a transaction by id)
+      │   └── postgres
+      └── transactions-by-account (rust, lambda: returns transactions by account)
+          └── postgres
 ```
 
 ### development
