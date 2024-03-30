@@ -56,13 +56,6 @@ resource "aws_ssm_parameter" "test_account" {
   value       = random_password.test_account.result
 }
 
-resource "aws_ssm_parameter" "notifications_topic_arn" {
-  name        = "/${var.ssm_prefix}/notifications/sns/topic/arn"
-  description = "notifications topic arn in ${local.SPACED_ID_ENV}"
-  type        = "SecureString"
-  value       = aws_sns_topic.notifications.arn
-}
-
 resource "aws_ssm_parameter" "postgres_db_name" {
   count       = var.build_db ? 1 : 0 // false during terraform development
   name        = "/${var.ssm_prefix}/database/sql/postgres/pgdatabase"
