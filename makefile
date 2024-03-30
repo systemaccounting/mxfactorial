@@ -16,7 +16,7 @@ TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_EXT)
 COMPOSE_DIR=./docker
 NOHUP_LOG=$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 
-# approx 5 minutes
+# approx 10 minutes
 all:
 	@$(MAKE) -s test-inv-file
 	@$(MAKE) -s test-env-arg
