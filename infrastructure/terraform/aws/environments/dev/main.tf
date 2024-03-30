@@ -3,7 +3,7 @@ locals {
   ENV              = "dev"
   APP_ENV          = "${local.APP}-${local.ENV}"
   PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
-  STORAGE_ENV_VAR = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
+  STORAGE_ENV_VAR  = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
   ORIGIN_PREFIX    = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
   ARTIFACTS_PREFIX = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
   TFSTATE_PREFIX   = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
@@ -46,8 +46,7 @@ module "dev" {
 
   ############### lambda ###############
 
-  notifications_return_limit           = 20
-  initial_account_balance              = 1000
+  initial_account_balance = 1000
 
   ############### rds ###############
 
@@ -68,10 +67,6 @@ module "dev" {
 
   // apigw v2
   enable_api_auto_deploy = true
-
-  ############### notifications ###############
-
-  enable_notifications = local.INFRA_ENV_VAR.ENABLE_NOTIFICATIONS.default
 
   ############### client ###############
 

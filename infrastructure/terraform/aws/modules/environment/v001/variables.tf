@@ -4,10 +4,8 @@ variable "rds_allow_major_version_upgrade" {}
 variable "rds_instance_class" {}
 variable "rds_parameter_group" {}
 variable "rds_instance_name" {}
-variable "notifications_return_limit" {}
 variable "apigw_authorization_header_key" {}
 variable "enable_api_auth" {}
-variable "enable_notifications" {}
 variable "graphql_deployment_version" {}
 variable "initial_account_balance" {}
 variable "client_origin_bucket_name" {}

@@ -983,7 +983,7 @@ mod integration_tests {
         let test_conn = _get_conn().await;
         let api_conn = DatabaseConnection(test_conn);
 
-        let file = File::open("../../pkg/testdata/transWTimes.json").unwrap();
+        let file = File::open("../../tests/testdata/transWTimes.json").unwrap();
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
         let test_transaction_items = test_intra_transaction.transaction.transaction_items;
@@ -1318,7 +1318,7 @@ mod integration_tests {
         let test_conn = _get_conn().await;
         let mut api_conn = DatabaseConnection(test_conn);
 
-        let input_file = File::open("../../pkg/testdata/requests.json").unwrap();
+        let input_file = File::open("../../tests/testdata/requests.json").unwrap();
         let input_reader = BufReader::new(input_file);
         let test_transactions: Vec<IntraTransaction> =
             serde_json::from_reader(input_reader).unwrap();
@@ -1340,7 +1340,7 @@ mod integration_tests {
         let test_conn = _get_conn().await;
         let mut api_conn = DatabaseConnection(test_conn);
 
-        let input_file = File::open("../../pkg/testdata/requests.json").unwrap();
+        let input_file = File::open("../../tests/testdata/requests.json").unwrap();
         let input_reader = BufReader::new(input_file);
         let test_transactions: Vec<IntraTransaction> =
             serde_json::from_reader(input_reader).unwrap();
@@ -1381,7 +1381,7 @@ mod integration_tests {
         let test_conn = _get_conn().await;
         let mut api_conn = DatabaseConnection(test_conn);
 
-        let input_file = File::open("../../pkg/testdata/requests.json").unwrap();
+        let input_file = File::open("../../tests/testdata/requests.json").unwrap();
         let input_reader = BufReader::new(input_file);
         let test_transactions: Vec<IntraTransaction> =
             serde_json::from_reader(input_reader).unwrap();
@@ -1412,7 +1412,7 @@ mod integration_tests {
         let test_conn = _get_conn().await;
         let mut api_conn = DatabaseConnection(test_conn);
 
-        let input_file = File::open("../../pkg/testdata/requests.json").unwrap();
+        let input_file = File::open("../../tests/testdata/requests.json").unwrap();
         let input_reader = BufReader::new(input_file);
         let test_transactions: Vec<IntraTransaction> =
             serde_json::from_reader(input_reader).unwrap();

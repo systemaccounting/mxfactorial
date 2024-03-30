@@ -15,8 +15,14 @@ locals {
 }
 
 data "aws_s3_object" "default" {
+  count  = var.artifacts_bucket_name == null ? 0 : 1
   bucket = var.artifacts_bucket_name
   key    = "${var.service_name}-src.zip"
+}
+
+data "aws_ecr_repository" "default" {
+  count = var.artifacts_bucket_name == null ? 1 : 0
+  name  = "${var.service_name}-${local.ID_ENV}"
 }
 
 data "aws_region" "current" {}
@@ -26,11 +32,13 @@ data "aws_caller_identity" "current" {}
 resource "aws_lambda_function" "default" {
   function_name     = "${var.service_name}-${local.ID_ENV}"
   description       = "${var.service_name} lambda service in ${local.SPACED_ID_ENV}"
-  s3_bucket         = data.aws_s3_object.default.bucket
-  s3_key            = data.aws_s3_object.default.key
-  s3_object_version = data.aws_s3_object.default.version_id
-  handler           = local.BINARY_NAME
-  runtime           = local.LAMBDA_RUNTIME
+  s3_bucket         = var.artifacts_bucket_name == null ? null : data.aws_s3_object.default[0].bucket
+  s3_key            = var.artifacts_bucket_name == null ? null : data.aws_s3_object.default[0].key
+  s3_object_version = var.artifacts_bucket_name == null ? null : data.aws_s3_object.default[0].version_id
+  image_uri         = var.artifacts_bucket_name == null ? "${data.aws_ecr_repository.default[0].repository_url}:latest" : null
+  package_type      = var.artifacts_bucket_name == null ? "Image" : null
+  handler           = var.artifacts_bucket_name == null ? null : local.BINARY_NAME
+  runtime           = var.artifacts_bucket_name == null ? null : local.LAMBDA_RUNTIME
   timeout           = var.lambda_timeout
   role              = aws_iam_role.default.arn
 

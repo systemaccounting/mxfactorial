@@ -93,9 +93,6 @@ infrastructure:
         environment:
           env_var:
             set:
-              NOTIFY_TOPIC_ARN:
-                ssm: notifications/sns/topic/arn
-                default: null
               PGDATABASE:
                 ssm: database/sql/postgres/pgdatabase
                 default: mxfactorial
@@ -117,30 +114,15 @@ infrastructure:
               POOL_ID:
                 ssm: auth/cognito/pool_id
                 default: null
-              APIGW_CONNECTIONS_URI:
-                ssm: api/websocket/connections/uri
-                default: null
               COGNITO_JWKS_URI:
                 ssm: auth/cognito/jwks/uri
-                default: null
-              NOTIFICATIONS_RETURN_LIMIT:
-                ssm: notifications/return_limit
                 default: null
               SECRET:
                 ssm: auth/cognito/test_account/secret
                 default: null
-              WEBSOCKET_CLIENT_URI:
-                ssm: api/websocket/client/uri
-                default: null
               ENABLE_API_AUTH:
                 ssm: null
                 default: false
-              ENABLE_NOTIFICATIONS:
-                ssm: null
-                default: false
-              DB_RESET_PASSPHRASE:
-                ssm: tool/lambda/db_reset/passphrase
-                default: null
               REGION:
                 ssm: null
                 default: us-east-1
@@ -180,9 +162,6 @@ infrastructure:
               RDS_INSTANCE_NAME_PREFIX:
                 ssm: null
                 default: mxfactorial
-              GO_MIGRATE_LAYER_PREFIX:
-                ssm: null
-                default: go-migrate-provided-deps
               READINESS_CHECK_PATH:
                 ssm: service/lambda/readiness_check_path
                 default: /healthz
@@ -217,6 +196,20 @@ infrastructure:
                 ssm: null
                 default: mxfactorial-tfstate
 migrations:
+  type: lib
+  params: []
+  env_var:
+    set:
+      SQL_TYPE:
+        ssm: null
+        default: postgres
+    get:
+      - SQL_TYPE
+      - PGHOST
+      - PGPORT
+      - PGUSER
+      - PGPASSWORD
+      - PGDATABASE
   dumps:
     env_var:
       set:
@@ -224,23 +217,19 @@ migrations:
           ssm: null
           default: ./migrations/dumps/testseed.sql
   go-migrate:
-    runtime: go1.x
+    runtime: bash
     min_code_cov: null
     type: app
-    local_dev: true
+    local_dev: false
     params:
       - AWS_REGION
     deploy: true
-    build_src_path: cmd
+    build_src_path: null
     dependents:
     env_var:
-      set:
-        GO_MIGRATE_PORT:
-          ssm: null
-          default: 11000
+      set: []
       get:
-        - READINESS_CHECK_PATH
-        - GO_MIGRATE_PORT
+        - SQL_TYPE
         - PGHOST
         - PGPORT
         - PGUSER
@@ -273,12 +262,6 @@ scripts:
       TEST_ACCOUNTS_MIGRATION_FILE:
         ssm: null
         default: ./migrations/testseed/000001_accounts.up.sql
-      GO_MOCK_PACKAGE_NAME_PREFIX:
-        ssm: null
-        default: mock
-      GO_MOCK_FILE_NAME_SUFFIX:
-        ssm: null
-        default: mock.go
       REQUIRED_PID_COUNT:
         ssm: null
         default: 10
@@ -534,66 +517,6 @@ services:
         - PGDATABASE
         - READINESS_CHECK_PATH
         - RETURN_RECORD_LIMIT
-  notifications-send:
-    runtime: go1.x
-    min_code_cov: null
-    type: app
-    params:
-      - AWS_REGION
-    deploy: true
-    build_src_path: cmd
-    dependents: []
-    env_var:
-      get:
-        - NOTIFY_TOPIC_ARN
-        - APIGW_CONNECTIONS_URI
-        - PGHOST
-        - PGPORT
-        - PGUSER
-        - PGPASSWORD
-        - PGDATABASE
-  notifications-get:
-    runtime: go1.x
-    min_code_cov: null
-    type: app
-    params:
-      - AWS_REGION
-      - ENABLE_API_AUTH
-    deploy: true
-    build_src_path: cmd
-    dependents: []
-    env_var:
-      get:
-        - COGNITO_JWKS_URI
-        - NOTIFICATIONS_RETURN_LIMIT
-        - CLIENT_ID
-        - SECRET
-        - WEBSOCKET_CLIENT_URI
-        - PGHOST
-        - PGPORT
-        - PGUSER
-        - PGPASSWORD
-        - PGDATABASE
-  notifications-clear:
-    runtime: go1.x
-    min_code_cov: null
-    type: app
-    params:
-      - AWS_REGION
-      - ENABLE_API_AUTH
-    deploy: true
-    build_src_path: cmd
-    dependents: []
-    env_var:
-      get:
-        - COGNITO_JWKS_URI
-        - CLIENT_ID
-        - WEBSOCKET_CLIENT_URI
-        - PGHOST
-        - PGPORT
-        - PGUSER
-        - PGPASSWORD
-        - PGDATABASE
   balance-by-account:
     runtime: rust1.x
     min_code_cov: null
@@ -617,17 +540,6 @@ services:
         - PGPASSWORD
         - PGDATABASE
         - READINESS_CHECK_PATH
-  wss-connect:
-    runtime: go1.x
-    type: app
-    min_code_cov: null
-    secrets: []
-    params: []
-    deploy: true
-    build_src_path: cmd
-    dependents: []
-    env_var:
-      get: []
   auto-confirm:
     runtime: rust1.x
     min_code_cov: null
@@ -661,132 +573,6 @@ tests:
       - BALANCE_BY_ACCOUNT_URL
       - AWS_LAMBDA_FUNCTION_NAME # used when testing cloud envs
   params: []
-pkg:
-  lambda:
-    runtime: go1.x
-    type: lib
-    path: pkg/aws/lambda
-    dependents: []
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/aws/lambda:
-        - IAWSLambda
-        - ILambdaService
-  service:
-    runtime: go1.x
-    type: lib
-    path: pkg/service
-    dependents:
-      - request-create
-      - request-approve
-      - request-by-id
-      - requests-by-account
-      - transaction-by-id
-      - transactions-by-account
-      - notifications-send
-      - notifications-get
-      - notifications-clear
-      - balance-by-account
-      - wss-connect
-      - auto-confirm
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/service:
-        - IAccountService
-        - IApproveService
-        - IBalanceService
-        - ICreateAccountService
-        - ITransactionNotificationService
-        - IProfileService
-        - IRuleInstanceService
-        - ITransactionService
-        - IWebsocketService
-  postgres:
-    runtime: go1.x
-    type: lib
-    path: pkg/postgres
-    dependents:
-      - service
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/postgres:
-        - SQLDB
-      github.com/jackc/pgx/v4:
-        - Rows
-        - Row
-  sqls:
-    runtime: go1.x
-    type: lib
-    path: pkg/sqls
-    dependents:
-      - postgres
-  testdata:
-    runtime: go1.x
-    type: lib
-    path: pkg/testdata
-    dependents: []
-  print:
-    runtime: go1.x
-    type: lib
-    path: pkg/print
-    dependents: []
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/print:
-        - Marshaler
-  types:
-    runtime: go1.x
-    type: lib
-    path: pkg/types
-    dependents:
-      - testdata
-      - postgres
-      - service
-      - tools
-      - sqls
-      - lambdasdk
-      - request-create
-      - request-approve
-      - request-by-id
-      - requests-by-account
-      - transaction-by-id
-      - transactions-by-account
-      - notifications-send
-      - notifications-get
-      - notifications-clear
-      - balance-by-account
-      - wss-connect
-      - auto-confirm
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/types:
-        - TrItemListHelper
-        - IScanRow
-        - IScanRows
-        - IEncodingJSON
-  sns:
-    runtime: go1.x
-    type: lib
-    path: pkg/aws/sns
-    dependents:
-      - notifications-send
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/aws/sns:
-        - ISNS
-  apigwma:
-    runtime: go1.x
-    type: lib
-    path: pkg/aws/apigwma
-    dependents: []
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/aws/apigwma:
-        - IAWSAPIGWMA
-  cognitoidp:
-    runtime: go1.x
-    type: lib
-    path: pkg/aws/cognitoidp
-    dependents: []
-    mocked_interfaces:
-      github.com/systemaccounting/mxfactorial/pkg/aws/cognitoidp:
-        - IJwtDeps
-        - IGetClaimedKeyID
-        - IIdpDeps
-        - IJwToken
 env_var:
   set:
     ENV_FILE_NAME:
@@ -812,18 +598,6 @@ params: []
     os:
       osx:
         install: '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
-  - name: go
-    os:
-      osx:
-        install: 'brew install go'
-  - name: gqlgen
-    os:
-      osx:
-        install: 'go install github.com/99designs/gqlgen@latest'
-  - name: mockgen
-    os:
-      osx:
-        install: 'go install github.com/golang/mock/mockgen@latest'
   - name: node
     os:
       osx:
@@ -848,14 +622,6 @@ params: []
     os:
       osx:
         install: 'brew install golang-migrate'
-    env_var:
-      set:
-        MOCK_FILE_SUFFIX:
-          ssm: null
-          default: mock.go
-        MOCK_PACKAGE_PREFIX:
-          ssm: null
-          default: mock
   - name: yq
     os:
       osx:

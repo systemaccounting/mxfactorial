@@ -60,7 +60,6 @@ module "prod" {
 
   ############### lambda ###############
 
-  notifications_return_limit           = 20
   initial_account_balance              = 1000
 
   ############### rds ###############
@@ -85,10 +84,6 @@ module "prod" {
 
   // apigw v2
   enable_api_auto_deploy = true
-
-  ############### notifications ###############
-
-  enable_notifications = local.INFRA_ENV_VAR.ENABLE_NOTIFICATIONS.default
 
   ############### client ###############
 

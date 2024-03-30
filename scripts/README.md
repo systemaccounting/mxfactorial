@@ -113,9 +113,8 @@ adds a mix of requests and transactions in docker postgres (requires `cd migrati
 
 1. `cd migrations && make insert`
 1. drops and up migrates postgres in docker
-1. inserts requests from `pkg/testdata/requests.json` using `services/request-create`
+1. inserts requests from `tests/testdata/requests.json` using `services/request-create`
 1. converts every other request into a transaction using `services/request-approve`
-
 
 ##### `dump-db.sh`
 
@@ -129,33 +128,6 @@ restores postgres db from path passed as parameter
 
 script sourced to standardize error handling in other scripts
 
-##### `mock-go-ifaces.sh`
-
-creates go mocks from list of interfaces inside `mock` subdirectory using [gomock](https://github.com/golang/mock) and `project.yaml` assignments
-
-`//go:generate mockgen...` not used, script and `project.yaml` preferred for convenient interface use and mock coverage audit
-
-1. set `.pkgs.lambdapg.mocked_interfaces` property under package or service in `project.yaml` to map of go package import paths and desired list of interfaces:
-
-    ```json5
-    "mocked_interfaces": {
-        "github.com/systemaccounting/mxfactorial/pkg/lambdapg": [
-            "Connector",
-            "SQLDB"
-        ],
-        "github.com/jackc/pgx/v4": [
-            "Rows"
-        ]
-    }
-    ```
-1. `make -C './pkg/lambdapg' mock`
-
-creates:
-```
-pkg/lambdapg/lambdapg_mock/lambdapg_mock.go
-pkg/lambdapg/lambdapg_mock/v4_mock.go
-```
-
 ##### `create-accounts.sh`
 
 creates testseed migration accounts in cognito
@@ -168,21 +140,9 @@ deletes testseed migration accounts from cognito
 
 sums value in json `transaction_item` list
 
-##### `save-id-token.sh`
-
-references a manually entered `USERNAME` and `PASSWWORD` assignment in a `.env` file, requests an id token from cognito, then saves the `ID_TOKEN` in the `.env` file
-
 ##### `print-id-token.sh`
 
 prints cognito user id token for convenient testing
-
-##### `get-notifications.sh`
-
-gets pending notifications from websocket endpoint
-
-##### `clear-notifications.sh`
-
-clears (deletes) pending notifications through websocket endpoint
 
 ##### `create-all-env-files.sh`
 
@@ -291,3 +251,23 @@ print the value of an `env-var` in `project.yaml`
 ##### `post-go-migrate.sh`
 
 send a http request to the internal `migrations/go-migrate` tool
+
+##### `auth-ecr-repo.sh`
+
+authenticate with ecr
+
+##### `push-ecr-image.sh`
+
+push docker image to ecr repo
+
+##### `update-function-image.sh`
+
+update lambda with latest ecr repository image
+
+##### `import-tf-init-env.sh`
+
+imports resources into the `infrastructure/terraform/aws/environments/init-$ENV`terraform configuration files
+
+##### `rust-coverage.sh`
+
+prints rust crate test coverage

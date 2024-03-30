@@ -6,9 +6,9 @@ module "go_migrate" {
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
     GO_MIGRATE_PASSPHRASE = random_password.go_migrate.result
+    SQL_TYPE              = local.SQL_TYPE
   })
-  aws_lwa_port                  = local.GO_MIGRATE_PORT
-  artifacts_bucket_name         = var.artifacts_bucket_name
+  artifacts_bucket_name         = null # defaults to ecr image
   create_secret                 = true
   attached_policy_arns          = []
   lambda_url_authorization_type = "NONE"

@@ -39,7 +39,7 @@ pub fn restore_testseed() {
 
 pub async fn create_transaction() -> Transaction {
     // load test transaction from file
-    let file = File::open("../pkg/testdata/transNoAppr.json").unwrap();
+    let file = File::open("../tests/testdata/transNoAppr.json").unwrap();
     let reader = BufReader::new(file);
     let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
 

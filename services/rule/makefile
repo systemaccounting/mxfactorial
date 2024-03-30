@@ -7,7 +7,7 @@ RULE_URL=$(HOST):$(RULE_PORT)
 NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 
 TEST_DATA_FILE=preRuleTrItems.json
-TEST_DATA_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata
+TEST_DATA_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/tests/testdata
 TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 
 dev:
@@ -27,7 +27,7 @@ run:
 		cargo watch --env-file $(ENV_FILE) -w $(SUB_PATH)/src -w crates -x run -p $(SUB_PATH)
 
 water:
-	@REQ=$$(yq -o=json $(RELATIVE_PROJECT_ROOT_PATH)/pkg/testdata/bottledWater.json); \
+	@REQ=$$(yq -o=json $(RELATIVE_PROJECT_ROOT_PATH)/tests/testdata/bottledWater.json); \
 		curl -s -d "$$REQ" -H 'Content-Type: application/json' $(RULE_URL) \
 		| yq -o=json
 

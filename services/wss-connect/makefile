@@ -1,6 +1,0 @@
-RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | grep project.yaml | wc -l | xargs) -eq 0 ]; do REL_PATH="$$REL_PATH./.."; done; printf '%s' "$$REL_PATH")
-include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
-include $(RELATIVE_PROJECT_ROOT_PATH)/make/go.mk
-
-run:
-	@$(DOCKER_ENV_VARS) go run ./cmd/main.go

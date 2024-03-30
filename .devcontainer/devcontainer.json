@@ -19,9 +19,6 @@
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
 			"settings": {
-				"go.toolsManagement.checkForUpdates": "local",
-				"go.useLanguageServer": true,
-				"go.gopath": "/go",
 				"lldb.executable": "/usr/bin/lldb",
 				"workbench.colorTheme": "Default Dark+"
 			},
@@ -31,7 +28,6 @@
 				"mutantdino.resourcemonitor",
 				"rangav.vscode-thunder-client@2.5.3",
 				"hashicorp.terraform",
-				"golang.go",
 				"svelte.svelte-vscode",
 				"shd101wyy.markdown-preview-enhanced",
 				"GraphQL.vscode-graphql",

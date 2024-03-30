@@ -3,8 +3,6 @@ FROM gitpod/workspace-full:latest
 ARG TF_VERSION=1.2.7
 
 RUN bash -lc "rustup default stable" && \
-	go install github.com/99designs/gqlgen@latest && \
-	go install github.com/golang/mock/mockgen@latest && \
 	go install github.com/mikefarah/yq/v4@latest && \
 	sudo apt-get install bc -y && \
 	sudo apt-get clean && \
