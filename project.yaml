@@ -219,7 +219,7 @@ migrations:
   go-migrate:
     runtime: bash
     min_code_cov: null
-    type: lib
+    type: app
     local_dev: false
     params:
       - AWS_REGION

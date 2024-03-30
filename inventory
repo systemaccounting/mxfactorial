@@ -1,4 +1,3 @@
-services/wss-connect
 services/transactions-by-account
 services/transaction-by-id
 services/rule
@@ -6,9 +5,6 @@ services/requests-by-account
 services/request-create
 services/request-by-id
 services/request-approve
-services/notifications-send
-services/notifications-get
-services/notifications-clear
 services/graphql
 services/balance-by-account
 services/auto-confirm
