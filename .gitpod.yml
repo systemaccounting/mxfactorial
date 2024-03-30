@@ -52,7 +52,6 @@ vscode:
   extensions:
     - rangav.vscode-thunder-client@2.5.3
     - hashicorp.terraform
-    - golang.go
     - svelte.svelte-vscode
     - shd101wyy.markdown-preview-enhanced
     - GraphQL.vscode-graphql
