@@ -16,7 +16,6 @@ provider "aws" {
   }
 }
 
-// creates 3 buckets and 1 dynamodb table
 module "project_storage_dev" {
   source                           = "../../modules/project-storage/v001"
   force_destroy_storage            = true
