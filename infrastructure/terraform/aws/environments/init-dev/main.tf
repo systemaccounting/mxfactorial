@@ -19,7 +19,7 @@ provider "aws" {
 // creates 3 buckets and 1 dynamodb table
 module "project_storage_dev" {
   source                           = "../../modules/project-storage/v001"
-  force_destroy_tfstate            = true
+  force_destroy_storage            = true
   env                              = local.ENV
   env_id                           = local.ENV_ID
   artifacts_bucket_name_prefix     = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default

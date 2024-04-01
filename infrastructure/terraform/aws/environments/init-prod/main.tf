@@ -18,7 +18,6 @@ provider "aws" {
 
 module "project_storage_prod" {
   source                           = "../../modules/project-storage/v001"
-  force_destroy_tfstate            = false
   env                              = local.ENV
   env_id                           = local.ENV_ID
   artifacts_bucket_name_prefix     = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
