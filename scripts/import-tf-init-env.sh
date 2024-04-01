@@ -26,9 +26,19 @@ cd infrastructure/terraform/aws/environments/init-$ENV
 
 terraform init
 
+# workflow data storage
 terraform import module.project_storage_$ENV.aws_dynamodb_table.github_workflows github-workflows-$ID_ENV
-terraform import module.project_storage_$ENV.aws_s3_bucket.artifacts mxfactorial-artifacts-$ID_ENV
-terraform import module.project_storage_$ENV.aws_s3_bucket.client_origin mxfactorial-client-$ID_ENV
+
+# tf state storage
 terraform import module.project_storage_$ENV.aws_s3_bucket.tfstate mxfactorial-tfstate-$ID_ENV
-terraform import module.project_storage_$ENV.aws_s3_bucket_public_access_block.client_origin mxfactorial-client-$ID_ENV
+
+# artifact storage
+terraform import module.project_storage_$ENV.aws_s3_bucket.artifacts mxfactorial-artifacts-$ID_ENV
+
+# docker image storage
 terraform import module.project_storage_$ENV.aws_ecr_repository.go_migrate go-migrate-$ID_ENV
+
+# client hosting
+terraform import module.project_storage_$ENV.aws_s3_bucket.client_origin mxfactorial-client-$ID_ENV
+terraform import module.project_storage_$ENV.aws_s3_bucket_website_configuration.client_origin mxfactorial-client-$ID_ENV
+terraform import module.project_storage_$ENV.aws_s3_bucket_public_access_block.client_origin mxfactorial-client-$ID_ENV
