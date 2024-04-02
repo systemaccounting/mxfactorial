@@ -154,10 +154,10 @@ endif
 ###################### docker ######################
 
 up:
-	docker-compose --log-level ERROR -f ../docker/compose.yaml up -d client --renew-anon-volumes --force-recreate --build
+	docker compose -f ../docker/compose.yaml up -d client --renew-anon-volumes --force-recreate --build
 
 down:
-	docker-compose --log-level ERROR -f ../docker/compose.yaml down
+	docker compose -f ../docker/compose.yaml down
 
 ###################### utils ######################
 

@@ -191,6 +191,6 @@ services:
       context: ../
       dockerfile: ./docker/client.Dockerfile
       args:
-        - GRAPHQL_URI=${GRAPHQL_URI}
+        - GRAPHQL_URI=${GRAPHQL_URI:-aHR0cDovL2xvY2FsaG9zdDoxMDAwMAo=}
     ports:
       - "10009:80"

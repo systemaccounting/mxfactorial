@@ -27,8 +27,7 @@ run:
 # postgres docker
 start:
 	@COMPOSE_IGNORE_ORPHANS=true \
-		docker-compose \
-			--log-level ERROR \
+		docker compose \
 			-f ../docker/compose.yaml \
 			up \
 			-d \
@@ -39,8 +38,7 @@ start:
 
 reset:
 	@COMPOSE_IGNORE_ORPHANS=true \
-		docker-compose \
-			--log-level ERROR \
+		docker compose \
 			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
 			up \
 			-d \
@@ -49,8 +47,7 @@ reset:
 			--force-recreate
 
 rebuild:
-	@docker-compose \
-		--log-level ERROR \
+	@docker compose \
 		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
 		build \
 		postgres \
@@ -60,8 +57,7 @@ up:
 	@$(MAKE) run
 
 down:
-	@docker-compose \
-		--log-level ERROR \
+	@docker compose \
 		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
 		down
 

@@ -34,8 +34,7 @@ source ./scripts/manage-cde-ports.sh
 COMPOSE_DIR=./docker
 
 INIT_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
-docker-compose \\
-  --log-level ERROR \\
+docker compose \\
   -f $COMPOSE_DIR/compose.yaml"
 
 if [[ $UP ]]; then
