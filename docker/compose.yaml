@@ -1,0 +1,196 @@
+name: mxf
+services:
+  postgres:
+    build:
+      context: ../
+      dockerfile: ./docker/bitnami-postgres.Dockerfile
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  graphql:
+    build:
+      context: ../
+      dockerfile: ./docker/graphql.Dockerfile
+    ports:
+      - "10000:10000"
+    environment:
+      RULE_URL: "http://rule:10001"
+      REQUEST_CREATE_URL: "http://request-create:10002"
+      REQUEST_APPROVE_URL: "http://request-approve:10003"
+      REQUEST_BY_ID_URL: "http://request-by-id:10005"
+      REQUESTS_BY_ACCOUNT_URL: "http://requests-by-account:10006"
+      TRANSACTIONS_BY_ACCOUNT_URL: "http://transactions-by-account:10008"
+      TRANSACTION_BY_ID_URL: "http://transaction-by-id:10007"
+      BALANCE_BY_ACCOUNT_URL: "http://balance-by-account:10004"
+      READINESS_CHECK_PATH: "/healthz"
+      RUST_LOG: info
+      GRAPHQL_PORT: 10000
+  balance-by-account:
+    build:
+      context: ../
+      dockerfile: ./docker/balance-by-account.Dockerfile
+    ports:
+      - "10004:10004"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      BALANCE_BY_ACCOUNT_PORT: 10004
+    depends_on:
+      - postgres
+  request-create:
+    build:
+      context: ../
+      dockerfile: ./docker/request-create.Dockerfile
+    ports:
+      - "10002:10002"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      RULE_URL: http://rule:10001
+      REQUEST_CREATE_PORT: 10002
+    depends_on:
+      - postgres
+  request-approve:
+    build:
+      context: ../
+      dockerfile: ./docker/request-approve.Dockerfile
+    ports:
+      - "10003:10003"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      REQUEST_APPROVE_PORT: 10003
+    depends_on:
+      - postgres
+  rule:
+    build:
+      context: ../
+      dockerfile: ./docker/rule.Dockerfile
+    ports:
+      - "10001:10001"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      RUST_LOG: info
+      RULE_PORT: 10001
+    depends_on:
+      - postgres
+  request-by-id:
+    build:
+      context: ../
+      dockerfile: ./docker/request-by-id.Dockerfile
+    ports:
+      - "10005:10005"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      REQUEST_BY_ID_PORT: 10005
+    depends_on:
+      - postgres
+  requests-by-account:
+    build:
+      context: ../
+      dockerfile: ./docker/requests-by-account.Dockerfile
+    ports:
+      - "10006:10006"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      RETURN_RECORD_LIMIT: 20
+      REQUESTS_BY_ACCOUNT_PORT: 10006
+    depends_on:
+      - postgres
+  transaction-by-id:
+    build:
+      context: ../
+      dockerfile: ./docker/transaction-by-id.Dockerfile
+    ports:
+      - "10007:10007"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      TRANSACTION_BY_ID_PORT: 10007
+    depends_on:
+      - postgres
+  transactions-by-account:
+    build:
+      context: ../
+      dockerfile: ./docker/transactions-by-account.Dockerfile
+    ports:
+      - "10008:10008"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      PG_MAX_CONNECTIONS: 20
+      PG_IDLE_TIMEOUT: 10000
+      PG_CONN_TIMEOUT: 500
+      READINESS_CHECK_PATH: /healthz
+      RETURN_RECORD_LIMIT: 20
+      TRANSACTIONS_BY_ACCOUNT_PORT: 10008
+    depends_on:
+      - postgres
+  client:
+    build:
+      context: ../
+      dockerfile: ./docker/client.Dockerfile
+      args:
+        - GRAPHQL_URI=${GRAPHQL_URI}
+    ports:
+      - "10009:80"
