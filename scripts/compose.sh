@@ -34,18 +34,9 @@ source ./scripts/manage-cde-ports.sh
 COMPOSE_DIR=./docker
 
 INIT_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
-docker compose \\
-  -f $COMPOSE_DIR/compose.bitnami-postgres.yaml \\
-  -f $COMPOSE_DIR/compose.rule.yaml \\
-  -f $COMPOSE_DIR/compose.request-create.yaml \\
-  -f $COMPOSE_DIR/compose.request-approve.yaml \\
-  -f $COMPOSE_DIR/compose.transaction-by-id.yaml \\
-  -f $COMPOSE_DIR/compose.transactions-by-account.yaml \\
-  -f $COMPOSE_DIR/compose.request-by-id.yaml \\
-  -f $COMPOSE_DIR/compose.requests-by-account.yaml \\
-  -f $COMPOSE_DIR/compose.balance-by-account.yaml \\
-  -f $COMPOSE_DIR/compose.graphql.yaml \\
-  -f $COMPOSE_DIR/compose.client.yaml"
+docker-compose \\
+  --log-level ERROR \\
+  -f $COMPOSE_DIR/compose.yaml"
 
 if [[ $UP ]]; then
 
