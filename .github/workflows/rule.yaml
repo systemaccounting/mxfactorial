@@ -101,6 +101,6 @@ jobs:
       - name: build image
         run: make -C $APP_DIR build-image
       - name: tag image
-        run: make -C $APP_DIR tag-dev-image
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C $APP_DIR tag-dev-image
       - name: push image
-        run: make -C $APP_DIR push-dev-image
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C $APP_DIR push-dev-image
