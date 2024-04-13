@@ -82,6 +82,8 @@ jobs:
     needs: [lint_test, unit_test, integration_test, client_test]
     steps:
       - uses: actions/checkout@v4
+      - name: mask values
+        run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
       - name: build image
         run: make -C $APP_DIR build-image
       - name: tag image
