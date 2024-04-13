@@ -25,7 +25,7 @@ while [[ "$#" -gt 0 ]]; do
         --initial) INITIAL='initial-' ;;
         --services-only) INVENTORY_LIST=$(cat inventory | grep services/) ;;
 		# for convenience, not currently referenced in makefiles
-        --transaction-services-only) INVENTORY_LIST=$(cat inventory | grep -e transaction -e request -e rule -e graphql) ;;
+        --transaction-services-only) INVENTORY_LIST=$(cat inventory | grep --color=never -e transaction -e request -e rule -e graphql) ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
 	shift
