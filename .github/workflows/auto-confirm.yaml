@@ -42,6 +42,7 @@ jobs:
       APP_DIR: services/auto-confirm
     needs: [lint_test, unit_test]
     steps:
+      - uses: actions/checkout@v4
       - name: build image
         run: make -C $APP_DIR build-image
       - name: tag image
