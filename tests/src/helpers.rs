@@ -8,32 +8,29 @@ use serde_json::json;
 use std::{env, fs::File, io::BufReader, process::Command};
 
 pub fn restore_testseed() {
-    if let Ok(val) = env::var("AWS_LAMBDA_FUNCTION_NAME") {
-        // nested condition assumes AWS_LAMBDA_FUNCTION_NAME always present but not always empty
-        if val.is_empty() {
-            let restore_output = Command::new("make")
-                .arg("-C")
-                .arg("../migrations/dumps")
-                .arg("restore-testseed")
-                .output()
-                .expect("failed to execute process");
+    if env::var("AWS_LAMBDA_FUNCTION_NAME").ok().is_some() {
+        let restore_output = Command::new("make")
+            .arg("-C")
+            .arg("../migrations/dumps")
+            .arg("restore-rds-testseed")
+            .arg("ENV=dev") // cadet todo: assigned ENV from env var
+            .output()
+            .expect("failed to execute process");
 
-            // cargo test -- --show-output
-            let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-            // println!("{}", _restore_output_str); // comment in to print db restore output
-        } else {
-            let restore_output = Command::new("make")
-                .arg("-C")
-                .arg("../migrations/dumps")
-                .arg("restore-rds-testseed")
-                .arg("ENV=dev") // cadet todo: assigned ENV from env var
-                .output()
-                .expect("failed to execute process");
+        // cargo test -- --show-output
+        let restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
+        println!("{}", restore_output_str);
+    } else {
+        let restore_output = Command::new("make")
+            .arg("-C")
+            .arg("../migrations/dumps")
+            .arg("restore-testseed")
+            .output()
+            .expect("failed to execute process");
 
-            // cargo test -- --show-output
-            let restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-            println!("{}", restore_output_str);
-        }
+        // cargo test -- --show-output
+        let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
+        // println!("{}", _restore_output_str); // comment in to print db restore output
     }
 }
 

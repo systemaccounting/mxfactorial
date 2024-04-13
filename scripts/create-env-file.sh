@@ -95,6 +95,8 @@ function set_default_values() {
 			else
 				echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
 			fi
+		elif [[ "$s" == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
+			continue # skip setting when ENV=local
 		else
 			ENV_VAR=$(yq "... | select(has(\"$s\")).$s.default" $PROJECT_CONF)
 			if [[ $ENV_VAR == 'null' ]]; then
@@ -118,12 +120,6 @@ function set_secrets() {
 				--output text)
 		else
 			ENV_VAR=$(echo "$CONF_OBJ" | yq ".default")
-		fi
-		# lambdas sign their requests when a function name is detected
-		# so this env var is set to 1 while integration testing from
-		# a local machine or workflow
-		if [[ $s == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
-			ENV_VAR=1
 		fi
 		echo $s=$ENV_VAR >> $ENV_FILE
 		unset ENV_VAR
