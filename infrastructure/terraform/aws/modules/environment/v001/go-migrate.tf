@@ -8,7 +8,6 @@ module "go_migrate" {
     GO_MIGRATE_PASSPHRASE = random_password.go_migrate.result
     SQL_TYPE              = local.SQL_TYPE
   })
-  artifacts_bucket_name         = null # defaults to ecr image
   create_secret                 = true
   attached_policy_arns          = []
   lambda_url_authorization_type = "NONE"
