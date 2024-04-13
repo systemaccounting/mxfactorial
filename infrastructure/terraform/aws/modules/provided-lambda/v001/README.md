@@ -4,10 +4,14 @@
 
 #### provided runtime lambda terraform module
 
-use:
-1. assign `var.artifacts_bucket_name` a name to deploy from an s3 bucket
-1. assign `var.artifacts_bucket_name` to null and add an `aws_ecr_repository` resource to `infrastructure/terraform/aws/modules/project-storage/v001/ecr.tf` to deploy from a docker image repository
-1. assign `var.aws_lwa_port` a unique project application port* to enable the [lambda web adapter](https://github.com/awslabs/aws-lambda-web-adapter)
+general use:
+1. requires adding an `aws_ecr_repository` resource to `infrastructure/terraform/aws/modules/project-storage/v001/ecr.tf`
+1. build, tag and push image, e.g. `make/ecr-lambda.mk`
+1. `terraform apply`
+
+lambda web adapter use:
+1. add `COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.2 /lambda-adapter /opt/extensions/lambda-adapter` to app Dockerfile
+1. assign `var.aws_lwa_port` a unique project application port* to configure the [lambda web adapter](https://github.com/awslabs/aws-lambda-web-adapter)
 
 examples:
 1. `infrastructure/terraform/aws/modules/environment/v001/lambda-services.tf`

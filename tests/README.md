@@ -11,7 +11,7 @@ local:
 1. `make start`
 1. `make test-local` in a separate shell
 
-docker-compose:
+docker compose:
 1. `make compose-up`
 1. `make test-docker` in a separate shell
 

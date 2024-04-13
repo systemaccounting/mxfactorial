@@ -1,0 +1,23 @@
+name: prod-services-deploy
+
+on:
+  push:
+    branches:
+    - 'master'
+
+jobs:
+  deploy_prod:
+    name: deploy services to prod cloud environment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: mask values
+        run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
+      - name: deploy services to prod cloud environment
+        run: |
+          for app in $(echo $(bash scripts/list-dir-paths.sh --type app | grep -v client) | xargs basename); do
+            # tag newly pushed prod images with master merge commit sha
+            bash scripts/tag-merge-commit.sh --app-name $app --env prod --env-id ${{ secrets.PROD_ENV_ID }};
+            # deploy newly tagged images to prod cloud
+            bash scripts/deploy-last-image.sh --app-name $app --env prod --env-id ${{ secrets.PROD_ENV_ID }};
+          done

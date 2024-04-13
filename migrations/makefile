@@ -28,9 +28,10 @@ run:
 start:
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose \
-			-f ../docker/compose.bitnami-postgres.yaml \
+			-f ../docker/compose.yaml \
 			up \
 			-d \
+			postgres \
 			--renew-anon-volumes \
 			--force-recreate \
 			--build
@@ -38,24 +39,27 @@ start:
 reset:
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose \
-			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.bitnami-postgres.yaml \
+			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
 			up \
 			-d \
+			postgres \
 			--renew-anon-volumes \
 			--force-recreate
 
 rebuild:
-	docker compose \
-		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.bitnami-postgres.yaml \
+	@docker compose \
+		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
 		build \
+		postgres \
 		--no-cache
 
 up:
 	@$(MAKE) run
 
 down:
-	docker compose \
-		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.bitnami-postgres.yaml down
+	@docker compose \
+		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
+		down
 
 stop:
 	@$(MAKE) down

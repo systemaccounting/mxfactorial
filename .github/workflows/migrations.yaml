@@ -1,0 +1,41 @@
+name: migrations
+
+on:
+  push:
+    paths:
+    - 'migrations/schema/**'
+    - 'migrations/seed/**'
+    - 'migrations/testseed/**'
+    branches-ignore:
+    - 'master'
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: bitnami/postgresql
+        ports:
+          - 5432:5432
+        env:
+          POSTGRESQL_USERNAME: test
+          POSTGRES_PASSWORD: test
+          POSTGRESQL_DATABASE: mxfactorial
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.x'
+      - name: install deps
+        run: make install-ci
+        working-directory: migrations
+      - name: wait for docker postgres and "test" user availability
+        run: while ! pg_isready -h localhost -p 5432; do sleep 1; done; sleep 5
+        working-directory: migrations
+      - name: up migrate from schema, seed and testseed directories
+        run: make updocker DB=test
+        working-directory: migrations
+      # todo: add insert, update and select tests
+      - name: stop container and clean up docker postgres data
+        run: make clean
+        working-directory: migrations

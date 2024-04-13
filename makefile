@@ -203,10 +203,10 @@ rebuild-transactions-by-account:
 	@bash scripts/rebuild-service.sh --name transactions-by-account
 
 rebuild-graphql:
-	@bash scripts/rebuild-service.sh --name graphql --no-db
+	@bash scripts/rebuild-service.sh --name graphql
 
 rebuild-client:
-	@bash scripts/rebuild-service.sh --name client --no-db
+	@bash scripts/rebuild-service.sh --name client
 
 ###################### demo ######################
 

@@ -154,10 +154,10 @@ endif
 ###################### docker ######################
 
 up:
-	docker compose -f ../docker/compose.client.yaml up -d --renew-anon-volumes --force-recreate --build
+	docker compose -f ../docker/compose.yaml up -d client --renew-anon-volumes --force-recreate --build
 
 down:
-	docker compose -f ../docker/compose.client.yaml down
+	docker compose -f ../docker/compose.yaml down
 
 ###################### utils ######################
 

@@ -1,28 +1,23 @@
 locals {
-  ID_ENV                    = "${var.env_id}-${var.env}"
-  TITLED_ID_ENV             = replace(title(local.ID_ENV), "-", "")
-  SPACED_ID_ENV             = replace(local.ID_ENV, "-", " ")
-  SERVICE_NAME_TITLE        = replace(title(var.service_name), "-", "")
-  SERVICE_NAME_UPPER        = replace(upper(var.service_name), "-", "_")
-  SERVICE_NAME_LOWER        = replace(var.service_name, "-", "_")
-  LOG_GROUP_NAME            = "/aws/lambda/${aws_lambda_function.default.function_name}"
-  PROJECT_CONF              = yamldecode(file("../../../../../project.yaml"))
-  ENVIRONMENT_CONF          = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
-  READINESS_CHECK_PATH      = local.ENVIRONMENT_CONF.READINESS_CHECK_PATH.default
-  WEB_ADAPTER_LAYER_VERSION = local.ENVIRONMENT_CONF.WEB_ADAPTER_LAYER_VERSION.default
-  BINARY_NAME               = local.PROJECT_CONF.services.env_var.set.BINARY_NAME.default
-  LAMBDA_RUNTIME            = local.PROJECT_CONF.infrastructure.terraform.aws.modules.env_var.set.LAMBDA_RUNTIME.default
-}
-
-data "aws_s3_object" "default" {
-  count  = var.artifacts_bucket_name == null ? 0 : 1
-  bucket = var.artifacts_bucket_name
-  key    = "${var.service_name}-src.zip"
+  ID_ENV               = "${var.env_id}-${var.env}"
+  TITLED_ID_ENV        = replace(title(local.ID_ENV), "-", "")
+  SPACED_ID_ENV        = replace(local.ID_ENV, "-", " ")
+  SERVICE_NAME_TITLE   = replace(title(var.service_name), "-", "")
+  SERVICE_NAME_UPPER   = replace(upper(var.service_name), "-", "_")
+  SERVICE_NAME_LOWER   = replace(var.service_name, "-", "_")
+  LOG_GROUP_NAME       = "/aws/lambda/${aws_lambda_function.default.function_name}"
+  PROJECT_CONF         = yamldecode(file("../../../../../project.yaml"))
+  ENVIRONMENT_CONF     = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
+  READINESS_CHECK_PATH = local.ENVIRONMENT_CONF.READINESS_CHECK_PATH.default
 }
 
 data "aws_ecr_repository" "default" {
-  count = var.artifacts_bucket_name == null ? 1 : 0
-  name  = "${var.service_name}-${local.ID_ENV}"
+  name = "${var.service_name}-${local.ID_ENV}"
+}
+
+data "aws_ecr_image" "default" {
+  repository_name = data.aws_ecr_repository.default.name
+  most_recent     = true
 }
 
 data "aws_region" "current" {}
@@ -30,34 +25,24 @@ data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
 resource "aws_lambda_function" "default" {
-  function_name     = "${var.service_name}-${local.ID_ENV}"
-  description       = "${var.service_name} lambda service in ${local.SPACED_ID_ENV}"
-  s3_bucket         = var.artifacts_bucket_name == null ? null : data.aws_s3_object.default[0].bucket
-  s3_key            = var.artifacts_bucket_name == null ? null : data.aws_s3_object.default[0].key
-  s3_object_version = var.artifacts_bucket_name == null ? null : data.aws_s3_object.default[0].version_id
-  image_uri         = var.artifacts_bucket_name == null ? "${data.aws_ecr_repository.default[0].repository_url}:latest" : null
-  package_type      = var.artifacts_bucket_name == null ? "Image" : null
-  handler           = var.artifacts_bucket_name == null ? null : local.BINARY_NAME
-  runtime           = var.artifacts_bucket_name == null ? null : local.LAMBDA_RUNTIME
-  timeout           = var.lambda_timeout
-  role              = aws_iam_role.default.arn
+  function_name = "${var.service_name}-${local.ID_ENV}"
+  description   = "${var.service_name} lambda service in ${local.SPACED_ID_ENV}"
+  image_uri     = data.aws_ecr_image.default.image_uri
+  package_type  = "Image"
+  timeout       = var.lambda_timeout
+  role          = aws_iam_role.default.arn
 
   environment {
     variables = merge(
       // add lambda web adapter env vars if aws_lwa_port set
       var.aws_lwa_port != null ? {
         READINESS_CHECK_PATH               = local.READINESS_CHECK_PATH
-        PORT                               = var.aws_lwa_port
+        AWS_LWA_PORT                       = var.aws_lwa_port
         "${local.SERVICE_NAME_UPPER}_PORT" = var.aws_lwa_port
       } : {},
       var.env_vars,
     )
   }
-
-  // add lambda web adapter layer if aws_lwa_port set
-  layers = concat(var.lambda_layer_arns, var.aws_lwa_port != null ? [
-    "arn:aws:lambda:${data.aws_region.current.name}:753240598075:layer:LambdaAdapterLayerX86:${local.WEB_ADAPTER_LAYER_VERSION}"
-  ] : [])
 }
 
 resource "aws_lambda_function_url" "default" {

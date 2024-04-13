@@ -17,7 +17,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --app-name) APP_NAME="$2"; shift ;;
         --payload) PAYLOAD="$2"; shift ;;
-        --env) ENVIRONMENT="$2"; shift ;;
+        --env) ENV="$2"; shift ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
 	shift
@@ -30,7 +30,12 @@ APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type app | grep --color=never 
 ENV_FILE="$APP_DIR_PATH/$ENV_FILE_NAME"
 
 if [[ ! -f $ENV_FILE ]]; then
-	make get-secrets -C $APP_DIR_PATH ENV=$ENVIRONMENT
+	make get-secrets -C $APP_DIR_PATH ENV=$ENV
+fi
+
+# recreate env file with cloud values if localhost values found
+if [[ $(sed -n '/http:\/\/localhost:/=' $ENV_FILE | wc -l | xargs) -gt 0 ]]; then
+	make get-secrets -C $APP_DIR_PATH ENV=$ENV
 fi
 
 SNAKE_APP_NAME=$(echo $APP_NAME | sed 's/-/_/g')

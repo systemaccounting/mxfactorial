@@ -560,7 +560,7 @@ tests:
     set:
       AWS_LAMBDA_FUNCTION_NAME:
         ssm: null
-        default: null # switched to non null by scripts/create-env-file.sh when testing lambdas
+        default: 1
     get:
       - GRAPHQL_URI
       - RULE_URL

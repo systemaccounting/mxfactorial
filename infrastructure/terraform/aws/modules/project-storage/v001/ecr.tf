@@ -1,9 +1,8 @@
-resource "aws_ecr_repository" "go_migrate" {
-  name                 = "go-migrate-${local.ID_ENV}"
-  image_tag_mutability = "MUTABLE"
-  force_delete         = true
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
+module "ecr_repos" {
+  for_each                = local.ECR_REPOS
+  source                  = "../../ecr/v001"
+  max_image_storage_count = var.max_image_storage_count
+  env                     = var.env
+  env_id                  = var.env_id
+  service_name            = each.value
 }

@@ -33,14 +33,6 @@ ARTIFACTS_BUCKET_PREFIX=$(yq ".infrastructure.terraform.aws.modules["project-sto
 
 ---
 
-##### `clean-artifact.sh`
-
-deletes `*.zip` files created in app directories
-
-##### `clean-binary.sh`
-
-deletes binaries created in app directories
-
 ##### `clean-env.sh`
 
 deletes `.env` files created in app directories
@@ -89,23 +81,11 @@ lists apps and libs in `project.yaml`, e.g. `services/request-create`
 
 prints list of environment variables set in `project.yaml`
 
-##### `put-object.sh`
-
-puts artifact created in app directory in s3 bucket
-
 ##### `set-codecov-flags.sh`
 
 sets custom [CODECOV_FLAGS](https://docs.codecov.com/docs/flags) github workflow environment variable to 1) app or package name, and 2) one standard codecov flag listed in `package.json`
 
 example: `CODECOV_FLAGS=tools,unittest`
-
-##### `update-function.sh`
-
-deploys lambda function from s3 object created by `put-object.sh`
-
-##### `zip-executable.sh`
-
-adds binaries and shell scripts to `*.zip` files for deployment in app directories
 
 ##### `insert-transactions.sh`
 
@@ -252,7 +232,7 @@ print the value of an `env-var` in `project.yaml`
 
 send a http request to the internal `migrations/go-migrate` tool
 
-##### `auth-ecr-repo.sh`
+##### `auth-ecr.sh`
 
 authenticate with ecr
 
@@ -271,3 +251,49 @@ imports resources into the `infrastructure/terraform/aws/environments/init-$ENV`
 ##### `rust-coverage.sh`
 
 prints rust crate test coverage
+
+#### `print-lambda-policy.sh`
+
+prints policy attached to lambda function
+
+#### `print-ecr-repo-uri.sh`
+
+prints uri of ecr repo
+
+#### `print-image-tag.sh`
+
+prints service image tag with ecr repo uri and current git sha added as tag version
+
+#### `delete-ecr-repos.sh`
+
+convenience script to delete all dev ecr repos
+
+### `push-dev-image.sh`
+
+pushes local docker image to dev ecr repo (assumes local image already tagged)
+
+### `deploy-dev-image.sh`
+
+deploys "last" dev ecr image to lambda function. "latest" tag convention not used in ecr image tagging
+
+### `tag-merge-commit.sh`
+
+1. gets tag from image deployed to lambda
+1. gets tag(s) from last image pushed to ecr (ecr images may have multiple tags)
+1. tests if currently deployed lambda image tag matches any tag belonging to last imaged pushed to ecr
+1. tags last ecr image with merge commit sha if last ecr image tag is NOT matched with currently deployed function image tag, OR
+1. exits before tagging last ecr image tag with merge commit sha if last ecr image tag IS matched with currently deployed function image tag (avoids retagging)
+
+### `deploy-last-image.sh`
+
+1. gets tag from image deployed to lambda
+1. gets tags from last image pushed to ecr (ecr images may have multiple tags)
+1. tests currently deployed lambda image tag matches any tag belonging to last imaged pushed to ecr
+1. deploys last ecr image if last ecr image tag is NOT matched with currently deployed function image tag, OR
+1. exits before deploying if last ecr image tag IS matched with currently deployed function image tag (avoids redeploying)
+
+### `push-prod-image.sh`
+used in integration test workflow after cloud integration tests pass
+1. tests if current dev image tagged with merge commit
+1. adds prod tag if current dev image tagged with merge commit, then pushes to prod ecr
+1. exits if current dev image NOT tagged with merge commit (prod image not tagged and pushed)

@@ -22,7 +22,6 @@ variable "create_secret" {
   default     = false
   description = "adds lambda arn in secrets manager for local testing"
 }
-variable "artifacts_bucket_name" {}
 variable "ssm_prefix" {}
 variable "env_id" {}
 variable "lambda_timeout" { default = 30 }
