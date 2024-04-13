@@ -5,7 +5,7 @@ module "graphql_apigwv2" {
   enable_api_auth          = var.enable_api_auth
   api_version              = 001
   env                      = var.env
-  lambda_invoke_arn        = aws_lambda_function.graphql.invoke_arn
+  lambda_invoke_arn        = module.graphql.lambda_invoke_arn
   enable_api_auto_deploy   = var.enable_api_auto_deploy
   cognito_client_id        = aws_cognito_user_pool_client.client.id
   cognito_endpoint         = aws_cognito_user_pool.pool.endpoint
