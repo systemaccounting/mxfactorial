@@ -1,4 +1,4 @@
-name: dev-migrations
+name: migrations
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
           POSTGRES_PASSWORD: test
           POSTGRESQL_DATABASE: mxfactorial
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v3
         with:
           go-version: '1.19.x'

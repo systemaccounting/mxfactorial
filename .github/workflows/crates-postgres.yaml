@@ -1,4 +1,4 @@
-name: dev-crates-postgres
+name: crates-postgres
 
 on:
   push:
