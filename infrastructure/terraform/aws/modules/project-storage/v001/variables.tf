@@ -9,3 +9,4 @@ variable "force_destroy_storage" {
 	type = bool
 	default = false
 }
+variable "max_image_storage_count" {}
