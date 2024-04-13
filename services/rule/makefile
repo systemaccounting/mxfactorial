@@ -1,24 +1,17 @@
 RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | grep project.yaml | wc -l | xargs) -eq 0 ]; do REL_PATH="$$REL_PATH./.."; done; printf '%s' "$$REL_PATH")
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/rust.mk
+include $(RELATIVE_PROJECT_ROOT_PATH)/make/ecr-lambda.mk
 
 RULE_PORT=$(shell yq '.services["$(APP_NAME)"].env_var.set.RULE_PORT.default' $(PROJECT_CONF))
 RULE_URL=$(HOST):$(RULE_PORT)
-NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 
 TEST_DATA_FILE=preRuleTrItems.json
 TEST_DATA_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/tests/testdata
 TEST_EVENT='$(shell cat $(TEST_DATA_DIR)/$(TEST_DATA_FILE))'
 
 dev:
-	@$(MAKE) start
-
-start:
-	@$(MAKE) get-secrets ENV=local
-	nohup cargo watch --env-file $(ENV_FILE) -w src -w $(RELATIVE_PROJECT_ROOT_PATH)/crates -x run >> $(NOHUP_LOG) &
-
-stop:
-	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH) stop
+	@$(MAKE) start-alone
 
 run:
 	@$(MAKE) -C ../../migrations run
