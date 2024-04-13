@@ -81,7 +81,7 @@ eval_with_no_print_directory "$CMD"
 
 echo ""
 
-echo -e -n "${GREEN}now add log.Println(\"hello cadet\") at the top of func main() in services/transactions-by-account/cmd/main.go to restart the service with a code change. press any key to continue${RESET}\n\n>"
+echo -e -n "${GREEN}now add \"println!(\"hello cadet\");\" at the top of fn main() in services/transactions-by-account/src/main.rs to restart the service with a code change. press any key to continue${RESET}\n\n>"
 read -n 1
 
 echo ""
