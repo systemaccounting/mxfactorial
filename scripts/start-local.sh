@@ -40,10 +40,10 @@ for d in "${APP_DIRS[@]}"; do
 	RUNTIME=$(yq "$CONF_PATH.runtime" $PROJECT_CONF)
 	BUILD_SRC_PATH=$(yq "$CONF_PATH.build_src_path" $PROJECT_CONF)
 
-	# use non shared make target to avoid cross build for rust
+	# compile rust before starting
 	if [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
 		echo -e -n "\n${GREEN}*** compiling $d${RESET}\n"
-		make --no-print-directory -C "$d" compile-dev
+		make --no-print-directory -C "$d" compile
 	fi
 
 	# skip starting client in workflows
@@ -58,9 +58,6 @@ for d in "${APP_DIRS[@]}"; do
 		# &; \ disown fails in make so backgrounding kept in bash
 		if [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
 			(cd "$d"; eval $(cat $ENV_FILE_NAME) cargo run > /dev/null 2>&1 & disown $!)
-		fi
-		if [[ "$RUNTIME" == 'go1.x' ]]; then
-			(cd "$d"; eval $(cat $ENV_FILE_NAME) go run ./$BUILD_SRC_PATH > /dev/null 2>&1 & disown $!)
 		fi
 	else
 		make --no-print-directory -C "$d" start
