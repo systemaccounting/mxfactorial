@@ -2,6 +2,13 @@ name: prod-services-deploy
 
 on:
   push:
+    paths:
+    - 'services/**'
+    - 'crates/**'
+    - 'migrations/schema/*'
+    - 'migrations/seed/*'
+    - 'client/**'
+    - 'docker/**'
     branches:
     - 'master'
 
