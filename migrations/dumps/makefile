@@ -5,8 +5,7 @@ dump-testseed:
 	bash scripts/dump-db.sh
 
 restore-testseed:
-	$(MAKE) -C '..' downdocker DB=test # drops functions
-	$(MAKE) -C '..' dropdocker DB=test # drops migration tables
+	$(MAKE) -C '..' dropdocker DB=test
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/restore-db.sh
 
@@ -15,7 +14,6 @@ dump-rds-testseed:
 	bash scripts/dump-db.sh --rds
 
 restore-rds-testseed:
-	$(MAKE) -C '..' downrds DB=test # drops functions
-	$(MAKE) -C '..' droprds DB=test # drops migration tables
+	$(MAKE) -C '..' droprds DB=test
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/restore-db.sh --rds
