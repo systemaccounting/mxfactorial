@@ -12,7 +12,7 @@ locals {
 }
 
 data "aws_ecr_repository" "default" {
-  name = "${var.service_name}-${local.ID_ENV}"
+  name = "${var.env_id}/${var.env}/${var.service_name}"
 }
 
 data "aws_ecr_image" "default" {
@@ -27,7 +27,7 @@ data "aws_caller_identity" "current" {}
 resource "aws_lambda_function" "default" {
   function_name = "${var.service_name}-${local.ID_ENV}"
   description   = "${var.service_name} lambda service in ${local.SPACED_ID_ENV}"
-  image_uri     = data.aws_ecr_image.default.image_uri
+  image_uri     = "${data.aws_ecr_repository.default.repository_url}:${data.aws_ecr_image.default.image_tags[0]}"
   package_type  = "Image"
   timeout       = var.lambda_timeout
   role          = aws_iam_role.default.arn
