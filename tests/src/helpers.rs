@@ -8,8 +8,10 @@ use serde_json::json;
 use std::{env, fs::File, io::BufReader, process::Command};
 
 pub fn restore_testseed() {
+    // cloud dev env
     if env::var("AWS_LAMBDA_FUNCTION_NAME").ok().is_some() {
         let restore_output = Command::new("make")
+            .arg("--no-print-directory")
             .arg("-C")
             .arg("../migrations/dumps")
             .arg("restore-rds-testseed")
@@ -18,10 +20,18 @@ pub fn restore_testseed() {
             .expect("failed to execute process");
 
         // cargo test -- --show-output
-        let restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-        println!("{}", restore_output_str);
+        if !restore_output.clone().stderr.is_empty() {
+            let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
+            println!("{}", restore_output_str);
+        }
+        if !restore_output.stdout.is_empty() {
+            let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
+            // println!("{}", _restore_output_str);
+        }
     } else {
+        // local env
         let restore_output = Command::new("make")
+            .arg("--no-print-directory")
             .arg("-C")
             .arg("../migrations/dumps")
             .arg("restore-testseed")
@@ -29,8 +39,14 @@ pub fn restore_testseed() {
             .expect("failed to execute process");
 
         // cargo test -- --show-output
-        let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-        // println!("{}", _restore_output_str); // comment in to print db restore output
+        if !restore_output.clone().stderr.is_empty() {
+            let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
+            println!("{}", restore_output_str);
+        }
+        if !restore_output.stdout.is_empty() {
+            let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
+            // println!("{}", _restore_output_str); // comment in to print db restore output
+        }
     }
 }
 
