@@ -1,9 +1,28 @@
 .github:
+  env_var:
+    set:
+      GITHUB_ORG:
+        ssm: null
+        default: systemaccounting
+      GITHUB_REPO_NAME:
+        ssm: null
+        default: mxfactorial
+  params: []
   codecov:
     flags:
       - unittest
       - integration
       - ui
+  workflows:
+    env_var:
+      set:
+        GITHUB_REGISTRY:
+          ssm: null
+          default: ghcr.io
+        IMAGE_BUILDER_WORKFLOW:
+          ssm: null
+          default: build-all-images.yaml
+    params: []
 client:
   runtime: v8
   min_code_cov: null
@@ -59,6 +78,9 @@ docker:
       DOCKER_USER:
         ssm: null
         default: mxfactorial
+      LOCAL_TAG_VERSION:
+        ssm: null
+        default: latest
 infrastructure:
   terraform:
     env_var:
@@ -294,6 +316,9 @@ scripts:
           - 'npm run build'
           - 'vite build'
           - 'tail -F'
+      SERVICES_ZIP:
+        ssm: null
+        default: mxfactorial.zip
 services:
   env_var:
     set:
