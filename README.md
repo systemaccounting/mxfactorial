@@ -51,7 +51,7 @@ encryption and replication are secondary
 government is not above failure, nor is it entitled to steal from the private sector to conceal its failure. improving government depends on failure [predicting](https://en.wikipedia.org/wiki/Time_travel_debugging) the individuals and laws that must be replaced. flying a flag and demanding loyalty before this step is just misdirection  
 
 **q.** how does systemaccounting manage expectation?  
-**a.** central banks providing "forward guidance" *appease* more than they **set** expectation when they allow interest rate manipulation and money printing. systemaccounting prices capital by switching the "risk-free" rate from referencing the hackable price of debt to the immutably recorded price of equity. when the risk-free rate refers to the empirical rate, i.e. to the historical and not the expected, the economy remains protected from the catastrophic failure indulged by intended government mispricing  
+**a.** central banks providing "forward guidance" appease more than they set expectation when they allow interest rate manipulation and money printing. systemaccounting prices capital by switching the "risk-free" rate from referencing the hackable price of debt to the immutably recorded price of equity. when the risk-free rate refers to the empirical rate, i.e. to the historical and not the expected, the economy remains protected from the catastrophic failure indulged by intended government mispricing  
 
 removing financial appeasement guides the freedom of speech by recalibrating expectation to the empirical  
 
