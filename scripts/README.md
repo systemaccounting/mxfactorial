@@ -301,3 +301,13 @@ used in integration test workflow after cloud integration tests pass
 ### `build-image-job.sh`
 
 used in `.github/workflows/build-all-images.yaml` to copy zipped code from s3, then build, tag and push service images to github container registry
+
+### `zip-services.sh`
+
+adds services to zip file. used by `scripts/build-all-images.sh` before triggering `.github/workflows/build-all-images.yaml`
+
+### `build-all-images.sh`
+zips and pushes current service code to s3, then triggers `.github/workflows/build-all-images.yaml` to avoid building almost a dozen rust images locally
+
+### `pull-all-images.sh`
+pulls images built and pushed by `.github/workflows/build-all-images.yaml`
