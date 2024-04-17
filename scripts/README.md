@@ -297,3 +297,7 @@ used in integration test workflow after cloud integration tests pass
 1. tests if current dev image tagged with merge commit
 1. adds prod tag if current dev image tagged with merge commit, then pushes to prod ecr
 1. exits if current dev image NOT tagged with merge commit (prod image not tagged and pushed)
+
+### `build-image-job.sh`
+
+used in `.github/workflows/build-all-images.yaml` to copy zipped code from s3, then build, tag and push service images to github container registry
