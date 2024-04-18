@@ -88,7 +88,6 @@ install:
 	curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh -s -- -y
 	rustup component add llvm-tools-preview --toolchain stable-x86_64-apple-darwin
 #	https://www.docker.com/products/docker-desktop
-	cargo install cross --git https://github.com/cross-rs/cross
 	cargo install cargo-watch
 	cargo install cargo-llvm-cov
 
