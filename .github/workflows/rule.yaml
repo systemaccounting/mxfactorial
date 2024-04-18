@@ -35,8 +35,8 @@ jobs:
           components: clippy, rustfmt
       - name: unit test
         run: cargo test
+      - uses: taiki-e/install-action@cargo-llvm-cov
       - name: coverage report
-        uses: taiki-e/install-action@cargo-llvm-cov
         run: |
           make rust-coverage RUST_PKG=rule
   database_test:
