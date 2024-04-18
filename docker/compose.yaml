@@ -13,6 +13,7 @@ services:
       retries: 5
       start_period: 10s
   graphql:
+    image: graphql:latest
     build:
       context: ../
       dockerfile: ./docker/graphql.Dockerfile
@@ -31,6 +32,7 @@ services:
       RUST_LOG: info
       GRAPHQL_PORT: 10000
   balance-by-account:
+    image: balance-by-account:latest
     build:
       context: ../
       dockerfile: ./docker/balance-by-account.Dockerfile
@@ -50,6 +52,7 @@ services:
     depends_on:
       - postgres
   request-create:
+    image: request-create:latest
     build:
       context: ../
       dockerfile: ./docker/request-create.Dockerfile
@@ -70,6 +73,7 @@ services:
     depends_on:
       - postgres
   request-approve:
+    image: request-approve:latest
     build:
       context: ../
       dockerfile: ./docker/request-approve.Dockerfile
@@ -89,6 +93,7 @@ services:
     depends_on:
       - postgres
   rule:
+    image: rule:latest
     build:
       context: ../
       dockerfile: ./docker/rule.Dockerfile
@@ -109,6 +114,7 @@ services:
     depends_on:
       - postgres
   request-by-id:
+    image: request-by-id:latest
     build:
       context: ../
       dockerfile: ./docker/request-by-id.Dockerfile
@@ -128,6 +134,7 @@ services:
     depends_on:
       - postgres
   requests-by-account:
+    image: requests-by-account:latest
     build:
       context: ../
       dockerfile: ./docker/requests-by-account.Dockerfile
@@ -148,6 +155,7 @@ services:
     depends_on:
       - postgres
   transaction-by-id:
+    image: transaction-by-id:latest
     build:
       context: ../
       dockerfile: ./docker/transaction-by-id.Dockerfile
@@ -167,6 +175,7 @@ services:
     depends_on:
       - postgres
   transactions-by-account:
+    image: transactions-by-account:latest
     build:
       context: ../
       dockerfile: ./docker/transactions-by-account.Dockerfile
