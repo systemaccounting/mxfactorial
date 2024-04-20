@@ -11,10 +11,10 @@ all:
 	@$(MAKE) -s test-cmd-arg
 	@$(MAKE) -s test-cmd-val
 ifeq (deploy,$(CMD))
-	@cd ..; bash scripts/deploy-all.sh --env $(ENV) --services-only
+	@cd ..; bash scripts/deploy-all.sh --env $(ENV) --services
 endif
 ifeq (initial-deploy,$(CMD))
-	@cd ..; bash scripts/deploy-all.sh --env $(ENV) --initial --services-only
+	@cd ..; bash scripts/deploy-all.sh --env $(ENV) --initial --services
 endif
 
 inventory:
