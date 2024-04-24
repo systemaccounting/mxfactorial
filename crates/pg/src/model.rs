@@ -3,6 +3,7 @@ use crate::postgres::{DatabaseConnection, ToSqlVec};
 use crate::sqls::common::TableTrait;
 use chrono::{DateTime, Utc};
 use geo_types::Point;
+use mockall::automock;
 use rust_decimal::Decimal;
 use std::{error::Error, vec};
 use types::{
@@ -20,6 +21,7 @@ const FIXED_DECIMAL_PLACES: usize = 3;
 
 // todo: add future boilerplate
 // https://doc.rust-lang.org/beta/rustc/lints/listing/warn-by-default.html#async-fn-in-trait
+#[automock]
 pub trait ModelTrait {
     async fn insert_account_query(&self, account: String) -> Result<(), Box<dyn Error>>;
     async fn delete_owner_account_query(&self, account: String) -> Result<(), Box<dyn Error>>;
