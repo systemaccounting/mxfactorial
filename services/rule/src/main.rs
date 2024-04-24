@@ -21,8 +21,8 @@ mod rules;
 // used by lambda to test for service availability
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
-async fn apply_transaction_item_rules(
-    svc: &Service<DatabaseConnection>,
+async fn apply_transaction_item_rules<'a>(
+    svc: &'a Service<'a, DatabaseConnection>,
     role_sequence: RoleSequence,
     transaction_items: &TransactionItems,
 ) -> TransactionItems {
@@ -112,8 +112,8 @@ async fn apply_transaction_item_rules(
     response
 }
 
-async fn apply_approval_rules(
-    svc: &Service<DatabaseConnection>,
+async fn apply_approval_rules<'a>(
+    svc: &'a Service<'a, DatabaseConnection>,
     role_sequence: RoleSequence,
     transaction_items: &mut TransactionItems,
     approval_time: &TZTime,
@@ -206,7 +206,7 @@ async fn apply_rules(
     let conn = pool.get_conn().await;
 
     // create service with conn
-    let svc = Service::new(conn);
+    let svc = Service::new(&conn);
 
     let mut rule_applied_tr_items =
         apply_transaction_item_rules(&svc, role_sequence, &transaction_items).await;
