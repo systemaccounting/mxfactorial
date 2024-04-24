@@ -1,20 +1,32 @@
 #!/bin/bash
 
 if [[ "$#" -ne 6 ]]; then
-	cat <<- 'EOF'
-	use:
-	bash scripts/push-prod-image.sh --app-name rule --env dev --env-id 12345
+	cat <<-'EOF'
+		use:
+		bash scripts/push-prod-image.sh --app-name rule --env dev --env-id 12345
 	EOF
 	exit 1
 fi
 
 while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --app-name) APP_NAME="$2"; shift ;;
-		--env) ENV="$2"; shift ;;
-		--env-id) ENV_ID="$2"; shift ;;
-        *) echo "unknown parameter passed: $1"; exit 1 ;;
-    esac
+	case $1 in
+	--app-name)
+		APP_NAME="$2"
+		shift
+		;;
+	--env)
+		ENV="$2"
+		shift
+		;;
+	--env-id)
+		ENV_ID="$2"
+		shift
+		;;
+	*)
+		echo "unknown parameter passed: $1"
+		exit 1
+		;;
+	esac
 	shift
 done
 
@@ -25,7 +37,7 @@ REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGIO
 REPO_NAME="$ID_ENV_PREFIX/$APP_NAME"
 PROD_ENV_ID=$(yq '.infrastructure.terraform.env-id.prod.env_var.set.PROD_ENV_ID.default' $PROJECT_CONF)
 
-MERGE_COMMIT_HASH=$(git rev-parse --short HEAD)
+MERGE_COMMIT_HASH=$(git rev-parse --short=7 HEAD)
 
 TAG_COUNT=$(aws ecr batch-get-image \
 	--repository-name=$REPO_NAME \
