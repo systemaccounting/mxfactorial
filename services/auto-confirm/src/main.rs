@@ -169,7 +169,7 @@ async fn func(event: LambdaEvent<CognitoEventUserPoolsPreSignup>) -> Result<Valu
             Error::from(e)
         })?;
 
-    let svc = Service::new(conn);
+    let svc = Service::new(&conn);
 
     let _ = svc
         .create_account_from_cognito_trigger(fake_profile, decimal_balance, 0)

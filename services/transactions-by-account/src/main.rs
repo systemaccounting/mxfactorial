@@ -20,7 +20,9 @@ async fn handle_event(
 ) -> Result<axum::Json<IntraTransactions>, StatusCode> {
     let client_request = event.0;
 
-    let svc = Service::new(pool.get_conn().await);
+    let conn = pool.get_conn().await;
+
+    let svc = Service::new(&conn);
 
     let account = client_request.account_name;
 

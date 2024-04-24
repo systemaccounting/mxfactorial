@@ -6,7 +6,7 @@ use axum::{
 };
 use httpclient::HttpClient as Client;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
-use service::Service;
+use service::{Service, TxService};
 use shutdown::shutdown_signal;
 use std::{env, error::Error, net::ToSocketAddrs};
 use thiserror::Error;
@@ -101,9 +101,9 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
     Ok(response)
 }
 
-async fn create_request(
+async fn create_request<'a>(
     rule_tested: IntraTransaction,
-    svc: &mut Service<DatabaseConnection>,
+    svc: &mut TxService<'a, DatabaseConnection>,
 ) -> Result<Transaction, RequestCreateError> {
     let accounts = rule_tested.transaction.transaction_items.list_accounts();
 
@@ -144,15 +144,21 @@ async fn handle_event(
         })
         .unwrap();
 
-    let mut svc = Service::new(pool.get_conn().await);
+    let mut tx_conn = pool.get_conn().await;
 
-    let inserted_transaction_request = create_request(rule_tested.clone(), &mut svc)
+    let mut tx_svc = TxService::new(&mut tx_conn);
+
+    let inserted_transaction_request = create_request(rule_tested.clone(), &mut tx_svc)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     // auth_account and approver_role are different on request-approve
     let auth_account = rule_tested.clone().auth_account.unwrap();
     let approver_role = rule_tested.transaction.author_role.unwrap();
+
+    let conn = pool.get_conn().await;
+
+    let svc = Service::new(&conn);
 
     let approved_transaction_request = svc
         .approve(auth_account, approver_role, inserted_transaction_request)
