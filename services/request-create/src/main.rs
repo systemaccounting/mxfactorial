@@ -6,7 +6,7 @@ use axum::{
 };
 use httpclient::HttpClient as Client;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
-use service::{Service, TxService};
+use service::Service;
 use shutdown::shutdown_signal;
 use std::{env, error::Error, net::ToSocketAddrs};
 use thiserror::Error;
@@ -103,7 +103,7 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
 
 async fn create_request<'a>(
     rule_tested: IntraTransaction,
-    svc: &mut TxService<'a, DatabaseConnection>,
+    svc: &Service<'a, DatabaseConnection>,
 ) -> Result<Transaction, RequestCreateError> {
     let accounts = rule_tested.transaction.transaction_items.list_accounts();
 
@@ -118,10 +118,7 @@ async fn create_request<'a>(
         .transaction_items
         .add_profile_ids(profile_ids);
 
-    let transaction_id = svc
-        .create_transaction_tx(transaction_request)
-        .await
-        .unwrap();
+    let transaction_id = svc.create_transaction(transaction_request).await.unwrap();
 
     let id = transaction_id.parse::<i32>().unwrap();
 
@@ -144,11 +141,11 @@ async fn handle_event(
         })
         .unwrap();
 
-    let mut tx_conn = pool.get_conn().await;
+    let conn = pool.get_conn().await;
 
-    let mut tx_svc = TxService::new(&mut tx_conn);
+    let svc = Service::new(&conn);
 
-    let inserted_transaction_request = create_request(rule_tested.clone(), &mut tx_svc)
+    let inserted_transaction_request = create_request(rule_tested.clone(), &svc)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
