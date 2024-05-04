@@ -27,6 +27,10 @@ impl TableTrait for ApprovalTable {
     fn name(&self) -> &str {
         self.inner.name
     }
+
+    fn column_count(&self) -> usize {
+        self.inner.len()
+    }
 }
 
 impl ApprovalTable {
@@ -40,6 +44,23 @@ impl ApprovalTable {
             self.get_column("device_id"),
             self.get_column("device_latlng").cast_value_as(Type::POINT),
             self.get_column("approval_time"),
+            self.get_column("expiration_time"),
+        ])
+    }
+
+    // fn_ postgres function
+    pub fn fn_insert_columns_with_casting(&self) -> Columns {
+        Columns(vec![
+            self.get_column("id"),
+            self.get_column("rule_instance_id"),
+            self.get_column("transaction_id"),
+            self.get_column("transaction_item_id"),
+            self.get_column("account_name"),
+            self.get_column("account_role"),
+            self.get_column("device_id"),
+            self.get_column("device_latlng").cast_value_as(Type::POINT),
+            self.get_column("approval_time"),
+            self.get_column("rejection_time"),
             self.get_column("expiration_time"),
         ])
     }
@@ -152,7 +173,7 @@ impl ApprovalTable {
     }
 
     pub fn select_approvals_by_transaction_ids_sql(&self, row_count: usize) -> String {
-        let values = create_params(row_count);
+        let values = create_params(row_count, &mut 1);
         let columns = self.select_all_with_casting().join_with_casting();
         format!(
             "{} {} {} {} {} {} {} ({})",
