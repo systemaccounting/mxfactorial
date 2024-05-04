@@ -3,7 +3,7 @@ use chrono::{DateTime, Duration, NaiveDate, NaiveDateTime, SecondsFormat, Utc};
 use postgres_protocol::types;
 use postgres_types::{FromSql, ToSql, Type};
 use serde::{Deserialize, Serialize, Serializer};
-use std::{error::Error, string::ToString};
+use std::{error::Error, fmt};
 
 #[derive(Eq, PartialEq, Debug, Deserialize, ToSql, Clone, Copy)]
 
@@ -23,12 +23,11 @@ impl TZTime {
     }
 }
 
-impl ToString for TZTime {
-    fn to_string(&self) -> String {
-        self.to_milli_tz()
+impl fmt::Display for TZTime {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_milli_tz())
     }
 }
-
 scalar!(TZTime);
 
 // https://github.com/sfackler/rust-postgres/blob/7cd7b187a5cb990ceb0ea9531cd3345b1e2799c3/postgres-types/src/chrono_04.rs
