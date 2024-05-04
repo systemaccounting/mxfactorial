@@ -27,6 +27,10 @@ impl TableTrait for AccountBalanceTable {
     fn name(&self) -> &str {
         self.inner.name
     }
+
+    fn column_count(&self) -> usize {
+        self.inner.len()
+    }
 }
 
 impl AccountBalanceTable {
@@ -49,7 +53,7 @@ impl AccountBalanceTable {
 
     pub fn select_account_balances_sql(&self, accounts_count: usize) -> String {
         let columns = self.select_columns_with_casting().join_with_casting();
-        let params = create_params(accounts_count);
+        let params = create_params(accounts_count, &mut 1);
         format!(
             "{} {} {} {} {} {} {} ({})",
             SELECT,

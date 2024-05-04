@@ -57,6 +57,10 @@ impl TableTrait for AccountOwnerTable {
     fn name(&self) -> &str {
         self.inner.name
     }
+
+    fn column_count(&self) -> usize {
+        self.inner.len()
+    }
 }
 
 impl AccountOwnerTable {
