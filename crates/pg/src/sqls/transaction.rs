@@ -1,13 +1,13 @@
 use crate::sqls::common::*;
 use crate::sqls::{approval::ApprovalTable, transaction_item::TransactionItemTable};
-use std::error::Error;
 use tokio_postgres::types::Type;
 use types::transaction::Transaction;
 
 const TRANSACTION_TABLE: &str = "transaction";
-const TR_ITEM_ALIAS_PREFIX: &str = "i";
-const APPROVAL_ALIAS_PREFIX: &str = "a";
-const TR_ALIAS: &str = "insert_transaction";
+const INSERT_TRANSACTION_FN: &str = "insert_transaction";
+const APPROVAL_ROW_TYPE: &str = "approval";
+const ENTIRE_TRANSACTION_ITEM_TYPE: &str = "entire_transaction_item";
+const ENTIRE_TRANSACTION_TYPE: &str = "entire_transaction";
 
 #[derive(Debug)]
 pub struct TransactionTable {
@@ -32,9 +32,19 @@ impl TableTrait for TransactionTable {
     fn name(&self) -> &str {
         self.inner.name
     }
+
+    fn column_count(&self) -> usize {
+        self.inner.columns.len()
+    }
 }
 
 impl TransactionTable {
+    // hack: tables are created from struct and may not match schema, e.g. created_at
+    fn add_column(&mut self, column_mame: &str) {
+        let column = Column::new(column_mame);
+        self.inner.columns.insert(column.name.clone(), column);
+    }
+
     fn insert_columns_with_casting(&self) -> Columns {
         Columns(vec![
             self.get_column("rule_instance_id"),
@@ -45,6 +55,23 @@ impl TransactionTable {
             self.get_column("author_role"),
             self.get_column("equilibrium_time"),
             self.get_column("sum_value").cast_value_as(Type::NUMERIC),
+        ])
+    }
+
+    // fn_ postgres function
+    fn fn_insert_columns_with_casting(&mut self) -> Columns {
+        self.add_column("created_at");
+        Columns(vec![
+            self.get_column("id"),
+            self.get_column("rule_instance_id"),
+            self.get_column("author"),
+            self.get_column("author_device_id"),
+            self.get_column("author_device_latlng")
+                .cast_value_as(Type::POINT),
+            self.get_column("author_role"),
+            self.get_column("equilibrium_time"),
+            self.get_column("sum_value").cast_value_as(Type::NUMERIC),
+            self.get_column("created_at"),
         ])
     }
 
@@ -63,86 +90,6 @@ impl TransactionTable {
         ])
     }
 
-    fn aux_stmt_name(prefix: &str, idx: usize) -> String {
-        format!("{}_{}", prefix, idx)
-    }
-
-    fn aux_stmt(stmt_name: &str, sql: &str) -> String {
-        format!("{} AS ({})", stmt_name, sql)
-    }
-    // todo: convert to postgres function accepting a composite type
-    // note: "Whenever you create a table, a composite type is also automatically created, with the same name as the table"
-    // https://www.postgresql.org/docs/current/rowtypes.html
-    pub fn insert_transaction_cte_sql(
-        &self,
-        transaction: Transaction,
-    ) -> Result<String, Box<dyn Error>> {
-        let mut cte = String::new();
-        cte.push_str(format!("{} {} {}", WITH, TR_ALIAS, AS).as_str());
-
-        cte.push(' '); // space before auxiliary statement
-
-        let mut positional_parameter = 1;
-
-        let insert_transaction_sql = self.insert_transaction_sql(&mut positional_parameter);
-        cte.push_str(format!("({})", insert_transaction_sql).as_str());
-
-        // loop through transaction items with index
-        for (i, tr_item) in transaction.transaction_items.into_iter().enumerate() {
-            let tr_item_aux_stmt_name = Self::aux_stmt_name(TR_ITEM_ALIAS_PREFIX, i); // i_0, i_1, i_2, ...
-            let tr_item_table = TransactionItemTable::new();
-            let tr_item_insert_sql = tr_item_table.insert_transaction_item_with_sql(
-                TR_ALIAS,
-                self.get_column_name("id").as_str(),
-                &mut positional_parameter,
-            );
-            let tr_item_aux_stmt =
-                Self::aux_stmt(tr_item_aux_stmt_name.as_str(), tr_item_insert_sql.as_str()); // i_0 AS ($?), i_1 AS ($?), i_2 AS ($?), ...
-            cte.push_str(format!(", {}", tr_item_aux_stmt).as_str());
-
-            // error if 0 approvals in transaction item
-            if tr_item.approvals.is_none() {
-                return Err("approvals in transaction item is None".into());
-            } else if tr_item.clone().approvals.unwrap().0.is_empty() {
-                return Err("approvals in transaction item is empty".into());
-            }
-
-            let appr_table = ApprovalTable::new();
-
-            let appr_insert_sql = appr_table.insert_approval_cte_sql(
-                TR_ALIAS,
-                self.get_column_name("id").as_str(),
-                tr_item_aux_stmt_name.as_str(),
-                tr_item_table.get_column_name("id").as_str(),
-                tr_item.clone().approvals.unwrap().0.len(),
-                &mut positional_parameter,
-            );
-
-            let appr_aux_stmt_name = Self::aux_stmt_name(APPROVAL_ALIAS_PREFIX, i); // a_0, a_1, a_2, ...
-            let appr_aux_stmt =
-                Self::aux_stmt(appr_aux_stmt_name.as_str(), appr_insert_sql.as_str()); // a_0 AS ($?), a_1 AS ($?), a_2 AS ($?), ...
-
-            cte.push_str(format!(", {}", appr_aux_stmt).as_str());
-        }
-
-        cte.push(' '); // space before SELECT
-
-        cte.push_str(
-            format!(
-                "{} {} {} {}",
-                SELECT,
-                self.get_column("id")
-                    .cast_column_as(Type::TEXT)
-                    .name_with_casting(),
-                FROM,
-                TR_ALIAS
-            )
-            .as_str(),
-        );
-
-        Ok(cte)
-    }
-
     pub fn insert_transaction_sql(&self, positional_parameter: &mut i32) -> String {
         let columns = self.insert_columns_with_casting();
         let values = create_value_params(columns.clone(), 1, positional_parameter);
@@ -156,6 +103,199 @@ impl TransactionTable {
             RETURNING,
             STAR
         )
+    }
+
+    fn pg_row_array(
+        &self,
+        columns: Columns,
+        row_count: usize,
+        row_type: &str,
+        positional_parameter: &mut i32,
+    ) -> String {
+        let mut array = String::new();
+        array.push_str(&format!("{} [", ARRAY));
+        for i in 0..row_count {
+            array.push_str(&self.pg_row(columns.clone(), None, positional_parameter));
+            if i < row_count - 1 {
+                array.push_str(", ");
+            }
+        }
+        array.push_str(&format!("]::{}[]", row_type));
+        array
+    }
+
+    fn pg_row(
+        &self,
+        columns: Columns,
+        row_type: Option<&str>,
+        positional_parameter: &mut i32,
+    ) -> String {
+        let mut row = String::new();
+        row.push_str(&format!("{}(", ROW));
+        for (j, c) in columns.clone().enumerate() {
+            row.push_str(&format!("${}", *positional_parameter));
+            if c.cast_value_as.is_some() {
+                row.push_str(&format!("::{}", c.cast_value_as.unwrap()));
+            }
+            *positional_parameter += 1;
+            if j < columns.len() - 1 {
+                row.push_str(", ");
+            }
+        }
+        row.push(')');
+        if let Some(t) = row_type {
+            row.push_str(&format!("::{}", t));
+        }
+        row
+    }
+
+    fn transaction_row(&self, positional_parameter: &mut i32) -> String {
+        let mut table = TransactionTable::new();
+        let columns = table.fn_insert_columns_with_casting();
+        self.pg_row(columns, None, positional_parameter)
+    }
+
+    fn transaction_item_row(&self, positional_parameter: &mut i32) -> String {
+        let table = TransactionItemTable::new();
+        let columns = table.fn_insert_columns_with_casting();
+        self.pg_row(columns, None, positional_parameter)
+    }
+
+    fn approval_array(&self, approval_count: usize, positional_parameter: &mut i32) -> String {
+        let table = ApprovalTable::new();
+        let columns = table.fn_insert_columns_with_casting();
+        self.pg_row_array(
+            columns,
+            approval_count,
+            APPROVAL_ROW_TYPE,
+            positional_parameter,
+        )
+    }
+
+    fn entire_transaction_item_row(
+        &self,
+        approval_count: usize,
+        positional_parameter: &mut i32,
+    ) -> String {
+        let tr_item_row = self.transaction_item_row(positional_parameter);
+        let appr_array = self.approval_array(approval_count, positional_parameter);
+        format!("{}({}, {})", ROW, tr_item_row, appr_array)
+    }
+
+    fn entire_transaction_item_array(
+        &self,
+        lengths_of_approvals: Vec<usize>,
+        positional_parameter: &mut i32,
+    ) -> String {
+        let mut entire_transaction_item_array = String::new();
+        entire_transaction_item_array.push_str(&format!("{} [", ARRAY));
+        for (i, length) in lengths_of_approvals.iter().enumerate() {
+            entire_transaction_item_array
+                .push_str(&self.entire_transaction_item_row(*length, positional_parameter));
+            if i < lengths_of_approvals.len() - 1 {
+                entire_transaction_item_array.push_str(", ");
+            }
+        }
+        entire_transaction_item_array.push_str(&format!("]::{}[]", ENTIRE_TRANSACTION_ITEM_TYPE));
+        entire_transaction_item_array
+    }
+
+    fn entire_transaction_row(
+        &self,
+        lengths_of_approvals: Vec<usize>, // transaction_item count = lengths_of_approvals.len()
+        positional_parameter: &mut i32,
+    ) -> String {
+        let tr_row = self.transaction_row(positional_parameter);
+        let tr_item_array =
+            self.entire_transaction_item_array(lengths_of_approvals, positional_parameter);
+        format!(
+            "{}({}, {})::{}",
+            ROW, tr_row, tr_item_array, ENTIRE_TRANSACTION_TYPE
+        )
+    }
+
+    /* example fn_select_insert_transaction_sql output:
+            SELECT insert_transaction(
+            ROW(
+                ROW(
+                    NULL, -- id
+                    NULL, -- rule_instance_id
+                    'GroceryStore', -- author
+                    NULL, -- author_device_id
+                    NULL, -- author_device_latlng
+                    'creditor', -- author_role
+                    NULL, -- equilibrium_time
+                    1.000, -- sum_value
+                    NULL -- created_at
+                ),
+                ARRAY [
+                    ROW(
+                        ROW(
+                            NULL, -- id
+                            NULL, -- transaction_id
+                            'bread', -- item_id
+                            1.000, -- price
+                            1, -- quantity
+                            true, -- debitor_first
+                            NULL, -- rule_instance_id
+                            NULL, -- rule_exec_ids
+                            NULL, -- unit_of_measurement
+                            NULL, -- units_measured
+                            'JacobWebb', -- debitor
+                            'GroceryStore', -- creditor
+                            7, -- debitor_profile_id
+                            11, -- creditor_profile_id
+                            NULL, -- debitor_approval_time
+                            NULL, -- creditor_approval_time
+                            NULL, -- debitor_expiration_time
+                            NULL, -- creditor_expiration_time
+                            NULL, -- debitor_rejection_time
+                            NULL -- creditor_rejection_time
+                        ),
+                        ARRAY [
+                            ROW(
+                                NULL, -- id
+                                NULL, -- rule_instance_id
+                                NULL, -- transaction_id
+                                NULL, -- transaction_item_id
+                                'JacobWebb', -- account_name
+                                'debitor', -- account_role
+                                NULL, -- device_id
+                                NULL, -- device_latlng
+                                NULL, -- approval_time
+                                NULL, -- rejection_time
+                                NULL -- expiration_time
+                            ),
+                            ROW(
+                                NULL, -- id
+                                NULL, -- rule_instance_id
+                                NULL, -- transaction_id
+                                NULL, -- transaction_item_id
+                                'GroceryStore', -- account_name
+                                'creditor', -- account_role
+                                NULL, -- device_id
+                                NULL, -- device_latlng
+                                '2024-04-26 14:42:48.698499+00', -- approval_time
+                                NULL, -- rejection_time
+                                NULL -- expiration_time
+                            )
+                        ]::approval[]
+                    )
+                ]::entire_transaction_item[]
+            )::entire_transaction
+        );
+    */
+
+    // creates a parameterized select statement for calling the insert_transaction postgres function
+    pub fn fn_select_insert_transaction_sql(&self, list_of_approval_lengths: Vec<usize>) -> String {
+        let mut select_insert_sql = String::new();
+        select_insert_sql.push_str(&format!("{} {}", SELECT, INSERT_TRANSACTION_FN));
+        select_insert_sql.push('(');
+        let mut positional_parameter = 1;
+        let sql = self.entire_transaction_row(list_of_approval_lengths, &mut positional_parameter);
+        select_insert_sql.push_str(&sql);
+        select_insert_sql.push(')');
+        select_insert_sql
     }
 
     pub fn select_transaction_by_id_sql(&self) -> String {
@@ -174,7 +314,7 @@ impl TransactionTable {
 
     pub fn select_transactions_by_ids_sql(&self, id_count: usize) -> String {
         let columns = self.select_all_with_casting().join_with_casting();
-        let values = create_params(id_count);
+        let values = create_params(id_count, &mut 1);
         format!(
             "{} {} {} {} {} {} {} ({})",
             SELECT,
@@ -244,92 +384,85 @@ mod tests {
         fs::File,
         io::{BufRead, BufReader},
     };
-    use types::{approval::Approvals, request_response::IntraTransaction};
+    use types::request_response::IntraTransaction;
 
     #[test]
-    fn it_creates_an_aux_stmt_name() {
-        let expected = "i_1";
+    fn it_creates_a_transaction_row() {
+        let mut test_table = TransactionTable::new();
+        let test_columns = test_table.fn_insert_columns_with_casting();
+        let test_row = test_table.pg_row(test_columns, None, &mut 1);
         assert_eq!(
-            TransactionTable::aux_stmt_name(TR_ITEM_ALIAS_PREFIX, 1),
-            expected
-        );
-    }
-
-    #[test]
-    fn it_creates_an_aux_stmt() {
-        let stmt_name = TransactionTable::aux_stmt_name(APPROVAL_ALIAS_PREFIX, 1);
-        let expected = "a_1 AS (test)";
-        assert_eq!(
-            TransactionTable::aux_stmt(stmt_name.as_str(), "test"),
-            expected
-        );
-    }
-
-    #[test]
-    fn it_creates_a_with_sql() {
-        let input_file = File::open("../../tests/testdata/requests.json").unwrap();
-        let input_reader = BufReader::new(input_file);
-        let test_transactions: Vec<IntraTransaction> =
-            serde_json::from_reader(input_reader).unwrap();
-        let test_transaction = test_transactions[0].transaction.clone();
-
-        let output_file = File::open("./testdata/transaction_insert.golden").unwrap();
-        let output_reader = BufReader::new(output_file);
-        let expected = output_reader.lines().next().unwrap().unwrap();
-
-        let test_table = TransactionTable::new();
-
-        assert_eq!(
-            test_table
-                .insert_transaction_cte_sql(test_transaction)
-                .unwrap(),
-            expected
-        )
-    }
-
-    // test error when approvals in transaction item is None
-    #[test]
-    fn it_returns_error_when_approvals_in_transaction_item_is_none() {
-        let file = File::open("../../tests/testdata/transWTimes.json").unwrap();
-        let reader = BufReader::new(file);
-        let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
-        let mut test_transaction = test_intra_transaction.transaction.clone();
-        test_transaction.transaction_items.0[0].approvals = None;
-        let test_table = TransactionTable::new();
-        assert_eq!(
-            test_table
-                .insert_transaction_cte_sql(test_transaction)
-                .unwrap_err()
-                .to_string(),
-            "approvals in transaction item is None"
-        )
-    }
-
-    // test error when approvals in transaction item is empty
-    #[test]
-    fn it_returns_error_when_approvals_in_transaction_item_is_empty() {
-        let file = File::open("../../tests/testdata/transWTimes.json").unwrap();
-        let reader = BufReader::new(file);
-        let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
-        let mut test_transaction = test_intra_transaction.transaction;
-        test_transaction.transaction_items.0[0].approvals = Some(Approvals { 0: vec![] });
-        let test_table = TransactionTable::new();
-        assert_eq!(
-            test_table
-                .insert_transaction_cte_sql(test_transaction)
-                .unwrap_err()
-                .to_string(),
-            "approvals in transaction item is empty"
+            test_row,
+            "ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9)"
         )
     }
 
     #[test]
     fn it_creates_an_insert_transaction_sql() {
-        let expected = "INSERT INTO transaction (rule_instance_id, author, author_device_id, author_device_latlng, author_role, equilibrium_time, sum_value) VALUES ($1, $2, $3, $4::point, $5, $6, $7::numeric) RETURNING *";
+        let input_file = File::open("../../tests/testdata/requests.json").unwrap();
+        let input_reader = BufReader::new(input_file);
+        let test_transactions: Vec<IntraTransaction> =
+            serde_json::from_reader(input_reader).unwrap();
+        let test_transaction = test_transactions[0].transaction.clone();
+        let lengths_of_approvals = test_transaction
+            .transaction_items
+            .list_lengths_of_approvals(); // [4, 4, 4, 3, 3, 3]
+
+        let output_file = File::open("./testdata/transaction_insert.golden").unwrap();
+        let output_reader = BufReader::new(output_file);
+        let expected = output_reader.lines().next().unwrap().unwrap();
+
+        let table = TransactionTable::new();
+        let sql = table.fn_select_insert_transaction_sql(lengths_of_approvals);
+        assert_eq!(sql, expected)
+    }
+
+    #[test]
+    fn it_creates_a_pg_row() {
+        let mut test_table = TransactionTable::new();
+        let test_columns = test_table.fn_insert_columns_with_casting();
+        let test_row = test_table.pg_row(test_columns, None, &mut 1);
         assert_eq!(
-            TransactionTable::new().insert_transaction_sql(&mut 1),
-            expected
-        );
+            test_row,
+            "ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9)"
+        )
+    }
+
+    #[test]
+    fn it_creates_a_pg_row_array() {
+        let mut test_table = TransactionTable::new();
+        let test_columns = test_table.fn_insert_columns_with_casting();
+        let test_array = test_table.pg_row_array(test_columns, 2, "test", &mut 1);
+        assert_eq!(
+            test_array,
+            "ARRAY [ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9), ROW($10, $11, $12, $13, $14::point, $15, $16, $17::numeric, $18)]::test[]"
+        )
+    }
+
+    #[test]
+    fn it_creates_an_entire_transaction_item_row() {
+        let test_table = TransactionTable::new();
+        let test_row = test_table.entire_transaction_item_row(2, &mut 1);
+        assert_eq!(
+            test_row,
+            r#"ROW(ROW($1, $2, $3, $4::numeric, $5::numeric, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20), ARRAY [ROW($21, $22, $23, $24, $25, $26, $27, $28::point, $29, $30, $31), ROW($32, $33, $34, $35, $36, $37, $38, $39::point, $40, $41, $42)]::approval[])"#
+        )
+    }
+
+    #[test]
+    fn it_creates_an_entire_transaction_item_array() {
+        assert_eq!(
+            TransactionTable::new().entire_transaction_item_array(vec![2, 2], &mut 1),
+            r#"ARRAY [ROW(ROW($1, $2, $3, $4::numeric, $5::numeric, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20), ARRAY [ROW($21, $22, $23, $24, $25, $26, $27, $28::point, $29, $30, $31), ROW($32, $33, $34, $35, $36, $37, $38, $39::point, $40, $41, $42)]::approval[]), ROW(ROW($43, $44, $45, $46::numeric, $47::numeric, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62), ARRAY [ROW($63, $64, $65, $66, $67, $68, $69, $70::point, $71, $72, $73), ROW($74, $75, $76, $77, $78, $79, $80, $81::point, $82, $83, $84)]::approval[])]::entire_transaction_item[]"#
+        )
+    }
+
+    #[test]
+    fn it_creates_an_entire_transaction_row() {
+        assert_eq!(
+            TransactionTable::new().entire_transaction_row(vec![2, 2], &mut 1),
+            r#"ROW(ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9), ARRAY [ROW(ROW($10, $11, $12, $13::numeric, $14::numeric, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29), ARRAY [ROW($30, $31, $32, $33, $34, $35, $36, $37::point, $38, $39, $40), ROW($41, $42, $43, $44, $45, $46, $47, $48::point, $49, $50, $51)]::approval[]), ROW(ROW($52, $53, $54, $55::numeric, $56::numeric, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71), ARRAY [ROW($72, $73, $74, $75, $76, $77, $78, $79::point, $80, $81, $82), ROW($83, $84, $85, $86, $87, $88, $89, $90::point, $91, $92, $93)]::approval[])]::entire_transaction_item[])::entire_transaction"#
+        )
     }
 
     #[test]
