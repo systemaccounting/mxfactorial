@@ -26,6 +26,10 @@ impl TableTrait for AccountProfileTable {
     fn name(&self) -> &str {
         self.inner.name
     }
+
+    fn column_count(&self) -> usize {
+        self.inner.len()
+    }
 }
 
 impl AccountProfileTable {
@@ -145,7 +149,7 @@ impl AccountProfileTable {
 
     pub fn select_profile_ids_by_account_names_sql(&self, account_name_count: usize) -> String {
         let columns = self.select_in_with_casting().join_with_casting();
-        let in_values = create_params(account_name_count);
+        let in_values = create_params(account_name_count, &mut 1);
         // create sql like: "SELECT id::text, account_name FROM account_profile WHERE account_name IN ($1, $2) AND removal_time IS NULL"
         format!(
             "{} {} {} {} {} {} {} ({}) {} {} {} {}",
@@ -166,7 +170,7 @@ impl AccountProfileTable {
 
     pub fn select_profiles_by_account_names_sql(&self, account_name_count: usize) -> String {
         let columns = self.select_all_with_text_casting().join_with_casting();
-        let in_values = create_params(account_name_count);
+        let in_values = create_params(account_name_count, &mut 1);
         format!(
             "{} {} {} {} {} {} {} ({}) {} {} {} {}",
             SELECT,

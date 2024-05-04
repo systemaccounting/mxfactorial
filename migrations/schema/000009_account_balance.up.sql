@@ -36,23 +36,7 @@ CREATE TYPE balance_change AS (
 	current_transaction_item_id integer
 );
 
--- changes multiple account balances in go
-CREATE OR REPLACE FUNCTION change_account_balances(VARIADIC balance_changes balance_change[])
-RETURNS void
-AS $$
-DECLARE
-	bc balance_change;
-BEGIN
-	FOREACH bc IN ARRAY balance_changes
-		LOOP
-			UPDATE account_balance
-			SET current_balance = bc.current_balance, current_transaction_item_id = bc.current_transaction_item_id
-			WHERE account_name = bc.account_name;
-		END LOOP;
-END;
-$$ LANGUAGE plpgsql;
-
--- changes multiple account balances in rust
+-- changes multiple account balances
 CREATE OR REPLACE FUNCTION change_balances(VARIADIC balance_changes account_balance[])
 RETURNS void
 AS $$

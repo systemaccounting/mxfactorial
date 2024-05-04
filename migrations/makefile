@@ -172,6 +172,11 @@ ifndef DIR
 	$(error trailing DIR assignment missing, e.g. make up DIR=schema)
 endif
 
+test-name-arg:
+ifndef NAME
+	$(error trailing NAME assignment missing, e.g. make create NAME=rule)
+endif
+
 test-cmd-arg:
 ifndef CMD
 	$(error trailing CMD assignment missing, e.g. make deploy-migrations CMD=up)

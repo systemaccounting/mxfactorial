@@ -22,11 +22,12 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-HASH=$(git rev-parse --short=7 HEAD)
+PROJECT_CONF=project.yaml
+SHORT_GIT_SHA_LENGTH=$(yq '.scripts.env_var.set.SHORT_GIT_SHA_LENGTH.default' $PROJECT_CONF)
+HASH=$(git rev-parse --short=$SHORT_GIT_SHA_LENGTH HEAD)
 LOCAL_IMAGE_TAG="$APP_NAME:$HASH"
 
 ENV=dev
-PROJECT_CONF=project.yaml
 ENV_ID=$(source scripts/print-env-id.sh)
 
 DEV_REPO=$(source scripts/print-ecr-repo-uri.sh --app-name $APP_NAME --env dev --env-id $ENV_ID)

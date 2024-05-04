@@ -56,6 +56,8 @@ pub const NULL: &str = "NULL";
 
 pub const EXISTS: &str = "EXISTS";
 
+pub const ARRAY: &str = "ARRAY";
+
 pub fn create_value_params(
     columns: Columns,
     row_count: usize,
@@ -82,12 +84,11 @@ pub fn create_value_params(
     values
 }
 
-pub fn create_params(count: usize) -> String {
-    let mut positional_parameter = 1;
+pub fn create_params(count: usize, positional_parameter: &mut i32) -> String {
     let mut values = String::new();
     for i in 0..count {
         values.push_str(&format!("${}", positional_parameter));
-        positional_parameter += 1;
+        *positional_parameter += 1;
         if i < count - 1 {
             values.push_str(", ");
         }
@@ -106,6 +107,7 @@ pub trait TableTrait {
     fn get_column(&self, column_name: &str) -> Column;
     fn get_column_name(&self, name: &str) -> String;
     fn name(&self) -> &str;
+    fn column_count(&self) -> usize;
 }
 
 impl Table {
@@ -120,7 +122,14 @@ impl Table {
     }
 
     pub fn get_column(&self, column_name: &str) -> Column {
-        self.columns.get(column_name).unwrap().clone() // panic if column does not exist
+        let column = self.columns.get(column_name);
+        match column {
+            Some(c) => c.clone(),
+            None => panic!(
+                "column {} does not exist in table {}",
+                column_name, self.name
+            ),
+        }
     }
 
     pub fn get_column_name(&self, column_name: &str) -> String {
@@ -129,6 +138,14 @@ impl Table {
 
     pub fn name(&self) -> &str {
         self.name
+    }
+
+    pub fn len(&self) -> usize {
+        self.columns.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.columns.is_empty()
     }
 }
 
@@ -249,7 +266,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_creates_create_value_params() {
+    fn it_will_create_value_params() {
         let columns = Columns(vec![
             Column::new("column1"),
             Column::new("column2"),
@@ -262,9 +279,9 @@ mod tests {
     }
 
     #[test]
-    fn it_creates_create_params() {
+    fn it_will_create_params() {
         let row_count = 3;
         let expected = String::from("$1, $2, $3");
-        assert_eq!(create_params(row_count), expected);
+        assert_eq!(create_params(row_count, &mut 1), expected);
     }
 }

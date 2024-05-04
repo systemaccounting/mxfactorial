@@ -61,18 +61,6 @@ impl DatabaseConnection {
         self.0.execute(sql_stmt.as_str(), &unboxed_values).await
     }
 
-    pub async fn tx(
-        &mut self,
-        sql_stmt: String,
-        values: ToSqlVec,
-    ) -> Result<Vec<Row>, tokio_postgres::Error> {
-        let unboxed_values = DatabaseConnection::unbox_values(&values);
-        let tx = self.0.transaction().await.unwrap();
-        let rows = tx.query(sql_stmt.as_str(), &unboxed_values).await.unwrap();
-        tx.commit().await.unwrap();
-        Ok(rows)
-    }
-
     fn unbox_values(values: &[Box<(dyn ToSql + Sync + Send)>]) -> Vec<&(dyn ToSql + Sync)> {
         values
             .iter()

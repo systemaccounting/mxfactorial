@@ -319,6 +319,9 @@ scripts:
       SERVICES_ZIP:
         ssm: null
         default: mxfactorial.zip
+      SHORT_GIT_SHA_LENGTH:
+        ssm: null
+        default: 7
 services:
   env_var:
     set:

@@ -27,6 +27,10 @@ impl TableTrait for TransactionItemTable {
     fn name(&self) -> &str {
         self.inner.name
     }
+
+    fn column_count(&self) -> usize {
+        self.inner.len()
+    }
 }
 
 impl TransactionItemTable {
@@ -49,6 +53,32 @@ impl TransactionItemTable {
             self.get_column("creditor_approval_time"),
             self.get_column("debitor_expiration_time"),
             self.get_column("creditor_expiration_time"),
+        ])
+    }
+
+    // fn_ postgres function
+    pub fn fn_insert_columns_with_casting(&self) -> Columns {
+        Columns(vec![
+            self.get_column("id"),
+            self.get_column("transaction_id"),
+            self.get_column("item_id"),
+            self.get_column("price").cast_value_as(Type::NUMERIC),
+            self.get_column("quantity").cast_value_as(Type::NUMERIC),
+            self.get_column("debitor_first"),
+            self.get_column("rule_instance_id"),
+            self.get_column("rule_exec_ids"),
+            self.get_column("unit_of_measurement"),
+            self.get_column("units_measured"),
+            self.get_column("debitor"),
+            self.get_column("creditor"),
+            self.get_column("debitor_profile_id"),
+            self.get_column("creditor_profile_id"),
+            self.get_column("debitor_approval_time"),
+            self.get_column("creditor_approval_time"),
+            self.get_column("debitor_expiration_time"),
+            self.get_column("creditor_expiration_time"),
+            self.get_column("debitor_rejection_time"),
+            self.get_column("creditor_rejection_time"),
         ])
     }
 
@@ -146,7 +176,7 @@ impl TransactionItemTable {
     }
 
     pub fn select_transaction_items_by_transaction_ids_sql(&self, row_count: usize) -> String {
-        let values = create_params(row_count);
+        let values = create_params(row_count, &mut 1);
         let columns = self.select_all_with_casting().join_with_casting();
         format!(
             "{} {} {} {} {} {} {} ({})",

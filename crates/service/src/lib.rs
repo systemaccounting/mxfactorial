@@ -318,6 +318,13 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         Ok(transaction)
     }
 
+    pub async fn create_transaction(
+        &self,
+        transaction: Transaction,
+    ) -> Result<String, Box<dyn Error>> {
+        self.conn.insert_transaction_query(transaction).await
+    }
+
     pub async fn get_last_n_requests(
         &self,
         account: String,
@@ -490,89 +497,6 @@ impl<'a, T: ModelTrait> Service<'a, T> {
                 account_role,
                 approver_account,
             )
-            .await
-    }
-}
-
-// duplicates Service to support mutable
-// reference required by transaction query
-pub struct TxService<'a, T: ModelTrait> {
-    conn: &'a mut T,
-}
-
-impl<'a, T: ModelTrait> TxService<'a, T> {
-    pub fn new(conn: &'a mut T) -> Self {
-        Self { conn }
-    }
-
-    pub async fn create_transaction_tx(
-        &mut self,
-        transaction: Transaction,
-    ) -> Result<String, Box<dyn Error>> {
-        self.conn.insert_transaction_tx_query(transaction).await
-    }
-
-    pub async fn get_profile_ids_by_account_names(
-        &self,
-        account_names: Vec<String>,
-    ) -> Result<ProfileIds, Box<dyn Error>> {
-        match self
-            .conn
-            .select_profile_ids_by_account_names_query(account_names)
-            .await
-        {
-            Ok(profile_ids) => {
-                let map = ProfileIds::from(profile_ids);
-                Ok(map)
-            }
-            Err(e) => Err(e),
-        }
-    }
-
-    pub async fn get_full_transaction_by_id(
-        &self,
-        transaction_id: i32,
-    ) -> Result<Transaction, Box<dyn Error>> {
-        let transaction = self
-            .get_transaction_with_transaction_items_and_approvals_by_id(transaction_id)
-            .await?;
-        Ok(transaction)
-    }
-
-    async fn get_transaction_with_transaction_items_and_approvals_by_id(
-        &self,
-        transaction_id: i32,
-    ) -> Result<Transaction, Box<dyn Error>> {
-        let mut transaction = self
-            .conn
-            .select_transaction_by_id_query(transaction_id)
-            .await?;
-
-        let transaction_items = self
-            .get_transaction_items_by_transaction_id(transaction_id)
-            .await?;
-
-        let approvals = self.get_approvals_by_transaction_id(transaction_id).await?;
-
-        transaction.build(transaction_items, approvals)?;
-        Ok(transaction)
-    }
-
-    pub async fn get_transaction_items_by_transaction_id(
-        &self,
-        transaction_id: i32,
-    ) -> Result<TransactionItems, Box<dyn Error>> {
-        self.conn
-            .select_transaction_items_by_transaction_id_query(transaction_id)
-            .await
-    }
-
-    pub async fn get_approvals_by_transaction_id(
-        &self,
-        transaction_id: i32,
-    ) -> Result<Approvals, Box<dyn Error>> {
-        self.conn
-            .select_approvals_by_transaction_id_query(transaction_id)
             .await
     }
 }
@@ -1087,6 +1011,21 @@ mod tests {
         let service = super::Service::new(&conn);
 
         let _ = service.get_full_transaction_by_id(transaction_id).await;
+    }
+
+    #[tokio::test]
+    async fn create_transaction_inserts_transaction() {
+        let mut conn = MockModelTrait::new();
+        let test_transaction = create_test_transaction();
+
+        conn.expect_insert_transaction_query()
+            .with(predicate::eq(test_transaction.clone()))
+            .times(1)
+            .returning(|_| Ok("1".to_string()));
+
+        let service = super::Service::new(&conn);
+
+        let _ = service.create_transaction(test_transaction).await;
     }
 
     #[tokio::test]

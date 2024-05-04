@@ -442,6 +442,15 @@ impl TransactionItems {
         Ok(Approvals(approvals))
     }
 
+    pub fn list_lengths_of_approvals(&self) -> Vec<usize> {
+        let mut lengths: Vec<usize> = vec![];
+        for ti in self.0.iter() {
+            let ti_approvals = ti.approvals.clone().unwrap();
+            lengths.push(ti_approvals.0.len())
+        }
+        lengths
+    }
+
     pub fn test_pending_role_approval(
         &self,
         auth_account: &str,
@@ -944,6 +953,14 @@ mod tests {
                 expiration_time: None,
             },
         ]);
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
+    }
+
+    #[test]
+    fn it_will_list_lengths_of_approvals_from_transaction_items() {
+        let test_tr_items = create_test_transaction_items();
+        let got = test_tr_items.list_lengths_of_approvals();
+        let want = vec![2, 2];
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
     }
 
