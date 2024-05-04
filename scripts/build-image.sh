@@ -26,7 +26,9 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-HASH=$(git rev-parse --short=7 HEAD)
+PROJECT_CONF=project.yaml
+SHORT_GIT_SHA_LENGTH=$(yq '.scripts.env_var.set.SHORT_GIT_SHA_LENGTH.default' $PROJECT_CONF)
+HASH=$(git rev-parse --short=$SHORT_GIT_SHA_LENGTH HEAD)
 IMAGE_TAG="$APP_NAME:$HASH"
 DOCKERFILE_PATH=./docker/$APP_NAME.Dockerfile
 

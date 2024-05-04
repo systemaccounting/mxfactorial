@@ -34,6 +34,7 @@ PROJECT_CONF=project.yaml
 ID_ENV="$ENV_ID-$ENV"
 ID_ENV_PREFIX="$ENV_ID/$ENV"
 REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+SHORT_GIT_SHA_LENGTH=$(yq '.scripts.env_var.set.SHORT_GIT_SHA_LENGTH.default' $PROJECT_CONF)
 
 IMAGE_NAME="$ID_ENV_PREFIX/$APP_NAME"
 LAMBDA_NAME="$APP_NAME-$ID_ENV"
@@ -54,7 +55,7 @@ fi
 LATEST_ECR_IMAGE_TAG_VERSIONS=($(aws ecr describe-images --repository-name $IMAGE_NAME --output text --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags' | xargs))
 
 # get the commit hash after merge
-MERGE_COMMIT_HASH=$(git rev-parse --short=7 HEAD)
+MERGE_COMMIT_HASH=$(git rev-parse --short=$SHORT_GIT_SHA_LENGTH HEAD)
 
 for TAG_VERSION in "${LATEST_ECR_IMAGE_TAG_VERSIONS[@]}"; do
 	if [[ "$TAG_VERSION" == "$DEPLOYED_IMAGE_TAG_VERSION" ]]; then
