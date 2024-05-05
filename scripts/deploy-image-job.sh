@@ -30,13 +30,13 @@ ARTIFACTS_BUCKET="$ARTIFACTS_BUCKET_PREFIX-$ID_ENV"
 SERVICES_ZIP=$(yq '.scripts.env_var.set.SERVICES_ZIP.default' $PROJECT_CONF)
 PROJECT_DIR=$(echo $SERVICES_ZIP | sed 's/.zip//')
 
+source scripts/auth-ecr.sh
+
 aws s3 cp s3://$ARTIFACTS_BUCKET/$SERVICES_ZIP . --region $REGION
 
 unzip $SERVICES_ZIP -d $PROJECT_DIR
 
 cd $PROJECT_DIR
-
-source scripts/auth-ecr.sh
 
 SERVICE_DIR=$(bash scripts/list-dir-paths.sh --type app | grep --color=never $SERVICE_NAME)
 
