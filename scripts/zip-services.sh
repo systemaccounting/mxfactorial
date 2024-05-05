@@ -20,6 +20,7 @@ zip -r $SERVICES_ZIP \
 	make \
 	makefile \
 	project.yaml \
+	scripts \
 	services \
 	crates \
 	tests \
