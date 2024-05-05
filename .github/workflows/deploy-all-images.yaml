@@ -1,0 +1,111 @@
+name: build-all-images
+
+on:
+  workflow_dispatch:
+
+env:
+  ENV_ID: ${{ secrets.DEV_ENV_ID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  GITHUB_REGISTRY: ghcr.io
+
+jobs:
+  rule:
+    name: rule
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: rule
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  balance_by_account:
+    name: balance-by-account
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: balance-by-account
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  graphql:
+    name: graphql
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: graphql
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  request_create:
+    name: request-create
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: request-create
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  request_approve:
+    name: request-approve
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: request-approve
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  request_by_id:
+    name: request-by-id
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: request-by-id
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  requests_by_account:
+    name: requests-by-account
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: requests-by-account
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  transaction_by_id:
+    name: transaction-by-id
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: transaction-by-id
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  transactions_by_account:
+    name: transactions-by-account
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: transactions-by-account
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  auto_confirm:
+    name: auto-confirm
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: auto-confirm
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  go_migrate:
+    name: go-migrate
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: go-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
