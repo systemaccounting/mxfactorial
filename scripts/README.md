@@ -311,3 +311,6 @@ zips and pushes current service code to s3, then triggers `.github/workflows/bui
 
 ### `pull-all-images.sh`
 pulls images built and pushed by `.github/workflows/build-all-images.yaml`
+
+### `deploy-all-images.sh`
+zips and pushes current service code to s3, then triggers `.github/workflows/deploy-all-images.yaml` to build and deploy services to lambda

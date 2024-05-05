@@ -22,6 +22,9 @@
         IMAGE_BUILDER_WORKFLOW:
           ssm: null
           default: build-all-images.yaml
+        DEPLOY_IMAGE_WORKFLOW:
+          ssm: null
+          default: deploy-all-images.yaml
     params: []
 client:
   runtime: v8
