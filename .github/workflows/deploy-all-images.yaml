@@ -1,4 +1,4 @@
-name: build-all-images
+name: deploy-all-images
 
 on:
   workflow_dispatch:
