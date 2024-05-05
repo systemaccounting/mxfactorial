@@ -2,7 +2,7 @@
   <img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png">
 </p>
 
-#### scripts reused in makefiles and workflows for consistency
+##### scripts reused in makefiles and workflows for consistency
 
 add and edit by assigning variables from root `project.yaml` to avoid reconciling variable assignments in terraform and elsewhere, for example:
 
@@ -252,31 +252,31 @@ imports resources into the `infrastructure/terraform/aws/environments/init-$ENV`
 
 prints rust crate test coverage
 
-#### `print-lambda-policy.sh`
+##### `print-lambda-policy.sh`
 
 prints policy attached to lambda function
 
-#### `print-ecr-repo-uri.sh`
+##### `print-ecr-repo-uri.sh`
 
 prints uri of ecr repo
 
-#### `print-image-tag.sh`
+##### `print-image-tag.sh`
 
 prints service image tag with ecr repo uri and current git sha added as tag version
 
-#### `delete-ecr-repos.sh`
+##### `delete-ecr-repos.sh`
 
 convenience script to delete all dev ecr repos
 
-### `push-dev-image.sh`
+##### `push-dev-image.sh`
 
 pushes local docker image to dev ecr repo (assumes local image already tagged)
 
-### `deploy-dev-image.sh`
+##### `deploy-dev-image.sh`
 
 deploys "last" dev ecr image to lambda function. "latest" tag convention not used in ecr image tagging
 
-### `tag-merge-commit.sh`
+##### `tag-merge-commit.sh`
 
 1. gets tag from image deployed to lambda
 1. gets tag(s) from last image pushed to ecr (ecr images may have multiple tags)
@@ -284,7 +284,7 @@ deploys "last" dev ecr image to lambda function. "latest" tag convention not use
 1. tags last ecr image with merge commit sha if last ecr image tag is NOT matched with currently deployed function image tag, OR
 1. exits before tagging last ecr image tag with merge commit sha if last ecr image tag IS matched with currently deployed function image tag (avoids retagging)
 
-### `deploy-last-image.sh`
+##### `deploy-last-image.sh`
 
 1. gets tag from image deployed to lambda
 1. gets tags from last image pushed to ecr (ecr images may have multiple tags)
@@ -292,25 +292,25 @@ deploys "last" dev ecr image to lambda function. "latest" tag convention not use
 1. deploys last ecr image if last ecr image tag is NOT matched with currently deployed function image tag, OR
 1. exits before deploying if last ecr image tag IS matched with currently deployed function image tag (avoids redeploying)
 
-### `push-prod-image.sh`
+##### `push-prod-image.sh`
 used in integration test workflow after cloud integration tests pass
 1. tests if current dev image tagged with merge commit
 1. adds prod tag if current dev image tagged with merge commit, then pushes to prod ecr
 1. exits if current dev image NOT tagged with merge commit (prod image not tagged and pushed)
 
-### `build-image-job.sh`
+##### `build-image-job.sh`
 
 used in `.github/workflows/build-all-images.yaml` to copy zipped code from s3, then build, tag and push service images to github container registry
 
-### `zip-services.sh`
+##### `zip-services.sh`
 
 adds services to zip file. used by `scripts/build-all-images.sh` before triggering `.github/workflows/build-all-images.yaml`
 
-### `build-all-images.sh`
+##### `build-all-images.sh`
 zips and pushes current service code to s3, then triggers `.github/workflows/build-all-images.yaml` to avoid building almost a dozen rust images locally
 
-### `pull-all-images.sh`
+##### `pull-all-images.sh`
 pulls images built and pushed by `.github/workflows/build-all-images.yaml`
 
-### `deploy-all-images.sh`
+##### `deploy-all-images.sh`
 zips and pushes current service code to s3, then triggers `.github/workflows/deploy-all-images.yaml` to build and deploy services to lambda
