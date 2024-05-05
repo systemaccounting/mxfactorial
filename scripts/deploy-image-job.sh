@@ -36,6 +36,8 @@ unzip $SERVICES_ZIP -d $PROJECT_DIR
 
 cd $PROJECT_DIR
 
+source scripts/auth-ecr.sh
+
 SERVICE_DIR=$(bash scripts/list-dir-paths.sh --type app | grep --color=never $SERVICE_NAME)
 
 cd "$SERVICE_DIR"
