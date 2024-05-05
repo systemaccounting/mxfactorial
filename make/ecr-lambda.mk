@@ -16,12 +16,6 @@ deploy-dev-image:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/deploy-dev-image.sh --app-name $(APP_NAME)
 
-update-dev-function:
-	@$(MAKE) -s build-image
-	@$(MAKE) -s tag-dev-image
-	@$(MAKE) -s push-dev-image
-	@$(MAKE) -s deploy-dev-image
-
 clean-image:
 	@for i in $$(docker image ls | grep '$(APP_NAME)' | awk '{print $$3}'); do docker rmi -f "$$i"; done;
 
@@ -33,7 +27,8 @@ initial-deploy:
 	@$(MAKE) -s push-dev-image
 
 deploy:
-	@$(MAKE) -s update-dev-function
+	@$(MAKE) -s initial-deploy
+	@$(MAKE) -s deploy-dev-image
 
 deploy-only:
 	@$(MAKE) -s tag-dev-image
@@ -41,4 +36,4 @@ deploy-only:
 	@$(MAKE) -s deploy-dev-image
 
 now:
-	@$(MAKE) -s update-dev-function
+	@$(MAKE) -s deploy
