@@ -138,7 +138,9 @@ impl From<Vec<(String, String)>> for ProfileIds {
     fn from(vec: Vec<(String, String)>) -> Self {
         let mut map = HashMap::new();
         for (k, v) in vec {
-            map.insert(v, k.parse::<i32>().unwrap());
+            let account_name = k.clone();
+            let profile_id = v.parse::<i32>().unwrap();
+            map.insert(account_name, profile_id);
         }
         ProfileIds(map)
     }
@@ -428,6 +430,19 @@ mod tests {
         if got != want {
             panic!("got {:#?}, want {:#?}", got, want);
         }
+    }
+
+    #[test]
+    fn it_creates_profile_ids_from_vec() {
+        let want = ProfileIds(HashMap::from_iter(vec![
+            (String::from("account_a"), 1),
+            (String::from("account_b"), 2),
+            (String::from("account_c"), 3),
+        ]));
+        let got = ProfileIds::from(vec![
+            // init vec with (String, String) tuples
+        ]);
+        assert_eq!(got, want, "got {:?}, want {:?}", got, want)
     }
 }
 
