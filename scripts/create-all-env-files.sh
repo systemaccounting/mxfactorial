@@ -13,12 +13,29 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-if [[ $ENV != 'local' ]] && [[ ! -f  infrastructure/terraform/env-id/terraform.tfstate ]]; then
+
+PROJECT_CONF=project.yaml
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
+ENV_FILE=$ENV_FILE_NAME # assumes project root
+
+if [[ -f $ENV_FILE ]]; then
+	if grep -q "ENV_ID=" $ENV_FILE; then
+		ENV_ID=$(grep "ENV_ID=" $ENV_FILE | cut -d'=' -f2)
+	else
+		echo "ENV_ID assignment missing from root .env"
+		echo "make env-id before continuing"
+		exit 1
+	fi
+else
+	echo "make get-secrets ENV=$ENV before continuing"
+	exit 1
+fi
+
+if [[ $ENV != 'local' ]] && [[ -z ENV_ID ]]; then
 	echo '"make build-dev" OR "make resume-dev ENV_ID=12345" before continuing. exiting'
 	exit 1
 fi
 
-PROJECT_CONF=project.yaml
 APP_CONF_PATHS=($(source scripts/list-conf-paths.sh --type app))
 
 for cp in "${APP_CONF_PATHS[@]}"; do

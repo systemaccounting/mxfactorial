@@ -25,12 +25,16 @@ ENV=dev
 PROJECT_CONF=project.yaml
 REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 TFSTATE_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
+ENV_FILE=$ENV_FILE_NAME
 
-if [[ -f infrastructure/terraform/env-id/terraform.tfstate ]]; then
-	ENV_ID=$(source scripts/print-env-id.sh)
-else
-	make env-id
-	ENV_ID=$(source scripts/print-env-id.sh)
+if [[ -z $ENV_ID ]]; then
+	if [[ -f $ENV_FILE ]] && grep -q "^ENV_ID=" $ENV_FILE; then
+		ENV_ID=$(grep "^ENV_ID=" $ENV_FILE | cut -d'=' -f2)
+	else
+		make env-id
+		ENV_ID=$(source scripts/print-env-id.sh)
+	fi
 fi
 
 ID_ENV="$ENV_ID-$ENV"
