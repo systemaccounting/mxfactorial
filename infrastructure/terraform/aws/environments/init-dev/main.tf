@@ -2,8 +2,12 @@ locals {
   ENV             = "dev"
   PROJECT_CONF    = yamldecode(file("../../../../../project.yaml"))
   INFRA_ENV_VAR   = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
-  ENV_ID          = jsondecode(file("../../../env-id/terraform.tfstate")).outputs.env_id.value
+  ENV_ID          = module.env_id.ENV_ID
   STORAGE_ENV_VAR = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
+}
+
+module "env_id" {
+  source = "../../../modules/env-id/v001"
 }
 
 provider "aws" {
