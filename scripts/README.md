@@ -198,7 +198,7 @@ sends a `bottled water` transaction item in a POST request to a locally running 
 
 ##### `print-env-id.sh`
 
-prints env id stored in `infrastructure/terraform/env-id/terraform.tfstate`
+prints env id stored in project root `.env` file
 
 ##### `encode-client-env.sh`
 
@@ -314,3 +314,12 @@ pulls images built and pushed by `.github/workflows/build-all-images.yaml`
 
 ##### `deploy-all-images.sh`
 zips and pushes current service code to s3, then triggers `.github/workflows/deploy-all-images.yaml` to build and deploy services to lambda
+
+##### `create-env-id.sh`
+adds a [$RANDOM](https://tldp.org/LDP/abs/html/randomvar.html) `ENV_ID` variable the `.env` file in project root. the `ENV_ID` variable is used by terraform to provision cloud development environments matched to a developers local machine
+
+##### `delete-env-id.sh`
+deletes the `ENV_ID` variable from `.env` in project root
+
+##### `delete-api-log-perms.sh`
+deletes the api gateway logging permissions added in `infrastructure/terraform/aws/environments/region/main.tf`
