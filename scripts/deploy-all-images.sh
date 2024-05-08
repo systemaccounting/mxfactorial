@@ -24,7 +24,6 @@ source scripts/zip-services.sh
 
 echo '*** uploading archive to s3'
 aws s3 cp $SERVICES_ZIP s3://$ARTIFACTS_BUCKET --region $REGION
-
 rm $SERVICES_ZIP
 
 echo "*** triggering .github/workflows/$WORKFLOW_ID"
