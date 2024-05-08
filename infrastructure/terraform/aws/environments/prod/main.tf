@@ -11,14 +11,14 @@ locals {
   ENV              = "prod"
   APP_ENV          = "${local.APP}-${local.ENV}"
   PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
-  STORAGE_ENV_VAR = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
+  STORAGE_ENV_VAR  = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
   ORIGIN_PREFIX    = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
   ARTIFACTS_PREFIX = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
   TFSTATE_PREFIX   = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
   INFRA_ENV_VAR    = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
   RDS_PREFIX       = local.INFRA_ENV_VAR.RDS_PREFIX.default
   REGION           = local.INFRA_ENV_VAR.REGION.default
-  ENV_ID           = local.PROJECT_CONF.infrastructure.terraform.env-id.prod.env_var.set.PROD_ENV_ID.default
+  ENV_ID           = local.PROJECT_CONF.env_var.set.PROD_ENV_ID.default
   ID_ENV           = "${local.ENV_ID}-${local.ENV}"
   CUSTOM_DOMAIN    = "mxfactorial.io"
   SSM_VERSION      = "v1"
@@ -60,13 +60,14 @@ module "prod" {
 
   ############### lambda ###############
 
-  initial_account_balance              = 1000
+  initial_account_balance = 1000
 
   ############### rds ###############
 
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
+  rds_engine_version              = "13.13"
   rds_instance_name               = "${local.RDS_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
 

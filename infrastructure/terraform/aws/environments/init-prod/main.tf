@@ -2,7 +2,7 @@ locals {
   ENV             = "prod"
   PROJECT_CONF    = yamldecode(file("../../../../../project.yaml"))
   INFRA_ENV_VAR   = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
-  ENV_ID          = local.PROJECT_CONF.infrastructure.terraform.env-id.prod.env_var.set.PROD_ENV_ID.default
+  ENV_ID          = local.PROJECT_CONF.env_var.set.PROD_ENV_ID.default
   STORAGE_ENV_VAR = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
 }
 
