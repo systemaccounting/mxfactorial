@@ -4,6 +4,7 @@ variable "rds_allow_major_version_upgrade" {}
 variable "rds_instance_class" {}
 variable "rds_parameter_group" {}
 variable "rds_instance_name" {}
+variable "rds_engine_version" {}
 variable "apigw_authorization_header_key" {}
 variable "enable_api_auth" {}
 variable "graphql_deployment_version" {}

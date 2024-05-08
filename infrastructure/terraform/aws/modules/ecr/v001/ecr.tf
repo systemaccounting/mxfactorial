@@ -1,7 +1,7 @@
 resource "aws_ecr_repository" "default" {
   name                 = "${var.env_id}/${var.env}/${var.service_name}"
   image_tag_mutability = "MUTABLE"
-  force_delete         = var.force_destroy_storage
+  force_delete         = var.force_delete
   image_scanning_configuration {
     scan_on_push = true
   }

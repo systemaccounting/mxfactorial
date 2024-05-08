@@ -5,4 +5,5 @@ module "ecr_repos" {
   env                     = var.env
   env_id                  = var.env_id
   service_name            = each.value
+  force_delete            = var.force_destroy_storage
 }

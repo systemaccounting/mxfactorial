@@ -18,7 +18,15 @@ NOCOLOR='\033[0m'
 
 ENV=dev
 PROJECT_CONF=project.yaml
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
+ENV_FILE=$ENV_FILE_NAME
 ENV_ID=$(source scripts/print-env-id.sh)
+
+if [[ -z $ENV_ID ]]; then
+    echo "ENV_ID not found in $ENV_FILE"
+    echo "bash scripts/set-custom-env-id.sh --env-id 12345 before continuing"
+    exit 1
+fi
 
 pushd infrastructure/terraform/aws/environments/dev
 
@@ -29,7 +37,7 @@ popd
 pushd infrastructure/terraform/aws/environments/region
 
 # skip if api gateway logging permission not managed by local terraform
-if [[ -f terraform.tfstate ]] && [[ $(yq '.resources | length > 0' ../../../env-id/terraform.tfstate) == "true" ]]; then
+if [[ -f terraform.tfstate ]]; then
 	terraform destroy --auto-approve && rm -rf .terraform* terraform.tfstate
 # todo: elif manually delete logging permission if current resource matches naming convention
 fi

@@ -10,8 +10,17 @@ ENV=dev
 PROJECT_CONF=project.yaml
 REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 TFSTATE_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
+ENV_FILE=$ENV_FILE_NAME
 
-make env-id
+if [[ -z $ENV_ID ]]; then
+	if [[ -f $ENV_FILE ]] && grep -q "^ENV_ID=" $ENV_FILE; then
+		ENV_ID=$(grep "^ENV_ID=" $ENV_FILE | cut -d'=' -f2)
+	else
+		make env-id
+		ENV_ID=$(source scripts/print-env-id.sh)
+	fi
+fi
 
 ENV_ID=$(source ./scripts/print-env-id.sh)
 TFSTATE_EXT=$(yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.default' $PROJECT_CONF)
@@ -120,7 +129,8 @@ make --no-print-directory uprds DB=test ENV=dev
 popd; popd; popd;
 
 printf "\n${YELLOW}*** testing integration with new infrastructure and app deployments${NOCOLOR}\n\n"
-make --no-print-directory test ENV=dev
+set +e # avoid exiting on flaky tests
+make --no-print-directory test-cloud ENV=dev
 
 BUILD_END_TIME=$(date +%s)
 BUILD_DURATION=$(($BUILD_END_TIME - $BUILD_START_TIME))

@@ -5,6 +5,7 @@ resource "aws_db_instance" "postgres" {
   allocated_storage                   = 20
   storage_type                        = "gp2"
   engine                              = "postgres"
+  engine_version                      = var.rds_engine_version
   instance_class                      = var.rds_instance_class
   db_name                             = "mxfactorial"
   username                            = "u${random_password.pguser.result}"

@@ -1,5 +1,6 @@
 locals {
-  ID_ENV = "${var.env_id}-${var.env}"
+  PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
+  GITHUB_REPO_NAME = local.PROJECT_CONF[".github"].env_var.set.GITHUB_REPO_NAME.default
 }
 
 resource "aws_api_gateway_account" "apigw_logging" {
@@ -7,12 +8,12 @@ resource "aws_api_gateway_account" "apigw_logging" {
 }
 
 resource "aws_iam_role" "apigw_logging" {
-  name = "${local.ID_ENV}-apigw-logging"
+  name = "mxfactorial-apigw-logging"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "APIGwTrustPolicy${var.env_id}${replace(title(var.region), "-", "")}"
+        Sid    = "${title(local.GITHUB_REPO_NAME)}APIGwTrustPolicy"
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
@@ -24,13 +25,13 @@ resource "aws_iam_role" "apigw_logging" {
 }
 
 resource "aws_iam_policy" "apigw_logging" {
-  name        = "${local.ID_ENV}-apigw-logging"
-  description = "apigw logging permission in ${var.env_id} ${var.region}"
+  name        = "${local.GITHUB_REPO_NAME}-apigw-logging"
+  description = "${local.GITHUB_REPO_NAME} apigw logging permission"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "LoggingPolicy${var.env_id}${replace(title(var.region), "-", "")}"
+        Sid = "${title(local.GITHUB_REPO_NAME)}LoggingPolicy"
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",

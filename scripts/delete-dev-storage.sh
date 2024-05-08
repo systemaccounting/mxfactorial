@@ -16,9 +16,9 @@ CLIENT_ORIGIN_BUCKET="$CLIENT_ORIGIN_BUCKET_PREFIX-$ID_ENV"
 TFSTATE_BUCKET="$TFSTATE_BUCKET_PREFIX-$ID_ENV"
 DDB_TABLE="$DDB_TABLE_NAME_PREFIX-$ID_ENV"
 
-export AWS_DEFAULT_REGION="$REGION"
+INIT_DEV_DIR=infrastructure/terraform/aws/environments/init-dev
 
-pushd infrastructure/terraform/aws/environments/init-dev
+export AWS_DEFAULT_REGION="$REGION"
 
 function delete_bucket() {
 	local bucket_name="$1"
@@ -39,8 +39,14 @@ function delete_dev_storage() {
 	TABLE_NAME=$(echo $DEL_RESP | yq '.TableName')
 	TABLE_STATUS=$(echo $DEL_RESP | yq '.TableStatus')
 
+	popd
+	source ./scripts/delete-ecr-repos.sh
+	pushd $INIT_DEV_DIR
+
 	printf '%s %s dynamodb table\n' "$TABLE_STATUS" "$TABLE_NAME"
 }
+
+pushd $INIT_DEV_DIR
 
 if ! [[ -f $LOCAL_TFSTATE_FILE ]]; then
 	echo "tfstate not found. manually deleting dev storage"
@@ -56,6 +62,7 @@ terraform destroy --auto-approve 2>/dev/null
 if [[ "$?" -ne 0 ]]; then
 	echo "destroy incomplete. manually deleting dev storage"
 	delete_dev_storage
+	popd
+else
+	popd
 fi
-
-popd

@@ -61,15 +61,6 @@ HOST="http://$LOCAL_ADDRESS"
 # set CLIENT_URI and GRAPHQL_URI vars
 source ./scripts/set-uri-vars.sh
 
-function test_env_file() {
-	if [[ ! -s $ENV_FILE ]]; then
-		rm -f $ENV_FILE
-		echo 'no env vars required'
-	else
-		echo 'env vars retrieved'
-	fi
-}
-
 function set_default_values() {
 	for s in "${SECRETS[@]}"; do
 		if [[ "$s" == *'_URL' ]]; then
@@ -136,11 +127,29 @@ function set_params() {
 	done
 }
 
+if [[ -f $ENV_FILE ]] && grep -q "^ENV_ID=" $ENV_FILE; then
+	ENV_ID=$(grep "ENV_ID=" $ENV_FILE | cut -d'=' -f2)
+	ADD_BACK=1
+fi
+
 rm -f $ENV_FILE
+
 if [[ $ENV == 'local' ]]; then
 	set_default_values
 else
 	set_secrets
 fi
+
+# add ENV_ID back if was removed
+if [[ $ADD_BACK ]]; then
+	echo ENV_ID=$ENV_ID >> $ENV_FILE
+fi
+
 set_params
-test_env_file
+
+if [[ ! -s $ENV_FILE ]]; then
+	rm -f $ENV_FILE
+	echo 'no env vars required'
+else
+	echo 'env vars retrieved'
+fi

@@ -94,13 +94,6 @@ infrastructure:
         TFSTATE_ENV_SUFFIX:
           ssm: null
           default: env_infra
-    env-id:
-      prod:
-        env_var:
-          set:
-            PROD_ENV_ID:
-              ssm: null
-              default: 0
     aws:
       environments:
         region:
@@ -615,6 +608,12 @@ env_var:
     NOHUP_LOG:
       ssm: null
       default: nohup.out
+    ENV_ID:
+      ssm: null
+      default: null # set by script
+    PROD_ENV_ID:
+      ssm: null
+      default: 0
   get:
     - CLIENT_URI
     - GRAPHQL_URI

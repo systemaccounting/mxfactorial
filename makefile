@@ -73,9 +73,6 @@ rust-coverage-percent:
 	@$(MAKE) rust-coverage | grep TOTAL | awk '{print $$10}' | cut -d '.' -f1
 
 install:
-	brew install go
-	go install github.com/99designs/gqlgen@latest
-	go install github.com/golang/mock/mockgen@latest
 	brew install node
 	brew install awscli
 	brew install warrensbox/tap/tfswitch
@@ -92,13 +89,13 @@ install:
 	cargo install cargo-llvm-cov
 
 env-id:
-	(cd infrastructure/terraform/env-id; terraform init && terraform apply --auto-approve)
+	@bash scripts/create-env-id.sh
 
 delete-env-id:
-	(cd infrastructure/terraform/env-id; rm -rf .terraform*; rm terraform.tfstate)
+	@bash scripts/delete-env-id.sh
 
 print-env-id:
-	@yq '.outputs.env_id.value' infrastructure/terraform/env-id/terraform.tfstate
+	@bash scripts/print-env-id.sh
 
 build-dev:
 	bash scripts/build-dev-env.sh
@@ -125,9 +122,6 @@ new-iam:
 
 delete-iam:
 	bash scripts/manage-gitpod-iam.sh --delete
-
-init:
-	go mod init github.com/systemaccounting/mxfactorial
 
 help:
 	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'

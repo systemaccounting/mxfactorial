@@ -8,18 +8,16 @@ NOCOLOR='\033[0m'
 
 ENV=dev
 PROJECT_CONF=project.yaml
+
+ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
+ENV_FILE=$ENV_FILE_NAME
+
 REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 IAM_USER=$(yq '.scripts.env_var.set.IAM_USER.default' $PROJECT_CONF)
-TFSTATE_ENV_ID=infrastructure/terraform/env-id/terraform.tfstate
+
 TFSTATE_INIT_DEV=infrastructure/terraform/aws/environments/init-dev/terraform.tfstate
 DEV_ENV_DIR=infrastructure/terraform/aws/environments/dev
 TFSTATE_DEV="$DEV_ENV_DIR/.terraform/terraform.tfstate"
-
-if [[ -f $TFSTATE_DEV ]]; then
-  DEV_DEPLOYED=$(cd $DEV_ENV_DIR; terraform state pull | yq '.resources | length > 0')
-  echo $DEV_DEPLOYED
-fi
-exit 0
 
 aws configure set default.region "$REGION"
 
@@ -28,24 +26,28 @@ function build_env() {
   source ./scripts/build-dev-env.sh
 }
 
-# exit when previously built env available
-if [[ -f $TFSTATE_ENV_ID ]] && [[ $(yq '.resources | length > 0' $TFSTATE_ENV_ID) == "true" ]]; then
-  ENV_ID=$(yq '.outputs.env_id.value' $TFSTATE_ENV_ID)
-
-  if [[ -f $TFSTATE_INIT_DEV ]] && [[ $(yq '.resources | length > 0' $TFSTATE_INIT_DEV) == "true" ]]; then
-
-    if [[ -f $TFSTATE_DEV ]]; then
-
-      DEV_DEPLOYED=$(cd $DEV_ENV_DIR; terraform state pull | yq '.resources | length > 0')
-
-      if [[ $DEV_DEPLOYED == 'true' ]]; then
-
-        echo "found previously built ${ENV_ID}-${ENV} env"
-
-        aws configure
-
+# test for existing env
+if [[ -f $ENV_FILE ]] && grep -q "ENV_ID=" $ENV_FILE; then # test for ENV_ID in root .env
+  ENV_ID=$(source ./scripts/print-env-id.sh)
+  if [[ -f $TFSTATE_INIT_DEV ]] && [[ $(yq '.resources | length > 0' $TFSTATE_INIT_DEV) == "true" ]]; then # test for init-dev state file
+    if [[ -f $TFSTATE_DEV ]]; then # test for dev state file
+      aws sts get-caller-identity &>/dev/null # test cli creds
+      if [[ "$?" -ne 0 ]]; then # fetch remote state if creds are configured
+        echo "${ENV_ID}-${ENV} env found but aws credentials not configured"
+        echo "\"aws configure\" to manage previously built env"
         exit 0
-
+      else # fetch remote state
+        DEV_DEPLOYED=$(
+          cd $DEV_ENV_DIR
+          terraform state pull | yq '.resources | length > 0'
+        )
+        if [[ $DEV_DEPLOYED == 'true' ]]; then # test for previously built env
+          echo "found previously built env: ${ENV_ID}-${ENV}"
+          echo "\"make delete-dev\" to destroy"
+          exit 0
+        else # build env with configured creds
+          build_env
+        fi
       fi
     fi
   fi
@@ -72,9 +74,8 @@ set +e
 # test cli creds
 # https://stackoverflow.com/questions/2292847/how-to-silence-output-in-a-bash-script#comment102069201_2293011
 aws sts get-caller-identity &>/dev/null
-
 if [[ "$?" -ne 0 ]]; then
-    echo -e "aws credentials not configured
+  echo -e "aws credentials not configured
 
 to restart dev environment build:
   1. aws configure

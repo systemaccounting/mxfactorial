@@ -56,7 +56,7 @@ SCRIPT_START_TIME=$(date +%s)
 echo "*** starting $MAKE_CMD of $INVENTORY_SIZE apps at $(date)"
 
 if [[ -n $GITHUB_PAT ]]; then
-	source scripts/build-all-images.sh
+	source scripts/pull-all-images.sh
 fi
 
 # loop through app directories and deploy or initial-deploy
