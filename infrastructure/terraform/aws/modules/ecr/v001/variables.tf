@@ -1,6 +1,6 @@
 variable "env" {}
 variable "env_id" {}
-variable "force_destroy_storage" {
+variable "force_delete" {
 	type = bool
 	default = false
 }
