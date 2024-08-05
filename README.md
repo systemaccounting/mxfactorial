@@ -28,7 +28,7 @@ first, currency is modeled as a lightweight, dual positive-negative structured t
   "creditor": "GroceryStore", // positive value (+)
   "debitor": "JacobWebb", // negative value (-)
   "creditor_approval_time": "2023-03-20T04:58:27.771Z",
-  "debitor_approval_time": "2023-03-20T05:24:13.465Z"
+  "debitor_approval_time": "2023-03-20T04:58:32.001Z"
 }
 ```
 encryption and replication are secondary
@@ -46,12 +46,96 @@ encryption and replication are secondary
 **a.** *u* = transactions per second, *w<sub>i</sub>* = value conserved per transaction, *Mx!* = value visible in a combinatorial game  
 
 **q.** how does standardizing financial value as a conserved quantity protect individuals?  
-**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d, consumer wealth increases. but government printing money, and government chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the 1) purchasing power created by producers, the 2) increased wealth of consumers, and the 3) value of all property owned by individuals  
+**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. consumer wealth increases when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d. but government printing money, and government chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the 1) purchasing power created by producers, the 2) increased wealth of consumers, and the 3) value of all property owned by individuals  
 
 government is not above failure, nor is it entitled to steal from the private sector to conceal its failure. improving government depends on failure [predicting](https://en.wikipedia.org/wiki/Time_travel_debugging) the individuals and laws that must be replaced. flying a flag and demanding loyalty before this step is just misdirection  
 
+**q.** what is a bank?  
+**a.** a lending business that receives government privilege in [12 U.S.C. § 1841(c)](https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1841&num=0&edition=prelim) to subsidize its cost of raising capital by bundling the services of 1) storing and 2) moving money with 3) offering loans:
+
+>(c) Bank Defined.-For purposes of this chapter-  
+>&nbsp;&nbsp;&nbsp;(1) In general.-Except as provided in paragraph (2), the term "bank" means any of the following:  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(A) An insured bank as defined in section 3(h) of the Federal Deposit Insurance Act [12 U.S.C. 1813(h)].  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(B) An institution organized under the laws of the United States, any State of the United States, the District of Columbia, any territory of the United States, Puerto Rico, Guam, American Samoa, or the Virgin Islands which both-  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(i) accepts demand **<ins>deposits</ins>** or deposits that the depositor may withdraw by check or similar means for **<ins>payment</ins>** to third parties or others; and  
+>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ii) is engaged in the business of making commercial **<ins>loans</ins>**.  
+
+**q.** how would a bank hypothetically operate in systemaccounting?  
+**a.**
+```json5
+[
+    // Starting with a zero balance, Jane receives 1000 from her employer
+    {
+        "item": "weekly salary",
+        "price": 1000,
+        "quantity": 1,
+        "creditor": "Jane", // balance increases by 1000
+        "debtitor": "Jane's Employer", // balance decreases by 1000
+        "debitor_approval_time": "2021-01-01T12:00:00Z",
+        "creditor_approval_time": "2021-01-01T12:05:00Z"
+    },
+    // Jane deposits 1000 in the bank and can withdraw it whenever she wants
+    {
+        "item": "bank deposit",
+        "price": 1000,
+        "quantity": 1,
+        "creditor": "Bank Of America", // balance increases by 1000
+        "debtitor": "Jane", // balance decreases by 1000
+        "debitor_approval_time": "2021-01-01T12:10:00Z",
+        "creditor_approval_time": "2021-01-01T12:11:00Z"
+    },
+    // but then Bank Of America decides to lend 1000 to John the Borrower
+    {
+        "item": "10% promissory note of 1000",
+        "price": 1000,
+        "quantity": 1,
+        "creditor": "John the Borrower", // balance increases by 1000
+        "debitor": "Bank Of America", // balance decreases by 1000
+        "debitor_approval_time": "2021-01-01T12:15:00Z",
+        "creditor_approval_time": "2021-01-01T12:16:00Z" 
+    },
+    // Jane can't withdraw 1000 until John the Borrower redeems the promissory note from Bank Of America
+    {
+        "item": "redeem 10% promissory note of 1000",
+        "price": 1010,
+        "quantity": 1,
+        "creditor": "Bank Of America", // balance increases by 1010
+        "debtitor": "John the Borrower", // balance decreases by 1010
+        "debitor_approval_time": "2022-01-01T12:00:00Z",
+        "creditor_approval_time": "2022-01-01T12:01:00Z"
+    },
+    // Now Jane can withdraw the 1000
+    {
+        "item": "bank withdrawal",
+        "price": 1000,
+        "quantity": 1,
+        "creditor": "Jane", // balance increases by 1000
+        "debtitor": "Bank Of America", // balance decreases by 1000
+        "debitor_approval_time": "2022-01-01T12:10:00Z",
+        "creditor_approval_time": "2022-01-01T12:11:00Z"
+    }
+]
+```
+**q.** operating a bank in systemaccounting is ridiculous. why would i use it to store and move money?  
+**a.** you wouldn't. receiving government privilege to tell depositors their money is still in the vault after exchanging it for a promissory note only violates a [natural physical law](https://en.wikipedia.org/wiki/You_can%27t_have_your_cake_and_eat_it). money is accounting. using a payment app supplied by the u.s. treasury empowers you to store your money and pay others independently from banks  
+
+**q.** where would i get a loan?  
+**a.** talk to a lending business  
+
+**q.** and how do lending businesses raise money?  
+**a.** by publishing their performance. investors confidently supply capital to lending businesses when their accounting proves they can profitably buy and sell promissory notes. storing and moving money for the public is NOT relevant to finance and only a matter of security  
+
+**q.** what would happen to central banks?  
+**a.** enforcing a conservation law on value privatizes the balance sheets of banks. central banks are not necessary when banks cannot include their balance sheets in the money supply  
+
+**q.** what would happen to the money multiplier?  
+**a.** there's no such thing as the "money multiplier". this phrase is weasel wording for equating assets of different types. the private instrument used to measure value expected in the future is not equal to the public instrument used to measure value eaned in the past: `bank note (risk > 0) != money (risk = 0)`  
+
+**q.** shouldn't money always be earning interest?  
+**a.** a free market does not require consuming financial risk  
+
 **q.** how does systemaccounting manage expectation?  
-**a.** central banks providing "forward guidance" appease more than they set expectation when they allow interest rate manipulation and money printing. systemaccounting prices capital by switching the "risk-free" rate from referencing the hackable price of debt to the immutably recorded price of equity. when the risk-free rate refers to the empirical rate, i.e. to the historical and not the expected, the economy remains protected from the catastrophic failure indulged by government mispricing  
+**a.** central banks providing "forward guidance" appease the democratic mandate more than they set expectation when they print money and manipulate interest rates. in addition to enforcing a conservation law on value, systemaccounting prices capital by switching the "risk-free" rate from referencing the hackable price of debt to the immutably recorded price of equity. when the risk-free rate refers to the empirical rate, i.e. to the historical and not the expected, the economy remains protected from the catastrophic failure indulged by government mispricing  
 
 removing financial appeasement guides the freedom of speech by recalibrating expectation to the empirical  
 
@@ -61,17 +145,76 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 **q.** will a government hosted payment app reduce my privacy?  
 **a.** you dont need to publish your account activity. publishing account data is a feature primarily intended for 1) businesses owners who wish to signal the demand for capital with an empirical rate of return and 2) government officials who wish to keep citizens informed of the performance of fiscal policies with empirical data  
 
+**q.** doesn't decentralized finance offer the most security?  
+**a.** centralized finance is not a threat when it's transparent. and decentralizing finance unwittingly decentralizes a cost center. information symmetry supplies the highest form of security and a single source rapidly receiving the most advanced r&d empowers the public with the most scalable reduction in the cost of storing, transforming and transmitting information  
+
+**q.** why can't we just remove government entirely from money?  
+**a.** removing law enforcement from money leaves it impotent  
+
+**q.** but what if i still don't want the government to know about my transactions?  
+**a.** then don't ask them to measure and testify you delivered value to someone else  
+
+**q.** how does systemaccounting define a transaction in a free market?  
+**a.** `value independently measured by seller - value independently measured by buyer = 0` in a space where the [order](https://en.wikipedia.org/wiki/Subtraction#Anti-commutativity) between production and consumption matters:  
+```json5
+[
+  {
+    "item": "bottled water",
+    "price": "1.000", // 1.000 measured by seller - 1.000 measured by buyer = 0
+    "quantity": "1",
+    "creditor": "GroceryStore", // seller (producer)
+    "debitor": "JacobWebb", // buyer (consumer)
+    "creditor_approval_time": "2023-03-20T04:58:27.771Z", // time seller independently measured 1.000 price
+    "debitor_approval_time": "2023-03-20T04:58:32.001Z" // time buyer independently measured 1.000 price
+  }
+]
+```  
+
+**q.** how does systemaccounting model a free market?  
+**a.** by splitting [everything](https://en.wikipedia.org/wiki/Spacetime_algebra#Spacetime_split) between debitors and creditors right down the middle  
+
+**q.** how does systemaccounting affect setting public policy?  
+**a.** solving problems one at a time depends on 1) researching facts, 2) designing a solution, 3) applying the solution, 4) measuring its input and output and 5) holding contributors accountable. empowering sincere fact finders and problem solvers with more convenient access to public data science reduces the risk of luring them into the idle game of assigning blame between fictional social groups  
+
 **q.** do you have any demos?  
 **a.** watch the [economic policy as code](https://mxfactorial.video/) video series  
 
 **q.** how to explain this project to non engineers?  
-**a.** share the [economic policy as code](https://mxfactorial.video/) video series  
+**a.** invite them to speak with an [ai](https://youtu.be/ZealDFpricU)  
+
+**q.** how to explain this project to a physicist?  
+**a.** invite them to speak with an [ai](https://github.com/user-attachments/files/15995381/2024-06-26_mxfactorial_claude-ai.mhtml.zip) (*todo: move content to mxfactorial.ipynb*) 
 
 **q.** why is the code public if the license is private?  
 **a.** publicly used code is a public structure
 
+**q.** what price does systemaccounting charge to conserve value?  
+**a.** the transaction author is charged `0.001` per transaction:
+```json5
+[ // 1.000 bottled water + 0.001 transaction cost = 1.001 total
+  {
+    "item": "bottled water",
+    "price": "1.000",
+    "quantity": "1",
+    "creditor": "GroceryStore",
+    "debitor": "JacobWebb",
+    "creditor_approval_time": null,
+    "debitor_approval_time": null
+  },
+  {
+    "item": "mxfactorial",
+    "price": "0.001",
+    "quantity": "1",
+    "creditor": "GroceryStore",
+    "debitor": "mxfactorial",
+    "creditor_approval_time": null,
+    "debitor_approval_time": null
+  }
+]
+```
+
 **q.** can i invest?  
-**a.** contribute what you like. the dividend for believing in science is protection
+**a.** contribute what you like. the dividend for believing in science is protection  
 
 ### how it works
 
