@@ -12,6 +12,18 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+  redis:
+    image: bitnami/redis:latest
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: redis-cli --no-auth-warning -a test PING | grep PONG
+      interval: 1s
+      timeout: 5s
+      retries: 5
+    environment:
+      REDIS_PORT_NUMBER: 6379
+      REDIS_PASSWORD: test
   graphql:
     image: graphql:latest
     build:
@@ -195,6 +207,28 @@ services:
       TRANSACTIONS_BY_ACCOUNT_PORT: 10008
     depends_on:
       - postgres
+  event:
+    image: event:latest
+    build:
+      context: ../
+      dockerfile: ./docker/event.Dockerfile
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      REDIS_DB: 0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USERNAME: default
+      REDIS_PASSWORD: test
+      RUST_BACKTRACE: 1
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
   client:
     build:
       context: ../
