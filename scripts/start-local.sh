@@ -23,6 +23,7 @@ fi
 set -e # exit when docker login not configured
 
 make --no-print-directory -C migrations start
+source scripts/start-stop-redis.sh
 
 set +e
 

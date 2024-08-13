@@ -73,4 +73,4 @@ for p in "${PATTERNS[@]}"; do
 	stop "$p"
 done
 
-make --no-print-directory -C migrations clean
+make --no-print-directory -C migrations clean # also stops redis in compose
