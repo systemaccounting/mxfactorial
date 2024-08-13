@@ -11,7 +11,7 @@ LOCAL_TAG_VERSION=$(yq '.docker.env_var.set.LOCAL_TAG_VERSION.default' $PROJECT_
 NAMESPACE=$GITHUB_ORG/$GITHUB_REPO_NAME
 REGISTRY_URI=$GITHUB_REGISTRY/$NAMESPACE
 
-SERVICES=($(bash scripts/list-dir-paths.sh --type app | grep -v client | xargs basename -a))
+SERVICES=($(bash scripts/list-deployments.sh | grep -v client | xargs basename -a))
 
 for SERVICE in "${SERVICES[@]}"; do
     IMAGE_NAME=$SERVICE:$LOCAL_TAG_VERSION

@@ -15,7 +15,7 @@ if [[ "$#" -lt 2 ]] || [[ "$#" -gt 4 ]]; then
 	exit 1
 fi
 
-INVENTORY=($(bash scripts/list-dir-paths.sh --type app))
+INVENTORY=($(bash scripts/list-deployments.sh))
 
 while [[ "$#" -gt 0 ]]; do
 	case $1 in
@@ -24,10 +24,10 @@ while [[ "$#" -gt 0 ]]; do
 		shift
 		;;
 	--initial) INITIAL=1 ;;
-	--services) INVENTORY=($(bash scripts/list-dir-paths.sh --type app |
+	--services) INVENTORY=($(bash scripts/list-deployments.sh |
 		grep --color=never services/)) ;;
 		# for convenience, not currently referenced in makefiles
-	--transaction-services) INVENTORY=($(bash scripts/list-dir-paths.sh --type app |
+	--transaction-services) INVENTORY=($(bash scripts/list-deployments.sh |
 		grep --color=never \
 			-e transact \
 			-e request \
@@ -41,7 +41,6 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-PROJECT_CONF=project.yaml
 MAKE_CMD=deploy
 
 # options are "deploy", or "initial-deploy" to prep for terraform
@@ -62,12 +61,6 @@ fi
 
 # loop through app directories and deploy or initial-deploy
 for app_dir in "${INVENTORY[@]}"; do
-	APP_CONF_PATH=$(bash scripts/dir-to-conf-path.sh "$app_dir")
-	DEPLOY=$(yq "$APP_CONF_PATH.deploy" $PROJECT_CONF)
-	# skip apps not set to deploy
-	if [[ $DEPLOY != true ]]; then
-		continue
-	fi
 	# store deploy start time
 	DEPLOY_START_TIME=$(date +%s)
 	DEPLOY_START_LAPSE=$(($DEPLOY_START_TIME - $SCRIPT_START_TIME))

@@ -26,7 +26,7 @@ jobs:
         run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
       - name: deploy services to prod cloud environment
         run: |
-          for app in $(bash scripts/list-dir-paths.sh --type app | grep -v client | xargs basename -a); do
+          for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
             # tag newly pushed prod images with master merge commit sha
             bash scripts/tag-merge-commit.sh --app-name $app --env prod --env-id ${{ secrets.PROD_ENV_ID }};
             # deploy newly tagged images to prod cloud
