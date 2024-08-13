@@ -332,3 +332,6 @@ starts and stops redis in docker compose
 
 ##### `watch-redis-key.sh`
 watches a redis key in docker
+
+##### `list-deployments.sh`
+lists apps configured in `project.yaml` with `deploy: true`

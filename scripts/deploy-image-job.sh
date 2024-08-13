@@ -38,7 +38,7 @@ unzip $SERVICES_ZIP -d $PROJECT_DIR
 
 cd $PROJECT_DIR
 
-SERVICE_DIR=$(bash scripts/list-dir-paths.sh --type app | grep --color=never $SERVICE_NAME)
+SERVICE_DIR=$(bash scripts/list-deployments.sh | grep --color=never $SERVICE_NAME)
 
 cd "$SERVICE_DIR"
 

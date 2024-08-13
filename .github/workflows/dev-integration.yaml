@@ -42,7 +42,7 @@ jobs:
           rm migrate.linux-amd64.deb
       - name: deploy to dev cloud environment
         run: |
-          for app in $(bash scripts/list-dir-paths.sh --type app | grep -v client | xargs basename -a); do
+          for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
             # tag newly pushed dev images with develop merge commit sha
             bash scripts/tag-merge-commit.sh --app-name $app --env dev --env-id ${{ secrets.DEV_ENV_ID }};
             # deploy newly tagged images to dev cloud
@@ -58,7 +58,7 @@ jobs:
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} cargo test --manifest-path ./tests/Cargo.toml --features integration_tests -- --test-threads=1
       - name: tag and push dev images to prod ecr
         run: |
-          for app in $(bash scripts/list-dir-paths.sh --type app | grep -v client | xargs basename -a); do
+          for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
             # tag newly tested dev images with prod and push to prod ecr
             bash scripts/push-prod-image.sh --app-name $app --env dev --env-id ${{ secrets.DEV_ENV_ID }};
           done
