@@ -1,5 +1,6 @@
 -- config in first migration
 SET timezone TO 'UTC';
+CREATE EXTENSION IF NOT EXISTS "hstore";
 
 -- personal account
 CREATE TABLE account (

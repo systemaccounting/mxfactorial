@@ -13,3 +13,5 @@ DROP FUNCTION add_subaccount;
 DROP TABLE subaccount;
 
 DROP TABLE account;
+
+DROP EXTENSION hstore;

@@ -323,3 +323,12 @@ deletes the `ENV_ID` variable from `.env` in project root
 
 ##### `delete-api-log-perms.sh`
 deletes the api gateway logging permissions added in `infrastructure/terraform/aws/environments/region/main.tf`
+
+##### `enable-pg-notice.sh`
+sets [log_min_messages](https://www.postgresql.org/docs/current/runtime-config-logging.html#RUNTIME-CONFIG-LOGGING-WHEN) to notice in docker postgres
+
+##### `start-stop-redis.sh`
+starts and stops redis in docker compose
+
+##### `watch-redis-key.sh`
+watches a redis key in docker
