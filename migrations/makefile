@@ -28,13 +28,14 @@ run:
 start:
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose \
-			-f ../docker/compose.yaml \
+			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
 			up \
 			-d \
 			postgres \
 			--renew-anon-volumes \
 			--force-recreate \
 			--build
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash ./scripts/enable-pg-notice.sh > /dev/null
 
 reset:
 	@COMPOSE_IGNORE_ORPHANS=true \
@@ -45,6 +46,7 @@ reset:
 			postgres \
 			--renew-anon-volumes \
 			--force-recreate
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash ./scripts/enable-pg-notice.sh > /dev/null
 
 rebuild:
 	@docker compose \
