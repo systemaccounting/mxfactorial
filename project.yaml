@@ -299,7 +299,6 @@ scripts:
       CI_SERVICE_PROCESSES:
         ssm: null
         default:
-          - 'go run '
           - 'target/debug'
       CLIENT_PROCESS:
         ssm: null
@@ -307,7 +306,6 @@ scripts:
       ADDED_PROCESSES_TO_TERM:
         ssm: null
         default:
-          - 'go-build'
           - 'npm run dev'
           - 'npm run build'
           - 'vite build'
@@ -564,6 +562,43 @@ services:
         - PGPASSWORD
         - PGDATABASE
         - READINESS_CHECK_PATH
+  event:
+    runtime: rust1.x
+    min_code_cov: null
+    type: app
+    local_dev: true
+    params: []
+    deploy: false
+    build_src_path: null
+    dependents: []
+    env_var:
+      set:
+        REDIS_DB:
+          ssm: null
+          default: 0
+        REDIS_HOST:
+          ssm: null
+          default: localhost
+        REDIS_PORT:
+          ssm: null
+          default: 6379
+        REDIS_USERNAME:
+          ssm: null
+          default: default
+        REDIS_PASSWORD:
+          ssm: null
+          default: test
+      get:
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
   auto-confirm:
     runtime: rust1.x
     min_code_cov: null

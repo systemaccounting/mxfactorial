@@ -10,6 +10,7 @@ members = [
 	"crates/types",
 	"services/auto-confirm",
 	"services/balance-by-account",
+	"services/event",
 	"services/graphql",
 	"services/request-approve",
 	"services/request-by-id",
