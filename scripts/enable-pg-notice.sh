@@ -5,6 +5,8 @@ ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 MIGRATIONS_DIR_PATH=./migrations
 ENV_FILE="$MIGRATIONS_DIR_PATH/$ENV_FILE_NAME"
 
+make -C $MIGRATIONS_DIR_PATH env ENV=local
+
 source $ENV_FILE
 
 until pg_isready -h $PGHOST -U $PGUSER -d $PGDATABASE; do sleep 1; done
