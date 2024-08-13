@@ -139,6 +139,9 @@ restart:
 list-pids:
 	@bash scripts/list-pids.sh
 
+list-used-ports:
+	@source scripts/list-env-vars.sh | grep --color=never -E "PORT$$" | xargs -I{} yq ".. | select(has(\"{}\")) | select(.{}) | .{}.default" $(PROJECT_CONF) | sort
+
 clean:
 	@APP_DIRS=($$(yq '.. | select(has("local_dev") and .local_dev == true) | path | join("/")' $(PROJECT_CONF))); \
 	for d in "$${APP_DIRS[@]}"; do \
@@ -194,6 +197,9 @@ rebuild-transaction-by-id:
 
 rebuild-transactions-by-account:
 	@bash scripts/rebuild-service.sh --name transactions-by-account
+
+rebuild-event:
+	@bash scripts/rebuild-service.sh --name event
 
 rebuild-graphql:
 	@bash scripts/rebuild-service.sh --name graphql
