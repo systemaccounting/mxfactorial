@@ -150,7 +150,7 @@ mod tests {
                     device_id: None,
                     device_latlng: None,
                     // latest approval time
-                    approval_time: Some(test_approval_time.clone()),
+                    approval_time: Some(test_approval_time),
                     rejection_time: None,
                     expiration_time: None,
                 },
@@ -164,9 +164,7 @@ mod tests {
                     device_id: None,
                     device_latlng: None,
                     // set 10s earlier
-                    approval_time: Some(TZTime(
-                        test_approval_time.clone().0 - Duration::seconds(10),
-                    )),
+                    approval_time: Some(TZTime(test_approval_time.0 - Duration::seconds(10))),
                     rejection_time: None,
                     expiration_time: None,
                 },
@@ -180,9 +178,7 @@ mod tests {
                     device_id: None,
                     device_latlng: None,
                     // set 20s earlier
-                    approval_time: Some(TZTime(
-                        test_approval_time.clone().0 - Duration::seconds(20),
-                    )),
+                    approval_time: Some(TZTime(test_approval_time.0 - Duration::seconds(20))),
                     rejection_time: None,
                     expiration_time: None,
                 },
@@ -198,13 +194,13 @@ mod tests {
             .0
             .clone()
             .into_iter()
-            .nth(0)
+            .next()
             .unwrap()
             .creditor_approval_time
             .unwrap();
 
         // want latest creditor_approval_time
-        let want_creditor_approval_time = test_approval_time.clone();
+        let want_creditor_approval_time = test_approval_time;
 
         assert_eq!(
             got_creditor_approval_time, want_creditor_approval_time,
@@ -218,7 +214,7 @@ mod tests {
             .0
             .clone()
             .into_iter()
-            .nth(0)
+            .next()
             .unwrap()
             .debitor_approval_time;
 
