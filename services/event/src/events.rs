@@ -1,5 +1,5 @@
 use crate::RedisClient;
-use fred::prelude::KeysInterface;
+use fred::prelude::LuaInterface;
 use std::collections::HashMap;
 
 // create events for measure api
@@ -23,11 +23,32 @@ impl<'a> Gdp<'a> {
     }
 }
 
+// redis lua script:
+// 1. increment a key by a float value
+// 2. set the GDP_TTL if new
+// 3. publish the new value on a channel named after the key
+const INCRBY_GDP: &str = r#"
+local r = redis.call('INCRBYFLOAT', KEYS[1], ARGV[1])
+if r == ARGV[1] then
+  redis.call('EXPIRE', KEYS[1], ARGV[2])
+end
+redis.call('PUBLISH', KEYS[1], r)
+"#;
+
+const GDP_TTL: i64 = 60 * 60 * 24 * 3; // secs * mins * hours * days = 3
+
 pub async fn redis_incrby_gdp<'a>(client: &RedisClient, gdp_map: Gdp<'a>) {
     for (key, value) in gdp_map.0.iter() {
         let k = key.to_string();
         let v = value.parse::<f64>().unwrap();
-        let _: f64 = client.incr_by_float(&k, v).await.unwrap();
+        let _: () = client
+            .eval(
+                INCRBY_GDP,
+                vec![k],
+                vec![v.to_string(), GDP_TTL.to_string()],
+            )
+            .await
+            .unwrap();
     }
 }
 

@@ -15,4 +15,4 @@ for app_dir in "${INVENTORY[@]}"; do
 	fi
 done
 
-echo "${DEPLOYMENTS[@]}"
+printf '%s\n' "${DEPLOYMENTS[@]}"

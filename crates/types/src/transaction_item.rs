@@ -712,7 +712,7 @@ mod tests {
         }
         test_tr_items.set_debitor_first_default();
         for t in test_tr_items.0.iter_mut() {
-            let got = t.debitor_first.clone();
+            let got = t.debitor_first;
             let want = Some(false);
             assert_eq!(got, want, "got {:?}, want {:?}", got, want)
         }
@@ -873,26 +873,18 @@ mod tests {
         let test_tr_item = create_test_transaction_item();
         let mut test_other = create_test_transaction_item();
         test_other.item_id = String::from("eggs");
-        assert_eq!(
-            test_tr_item.test_equality(&test_other),
-            false,
-            "got {}, want {}",
-            test_tr_item.test_equality(&test_other),
-            false
-        )
+        let got = test_tr_item.test_equality(&test_other);
+        let want = false;
+        assert!(!got, "got {}, want {}", !got, want)
     }
 
     #[test]
     fn it_will_test_equality_as_positive_on_a_transaction_item() {
         let test_tr_item = create_test_transaction_item();
         let test_other = create_test_transaction_item();
-        assert_eq!(
-            test_tr_item.test_equality(&test_other),
-            true,
-            "got {}, want {}",
-            test_tr_item.test_equality(&test_other),
-            true
-        )
+        let got = test_tr_item.test_equality(&test_other);
+        let want = true;
+        assert!(got, "got {}, want {}", got, want)
     }
 
     #[test]
@@ -1186,7 +1178,10 @@ mod tests {
     fn it_will_test_equality_as_positive_on_transaction_items() {
         let test_tr_items = create_test_transaction_items();
         let test_other = create_test_transaction_items();
-        assert_eq!(test_tr_items.test_equality(test_other).unwrap(), ())
+        match test_tr_items.test_equality(test_other) {
+            Ok(_) => (),
+            Err(e) => panic!("error: {}", e),
+        }
     }
 
     #[test]
@@ -1384,7 +1379,7 @@ mod tests {
     #[test]
     fn it_returns_inconsistent_err() {
         let test_transaction = create_test_inconsistent_err_transaction_items();
-        let got = test_transaction.is_debitor_first().map_err(|e| e);
+        let got = test_transaction.is_debitor_first();
         assert_eq!(got, Err(TransactionItemError::InconsistentValue));
     }
 

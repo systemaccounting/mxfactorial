@@ -142,7 +142,7 @@ mod tests {
         const TIME_SEC_CONVERSION: i64 = 946_684_800;
         const USEC_PER_SEC: i64 = 1_000_000;
         test_buf.put_i64((1_698_641_816 - TIME_SEC_CONVERSION) * USEC_PER_SEC);
-        let got = TZTime::from_sql(&test_pg_type, &mut test_buf).unwrap();
+        let got = TZTime::from_sql(&test_pg_type, &test_buf).unwrap();
         let want = TZTime(
             DateTime::parse_from_rfc3339("2023-10-30T04:56:56Z")
                 .unwrap()

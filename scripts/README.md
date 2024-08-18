@@ -327,11 +327,14 @@ deletes the api gateway logging permissions added in `infrastructure/terraform/a
 ##### `enable-pg-notice.sh`
 sets [log_min_messages](https://www.postgresql.org/docs/current/runtime-config-logging.html#RUNTIME-CONFIG-LOGGING-WHEN) to notice in docker postgres
 
-##### `start-stop-redis.sh`
-starts and stops redis in docker compose
+##### `manage-redis.sh`
+starts, stops or flushes redis in docker compose
 
 ##### `watch-redis-key.sh`
 watches a redis key in docker
 
 ##### `list-deployments.sh`
 lists apps configured in `project.yaml` with `deploy: true`
+
+##### `test-all.sh`
+run all tests before before creating a pull request

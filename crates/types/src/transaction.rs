@@ -207,8 +207,10 @@ pub mod tests {
     #[test]
     fn it_tests_unique_contra_accounts_on_a_transaction() {
         let transaction = create_test_transaction();
-        let got = transaction.test_unique_contra_accounts().unwrap();
-        assert_eq!(got, ())
+        match transaction.test_unique_contra_accounts() {
+            Ok(()) => (),
+            Err(e) => panic!("error: {:?}", e),
+        }
     }
 
     #[test]
@@ -237,10 +239,10 @@ pub mod tests {
     #[test]
     fn it_tests_positive_for_pending_role_approvals() {
         let transaction = create_test_transaction();
-        let got = transaction
-            .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
-            .unwrap();
-        assert_eq!(got, ())
+        match transaction.test_pending_role_approval("JacobWebb", AccountRole::Debitor) {
+            Ok(()) => (),
+            Err(e) => panic!("error: {:?}", e),
+        }
     }
 
     #[test]
@@ -329,10 +331,10 @@ pub mod tests {
     #[test]
     fn it_tests_positive_for_pending_role_approval() {
         let transaction = create_test_transaction();
-        let got = transaction
-            .test_pending_role_approval("JacobWebb", AccountRole::Debitor)
-            .unwrap();
-        assert_eq!(got, ())
+        match transaction.test_pending_role_approval("JacobWebb", AccountRole::Debitor) {
+            Ok(()) => (),
+            Err(e) => panic!("error: {:?}", e),
+        }
     }
 
     #[test]

@@ -899,14 +899,14 @@ mod integration_tests {
         // create the query argument
         let test_account = "test_account".to_string();
         // call the function under test
-        let _ = api_conn
+        api_conn
             .insert_account_query(test_account.clone())
             .await
             .unwrap();
 
         // create a sql to test the record was inserted
         _row_exists(
-            &format!(
+            format!(
                 "SELECT EXISTS(SELECT 1 FROM account WHERE name = '{}')",
                 test_account
             )
@@ -934,14 +934,14 @@ mod integration_tests {
         let api_conn = DatabaseConnection(test_conn);
 
         // call the function under test
-        let _ = api_conn
+        api_conn
             .delete_owner_account_query(test_account.clone())
             .await
             .unwrap();
 
         // test the record was deleted
         _row_exists(
-            &format!(
+            format!(
                 "SELECT NOT EXISTS(SELECT 1 FROM account_owner WHERE owner_account = '{}')",
                 test_account
             )
@@ -1011,7 +1011,7 @@ mod integration_tests {
         let reader = BufReader::new(file);
         let test_intra_transaction: IntraTransaction = serde_json::from_reader(reader).unwrap();
         let test_transaction_items = test_intra_transaction.transaction.transaction_items;
-        let _ = api_conn
+        api_conn
             .update_account_balances_query(test_transaction_items.clone())
             .await
             .unwrap();
@@ -1047,7 +1047,7 @@ mod integration_tests {
         let test_balance = "1000.000";
         let test_balance_dec = Decimal::from_str(test_balance).unwrap();
         let test_curr_tr_item_id = 1;
-        let _ = api_conn
+        api_conn
             .insert_account_balance_query(
                 test_account.clone(),
                 test_balance_dec,
@@ -1139,7 +1139,7 @@ mod integration_tests {
         let test_account = "test_account".to_string();
 
         // insert account to associate with profile
-        let _ = api_conn
+        api_conn
             .insert_account_query(test_account.clone())
             .await
             .unwrap();
@@ -1488,7 +1488,7 @@ mod integration_tests {
             .await
             .unwrap();
 
-        assert_eq!(exists, false);
+        assert!(!exists);
     }
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]
@@ -1510,7 +1510,7 @@ mod integration_tests {
             "JacobWebb".to_string(),
         ];
 
-        let _ = api_conn
+        api_conn
             .insert_rule_instance_query(
                 test_rule_type.clone(),
                 test_rule_name.clone(),
@@ -1573,7 +1573,7 @@ mod integration_tests {
             .await
             .unwrap();
 
-        assert_eq!(exists, true);
+        assert!(exists);
     }
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]

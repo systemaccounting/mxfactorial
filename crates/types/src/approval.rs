@@ -512,7 +512,11 @@ mod tests {
             rejection_time: None,
             expiration_time: None,
         };
-        assert_eq!(test_approval.test_pending().unwrap(), ());
+
+        match test_approval.test_pending() {
+            Ok(_) => (),
+            Err(e) => panic!("test failed with error: {:?}", e),
+        }
     }
 
     #[test]
@@ -566,12 +570,11 @@ mod tests {
                 expiration_time: None,
             },
         ]);
-        assert_eq!(
-            test_approvals
-                .test_pending_role_approval("GroceryCo", AccountRole::Creditor)
-                .unwrap(),
-            ()
-        );
+
+        match test_approvals.test_pending_role_approval("GroceryCo", AccountRole::Creditor) {
+            Ok(_) => (),
+            Err(e) => panic!("test failed with error: {:?}", e),
+        }
     }
 
     #[test]
