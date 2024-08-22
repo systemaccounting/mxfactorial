@@ -12,6 +12,7 @@ members = [
 	"services/balance-by-account",
 	"services/event",
 	"services/graphql",
+	"services/measure",
 	"services/request-approve",
 	"services/request-by-id",
 	"services/request-create",

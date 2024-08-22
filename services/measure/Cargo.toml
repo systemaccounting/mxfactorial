@@ -1,0 +1,16 @@
+[package]
+name = "measure"
+version = "0.1.0"
+edition = "2021"
+rust-version.workspace = true
+
+[dependencies]
+axum = { version = "0.7.5", features = ["ws"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread"] }
+shutdown = { path = "../../crates/shutdown" }
+futures = "0.3.30"
+serde = { version = "1.0.208", features = ["serde_derive"] }
+fred = {version = "9.1.1", default-features = false, features = ["i-pubsub"] }
+pg = { path = "../../crates/pg" }

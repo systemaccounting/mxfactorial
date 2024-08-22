@@ -223,7 +223,30 @@ services:
       REDIS_PORT: 6379
       REDIS_USERNAME: default
       REDIS_PASSWORD: test
-      RUST_BACKTRACE: 1
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+  measure:
+    image: measure:latest
+    build:
+      context: ../
+      dockerfile: ./docker/measure.Dockerfile
+    ports:
+      - "10010:10010"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      REDIS_DB: 0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USERNAME: default
+      REDIS_PASSWORD: test
+      MEASURE_PORT: 10010
     depends_on:
       redis:
         condition: service_healthy

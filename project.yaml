@@ -599,6 +599,32 @@ services:
         - REDIS_PORT
         - REDIS_USERNAME
         - REDIS_PASSWORD
+  measure:
+    runtime: rust1.x
+    min_code_cov: null
+    type: app
+    local_dev: true
+    params: []
+    deploy: false
+    build_src_path: null
+    dependents: []
+    env_var:
+      set:
+        MEASURE_PORT:
+          ssm: null
+          default: 10010
+      get:
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
+        - MEASURE_PORT
   auto-confirm:
     runtime: rust1.x
     min_code_cov: null
