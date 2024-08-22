@@ -3,7 +3,7 @@
 set -e
 
 # print use
-if [[ "$#" -ne 0 ]] && [[ "$#" -ne 1 ]]; then
+if [[ "$#" -ne 1 ]]; then
 	cat <<-'EOF'
 		use:
 		bash scripts/manage-redis.sh --start # OR --stop OR --flush
