@@ -47,57 +47,65 @@ struct Event {
 #[tokio::main]
 async fn main() {
     let pg_uri = pg_conn_uri();
-
-    let (client, mut connection) = tokio_postgres::connect(pg_uri.as_str(), NoTls)
-        .await
-        .unwrap();
-
-    let (tx, mut rx) = mpsc::unbounded();
-
-    let stream =
-        stream::poll_fn(move |cx| connection.poll_message(cx)).map_err(|e| panic!("{}", e));
-
-    let connection = stream.forward(tx).map(|r| r.unwrap());
-
-    tokio::spawn(connection);
-
-    client.batch_execute("LISTEN event;").await.unwrap(); // add more listeners in multiline string
-
     let redis_uri = redis_conn_uri();
     let redis_config = RedisConfig::from_url(&redis_uri).unwrap();
     let redis_client = Builder::from_config(redis_config).build().unwrap();
     redis_client.init().await.unwrap();
 
     loop {
-        // block until message received
-        let message = match rx.next().await {
-            Some(message) => message,
-            None => continue,
+        let (client, mut connection) = match tokio_postgres::connect(pg_uri.as_str(), NoTls).await {
+            Ok(conn) => conn,
+            Err(_e) => {
+                // println!("failed to connect to postgres: {}", e);
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+                continue;
+            }
         };
 
-        match message {
-            AsyncMessage::Notification(n) => {
-                // search for json_build_object in schema
-                // for matching postgres Event structure
-                match serde_json::from_str::<Event>(n.payload()) {
-                    Ok(event) => {
-                        match event.name.as_str() {
-                            "gdp" => {
-                                // parse event value as Gdp map
-                                let gdp_map = events::Gdp::new(event.value.as_str());
-                                events::redis_incrby_gdp(&redis_client, gdp_map).await;
-                            }
-                            _ => {
-                                println!("unknown event: {}", event.name);
-                            }
+        let (tx, mut rx) = mpsc::unbounded();
+
+        let stream =
+            stream::poll_fn(move |cx| connection.poll_message(cx)).map_err(|e| panic!("{}", e));
+        let connection = stream.forward(tx).map(|r| r.unwrap());
+        let handler = tokio::spawn(connection);
+
+        if let Err(e) = client.batch_execute("LISTEN event;").await {
+            println!("failed to execute LISTEN command: {}", e);
+            handler.abort();
+            continue;
+        }
+
+        loop {
+            let message = match rx.next().await {
+                Some(message) => message,
+                None => {
+                    // println!("connection terminated. attempting to reconnect...");
+                    handler.abort();
+                    break;
+                }
+            };
+
+            match message {
+                AsyncMessage::Notification(n) => match serde_json::from_str::<Event>(n.payload()) {
+                    Ok(event) => match event.name.as_str() {
+                        "gdp" => {
+                            let gdp_map = events::Gdp::new(event.value.as_str());
+                            events::redis_incrby_gdp(&redis_client, gdp_map).await;
                         }
-                    }
+                        _ => {
+                            println!("unknown event: {}", event.name);
+                        }
+                    },
                     Err(e) => {
-                        println!("{}", e);
+                        println!("failed to parse event: {}", e);
                     }
+                },
+                _ => {
+                    println!("unhandled message: {:?}", message);
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                    continue;
                 }
             }
-            _ => continue, // todo: handle error
-        };
+        }
     }
 }

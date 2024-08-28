@@ -5,4 +5,4 @@
 
 ### event
 
-receives events such as `gdp` from postgres and increments keys in redis for the measure service
+listens to and receives events such as `gdp` from postgres and increments keys in redis for the measure service
