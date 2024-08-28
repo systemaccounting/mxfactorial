@@ -75,6 +75,12 @@ crates:
     type: lib
     env_var: null
     params: []
+  wsclient:
+    runtime: rust1.x
+    min_code_cov: 0
+    type: lib
+    env_var: null
+    params: []
 docker:
   env_var:
     set:
@@ -355,6 +361,8 @@ services:
         - BALANCE_BY_ACCOUNT_URL
         - READINESS_CHECK_PATH
         - GRAPHQL_PORT
+        - MEASURE_URL
+        - MEASURE_RESOURCE
   request-create:
     runtime: rust1.x
     min_code_cov: null
@@ -613,6 +621,12 @@ services:
         MEASURE_PORT:
           ssm: null
           default: 10010
+        MEASURE_URL:
+          ssm: null
+          default: null # script sets as $LOCAL_ADDRESS:$PORT
+        MEASURE_RESOURCE:
+          ssm: null
+          default: ws
       get:
         - PGHOST
         - PGPORT
