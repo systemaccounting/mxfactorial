@@ -23,6 +23,8 @@ aws_lambda_events = { version = "0.13.0", default-features = false, features = [
 tower-http = { version = "0.5.1", features = ["cors"] }
 http = "1.0.0"
 shutdown = { path = "../../crates/shutdown" }
+futures-util = "0.3.30"
+wsclient = { path = "../../crates/wsclient" }
 
 [target.x86_64-unknown-linux-musl.dependencies]
 # https://github.com/cross-rs/cross/wiki/Recipes#vendored
