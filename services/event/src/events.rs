@@ -1,5 +1,7 @@
 use crate::RedisClient;
 use fred::prelude::LuaInterface;
+use rust_decimal::prelude::*;
+use rust_decimal::Decimal;
 use std::collections::HashMap;
 
 // create events for measure api
@@ -40,7 +42,7 @@ const GDP_TTL: i64 = 60 * 60 * 24 * 3; // secs * mins * hours * days = 3
 pub async fn redis_incrby_gdp<'a>(client: &RedisClient, gdp_map: Gdp<'a>) {
     for (key, value) in gdp_map.0.iter() {
         let k = key.to_string();
-        let v = value.parse::<f64>().unwrap();
+        let v = trim_string_decimal(&value.parse::<String>().unwrap());
         let _: () = client
             .eval(
                 INCRBY_GDP,
@@ -49,6 +51,16 @@ pub async fn redis_incrby_gdp<'a>(client: &RedisClient, gdp_map: Gdp<'a>) {
             )
             .await
             .unwrap();
+    }
+}
+
+fn trim_string_decimal(s: &str) -> String {
+    if s.parse::<f64>().is_ok() {
+        let d = Decimal::from_str(s).unwrap();
+        // set precision to 3 decimal places
+        d.round_dp(3).to_string()
+    } else {
+        s.to_string()
     }
 }
 
