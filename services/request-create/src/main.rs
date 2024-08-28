@@ -88,7 +88,7 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
         .test_equality(req.clone().transaction.transaction_items)
     {
         Ok(_) => {
-            println!("client request equal to rule response")
+            // println!("client request equal to rule response")
         }
         Err(e) => {
             return Err(Box::new(e));
