@@ -1576,6 +1576,7 @@ dependencies = [
  "fred",
  "futures-channel",
  "futures-util",
+ "rust_decimal",
  "serde",
  "serde_json",
  "tokio",
@@ -1938,6 +1939,7 @@ dependencies = [
  "async-graphql-axum",
  "aws_lambda_events 0.13.0",
  "axum 0.7.5",
+ "futures-util",
  "http 1.0.0",
  "httpclient",
  "openssl",
@@ -1948,6 +1950,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "types",
+ "wsclient",
 ]
 
 [[package]]
@@ -2657,6 +2660,7 @@ dependencies = [
  "fred",
  "futures",
  "pg",
+ "rust_decimal",
  "serde",
  "shutdown",
  "tokio",
@@ -3152,20 +3156,6 @@ dependencies = [
  "rustix 0.38.21",
  "tracing",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "postgres"
-version = "0.19.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "960c214283ef8f0027974c03e9014517ced5db12f021a9abb66185a5751fab0a"
-dependencies = [
- "bytes",
- "fallible-iterator",
- "futures-util",
- "log",
- "tokio",
- "tokio-postgres",
 ]
 
 [[package]]
@@ -3789,20 +3779,19 @@ dependencies = [
 
 [[package]]
 name = "rust_decimal"
-version = "1.34.3"
+version = "1.36.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b39449a79f45e8da28c57c341891b69a183044b29518bb8f86dbac9df60bb7df"
+checksum = "b082d80e3e3cc52b2ed634388d436fe1f4de6af5786cc2de9ba9737527bdf555"
 dependencies = [
  "arrayvec",
  "borsh",
  "bytes",
  "num-traits",
- "postgres",
+ "postgres-types",
  "rand 0.8.5",
  "rkyv",
  "serde",
  "serde_json",
- "tokio-postgres",
 ]
 
 [[package]]
@@ -4636,7 +4625,7 @@ dependencies = [
  "futures-util",
  "log",
  "tokio",
- "tungstenite",
+ "tungstenite 0.21.0",
 ]
 
 [[package]]
@@ -4872,6 +4861,24 @@ dependencies = [
  "sha1",
  "thiserror",
  "url",
+ "utf-8",
+]
+
+[[package]]
+name = "tungstenite"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "18e5b8366ee7a95b16d32197d0b2604b43a0be89dc5fac9f8e96ccafbaedda8a"
+dependencies = [
+ "byteorder",
+ "bytes",
+ "data-encoding",
+ "http 1.0.0",
+ "httparse",
+ "log",
+ "rand 0.8.5",
+ "sha1",
+ "thiserror",
  "utf-8",
 ]
 
@@ -5385,6 +5392,13 @@ checksum = "524e57b2c537c0f9b1e69f1965311ec12182b4122e45035b1508cd24d2adadb1"
 dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "wsclient"
+version = "0.1.0"
+dependencies = [
+ "tungstenite 0.24.0",
 ]
 
 [[package]]
