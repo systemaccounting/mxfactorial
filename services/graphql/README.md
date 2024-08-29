@@ -7,6 +7,24 @@
 
 structures and routes requests to systemaccounting services
 
+\* postman does not support exporting subscription configuration from its graphql feature. until requests are ported to an alternative api testing client with an export feature, subscription testing is availble on http://localhost:10000/  
+
+subscription query:
+```gql
+subscription QueryGdp($date: String!, $country: String, $region: String, $municipality: String) {
+  queryGdp(date: $date, country: $country, region: $region, municipality: $municipality)
+}
+```
+query variables:
+```json
+{
+    "date": "2024-08-28",
+    "country": "United States of America",
+    "region": "California",
+    "municipality": "Sacramento"
+}
+```
+
 #### build & deploy FAST
 * `make deploy ENV=dev` to build and deploy lambda
 

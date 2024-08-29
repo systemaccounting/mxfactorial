@@ -3,6 +3,6 @@
 </p>
 
 
-### event
+### measure
 
-listens to and receives events such as `gdp` from postgres and increments keys in redis for the measure service
+subscribes to redis channels and sends events to websockets consumed by graphql

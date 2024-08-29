@@ -63,7 +63,14 @@ source ./scripts/set-uri-vars.sh
 
 function set_default_values() {
 	for s in "${SECRETS[@]}"; do
-		if [[ "$s" == *'_URL' ]]; then
+		# todo: hardcode protocol prefixes in apps. this ws:// exception for MEASURE_URL is a hack
+		if [[ "$s" == 'MEASURE_URL' ]]; then
+			SVC_NAME=$(printf '%s' "$s" | sed 's/_URL//')
+			PORT_ENV_VAR="$SVC_NAME"_PORT
+			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+			echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL" >> $ENV_FILE
+			continue
+		elif [[ "$s" == *'_URL' ]]; then
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_URL//')
 			PORT_ENV_VAR="$SVC_NAME"_PORT
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)

@@ -4,25 +4,27 @@ use ::types::{
     transaction::Transaction,
     transaction_item::{TransactionItem, TransactionItems},
 };
+use ::wsclient::WsClient;
 use async_graphql::*;
-use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use async_graphql_axum::{GraphQL, GraphQLSubscription};
 use aws_lambda_events::event::apigw::ApiGatewayV2httpRequestContext;
 use axum::{
-    extract::State,
     http::{HeaderMap, StatusCode},
     response::{self, IntoResponse},
-    routing::{get, post},
+    routing::get,
     Router,
 };
+use futures_util::{stream, stream::Stream};
 use httpclient::HttpClient as Client;
 use serde_json::json;
 use shutdown::shutdown_signal;
-use std::{env, net::ToSocketAddrs, result::Result};
+use std::{env, net::ToSocketAddrs, result::Result, task::Poll};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 const GRAPHQL_RESOURCE: &str = "query";
+const SUBSCRIPTION_RESOURCE: &str = "ws";
 
 struct Query;
 
@@ -180,6 +182,35 @@ impl Mutation {
     }
 }
 
+struct Subscription;
+
+#[Subscription]
+impl Subscription {
+    async fn query_gdp(
+        &self,
+        _ctx: &Context<'_>,
+        #[graphql(name = "date")] date: String,
+        #[graphql(name = "country")] country: Option<String>,
+        #[graphql(name = "region")] region: Option<String>,
+        #[graphql(name = "municipality")] municipality: Option<String>,
+    ) -> impl Stream<Item = f64> {
+        let base_uri = env::var("MEASURE_URL").unwrap();
+        let resource = env::var("MEASURE_RESOURCE").unwrap();
+        let uri = format!("{}/{}", base_uri, resource);
+        let ws_client = WsClient::new(uri, "gdp".to_string(), date, country, region, municipality);
+        let mut socket = ws_client.connect();
+
+        // send socket messages to stream
+        stream::poll_fn(move |_cx| match socket.read() {
+            Ok(msg) => {
+                let gdp = msg.into_text().unwrap().parse::<f64>().unwrap();
+                Poll::Ready(Some(gdp))
+            }
+            Err(_e) => Poll::Ready(None),
+        })
+    }
+}
+
 fn account_auth(account_name: String, auth_account: String) -> String {
     json!({
         "account_name": account_name,
@@ -230,18 +261,9 @@ async fn graphiql() -> impl IntoResponse {
     response::Html(
         http::GraphiQLSource::build()
             .endpoint(format!("/{}", GRAPHQL_RESOURCE).as_str())
+            .subscription_endpoint(format!("/{}", SUBSCRIPTION_RESOURCE).as_str())
             .finish(),
     )
-}
-
-async fn graphql_handler(
-    State(schema): State<Schema<Query, Mutation, EmptySubscription>>,
-    headers: HeaderMap,
-    req: GraphQLRequest,
-) -> GraphQLResponse {
-    let mut req = req.into_inner();
-    req = req.data(headers.clone());
-    schema.execute(req).await.into()
 }
 
 #[tokio::main]
@@ -251,20 +273,23 @@ async fn main() {
     let readiness_check_path = env::var(READINESS_CHECK_PATH)
         .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
 
-    let schema = Schema::build(Query, Mutation, EmptySubscription).finish();
+    let schema = Schema::build(Query, Mutation, Subscription).finish();
 
     let app = Router::new()
         .route("/", get(graphiql))
-        .route(
+        .route_service(
             format!("/{}", GRAPHQL_RESOURCE).as_str(),
-            post(graphql_handler),
+            GraphQL::new(schema.clone()),
         )
         .route(
             readiness_check_path.as_str(), // absolute path so format not used
             get(|| async { StatusCode::OK }),
         )
-        .layer(CorsLayer::permissive())
-        .with_state(schema);
+        .route_service(
+            format!("/{}", SUBSCRIPTION_RESOURCE).as_str(),
+            GraphQLSubscription::new(schema),
+        )
+        .layer(CorsLayer::permissive());
 
     let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
 

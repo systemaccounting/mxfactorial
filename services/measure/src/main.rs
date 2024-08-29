@@ -13,6 +13,8 @@ use axum::{
 use fred::prelude::*;
 use futures::{sink::SinkExt, stream::StreamExt};
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
+use rust_decimal::prelude::*;
+use rust_decimal::Decimal;
 use serde::Deserialize;
 use shutdown::shutdown_signal;
 use std::{env, net::SocketAddr};
@@ -37,18 +39,25 @@ fn redis_conn_uri() -> String {
 struct Params {
     measure: String,
     date: String,
-    country: String,
-    region: String,
-    // sub_region: String,
-    municipality: String,
+    country: Option<String>,
+    region: Option<String>,
+    // sub_region: Option<String>,
+    municipality: Option<String>,
 }
 
 impl Params {
     fn redis_gdp_key(&self) -> String {
-        format!(
-            "{}:{}:{}:{}:{}", // 2024-08-20:gdp:usa:cal:sac
-            self.date, self.measure, self.country, self.region, self.municipality
-        )
+        let mut key = format!("{}:{}", self.date, self.measure,);
+        if self.country.is_some() {
+            key.push_str(&format!(":{}", self.country.as_ref().unwrap()));
+        }
+        if self.region.is_some() {
+            key.push_str(&format!(":{}", self.region.as_ref().unwrap()));
+        }
+        if self.municipality.is_some() {
+            key.push_str(&format!(":{}", self.municipality.as_ref().unwrap()));
+        }
+        key
     }
 }
 
@@ -115,13 +124,14 @@ async fn handle_socket(socket: WebSocket, _who: SocketAddr, pool: ConnectionPool
 async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) {
     let (mut ws_tx, mut ws_rx) = socket.split();
     let mut redis_stream = redis_client.message_rx();
-    while let Ok(message) = redis_stream.recv().await {
-        let message = message.value.as_string().unwrap();
-        ws_tx.send(Message::Text(message)).await.unwrap();
 
+    loop {
         tokio::select! {
             ws_msg = ws_rx.next() => {
                 if let Some(Ok(Message::Close(_))) = ws_msg {
+                    break;
+                }
+                if ws_msg.is_none() {
                     break;
                 }
             },
@@ -129,7 +139,10 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
                 match redis_msg {
                     Ok(message) => {
                         let message = message.value.as_string().unwrap();
-                        ws_tx.send(Message::Text(message)).await.unwrap();
+                        let item = Message::Text(trim_string_decimal(message.as_str()));
+                        if ws_tx.send(item).await.is_err() {
+                            break;
+                        }
                     }
                     Err(e) => {
                         tracing::error!("error receiving message: {}", e);
@@ -139,19 +152,34 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
             }
         }
     }
+
+    if let Err(e) = ws_tx.close().await {
+        tracing::error!("error closing websocket: {}", e);
+    }
 }
 
 async fn redis_names(pg_conn: &DatabaseConnection, ws_params: Params) -> Params {
-    let country = query_key(pg_conn, ws_params.country).await;
-    let region = query_key(pg_conn, ws_params.region).await;
-    let municipality = query_key(pg_conn, ws_params.municipality).await;
-    Params {
+    let mut keys: Params = Params {
         measure: ws_params.measure,
         date: ws_params.date,
-        country,
-        region,
-        municipality,
+        country: None,
+        region: None,
+        municipality: None,
+    };
+    if ws_params.country.is_some() {
+        keys.country = Some(query_key(pg_conn, ws_params.country.unwrap()).await);
+    } else {
+        return keys;
     }
+    if ws_params.region.is_some() {
+        keys.region = Some(query_key(pg_conn, ws_params.region.unwrap()).await);
+    } else {
+        return keys;
+    }
+    if ws_params.municipality.is_some() {
+        keys.municipality = Some(query_key(pg_conn, ws_params.municipality.unwrap()).await);
+    }
+    keys
 }
 
 async fn query_key(pg_conn: &DatabaseConnection, place: String) -> String {
@@ -163,6 +191,16 @@ async fn query_key(pg_conn: &DatabaseConnection, place: String) -> String {
         .get(0)
 }
 
+fn trim_string_decimal(s: &str) -> String {
+    if s.parse::<f64>().is_ok() {
+        let d = Decimal::from_str(s).unwrap();
+        // set precision to 3 decimal places
+        d.round_dp(3).to_string()
+    } else {
+        s.to_string()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -172,9 +210,9 @@ mod tests {
         let params = Params {
             measure: "gdp".to_string(),
             date: "2024-08-20".to_string(),
-            country: "usa".to_string(),
-            region: "cal".to_string(),
-            municipality: "sac".to_string(),
+            country: Some("usa".to_string()),
+            region: Some("cal".to_string()),
+            municipality: Some("sac".to_string()),
         };
         assert_eq!(
             params.redis_gdp_key(),
