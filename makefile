@@ -247,6 +247,10 @@ restore-testseed:
 insert:
 	@$(MAKE) -C ./migrations insert
 
+continue-insert:
+	bash scripts/manage-redis.sh --flush
+	bash scripts/insert-transactions.sh --continue
+
 ###################### secrets ######################
 
 clean-env:
