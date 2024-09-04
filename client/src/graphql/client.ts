@@ -1,4 +1,4 @@
-import { createClient, defaultExchanges } from '@urql/core';
+import { createClient, cacheExchange, fetchExchange } from '@urql/core';
 import type { ClientOptions } from '@urql/core';
 import { getIdToken } from '../auth/cognito';
 import b64 from 'base-64';
@@ -9,7 +9,7 @@ const url: string = b64.decode(process.env.GRAPHQL_URI as string)?.trim() + '/' 
 
 const clientOpts: ClientOptions = {
 	url,
-	exchanges: defaultExchanges,
+	exchanges: [cacheExchange, fetchExchange],
 	maskTypename: true,
 	fetchOptions: {
 		credentials: 'same-origin'

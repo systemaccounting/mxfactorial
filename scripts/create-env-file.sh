@@ -84,6 +84,16 @@ function set_default_values() {
 			else
 				echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
 			fi
+		elif [[ "$s" == 'GRAPHQL_SUBSCRIPTIONS_URI' ]]; then
+			SVC_NAME=$(printf '%s' "$s" | sed 's/_SUBSCRIPTIONS_URI//')
+			PORT_ENV_VAR="$SVC_NAME"_PORT
+			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+			# todo: handle in scripts/set-uri-vars.sh
+			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+				echo "$s=$GRAPHQL_URI" >> $ENV_FILE
+			else
+				echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL/ws" >> $ENV_FILE
+			fi
 		elif [[ "$s" == 'CLIENT_URI' ]]; then # todo: change CLIENT_URI to CLIENT_URL
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_URI//')
 			PORT_ENV_VAR="$SVC_NAME"_PORT
