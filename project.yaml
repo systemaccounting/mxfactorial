@@ -40,11 +40,17 @@ client:
       CLIENT_PORT:
         ssm: null
         default: 10009
+      GOOGLE_MAPS_API_KEY:
+        ssm: null
+        # todo: precommit hook requiring null
+        default: null
     get:
       - POOL_ID
       - CLIENT_ID
       - GRAPHQL_URI
       - CLIENT_PORT
+      - GOOGLE_MAPS_API_KEY
+      - GRAPHQL_SUBSCRIPTIONS_URI
   params:
     - ENABLE_API_AUTH
 crates:
@@ -159,6 +165,9 @@ infrastructure:
               GRAPHQL_URI:
                 ssm: api/graphql/uri
                 default: null # script sets as localhost:$PORT
+              GRAPHQL_SUBSCRIPTIONS_URI:
+                ssm: null
+                default: null
               REQUEST_CREATE_URL:
                 ssm: service/lambda/request_create/url
                 default: null
