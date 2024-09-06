@@ -45,6 +45,11 @@ encryption and replication are secondary
 **q.** what is the equation?  
 **a.** *u* = transactions per second, *w<sub>i</sub>* = value conserved per transaction, *Mx!* = value visible in a combinatorial game  
 
+**q.** how to explain the equation to a non engineer?  
+**a.** just say "add all the transactions conserving value every second":  
+
+![sum conserved value now](https://github.com/user-attachments/assets/c6ea04b2-06a1-4234-b3d7-956007f5141f)  
+
 **q.** how does standardizing financial value as a conserved quantity protect individuals?  
 **a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. consumer wealth increases when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d. but government printing money, and government chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the 1) purchasing power created by producers, the 2) increased wealth of consumers, and the 3) value of all property owned by individuals  
 
@@ -124,6 +129,9 @@ government is not above failure, nor is it entitled to steal from the private se
 
 **q.** and how do lending businesses raise money?  
 **a.** by publishing their performance. investors confidently supply capital to lending businesses when their accounting proves they can profitably buy and sell promissory notes. storing and moving money for the public is NOT relevant to finance and only a matter of security  
+
+**q.** but what if i don't want to publish my earnings?  
+**a.** publishing your earnings is not required but you won't attract capital. publishing profit signals to investors the demand for capital, or the supply of return, and invites competition from producers capable of lowering prices for consumers. indulging a fear of competition through secrecy weakens an economy and enables greed  
 
 **q.** what would happen to central banks?  
 **a.** enforcing a conservation law on value privatizes the balance sheets of banks. central banks are not necessary when banks cannot include their balance sheets in the money supply  
