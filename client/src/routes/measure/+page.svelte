@@ -9,8 +9,10 @@
 	let priceTag: HTMLDivElement;
 	let map: google.maps.Map;
 	let markers = [] as any[]; // todo: google.maps.marker.AdvancedMarkerElement does not expect setMap method
-	let currentWsClient: { dispose: () => void } | null = null;
 	let messageCount = 0;
+	let wsClient: any = null; // todo: graphql-ws Client type
+	let stop = false;
+	let defaultCoordinates = { lat: 39.8283, lng: -98.5795 }; // usa
 
 	async function subscribeGdp(
 		date: string,
@@ -18,32 +20,37 @@
 		region: string,
 		municipality: string | null
 	) {
-		// terminate previous websocket connection
-		if (currentWsClient) {
-			currentWsClient.dispose();
-			currentWsClient = null;
+		if (wsClient) {
+			stop = true;
+		} else {
+			wsClient = createWSClient({
+				url: b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string),
+				lazy: false
+			});
 		}
 
-		const wsClient = createWSClient({
-			url: b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string)
-		});
-		currentWsClient = wsClient;
-
-		const query = `subscription QueryGdp($date: String!, $country: String, $region: String, $municipality: String) {
-            queryGdp(date: $date, country: $country, region: $region, municipality: $municipality)
-        }`;
 		const variables: any = { date, country, region };
 		if (municipality) {
 			variables.municipality = municipality;
 		}
 
-		const subscription: any = wsClient.iterate({
-			query,
+		let subscription = wsClient.iterate({
+			query: `subscription QueryGdp($date: String!, $country: String, $region: String, $municipality: String) {
+				queryGdp(date: $date, country: $country, region: $region, municipality: $municipality)
+				}`,
 			variables
 		});
 
 		messageCount = 0;
 		for await (const { data } of subscription) {
+			if (stop) {
+				// console.log('stopping subscription');
+				stop = false;
+				break;
+			}
+			if (messageCount == 0) {
+				// console.log('starting subscription');
+			}
 			messageCount++;
 			price = data.queryGdp.toFixed(3);
 		}
@@ -57,6 +64,11 @@
 
 	async function handleSearch(event: Event) {
 		event.preventDefault();
+
+		if (searchQuery.trim() === '') {
+			resetMap();
+			return;
+		}
 
 		// parse location from search query
 		let location;
@@ -72,8 +84,8 @@
 			location = 'sacramento california';
 		}
 
-		const queryVars = parseQuery(location);
 		changeMapCenter(location);
+		const queryVars = parseQuery(location);
 		await subscribeGdp(queryVars.time, queryVars.country, queryVars.region, queryVars.municipality);
 	}
 
@@ -108,7 +120,7 @@
 		loader.load().then((google) => {
 			const { Map } = google.maps;
 			map = new Map(document.getElementById('map') as HTMLElement, {
-				center: { lat: 39.8283, lng: -98.5795 }, // usa coordinates
+				center: defaultCoordinates, // usa coordinates
 				zoom: 4,
 				mapId: '4504f8b37365c3d0'
 			});
@@ -124,6 +136,15 @@
 				}, 250); // fade in after 0.25 seconds
 			}
 		}, 100); // check every 100 milliseconds
+	}
+
+	function resetMap() {
+		if (map) {
+			markers.forEach((marker) => marker.setMap(null));
+			markers = [];
+			map.setCenter(defaultCoordinates);
+			map.setZoom(4);
+		}
 	}
 
 	function changeMapCenter(location: string) {

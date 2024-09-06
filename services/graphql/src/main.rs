@@ -6,21 +6,25 @@ use ::types::{
 };
 use ::wsclient::WsClient;
 use async_graphql::*;
-use async_graphql_axum::{GraphQL, GraphQLSubscription};
+use async_graphql_axum::{GraphQL, GraphQLProtocol, GraphQLWebSocket};
+use async_stream::stream;
 use aws_lambda_events::event::apigw::ApiGatewayV2httpRequestContext;
 use axum::{
+    extract::{State, WebSocketUpgrade},
     http::{HeaderMap, StatusCode},
     response::{self, IntoResponse},
     routing::get,
     Router,
 };
-use futures_util::{stream, stream::Stream};
+use futures_util::stream::Stream;
 use httpclient::HttpClient as Client;
+use log::debug;
 use serde_json::json;
 use shutdown::shutdown_signal;
-use std::{env, net::ToSocketAddrs, result::Result, task::Poll};
+use std::{env, net::ToSocketAddrs, result::Result};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
+use tungstenite::error::Error as WsError;
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 const GRAPHQL_RESOURCE: &str = "query";
@@ -198,16 +202,44 @@ impl Subscription {
         let resource = env::var("MEASURE_RESOURCE").unwrap();
         let uri = format!("{}/{}", base_uri, resource);
         let ws_client = WsClient::new(uri, "gdp".to_string(), date, country, region, municipality);
-        let mut socket = ws_client.connect();
 
-        // send socket messages to stream
-        stream::poll_fn(move |_cx| match socket.read() {
-            Ok(msg) => {
-                let gdp = msg.into_text().unwrap().parse::<f64>().unwrap();
-                Poll::Ready(Some(gdp))
+        stream! {
+            let mut measure_socket = match ws_client.connect() {
+                Ok(ws) => {
+                    debug!("measure websocket connection created");
+                    ws
+                }
+                Err(_e) => {
+                    debug!("measure webSocket connection failure: {:?}", _e);
+                    return;
+                }
+            };
+
+            loop {
+                match measure_socket.read() {
+                    Ok(msg) => {
+                        match msg {
+                            tungstenite::Message::Text(text) => {
+                                let gdp: f64 = serde_json::from_str(&text).unwrap();
+                                yield gdp;
+                            }
+                            _ => {
+                                debug!("received non-text message: {:?}", msg);
+                            }
+                        }
+                    }
+                    Err(WsError::ConnectionClosed) => {
+                        measure_socket.close(None).unwrap();
+                        debug!("measure websocket closed");
+                        break;
+                    }
+                    Err(e) => {
+                        debug!("measure message receipt failure: {:?}", e);
+                        break;
+                    }
+                }
             }
-            Err(_e) => Poll::Ready(None),
-        })
+        }
     }
 }
 
@@ -266,6 +298,21 @@ async fn graphiql() -> impl IntoResponse {
     )
 }
 
+async fn graphql_subscription(
+    State(schema): State<Schema<Query, Mutation, Subscription>>,
+    protocol: GraphQLProtocol,
+    ws: WebSocketUpgrade,
+) -> impl IntoResponse {
+    ws.protocols(http::ALL_WEBSOCKET_PROTOCOLS)
+        .on_upgrade(move |socket| async move {
+            // println!("connection opened");
+            GraphQLWebSocket::new(socket, schema, protocol)
+                .serve()
+                .await;
+            // println!("connection closed");
+        })
+}
+
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt().with_ansi(false).init();
@@ -285,11 +332,12 @@ async fn main() {
             readiness_check_path.as_str(), // absolute path so format not used
             get(|| async { StatusCode::OK }),
         )
-        .route_service(
+        .route(
             format!("/{}", SUBSCRIPTION_RESOURCE).as_str(),
-            GraphQLSubscription::new(schema),
+            get(graphql_subscription),
         )
-        .layer(CorsLayer::permissive());
+        .layer(CorsLayer::permissive())
+        .with_state(schema);
 
     let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
 

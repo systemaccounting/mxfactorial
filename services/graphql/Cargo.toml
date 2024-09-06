@@ -8,10 +8,7 @@ rust-version.workspace = true
 async-graphql = "7.0.0"
 async-graphql-axum = "7.0.0"
 axum = "0.7.4"
-tokio = { version = "1.35.1", features = [
-	"macros",
-	"rt-multi-thread",
-] }
+tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 types = { path = "../../crates/types" }
@@ -25,6 +22,9 @@ http = "1.0.0"
 shutdown = { path = "../../crates/shutdown" }
 futures-util = "0.3.30"
 wsclient = { path = "../../crates/wsclient" }
+tungstenite = { version = "0.24.0", default-features = false }
+async-stream = "0.3.5"
+log = "0.4.22"
 
 [target.x86_64-unknown-linux-musl.dependencies]
 # https://github.com/cross-rs/cross/wiki/Recipes#vendored
