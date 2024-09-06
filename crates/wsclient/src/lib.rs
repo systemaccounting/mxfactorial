@@ -18,9 +18,11 @@ impl WsClient {
         WsClient { uri }
     }
 
-    pub fn connect(&self) -> WebSocket<MaybeTlsStream<TcpStream>> {
-        let (socket, _) = connect(self.uri.query_string()).expect("failed to connect");
-        socket
+    pub fn connect(
+        &self,
+    ) -> Result<WebSocket<MaybeTlsStream<TcpStream>>, tungstenite::error::Error> {
+        let (ws_stream, _) = connect(self.uri.query_string())?;
+        Ok(ws_stream)
     }
 }
 
