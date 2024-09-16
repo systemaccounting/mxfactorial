@@ -19,6 +19,10 @@ HOST=http://$(LOCAL_ADDRESS)
 GRAPHQL_URI=$(HOST):$(shell yq '.services.graphql.env_var.set.GRAPHQL_PORT.default' $(PROJECT_CONF))
 B64_GRAPHQL_URI=$(shell if [ `uname -s` == 'Darwin' ]; then printf $(GRAPHQL_URI) | base64; else printf $(GRAPHQL_URI) | base64 -w 0; fi)
 NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
+GITHUB_ORG=$(shell yq '.[".github"].env_var.set.GITHUB_ORG.default' $(PROJECT_CONF))
+GITHUB_REPO_NAME=$(shell yq '.[".github"].env_var.set.GITHUB_REPO_NAME.default' $(PROJECT_CONF))
+GITHUB_REGISTRY=$(shell yq '.[".github"].workflows.env_var.set.GITHUB_REGISTRY.default' $(PROJECT_CONF))
+CONTAINER_REGISTRY=$(GITHUB_REGISTRY)/$(GITHUB_ORG)/$(GITHUB_REPO_NAME)/$(APP_NAME)
 
 dev:
 	@$(MAKE) start
@@ -158,6 +162,15 @@ up:
 
 down:
 	docker compose -f ../docker/compose.yaml down
+
+###################### k8s ######################
+
+build-k8s:
+	cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	docker build -f ./docker/client.Dockerfile -t $(CONTAINER_REGISTRY):latest .
+
+push-k8s:
+	docker push $(CONTAINER_REGISTRY):latest
 
 ###################### utils ######################
 
