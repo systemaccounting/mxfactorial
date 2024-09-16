@@ -3,6 +3,9 @@ FROM gitpod/workspace-full:latest
 ARG TF_VERSION=1.2.7
 
 RUN bash -lc "rustup default stable" && \
+	wget -O- https://carvel.dev/install.sh > install.sh && \
+	sudo bash install.sh && \
+	rm install.sh && \
 	go install github.com/mikefarah/yq/v4@latest && \
 	sudo apt-get install bc -y && \
 	sudo apt-get clean && \

@@ -5,8 +5,9 @@ ARG MIGRATE_VERSION=4.15.2
 ARG WATCH_VERSION=8.4.0
 ARG CARGO_LLVM_COV_VERSION=0.5.36
 
-RUN go install github.com/99designs/gqlgen@latest && \
-	go install github.com/golang/mock/mockgen@latest && \
+RUN wget -O- https://carvel.dev/install.sh > install.sh && \
+	sudo bash install.sh && \
+	rm install.sh && \
 	go install github.com/mikefarah/yq/v4@latest && \
 	chmod -R a+w /go/pkg && \
 	curl -fSsl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
