@@ -18,6 +18,9 @@ use rust_decimal::Decimal;
 use serde::Deserialize;
 use shutdown::shutdown_signal;
 use std::{env, net::SocketAddr};
+use http::StatusCode;
+
+const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
 fn redis_conn_uri() -> String {
     let redis_db = std::env::var("REDIS_DB").unwrap();
@@ -66,10 +69,19 @@ impl Params {
 
 #[tokio::main]
 async fn main() {
+    let readiness_check_path = env::var(READINESS_CHECK_PATH)
+        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+
     let conn_uri = DB::create_conn_uri_from_env_vars();
     let pool = DB::new_pool(&conn_uri).await;
 
-    let app = Router::new().route("/ws", get(ws_handler)).with_state(pool);
+    let app = Router::new()
+        .route("/ws", get(ws_handler))
+        .route(
+            readiness_check_path.as_str(), // absolute path so format not used
+            get(|| async { StatusCode::OK }),
+        )
+        .with_state(pool);
 
     let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
     let port = env::var("MEASURE_PORT").unwrap();
