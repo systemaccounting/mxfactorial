@@ -247,6 +247,7 @@ services:
       REDIS_USERNAME: default
       REDIS_PASSWORD: test
       MEASURE_PORT: 10010
+      READINESS_CHECK_PATH: "/healthz"
     depends_on:
       redis:
         condition: service_healthy
@@ -256,7 +257,5 @@ services:
     build:
       context: ../
       dockerfile: ./docker/client.Dockerfile
-      args:
-        - GRAPHQL_URI=${GRAPHQL_URI:-aHR0cDovL2xvY2FsaG9zdDoxMDAwMAo=}
     ports:
       - "10009:80"
