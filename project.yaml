@@ -228,6 +228,54 @@ infrastructure:
               TFSTATE_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-tfstate
+k8s:
+  type: lib
+  params: []
+  env_var:
+    set: null
+    get:
+      - BALANCE_BY_ACCOUNT_PORT
+      - PGDATABASE
+      - PGUSER
+      - PGPASSWORD
+      # - PGHOST # sets localhost instead of "postgres" in k8s
+      - PGPORT
+      - READINESS_CHECK_PATH
+      - GITHUB_REGISTRY
+      - GITHUB_ORG
+      - GITHUB_REPO_NAME
+      - REDIS_DB
+      # - REDIS_HOST # sets localhost instead of "redis" in k8s
+      - REDIS_PORT
+      - REDIS_USERNAME
+      - REDIS_PASSWORD
+      - GRAPHQL_PORT
+      - RULE_PORT
+      - REQUEST_CREATE_PORT
+      - REQUEST_APPROVE_PORT
+      - REQUEST_BY_ID_PORT
+      - REQUESTS_BY_ACCOUNT_PORT
+      - TRANSACTIONS_BY_ACCOUNT_PORT
+      - TRANSACTION_BY_ID_PORT
+      - MEASURE_PORT
+      - RETURN_RECORD_LIMIT
+  local:
+    type: lib
+    params: []
+    env_var:
+      set: null
+      get:
+        - CLIENT_PORT
+        - PGPORT
+        - GRAPHQL_PORT
+        - RULE_PORT
+        - REQUEST_CREATE_PORT
+        - REQUEST_APPROVE_PORT
+        - BALANCE_BY_ACCOUNT_PORT
+        - REQUEST_BY_ID_PORT
+        - REQUESTS_BY_ACCOUNT_PORT
+        - TRANSACTION_BY_ID_PORT
+        - TRANSACTIONS_BY_ACCOUNT_PORT
 migrations:
   type: lib
   params: []
@@ -648,6 +696,7 @@ services:
         - REDIS_USERNAME
         - REDIS_PASSWORD
         - MEASURE_PORT
+        - READINESS_CHECK_PATH
   auto-confirm:
     runtime: rust1.x
     min_code_cov: null
@@ -764,3 +813,7 @@ params: []
     os:
       osx:
         install: 'cargo install cargo-llvm-cov'
+  - name: ytt
+    os:
+      osx:
+        install: 'brew tap carvel-dev/carvel && brew install ytt'
