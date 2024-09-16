@@ -15,6 +15,11 @@ TFSTATE_EXT=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.defaul
 TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_EXT)
 COMPOSE_DIR=./docker
 NOHUP_LOG=$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
+REDIS_DB=$(shell yq '.services.event.env_var.set.REDIS_DB.default' $(PROJECT_CONF))
+REDIS_USERNAME=$(shell yq '.services.event.env_var.set.REDIS_USERNAME.default' $(PROJECT_CONF))
+REDIS_PASSWORD=$(shell yq '.services.event.env_var.set.REDIS_PASSWORD.default' $(PROJECT_CONF))
+REDIS_PORT=$(shell yq '.services.event.env_var.set.REDIS_PORT.default' $(PROJECT_CONF))
+REDIS_HOST=$(shell yq '.services.event.env_var.set.REDIS_HOST.default' $(PROJECT_CONF))
 
 # approx 10 minutes
 all:
@@ -150,6 +155,9 @@ clean:
 	@$(MAKE) --no-print-directory -C tests clean
 	@rm -f ./$(NOHUP_LOG)
 
+redis-uri:
+	@echo "redis://$(REDIS_USERNAME):$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)"
+
 ###################### docker ######################
 
 test-up:
@@ -248,7 +256,6 @@ insert:
 	@$(MAKE) -C ./migrations insert
 
 continue-insert:
-	bash scripts/manage-redis.sh --flush
 	bash scripts/insert-transactions.sh --continue
 
 ###################### secrets ######################

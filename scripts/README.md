@@ -338,3 +338,6 @@ lists apps configured in `project.yaml` with `deploy: true`
 
 ##### `test-all.sh`
 run all tests before before creating a pull request
+
+##### `set-k8s-ports.sh`
+changes ports set in `project.yaml` to 3xxxx for access through kubernetes [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport)

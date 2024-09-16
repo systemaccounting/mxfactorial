@@ -9,11 +9,20 @@ fi
 
 # https://stackoverflow.com/a/33826763
 while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        --app-name) APP_NAME="$2"; shift ;;
-        --env) ENV="$2"; shift ;;
-        *) echo "unknown parameter passed: $1"; exit 1 ;;
-    esac
+	case $1 in
+	--app-name)
+		APP_NAME="$2"
+		shift
+		;;
+	--env)
+		ENV="$2"
+		shift
+		;;
+	*)
+		echo "unknown parameter passed: $1"
+		exit 1
+		;;
+	esac
 	shift
 done
 
@@ -68,21 +77,21 @@ function set_default_values() {
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_URL//')
 			PORT_ENV_VAR="$SVC_NAME"_PORT
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL" >> $ENV_FILE
+			echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
 			continue
 		elif [[ "$s" == *'_URL' ]]; then
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_URL//')
 			PORT_ENV_VAR="$SVC_NAME"_PORT
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
+			echo "$s=$HOST:$PORT_VAL" >>$ENV_FILE
 		elif [[ "$s" == 'GRAPHQL_URI' ]]; then # todo: change GRAPHQL_URI to GRAPHQL_URL
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_URI//')
 			PORT_ENV_VAR="$SVC_NAME"_PORT
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
 			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
-				echo "$s=$GRAPHQL_URI" >> $ENV_FILE
+				echo "$s=$GRAPHQL_URI" >>$ENV_FILE
 			else
-				echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
+				echo "$s=$HOST:$PORT_VAL" >>$ENV_FILE
 			fi
 		elif [[ "$s" == 'GRAPHQL_SUBSCRIPTIONS_URI' ]]; then
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_SUBSCRIPTIONS_URI//')
@@ -90,18 +99,18 @@ function set_default_values() {
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
 			# todo: handle in scripts/set-uri-vars.sh
 			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
-				echo "$s=$GRAPHQL_URI" >> $ENV_FILE
+				echo "$s=$GRAPHQL_URI" >>$ENV_FILE
 			else
-				echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL/ws" >> $ENV_FILE
+				echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL/ws" >>$ENV_FILE
 			fi
 		elif [[ "$s" == 'CLIENT_URI' ]]; then # todo: change CLIENT_URI to CLIENT_URL
 			SVC_NAME=$(printf '%s' "$s" | sed 's/_URI//')
 			PORT_ENV_VAR="$SVC_NAME"_PORT
 			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
 			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
-				echo "$s=$CLIENT_URI" >> $ENV_FILE
+				echo "$s=$CLIENT_URI" >>$ENV_FILE
 			else
-				echo "$s=$HOST:$PORT_VAL" >> $ENV_FILE
+				echo "$s=$HOST:$PORT_VAL" >>$ENV_FILE
 			fi
 		elif [[ "$s" == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
 			continue # skip setting when ENV=local
@@ -110,7 +119,7 @@ function set_default_values() {
 			if [[ $ENV_VAR == 'null' ]]; then
 				ENV_VAR=
 			fi
-			echo $s=$ENV_VAR >> $ENV_FILE
+			echo $s=$ENV_VAR >>$ENV_FILE
 		fi
 	done
 }
@@ -129,7 +138,7 @@ function set_secrets() {
 		else
 			ENV_VAR=$(echo "$CONF_OBJ" | yq ".default")
 		fi
-		echo $s=$ENV_VAR >> $ENV_FILE
+		echo $s=$ENV_VAR >>$ENV_FILE
 		unset ENV_VAR
 	done
 }
@@ -137,9 +146,9 @@ function set_secrets() {
 function set_params() {
 	for p in ${PARAMS[@]}; do
 		if [[ $p == 'AWS_REGION' ]]; then
-			echo $p=$REGION >> $ENV_FILE
+			echo $p=$REGION >>$ENV_FILE
 		elif [[ $p == 'ENABLE_API_AUTH' ]]; then
-			echo ENABLE_API_AUTH=$ENABLE_API_AUTH >> $ENV_FILE
+			echo ENABLE_API_AUTH=$ENABLE_API_AUTH >>$ENV_FILE
 		fi
 	done
 }
@@ -159,10 +168,20 @@ fi
 
 # add ENV_ID back if was removed
 if [[ $ADD_BACK ]]; then
-	echo ENV_ID=$ENV_ID >> $ENV_FILE
+	echo ENV_ID=$ENV_ID >>$ENV_FILE
 fi
 
 set_params
+
+# ytt requires yaml format
+# convert $ENV_FILE to yaml if k8s dir is an $ENV_FILE substring
+if [[ $ENV_FILE == *'k8s/'* ]]; then
+	if [[ $(uname) == 'Darwin' ]]; then
+		sed -i '' 's/=/: /' $ENV_FILE
+	else
+		sed -i 's/=/: /' $ENV_FILE
+	fi
+fi
 
 if [[ ! -s $ENV_FILE ]]; then
 	rm -f $ENV_FILE

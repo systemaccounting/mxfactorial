@@ -35,8 +35,15 @@ function flush() {
 	REDIS_URI="redis://$REDIS_USERNAME:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/$REDIS_DB"
 	COMPOSE_PROJECT_NAME=$(yq '.name' ./docker/compose.yaml)
 	CONTAINER_NAME="$COMPOSE_PROJECT_NAME-redis-1"
+	PGPORT=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.PGPORT.default' $PROJECT_CONF)
 
-	docker exec -it $CONTAINER_NAME redis-cli --no-auth-warning -u $REDIS_URI FLUSHDB
+	# test for compose or k8s
+	if [[ "$PGPORT" == "5432" ]]; then
+		docker exec -it $CONTAINER_NAME redis-cli --no-auth-warning -u $REDIS_URI FLUSHDB
+	else
+		POD=$(kubectl get pods -l app=redis -o jsonpath='{.items[0].metadata.name}')
+		kubectl --stdin --tty exec $POD -- redis-cli --no-auth-warning -u $REDIS_URI FLUSHDB
+	fi
 }
 
 while [[ "$#" -gt 0 ]]; do

@@ -20,6 +20,12 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONF=project.yaml
+
+# temp set k8s ports if pods are running
+if [[ $(kubectl get pods | wc -l | xargs) -gt 3 ]]; then
+	bash scripts/set-k8s-ports.sh
+fi
+
 LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)
 HOST="http://$LOCAL_ADDRESS"
 REQUEST_CREATE_PORT=$(yq ".services.request-create.env_var.set.REQUEST_CREATE_PORT.default" $PROJECT_CONF)
@@ -42,12 +48,19 @@ export PGPORT=$(yq ".${ENV_VAR_PATH}.PGPORT.default" $PROJECT_CONF)
 
 # reset postgres in docker
 (
+	bash scripts/manage-redis.sh --flush
 	cd $MIGRATIONS_DIR
 	make resetdocker DB=test
 )
 echo "*** finished migrations"
 
 echo ""
+
+# reset ports if k8s
+if [[ $(kubectl get pods | wc -l | xargs) -gt 3 ]]; then
+	bash scripts/set-k8s-ports.sh --reset
+fi
+
 
 function request() {
 	local request="$1"

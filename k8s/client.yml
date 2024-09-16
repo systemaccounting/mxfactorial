@@ -1,0 +1,52 @@
+#@ load("@ytt:data", "data")
+#@ app = "client"
+#@ app_port = 80
+#@ image_version = "latest"
+#@ image = "{}/{}/{}/{}:{}".format(data.values.GITHUB_REGISTRY, data.values.GITHUB_ORG, data.values.GITHUB_REPO_NAME, app, image_version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #@ app + "-deployment"
+  labels:
+    app: #@ app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: #@ app
+  template:
+    metadata:
+      labels:
+        app: #@ app
+    spec:
+      containers:
+        - name: #@ app
+          image: #@ image
+          ports:
+            - containerPort: #@ app_port
+          env:
+            - name: GRAPHQL_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: client-config
+                  key: GRAPHQL_URI
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: #@ app
+spec:
+  selector:
+    app: #@ app
+  ports:
+    - protocol: TCP
+      port: #@ app_port
+      targetPort: #@ app_port
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: client-config
+data:
+  GRAPHQL_URI: aHR0cDovL2xvY2FsaG9zdDozMDAwMAo=
