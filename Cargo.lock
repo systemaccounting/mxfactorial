@@ -2651,6 +2651,7 @@ dependencies = [
  "axum 0.7.5",
  "fred",
  "futures",
+ "http 1.0.0",
  "pg",
  "rust_decimal",
  "serde",
