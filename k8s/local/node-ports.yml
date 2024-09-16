@@ -1,0 +1,166 @@
+#@ load("@ytt:data", "data")
+#@ def convert_to_node_port(port):
+#@   if port == 5432:
+#@     return 32345
+#@   end
+#@   port_str = str(port)
+#@   if len(port_str) == 5:
+#@     new_port_str = "3" + port_str[1:]
+#@     return int(new_port_str)
+#@   end
+#@   return port
+#@ end
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql-node-port
+spec:
+  selector:
+    app: graphql
+  ports:
+    - protocol: TCP
+      port: #@ data.values.GRAPHQL_PORT
+      targetPort: #@ data.values.GRAPHQL_PORT
+      nodePort: #@ convert_to_node_port(data.values.GRAPHQL_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rule-node-port
+spec:
+  selector:
+    app: rule
+  ports:
+    - protocol: TCP
+      port: #@ data.values.RULE_PORT
+      targetPort: #@ data.values.RULE_PORT
+      nodePort: #@ convert_to_node_port(data.values.RULE_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: request-create-node-port
+spec:
+  selector:
+    app: request-create
+  ports:
+    - protocol: TCP
+      port: #@ data.values.REQUEST_CREATE_PORT
+      targetPort: #@ data.values.REQUEST_CREATE_PORT
+      nodePort: #@ convert_to_node_port(data.values.REQUEST_CREATE_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: request-approve-node-port
+spec:
+  selector:
+    app: request-approve
+  ports:
+    - protocol: TCP
+      port: #@ data.values.REQUEST_APPROVE_PORT
+      targetPort: #@ data.values.REQUEST_APPROVE_PORT
+      nodePort: #@ convert_to_node_port(data.values.REQUEST_APPROVE_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: balance-by-account-node-port
+spec:
+  selector:
+    app: balance-by-account
+  ports:
+    - protocol: TCP
+      port: #@ data.values.BALANCE_BY_ACCOUNT_PORT
+      targetPort: #@ data.values.BALANCE_BY_ACCOUNT_PORT
+      nodePort: #@ convert_to_node_port(data.values.BALANCE_BY_ACCOUNT_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: request-by-id-node-port
+spec:
+  selector:
+    app: request-by-id
+  ports:
+    - protocol: TCP
+      port: #@ data.values.REQUEST_BY_ID_PORT
+      targetPort: #@ data.values.REQUEST_BY_ID_PORT
+      nodePort: #@ convert_to_node_port(data.values.REQUEST_BY_ID_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: requests-by-account-node-port
+spec:
+  selector:
+    app: requests-by-account
+  ports:
+    - protocol: TCP
+      port: #@ data.values.REQUESTS_BY_ACCOUNT_PORT
+      targetPort: #@ data.values.REQUESTS_BY_ACCOUNT_PORT
+      nodePort: #@ convert_to_node_port(data.values.REQUESTS_BY_ACCOUNT_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transaction-by-id-node-port
+spec:
+  selector:
+    app: transaction-by-id
+  ports:
+    - protocol: TCP
+      port: #@ data.values.TRANSACTION_BY_ID_PORT
+      targetPort: #@ data.values.TRANSACTION_BY_ID_PORT
+      nodePort: #@ convert_to_node_port(data.values.TRANSACTION_BY_ID_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transactions-by-account-node-port
+spec:
+  selector:
+    app: transactions-by-account
+  ports:
+    - protocol: TCP
+      port: #@ data.values.TRANSACTIONS_BY_ACCOUNT_PORT
+      targetPort: #@ data.values.TRANSACTIONS_BY_ACCOUNT_PORT
+      nodePort: #@ convert_to_node_port(data.values.TRANSACTIONS_BY_ACCOUNT_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-node-port
+spec:
+  selector:
+    app: client
+  ports:
+    - protocol: TCP
+      port: #@ data.values.CLIENT_PORT
+      targetPort: #@ data.values.CLIENT_PORT
+      nodePort: #@ convert_to_node_port(data.values.CLIENT_PORT)
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-node-port
+spec:
+  selector:
+    app: postgres
+  ports:
+    - protocol: TCP
+      port: #@ data.values.PGPORT
+      targetPort: #@ data.values.PGPORT
+      nodePort: #@ convert_to_node_port(data.values.PGPORT)
+  type: NodePort
