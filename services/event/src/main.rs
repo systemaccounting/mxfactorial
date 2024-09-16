@@ -50,13 +50,25 @@ async fn main() {
     let redis_uri = redis_conn_uri();
     let redis_config = RedisConfig::from_url(&redis_uri).unwrap();
     let redis_client = Builder::from_config(redis_config).build().unwrap();
-    redis_client.init().await.unwrap();
+
+    loop {
+        match redis_client.init().await {
+            Ok(_) => {
+                // println!("event connected to redis");
+                break;
+            }
+            Err(_e) => {
+                // println!("failed to connect to redis: {}", _e);
+                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+            }
+        }
+    }
 
     loop {
         let (client, mut connection) = match tokio_postgres::connect(pg_uri.as_str(), NoTls).await {
             Ok(conn) => conn,
             Err(_e) => {
-                // println!("failed to connect to postgres: {}", e);
+                // println!("failed to connect to postgres: {}", _e);
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
                 continue;
             }
