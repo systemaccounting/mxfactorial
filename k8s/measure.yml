@@ -1,0 +1,81 @@
+#@ load("@ytt:data", "data")
+#@ app = "measure"
+#@ app_port = data.values.MEASURE_PORT
+#@ image_version = "latest"
+#@ image = "{}/{}/{}/{}:{}".format(data.values.GITHUB_REGISTRY, data.values.GITHUB_ORG, data.values.GITHUB_REPO_NAME, app, image_version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #@ app + "-deployment"
+  labels:
+    app: #@ app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: #@ app
+  template:
+    metadata:
+      labels:
+        app: #@ app
+    spec:
+      containers:
+        - name: #@ app
+          image: #@ image
+          ports:
+            - containerPort: #@ app_port
+          env:
+            - name: PGDATABASE
+              value: #@ data.values.PGDATABASE
+            - name: PGUSER
+              value: #@ data.values.PGUSER
+            - name: PGPASSWORD
+              value: #@ data.values.PGPASSWORD
+            - name: PGHOST
+              value: postgres
+            - name: PGPORT
+              value: #@ "{}".format(data.values.PGPORT)
+            - name: REDIS_DB
+              value: #@ "{}".format(data.values.REDIS_DB)
+            - name: REDIS_HOST
+            #! todo: remove hardcode
+              value: redis
+            - name: REDIS_PORT
+              value: #@ "{}".format(data.values.REDIS_PORT)
+            - name: REDIS_USERNAME
+              value: #@ data.values.REDIS_USERNAME
+            - name: REDIS_PASSWORD
+              value: #@ data.values.REDIS_PASSWORD
+            - name: MEASURE_PORT
+              value: #@ "{}".format(app_port)
+            - name: READINESS_CHECK_PATH
+              value: #@ data.values.READINESS_CHECK_PATH
+          livenessProbe:
+            httpGet:
+              path: #@ data.values.READINESS_CHECK_PATH
+              port: #@ app_port
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: #@ data.values.READINESS_CHECK_PATH
+              port: #@ app_port
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: #@ app
+spec:
+  selector:
+    app: #@ app
+  ports:
+    - protocol: TCP
+      port: #@ app_port
+      targetPort: #@ app_port
+  type: ClusterIP

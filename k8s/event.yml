@@ -1,0 +1,54 @@
+#@ load("@ytt:data", "data")
+#@ app = "event"
+#@ image_version = "latest"
+#@ image = "{}/{}/{}/{}:{}".format(data.values.GITHUB_REGISTRY, data.values.GITHUB_ORG, data.values.GITHUB_REPO_NAME, app, image_version)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #@ app + "-deployment"
+  labels:
+    app: #@ app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: #@ app
+  template:
+    metadata:
+      labels:
+        app: #@ app
+    spec:
+      containers:
+        - name: #@ app
+          image: #@ image
+          env:
+            - name: PGDATABASE
+              value: #@ data.values.PGDATABASE
+            - name: PGUSER
+              value: #@ data.values.PGUSER
+            - name: PGPASSWORD
+              value: #@ data.values.PGPASSWORD
+            - name: PGHOST
+              value: postgres
+            - name: PGPORT
+              value: #@ "{}".format(data.values.PGPORT)
+            - name: REDIS_DB
+              value: #@ "{}".format(data.values.REDIS_DB)
+            - name: REDIS_HOST
+              #! todo: remove hardcode
+              value: redis
+            - name: REDIS_PORT
+              value: #@ "{}".format(data.values.REDIS_PORT)
+            - name: REDIS_USERNAME
+              value: #@ data.values.REDIS_USERNAME
+            - name: REDIS_PASSWORD
+              value: #@ data.values.REDIS_PASSWORD
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - echo
+                - -n
+            initialDelaySeconds: 5
+            periodSeconds: 5
