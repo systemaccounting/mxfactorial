@@ -32,14 +32,21 @@ spec:
             - name: PGPASSWORD
               value: #@ data.values.PGPASSWORD
             - name: PGHOST
+              #@ if data.values.PGHOST != "localhost":
+              value: #@ data.values.PGHOST
+              #@ else:
               value: postgres
+              #@ end
             - name: PGPORT
               value: #@ "{}".format(data.values.PGPORT)
             - name: REDIS_DB
               value: #@ "{}".format(data.values.REDIS_DB)
             - name: REDIS_HOST
-            #! todo: remove hardcode
+              #@ if data.values.REDIS_HOST != "localhost":
+              value: #@ data.values.REDIS_HOST
+              #@ else:
               value: redis
+              #@ end
             - name: REDIS_PORT
               value: #@ "{}".format(data.values.REDIS_PORT)
             - name: REDIS_USERNAME

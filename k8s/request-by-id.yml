@@ -32,7 +32,11 @@ spec:
             - name: PGPASSWORD
               value: #@ data.values.PGPASSWORD
             - name: PGHOST
+              #@ if data.values.PGHOST != "localhost":
+              value: #@ data.values.PGHOST
+              #@ else:
               value: postgres
+              #@ end
             - name: PGPORT
               value: #@ "{}".format(data.values.PGPORT)
             - name: PG_MAX_CONNECTIONS
