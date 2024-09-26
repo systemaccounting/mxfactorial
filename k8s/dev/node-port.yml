@@ -1,0 +1,19 @@
+#@ load("@ytt:data", "data")
+#@ def convert_to_node_port(port):
+#@   port_str = str(port)
+#@   new_port_str = "3" + port_str[1:]
+#@   return int(new_port_str)
+#@ end
+apiVersion: v1
+kind: Service
+metadata:
+  name: measure-node-port
+spec:
+  selector:
+    app: measure
+  ports:
+    - protocol: TCP
+      port: #@ data.values.MEASURE_PORT
+      targetPort: #@ data.values.MEASURE_PORT
+      nodePort: #@ convert_to_node_port(data.values.MEASURE_PORT)
+  type: NodePort

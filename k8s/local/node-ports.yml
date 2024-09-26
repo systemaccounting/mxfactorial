@@ -164,3 +164,17 @@ spec:
       targetPort: #@ data.values.PGPORT
       nodePort: #@ convert_to_node_port(data.values.PGPORT)
   type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: measure-node-port
+spec:
+  selector:
+    app: measure
+  ports:
+    - protocol: TCP
+      port: #@ data.values.MEASURE_PORT
+      targetPort: #@ data.values.MEASURE_PORT
+      nodePort: #@ convert_to_node_port(data.values.MEASURE_PORT)
+  type: NodePort
