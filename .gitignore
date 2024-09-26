@@ -81,3 +81,6 @@ migrations/dumps/*.sql
 
 # vscode
 tests/thunder-tests/thunderActivity.json
+
+# ssh
+k8s/*.pem
