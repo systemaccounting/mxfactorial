@@ -198,9 +198,30 @@ infrastructure:
               READINESS_CHECK_PATH:
                 ssm: service/lambda/readiness_check_path
                 default: /healthz
-              WEB_ADAPTER_LAYER_VERSION:
-                ssm:
-                default: 17
+        microk8s:
+          env_var:
+            set:
+              MICROK8S_SSH_PUB_KEY:
+                ssm: ops/ec2/microk8s/ssh/pub_key
+                default: null
+              MICROK8S_SSH_PRIV_KEY:
+                ssm: ops/ec2/microk8s/ssh/priv_key
+                default: null
+              MICROK8S_SSH_USER:
+                ssm: null
+                default: ubuntu
+              MICROK8S_SSH_HOST:
+                ssm: ops/ec2/microk8s/ssh/host
+                default: null
+              MICROK8S_SSH_PORT:
+                ssm: null
+                default: 22
+              MICROK8S_SSH_KEY_NAME_PREFIX:
+                ssm: null
+                default: microk8s
+              MICROK8S_MANIFESTS_DIR:
+                ssm: null
+                default: k8s
         project-storage:
           env_var:
             set:
@@ -229,36 +250,6 @@ infrastructure:
                 ssm: null
                 default: mxfactorial-tfstate
 k8s:
-  type: lib
-  params: []
-  env_var:
-    set: null
-    get:
-      - BALANCE_BY_ACCOUNT_PORT
-      - PGDATABASE
-      - PGUSER
-      - PGPASSWORD
-      # - PGHOST # sets localhost instead of "postgres" in k8s
-      - PGPORT
-      - READINESS_CHECK_PATH
-      - GITHUB_REGISTRY
-      - GITHUB_ORG
-      - GITHUB_REPO_NAME
-      - REDIS_DB
-      # - REDIS_HOST # sets localhost instead of "redis" in k8s
-      - REDIS_PORT
-      - REDIS_USERNAME
-      - REDIS_PASSWORD
-      - GRAPHQL_PORT
-      - RULE_PORT
-      - REQUEST_CREATE_PORT
-      - REQUEST_APPROVE_PORT
-      - REQUEST_BY_ID_PORT
-      - REQUESTS_BY_ACCOUNT_PORT
-      - TRANSACTIONS_BY_ACCOUNT_PORT
-      - TRANSACTION_BY_ID_PORT
-      - MEASURE_PORT
-      - RETURN_RECORD_LIMIT
   local:
     type: lib
     params: []
@@ -276,6 +267,42 @@ k8s:
         - REQUESTS_BY_ACCOUNT_PORT
         - TRANSACTION_BY_ID_PORT
         - TRANSACTIONS_BY_ACCOUNT_PORT
+        - PGDATABASE
+        - PGUSER
+        - PGPASSWORD
+        - PGHOST
+        - READINESS_CHECK_PATH
+        - GITHUB_REGISTRY
+        - GITHUB_ORG
+        - GITHUB_REPO_NAME
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
+        - MEASURE_PORT
+        - RETURN_RECORD_LIMIT
+  dev:
+    type: lib
+    params: []
+    env_var:
+      set: null
+      get:
+        - PGDATABASE
+        - PGUSER
+        - PGPASSWORD
+        - PGHOST
+        - PGPORT
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
+        - MEASURE_PORT
+        - READINESS_CHECK_PATH
+        - GITHUB_REGISTRY
+        - GITHUB_ORG
+        - GITHUB_REPO_NAME
 migrations:
   type: lib
   params: []

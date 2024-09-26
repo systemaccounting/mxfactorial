@@ -57,7 +57,7 @@ module "dev" {
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres14"
-  rds_engine_version              = "14.10"
+  rds_engine_version              = "14.12"
   rds_instance_name               = "${local.RDS_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
 
@@ -72,6 +72,11 @@ module "dev" {
 
   // apigw v2
   enable_api_auto_deploy = true
+
+  ############### k8s ###############
+  
+  microk8s_instance_type = "t2.medium"
+  enable_microk8s = false
 
   ############### client ###############
 

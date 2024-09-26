@@ -20,3 +20,5 @@ variable "env_id" {}
 variable "build_db" { type = bool }
 variable "build_cache" { type = bool }
 variable "readiness_check_path" { default = "/healthz" } // todo: assign from root project.yaml
+variable "microk8s_instance_type" {}
+variable "enable_microk8s" { type = bool }
