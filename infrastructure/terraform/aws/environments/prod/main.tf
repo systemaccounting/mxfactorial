@@ -86,6 +86,11 @@ module "prod" {
   // apigw v2
   enable_api_auto_deploy = true
 
+  ############### k8s ###############
+
+  microk8s_instance_type = "t2.medium"
+  enable_microk8s = false
+
   ############### client ###############
 
   client_origin_bucket_name = "${local.ORIGIN_PREFIX}-${local.ID_ENV}"

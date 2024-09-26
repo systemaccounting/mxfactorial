@@ -341,3 +341,6 @@ run all tests before before creating a pull request
 
 ##### `set-k8s-ports.sh`
 changes ports set in `project.yaml` to 3xxxx for access through kubernetes [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport)
+
+#### `get-ssh-key.sh`
+gets ssh key from ssm and writes it to disk
