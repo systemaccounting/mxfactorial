@@ -12,13 +12,13 @@ use axum::{
 };
 use fred::prelude::*;
 use futures::{sink::SinkExt, stream::StreamExt};
+use http::StatusCode;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
 use rust_decimal::prelude::*;
 use rust_decimal::Decimal;
 use serde::Deserialize;
 use shutdown::shutdown_signal;
 use std::{env, net::SocketAddr};
-use http::StatusCode;
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
@@ -69,6 +69,10 @@ impl Params {
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
+
     let readiness_check_path = env::var(READINESS_CHECK_PATH)
         .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
 
