@@ -1578,7 +1578,7 @@ mod integration_tests {
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]
     #[tokio::test]
-    async fn it_crates_a_selects_approvers_query() {
+    async fn it_creates_a_selects_approvers_query() {
         _before_each();
 
         let test_conn = _get_conn().await;
