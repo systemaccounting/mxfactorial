@@ -220,4 +220,4 @@ the rule service returns a `transaction` object with `transaction_items` listing
 ### prepare for terraform
 `make initial-deploy ENV=dev` to zip and put source in s3 only
 
-terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infrastructure/terraform/aws/modules/environment/v001/lambda-services.tf#L215-L234
+terraform: https://github.com/systemaccounting/mxfactorial/blob/d45b5dcb214eddb531819d2206786fbdd5c9033a/infra/terraform/aws/modules/environment/v001/lambda-services.tf#L26-L40

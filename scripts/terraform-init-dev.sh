@@ -7,7 +7,7 @@ if [[ "$#" -ne 4 ]]; then
 	use:
 	bash scripts/terraform-init-dev.sh \
 		--key env_infra.tfstate \
-		--dir infrastructure/terraform/aws/environments/dev
+		--dir infra/terraform/aws/environments/dev
 	EOF
 	exit 1
 fi
@@ -23,8 +23,8 @@ done
 
 ENV=dev
 PROJECT_CONF=project.yaml
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
-TFSTATE_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+TFSTATE_BUCKET_PREFIX=$(yq '.infra.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE=$ENV_FILE_NAME
 

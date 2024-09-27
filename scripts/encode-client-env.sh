@@ -3,7 +3,7 @@
 PROJECT_CONF=project.yaml
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE="$ENV_FILE_NAME"
-ENABLE_API_AUTH=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $PROJECT_CONF)
+ENABLE_API_AUTH=$(yq '.infra.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $PROJECT_CONF)
 
 cd client
 

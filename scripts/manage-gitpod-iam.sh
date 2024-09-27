@@ -15,7 +15,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONF=project.yaml
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 IAM_USER=$(yq '.scripts.env_var.set.IAM_USER.default' $PROJECT_CONF)
 USER_POLICY_ARN=$(yq '.scripts.env_var.set.USER_POLICY_ARN.default' $PROJECT_CONF)
 

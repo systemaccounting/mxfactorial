@@ -16,10 +16,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONF=project.yaml
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 ENV_ID=$(source scripts/print-env-id.sh)
-RDS_INSTANCE_NAME_PREFIX=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.RDS_INSTANCE_NAME_PREFIX.default' $PROJECT_CONF)
+RDS_INSTANCE_NAME_PREFIX=$(yq '.infra.terraform.aws.modules.environment.env_var.set.RDS_INSTANCE_NAME_PREFIX.default' $PROJECT_CONF)
 RDS_INSTANCE_NAME="$RDS_INSTANCE_NAME_PREFIX-$ENV_ID-$ENV"
 
 if [[ "$START" -eq 1 ]]; then

@@ -75,7 +75,7 @@ resource "aws_security_group" "default" {
 
 data "aws_db_subnet_group" "default" {
   # todo: replace hardcoded "db-subnet-group" prefix with variable here and
-  # in infrastructure/terraform/aws/modules/environment/v001/rds.tf
+  # in infra/terraform/aws/modules/environment/v001/rds.tf
   name = "db-subnet-group-${local.ID_ENV}"
 }
 

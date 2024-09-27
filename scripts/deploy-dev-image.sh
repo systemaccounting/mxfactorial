@@ -19,7 +19,7 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONF=project.yaml
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 ENV=dev
 ENV_ID=$(source scripts/print-env-id.sh)
 ID_ENV="$ENV_ID/$ENV"

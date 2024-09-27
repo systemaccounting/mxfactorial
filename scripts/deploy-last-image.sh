@@ -21,7 +21,7 @@ done
 PROJECT_CONF=project.yaml
 ID_ENV="$ENV_ID-$ENV"
 ID_ENV_PREFIX="$ENV_ID/$ENV"
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 IMAGE_NAME="$ID_ENV_PREFIX/$APP_NAME"
 LAMBDA_NAME="$APP_NAME-$ID_ENV"

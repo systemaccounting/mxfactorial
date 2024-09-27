@@ -7,11 +7,11 @@ endif
 PROJECT_CONF=project.yaml
 SECRETS=$(shell yq '.env_var.get[]' $(PROJECT_CONF))
 ENV_VARS=$(SECRETS)
-REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
+REGION=$(shell yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
 ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
-TFSTATE_ENV_SUFFIX=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $(PROJECT_CONF))
-TFSTATE_EXT=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.default' $(PROJECT_CONF))
+TFSTATE_ENV_SUFFIX=$(shell yq '.infra.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $(PROJECT_CONF))
+TFSTATE_EXT=$(shell yq '.infra.terraform.env_var.set.TFSTATE_EXT.default' $(PROJECT_CONF))
 TFSTATE_ENV_FILE=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_EXT)
 COMPOSE_DIR=./docker
 NOHUP_LOG=$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
@@ -109,18 +109,18 @@ delete-dev:
 	bash scripts/delete-dev-env.sh
 
 delete-dev-state:
-	(cd infrastructure/terraform/aws/environments/dev; rm -rf .terraform* .tfplan*)
+	(cd infra/terraform/aws/environments/dev; rm -rf .terraform* .tfplan*)
 
 init-dev:
 	bash scripts/terraform-init-dev.sh \
 		--key $(TFSTATE_ENV_FILE) \
-		--dir infrastructure/terraform/aws/environments/dev
+		--dir infra/terraform/aws/environments/dev
 
 set-env-id:
 	$(MAKE) resume-dev
 
 resume-dev:
-	$(MAKE) -C infrastructure/terraform/aws/environments/dev resume
+	$(MAKE) -C infra/terraform/aws/environments/dev resume
 
 new-iam:
 	bash scripts/manage-gitpod-iam.sh --new

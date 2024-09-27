@@ -23,10 +23,10 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONF=project.yaml
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 ENV=dev
 ID_ENV="$ENV_ID-$ENV"
-ARTIFACTS_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default' $PROJECT_CONF)
+ARTIFACTS_BUCKET_PREFIX=$(yq '.infra.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default' $PROJECT_CONF)
 ARTIFACTS_BUCKET="$ARTIFACTS_BUCKET_PREFIX-$ID_ENV"
 SERVICES_ZIP=$(yq '.scripts.env_var.set.SERVICES_ZIP.default' $PROJECT_CONF)
 SERVICES_DIR=$(echo $SERVICES_ZIP | sed 's/.zip//')

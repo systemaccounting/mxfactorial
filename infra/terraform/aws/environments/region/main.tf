@@ -1,6 +1,6 @@
 locals {
   PROJECT_CONF = yamldecode(file("../../../../../project.yaml"))
-  REGION       = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default
+  REGION       = local.PROJECT_CONF.infra.terraform.aws.modules.environment.env_var.set.REGION.default
 }
 
 provider "aws" {

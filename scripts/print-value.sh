@@ -15,8 +15,8 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONF=project.yaml
-SSM_VERSION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+SSM_VERSION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 CONF_OBJ=$(yq "... | select(has(\"$VAR\")).$VAR" $PROJECT_CONF)
 
 IS_AVAILABLE=$(source scripts/list-env-vars.sh | grep -e "^$VAR$" | wc -l | xargs)

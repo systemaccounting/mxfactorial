@@ -8,7 +8,7 @@ add and edit by assigning variables from root `project.yaml` to avoid reconcilin
 
 `project.yaml`
 ```yaml
-infrastructure:
+infra:
   terraform:
     aws:
       modules:
@@ -19,14 +19,14 @@ infrastructure:
                 default: mxfactorial-artifacts
 ```
 
-`infrastructure/terraform/aws/environments/prod/main.tf`
+`infra/terraform/aws/environments/prod/main.tf`
 ```
-ARTIFACTS_BUCKET_PREFIX = jsondecode(file("../../../../../project.yaml")).infrastructure.terraform.aws.modules.project-storage.env_var.set.ARTIFACTS_BUCKET_PREFIX.default
+ARTIFACTS_BUCKET_PREFIX = jsondecode(file("../../../../../project.yaml")).infra.terraform.aws.modules.project-storage.env_var.set.ARTIFACTS_BUCKET_PREFIX.default
 ```
 
 `scripts/put-object.sh`
 ```sh
-ARTIFACTS_BUCKET_PREFIX=$(yq ".infrastructure.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default" project.yaml)
+ARTIFACTS_BUCKET_PREFIX=$(yq ".infra.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default" project.yaml)
 ```
 
 \*scripts assume **project root** as initial current working directory
@@ -246,7 +246,7 @@ update lambda with latest ecr repository image
 
 ##### `import-tf-init-env.sh`
 
-imports resources into the `infrastructure/terraform/aws/environments/init-$ENV`terraform configuration files
+imports resources into the `infra/terraform/aws/environments/init-$ENV`terraform configuration files
 
 ##### `rust-coverage.sh`
 
@@ -322,7 +322,7 @@ adds a [$RANDOM](https://tldp.org/LDP/abs/html/randomvar.html) `ENV_ID` variable
 deletes the `ENV_ID` variable from `.env` in project root
 
 ##### `delete-api-log-perms.sh`
-deletes the api gateway logging permissions added in `infrastructure/terraform/aws/environments/region/main.tf`
+deletes the api gateway logging permissions added in `infra/terraform/aws/environments/region/main.tf`
 
 ##### `enable-pg-notice.sh`
 sets [log_min_messages](https://www.postgresql.org/docs/current/runtime-config-logging.html#RUNTIME-CONFIG-LOGGING-WHEN) to notice in docker postgres

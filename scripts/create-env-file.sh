@@ -57,11 +57,11 @@ if [[ $ENV != 'local' ]]; then
 	ENV_ID=$(source scripts/print-env-id.sh)
 fi
 
-SSM_VERSION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+SSM_VERSION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 SECRETS=($(yq "$APP_CONF_PATH.env_var.get | join(\" \")" $PROJECT_CONF))
 PARAMS=($(yq "$APP_CONF_PATH.params | join(\" \")" $PROJECT_CONF))
-ENABLE_API_AUTH=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $PROJECT_CONF)
+ENABLE_API_AUTH=$(yq '.infra.terraform.aws.modules.environment.env_var.set.ENABLE_API_AUTH.default' $PROJECT_CONF)
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE="$APP_DIR_PATH/$ENV_FILE_NAME"
 LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)

@@ -45,7 +45,7 @@ REDIS_HOST=$(yq '.services.event.env_var.set.REDIS_HOST.default' $PROJECT_CONF)
 REDIS_URI="redis://$REDIS_USERNAME:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/$REDIS_DB"
 COMPOSE_PROJECT_NAME=$(yq '.name' ./docker/compose.yaml)
 CONTAINER_NAME="$COMPOSE_PROJECT_NAME-redis-1"
-PGPORT=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.PGPORT.default' $PROJECT_CONF)
+PGPORT=$(yq '.infra.terraform.aws.modules.environment.env_var.set.PGPORT.default' $PROJECT_CONF)
 
 # reset ports if k8s
 if [[ $(kubectl get pods | wc -l | xargs) -gt 3 ]]; then

@@ -7,10 +7,10 @@
 **/*.backup
 **/*lock.info
 **/.terraform/
-infrastructure/terraform/env-id/.terraform.*
-infrastructure/terraform/aws/environments/region/.terraform*
-infrastructure/terraform/aws/environments/init-dev/.terraform*
-infrastructure/terraform/aws/environments/dev/.terraform*
+infra/terraform/env-id/.terraform.*
+infra/terraform/aws/environments/region/.terraform*
+infra/terraform/aws/environments/init-dev/.terraform*
+infra/terraform/aws/environments/dev/.terraform*
 
 ## linux
 nohup.out
@@ -53,8 +53,8 @@ services/**/bootstrap
 # aws-cdk
 .cdk.staging
 cdk.out
-infrastructure/aws-cdk/**/*.js
-infrastructure/aws-cdk/**/*.d.ts
+infra/aws-cdk/**/*.js
+infra/aws-cdk/**/*.d.ts
 
 # ipython
 .ipynb_checkpoints

@@ -19,7 +19,7 @@ done
 
 PROJECT_CONF=project.yaml
 ENV_ID=$(source scripts/print-env-id.sh)
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 UNSORTED_FUNCTIONS=($(aws lambda list-functions \
 	--region $REGION \

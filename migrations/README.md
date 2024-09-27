@@ -67,7 +67,7 @@ test db = `./schema` + `./seed` + `./testseed`
 1. navigate to `/aws/lambda/go-migrate-faas-dev` log group in cloudwatch to view lambda logs
 
 ### create a TEST database in postgres rds from lambda
-1. provision a terraform stack, e.g. `infrastructure/terraform/aws/environments/dev`
+1. provision a terraform stack, e.g. `infra/terraform/aws/environments/dev`
 1. set the `MIGRATION_LAMBDA_NAME` variable in `mirations/makefile`
 1. `make lambda-up-all DB=test ENV=dev BRANCH=199/db-item-transaction` deploys all migration directories
 1. `make lambda-down-all DB=test ENV=dev BRANCH=199/db-item-transaction` removes all migrations
@@ -76,7 +76,7 @@ test db = `./schema` + `./seed` + `./testseed`
 \* ***includes** `./testseed` migrations*
 
 ### create a PROD database in postgres rds from lambda
-1. provision a terraform stack, e.g. `infrastructure/terraform/aws/environments/prod`
+1. provision a terraform stack, e.g. `infra/terraform/aws/environments/prod`
 1. set the `MIGRATION_LAMBDA_NAME` variable in `mirations/makefile`
 1. `make lambda-up-all DB=prod ENV=prod BRANCH=199/db-item-transaction` up migrates all versions from checked in `./schema` and `./seed` migration directories
 1. `make lambda-down-all DB=prod ENV=prod BRANCH=199/db-item-transaction` deploys all down migrations from the checked in `./schema` and `./seed` directories

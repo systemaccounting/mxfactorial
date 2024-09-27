@@ -27,7 +27,7 @@ PROJECT_CONF=project.yaml
 ENV_ID=$(source scripts/print-env-id.sh)
 ID_ENV="$ENV_ID-$ENV"
 LAMBDA_NAME="$APP_NAME-$ID_ENV"
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 LAST_MOD=$(aws lambda update-function-code \
 		--function-name="$LAMBDA_NAME" \
