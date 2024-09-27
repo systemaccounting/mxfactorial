@@ -13,4 +13,4 @@ deploys migrations in `/mxfactorial/migrations/$DESIRED_MIGRATION_DIRECTORY` to 
 #### deploy migrations
 1. see `/mxfactorial/migrations/README.md`
 
-terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infrastructure/terraform/aws/modules/environment/v001/go-migrate.tf
+terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infra/terraform/aws/modules/environment/v001/go-migrate.tf

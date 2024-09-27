@@ -32,8 +32,8 @@ done
 PROJECT_CONF=project.yaml
 ENV_ID=$(source scripts/print-env-id.sh)
 ID_ENV="$ENV_ID-$ENV"
-SSM_VERSION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+SSM_VERSION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 KEY_PATH="$DIR/$ID_ENV.pem"
 
 if [[ -f $KEY_PATH ]]; then

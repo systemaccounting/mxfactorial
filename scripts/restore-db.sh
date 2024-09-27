@@ -24,7 +24,7 @@ PROJECT_CONF=project.yaml
 DUMP_PATH=$(yq '.migrations.dumps.env_var.set.TESTSEED_DUMP_PATH.default' $PROJECT_CONF)
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE="$ENV_FILE_NAME"
-PG_CONF_PATH='.infrastructure.terraform.aws.modules.environment.env_var.set'
+PG_CONF_PATH='.infra.terraform.aws.modules.environment.env_var.set'
 
 if [[ $DUMP_RDS ]]; then
 	pushd migrations >/dev/null

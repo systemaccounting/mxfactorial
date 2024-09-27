@@ -8,8 +8,8 @@ BUILD_START_TIME=$(date +%s)
 
 ENV=dev
 PROJECT_CONF=project.yaml
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
-TFSTATE_BUCKET_PREFIX=$(yq '.infrastructure.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+TFSTATE_BUCKET_PREFIX=$(yq '.infra.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE=$ENV_FILE_NAME
 
@@ -23,17 +23,17 @@ if [[ -z $ENV_ID ]]; then
 fi
 
 ENV_ID=$(source ./scripts/print-env-id.sh)
-TFSTATE_EXT=$(yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.default' $PROJECT_CONF)
-TFSTATE_APIGW_SUFFIX=$(yq '.infrastructure.terraform.aws.environments.region.env_var.set.TFSTATE_APIGW_SUFFIX.default' $PROJECT_CONF)
+TFSTATE_EXT=$(yq '.infra.terraform.env_var.set.TFSTATE_EXT.default' $PROJECT_CONF)
+TFSTATE_APIGW_SUFFIX=$(yq '.infra.terraform.aws.environments.region.env_var.set.TFSTATE_APIGW_SUFFIX.default' $PROJECT_CONF)
 TFSTATE_APIGW="$TFSTATE_APIGW_SUFFIX".$TFSTATE_EXT
-TFSTATE_ENV_SUFFIX=$(yq '.infrastructure.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $PROJECT_CONF)
+TFSTATE_ENV_SUFFIX=$(yq '.infra.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $PROJECT_CONF)
 TFSTATE_ENV="$TFSTATE_ENV_SUFFIX".$TFSTATE_EXT
 
 ID_ENV="$ENV_ID-$ENV"
 TFSTATE_BUCKET="$TFSTATE_BUCKET_PREFIX-$ID_ENV"
 TFPLAN_FILE=.tfplan
 
-pushd infrastructure/terraform/aws/environments/init-dev
+pushd infra/terraform/aws/environments/init-dev
 
 terraform init
 
@@ -46,9 +46,9 @@ function apply_agigw_logging_perm() {
 
 	source ./scripts/terraform-init-dev.sh \
 		--key "$TFSTATE_APIGW" \
-		--dir infrastructure/terraform/aws/environments/region
+		--dir infra/terraform/aws/environments/region
 
-	pushd infrastructure/terraform/aws/environments/region
+	pushd infra/terraform/aws/environments/region
 
 	printf "\n${YELLOW}*** provisioning $ID_ENV api gateway logging permission and saving in $TFSTATE_APIGW${NOCOLOR}\n\n"
 	terraform apply
@@ -84,9 +84,9 @@ make --no-print-directory all CMD=initial-deploy ENV=dev
 
 source ./scripts/terraform-init-dev.sh \
 	--key "$TFSTATE_ENV" \
-	--dir infrastructure/terraform/aws/environments/dev
+	--dir infra/terraform/aws/environments/dev
 
-pushd infrastructure/terraform/aws/environments/dev
+pushd infra/terraform/aws/environments/dev
 
 printf "\n${YELLOW}*** creating terraform plan for $ID_ENV infrastructure${NOCOLOR}\n\n"
 terraform plan -out $TFPLAN_FILE

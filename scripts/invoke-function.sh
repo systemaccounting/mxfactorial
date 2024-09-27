@@ -35,7 +35,7 @@ LAMBDA_INVOKE_LOG_FILE_NAME=$(yq '.services.env_var.set.LAMBDA_INVOKE_LOG.defaul
 
 LAMBDA_INVOKE_LOG="$LAMBDA_INVOKE_LOG_FILE_PATH/$LAMBDA_INVOKE_LOG_FILE_NAME"
 
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 aws lambda invoke \
 	--region $REGION \

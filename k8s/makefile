@@ -1,9 +1,9 @@
 RELATIVE_PROJECT_ROOT_PATH=..
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
-SSH_KEY_SSM_SUFFIX=$(shell yq '.infrastructure.terraform.aws.modules.microk8s.env_var.set.MICROK8S_SSH_PRIV_KEY.ssm' $(PROJECT_CONF))
-MICROK8S_SSH_KEY_NAME_PREFIX=$(shell yq '.infrastructure.terraform.aws.modules.microk8s.env_var.set.MICROK8S_SSH_KEY_NAME_PREFIX.default' $(PROJECT_CONF))
-MICROK8S_SSH_USER=$(shell yq '.infrastructure.terraform.aws.modules.microk8s.env_var.set.MICROK8S_SSH_USER.default' $(PROJECT_CONF))
-MICROK8S_MANIFESTS_DIR=$(shell yq '.infrastructure.terraform.aws.modules.microk8s.env_var.set.MICROK8S_MANIFESTS_DIR.default' $(PROJECT_CONF))
+SSH_KEY_SSM_SUFFIX=$(shell yq '.infra.terraform.aws.modules.microk8s.env_var.set.MICROK8S_SSH_PRIV_KEY.ssm' $(PROJECT_CONF))
+MICROK8S_SSH_KEY_NAME_PREFIX=$(shell yq '.infra.terraform.aws.modules.microk8s.env_var.set.MICROK8S_SSH_KEY_NAME_PREFIX.default' $(PROJECT_CONF))
+MICROK8S_SSH_USER=$(shell yq '.infra.terraform.aws.modules.microk8s.env_var.set.MICROK8S_SSH_USER.default' $(PROJECT_CONF))
+MICROK8S_MANIFESTS_DIR=$(shell yq '.infra.terraform.aws.modules.microk8s.env_var.set.MICROK8S_MANIFESTS_DIR.default' $(PROJECT_CONF))
 
 # avoid assigning ENV_ID on local commands or when ENV is not assigned
 ifneq ($(origin ENV), undefined)

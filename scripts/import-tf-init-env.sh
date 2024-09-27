@@ -22,7 +22,7 @@ ENV_ID=$(source scripts/print-env-id.sh)
 
 ID_ENV="$ENV_ID-$ENV"
 
-cd infrastructure/terraform/aws/environments/init-$ENV
+cd infra/terraform/aws/environments/init-$ENV
 
 terraform init
 

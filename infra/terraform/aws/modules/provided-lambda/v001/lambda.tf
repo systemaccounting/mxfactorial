@@ -7,7 +7,7 @@ locals {
   SERVICE_NAME_LOWER   = replace(var.service_name, "-", "_")
   LOG_GROUP_NAME       = "/aws/lambda/${aws_lambda_function.default.function_name}"
   PROJECT_CONF         = yamldecode(file("../../../../../project.yaml"))
-  ENVIRONMENT_CONF     = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
+  ENVIRONMENT_CONF     = local.PROJECT_CONF.infra.terraform.aws.modules.environment.env_var.set
   READINESS_CHECK_PATH = local.ENVIRONMENT_CONF.READINESS_CHECK_PATH.default
 }
 

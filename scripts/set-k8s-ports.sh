@@ -56,7 +56,7 @@ function set() {
 	done
 
 	# set PGPORT separately to ./k8s/postgres-node-port.yml:spec.ports.containerPort
-	yq -i ".infrastructure.terraform.aws.modules.environment.env_var.set.PGPORT.default = $pgport" project.yaml
+	yq -i ".infra.terraform.aws.modules.environment.env_var.set.PGPORT.default = $pgport" project.yaml
 
 	# remove trailing newline if empty
 	if [[ -z $(tail -c 1 $PROJECT_CONF) ]]; then

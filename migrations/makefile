@@ -12,8 +12,8 @@ MIGRATIONS_DIR=$(CURDIR)/$(DIR)
 
 # go-migrate lambda vars
 MIGRATION_LAMBDA_NAME=go-migrate-$(ENV_ID)-$(ENV)
-REGION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
-SSM_VERSION=$(shell yq '.infrastructure.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $(PROJECT_CONF))
+REGION=$(shell yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
+SSM_VERSION=$(shell yq '.infra.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $(PROJECT_CONF))
 GO_MIGRATE_PASSPHRASE=$(shell aws ssm get-parameter \
 	--name /$(ENV_ID)/$(SSM_VERSION)/$(ENV)/tool/lambda/go_migrate/passphrase \
 	--query 'Parameter.Value' \

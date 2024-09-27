@@ -1,8 +1,8 @@
 RELATIVE_PROJECT_ROOT_PATH=../../../../..
 PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
-TFSTATE_ENV_SUFFIX=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $(PROJECT_CONF))
-TFSTATE_EXT=$(shell yq '.infrastructure.terraform.env_var.set.TFSTATE_EXT.default' $(PROJECT_CONF))
+TFSTATE_ENV_SUFFIX=$(shell yq '.infra.terraform.env_var.set.TFSTATE_ENV_SUFFIX.default' $(PROJECT_CONF))
+TFSTATE_EXT=$(shell yq '.infra.terraform.env_var.set.TFSTATE_EXT.default' $(PROJECT_CONF))
 TFSTATE_ENV=$(TFSTATE_ENV_SUFFIX).$(TFSTATE_EXT)
 
 ### arg test
@@ -18,10 +18,10 @@ resume:
 			--env-id $(ENV_ID); \
 		bash scripts/terraform-init-dev.sh \
 			--key $(TFSTATE_ENV) \
-			--dir infrastructure/terraform/aws/environments/dev
+			--dir infra/terraform/aws/environments/dev
 
 init:
 	cd $(RELATIVE_PROJECT_ROOT_PATH); \
 		bash scripts/terraform-init-dev.sh \
 			--key $(TFSTATE_ENV) \
-			--dir infrastructure/terraform/aws/environments/dev
+			--dir infra/terraform/aws/environments/dev

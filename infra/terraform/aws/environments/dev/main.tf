@@ -1,27 +1,25 @@
-terraform {
-  backend "s3" {
-    bucket = "mxfactorial-tfstate-0-prod"
-    key    = "terraform.tfstate"
-    region = "us-east-1"
-  }
-}
-
 locals {
   APP              = "mxfactorial"
-  ENV              = "prod"
+  ENV              = "dev"
   APP_ENV          = "${local.APP}-${local.ENV}"
   PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
-  STORAGE_ENV_VAR  = local.PROJECT_CONF.infrastructure.terraform.aws.modules.project-storage.env_var.set
+  STORAGE_ENV_VAR  = local.PROJECT_CONF.infra.terraform.aws.modules.project-storage.env_var.set
   ORIGIN_PREFIX    = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
   ARTIFACTS_PREFIX = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
   TFSTATE_PREFIX   = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
-  INFRA_ENV_VAR    = local.PROJECT_CONF.infrastructure.terraform.aws.modules.environment.env_var.set
+  INFRA_ENV_VAR    = local.PROJECT_CONF.infra.terraform.aws.modules.environment.env_var.set
   RDS_PREFIX       = local.INFRA_ENV_VAR.RDS_PREFIX.default
   REGION           = local.INFRA_ENV_VAR.REGION.default
-  ENV_ID           = local.PROJECT_CONF.env_var.set.PROD_ENV_ID.default
+  ENV_ID           = module.env_id.ENV_ID
   ID_ENV           = "${local.ENV_ID}-${local.ENV}"
-  CUSTOM_DOMAIN    = "mxfactorial.io"
-  SSM_VERSION      = "v1"
+}
+
+terraform {
+  backend "s3" {} // override with scripts/terraform-init-dev.sh
+}
+
+module "env_id" {
+  source = "../../../modules/env-id/v001"
 }
 
 provider "aws" {
@@ -34,13 +32,8 @@ provider "aws" {
   }
 }
 
-module "acm_certs_prod" {
-  source             = "../../modules/acm-certs/v001"
-  env                = local.ENV
-  custom_domain_name = local.CUSTOM_DOMAIN
-}
-
-module "prod" {
+// IMPORTANT: first build lambda artifacts using `make all CMD=initial-deploy ENV=$ENV` from project root
+module "dev" {
   source = "../../modules/environment/v001"
 
   ############### shared ###############
@@ -48,15 +41,12 @@ module "prod" {
   env                   = local.ENV
   artifacts_bucket_name = "${local.ARTIFACTS_PREFIX}-${local.ID_ENV}"
   env_id                = local.ENV_ID
-  build_db              = true
-  build_cache           = true
-
-  // OPTIONAL, comment or delete if unused:
-  custom_domain_name = local.CUSTOM_DOMAIN
+  build_db              = local.PROJECT_CONF.scripts.env_var.set.BUILD_DB.default    // false during terraform development
+  build_cache           = local.PROJECT_CONF.scripts.env_var.set.BUILD_CACHE.default // false during terraform development
 
   ############### ssm ###############
 
-  ssm_prefix = "${local.ENV_ID}/${local.SSM_VERSION}/${local.ENV}"
+  ssm_prefix = "${local.ENV_ID}/${local.INFRA_ENV_VAR.SSM_VERSION.default}/${local.ENV}"
 
   ############### lambda ###############
 
@@ -66,8 +56,8 @@ module "prod" {
 
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
-  rds_parameter_group             = "default.postgres13"
-  rds_engine_version              = "13.13"
+  rds_parameter_group             = "default.postgres14"
+  rds_engine_version              = "14.12"
   rds_instance_name               = "${local.RDS_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
 
@@ -80,9 +70,6 @@ module "prod" {
   graphql_deployment_version     = 1
   apigw_authorization_header_key = "Authorization"
 
-  // OPTIONAL, comment or delete api_cert_arn if custom_domain_name unused:
-  api_cert_arn = module.acm_certs_prod.api_cert // acm-certs module requires api subdomain = "${var.env}-api"
-
   // apigw v2
   enable_api_auto_deploy = true
 
@@ -94,9 +81,4 @@ module "prod" {
   ############### client ###############
 
   client_origin_bucket_name = "${local.ORIGIN_PREFIX}-${local.ID_ENV}"
-
-  ############### cloudfront ###############
-
-  // OPTIONAL, comment or delete client_cert_arn if custom_domain_name unused:
-  client_cert_arn = module.acm_certs_prod.client_cert // acm-certs module requires client subdomain = var.env
 }

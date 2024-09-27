@@ -12,11 +12,11 @@ PROJECT_CONF=project.yaml
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE=$ENV_FILE_NAME
 
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 IAM_USER=$(yq '.scripts.env_var.set.IAM_USER.default' $PROJECT_CONF)
 
-TFSTATE_INIT_DEV=infrastructure/terraform/aws/environments/init-dev/terraform.tfstate
-DEV_ENV_DIR=infrastructure/terraform/aws/environments/dev
+TFSTATE_INIT_DEV=infra/terraform/aws/environments/init-dev/terraform.tfstate
+DEV_ENV_DIR=infra/terraform/aws/environments/dev
 TFSTATE_DEV="$DEV_ENV_DIR/.terraform/terraform.tfstate"
 
 aws configure set default.region "$REGION"

@@ -28,13 +28,13 @@ if [[ -z $ENV_ID ]]; then
     exit 1
 fi
 
-pushd infrastructure/terraform/aws/environments/dev
+pushd infra/terraform/aws/environments/dev
 
 terraform destroy --auto-approve && rm -rf .terraform* .tfplan*
 
 popd
 
-pushd infrastructure/terraform/aws/environments/region
+pushd infra/terraform/aws/environments/region
 
 # skip if api gateway logging permission not managed by local terraform
 if [[ -f terraform.tfstate ]]; then

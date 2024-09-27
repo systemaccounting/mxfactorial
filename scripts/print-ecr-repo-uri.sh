@@ -21,7 +21,7 @@ done
 PROJECT_CONF=project.yaml
 ID_ENV_PREFIX="$ENV_ID/$ENV"
 IMAGE_NAME="$ID_ENV_PREFIX/$APP_NAME"
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 aws ecr describe-repositories \
 	--query "repositories[?contains(repositoryUri, \`$IMAGE_NAME\`)].repositoryUri" \

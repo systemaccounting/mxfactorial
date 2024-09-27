@@ -2,7 +2,7 @@ locals {
   ID_ENV                = "${var.env_id}-${var.env}"
   PROJECT_CONF          = "project.yaml"
   CONF_FILE             = yamldecode(file("../../../../../${local.PROJECT_CONF}"))
-  STORAGE_ENV_VAR       = local.CONF_FILE.infrastructure.terraform.aws.modules.project-storage.env_var.set
+  STORAGE_ENV_VAR       = local.CONF_FILE.infra.terraform.aws.modules.project-storage.env_var.set
   DDB_TABLE_NAME_PREFIX = local.STORAGE_ENV_VAR.DDB_TABLE_NAME_PREFIX.default
   DDB_TABLE_HASH_KEY    = local.STORAGE_ENV_VAR.DDB_TABLE_HASH_KEY.default
   ID_ENV_PREFIX         = "${var.env_id}/${var.env}"

@@ -39,7 +39,7 @@ TEST_DATA_FILE_LENGTH=$(yq -o=json 'length' $TEST_DATA_FILE)
 MIGRATIONS_DIR=./migrations
 TEST_ENV=dev
 
-ENV_VAR_PATH='infrastructure.terraform.aws.modules.environment.env_var.set'
+ENV_VAR_PATH='infra.terraform.aws.modules.environment.env_var.set'
 export PGDATABASE=$(yq ".${ENV_VAR_PATH}.PGDATABASE.default" $PROJECT_CONF)
 export PGUSER=$(yq ".${ENV_VAR_PATH}.PGUSER.default" $PROJECT_CONF)
 export PGPASSWORD=$(yq ".${ENV_VAR_PATH}.PGPASSWORD.default" $PROJECT_CONF)

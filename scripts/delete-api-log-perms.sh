@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PROJECT_CONF=project.yaml
-REGION=$(yq '.infrastructure.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 GITHUB_REPO_NAME=$(yq '.[".github"].env_var.set.GITHUB_REPO_NAME.default' $PROJECT_CONF)
 PROJECT_NAME=$GITHUB_REPO_NAME
 

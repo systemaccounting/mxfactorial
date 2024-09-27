@@ -1,4 +1,4 @@
-// bucket provisioned in infrastructure/terraform/aws/environments/init-env
+// bucket provisioned in infra/terraform/aws/environments/init-env
 
 resource "random_password" "referer" {
   length  = 24

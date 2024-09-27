@@ -96,7 +96,7 @@ docker:
       LOCAL_TAG_VERSION:
         ssm: null
         default: latest
-infrastructure:
+infra:
   terraform:
     env_var:
       set:
