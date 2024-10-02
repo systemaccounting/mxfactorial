@@ -56,7 +56,7 @@ encryption and replication are secondary
 government is not above failure, nor is it entitled to steal from the private sector to conceal its failure. improving government depends on failure [predicting](https://en.wikipedia.org/wiki/Time_travel_debugging) the individuals and laws that must be replaced. flying a flag and demanding loyalty before this step is just misdirection  
 
 **q.** what is a bank?  
-**a.** a lending business that receives government privilege in [12 U.S.C. § 1841(c)](https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1841&num=0&edition=prelim) to subsidize its cost of raising capital by bundling the services of 1) storing and 2) moving money with 3) offering loans:
+**a.** a lending business that receives government privilege in [12 U.S.C. § 1841(c)](https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1841&num=0&edition=prelim) to subsidize its cost of raising capital by [bundling](https://en.wikipedia.org/wiki/Product_bundling) the services of 1) storing and 2) moving money with 3) offering loans:
 
 >(c) Bank Defined.-For purposes of this chapter-  
 >&nbsp;&nbsp;&nbsp;(1) In general.-Except as provided in paragraph (2), the term "bank" means any of the following:  
@@ -137,7 +137,7 @@ government is not above failure, nor is it entitled to steal from the private se
 **a.** enforcing a conservation law on value privatizes the balance sheets of banks. central banks are not necessary when banks cannot include their balance sheets in the money supply  
 
 **q.** what would happen to the money multiplier?  
-**a.** there's no such thing as the "money multiplier". this phrase is weasel wording for equating assets of different types. the private instrument used to measure value expected in the future is not equal to the public instrument used to measure value eaned in the past: `bank note (risk > 0) != money (risk = 0)`  
+**a.** there's no such thing as the "money multiplier". this phrase is weasel wording for equating assets of different types. the private instrument used to measure value expected in the future is not equal to the public instrument used to measure value eaned in the past: `bank note (risk > 0) != money (risk = 0)`. by defining value and liability as conserved, systemaccounting introduces a physics-based type system into finance that prevents such abuses  
 
 **q.** shouldn't money always be earning interest?  
 **a.** a free market does not require consuming financial risk  
