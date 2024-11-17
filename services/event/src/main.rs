@@ -2,6 +2,7 @@ use fred::prelude::*;
 use futures_channel::mpsc;
 use futures_util::{stream, FutureExt, StreamExt, TryStreamExt};
 use serde::Deserialize;
+use std::env;
 use tokio_postgres::{AsyncMessage, NoTls};
 mod events;
 
@@ -46,6 +47,12 @@ struct Event {
 
 #[tokio::main]
 async fn main() {
+    if let Ok(level) = env::var("RUST_LOG") {
+        tracing_subscriber::fmt().with_env_filter(level).init();
+    } else {
+        tracing_subscriber::fmt().init();
+    }
+
     let pg_uri = pg_conn_uri();
     let redis_uri = redis_conn_uri();
     let redis_config = RedisConfig::from_url(&redis_uri).unwrap();
@@ -54,11 +61,11 @@ async fn main() {
     loop {
         match redis_client.init().await {
             Ok(_) => {
-                // println!("event connected to redis");
+                tracing::info!("event connected to redis");
                 break;
             }
             Err(_e) => {
-                // println!("failed to connect to redis: {}", _e);
+                tracing::info!("failed to connect to redis: {}", _e);
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
             }
         }
@@ -68,7 +75,7 @@ async fn main() {
         let (client, mut connection) = match tokio_postgres::connect(pg_uri.as_str(), NoTls).await {
             Ok(conn) => conn,
             Err(_e) => {
-                // println!("failed to connect to postgres: {}", _e);
+                tracing::info!("failed to connect to postgres: {}", _e);
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
                 continue;
             }
@@ -82,7 +89,7 @@ async fn main() {
         let handler = tokio::spawn(connection);
 
         if let Err(e) = client.batch_execute("LISTEN event;").await {
-            println!("failed to execute LISTEN command: {}", e);
+            tracing::info!("failed to execute LISTEN command: {}", e);
             handler.abort();
             continue;
         }
@@ -91,7 +98,7 @@ async fn main() {
             let message = match rx.next().await {
                 Some(message) => message,
                 None => {
-                    // println!("connection terminated. attempting to reconnect...");
+                    tracing::info!("connection terminated. attempting to reconnect...");
                     handler.abort();
                     break;
                 }
@@ -105,15 +112,15 @@ async fn main() {
                             events::redis_incrby_gdp(&redis_client, gdp_map).await;
                         }
                         _ => {
-                            println!("unknown event: {}", event.name);
+                            tracing::info!("unknown event: {}", event.name);
                         }
                     },
                     Err(e) => {
-                        println!("failed to parse event: {}", e);
+                        tracing::info!("failed to parse event: {}", e);
                     }
                 },
                 _ => {
-                    println!("unhandled message: {:?}", message);
+                    tracing::info!("unhandled message: {:?}", message);
                     tokio::time::sleep(std::time::Duration::from_secs(1)).await;
                     continue;
                 }

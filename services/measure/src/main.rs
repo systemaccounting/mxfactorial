@@ -69,9 +69,11 @@ impl Params {
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .init();
+    if let Ok(level) = env::var("RUST_LOG") {
+        tracing_subscriber::fmt().with_env_filter(level).init();
+    } else {
+        tracing_subscriber::fmt().init();
+    }
 
     let readiness_check_path = env::var(READINESS_CHECK_PATH)
         .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
@@ -144,10 +146,8 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
     loop {
         tokio::select! {
             ws_msg = ws_rx.next() => {
-                if let Some(Ok(Message::Close(_))) = ws_msg {
-                    break;
-                }
                 if ws_msg.is_none() {
+                    tracing::error!("measure received empty message from graphql");
                     break;
                 }
             },
@@ -155,13 +155,20 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
                 match redis_msg {
                     Ok(message) => {
                         let message = message.value.as_string().unwrap();
-                        let item = Message::Text(trim_string_decimal(message.as_str()));
-                        if ws_tx.send(item).await.is_err() {
-                            break;
+                        let gdp = trim_string_decimal(message.as_str());
+                        let msg = Message::Text(gdp.clone());
+                        match ws_tx.send(msg).await {
+                            Ok(_) => {
+                                tracing::info!("message sent to graphql: {}", gdp);
+                            },
+                            Err(e) => {
+                                tracing::error!("error sending message to graphql: {}", e);
+                                break;
+                            }
                         }
                     }
                     Err(e) => {
-                        tracing::error!("error receiving message: {}", e);
+                        tracing::error!("error receiving message from graphql: {}", e);
                         break;
                     }
                 }
@@ -169,8 +176,13 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
         }
     }
 
-    if let Err(e) = ws_tx.close().await {
-        tracing::error!("error closing websocket: {}", e);
+    match ws_tx.close().await {
+        Ok(_) => {
+            tracing::info!("websocket with graphql closed");
+        }
+        Err(e) => {
+            tracing::error!("error closing websocket with graphql: {}", e);
+        }
     }
 }
 
