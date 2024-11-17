@@ -447,6 +447,7 @@ services:
         - GRAPHQL_PORT
         - MEASURE_URL
         - MEASURE_RESOURCE
+        - RUST_LOG
   request-create:
     runtime: rust1.x
     min_code_cov: null
@@ -518,7 +519,8 @@ services:
           default: localhost
         RUST_LOG:
           ssm: null
-          default: info
+          # https://docs.rs/env_logger/latest/env_logger/#enabling-logging
+          default: off
         RUST_BACKTRACE:
           ssm: null
           default: 1
@@ -724,6 +726,7 @@ services:
         - REDIS_PASSWORD
         - MEASURE_PORT
         - READINESS_CHECK_PATH
+        - RUST_LOG
   auto-confirm:
     runtime: rust1.x
     min_code_cov: null
