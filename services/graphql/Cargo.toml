@@ -24,7 +24,6 @@ futures-util = "0.3.30"
 wsclient = { path = "../../crates/wsclient" }
 tungstenite = { version = "0.24.0", default-features = false }
 async-stream = "0.3.5"
-log = "0.4.22"
 
 [target.x86_64-unknown-linux-musl.dependencies]
 # https://github.com/cross-rs/cross/wiki/Recipes#vendored
