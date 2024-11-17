@@ -184,6 +184,11 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 **q.** how does systemaccounting affect setting public policy?  
 **a.** solving problems one at a time depends on 1) researching facts, 2) designing a solution, 3) applying the solution, 4) measuring its input and output and 5) holding contributors accountable. empowering sincere fact finders and problem solvers with more convenient access to public data science reduces the risk of luring them into the idle game of assigning blame between fictional social groups  
 
+**q.** how does systemaccounting create jobs?  
+**a.** the demand for labor increases when capital is allocated. for example, when an investor can quickly and confidently find a profitable grocery store chain and supply the owner capital to open more stores, the owner will hire more labor. systemaccounting accelerates the movement of capital by setting the measure of its demand to the conveniently discoverable and empirical supply of return  
+
+on the other hand, systemaccounting will eliminate a lot of archaic labor dependent on market friction in the short term and manual labor dependent on highly repetitive work in the long term (automation attracts capital). [be patient](https://gist.github.com/mxfactorial/e127115f4e9d240dd992cfc0920d1527)  
+
 **q.** do you have any demos?  
 **a.** watch the [economic policy as code](https://mxfactorial.video/) video series  
 
