@@ -3,14 +3,14 @@
 	import { onMount } from 'svelte';
 	import b64 from 'base-64';
 	import { createClient as createWSClient } from 'graphql-ws';
-
+	import type { Client } from 'graphql-ws';
 	let searchQuery = '';
-	let price = 0.0;
+	let price: string;
 	let priceTag: HTMLDivElement;
 	let map: google.maps.Map;
 	let markers = [] as any[]; // todo: google.maps.marker.AdvancedMarkerElement does not expect setMap method
 	let messageCount = 0;
-	let wsClient: any = null; // todo: graphql-ws Client type
+	let wsClient: Client;
 	let stop = false;
 	let defaultCoordinates = { lat: 39.8283, lng: -98.5795 }; // usa
 
@@ -20,39 +20,36 @@
 		region: string,
 		municipality: string | null
 	) {
-		if (wsClient) {
-			stop = true;
-		} else {
-			wsClient = createWSClient({
-				url: b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string),
-				lazy: false
-			});
+
+		if (messageCount) {
+			await resetWebsocket();
 		}
+
+		wsClient = createWSClient({
+				url: b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string),
+			});
 
 		const variables: any = { date, country, region };
 		if (municipality) {
 			variables.municipality = municipality;
 		}
 
-		let subscription = wsClient.iterate({
+		const subscription = wsClient.iterate({
 			query: `subscription QueryGdp($date: String!, $country: String, $region: String, $municipality: String) {
 				queryGdp(date: $date, country: $country, region: $region, municipality: $municipality)
 				}`,
 			variables
 		});
 
-		messageCount = 0;
 		for await (const { data } of subscription) {
 			if (stop) {
-				// console.log('stopping subscription');
 				stop = false;
 				break;
 			}
-			if (messageCount == 0) {
-				// console.log('starting subscription');
+			if (data && typeof data.queryGdp === 'number') {
+				price = data.queryGdp.toFixed(3);
+				messageCount++;
 			}
-			messageCount++;
-			price = data.queryGdp.toFixed(3);
 		}
 	}
 
@@ -66,7 +63,7 @@
 		event.preventDefault();
 
 		if (searchQuery.trim() === '') {
-			resetMap();
+			await resetMap();
 			return;
 		}
 
@@ -87,6 +84,15 @@
 		changeMapCenter(location);
 		const queryVars = parseQuery(location);
 		await subscribeGdp(queryVars.time, queryVars.country, queryVars.region, queryVars.municipality);
+	}
+
+	async function resetWebsocket() {
+		stop = true;
+		// wait for subscription loop to break
+		while (stop) {
+			await new Promise((resolve) => setTimeout(resolve, 100));
+		}
+		messageCount = 0;
 	}
 
 	function toTitleCase(str: string) {
@@ -138,8 +144,9 @@
 		}, 100); // check every 100 milliseconds
 	}
 
-	function resetMap() {
+	async function resetMap() {
 		if (map) {
+			await resetWebsocket();
 			markers.forEach((marker) => marker.setMap(null));
 			markers = [];
 			map.setCenter(defaultCoordinates);
@@ -210,13 +217,13 @@
 
 					priceTag.appendChild(pseudoElement);
 
-					const market = new AdvancedMarkerElement({
+					const marker = new AdvancedMarkerElement({
 						map,
 						position: location,
 						content: priceTag
 					});
 
-					markers.push(market);
+					markers.push(marker);
 
 					waitForMessages();
 				} else {
