@@ -54,6 +54,10 @@ fi
 
 # avoid env-id when developing locally
 if [[ $ENV != 'local' ]]; then
+	if [[ ! -f '.env' ]]; then
+		echo 'set ENV_ID variable in project root .env or make build-dev to build a cloud dev environment'
+		exit 1
+	fi
 	ENV_ID=$(source scripts/print-env-id.sh)
 fi
 
@@ -70,77 +74,78 @@ HOST="http://$LOCAL_ADDRESS"
 # set CLIENT_URI and GRAPHQL_URI vars
 source ./scripts/set-uri-vars.sh
 
-function set_default_values() {
-	for s in "${SECRETS[@]}"; do
-		# todo: hardcode protocol prefixes in apps. this ws:// exception for MEASURE_URL is a hack
-		if [[ "$s" == 'MEASURE_URL' ]]; then
-			SVC_NAME=$(printf '%s' "$s" | sed 's/_URL//')
-			PORT_ENV_VAR="$SVC_NAME"_PORT
-			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
-			continue
-		elif [[ "$s" == *'_URL' ]]; then
-			SVC_NAME=$(printf '%s' "$s" | sed 's/_URL//')
-			PORT_ENV_VAR="$SVC_NAME"_PORT
-			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			echo "$s=$HOST:$PORT_VAL" >>$ENV_FILE
-		elif [[ "$s" == 'GRAPHQL_URI' ]]; then # todo: change GRAPHQL_URI to GRAPHQL_URL
-			SVC_NAME=$(printf '%s' "$s" | sed 's/_URI//')
-			PORT_ENV_VAR="$SVC_NAME"_PORT
-			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
-				echo "$s=$GRAPHQL_URI" >>$ENV_FILE
-			else
-				echo "$s=$HOST:$PORT_VAL" >>$ENV_FILE
-			fi
-		elif [[ "$s" == 'GRAPHQL_SUBSCRIPTIONS_URI' ]]; then
-			SVC_NAME=$(printf '%s' "$s" | sed 's/_SUBSCRIPTIONS_URI//')
-			PORT_ENV_VAR="$SVC_NAME"_PORT
-			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			# todo: handle in scripts/set-uri-vars.sh
-			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
-				echo "$s=$GRAPHQL_URI" >>$ENV_FILE
-			else
-				echo "$s=ws://$LOCAL_ADDRESS:$PORT_VAL/ws" >>$ENV_FILE
-			fi
-		elif [[ "$s" == 'CLIENT_URI' ]]; then # todo: change CLIENT_URI to CLIENT_URL
-			SVC_NAME=$(printf '%s' "$s" | sed 's/_URI//')
-			PORT_ENV_VAR="$SVC_NAME"_PORT
-			PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-			if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
-				echo "$s=$CLIENT_URI" >>$ENV_FILE
-			else
-				echo "$s=$HOST:$PORT_VAL" >>$ENV_FILE
-			fi
-		elif [[ "$s" == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
-			continue # skip setting when ENV=local
+function set_default_value() {
+	local SECRET="$1"
+	# todo: hardcode protocol prefixes in apps. this ws:// exception for MEASURE_URL is a hack
+	if [[ "$SECRET" == 'MEASURE_URL' ]]; then
+		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URL//')
+		PORT_ENV_VAR="$SVC_NAME"_PORT
+		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+		echo "$SECRET=ws://$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
+	elif [[ "$SECRET" == *'_URL' ]]; then
+		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URL//')
+		PORT_ENV_VAR="$SVC_NAME"_PORT
+		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+		echo "$SECRET=$HOST:$PORT_VAL" >>$ENV_FILE
+	elif [[ "$SECRET" == 'GRAPHQL_URI' ]]; then # todo: change GRAPHQL_URI to GRAPHQL_URL
+		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URI//')
+		PORT_ENV_VAR="$SVC_NAME"_PORT
+		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+			echo "$SECRET=$GRAPHQL_URI" >>$ENV_FILE
 		else
-			ENV_VAR=$(yq "... | select(has(\"$s\")).$s.default" $PROJECT_CONF)
-			if [[ $ENV_VAR == 'null' ]]; then
-				ENV_VAR=
-			fi
-			echo $s=$ENV_VAR >>$ENV_FILE
+			echo "$SECRET=$HOST:$PORT_VAL" >>$ENV_FILE
 		fi
-	done
+	elif [[ "$SECRET" == 'GRAPHQL_SUBSCRIPTIONS_URI' ]]; then
+		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_SUBSCRIPTIONS_URI//')
+		PORT_ENV_VAR="$SVC_NAME"_PORT
+		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+		# todo: handle in scripts/set-uri-vars.sh
+		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+			echo "$SECRET=$GRAPHQL_URI" >>$ENV_FILE
+		else
+			echo "$SECRET=ws://$LOCAL_ADDRESS:$PORT_VAL/ws" >>$ENV_FILE
+		fi
+	elif [[ "$SECRET" == 'CLIENT_URI' ]]; then # todo: change CLIENT_URI to CLIENT_URL
+		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URI//')
+		PORT_ENV_VAR="$SVC_NAME"_PORT
+		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
+		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+			echo "$SECRET=$CLIENT_URI" >>$ENV_FILE
+		else
+			echo "$SECRET=$HOST:$PORT_VAL" >>$ENV_FILE
+		fi
+	elif [[ "$SECRET" == 'RUST_LOG' ]]; then
+		RUST_LOG_VAL=$(yq "$APP_CONF_PATH.rust_log" $PROJECT_CONF)
+		echo "$SECRET=$RUST_LOG_VAL" >>$ENV_FILE
+	else
+		ENV_VAR=$(yq "... | select(has(\"$SECRET\")).$SECRET.default" $PROJECT_CONF)
+		if [[ $ENV_VAR == 'null' ]]; then
+			ENV_VAR=
+		fi
+		echo $SECRET=$ENV_VAR >>$ENV_FILE
+	fi
+	unset ENV_VAR
+	unset SECRET
 }
 
-function set_secrets() {
-	for s in "${SECRETS[@]}"; do
-		CONF_OBJ=$(yq "... | select(has(\"$s\")).$s" $PROJECT_CONF)
-		if [[ $(echo "$CONF_OBJ" | yq .ssm) != 'null' ]]; then
-			SSM_SUFFIX=$(yq "... | select(has(\"$s\")).$s.ssm" $PROJECT_CONF)
-			ENV_VAR=$(aws ssm get-parameter \
-				--name "/$ENV_ID/$SSM_VERSION/$ENV/$SSM_SUFFIX" \
-				--query 'Parameter.Value' \
-				--region $REGION \
-				--with-decryption \
-				--output text)
-		else
-			ENV_VAR=$(echo "$CONF_OBJ" | yq ".default")
-		fi
-		echo $s=$ENV_VAR >>$ENV_FILE
-		unset ENV_VAR
-	done
+function set_secret() {
+	local SECRET="$1"
+	CONF_OBJ=$(yq "... | select(has(\"$SECRET\")).$SECRET" $PROJECT_CONF)
+	if [[ $(echo "$CONF_OBJ" | yq .ssm) != 'null' ]]; then
+		SSM_SUFFIX=$(yq "... | select(has(\"$SECRET\")).$SECRET.ssm" $PROJECT_CONF)
+		ENV_VAR=$(aws ssm get-parameter \
+			--name "/$ENV_ID/$SSM_VERSION/$ENV/$SSM_SUFFIX" \
+			--query 'Parameter.Value' \
+			--region $REGION \
+			--with-decryption \
+			--output text)
+	else
+		ENV_VAR=$(echo "$CONF_OBJ" | yq ".default")
+	fi
+	echo $s=$ENV_VAR >>$ENV_FILE
+	unset ENV_VAR
+	unset SECRET
 }
 
 function set_params() {
@@ -160,11 +165,16 @@ fi
 
 rm -f $ENV_FILE
 
-if [[ $ENV == 'local' ]]; then
-	set_default_values
-else
-	set_secrets
-fi
+for s in "${SECRETS[@]}"; do
+	if [[ $ENV == 'local' ]]; then
+		if [[ "$SECRET" == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
+			continue # skip setting when ENV=local
+		fi
+		set_default_value "$s"
+	else
+		set_secret "$s"
+	fi
+done
 
 # add ENV_ID back if was removed
 if [[ $ADD_BACK ]]; then
