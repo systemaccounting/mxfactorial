@@ -427,7 +427,8 @@ services:
       - AWS_REGION
     deploy: true
     build_src_path: null
-    dependents:
+    dependents: []
+    rust_log: off
     env_var:
       set:
         GRAPHQL_PORT:
@@ -459,6 +460,7 @@ services:
     build_src_path: null
     dependents:
       - request-approve
+    rust_log: off
     env_var:
       set:
         REQUEST_CREATE_PORT:
@@ -484,6 +486,7 @@ services:
     deploy: true
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
         REQUEST_APPROVE_PORT:
@@ -509,6 +512,7 @@ services:
     build_src_path: null
     dependents:
       - request-create
+    rust_log: off
     env_var:
       set:
         RULE_PORT:
@@ -519,8 +523,9 @@ services:
           default: localhost
         RUST_LOG:
           ssm: null
+          # set by scripts/create-env-file.sh
           # https://docs.rs/env_logger/latest/env_logger/#enabling-logging
-          default: off
+          default: null
         RUST_BACKTRACE:
           ssm: null
           default: 1
@@ -548,11 +553,12 @@ services:
     deploy: true
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
-        REQUEST_BY_ID_PORT:
-          ssm: null
-          default: 10005
+      REQUEST_BY_ID_PORT:
+        ssm: null
+        default: 10005
       get:
         - REQUEST_BY_ID_URL
         - REQUEST_BY_ID_PORT
@@ -571,6 +577,7 @@ services:
     deploy: true
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
         REQUESTS_BY_ACCOUNT_PORT:
@@ -595,6 +602,7 @@ services:
     deploy: true
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
         TRANSACTION_BY_ID_PORT:
@@ -618,6 +626,7 @@ services:
     deploy: true
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
         TRANSACTIONS_BY_ACCOUNT_PORT:
@@ -642,6 +651,7 @@ services:
     deploy: true
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
         BALANCE_BY_ACCOUNT_PORT:
@@ -665,6 +675,7 @@ services:
     deploy: false
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
         REDIS_DB:
@@ -693,6 +704,7 @@ services:
         - REDIS_PORT
         - REDIS_USERNAME
         - REDIS_PASSWORD
+        - RUST_LOG
   measure:
     runtime: rust1.x
     min_code_cov: null
@@ -702,6 +714,7 @@ services:
     deploy: false
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       set:
         MEASURE_PORT:
@@ -735,6 +748,7 @@ services:
     deploy: true
     build_src_path: null
     dependents: []
+    rust_log: off
     env_var:
       get: # used by make targets
         - POOL_ID
