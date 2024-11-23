@@ -14,10 +14,6 @@ DEPS_DIR=$(CURDIR)/node_modules
 REGION=$(shell yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $(PROJECT_CONF))
 ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
 ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
-LOCAL_ADDRESS=$(shell yq '.env_var.set.LOCAL_ADDRESS.default' $(PROJECT_CONF))
-HOST=http://$(LOCAL_ADDRESS)
-GRAPHQL_URI=$(HOST):$(shell yq '.services.graphql.env_var.set.GRAPHQL_PORT.default' $(PROJECT_CONF))
-B64_GRAPHQL_URI=$(shell if [ `uname -s` == 'Darwin' ]; then printf $(GRAPHQL_URI) | base64; else printf $(GRAPHQL_URI) | base64 -w 0; fi)
 NOHUP_LOG=$(RELATIVE_PROJECT_ROOT_PATH)/$(shell yq '.env_var.set.NOHUP_LOG.default' $(PROJECT_CONF))
 GITHUB_ORG=$(shell yq '.[".github"].env_var.set.GITHUB_ORG.default' $(PROJECT_CONF))
 GITHUB_REPO_NAME=$(shell yq '.[".github"].env_var.set.GITHUB_REPO_NAME.default' $(PROJECT_CONF))
@@ -167,7 +163,7 @@ down:
 
 build-k8s:
 	cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	docker build -f ./docker/client.Dockerfile -t $(CONTAINER_REGISTRY):latest .
+	docker build -f ./docker/client.Dockerfile -t $(CONTAINER_REGISTRY):latest --provenance=false .
 
 push-k8s:
 	docker push $(CONTAINER_REGISTRY):latest

@@ -37,4 +37,4 @@ unzip $SERVICES_ZIP -d $SERVICES_DIR
 
 cd $SERVICES_DIR
 
-docker build -t $SERVICE_NAME:latest -f ./docker/$SERVICE_NAME.Dockerfile $BUILD_CTX
+docker build -t $SERVICE_NAME:latest -f ./docker/$SERVICE_NAME.Dockerfile --provenance=false $BUILD_CTX
