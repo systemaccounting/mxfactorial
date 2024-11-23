@@ -54,7 +54,7 @@ fi
 
 # avoid env-id when developing locally
 if [[ $ENV != 'local' ]]; then
-	if [[ ! -f '.env' ]]; then
+	if [[ ! -f '.env' ]] && [[ -z $ENV_ID ]]; then
 		echo 'set ENV_ID variable in project root .env or make build-dev to build a cloud dev environment'
 		exit 1
 	fi
@@ -69,24 +69,17 @@ ENABLE_API_AUTH=$(yq '.infra.terraform.aws.modules.environment.env_var.set.ENABL
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE="$APP_DIR_PATH/$ENV_FILE_NAME"
 LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)
-HOST="http://$LOCAL_ADDRESS"
 
 # set CLIENT_URI and GRAPHQL_URI vars
 source ./scripts/set-uri-vars.sh
 
 function set_default_value() {
 	local SECRET="$1"
-	# todo: hardcode protocol prefixes in apps. this ws:// exception for MEASURE_URL is a hack
-	if [[ "$SECRET" == 'MEASURE_URL' ]]; then
+	if [[ "$SECRET" == *'_URL' ]]; then
 		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URL//')
 		PORT_ENV_VAR="$SVC_NAME"_PORT
 		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-		echo "$SECRET=ws://$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
-	elif [[ "$SECRET" == *'_URL' ]]; then
-		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URL//')
-		PORT_ENV_VAR="$SVC_NAME"_PORT
-		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-		echo "$SECRET=$HOST:$PORT_VAL" >>$ENV_FILE
+		echo "$SECRET=$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
 	elif [[ "$SECRET" == 'GRAPHQL_URI' ]]; then # todo: change GRAPHQL_URI to GRAPHQL_URL
 		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URI//')
 		PORT_ENV_VAR="$SVC_NAME"_PORT
@@ -94,7 +87,7 @@ function set_default_value() {
 		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
 			echo "$SECRET=$GRAPHQL_URI" >>$ENV_FILE
 		else
-			echo "$SECRET=$HOST:$PORT_VAL" >>$ENV_FILE
+			echo "$SECRET=$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
 		fi
 	elif [[ "$SECRET" == 'GRAPHQL_SUBSCRIPTIONS_URI' ]]; then
 		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_SUBSCRIPTIONS_URI//')
@@ -104,7 +97,7 @@ function set_default_value() {
 		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
 			echo "$SECRET=$GRAPHQL_URI" >>$ENV_FILE
 		else
-			echo "$SECRET=ws://$LOCAL_ADDRESS:$PORT_VAL/ws" >>$ENV_FILE
+			echo "$SECRET=$LOCAL_ADDRESS:$PORT_VAL/ws" >>$ENV_FILE
 		fi
 	elif [[ "$SECRET" == 'CLIENT_URI' ]]; then # todo: change CLIENT_URI to CLIENT_URL
 		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URI//')
@@ -113,7 +106,7 @@ function set_default_value() {
 		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
 			echo "$SECRET=$CLIENT_URI" >>$ENV_FILE
 		else
-			echo "$SECRET=$HOST:$PORT_VAL" >>$ENV_FILE
+			echo "$SECRET=$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
 		fi
 	elif [[ "$SECRET" == 'RUST_LOG' ]]; then
 		RUST_LOG_VAL=$(yq "$APP_CONF_PATH.rust_log" $PROJECT_CONF)
@@ -167,7 +160,7 @@ rm -f $ENV_FILE
 
 for s in "${SECRETS[@]}"; do
 	if [[ $ENV == 'local' ]]; then
-		if [[ "$SECRET" == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
+		if [[ "$s" == 'AWS_LAMBDA_FUNCTION_NAME' ]]; then
 			continue # skip setting when ENV=local
 		fi
 		set_default_value "$s"

@@ -24,6 +24,7 @@ use std::{env, net::ToSocketAddrs, result::Result};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tungstenite::error::Error as WsError;
+use uribuilder::Uri;
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 const GRAPHQL_RESOURCE: &str = "query";
@@ -40,7 +41,7 @@ impl Query {
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> String {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
-        let uri = env::var("BALANCE_BY_ACCOUNT_URL").unwrap();
+        let uri = Uri::new_from_env_var("BALANCE_BY_ACCOUNT_URL").to_string();
         let body = account_auth(account_name, account_from_token);
         let client = Client::new();
         let response = client.post(uri, body).await.unwrap();
@@ -55,7 +56,7 @@ impl Query {
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> Vec<Transaction> {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
-        let uri = env::var("TRANSACTIONS_BY_ACCOUNT_URL").unwrap();
+        let uri = Uri::new_from_env_var("TRANSACTIONS_BY_ACCOUNT_URL").to_string();
         let body = account_auth(account_name, account_from_token);
         let client = Client::new();
         let response = client.post(uri, body).await.unwrap();
@@ -73,7 +74,7 @@ impl Query {
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> Transaction {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
-        let uri = env::var("TRANSACTION_BY_ID_URL").unwrap();
+        let uri = Uri::new_from_env_var("TRANSACTION_BY_ID_URL").to_string();
         let body = id_account_auth(id, account_name, account_from_token);
         let client = Client::new();
         let response = client.post(uri, body).await.unwrap();
@@ -90,7 +91,7 @@ impl Query {
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> Vec<Transaction> {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
-        let uri = env::var("REQUESTS_BY_ACCOUNT_URL").unwrap();
+        let uri = Uri::new_from_env_var("REQUESTS_BY_ACCOUNT_URL").to_string();
         let client = Client::new();
         let body = account_auth(account_name, account_from_token);
         let response = client.post(uri, body).await.unwrap();
@@ -108,7 +109,7 @@ impl Query {
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> Transaction {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
-        let uri = env::var("REQUEST_BY_ID_URL").unwrap();
+        let uri = Uri::new_from_env_var("REQUEST_BY_ID_URL").to_string();
         let body = id_account_auth(id, account_name, account_from_token);
         let client = Client::new();
         let response = client.post(uri, body).await.unwrap();
@@ -122,7 +123,7 @@ impl Query {
         &self,
         #[graphql(name = "transaction_items")] transaction_items: Vec<TransactionItem>,
     ) -> Transaction {
-        let uri = env::var("RULE_URL").unwrap();
+        let uri = Uri::new_from_env_var("RULE_URL").to_string();
         let client = Client::new();
         let body = json!(transaction_items).to_string();
         let response = client.post(uri, body).await.unwrap();
@@ -143,7 +144,7 @@ impl Mutation {
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> Transaction {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
-        let uri = env::var("REQUEST_CREATE_URL").unwrap();
+        let uri = Uri::new_from_env_var("REQUEST_CREATE_URL").to_string();
         let client = Client::new();
         let request = IntraTransaction::new(
             account_from_token.clone(),
@@ -169,7 +170,7 @@ impl Mutation {
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> Transaction {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
-        let uri = env::var("REQUEST_APPROVE_URL").unwrap();
+        let uri = Uri::new_from_env_var("REQUEST_APPROVE_URL").to_string();
         let client = Client::new();
         let request = RequestApprove::new(
             account_from_token,
@@ -197,9 +198,11 @@ impl Subscription {
         #[graphql(name = "region")] region: Option<String>,
         #[graphql(name = "municipality")] municipality: Option<String>,
     ) -> impl Stream<Item = f64> {
-        let base_uri = env::var("MEASURE_URL").unwrap();
         let resource = env::var("MEASURE_RESOURCE").unwrap();
-        let uri = format!("{}/{}", base_uri, resource);
+        let uri = Uri::new_from_env_var("MEASURE_URL")
+            .with_path(resource.as_str())
+            .with_ws()
+            .to_string();
         let ws_client = WsClient::new(uri, "gdp".to_string(), date, country, region, municipality);
         stream! {
             let mut measure_socket = match ws_client.connect() {

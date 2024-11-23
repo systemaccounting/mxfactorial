@@ -15,6 +15,7 @@ use types::{
     request_response::IntraTransaction, transaction::Transaction,
     transaction_item::TransactionItems,
 };
+use uribuilder::Uri;
 
 // used by lambda to test for service availability
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
@@ -36,7 +37,7 @@ enum RequestCreateError {
 pub async fn get_rule_applied_transaction(
     transaction_items: TransactionItems,
 ) -> Result<IntraTransaction, Box<dyn Error>> {
-    let uri = env::var("RULE_URL").unwrap();
+    let uri = Uri::new_from_env_var("RULE_URL").to_string();
     let client = Client::new();
     let body = transaction_items.to_json_string();
     let response = client.post(uri, body).await?;

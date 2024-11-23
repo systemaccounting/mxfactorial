@@ -2,13 +2,16 @@ import { createClient, cacheExchange, fetchExchange } from '@urql/core';
 import type { ClientOptions } from '@urql/core';
 import { getIdToken } from '../auth/cognito';
 import b64 from 'base-64';
+import buildUri from '../utils/uriBuilder';
 
 const apiResource = 'query';
 
-const url: string = b64.decode(process.env.GRAPHQL_URI as string)?.trim() + '/' + apiResource;
+const relativeUri: string = b64.decode(process.env.GRAPHQL_URI as string)?.trim() + '/' + apiResource;
+
+const uri: string = buildUri(relativeUri);
 
 const clientOpts: ClientOptions = {
-	url,
+	url: uri,
 	exchanges: [cacheExchange, fetchExchange],
 	maskTypename: true,
 	fetchOptions: {

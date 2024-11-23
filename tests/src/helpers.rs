@@ -6,6 +6,7 @@ use ::types::{
 use httpclient::HttpClient as Client;
 use serde_json::json;
 use std::{env, fs::File, io::BufReader, process::Command};
+use uribuilder::Uri;
 
 pub fn restore_testseed() {
     // cloud dev env
@@ -68,7 +69,7 @@ pub async fn create_transaction() -> Transaction {
     let transaction_id = create_request.id.clone().unwrap();
 
     // approve the transaction request using the debit approver and transaction id
-    let approve_request_uri = env::var("REQUEST_APPROVE_URL").unwrap();
+    let approve_request_uri = Uri::new_from_env_var("REQUEST_APPROVE_URL").to_string();
     let approve_request_body = RequestApprove::new(
         debit_approver.clone(),
         transaction_id,

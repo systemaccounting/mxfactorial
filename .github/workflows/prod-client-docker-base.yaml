@@ -19,6 +19,6 @@ jobs:
       - name: docker login
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u mxfactorial --password-stdin
       - name: docker build
-        run: docker build -f ./docker/client-base.Dockerfile -t "$IMAGE_NAME" .
+        run: docker build -f ./docker/client-base.Dockerfile -t "$IMAGE_NAME" --provenance=false .
       - name: docker push
         run: docker image push "$IMAGE_NAME"

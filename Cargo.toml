@@ -8,6 +8,7 @@ members = [
 	"crates/service",
 	"crates/shutdown",
 	"crates/types",
+	"crates/uribuilder",
 	"crates/wsclient",
 	"services/auto-confirm",
 	"services/balance-by-account",

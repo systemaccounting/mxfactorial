@@ -4,6 +4,7 @@
 	import b64 from 'base-64';
 	import { createClient as createWSClient } from 'graphql-ws';
 	import type { Client } from 'graphql-ws';
+	import uriBuilder from '../../utils/uriBuilder';
 	let searchQuery = '';
 	let price: string;
 	let priceTag: HTMLDivElement;
@@ -20,14 +21,15 @@
 		region: string,
 		municipality: string | null
 	) {
-
 		if (messageCount) {
 			await resetWebsocket();
 		}
 
+		const uri = uriBuilder(b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string))
+
 		wsClient = createWSClient({
-				url: b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string),
-			});
+			url: uri
+		});
 
 		const variables: any = { date, country, region };
 		if (municipality) {
