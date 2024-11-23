@@ -8,7 +8,7 @@ use gql_client::Client as GqlClient;
 use httpclient::HttpClient as Client;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::env;
+use uribuilder::Uri;
 
 const GRAPHQL_RESOURCE: &str = "query";
 
@@ -27,11 +27,9 @@ pub async fn get_balance_gql(
     account_name: String,
     auth_account: String,
 ) -> Result<String, Box<dyn std::error::Error>> {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let query = r#"query getBalance($account_name: String!, $auth_account: String!) {
         balance(account_name: $account_name, auth_account: $auth_account)
       }"#;
@@ -122,11 +120,9 @@ struct RuleVars {
 pub async fn get_rules_gql(
     transaction_items: Vec<TransactionItem>,
 ) -> Result<Transaction, Box<dyn std::error::Error>> {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let query = r#"query getRules($transaction_items: [TransactionItemInput!]) {
         rules(transaction_items: $transaction_items) {
           id
@@ -187,11 +183,9 @@ pub async fn create_request_gql(
     auth_account: String,
     transaction_items: Vec<TransactionItem>,
 ) -> Transaction {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let query = r#"mutation createRequest($transaction_items: [TransactionItemInput!], $auth_account: String!) {
         createRequest(transaction_items: $transaction_items, auth_account: $auth_account) {
           id
@@ -258,11 +252,9 @@ pub async fn approve_request_gql(
     account_role: String,
     auth_account: String,
 ) -> Transaction {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let mutation = r#"mutation approveRequest($id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {
         approveRequest(id: $id, account_name: $account_name, account_role: $account_role, auth_account: $auth_account) {
           id
@@ -328,11 +320,9 @@ pub async fn get_transactions_by_account_gql(
     auth_account: String,
     account_name: String,
 ) -> Vec<Transaction> {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let query = r#"query getTransactionsByAccount($account_name: String!, $auth_account: String!) {
         transactionsByAccount(account_name: $account_name, auth_account: $auth_account) {
           id
@@ -400,11 +390,9 @@ pub async fn get_transaction_by_id_gql(
     account_name: String,
     id: String,
 ) -> Transaction {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let query = r#"query getTransactionByID($id: String!, $account_name: String!, $auth_account: String!) {
         transactionByID(id: $id, account_name: $account_name, auth_account: $auth_account) {
           id
@@ -468,11 +456,9 @@ pub async fn get_requests_by_account_gql(
     auth_account: String,
     account_name: String,
 ) -> Vec<Transaction> {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let query = r#"query getRequestsByAccount($account_name: String!, $auth_account: String!) {
         requestsByAccount(account_name: $account_name, auth_account: $auth_account) {
           id
@@ -537,11 +523,9 @@ pub async fn get_request_by_id_gql(
     account_name: String,
     id: String,
 ) -> Transaction {
-    let uri = format!(
-        "{}/{}",
-        std::env::var("GRAPHQL_URI").unwrap(),
-        GRAPHQL_RESOURCE
-    );
+    let uri = Uri::new_from_env_var("GRAPHQL_URI")
+        .with_path(GRAPHQL_RESOURCE)
+        .to_string();
     let query = r#"query getRequestByID($id: String!, $account_name: String!, $auth_account: String!) {
         requestByID(id: $id, account_name: $account_name, auth_account: $auth_account) {
           id
@@ -590,7 +574,7 @@ pub async fn get_request_by_id_gql(
 
 pub async fn get_rules_http(transaction_items: Vec<TransactionItem>) -> IntraTransaction {
     let client = Client::new();
-    let uri = env::var("RULE_URL").unwrap();
+    let uri = Uri::new_from_env_var("RULE_URL").to_string();
     let body_json = json!(transaction_items).to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
@@ -605,7 +589,7 @@ pub async fn create_request_http(
     let body = IntraTransaction::new(auth_account.clone(), transaction);
     let body_json = json!(body).to_string();
     let client = Client::new();
-    let uri = env::var("REQUEST_CREATE_URL").unwrap();
+    let uri = Uri::new_from_env_var("REQUEST_CREATE_URL").to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let transaction_request: IntraTransaction = serde_json::from_str(&response_string).unwrap();
@@ -626,7 +610,7 @@ pub async fn approve_request_http(
     })
     .to_string();
     let client = Client::new();
-    let uri = env::var("REQUEST_APPROVE_URL").unwrap();
+    let uri = Uri::new_from_env_var("REQUEST_APPROVE_URL").to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let approved: IntraTransaction = serde_json::from_str(&response_string).unwrap();
@@ -640,7 +624,7 @@ pub async fn get_account_balance_http(account_name: String, auth_account: String
     })
     .to_string();
     let client = Client::new();
-    let uri = env::var("BALANCE_BY_ACCOUNT_URL").unwrap();
+    let uri = Uri::new_from_env_var("BALANCE_BY_ACCOUNT_URL").to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let balance_float: f32 = serde_json::from_str(&response_string).unwrap();
@@ -659,7 +643,7 @@ pub async fn get_transaction_by_id_http(
     })
     .to_string();
     let client = Client::new();
-    let uri = env::var("TRANSACTION_BY_ID_URL").unwrap();
+    let uri = Uri::new_from_env_var("TRANSACTION_BY_ID_URL").to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let intra_transaction: IntraTransaction = serde_json::from_str(&response_string).unwrap();
@@ -676,7 +660,7 @@ pub async fn get_transactions_by_account_http(
     })
     .to_string();
     let client = Client::new();
-    let uri = env::var("TRANSACTIONS_BY_ACCOUNT_URL").unwrap();
+    let uri = Uri::new_from_env_var("TRANSACTIONS_BY_ACCOUNT_URL").to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let intra_transactions: IntraTransactions = serde_json::from_str(&response_string).unwrap();
@@ -695,7 +679,7 @@ pub async fn get_request_by_id_http(
     })
     .to_string();
     let client = Client::new();
-    let uri = env::var("REQUEST_BY_ID_URL").unwrap();
+    let uri = Uri::new_from_env_var("REQUEST_BY_ID_URL").to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let intra_transaction: IntraTransaction = serde_json::from_str(&response_string).unwrap();
@@ -712,7 +696,7 @@ pub async fn get_requests_by_account_http(
     })
     .to_string();
     let client = Client::new();
-    let uri = env::var("REQUESTS_BY_ACCOUNT_URL").unwrap();
+    let uri = Uri::new_from_env_var("REQUESTS_BY_ACCOUNT_URL").to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let intra_transactions: IntraTransactions = serde_json::from_str(&response_string).unwrap();

@@ -15,6 +15,7 @@ httpclient = { path = "../crates/httpclient" }
 serde_json = "1.0.111"
 gql_client = "1.0.7"
 regex = "1.10.3"
+uribuilder = { path = "../crates/uribuilder" }
 
 [features]
 integration_tests = []
