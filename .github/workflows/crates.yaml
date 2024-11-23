@@ -20,12 +20,12 @@ jobs:
       - uses: taiki-e/install-action@nextest
       - name: crates lint
         run: |
-          cargo fmt -p pg -p types -p httpclient -- --check
-          cargo clippy -p pg -p types -p httpclient -- -Dwarnings
+          cargo fmt -p pg -p types -p httpclient -p uribuilder -- --check
+          cargo clippy -p pg -p types -p httpclient -p uribuilder -- -Dwarnings
       - name: install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
       - name: crates unit tests
-        run: cargo test -p pg -p types -p httpclient
+        run: cargo test -p pg -p types -p httpclient -p uribuilder
       - name: crates/types coverage report
         run: |
           make rust-coverage RUST_PKG=types

@@ -81,6 +81,12 @@ crates:
     type: lib
     env_var: null
     params: []
+  uribuilder:
+    runtime: rust1.x
+    min_code_cov: 0
+    type: lib
+    env_var: null
+    params: []
   wsclient:
     runtime: rust1.x
     min_code_cov: 0
@@ -164,7 +170,7 @@ infra:
                 default: v1
               GRAPHQL_URI:
                 ssm: api/graphql/uri
-                default: null # script sets as localhost:$PORT
+                default: null # scripts/create-env-file.sh sets as localhost:$PORT
               GRAPHQL_SUBSCRIPTIONS_URI:
                 ssm: null
                 default: null
@@ -435,7 +441,6 @@ services:
           ssm: null
           default: 10000
       get:
-        - GRAPHQL_URI
         - RULE_URL
         - REQUEST_CREATE_URL
         - REQUEST_APPROVE_URL
@@ -468,7 +473,6 @@ services:
           default: 10002
       get:
         - READINESS_CHECK_PATH
-        - REQUEST_CREATE_URL
         - RULE_URL
         - REQUEST_CREATE_PORT
         - PGHOST
@@ -494,7 +498,6 @@ services:
           default: 10003
       get:
         - READINESS_CHECK_PATH
-        - REQUEST_APPROVE_URL
         - REQUEST_APPROVE_PORT
         - PGHOST
         - PGPORT
@@ -538,7 +541,6 @@ services:
         - CLIENT_ID
         - POOL_ID
         - GRAPHQL_URI
-        - RULE_URL
         - READINESS_CHECK_PATH
         - RULE_PORT
         - HOSTNAME_OR_IP
@@ -556,11 +558,10 @@ services:
     rust_log: off
     env_var:
       set:
-      REQUEST_BY_ID_PORT:
-        ssm: null
-        default: 10005
+        REQUEST_BY_ID_PORT:
+          ssm: null
+          default: 10005
       get:
-        - REQUEST_BY_ID_URL
         - REQUEST_BY_ID_PORT
         - PGHOST
         - PGPORT
@@ -584,7 +585,6 @@ services:
           ssm: null
           default: 10006
       get:
-        - REQUESTS_BY_ACCOUNT_URL
         - REQUESTS_BY_ACCOUNT_PORT
         - PGHOST
         - PGPORT
@@ -609,7 +609,6 @@ services:
           ssm: null
           default: 10007
       get:
-        - TRANSACTION_BY_ID_URL
         - TRANSACTION_BY_ID_PORT
         - PGHOST
         - PGPORT
@@ -633,7 +632,6 @@ services:
           ssm: null
           default: 10008
       get:
-        - TRANSACTIONS_BY_ACCOUNT_URL
         - TRANSACTIONS_BY_ACCOUNT_PORT
         - PGHOST
         - PGPORT
@@ -658,7 +656,6 @@ services:
           ssm: null
           default: 10004
       get:
-        - BALANCE_BY_ACCOUNT_URL
         - BALANCE_BY_ACCOUNT_PORT
         - PGHOST
         - PGPORT
