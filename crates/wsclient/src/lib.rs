@@ -1,5 +1,5 @@
-use std::net::TcpStream;
-use tungstenite::{connect, stream::MaybeTlsStream, WebSocket};
+use async_std::net::TcpStream;
+use async_tungstenite::{async_std::connect_async, tungstenite, WebSocketStream};
 
 pub struct WsClient {
     uri: WsUri,
@@ -18,10 +18,8 @@ impl WsClient {
         WsClient { uri }
     }
 
-    pub fn connect(
-        &self,
-    ) -> Result<WebSocket<MaybeTlsStream<TcpStream>>, tungstenite::error::Error> {
-        let (ws_stream, _) = connect(self.uri.query_string())?;
+    pub async fn connect(&self) -> Result<WebSocketStream<TcpStream>, tungstenite::error::Error> {
+        let (ws_stream, _) = connect_async(self.uri.query_string()).await?;
         Ok(ws_stream)
     }
 }
