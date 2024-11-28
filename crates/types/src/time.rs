@@ -38,7 +38,7 @@ fn base() -> NaiveDateTime {
         .unwrap()
 }
 
-impl<'a> FromSql<'a> for TZTime {
+impl FromSql<'_> for TZTime {
     #[allow(unused_variables)]
     fn from_sql(type_: &Type, raw: &[u8]) -> Result<TZTime, Box<dyn Error + Sync + Send>> {
         let t = types::timestamp_from_sql(raw)?;
