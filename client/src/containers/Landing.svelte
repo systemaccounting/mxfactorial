@@ -12,7 +12,8 @@
 	let password: string = '';
 	let showLoading: boolean = false;
 
-	function handleSignIn() {
+	function handleSignIn(e: Event) {
+		e.preventDefault();
 		if (c.ENABLE_AUTH) {
 			signIn(account, password)
 				.then(() => {
@@ -34,7 +35,7 @@
 		if (c.ENABLE_AUTH) {
 			signUp(account, password)
 				.then((newAccount) => {
-					setAccount(newAccount);
+					setAccount(newAccount as string);
 					goto('/account');
 				})
 				.catch((err) => {
@@ -55,11 +56,10 @@
 		demo web client for <a
 			href="https://github.com/systemaccounting/mxfactorial"
 			target="_blank"
-			rel="noopener noreferrer"><i>Mx!</i> platform<i /></a
-		>
+			rel="noopener noreferrer"><i>Mx!</i> platform</a>
 	</p>
 	{#if !showLoading}
-		<form on:submit|preventDefault={handleSignIn}>
+		<form onsubmit={handleSignIn}>
 			<input placeholder="account" bind:value={account} />
 			<input placeholder="password" type="password" class:hasError bind:value={password} />
 			<button
@@ -75,7 +75,7 @@
 				class:inactive
 				data-id="createAccountButton"
 				type="button"
-				on:click={handleSignUp}>Create</button
+				onclick={handleSignUp}>Create</button
 			>
 		</form>
 	{:else}

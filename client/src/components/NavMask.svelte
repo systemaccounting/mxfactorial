@@ -1,14 +1,15 @@
 <script lang="ts">
-	export let isActive: boolean;
+	import { switchActiveNav } from '../stores/activeNav';
 
-	function handleEvent(): void {
-		isActive = !isActive;
+	function handleEvent(e: Event): void {
+		e.preventDefault();
+		switchActiveNav();
 	}
 </script>
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+<div class="nav-mask" onclick={handleEvent}></div>
 
-<div class="nav-mask" on:click|preventDefault={handleEvent} />
-
-<svelte:window on:keypress={handleEvent} />
+<svelte:window onkeypress={handleEvent} />
 
 <style>
 	.nav-mask {

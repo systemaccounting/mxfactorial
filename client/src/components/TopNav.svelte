@@ -14,7 +14,8 @@
 </script>
 
 <div data-id="topNav">
-	<span on:click={handleNavigation} data-id="homeIcon">
+	<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+	<span onclick={handleNavigation} data-id="homeIcon">
 		<Icon addedStyle="float: left;" iconName={faHome} dataIDValue="" />
 	</span>
 	<Icon addedStyle="width: 2.5rem;" iconName={faFlag} dataIDValue="notificationIcon" />
