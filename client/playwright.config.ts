@@ -1,7 +1,12 @@
-import baseConfig from './playwright.base.config.ts';
+import { defineConfig } from '@playwright/test';
 
-const config: PlaywrightTestConfig = {
-	...baseConfig,
-};
+export default defineConfig({
+	webServer: {
+		command: 'npm run build && npm run preview',
+		port: 4173
+	},
 
-export default config;
+	testDir: 'e2e',
+	workers: 1,
+	timeout: 20000,
+});
