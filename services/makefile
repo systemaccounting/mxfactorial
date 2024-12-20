@@ -30,7 +30,8 @@ print:
 ### arg tests
 test-env-arg:
 ifndef ENV
-	$(error trailing ENV assignment missing, e.g. make all ENV=stg)
+	$(info trailing ENV assignment missing, e.g. make env ENV=dev|stg|prod, defaulting to 'local')
+ENV=local
 endif
 
 test-cmd-arg:

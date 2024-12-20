@@ -22,8 +22,11 @@ clean-image:
 ###################### globally required ######################
 
 initial-deploy:
+	@echo "build"
 	@$(MAKE) -s build-image
+	@echo "tag"
 	@$(MAKE) -s tag-dev-image
+	@echo "push"
 	@$(MAKE) -s push-dev-image
 
 deploy:
