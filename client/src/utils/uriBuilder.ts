@@ -1,4 +1,4 @@
-import url from 'url';
+import url from 'url'; // cadet todo: replace with whatwg-url and add tests
 
 export default function (uri: string): string {
 	// if protocol prefix missing
