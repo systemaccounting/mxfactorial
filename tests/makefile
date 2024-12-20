@@ -36,7 +36,8 @@ test-k8s:
 
 test-env-arg:
 ifndef ENV
-	$(error trailing ENV assignment missing, e.g. make test ENV=dev)
+	$(info trailing ENV assignment missing, e.g. make env ENV=dev|stg|prod, defaulting to 'local')
+ENV=local
 endif
 
 test-env-file:
@@ -59,5 +60,4 @@ get-secrets:
 		--app-name $(APP_NAME) \
 		--env $(ENV)
 env:
-	@$(MAKE) -s test-env-arg
 	@$(MAKE) get-secrets
