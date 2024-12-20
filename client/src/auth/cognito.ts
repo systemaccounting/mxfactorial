@@ -1,5 +1,5 @@
 import { CognitoUserPool, AuthenticationDetails, CognitoUser} from 'amazon-cognito-identity-js';
-import type { ICognitoUserPoolData } from 'amazon-cognito-identity-js';
+import type { ICognitoUserPoolData, CognitoUserSession } from 'amazon-cognito-identity-js';
 import b64 from 'base-64';
 import c from '../utils/constants';
 
@@ -9,7 +9,7 @@ const poolData: ICognitoUserPoolData = {
 };
 
 let userPool: CognitoUserPool;
-let cognitoUser: CognitoUser;
+let cognitoUser: CognitoUser | null;
 
 if (c.ENABLE_AUTH) {
 	userPool = new CognitoUserPool(poolData);
@@ -17,60 +17,70 @@ if (c.ENABLE_AUTH) {
 }
 
 function signIn(account: string, password: string) {
-	const authDetails = new AuthenticationDetails({
-		Username: account,
-		Password: password,
-	});
+    const authDetails = new AuthenticationDetails({
+        Username: account,
+        Password: password,
+    });
 
-	const userData = {
-		Username: account,
-		Pool: userPool,
-	};
+    const userData = {
+        Username: account,
+        Pool: userPool,
+    };
 
-	cognitoUser = new CognitoUser(userData);
+    cognitoUser = new CognitoUser(userData);
 
-	return new Promise((res, rej) => {
-		cognitoUser.authenticateUser(authDetails, {
-			onSuccess: function () { // passes "data"
-				res({});
-			},
-			onFailure: function (err) {
-				console.error(err.message)
-				rej(err)
-			}
-		});
-	});
+    return new Promise((res, rej) => {
+        if (cognitoUser) {
+            cognitoUser.authenticateUser(authDetails, {
+                onSuccess: function () { // passes "data"
+                    res({});
+                },
+                onFailure: function (err) {
+                    console.error(err.message)
+                    rej(err)
+                }
+            });
+        }
+    });
 };
 
 function signOut() {
-	try {
-		cognitoUser.signOut();
-	} catch (e) {
-		console.log(e);
-	};
+	if (cognitoUser) {
+		try {
+			cognitoUser.signOut();
+		} catch (e) {
+			console.log(e);
+		};
+	}
 };
 
 function signUp(account: string, password: string) {
 	return new Promise((res, rej) => {
-		userPool.signUp(account, password, [], null, function (err, result): Promise<string> {
+		userPool.signUp(account, password, [], [], function (err, result): Promise<string>|void {
 			if (err) {
 				rej(err)
 				return;
 			}
-			cognitoUser = result.user;
-			res(cognitoUser.getUsername());
+			if (result) {
+				cognitoUser = result.user;
+				res(cognitoUser.getUsername());
+			} else {
+				rej("No result")
+			}
 		})
 	});
 };
 
-function getIdToken(cb) {
-	if (cognitoUser != null) {
-		cognitoUser.getSession(function(err, session) {
+function getIdToken(cb: (token: string) => void) {
+	if (cognitoUser) {
+		cognitoUser.getSession(function(err: Error | null, session: CognitoUserSession | null) {
 			if (err) {
 				alert(err.message || JSON.stringify(err));
 				return;
 			}
-			cb(session.getIdToken().jwtToken);
+			if (session) {
+				cb(session.getIdToken().getJwtToken());
+			}
 		})
 	}
 }

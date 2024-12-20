@@ -1,8 +1,8 @@
 export function duplicateRequestsPerRole(
 	currAcct: string,
-	requests: ITransaction[]
-): ITransaction[] {
-	const perRole: ITransaction[] = [];
+	requests: App.ITransaction[]
+): App.ITransaction[] {
+	const perRole: App.ITransaction[] = [];
 	for (const tr of requests) {
 		for (const trItem of tr.transaction_items) {
 			if (trItem.creditor == currAcct) {
@@ -22,9 +22,9 @@ export function duplicateRequestsPerRole(
 
 export function duplicateTransactionsPerRole(
 	currAcct: string,
-	transactions: ITransaction[]
-): ITransaction[] {
-	const perRole: ITransaction[] = [];
+	transactions: App.ITransaction[]
+): App.ITransaction[] {
+	const perRole: App.ITransaction[] = [];
 	for (const tr of transactions) {
 		for (const trItem of tr.transaction_items) {
 			if (trItem.creditor == currAcct) {
@@ -44,7 +44,7 @@ export function duplicateTransactionsPerRole(
 
 export function isCreditor(
 	currAcct: string | unknown,
-	trItems: ITransactionItem[]
+	trItems: App.ITransactionItem[]
 ): boolean {
 	for (let i = 0; i < trItems.length; i++) {
 		if (trItems[i].creditor == currAcct) {
@@ -55,7 +55,7 @@ export function isCreditor(
 }
 
 // todo: temp until transaction rejection time added on server
-export function isRejected(trItems: ITransactionItem[]): boolean {
+export function isRejected(trItems: App.ITransactionItem[]): boolean {
 	for (let i = 0; i < trItems.length; i++) {
 		if (
 			trItems[i].debitor_rejection_time != null ||
@@ -67,7 +67,7 @@ export function isRejected(trItems: ITransactionItem[]): boolean {
 	return false;
 }
 
-export function sum(trIts: ITransactionItem[]): string {
+export function sum(trIts: App.ITransactionItem[]): string {
 	let accumulated = 0;
 	for (let i = 0; i < trIts.length; i++) {
 		const price = parseFloat(trIts[i].price);
@@ -83,7 +83,7 @@ export function sum(trIts: ITransactionItem[]): string {
 	return accumulated.toFixed(3);
 }
 
-export function disableButton(trIts: ITransactionItem[]): boolean {
+export function disableButton(trIts: App.ITransactionItem[]): boolean {
 	for (const i of trIts) {
 		if (i.rule_instance_id && i.rule_instance_id.length) {
 			continue;
@@ -108,7 +108,7 @@ export function disableButton(trIts: ITransactionItem[]): boolean {
 	return false;
 }
 
-export function accountsAvailable(trItems: ITransaction[]): boolean {
+export function accountsAvailable(trItems: App.ITransactionItem[]): boolean {
 	for (const trItem of trItems) {
 		if (trItem.debitor && trItem.debitor.length && trItem.creditor && trItem.creditor.length) {
 			continue
@@ -119,7 +119,7 @@ export function accountsAvailable(trItems: ITransaction[]): boolean {
 	return true
 }
 
-export function requestTime(trItems: ITransactionItem[]): Date {
+export function requestTime(trItems: App.ITransactionItem[]): Date {
 	let requestDate: Date = new Date();
 
 	for (const trItem of trItems) {
@@ -135,7 +135,7 @@ export function requestTime(trItems: ITransactionItem[]): Date {
 	return requestDate;
 }
 
-export function expirationTime(trItems: ITransactionItem[]): Date {
+export function expirationTime(trItems: App.ITransactionItem[]): Date {
 	let expirationTime: Date = new Date();
 
 	let nullCount = 0;
@@ -160,17 +160,17 @@ export function expirationTime(trItems: ITransactionItem[]): Date {
 	return expirationTime;
 }
 
-export function getTransactionById(id: string, transactions: ITransaction[]): ITransaction {
+export function getTransactionById(id: string, transactions: App.ITransaction[]): App.ITransaction {
 	return transactions.filter(x => x.id == id)[0]
 }
 
-export function filterUserAddedItems(reqItems: ITransactionItem[]): ITransactionItem[] {
+export function filterUserAddedItems(reqItems: App.ITransactionItem[]): App.ITransactionItem[] {
 	return reqItems.filter(
 		(x) => !x.rule_instance_id || x.rule_instance_id == ""
 	);
 }
 
-export function filterRuleAddedItems(reqItems: ITransactionItem[]): ITransactionItem[] {
+export function filterRuleAddedItems(reqItems: App.ITransactionItem[]): App.ITransactionItem[] {
 	return reqItems.filter((x) => {
 		return x.rule_instance_id || x.rule_instance_id?.length > 0
 	})
@@ -178,7 +178,7 @@ export function filterRuleAddedItems(reqItems: ITransactionItem[]): ITransaction
 
 export function isRequestPending(
 	currAcct: string | unknown,
-	request: ITransaction,
+	request: App.ITransaction,
 ): boolean {
 	for (const req of request.transaction_items) {
 		if (req.creditor == currAcct && req.creditor_approval_time) {
@@ -195,7 +195,7 @@ export function isRequestPending(
 
 export function getTransContraAccount(
 	currentAccount: string | unknown, // todo: stores have unknown
-	transaction: ITransaction
+	transaction: App.ITransaction
 ): string | null {
 	for (const trItem of transaction.transaction_items) {
 		if (trItem.rule_instance_id) {
@@ -219,32 +219,38 @@ export function getTransContraAccount(
 
 export function getTrItemsContraAccount(
 	currentAccount: string | unknown, // todo: stores have unknown
-	trItems: ITransactionItem[]
-): string | null {
+	trItems: App.ITransactionItem[]
+): string {
 	if (!trItems) {
-		return null
+		console.error(`getTrItemsContraAccount error: 0 transaction items`)
 	}
-	if (trItems.length == 1) {
-		if (trItems[0].debitor == null || trItems[0].creditor == null) {
-			return null
-		}
-	}
+	let contraAccount = '';
 	for (const trItem of trItems) {
+		if (!trItem.creditor) {
+			console.error(`getTrItemsContraAccount error: transaction item missing creditor`)
+		}
+		if (!trItem.debitor) {
+			console.error(`getTrItemsContraAccount error: transaction item missing debitor`)
+		}
 		if (trItem.rule_instance_id) {
 			continue
 		}
 		if (trItem.creditor == currentAccount) {
-			return trItem.debitor
+			contraAccount = trItem.debitor
+			break
 		}
 		if (trItem.debitor == currentAccount) {
-			return trItem.creditor
+			contraAccount = trItem.creditor
+			break
 		}
 	}
-	console.error(`getTrItemsContraAccount error: ${currentAccount} not found`)
-	return null
+	if (contraAccount == '') {
+		console.error(`getTrItemsContraAccount error: ${currentAccount} not found`)
+	}
+	return contraAccount
 }
 
-export function sortTrItems(trItems: ITransactionItem[]) {
+export function sortTrItems(trItems: App.ITransactionItem[]) {
 	// create list of rule_exec_ids
 	let ruleExecIDs: string[] = [];
 	for (const trItem of trItems) {
