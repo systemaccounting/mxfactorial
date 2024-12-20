@@ -1,10 +1,13 @@
 <script lang="ts">
 	import Card from "./Card.svelte";
 	import { fromNow } from "../utils/date";
-	export let contraAccount: string | null;
-	export let isCurrentAccountCreditor: boolean;
-	export let equilibriumTime: Date;
-	export let sumValue: string;
+	interface Props {
+		contraAccount: string | null;
+		isCurrentAccountCreditor: boolean;
+		equilibriumTime: Date;
+		sumValue: string;
+	}
+	let { contraAccount, isCurrentAccountCreditor, equilibriumTime, sumValue }: Props = $props();
 </script>
 
 <Card>

@@ -1,10 +1,13 @@
 <script lang="ts">
-	import Indicator from "../components/Indicator.svelte";
-	export let index: number;
-	export let nameValue: string;
-	export let priceValue: string;
-	export let quantityValue: string;
-	let hasError: boolean;
+	import Indicator from '../components/Indicator.svelte';
+	interface Props {
+		index: number;
+		nameValue: string;
+		priceValue: string;
+		quantityValue: string;
+		hasError?: boolean;
+	}
+	let { index, nameValue, priceValue, quantityValue, hasError = false }: Props = $props();
 </script>
 
 <div data-id-index={index} class="container">

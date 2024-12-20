@@ -1,7 +1,10 @@
 <script lang="ts">
-	export let hasError: boolean;
-	export let value: string;
-	export let placeholder: string;
+	interface Props {
+		hasError?: boolean;
+		value: string;
+		placeholder: string;
+	}
+	let { hasError, value, placeholder }: Props = $props();
 </script>
 
 <div class="container">

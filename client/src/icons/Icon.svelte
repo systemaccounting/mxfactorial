@@ -1,14 +1,18 @@
 <script lang="ts">
 	import Fa from "svelte-fa";
 	import type { IconDefinition } from "@fortawesome/fontawesome-common-types";
-	export let iconName: IconDefinition;
-	export let addedStyle: string;
-	export let dataIDValue: string;
+	interface Props {
+		iconName: IconDefinition;
+		addedStyle: string;
+		dataIDValue: string;
+	}
+
+	let { iconName, addedStyle, dataIDValue }: Props = $props();
 
 	const max: number = 1.0;
 	const min: number = 0.7;
 
-	let opacity: number = min;
+	let opacity = $state(min);
 
 	function enter(): void {
 		opacity = max;
@@ -19,7 +23,7 @@
 	}
 </script>
 
-<span on:mouseenter={enter} on:mouseleave={leave} data-id={dataIDValue}>
+<span role="presentation" onmouseenter={enter} onmouseleave={leave} data-id={dataIDValue}>
 	<Fa
 		size="lg"
 		color="#fff"
