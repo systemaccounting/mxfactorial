@@ -1,11 +1,13 @@
 <script lang="ts">
 	import '../app.css';
 	import Storage from './Storage.svelte';
+	import type { Snippet } from 'svelte';
+	let { children }: { children: Snippet } = $props();
 </script>
 
 <Storage>
 	<div class="mobile-layout">
-		<slot />
+		{@render children()}
 	</div>
 </Storage>
 

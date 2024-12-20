@@ -2,29 +2,33 @@
 	// temp save stores locally until
 	// session management added
 	// https://gist.github.com/stevesob/f25e54418369a24dd7d3907d9094ed91#file-app-svelte
+	import type { Snippet } from 'svelte';
+	let { children }: { children: Snippet } = $props();
 	import { onMount } from 'svelte';
 	import { account } from '../stores/account';
 	import { requestCreate } from '../stores/requestCreate';
 	import { requestsPending } from '../stores/requestsPending';
 	import { history } from '../stores/history';
 	import c from '../utils/constants';
-	let save = false;
+	let save = $state(false);
 
-	$: if (save && $account) {
-		window.localStorage.setItem(c.ACCOUNT_KEY, JSON.stringify($account));
-	}
+	$effect(() => {
+		if (save && $account) {
+			window.localStorage.setItem(c.ACCOUNT_KEY, JSON.stringify($account));
+		}
 
-	$: if (save && $requestCreate) {
-		window.localStorage.setItem(c.REQUEST_CREATE_KEY, JSON.stringify($requestCreate));
-	}
+		if (save && $requestCreate) {
+			window.localStorage.setItem(c.REQUEST_CREATE_KEY, JSON.stringify($requestCreate));
+		}
 
-	$: if (save && $requestsPending) {
-		window.localStorage.setItem(c.REQUESTS_PENDING_KEY, JSON.stringify($requestsPending));
-	}
+		if (save && $requestsPending) {
+			window.localStorage.setItem(c.REQUESTS_PENDING_KEY, JSON.stringify($requestsPending));
+		}
 
-	$: if (save && $history) {
-		window.localStorage.setItem(c.HISTORY_KEY, JSON.stringify(history));
-	}
+		if (save && $history) {
+			window.localStorage.setItem(c.HISTORY_KEY, JSON.stringify(history));
+		}
+	});
 
 	onMount(async () => {
 		let accountSes = window.localStorage.getItem(c.ACCOUNT_KEY);
@@ -52,5 +56,5 @@
 </script>
 
 {#if save}
-<slot />
+	{@render children()}
 {/if}

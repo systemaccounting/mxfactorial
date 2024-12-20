@@ -3,17 +3,24 @@
 	import Hamburger from './Hamburger.svelte';
 	import NavMenu from './NavMenu.svelte';
 	import NavMask from './NavMask.svelte';
-	let isActive: boolean = false;
+	import type { Snippet } from 'svelte';
+	let { children }: { children: Snippet } = $props();
+	import { activeNav } from '../stores/activeNav';
+	import { get } from 'svelte/store';
+	let isNavActive = $state(get(activeNav));
+	activeNav.subscribe((value) => {
+		isNavActive = value;
+	});
 </script>
 
 <div class="private">
 	<TopNav />
-	<slot />
-	{#if isActive}
-		<NavMask bind:isActive />
-		<NavMenu bind:isActive />
+	{@render children()}
+	{#if isNavActive}
+		<NavMask />
+		<NavMenu />
 	{/if}
-	<Hamburger bind:isActive />
+	<Hamburger />
 </div>
 
 <style>

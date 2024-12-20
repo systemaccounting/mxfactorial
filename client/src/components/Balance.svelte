@@ -5,7 +5,7 @@
 	import BALANCE_QUERY from '../graphql/query/balance';
 	import type { Client } from '@urql/core';
 	import { getContext, onMount } from 'svelte';
-	import c from '../utils/constants'
+	import c from '../utils/constants';
 
 	let client: Client = getContext(c.CLIENT_CTX_KEY);
 
@@ -29,17 +29,19 @@
 	<div data-id="balance">
 		<Info label="account" value={$account} />
 		<Card minHeight="2rem">
-			<small>
-				<span> Balance </span>
-			</small>
-			{#await getBalance()}
-				<p data-id="accountBalance">0.000</p>
-			{:then balance}
-				<p data-id="accountBalance">{balance}</p>
-			{:catch error}
-				{alert(error.message)}
-				<p data-id="accountBalance">0.000</p>
-			{/await}
+			{#snippet children()}
+				<small>
+					<span> Balance </span>
+				</small>
+				{#await getBalance()}
+					<p data-id="accountBalance">0.000</p>
+				{:then balance}
+					<p data-id="accountBalance">{balance}</p>
+				{:catch error}
+					{alert(error.message)}
+					<p data-id="accountBalance">0.000</p>
+				{/await}
+			{/snippet}
 		</Card>
 	</div>
 {/if}

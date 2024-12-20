@@ -37,23 +37,28 @@
 
 	let client: Client = getContext(c.CLIENT_CTX_KEY);
 
-	let trItemHeight: number;
+	let trItemHeight = $state(0);
 	let prevReqItemsCount = 0;
+
 	// restore recipient saved in store if avail
-	let recipient = getRecipient($account) ? getRecipient($account) : '';
-	let showLoading = false;
-	let rulesEventCount = 0;
+	let recipient = $state(getRecipient($account) ? getRecipient($account) : '');
+
+	let showLoading = $state(false);
+	let rulesEventCount = $state(0);
 	let previouslySubmitted = ''; // used to send rules request only on diff
 	const rulesRequestTimeBufferMs = 995; // 5 ms remainder added in setTimeout
 	let minRequestTime = new Date().getTime() + rulesRequestTimeBufferMs;
-	let sumValue: string;
-	let isCredit = true;
 
-	$: reqItems = initial;
-	$: sumValue = sum(reqItems);
-	$: disableAddItem = true;
-	$: handleAutoScroll(reqItems);
-	$: resetRecipient(reqItems);
+	let sumValue = $state('0.000');
+	let isCredit = $state(true);
+	let reqItems = $state(initial);
+	let disableAddItem = $state(true);
+
+	$effect(() => {
+		sumValue = sum(reqItems);
+		handleAutoScroll(reqItems);
+		resetRecipient(reqItems);
+	});
 
 	requestCreate.subscribe(function (requestItems: App.ITransactionItem[]): void {
 		reqItems = requestItems;
@@ -86,9 +91,8 @@
 		addRequestItem();
 	}
 
-	function handleRemoveClick(e: CustomEvent): void {
-		let indexToRemove: number = e.detail;
-		removeRequestItem(indexToRemove);
+	function handleRemoveClick(idx: number): void {
+		removeRequestItem(idx);
 	}
 
 	function handleAutoScroll(requestItems: App.ITransactionItem[]) {
@@ -101,11 +105,15 @@
 		}
 	}
 
-	function handleChangeRecipient(e: CustomEvent) {
-		if (isCredit) {
-			addRecipient(e.detail.value, $account);
-		} else {
-			addRecipient($account, e.detail.value);
+	function handleChangeRecipient(e: Event) {
+		if (e.target instanceof HTMLInputElement) {
+			if (isCredit) {
+				if (e.target instanceof HTMLInputElement) {
+					addRecipient(e.target.value, $account);
+				}
+			} else {
+				addRecipient($account, e.target.value);
+			}
 		}
 	}
 
@@ -142,87 +150,104 @@
 </script>
 
 <Nav>
-	<div class="container" on:click={() => console.log(reqItems)}>
-		<Balance />
-	</div>
-	<div data-id="switchBtns" class="switch container">
-		<SwitchButtons bind:switchButtons={isCredit} dataId="dbCrBtns">
-			<span slot="left">
-				<SubtractIcon size={14} style="transform: translate(-1px, 3px);" /> debit
-			</span>
-			<span slot="right">
-				credit <AddIcon size={14} style="transform: translate(3px, 2px);" />
-			</span>
-		</SwitchButtons>
-	</div>
-	<div class="container">
-		<Info label="total" value={sumValue} />
-	</div>
-	<div class="container">
-		<Input
-			placeholder="Recipient"
-			hasError={false}
-			bind:value={recipient}
-			insertId="recipient"
-			on:insert={handleChangeRecipient}
-			disabled={showLoading}
-		/>
-	</div>
-	{#if !showLoading}
-		<div data-id="transactionItems" class="transaction-items">
-			{#each reqItems as item, i}
-				{#if !item.rule_instance_id || !item.rule_instance_id.length}
-					<div
-						data-id="transactionItem"
-						data-id-index={i}
-						class="container"
-						bind:clientHeight={trItemHeight}
-					>
-						<TransactionItem
-							nameValue={item.item_id}
-							priceValue={item.price}
-							quantityValue={item.quantity}
-							index={i}
-							on:index={handleRemoveClick}
-						/>
-					</div>
-				{/if}
-			{/each}
+	{#snippet children()}
+		<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+		<div class="container" onclick={() => console.log(reqItems)}>
+			<Balance />
+		</div>
+		<div data-id="switchBtns" class="switch container">
+			<SwitchButtons bind:switchButtons={isCredit} dataId="dbCrBtns">
+				{#snippet left()}
+					<span>
+						<SubtractIcon size={14} style="transform: translate(-1px, 3px);" /> debit
+					</span>
+				{/snippet}
+				{#snippet right()}
+					<span>
+						credit <AddIcon size={14} style="transform: translate(3px, 2px);" />
+					</span>
+				{/snippet}
+			</SwitchButtons>
 		</div>
 		<div class="container">
-			<span class="add-btn" on:click={handleAddClick}>
-				<Button
-					disabled={disableAddItem}
-					class="btn-height {disableAddItem ? 'disable-add-btn' : 'enable-add-btn'}"
-					><AddIcon size={14} style="transform: translate(3px, 2px);" /> Item</Button
-				>
-			</span>
-			<span on:click={handleRequestClick}>
-				<Button disabled={false} class="btn-height  {isCredit ? 'request-btn' : 'pay-btn'}"
-					>{isCredit ? 'Request' : 'Pay'}
-				</Button>
-			</span>
+			<Info label="total" value={sumValue} />
 		</div>
-
-		{#if rulesEventCount && reqItems.filter((r) => r.rule_instance_id).length}
-			<div data-id="ruleItems" class="container">
-				{#each reqItems.filter((r) => r.rule_instance_id) as item, i}
-					<div data-id="ruleItem" data-id-index={i} class="container">
-						<RuleItem
-							nameValue={item.item_id}
-							priceValue={item.price}
-							quantityValue={item.quantity}
-							index={i}
-						/>
-					</div>
+		<div class="container">
+			<Input
+				placeholder="Recipient"
+				hasError={false}
+				bind:value={recipient}
+				insertId="recipient"
+				oninsert={handleChangeRecipient}
+				disabled={showLoading}
+			/>
+		</div>
+		{#if !showLoading}
+			<div data-id="transactionItems" class="transaction-items">
+				{#each reqItems as item, i}
+					{#if !item.rule_instance_id || !item.rule_instance_id.length}
+						<div
+							data-id="transactionItem"
+							data-id-index={i}
+							class="container"
+							bind:clientHeight={trItemHeight}
+						>
+							<TransactionItem
+								nameValue={item.item_id}
+								priceValue={item.price}
+								quantityValue={item.quantity}
+								index={i}
+								{handleRemoveClick}
+							/>
+						</div>
+					{/if}
 				{/each}
 			</div>
+			<div class="container">
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+				<span class="add-btn" onclick={handleAddClick}>
+					{#snippet addButton()}
+						<AddIcon size={14} style="transform: translate(3px, 2px);" /> Item
+					{/snippet}
+					<Button
+						disabled={disableAddItem}
+						class="btn-height {disableAddItem ? 'disable-add-btn' : 'enable-add-btn'}"
+						children={addButton}
+					/>
+				</span>
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+				<span onclick={handleRequestClick}>
+					{#snippet reqPayBtn()}
+						{isCredit ? 'Request' : 'Pay'}
+					{/snippet}
+					<Button
+						disabled={false}
+						class="btn-height  {isCredit ? 'request-btn' : 'pay-btn'}"
+						children={reqPayBtn}
+					/>
+				</span>
+			</div>
+
+			{#if rulesEventCount && reqItems.filter((r) => r.rule_instance_id).length}
+				<div data-id="ruleItems" class="container">
+					{#each reqItems.filter((r) => r.rule_instance_id) as item, i}
+						<div data-id="ruleItem" data-id-index={i} class="container">
+							<RuleItem
+								nameValue={item.item_id}
+								priceValue={item.price}
+								quantityValue={item.quantity}
+								index={i}
+							/>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		{:else}
+			<div class="loading">
+				<Pulse color="#fff" />
+			</div>
 		{/if}
-	{:else}
-		<div class="loading">
-			<Pulse color="#fff" />
-		</div>
-	{/if}
+	{/snippet}
 </Nav>
 
 <style>

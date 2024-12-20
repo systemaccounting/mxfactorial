@@ -1,14 +1,19 @@
 <script lang="ts">
-	export let isActive: boolean;
-	function handleClick(): void {
-		isActive = !isActive;
+	import { activeNav, switchActiveNav } from '../stores/activeNav';
+	function handleClick(e: MouseEvent): void {
+		e.preventDefault();
+		switchActiveNav();
 	}
+	let isNavActive: boolean;
+	activeNav.subscribe((value) => {
+		isNavActive = value;
+	});
 </script>
-
-<button on:click|preventDefault={handleClick}>
-	<span class="first {isActive ? 'first-active' : ''}" />
-	<span class="second {isActive ? 'second-active' : ''}" />
-	<span class="third {isActive ? 'third-active' : ''}" />
+<!-- svelte-ignore a11y_consider_explicit_label -->
+<button onclick={handleClick}>
+	<span class="first {isNavActive ? 'first-active' : ''}"></span>
+	<span class="second {isNavActive ? 'second-active' : ''}"></span>
+	<span class="third {isNavActive ? 'third-active' : ''}"></span>
 </button>
 
 <style>

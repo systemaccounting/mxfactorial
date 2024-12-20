@@ -47,22 +47,40 @@
 </script>
 
 <Nav>
-	<div class="switch">
-		<SwitchButtons bind:switchButtons={isActive} dataId="activeRejectedBtns">
-			<span slot="left">Rejected</span>
-			<span slot="right">Active</span>
-		</SwitchButtons>
-	</div>
-	{#await getRequestsByAccount() then requestsByAccount}
-		<div class="requests">
-			<div class="container">
-				{#each requestsByAccount as req, i}
-					{#if isActive}
-						{#if !isRejected(req['transaction_items'])}
+	{#snippet children()}
+		<div class="switch">
+			<SwitchButtons bind:switchButtons={isActive} dataId="activeRejectedBtns">
+				{#snippet left()}
+					Rejected
+				{/snippet}
+				{#snippet right()}
+					Active
+				{/snippet}
+			</SwitchButtons>
+		</div>
+		{#await getRequestsByAccount() then requestsByAccount}
+			<div class="requests">
+				<div class="container">
+					{#each requestsByAccount as req, i}
+						{#if isActive}
+							{#if !isRejected(req['transaction_items'])}
+								<a href={'/requests/' + req['id']}>
+									<div class="container" data-id-index={i} data-id-req={req['id']}>
+										<RequestCard
+											contraAccount={getTransContraAccount($account, req)}
+											isCurrentAccountAuthor={req['author'] == $account}
+											isCurrentAccountCreditor={isCreditor($account, req['transaction_items'])}
+											requestTime={requestTime(req['transaction_items'])}
+											sumValue={req['sum_value']}
+										/>
+									</div>
+								</a>
+							{/if}
+						{:else if isRejected(req['transaction_items'])}
 							<a href={'/requests/' + req['id']}>
 								<div class="container" data-id-index={i} data-id-req={req['id']}>
 									<RequestCard
-										contraAccount={getTransContraAccount($account, req)}
+										contraAccount={$account == req['author'] ? $account : req['author']}
 										isCurrentAccountAuthor={req['author'] == $account}
 										isCurrentAccountCreditor={isCreditor($account, req['transaction_items'])}
 										requestTime={requestTime(req['transaction_items'])}
@@ -71,27 +89,14 @@
 								</div>
 							</a>
 						{/if}
-					{:else if isRejected(req['transaction_items'])}
-						<a href={'/requests/' + req['id']}>
-							<div class="container" data-id-index={i} data-id-req={req['id']}>
-								<RequestCard
-									contraAccount={$account == req['author'] ? $account : req['author']}
-									isCurrentAccountAuthor={req['author'] == $account}
-									isCurrentAccountCreditor={isCreditor($account, req['transaction_items'])}
-									requestTime={requestTime(req['transaction_items'])}
-									sumValue={req['sum_value']}
-								/>
-							</div>
-						</a>
-					{/if}
-				{/each}
+					{/each}
+				</div>
 			</div>
-		</div>
-	{:catch error}
-		<p>{error.message}</p>
-	{/await}
+		{:catch error}
+			<p>{error.message}</p>
+		{/await}
+	{/snippet}
 </Nav>
-<slot />
 
 <style>
 	.switch {
