@@ -3,6 +3,11 @@ include $(RELATIVE_PROJECT_ROOT_PATH)/make/shared.mk
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/rust.mk
 include $(RELATIVE_PROJECT_ROOT_PATH)/make/ecr-lambda.mk
 
+test-acc-arg:
+ifndef ACC
+	$(error trailing ACC assignment missing, e.g. make createuser ACC=testuser)
+endif
+
 signup:
 	@$(MAKE) -s test-env-file
 	@$(MAKE) -s test-acc-arg
