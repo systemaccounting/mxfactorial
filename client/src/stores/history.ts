@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
 
-let initial: App.Transaction[];
+const initial: App.ITransaction[] = [];
 
 const history = writable(initial);
 

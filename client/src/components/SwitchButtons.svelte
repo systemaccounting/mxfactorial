@@ -1,6 +1,12 @@
 <script lang="ts">
-	export let switchButtons: boolean;
-	export let dataId: string;
+	import type { Snippet } from 'svelte';
+	interface Props {
+		switchButtons: boolean;
+		dataId: string;
+		left: Snippet;
+		right: Snippet;
+	}
+	let { switchButtons = $bindable(), dataId, left, right }: Props = $props();
 	import { switchRecipient } from '../stores/requestCreate';
 
 	function handleLeftButtonClick(): void {
@@ -15,12 +21,12 @@
 </script>
 
 <div data-id={dataId} class="group">
-	<button on:click={handleLeftButtonClick} class={switchButtons ? 'inactive' : 'active'}
-		><slot name="left" /></button
-	>
-	<button on:click={handleRightButtonClick} class={switchButtons ? 'active' : 'inactive'}
-		><slot name="right" /></button
-	>
+	<button onclick={handleLeftButtonClick} class={switchButtons ? 'inactive' : 'active'}>
+		{@render left()}
+	</button>
+	<button onclick={handleRightButtonClick} class={switchButtons ? 'active' : 'inactive'}>
+		{@render right()}
+	</button>
 </div>
 
 <style>

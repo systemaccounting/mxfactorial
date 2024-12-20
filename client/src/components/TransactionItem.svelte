@@ -1,54 +1,64 @@
 <script lang="ts">
-	import Input from "./Input.svelte";
-	import RemoveIcon from "../icons/RemoveIcon.svelte";
-	import { changeRequestItem } from "../stores/requestCreate";
-	export let index: number;
-	export let nameValue: string;
-	export let priceValue: string;
-	export let quantityValue: string;
-	let hasError: boolean;
+	import Input from './Input.svelte';
+	import RemoveIcon from '../icons/RemoveIcon.svelte';
+	import { changeRequestItem } from '../stores/requestCreate';
+	interface Props {
+		index: number;
+		nameValue: string;
+		priceValue: string;
+		quantityValue: string;
+		hasError?: boolean;
+		handleRemoveClick: (idx: number) => void;
+	}
+	let { index, nameValue, priceValue, quantityValue, hasError = false, handleRemoveClick }: Props = $props();
 
-	const ITEM_NAME: string = "item_id";
+	const ITEM_NAME: keyof App.ITransactionItem = 'item_id';
 
-	const ITEM_PRICE: string = "price";
+	const ITEM_PRICE: keyof App.ITransactionItem = 'price';
 
-	const ITEM_QUANTITY: string = "quantity";
+	const ITEM_QUANTITY: keyof App.ITransactionItem = 'quantity';
 
-	function handleName(e: CustomEvent) {
-		changeRequestItem(index, ITEM_NAME, e.detail.value);
+	function handleName(e: Event) {
+		if (e.target instanceof HTMLInputElement) {
+			changeRequestItem(index, ITEM_NAME, e.target.value);
+		}
 	}
 
-	function handlePrice(e: CustomEvent) {
-		changeRequestItem(index, ITEM_PRICE, e.detail.value);
+	function handlePrice(e: Event) {
+		if (e.target instanceof HTMLInputElement) {
+			changeRequestItem(index, ITEM_PRICE, e.target.value);
+		}
 	}
 
-	function handleQuantity(e: CustomEvent) {
-		changeRequestItem(index, ITEM_QUANTITY, e.detail.value);
+	function handleQuantity(e: Event) {
+		if (e.target instanceof HTMLInputElement) {
+			changeRequestItem(index, ITEM_QUANTITY, e.target.value);
+		}
 	}
 </script>
 
 <div>
-	<RemoveIcon size={10} style={null} {index} on:index />
+	<RemoveIcon size={10} style={null} {index} {handleRemoveClick} />
 	<Input
 		insertId={ITEM_NAME}
 		placeholder="Item"
 		{hasError}
 		value={nameValue}
-		on:insert={handleName}
+		oninsert={handleName}
 	/>
 	<Input
 		insertId={ITEM_PRICE}
 		placeholder="Price"
 		{hasError}
 		value={priceValue}
-		on:insert={handlePrice}
+		oninsert={handlePrice}
 	/>
 	<Input
 		insertId={ITEM_QUANTITY}
 		placeholder="Quantity"
 		{hasError}
 		value={quantityValue}
-		on:insert={handleQuantity}
+		oninsert={handleQuantity}
 	/>
 </div>
 

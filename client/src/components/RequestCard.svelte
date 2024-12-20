@@ -1,28 +1,39 @@
 <script lang="ts">
-	import Card from "./Card.svelte";
-	import { fromNow } from "../utils/date";
-	export let contraAccount: string | null;
-	export let isCurrentAccountAuthor: boolean;
-	export let isCurrentAccountCreditor: boolean;
-	export let requestTime: Date;
-	export let sumValue: string;
+	import Card from './Card.svelte';
+	import { fromNow } from '../utils/date';
+	interface Props {
+		contraAccount: string | null;
+		isCurrentAccountAuthor: boolean;
+		isCurrentAccountCreditor: boolean;
+		requestTime: Date;
+		sumValue: string;
+	}
+	let {
+		contraAccount,
+		isCurrentAccountAuthor,
+		isCurrentAccountCreditor,
+		requestTime,
+		sumValue
+	}: Props = $props();
 </script>
 
 <div>
 	<Card>
-		<small>
-			{#if isCurrentAccountAuthor}
-				<strong>{contraAccount}</strong> request sent
-			{:else}
-				<strong>{contraAccount}</strong> request received
-			{/if}
-			{fromNow(requestTime)}
-		</small>
-		<p>
-			<strong>
-				{isCurrentAccountCreditor ? "" : "-"}{sumValue}
-			</strong>
-		</p>
+		{#snippet children()}
+			<small>
+				{#if isCurrentAccountAuthor}
+					<strong>{contraAccount}</strong> request sent
+				{:else}
+					<strong>{contraAccount}</strong> request received
+				{/if}
+				{fromNow(requestTime)}
+			</small>
+			<p>
+				<strong>
+					{isCurrentAccountCreditor ? '' : '-'}{sumValue}
+				</strong>
+			</p>
+		{/snippet}
 	</Card>
 </div>
 

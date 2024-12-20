@@ -23,7 +23,7 @@
 	import { getContext } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { account } from '../../../stores/account';
-	import c from '../../../utils/constants'
+	import c from '../../../utils/constants';
 
 	let client: Client = getContext(c.CLIENT_CTX_KEY);
 	let showLoading = false;
@@ -39,7 +39,7 @@
 		if (!res.data || !res.data.requestByID) {
 			return {} as App.ITransaction; // todo: support empty object in component
 		} else {
-			sortTrItems(res.data.requestByID.transaction_items)
+			sortTrItems(res.data.requestByID.transaction_items);
 			return res.data.requestByID;
 		}
 	}
@@ -68,111 +68,145 @@
 </script>
 
 <Nav>
-	<div class="container">
-		<DetailHeader>
-			<span slot="left" data-id="backBtn">
-				<a href={$page.url.pathname.substring(0, $page.url.pathname.lastIndexOf('/'))}>
-					<Icon addedStyle="" iconName={faArrowLeft} dataIDValue="backBtn" />
-				</a>
-			</span>
-			<span slot="middle"> Request </span>
-			<span slot="right">
-				<Icon addedStyle="" iconName={faEnvelope} dataIDValue="emailCopyBtn" /></span
-			>
-		</DetailHeader>
-	</div>
-	<div class="container">
-		{#await getRequestByID() then trRequest}
-			<div
-				data-id="requestContraAccount"
-				data-id-request-contra-account={getTransContraAccount($currentAccount, trRequest)}
-				class="container"
-				on:click={() => console.log(trRequest)}
-			>
-				<Card minHeight="2rem">
-					<strong>{getTransContraAccount($currentAccount, trRequest)}</strong>
-				</Card>
-			</div>
-			<div data-id="sumValue" class="container">
-				<Card minHeight="2rem">
-					<strong
-						>{isCreditor($currentAccount, trRequest.transaction_items)
-							? ''
-							: '-'}{trRequest.sum_value}</strong
-					>
-				</Card>
-			</div>
-			<div data-id="requestTime" class="container">
-				<Card titleFontSize="0.8rem">
-					<small>
-						<p class="time-title">
-							<strong> Time of request </strong>
-						</p>
-					</small>
-					<span class="time-content">
-						{fromNow(requestTime(trRequest.transaction_items))}
+	{#snippet children()}
+		<div class="container">
+			<DetailHeader>
+				{#snippet left()}
+					<span data-id="backBtn">
+						<a href={$page.url.pathname.substring(0, $page.url.pathname.lastIndexOf('/'))}>
+							<Icon addedStyle="" iconName={faArrowLeft} dataIDValue="backBtn" />
+						</a>
 					</span>
-				</Card>
-			</div>
-			<div data-id="expirationTime" class="container">
-				<Card titleFontSize="0.8rem">
-					<small>
-						<p class="time-title">
-							<strong> Time of expiration </strong>
-						</p>
-					</small>
-					<span class="time-content">
-						{expirationTime(trRequest.transaction_items).toString() == new Date(0).toString()
-							? 'none'
-							: fromNow(expirationTime(trRequest.transaction_items))}
-					</span>
-				</Card>
-			</div>
-			<div class="btn-group">
-				{#if isRequestPending($currentAccount, trRequest)}
-					<Button disabled={true} class="pending-btn">Pending</Button>
-				{:else}
-					<span on:click={() => handleApproveClick(trRequest)} data-id="approve-btn">
-						<Button disabled={false} class="approve-btn">Approve</Button>
-					</span>
-					<Button disabled={false} class="reject-btn">Reject</Button>
-				{/if}
-			</div>
-			{#if !showLoading}
-				<div class="transaction-items">
-					{#each trRequest.transaction_items as trItem, i}
-						<div data-id="transaction-item" data-id-index={i} class="container">
-							<Card>
-								<p class="transaction-item-title">
-									{trItem.item_id}
-								</p>
-								<p class="quantity-price">
-									<span class="transaction-item-quantity">{trItem.quantity}</span> x
-									<span class="transaction-item-price">{trItem.price}</span>
-								</p>
-							</Card>
-						</div>
-					{/each}
-				</div>
-				<div class="container">
-					<Card titleFontSize="0.8rem">
-						<div style="clear: both;">
-							<p class="left zeros">Transaction ID</p>
-							<p class="right zeros">
-								{trRequest.id}
-							</p>
-						</div>
+				{/snippet}
+
+				{#snippet middle()}
+					<span> Request </span>
+				{/snippet}
+
+				{#snippet right()}
+					<span> <Icon addedStyle="" iconName={faEnvelope} dataIDValue="emailCopyBtn" /></span>
+				{/snippet}
+			</DetailHeader>
+		</div>
+		<div class="container">
+			{#await getRequestByID() then trRequest}
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+				<div
+					data-id="requestContraAccount"
+					data-id-request-contra-account={getTransContraAccount($currentAccount, trRequest)}
+					class="container"
+					onclick={() => console.log(trRequest)}
+				>
+					<Card minHeight="2rem">
+						{#snippet children()}
+							<strong>{getTransContraAccount($currentAccount, trRequest)}</strong>
+						{/snippet}
 					</Card>
 				</div>
-			{:else}
-				<div class="loading">
-					<Pulse color="#fff" />
+				<div data-id="sumValue" class="container">
+					<Card minHeight="2rem">
+						{#snippet children()}
+							<strong
+								>{isCreditor($currentAccount, trRequest.transaction_items)
+									? ''
+									: '-'}{trRequest.sum_value}</strong
+							>
+						{/snippet}
+					</Card>
 				</div>
-			{/if}
-		{:catch error}
-			<p>{error.message}</p>
-		{/await}
-	</div>
+				<div data-id="requestTime" class="container">
+					<Card>
+						{#snippet children()}
+							<small>
+								<p class="time-title">
+									<strong> Time of request </strong>
+								</p>
+							</small>
+							<span class="time-content">
+								{fromNow(requestTime(trRequest.transaction_items))}
+							</span>
+						{/snippet}
+					</Card>
+				</div>
+				<div data-id="expirationTime" class="container">
+					<Card>
+						{#snippet children()}
+							<small>
+								<p class="time-title">
+									<strong> Time of expiration </strong>
+								</p>
+							</small>
+							<span class="time-content">
+								{expirationTime(trRequest.transaction_items).toString() == new Date(0).toString()
+									? 'none'
+									: fromNow(expirationTime(trRequest.transaction_items))}
+							</span>
+						{/snippet}
+					</Card>
+				</div>
+				<div class="btn-group">
+					{#if isRequestPending($currentAccount, trRequest)}
+						<Button disabled={true} class="pending-btn">
+							{#snippet children()}
+								Pending
+							{/snippet}
+						</Button>
+					{:else}
+						<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+						<span onclick={() => handleApproveClick(trRequest)} data-id="approve-btn">
+							<Button disabled={false} class="approve-btn">
+								{#snippet children()}
+									Approve
+								{/snippet}
+							</Button>
+						</span>
+						<Button disabled={false} class="reject-btn">
+							{#snippet children()}
+								Reject
+							{/snippet}
+						</Button>
+					{/if}
+				</div>
+				{#if !showLoading}
+					<div class="transaction-items">
+						{#each trRequest.transaction_items as trItem, i}
+							<div data-id="transaction-item" data-id-index={i} class="container">
+								<Card>
+									{#snippet children()}
+										<p class="transaction-item-title">
+											{trItem.item_id}
+										</p>
+										<p class="quantity-price">
+											<span class="transaction-item-quantity">{trItem.quantity}</span> x
+											<span class="transaction-item-price">{trItem.price}</span>
+										</p>
+									{/snippet}
+								</Card>
+							</div>
+						{/each}
+					</div>
+					<div class="container">
+						<Card>
+							{#snippet children()}
+								<div style="clear: both;">
+									<p class="left zeros">Transaction ID</p>
+									<p class="right zeros">
+										{trRequest.id}
+									</p>
+								</div>
+							{/snippet}
+						</Card>
+					</div>
+				{:else}
+					<div class="loading">
+						<Pulse color="#fff" />
+					</div>
+				{/if}
+			{:catch error}
+				<p>{error.message}</p>
+			{/await}
+		</div>
+	{/snippet}
 </Nav>
 
 <style>

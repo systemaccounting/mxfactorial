@@ -1,22 +1,20 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import type { UserConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
+import { sveltekit } from '@sveltejs/kit/vite'
 import dotenv from 'dotenv';
 
-const { parsed: vars } = dotenv.config()
+const { parsed: vars = {} } = dotenv.config();
 
-const config: UserConfig = {
+export default defineConfig({
 	plugins: [sveltekit()],
 	define: {
-		process :{
-			env: { ...vars }
+		'process.env': {
+			...vars
 		}
 	},
-	optimizeDeps: {
-		exclude: ['@urql/svelte'],
-	  },
+	test: {
+		include: ['src/**/*.{test,spec}.{js,ts}']
+	},
 	server: {
 		port: vars.CLIENT_PORT
 	}
-};
-
-export default config;
+});

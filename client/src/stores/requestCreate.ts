@@ -66,10 +66,10 @@ function addRuleItems(ruleAddedItems: App.ITransactionItem[]): void {
 	});
 };
 
-function changeRequestItem(
+function changeRequestItem<T extends keyof App.ITransactionItem>(
 	index: number,
-	name: string,
-	value: string,
+	name: T,
+	value: App.ITransactionItem[T],
 ): void {
 	return requestCreate.update(function (reqItems: App.ITransactionItem[]) {
 		reqItems[index][name] = value;
@@ -79,12 +79,12 @@ function changeRequestItem(
 
 function addRecipient(debitor: string, creditor: string): void {
 	return requestCreate.update(function (reqItems: App.ITransactionItem[]) {
-		const userAdded = filterUserAddedItems(reqItems)
-		const recipientAdded = userAdded.map((x) => {
-			x.debitor = debitor ? debitor : null
-			x.creditor = creditor ? creditor : null
+		const userAdded = filterUserAddedItems(reqItems);
+		const recipientAdded = userAdded.map(x => {
+			x.debitor = debitor
+			x.creditor = creditor
 			return x
-		})
+		});
 		return [...recipientAdded];
 	});
 };
@@ -105,6 +105,9 @@ function switchRecipient(): void {
 
 function getRecipient(currentAccount: string | unknown): string {
 	const req = get(requestCreate);
+	if (JSON.stringify(req) == JSON.stringify(initial)) {
+		return ""
+	}
 	const contraAccount = getTrItemsContraAccount(currentAccount, req)
 	return contraAccount
 };

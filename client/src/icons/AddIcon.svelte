@@ -1,6 +1,9 @@
 <script lang="ts">
-	export let size: number;
-	export let style: string;
+	interface Props {
+		size: number;
+		style: string;
+	}
+	let { size, style }: Props = $props();
 </script>
 
 <svg {style} viewBox="0 0 1024 1024" width={size} height={size}>

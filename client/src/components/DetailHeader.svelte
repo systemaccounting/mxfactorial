@@ -1,7 +1,27 @@
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+	interface Props {
+		left: Snippet;
+		middle: Snippet;
+		right: Snippet;
+	}
+	let {
+		left,
+		middle,
+		right
+	}: Props = $props();
+</script>
+
 <div>
-	<span><slot name="left" /></span>
-	<span><slot name="middle" /></span>
-	<span><slot name="right" /></span>
+	<span>
+		{@render left()}
+	</span>
+	<span>
+		{@render middle()}
+	</span>
+	<span>
+		{@render right()}
+	</span>
 </div>
 
 <style>

@@ -1,10 +1,11 @@
-// See https://kit.svelte.dev/docs/types#app
+// See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 declare global {
 	namespace App {
 		// interface Error {}
 		// interface Locals {}
 		// interface PageData {}
+		// interface PageState {}
 		// interface Platform {}
 
 		interface ITransactionItem {
@@ -15,6 +16,7 @@ declare global {
 			quantity: string;
 			debitor_first: boolean;
 			rule_instance_id: string;
+			rule_exec_ids: string[];
 			unit_of_measurement: string;
 			units_measured: string;
 			debitor: string;

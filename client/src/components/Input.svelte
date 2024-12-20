@@ -1,23 +1,22 @@
 <script lang="ts">
 	// insertId enables any parent component to discover
 	// which input component is sending an insert event
-	export let insertId: string;
-	export let hasError: boolean;
-	export let placeholder: string;
-	export let value: string;
-	export let disabled: boolean = false;
-	import type { IInsertValueId } from "../main.d";
-	import { createEventDispatcher } from "svelte";
-
-	const dispatch = createEventDispatcher<{ insert: IInsertValueId }>();
-
-	function handleInsert(e: Event) {
-		const input = e.target as HTMLInputElement;
-		dispatch("insert", {
-			id: insertId,
-			value: input.value,
-		});
+	interface Props {
+		insertId: string;
+		hasError: boolean;
+		placeholder: string;
+		value: string;
+		disabled?: boolean;
+		oninsert: (e: Event) => void;
 	}
+	let {
+		insertId,
+		hasError,
+		placeholder,
+		value = $bindable(),
+		disabled = false,
+		oninsert
+	}: Props = $props();
 </script>
 
 <div class="container">
@@ -26,7 +25,7 @@
 		{placeholder}
 		bind:value
 		class="field {hasError ? 'error' : null}"
-		on:input={handleInsert}
+		oninput={oninsert}
 		{disabled}
 	/>
 </div>

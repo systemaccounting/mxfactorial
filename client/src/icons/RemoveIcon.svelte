@@ -1,18 +1,21 @@
 <script lang="ts">
-	export let size: number;
-	export let style: string | null;
-	export let index: number;
-	import { createEventDispatcher } from 'svelte';
+	interface Props {
+		size: number;
+		style: string | null;
+		index: number;
+		handleRemoveClick: (idx: number) => void;
+	}
+	let { size, style, index, handleRemoveClick }: Props = $props();
 
-	const dispatch = createEventDispatcher<{ index: number }>();
-
-	function handleRemove(): void {
-		dispatch('index', index);
+	function handleRemove(e: Event): void {
+		e.preventDefault();
+		handleRemoveClick(index);
 	}
 </script>
 
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <svg
-	on:click|preventDefault={handleRemove}
+	onclick={handleRemove}
 	{style}
 	width={size}
 	height={size}

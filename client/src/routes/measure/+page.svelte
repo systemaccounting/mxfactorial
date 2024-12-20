@@ -5,12 +5,12 @@
 	import { createClient as createWSClient } from 'graphql-ws';
 	import type { Client } from 'graphql-ws';
 	import uriBuilder from '../../utils/uriBuilder';
-	let searchQuery = '';
-	let price: string;
-	let priceTag: HTMLDivElement;
+	let searchQuery = $state('california gdp now');
+	let price = $state('0.000');
+	let priceTag: HTMLDivElement = $state(document.createElement('div'));
 	let map: google.maps.Map;
 	let markers = [] as any[]; // todo: google.maps.marker.AdvancedMarkerElement does not expect setMap method
-	let messageCount = 0;
+	let messageCount = $state(0);
 	let wsClient: Client;
 	let stop = false;
 	let defaultCoordinates = { lat: 39.8283, lng: -98.5795 }; // usa
@@ -25,7 +25,7 @@
 			await resetWebsocket();
 		}
 
-		const uri = uriBuilder(b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string))
+		const uri = uriBuilder(b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string));
 
 		wsClient = createWSClient({
 			url: uri
@@ -239,13 +239,15 @@
 		initMap();
 	});
 
-	$: if (priceTag) {
-		priceTag.textContent = `${price}`;
-	}
+	$effect(() => {
+		if (priceTag) {
+			priceTag.textContent = `${price}`;
+		}
+	});
 </script>
 
 <div class="search-bar-container">
-	<form class="search-bar" on:submit={handleSearch}>
+	<form class="search-bar" onsubmit={handleSearch}>
 		<input
 			type="text"
 			class="search-input"
@@ -256,7 +258,7 @@
 </div>
 
 <div class="map-container">
-	<div id="map" />
+	<div id="map"></div>
 </div>
 
 <style>

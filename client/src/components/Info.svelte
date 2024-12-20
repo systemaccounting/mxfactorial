@@ -1,7 +1,10 @@
 <script lang="ts">
 	import type { Writable } from 'svelte/store';
-	export let label: string;
-	export let value: Writable<string> | null | string;
+	interface Props {
+		label: string;
+		value: Writable<string> | null | string;
+	}
+	let { label, value }: Props = $props();
 </script>
 
 <div class="info">

@@ -1,10 +1,20 @@
 <script lang="ts">
-	export let disabled: boolean;
+	import type { Snippet } from 'svelte';
+	interface Props {
+		disabled: boolean;
+		class: string;
+		children: Snippet;
+	}
+	let {
+		disabled = false,
+		class: klass,
+		children
+	}: Props = $props();
 </script>
 
 <div>
-	<button {disabled} class={$$props.class}>
-		<slot />
+	<button {disabled} class={klass}>
+		{@render children()}
 	</button>
 </div>
 

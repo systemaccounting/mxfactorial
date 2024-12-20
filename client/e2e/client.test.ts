@@ -1,8 +1,14 @@
 import { expect, test, chromium } from '@playwright/test';
 
+interface ITestTransactionItem {
+	item_id: string;
+	quantity: string;
+	price: string;
+}
+
 test('2 buttons on landing page', async ({ page }) => {
 	await page.goto('/');
-	await expect(await page.getByRole('button')).toHaveCount(2);
+	await expect(page.getByRole('button')).toHaveCount(2);
 });
 
 test('request detail screen pairs transaction items with rule added items', async ({ page }) => {
@@ -11,7 +17,7 @@ test('request detail screen pairs transaction items with rule added items', asyn
 	await page.locator('css=.first').click();
 	await page.getByText('Requests').click();
 	await page.locator('css=[data-id-req="1"]').click();
-	await expect(await getFirstNTransactionItems(page, 6)).toEqual(
+	expect(await getFirstNTransactionItems(page, 6)).toEqual(
 		// migrations/testseed/000003_request.up.sql
 		[
 			{
@@ -120,7 +126,7 @@ async function signOut(page) {
 }
 
 async function getFirstNTransactionItems(page, n) {
-	const transactionItems = [];
+	const transactionItems: ITestTransactionItem[] = [];
 	for (let i = 0; i < n; i++) {
 
 		transactionItems.push({

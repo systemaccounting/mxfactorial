@@ -9,7 +9,7 @@
 		requestTime,
 		isCreditor,
 		getTransContraAccount,
-		sortTrItems
+		sortTrItems,
 	} from '../../../utils/transactions';
 	import { fromNow } from '../../../utils/date';
 	import DisputeIcon from '../../../icons/DisputeIcon.svelte';
@@ -40,88 +40,106 @@
 </script>
 
 <Nav>
-	<div class="container">
-		<DetailHeader>
-			<span slot="left" data-id="backBtn">
-				<a href={$page.url.pathname.substring(0, $page.url.pathname.lastIndexOf('/'))}>
-					<Icon addedStyle="" iconName={faArrowLeft} dataIDValue="backBtn" />
-				</a>
-			</span>
-			<span slot="middle"> History </span>
-			<span slot="right">
-				<Icon addedStyle="" iconName={faEnvelope} dataIDValue="emailCopyBtn" /></span
+	{#snippet children()}
+		<div class="container">
+			<DetailHeader>
+				{#snippet left()}
+					<span data-id="backBtn">
+						<a href={$page.url.pathname.substring(0, $page.url.pathname.lastIndexOf('/'))}>
+							<Icon addedStyle="" iconName={faArrowLeft} dataIDValue="backBtn" />
+						</a>
+					</span>
+				{/snippet}
+				{#snippet middle()}
+					<span> History </span>
+				{/snippet}
+				{#snippet right()}
+					<span> <Icon addedStyle="" iconName={faEnvelope} dataIDValue="emailCopyBtn" /></span>
+				{/snippet}
+			</DetailHeader>
+		</div>
+		{#await getTransactionByID() then transaction}
+			<div
+				data-id="contraAccount"
+				data-id-contra-account={getTransContraAccount($account, transaction)}
+				class="container"
 			>
-		</DetailHeader>
-	</div>
-	{#await getTransactionByID() then transaction}
-		<div
-			data-id="contraAccount"
-			data-id-contra-account={getTransContraAccount($account, transaction)}
-			class="container"
-		>
-			<Card minHeight="2rem">
-				<strong>{getTransContraAccount($account, transaction)}</strong>
-			</Card>
-		</div>
-		<div data-id="sumValue" class="container">
-			<Card minHeight="2rem">
-				<strong
-					>{isCreditor($currentAccount, transaction.transaction_items)
-						? ''
-						: '-'}{transaction.sum_value}</strong
-				>
-			</Card>
-		</div>
-		<div data-id="transactionTime" class="container">
-			<Card titleFontSize="0.8rem">
-				<small>
-					<p class="time-title">
-						<strong> Equilibrium time </strong>
-					</p>
-				</small>
-				<span class="time-content">
-					{fromNow(requestTime(transaction.transaction_items))}
-				</span>
-			</Card>
-		</div>
-		<hr />
-		<div class="container">
-			{#each transaction.transaction_items as trItem, i}
-				<div data-id="transaction-item" data-id-index={i} class="container">
-					<Card>
-						<p class="transaction-item-title">
-							{trItem.item_id}
-						</p>
-						<p class="quantity-price">
-							<span class="transaction-item-quantity">{trItem.quantity}</span> x
-							<span class="transaction-item-price">{trItem.price}</span>
-						</p>
-					</Card>
-				</div>
-			{/each}
-		</div>
-		<hr />
-		<div class="container">
-			<Card titleFontSize="0.8rem">
-				<div style="clear: both;">
-					<p class="left zeros">Transaction ID</p>
-					<p class="right zeros">
-						{transaction.id}
-					</p>
-				</div>
-			</Card>
-		</div>
-		<div class="btn-group">
-			<Button disabled={false} class="dispute-btn">
-				<DisputeIcon
-					style="transform: translate(-6px, 4px)
-	;"
-				/><span class="dispute-btn-text"> Dispute</span>
-			</Button>
-		</div>
-	{:catch error}
-		<p>{error.message}</p>
-	{/await}
+				<Card minHeight="2rem">
+					{#snippet children()}
+						<strong>{getTransContraAccount($account, transaction)}</strong>
+					{/snippet}
+				</Card>
+			</div>
+			<div data-id="sumValue" class="container">
+				<Card minHeight="2rem">
+					{#snippet children()}
+						<strong
+							>{isCreditor($currentAccount, transaction.transaction_items)
+								? ''
+								: '-'}{transaction.sum_value}</strong
+						>
+					{/snippet}
+				</Card>
+			</div>
+			<div data-id="transactionTime" class="container">
+				<Card>
+					{#snippet children()}
+						<small>
+							<p class="time-title">
+								<strong> Equilibrium time </strong>
+							</p>
+						</small>
+						<span class="time-content">
+							{fromNow(requestTime(transaction.transaction_items))}
+						</span>
+					{/snippet}
+				</Card>
+			</div>
+			<hr />
+			<div class="container">
+				{#each transaction.transaction_items as trItem, i}
+					<div data-id="transaction-item" data-id-index={i} class="container">
+						<Card>
+							{#snippet children()}
+								<p class="transaction-item-title">
+									{trItem.item_id}
+								</p>
+								<p class="quantity-price">
+									<span class="transaction-item-quantity">{trItem.quantity}</span> x
+									<span class="transaction-item-price">{trItem.price}</span>
+								</p>
+							{/snippet}
+						</Card>
+					</div>
+				{/each}
+			</div>
+			<hr />
+			<div class="container">
+				<Card>
+					{#snippet children()}
+						<div style="clear: both;">
+							<p class="left zeros">Transaction ID</p>
+							<p class="right zeros">
+								{transaction.id}
+							</p>
+						</div>
+					{/snippet}
+				</Card>
+			</div>
+			<div class="btn-group">
+				<Button disabled={false} class="dispute-btn">
+					{#snippet children()}
+						<DisputeIcon
+							style="transform: translate(-6px, 4px)
+;"
+						/><span class="dispute-btn-text"> Dispute</span>
+					{/snippet}
+				</Button>
+			</div>
+		{:catch error}
+			<p>{error.message}</p>
+		{/await}
+	{/snippet}
 </Nav>
 
 <style>

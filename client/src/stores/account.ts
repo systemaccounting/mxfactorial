@@ -1,9 +1,8 @@
-import { writable } from 'svelte/store'
-import { get } from 'svelte/store'
+import { writable, get } from 'svelte/store'
 
 const account = writable('')
 
-const setAccount = acct => {
+const setAccount = (acct: string) => {
 	account.set(acct)
 };
 

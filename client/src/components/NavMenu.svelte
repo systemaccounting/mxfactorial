@@ -3,14 +3,14 @@
 	import { signOut } from '../auth/cognito';
 	import { browser } from '$app/environment';
 	import c from '../utils/constants';
-
-	export let isActive: boolean;
+	import { switchActiveNav } from '../stores/activeNav';
 
 	function handleDisplayClick(): void {
-		isActive = !isActive;
+		switchActiveNav();
 	}
 
-	function handleSignOutClick() {
+	function handleSignOutClick(e: Event): void {
+		e.preventDefault();
 		if (process.env.CLIENT_ID && process.env.POOL_ID) {
 			signOut();
 		}
@@ -24,7 +24,8 @@
 	}
 </script>
 
-<div on:click={handleDisplayClick}>
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+<div onclick={handleDisplayClick}>
 	<ul data-id="nav-menu">
 		<a href="/requests">
 			<li data-id="nav-menu-item">Requests</li>
@@ -35,7 +36,8 @@
 		<li data-id="nav-menu-item">Rules</li>
 		<li data-id="nav-menu-item">Query</li>
 		<li data-id="nav-menu-item">Support</li>
-		<li data-name="sign-out" data-id="nav-menu-item" on:click|preventDefault={handleSignOutClick}>
+		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+		<li data-name="sign-out" data-id="nav-menu-item" onclick={handleSignOutClick}>
 			Sign Out
 		</li>
 	</ul>

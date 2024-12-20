@@ -1,9 +1,15 @@
 <script lang="ts">
-	export let minHeight: string = "3rem";
+	import type { Snippet } from 'svelte';
+	interface Props {
+		minHeight?: string;
+		class?: string;
+		children: Snippet;
+	}
+	let { minHeight = '3rem', class: klass, children }: Props = $props();
 </script>
 
-<div style="min-height: {minHeight};" class={$$props.class}>
-	<slot />
+<div style="min-height: {minHeight};" class={klass ? klass : ''}>
+	{@render children()}
 </div>
 
 <style>

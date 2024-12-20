@@ -46,25 +46,27 @@
 </script>
 
 <Nav>
-	<Balance />
-	{#await getTransactionsByAccount() then transactionsByAccount}
-		<div class="container">
-			{#each transactionsByAccount as tr, i}
-				<a href={'/history/' + tr['id']}>
-					<div class="history" data-id-index={i} data-id-tr={tr.id}>
-						<HistoryCard
-							contraAccount={getTransContraAccount($account, tr)}
-							isCurrentAccountCreditor={isCreditor($account, tr.transaction_items)}
-							equilibriumTime={requestTime(tr.transaction_items)}
-							sumValue={tr.sum_value}
-						/>
-					</div>
-				</a>
-			{/each}
-		</div>
-	{:catch error}
-		<p>request failed: ${error.message}</p>
-	{/await}
+	{#snippet children()}
+		<Balance />
+		{#await getTransactionsByAccount() then transactionsByAccount}
+			<div class="container">
+				{#each transactionsByAccount as tr, i}
+					<a href={'/history/' + tr['id']}>
+						<div class="history" data-id-index={i} data-id-tr={tr.id}>
+							<HistoryCard
+								contraAccount={getTransContraAccount($account, tr)}
+								isCurrentAccountCreditor={isCreditor($account, tr.transaction_items)}
+								equilibriumTime={requestTime(tr.transaction_items)}
+								sumValue={tr.sum_value}
+							/>
+						</div>
+					</a>
+				{/each}
+			</div>
+		{:catch error}
+			<p>request failed: ${error.message}</p>
+		{/await}
+	{/snippet}
 </Nav>
 
 <style>
