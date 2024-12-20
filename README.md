@@ -51,7 +51,7 @@ encryption and replication are secondary
 ![sum conserved value now](https://github.com/user-attachments/assets/c6ea04b2-06a1-4234-b3d7-956007f5141f)  
 
 **q.** how does standardizing financial value as a conserved quantity protect individuals?  
-**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. consumer wealth increases when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d. but government printing money, and government chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services since they unfairly depend on transferring their expense to everyone else. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the 1) purchasing power created by producers, the 2) increased wealth of consumers and 3) the value of all property  
+**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. consumer wealth increases when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d. but government printing money and government chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services since they unfairly depend on transferring their expense to everyone else. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the purchasing power created by producers, the wealth it creates for consumers and the measured value of all property  
 
 government is not above failure, nor is it entitled to steal from the private sector to conceal its failure. improving government depends on failure [predicting](https://en.wikipedia.org/wiki/Time_travel_debugging) the individuals and laws that must be replaced. flying a flag and demanding loyalty before this step is just misdirection  
 
@@ -179,7 +179,7 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 ```  
 
 **q.** how does systemaccounting model a free market?  
-**a.** by splitting [everything](https://en.wikipedia.org/wiki/Spacetime_algebra#Spacetime_split) between debitors and creditors right down the middle  
+**a.** by splitting **everything** between debitors and creditors [right down the middle](https://en.wikipedia.org/wiki/Spacetime_algebra#Spacetime_split)  
 
 **q.** how does systemaccounting affect setting public policy?  
 **a.** solving problems one at a time depends on 1) researching facts, 2) designing a solution, 3) applying the solution, 4) measuring its input and output and 5) holding contributors accountable. empowering sincere fact finders and problem solvers with more convenient access to public data science reduces the risk of luring them into the idle game of assigning blame between fictional social groups  
