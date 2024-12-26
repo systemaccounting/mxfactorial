@@ -31,7 +31,7 @@ first, currency is modeled as a lightweight, dual positive-negative structured t
   "debitor_approval_time": "2023-03-20T04:58:32.001Z"
 }
 ```
-encryption and replication are secondary
+once transactions are typed as [conserved](https://en.wikipedia.org/wiki/Conserved_quantity), applying encryption and replication become useful
 
 **q.** where will i bank?  
 **a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their accounting, then assume no one except you will own that risk after you consume it  
@@ -146,6 +146,15 @@ government is not above failure, nor is it entitled to steal from the private se
 **a.** central banks providing "forward guidance" appease the democratic mandate more than they set expectation when they print money and manipulate interest rates. in addition to enforcing a conservation law on value, systemaccounting prices capital by switching the "risk-free" rate from referencing the hackable price of debt to the immutably recorded price of equity. when the risk-free rate refers to the empirical rate, i.e. to the historical and not the expected, the economy remains protected from the catastrophic failure indulged by government mispricing  
 
 removing financial appeasement guides the freedom of speech by recalibrating expectation to the empirical  
+
+**q.** how are prices regulated in systemaccounting?  
+**a.** prices are regulated naturally by dynamic equilibrium. when rates of return are empirical and transparent, capital can flow to above average rates to help increase supply and lower prices  
+
+**q.** how does systemaccounting manage financial stability?  
+**a.** systemaccounting automates financial stability by typing transactions as conserved. [bounding](https://en.wikipedia.org/wiki/BIBO_stability) financial system inputs automatically protects it from blowing up  
+
+**q.** how does systemaccounting model an economy?  
+**a.** systemaccounting models economic activity with conformal geometric algebra which recognizes the public's right to continuity when searching for correlation. in a cga economy, goods and services are referenced in transactions as 3d objects. this 3d physical space of goods and services provides the data model's base space. then motion of goods services between debitors and creditors is modeled by orthogonally extending the base space with 2 more debitor and creditor dimensions. adding a quadratic structure to the debitor and creditor dimensions, and assigning each to negative and positive one respectively, enables measuring the alternating, signed recurrence of accounts across transactions. now referencing industry, occupation and other contextual values supports designing financial and economic queries with continuity-embedding multivectors  
 
 **q.** will a government hosted payment app reduce my freedom?  
 **a.** the government can already see your transactions. systemaccounting empowers you to see the transactions of your government. access to the realtime financial performance of your government helps protect you from electing individuals who exploit money printing, price manipulation and the absence of accountability to systematize the cost of their failures to everyone else  
@@ -334,7 +343,7 @@ on the other hand, systemaccounting will eliminate a lot of archaic labor depend
 
 ### general use cases
 public demonstration of the following use cases through a systemaccounting function:
-* expressing a [conservation law](https://en.wikipedia.org/wiki/Conservation_law) through a [data structure](https://github.com/systemaccounting/mxfactorial/blob/develop/mxfactorial.ipynb) disambiguates *delivered* value from *expected* value, and replaces [committees](https://www.federalreserve.gov/financial-stability.htm) with an automated [financial stability criterion](https://en.wikipedia.org/wiki/BIBO_stability)
+* expressing a [conservation law](https://en.wikipedia.org/wiki/Conservation_law) through a [data structure](https://github.com/systemaccounting/mxfactorial/blob/develop/mxfactorial.ipynb) disambiguates *delivered* value from *expected* value, and replaces [committees](https://www.federalreserve.gov/financial-stability.htm) with an automated financial stability criterion
 * producing a [scientific measure](http://www.systemaccounting.org/how_does_systemaccounting_produce_a_scientific_measure_of_the_cost_of_capital) of the equilibrium price of capital signals the demand for capital with an empirical rate of return instead of a [government defined word](https://www.systemaccounting.org/what_is_a_bank), and removes the ability of a central authority to [manipulate](https://en.wikipedia.org/wiki/Federal_funds_rate) the price of credit
 * `SELECT SUM(price*quantity) FROM transactions WHERE time = NOW()` maximizes & protects for individuals a scientific standard the publicly-measured quarterly or annual '[GDP](https://en.wikipedia.org/wiki/Gross_domestic_product)' violates
 * where an industry is [chartered](http://www.occ.gov/topics/licensing/index-licensing.html), [protected](https://en.wikipedia.org/wiki/Bailout), and [primarily depended upon](https://www.opensecrets.org/industries) by a government requiring [election assistance](https://en.wikipedia.org/wiki/Collusion), conserving value & liability (information) separates the balance sheets of governments from individuals, and eliminates [socializing](https://en.wikipedia.org/wiki/Externality#Negative) the [default risk](https://en.wikipedia.org/wiki/Liability_(financial_accounting)) of any individual or firm
