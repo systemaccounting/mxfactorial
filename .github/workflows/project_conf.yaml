@@ -1,0 +1,19 @@
+name: project-conf
+
+on:
+  push:
+    paths:
+    - project.yaml
+
+jobs:
+  conf_test:
+    name: test types in project.yaml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cue-lang/setup-cue@v1.0.0
+        with:
+          version: v0.11.1
+        id: install
+      - name: test project.yaml
+        run: cue vet ./cue/project_conf.cue project.yaml

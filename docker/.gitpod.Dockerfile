@@ -1,6 +1,7 @@
 FROM gitpod/workspace-full:latest
 
 ARG TF_VERSION=1.2.7
+ARG CUE_VERSION=0.11.1
 
 RUN bash -lc "rustup default stable" && \
 	wget -O- https://carvel.dev/install.sh > install.sh && \
@@ -17,6 +18,10 @@ RUN bash -lc "rustup default stable" && \
 	unzip terraform_${TF_VERSION}_linux_amd64.zip && \
 	sudo mv terraform /usr/local/bin && \
 	rm terraform_${TF_VERSION}_linux_amd64.zip && \
+	wget https://github.com/cue-lang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
+	tar -xf cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
+	sudo mv cue /usr/local/bin && \
+	rm -rf cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
 	rustup component add llvm-tools-preview --toolchain stable-x86_64-unknown-linux-gnu && \
 	cargo install cargo-llvm-cov && \
 	brew install libpq && \

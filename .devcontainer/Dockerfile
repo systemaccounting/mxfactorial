@@ -4,6 +4,7 @@ ARG TF_VERSION=1.2.7
 ARG MIGRATE_VERSION=4.15.2
 ARG WATCH_VERSION=8.4.0
 ARG CARGO_LLVM_COV_VERSION=0.5.36
+ARG CUE_VERSION=0.11.1
 
 RUN wget -O- https://carvel.dev/install.sh > install.sh && \
 	sudo bash install.sh && \
@@ -26,6 +27,10 @@ RUN wget -O- https://carvel.dev/install.sh > install.sh && \
 	tar -xf cargo-llvm-cov-x86_64-unknown-linux-gnu.tar.gz && \
 	sudo mv cargo-llvm-cov /usr/local/bin && \
 	rm -rf cargo-llvm-cov* && \
+	wget https://github.com/cue-lang/cue/releases/download/v${CUE_VERSION}/cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
+	tar -xf cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
+	sudo mv cue /usr/local/bin && \
+	rm -rf cue_v${CUE_VERSION}_linux_amd64.tar.gz && \
 	npm install -g eslint && \
 	sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
 	wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - && \

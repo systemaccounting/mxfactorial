@@ -7,6 +7,7 @@
       GITHUB_REPO_NAME:
         ssm: null
         default: mxfactorial
+    get: []
   params: []
   codecov:
     flags:
@@ -25,6 +26,7 @@
         DEPLOY_IMAGE_WORKFLOW:
           ssm: null
           default: deploy-all-images.yaml
+      get: []
     params: []
 client:
   runtime: v8
@@ -54,13 +56,17 @@ client:
   params:
     - ENABLE_API_AUTH
 crates:
-  env_var: null
+  env_var:
+    set: {}
+    get: []
   params: []
   httpclient:
     runtime: rust1.x
     min_code_cov: 55
     type: lib
-    env_var: null
+    env_var:
+      set: {}
+      get: []
     params: []
   pg:
     runtime: rust1.x
@@ -68,7 +74,7 @@ crates:
     type: lib
     params: []
     env_var:
-      set: null
+      set: {}
       get:
         - PGHOST
         - PGPORT
@@ -79,19 +85,25 @@ crates:
     runtime: rust1.x
     min_code_cov: 93
     type: lib
-    env_var: null
+    env_var:
+      set: {}
+      get: []
     params: []
   uribuilder:
     runtime: rust1.x
     min_code_cov: 0
     type: lib
-    env_var: null
+    env_var:
+      set: {}
+      get: []
     params: []
   wsclient:
     runtime: rust1.x
     min_code_cov: 0
     type: lib
-    env_var: null
+    env_var:
+      set: {}
+      get: []
     params: []
 docker:
   env_var:
@@ -102,6 +114,7 @@ docker:
       LOCAL_TAG_VERSION:
         ssm: null
         default: latest
+    get: []
 infra:
   terraform:
     env_var:
@@ -112,6 +125,7 @@ infra:
         TFSTATE_ENV_SUFFIX:
           ssm: null
           default: env_infra
+      get: []
     aws:
       environments:
         region:
@@ -120,12 +134,14 @@ infra:
               TFSTATE_APIGW_SUFFIX:
                 ssm: null
                 default: apigw_logging
+            get: []
       modules:
         env_var:
           set:
             LAMBDA_RUNTIME:
               ssm: null
               default: provided.al2023
+          get: []
         environment:
           env_var:
             set:
@@ -204,6 +220,7 @@ infra:
               READINESS_CHECK_PATH:
                 ssm: service/lambda/readiness_check_path
                 default: /healthz
+            get: []
         microk8s:
           env_var:
             set:
@@ -228,6 +245,7 @@ infra:
               MICROK8S_MANIFESTS_DIR:
                 ssm: null
                 default: k8s
+            get: []
         project-storage:
           env_var:
             set:
@@ -255,12 +273,13 @@ infra:
               TFSTATE_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-tfstate
+            get: []
 k8s:
   local:
     type: lib
     params: []
     env_var:
-      set: null
+      set: {}
       get:
         - CLIENT_PORT
         - PGPORT
@@ -292,7 +311,7 @@ k8s:
     type: lib
     params: []
     env_var:
-      set: null
+      set: {}
       get:
         - PGDATABASE
         - PGUSER
@@ -330,6 +349,7 @@ migrations:
         TESTSEED_DUMP_PATH:
           ssm: null
           default: ./migrations/dumps/testseed.sql
+      get: []
   go-migrate:
     runtime: bash
     min_code_cov: null
@@ -339,9 +359,10 @@ migrations:
       - AWS_REGION
     deploy: true
     build_src_path: null
-    dependents:
+    dependents: []
+    rust_log: off
     env_var:
-      set: []
+      set: {}
       get:
         - SQL_TYPE
         - PGHOST
@@ -355,6 +376,7 @@ migrations:
         TEST_ACCOUNTS_FILE:
           ssm: null
           default: ./migrations/testseed/000001_accounts.up.sql
+      get: []
 scripts:
   env_var:
     set:
@@ -412,6 +434,7 @@ scripts:
       SHORT_GIT_SHA_LENGTH:
         ssm: null
         default: 7
+    get: []
 services:
   env_var:
     set:
@@ -424,6 +447,8 @@ services:
       RETURN_RECORD_LIMIT:
         ssm: null
         default: 20
+    get: []
+  params: []
   graphql:
     runtime: rust1.x
     min_code_cov: null
@@ -741,12 +766,14 @@ services:
     runtime: rust1.x
     min_code_cov: null
     type: app
+    local_dev: false
     params: []
     deploy: true
     build_src_path: null
     dependents: []
     rust_log: off
     env_var:
+      set: {}
       get: # used by make targets
         - POOL_ID
         - CLIENT_ID
@@ -858,3 +885,7 @@ params: []
     os:
       osx:
         install: 'brew tap carvel-dev/carvel && brew install ytt'
+  - name: cue
+    os:
+      osx:
+        install: 'brew install cue-lang/tap/cue'
