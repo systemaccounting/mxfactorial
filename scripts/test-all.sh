@@ -28,3 +28,5 @@ fi
 yq -i '.client.env_var.set.GOOGLE_MAPS_API_KEY.default = null' $PROJECT_CONF
 # remove empty line at end of project.yaml
 printf %s "$(cat $PROJECT_CONF)" >$PROJECT_CONF
+# test project.yaml types
+cue vet ./cue/project_conf.cue $PROJECT_CONF
