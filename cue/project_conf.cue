@@ -152,14 +152,3 @@ tests: {
     type!: #AppType
     deploy: false
 }
-
-#Os: "osx"
-
-#Tool: {
-    name!: string
-    os: [#Os]: {
-        install: string
-    }
-}
-
-".tools": [...#Tool]

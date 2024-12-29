@@ -344,3 +344,6 @@ changes ports set in `project.yaml` to 3xxxx for access through kubernetes [Node
 
 #### `get-ssh-key.sh`
 gets ssh key from ssm and writes it to disk
+
+#### `install.sh`
+installs project dependencies. only macos supported

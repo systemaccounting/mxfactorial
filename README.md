@@ -56,7 +56,7 @@ once transactions are typed as [conserved](https://en.wikipedia.org/wiki/Conserv
 government is not above failure, nor is it entitled to steal from the private sector to conceal its failure. improving government depends on failure [predicting](https://en.wikipedia.org/wiki/Time_travel_debugging) the individuals and laws that must be replaced. flying a flag and demanding loyalty before this step is just misdirection  
 
 **q.** what is a bank?  
-**a.** a lending business that receives government privilege in [12 U.S.C. § 1841(c)](https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1841&num=0&edition=prelim) to subsidize its cost of raising capital by [bundling](https://en.wikipedia.org/wiki/Product_bundling) the services of 1) storing and 2) moving money with 3) offering loans:
+**a.** a lending business that receives government privilege in [12 U.S.C. § 1841(c)](https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title12-section1841&num=0&edition=prelim) to subsidize its cost of raising capital by anticompetitively [bundling](https://en.wikipedia.org/wiki/Product_bundling) the services of 1) storing and 2) moving money with 3) offering loans:
 
 >(c) Bank Defined.-For purposes of this chapter-  
 >&nbsp;&nbsp;&nbsp;(1) In general.-Except as provided in paragraph (2), the term "bank" means any of the following:  
