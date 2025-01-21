@@ -15,7 +15,7 @@ RUN USER=root cargo build \
 
 FROM alpine
 
-COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.2 /lambda-adapter /opt/extensions/lambda-adapter
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.0 /lambda-adapter /opt/extensions/lambda-adapter
 COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/request-approve /app/request-approve
 
 EXPOSE 10003
