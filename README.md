@@ -31,7 +31,7 @@ first, currency is modeled as a lightweight, dual positive-negative structured t
   "debitor_approval_time": "2023-03-20T04:58:32.001Z"
 }
 ```
-once transactions are typed as [conserved](https://en.wikipedia.org/wiki/Conserved_quantity), applying encryption and replication become useful
+once transactions are typed as [conserved](https://en.wikipedia.org/wiki/Conserved_quantity), applying encryption and replication is relevant  
 
 **q.** where will i bank?  
 **a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their accounting, then assume no one except you will own that risk after you consume it  
@@ -137,7 +137,7 @@ government is not above failure, nor is it entitled to steal from the private se
 **a.** enforcing a conservation law on value privatizes the balance sheets of banks. central banks are not necessary when banks cannot include their balance sheets in the money supply  
 
 **q.** what would happen to the money multiplier?  
-**a.** there's no such thing as the "money multiplier". this phrase is weasel wording for equating assets of different types. the private instrument used to measure value expected in the future is not equal to the public instrument used to measure value eaned in the past: `bank note (risk > 0) != money (risk = 0)`. by defining value and liability as conserved, systemaccounting introduces a physics-based type system into finance that prevents such abuses  
+**a.** there's no such thing as the "money multiplier". this phrase is weasel wording for equating assets of different types. the private instrument used to measure value expected in the future is not equal to the public instrument used to measure value earned in the past: `bank note (risk > 0) != money (risk = 0)`. by defining value and liability as conserved, systemaccounting introduces a physics-based type system into finance that prevents such abuses  
 
 **q.** shouldn't money always be earning interest?  
 **a.** a free market does not require consuming financial risk  
@@ -154,7 +154,12 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 **a.** systemaccounting automates financial stability by typing transactions as conserved. [bounding](https://en.wikipedia.org/wiki/BIBO_stability) financial system inputs automatically protects it from blowing up  
 
 **q.** how does systemaccounting model an economy?  
-**a.** systemaccounting models economic activity with conformal geometric algebra which recognizes the public's right to continuity when searching for correlation. in a cga economy, goods and services are referenced in transactions as 3d objects. this 3d physical space of goods and services provides the data model's base space. then motion of goods services between debitors and creditors is modeled by orthogonally extending the base space with 2 more debitor and creditor dimensions. adding a quadratic structure to the debitor and creditor dimensions, and assigning each to negative and positive one respectively, enables measuring the alternating, signed recurrence of accounts across transactions. now referencing industry, occupation and other contextual values supports designing financial and economic queries with continuity-embedding multivectors  
+**a.** systemaccounting recognizes the public's right to continuity when searching for correlation so it models economic activity with conformal geometric algebra. in a cga economy, goods and services are referenced in transactions as 3d objects. this 3d physical space of goods and services provides the data model's base space. then motion of goods services between debitors and creditors is modeled by orthogonally extending the base space with 2 more debitor and creditor dimensions. adding a quadratic structure to the debitor and creditor dimensions and assigning each to -1 and +1 respectively enables measuring the alternating, signed recurrence of accounts across transactions. now referencing industry, occupation and other contextual values across *transactions as rotations* supports designing financial and economic queries with continuity-embedding multivectors  
+
+**q.** does replacing a banking with a cga economy require a democratic mandate?  
+**a.** no. but while sending someone down the well with a spartan kick to the chest is tempting when you hear them claim the choice to stop stealing from you through a "money multiplier" is their "democratic right", they're likely still under the spell that the counted opinion has more authority than the empirical one  
+
+so they'll receive **courtesy** while the instrument used to finance this absurdity is expediently removed  
 
 **q.** will a government hosted payment app reduce my freedom?  
 **a.** the government can already see your transactions. systemaccounting empowers you to see the transactions of your government. access to the realtime financial performance of your government helps protect you from electing individuals who exploit money printing, price manipulation and the absence of accountability to systematize the cost of their failures to everyone else  

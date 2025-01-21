@@ -10,7 +10,7 @@ general use:
 1. `terraform apply`
 
 lambda web adapter use:
-1. add `COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.2 /lambda-adapter /opt/extensions/lambda-adapter` to app Dockerfile
+1. add `COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.0 /lambda-adapter /opt/extensions/lambda-adapter` to app Dockerfile
 1. assign `var.aws_lwa_port` a unique project application port* to configure the [lambda web adapter](https://github.com/awslabs/aws-lambda-web-adapter)
 
 examples:
