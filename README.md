@@ -51,7 +51,7 @@ once transactions are typed as [conserved](https://en.wikipedia.org/wiki/Conserv
 ![sum conserved value now](https://github.com/user-attachments/assets/c6ea04b2-06a1-4234-b3d7-956007f5141f)  
 
 **q.** how does standardizing financial value as a conserved quantity protect individuals?  
-**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. consumer wealth increases when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d. but government printing money and government chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services since they unfairly depend on transferring their expense to everyone else. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the purchasing power created by producers, the wealth it creates for consumers and the measured value of all property  
+**a.** applying a conservation law to financial value protects producers and consumers from an abuse of government authority. consumer wealth increases when producers increase the [purchasing power](https://en.wikipedia.org/wiki/Information_content) of money by shipping useful r&d. but government printing money and government-chartered "bankers" expecting money are not the same types of events as producers shipping useful r&d. theyre not even the same types of events as producers shipping common goods and services since they unfairly depend on transferring their expense to everyone else. so when government authority is used to violate conservation by defining money as something you can just print and [mix](https://en.wikipedia.org/wiki/Money_multiplier) with failing "bank" notes, the loss of information in money from these physically negative events steals away the purchasing power created by producers, the wealth it creates for consumers and the measured value of all property  
 
 government is not above failure, nor is it entitled to steal from the private sector to conceal its failure. improving government depends on failure [predicting](https://en.wikipedia.org/wiki/Time_travel_debugging) the individuals and laws that must be replaced. flying a flag and demanding loyalty before this step is just misdirection  
 
@@ -154,10 +154,10 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 **a.** systemaccounting automates financial stability by typing transactions as conserved. [bounding](https://en.wikipedia.org/wiki/BIBO_stability) financial system inputs automatically protects it from blowing up  
 
 **q.** how does systemaccounting model an economy?  
-**a.** systemaccounting recognizes the public's right to continuity when searching for correlation so it models economic activity with conformal geometric algebra. in a cga economy, goods and services are referenced in transactions as 3d objects. this 3d physical space of goods and services provides the data model's base space. then motion of goods services between debitors and creditors is modeled by orthogonally extending the base space with 2 more debitor and creditor dimensions. adding a quadratic structure to the debitor and creditor dimensions and assigning each to -1 and +1 respectively enables measuring the alternating, signed recurrence of accounts across transactions. now referencing industry, occupation and other contextual values across *transactions as rotations* supports designing financial and economic queries with continuity-embedding multivectors  
+**a.** systemaccounting recognizes the public's right to continuity when searching for correlation so it models economic activity with conformal geometric algebra. in a cga economy, goods and services are referenced in transactions as 3d objects. this 3d physical space of goods and services provides the data model's base space. then motion of goods services between debitors and creditors is modeled by orthogonally extending the base space with 2 more debitor and creditor dimensions. adding a quadratic structure to the debitor and creditor dimensions and assigning each to -1 and +1 respectively enables measuring the alternating, signed recurrence of accounts across transactions. now referencing industry, occupation and other contextual values across *transactions as rotations* supports designing financial and economic queries with continuity-embedding multivectors. propagating economic value through light-like transactions achieves a much higher form of fidelity to how information travels in spacetime than through the transactions middled by government-chartered "banks"  
 
 **q.** does replacing a banking with a cga economy require a democratic mandate?  
-**a.** no. but while sending someone down the well with a spartan kick to the chest is tempting when you hear them claim the choice to stop stealing from you through a "money multiplier" is their "democratic right", they're likely still under the spell that the counted opinion has more authority than the empirical one  
+**a.** no. but while sending someone down a hole with a spartan kick to the chest is tempting when you hear them claim the choice to stop stealing from you through a "money multiplier" is their *democratic right*, they're likely still under the spell that the counted opinion has more authority than the empirical one  
 
 so they'll receive **courtesy** while the instrument used to finance this absurdity is expediently removed  
 
@@ -241,7 +241,7 @@ on the other hand, systemaccounting will eliminate a lot of archaic labor depend
 ```
 
 **q.** can i invest?  
-**a.** contribute what you like. the dividend for believing in science is protection  
+**a.** contribute what you like. the dividend for believing in science is protection from other people's fiction  
 
 ### how it works
 
