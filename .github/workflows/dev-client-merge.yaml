@@ -1,0 +1,44 @@
+name: dev-client-merge
+# comes after dev-client-deploy.yaml
+
+# tags, pushes and deploys to dev cloud on develop merge,
+# then pushes image to prod
+
+# this workflow intentionally omits testing client integration in dev cloud
+# to reduce time and debugging latency issues in tests with lambda hosted ssr
+
+on:
+  push:
+    paths:
+    - 'client/**'
+    branches:
+    - 'develop'
+
+jobs:
+  tag_push_deploy_dev:
+    name: tag develop client
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      APP_DIR: client
+    steps:
+      - uses: actions/checkout@v4
+      - name: tag client image with develop merge commit sha
+        run: bash scripts/tag-merge-commit.sh --app-name $APP_DIR --env dev --env-id ${{ secrets.DEV_ENV_ID }}
+      - name: deploy to dev cloud environment
+      # deploy newly tagged dev image to dev cloud
+        run: bash scripts/deploy-last-image.sh --app-name $APP_DIR --env dev --env-id ${{ secrets.DEV_ENV_ID }}
+  push_prod:
+    name: push develop client to prod ecr
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      APP_DIR: client
+    steps:
+      - uses: actions/checkout@v4
+      - name: tag and push dev images to prod ecr
+        run: bash scripts/push-prod-image.sh --app-name $APP_DIR --env dev --env-id ${{ secrets.DEV_ENV_ID }}

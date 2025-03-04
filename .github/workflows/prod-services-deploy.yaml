@@ -7,7 +7,6 @@ on:
     - 'crates/**'
     - 'migrations/schema/*'
     - 'migrations/seed/*'
-    - 'client/**'
     - 'docker/**'
     branches:
     - 'master'

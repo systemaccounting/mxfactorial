@@ -1,0 +1,56 @@
+name: dev-client-deploy
+# deploys client to dev cloud before develop merge
+on:
+  push:
+    paths:
+    - 'client/**'
+    branches-ignore:
+    - 'master'
+    - 'develop'
+
+jobs:
+  test:
+    name: test client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: start services
+        run: make start
+      # todo: unit tests
+      - name: e2e test client
+        run: make -C ./client test-ci
+      - name: clean up
+        run: make stop
+  push_image:
+    name: push image to dev ecr
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      APP_DIR: client
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: mask values
+        run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
+      - name: build image
+        run: make -C $APP_DIR build-image
+      - name: tag image
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C $APP_DIR tag-dev-image
+      - name: push image
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C $APP_DIR push-dev-image
+  deploy:
+    name: deploy client
+    needs: push_image
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      APP_DIR: client
+    steps:
+      - uses: actions/checkout@v4
+      - name: deploy to dev cloud environment
+          # deploy newly tagged image to dev cloud
+        run: bash scripts/deploy-last-image.sh --app-name $APP_DIR --env dev --env-id ${{ secrets.DEV_ENV_ID }}

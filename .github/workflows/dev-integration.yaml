@@ -56,6 +56,7 @@ jobs:
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./tests get-secrets ENV=dev
       - name: run dev cloud integration tests
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} cargo test --manifest-path ./tests/Cargo.toml --features integration_tests -- --test-threads=1
+      # todo: test client integration
       - name: tag and push dev images to prod ecr
         run: |
           for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
