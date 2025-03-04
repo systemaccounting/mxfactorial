@@ -1,5 +1,5 @@
 locals {
-  COGNITO_JWKS_URI = "https://cognito-idp.${data.aws_region.current.name}.amazonaws.com/${aws_cognito_user_pool.pool.id}/.well-known/jwks.json"
+  COGNITO_JWKS_URI = "https://${aws_cognito_user_pool.pool.endpoint}/.well-known/jwks.json"
 }
 
 resource "aws_cognito_user_pool" "pool" {
