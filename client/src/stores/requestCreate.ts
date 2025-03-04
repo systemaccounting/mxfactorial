@@ -105,7 +105,8 @@ function switchRecipient(): void {
 
 function getRecipient(currentAccount: string | unknown): string {
 	const req = get(requestCreate);
-	if (JSON.stringify(req) == JSON.stringify(initial)) {
+	const empty: App.ITransactionItem[] = JSON.parse(JSON.stringify(initialJSON));
+	if (JSON.stringify(req) == JSON.stringify(empty)) {
 		return ""
 	}
 	const contraAccount = getTrItemsContraAccount(currentAccount, req)
