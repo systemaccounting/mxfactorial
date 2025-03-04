@@ -1,23 +1,26 @@
 FROM mxfactorial/client-base:v1 AS builder1
 
-ARG GRAPHQL_URI=aHR0cDovL2xvY2FsaG9zdDoxMDAwMAo=
+ARG PUBLIC_POOL_ID
+ARG PUBLIC_CLIENT_ID
+ARG PUBLIC_GRAPHQL_URI
+ARG PUBLIC_DOMAIN
+ARG PORT
+
+WORKDIR /app
 
 COPY client .
 
-RUN printf "ENABLE_API_AUTH=false\nGRAPHQL_URI=$GRAPHQL_URI\n" > .env
-
+# WARNING: docker build was failing to COPY package*.json with unstaged
+# changes on macos so npm install may be required before npm run build:
+# RUN npm install
 RUN npm run build
 
-FROM nginx:latest
+FROM node:lts-alpine
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.9.0 /lambda-adapter /opt/extensions/lambda-adapter
+COPY --from=builder1 /app/build /app
+COPY --from=builder1 /app/package.json /app
+COPY --from=builder1 /app/package-lock.json /app
 
-EXPOSE 80
+WORKDIR /app
 
-COPY --from=builder1 /app/entrypoint.sh /docker-entrypoint.d/40-set-env-vars.sh
-
-RUN chmod +x /docker-entrypoint.d/40-set-env-vars.sh
-
-COPY --from=builder1 /app/.svelte-kit/output/prerendered/pages/index.html /usr/share/nginx/html
-
-COPY --from=builder1 /app/.svelte-kit/output/client/ /usr/share/nginx/html
-
-COPY --from=builder1 /app/nginx.conf /etc/nginx/conf.d/default.conf
+CMD ["node", "index.js"]
