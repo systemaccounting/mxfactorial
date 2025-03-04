@@ -22,11 +22,10 @@ provider "aws" {
 
 module "project_storage_dev" {
   source                           = "../../modules/project-storage/v001"
-  force_destroy_storage            = true
+  force_destroy_storage            = false
   env                              = local.ENV
   env_id                           = local.ENV_ID
   artifacts_bucket_name_prefix     = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
-  client_origin_bucket_name_prefix = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
   tfstate_bucket_name_prefix       = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
   ddb_table_name_prefix            = local.STORAGE_ENV_VAR.DDB_TABLE_NAME_PREFIX.default
   ddb_table_hash_key               = local.STORAGE_ENV_VAR.DDB_TABLE_HASH_KEY.default
