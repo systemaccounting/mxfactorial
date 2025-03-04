@@ -29,7 +29,7 @@ module "rule" {
   env          = var.env
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
-  env_vars = merge(local.POSTGRES_VARS, {})
+  env_vars     = merge(local.POSTGRES_VARS, {})
   aws_lwa_port = local.RULE_PORT
   invoke_url_principals = [
     module.graphql.lambda_role_arn,
@@ -141,4 +141,25 @@ module "auto_confirm" {
     INITIAL_ACCOUNT_BALANCE = var.initial_account_balance
   })
   invoke_arn_principals = ["cognito-idp.amazonaws.com"]
+}
+
+module "client" {
+  source       = "../../provided-lambda/v001"
+  service_name = "client"
+  env          = var.env
+  ssm_prefix   = var.ssm_prefix
+  env_id       = var.env_id
+  env_vars = {
+    PORT = local.CLIENT_PORT
+    # variables requiring a PUBLIC_* prefix
+    # https://svelte.dev/docs/kit/configuration#env
+    PUBLIC_POOL_ID                   = aws_cognito_user_pool.pool.id
+    PUBLIC_CLIENT_ID                 = aws_cognito_user_pool_client.client.id
+    PUBLIC_GRAPHQL_URI               = module.graphql_apigwv2.invoke_url
+    PUBLIC_GOOGLE_MAPS_API_KEY       = null
+    PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI = null
+  }
+  aws_lwa_port          = local.CLIENT_PORT
+  invoke_url_principals = [module.graphql.lambda_role_arn]
+  create_secret         = true
 }
