@@ -6,21 +6,12 @@ resource "aws_ssm_parameter" "graphql_uri" {
   value = var.custom_domain_name == "" ? module.graphql_apigwv2.invoke_url : ("https://${var.env == "prod" ? "api.${var.custom_domain_name}" : "${var.env}-api.${var.custom_domain_name}"}")
 }
 
-resource "aws_ssm_parameter" "cache_client_uri" {
+resource "aws_ssm_parameter" "apigw_client_uri" {
   count       = var.build_cache ? 1 : 0 // false during terraform development
   name        = "/${var.ssm_prefix}/client/uri"
   description = "client address in ${local.SPACED_ID_ENV}"
   type        = "SecureString"
-  // store cloudfront dns if no custom dns
-  value = var.custom_domain_name == "" ? "https://${aws_cloudfront_distribution.s3_client_distribution[0].domain_name}" : ("https://${var.env == "prod" ? var.custom_domain_name : "${var.env}.${var.custom_domain_name}"}")
-}
-
-resource "aws_ssm_parameter" "s3_client_uri" {
-  count       = var.build_cache ? 0 : 1 // replaces cloudfront cache address when cloudfront avoided during development
-  name        = "/${var.ssm_prefix}/client/uri"
-  description = "client address in ${local.SPACED_ID_ENV}"
-  type        = "SecureString"
-  value       = "http://${var.client_origin_bucket_name}.s3-website-${data.aws_region.current.name}.amazonaws.com"
+  value       = module.client_apigwv2.invoke_url
 }
 
 resource "aws_ssm_parameter" "pool_id" {
