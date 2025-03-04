@@ -1,26 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { signOut } from '../auth/cognito';
-	import { browser } from '$app/environment';
-	import c from '../utils/constants';
 	import { switchActiveNav } from '../stores/activeNav';
+	import { signOut } from '../auth/cognito';
+	import { page } from '$app/state';
 
-	function handleDisplayClick(): void {
+	function handleDisplayClick() {
 		switchActiveNav();
 	}
 
-	function handleSignOutClick(e: Event): void {
+	function handleSignOutClick(e: Event) {
 		e.preventDefault();
-		if (process.env.CLIENT_ID && process.env.POOL_ID) {
-			signOut();
+		try {
+			signOut(page.data.poolId, page.data.clientId, document.location.hostname);
+		} catch (err) {
+			alert(err);
 		}
 		goto('/');
-		if (browser) {
-			localStorage.removeItem(c.ACCOUNT_KEY);
-			localStorage.removeItem(c.REQUEST_CREATE_KEY);
-			localStorage.removeItem(c.REQUESTS_PENDING_KEY);
-			localStorage.removeItem(c.HISTORY_KEY);
-		}
 	}
 </script>
 
@@ -37,9 +32,7 @@
 		<li data-id="nav-menu-item">Query</li>
 		<li data-id="nav-menu-item">Support</li>
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<li data-name="sign-out" data-id="nav-menu-item" onclick={handleSignOutClick}>
-			Sign Out
-		</li>
+		<li data-name="sign-out" data-id="nav-menu-item" onclick={handleSignOutClick}>Sign Out</li>
 	</ul>
 </div>
 

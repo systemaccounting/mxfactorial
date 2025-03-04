@@ -1,52 +1,43 @@
 <script lang="ts">
+	import { signUp, signIn } from '../auth/cognito';
 	import { goto } from '$app/navigation';
-	import { signIn, signUp } from '../auth/cognito';
-	import { Pulse } from 'svelte-loading-spinners';
-	import { setAccount } from '../stores/account';
-	import c from '../utils/constants';
+	import { page } from '$app/state';
 
 	let hasError: boolean = false;
 	let disabled: boolean = false;
 	let inactive: boolean = false;
 	let account: string = '';
 	let password: string = '';
-	let showLoading: boolean = false;
 
-	function handleSignIn(e: Event) {
+	async function handleSignIn(e: Event) {
 		e.preventDefault();
-		if (c.ENABLE_AUTH) {
-			signIn(account, password)
-				.then(() => {
-					setAccount(account);
-					goto('/account');
-				})
-				.catch((err) => {
-					showLoading = false;
-					alert(err.message);
-				});
-		} else {
-			setAccount(account);
-			goto('/account');
+		try {
+			await signIn(
+				page.data.poolId,
+				page.data.clientId,
+				document.location.hostname,
+				account,
+				password
+			);
+		} catch (err) {
+			alert(err);
 		}
-		showLoading = true;
+		goto('/account');
 	}
 
-	function handleSignUp() {
-		if (c.ENABLE_AUTH) {
-			signUp(account, password)
-				.then((newAccount) => {
-					setAccount(newAccount as string);
-					goto('/account');
-				})
-				.catch((err) => {
-					showLoading = false;
-					alert(err.message);
-				});
-		} else {
-			setAccount(account);
-			goto('/account');
+	async function handleSignUp() {
+		try {
+			await signUp(
+				page.data.poolId,
+				page.data.clientId,
+				document.location.hostname,
+				account,
+				password
+			);
+		} catch (err) {
+			alert(err);
 		}
-		showLoading = true;
+		goto('/account');
 	}
 </script>
 
@@ -56,33 +47,34 @@
 		demo web client for <a
 			href="https://github.com/systemaccounting/mxfactorial"
 			target="_blank"
-			rel="noopener noreferrer"><i>Mx!</i> platform</a>
+			rel="noopener noreferrer"><i>Mx!</i> platform</a
+		>
 	</p>
-	{#if !showLoading}
-		<form onsubmit={handleSignIn}>
-			<input placeholder="account" bind:value={account} />
-			<input placeholder="password" type="password" class:hasError bind:value={password} />
-			<button
-				class="base-button primary"
-				data-id="signInButton"
-				class:disabled
-				class:inactive
-				type="submit">Sign In</button
-			>
-			<button
-				class="base-button create-account"
-				class:disabled
-				class:inactive
-				data-id="createAccountButton"
-				type="button"
-				onclick={handleSignUp}>Create</button
-			>
-		</form>
-	{:else}
-		<div class="loading">
-			<Pulse color="#fff" />
-		</div>
-	{/if}
+	<form onsubmit={handleSignIn}>
+		<input placeholder="account" name="account" bind:value={account} />
+		<input
+			placeholder="password"
+			name="password"
+			type="password"
+			class:hasError
+			bind:value={password}
+		/>
+		<button
+			class="base-button primary"
+			data-id="signInButton"
+			class:disabled
+			class:inactive
+			type="submit">Sign In</button
+		>
+		<button
+			class="base-button create-account"
+			class:disabled
+			class:inactive
+			data-id="createAccountButton"
+			type="submit"
+			onclick={handleSignUp}>Create</button
+		>
+	</form>
 </div>
 
 <style>
@@ -165,13 +157,5 @@
 	.create-account {
 		background-color: rgb(0, 153, 230);
 		color: white;
-	}
-
-	.loading {
-		padding: 0;
-		border: 0;
-		margin: 4rem 0 0 0;
-		display: flex;
-		justify-content: center;
 	}
 </style>
