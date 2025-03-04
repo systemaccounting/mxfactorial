@@ -200,10 +200,6 @@ sends a `bottled water` transaction item in a POST request to a locally running 
 
 prints env id stored in project root `.env` file
 
-##### `encode-client-env.sh`
-
-base64 encodes client .env file
-
 ##### `start-local.sh`
 
 starts transaction related services locally with restarts on file changes. logs written to nohup.out
@@ -347,3 +343,6 @@ gets ssh key from ssm and writes it to disk
 
 #### `install.sh`
 installs project dependencies. only macos supported
+
+#### `delete-dev-images.sh`
+deletes all images of single app in dev ecr
