@@ -25,7 +25,7 @@ fi
 
 declare TESTED_APP_NAME
 # parse app-name from image-repo
-for d in $(source scripts/list-deployments.sh | grep -v client); do
+for d in $(source scripts/list-deployments.sh); do
 	# remove directory path
 	APP_NAME=$(basename $d)
 	# test for substring match
@@ -36,6 +36,6 @@ done
 
 if [[ -z $TESTED_APP_NAME ]]; then
 	echo "error: failed to match service name with $CURR_TAG"
-	source scripts/list-deployments.sh | grep -v client | xargs basename
+	source scripts/list-deployments.sh | xargs basename
 	exit 1
 fi
