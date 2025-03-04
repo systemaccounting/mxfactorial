@@ -6,14 +6,14 @@ use ::types::{
 };
 use ::wsclient::WsClient;
 use async_graphql::*;
-use async_graphql_axum::{GraphQL, GraphQLProtocol, GraphQLWebSocket};
+use async_graphql_axum::{GraphQLProtocol, GraphQLRequest, GraphQLResponse, GraphQLWebSocket};
 use async_stream::stream;
 use aws_lambda_events::event::apigw::ApiGatewayV2httpRequestContext;
 use axum::{
     extract::{State, WebSocketUpgrade},
     http::{HeaderMap, StatusCode},
     response::{self, IntoResponse},
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use futures_util::{stream::Stream, StreamExt};
@@ -329,6 +329,17 @@ async fn graphql_subscription(
         })
 }
 
+async fn graphql(
+    State(schema): State<Schema<Query, Mutation, Subscription>>,
+    headers: HeaderMap,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    let mut req = req.into_inner();
+    // reattach headers to request
+    req = req.data(headers);
+    schema.execute(req).await.into()
+}
+
 #[tokio::main]
 async fn main() {
     if let Ok(level) = env::var("RUST_LOG") {
@@ -344,10 +355,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(graphiql))
-        .route_service(
-            format!("/{}", GRAPHQL_RESOURCE).as_str(),
-            GraphQL::new(schema.clone()),
-        )
+        .route(format!("/{}", GRAPHQL_RESOURCE).as_str(), post(graphql))
         .route(
             readiness_check_path.as_str(), // absolute path so format not used
             get(|| async { StatusCode::OK }),
