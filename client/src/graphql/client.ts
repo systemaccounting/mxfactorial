@@ -1,44 +1,53 @@
-import { createClient, cacheExchange, fetchExchange, mapExchange } from '@urql/core';
-import type { ClientOptions } from '@urql/core';
-import { getIdToken } from '../auth/cognito';
-import b64 from 'base-64';
+import { createClient as createGqlClient, cacheExchange, fetchExchange, mapExchange } from '@urql/core';
+import type { ClientOptions, Client } from '@urql/core';
 import buildUri from '../utils/uriBuilder';
+const queryResource = 'query'; // todo: read from env var
 
-const apiResource = 'query';
+function createOpts(relativeUri: string, idToken: string|null): ClientOptions {
+	// ENABLE_TLS required by uriBuilder() is NOT currently set in project.yaml or
+	// used here but TLS remains when relativeUri passed with https:// prefix
+	const url = buildUri(relativeUri, false) + queryResource;
 
-const relativeUri: string = b64.decode(process.env.GRAPHQL_URI as string)?.trim() + '/' + apiResource;
-
-const uri: string = buildUri(relativeUri);
-
-const clientOpts: ClientOptions = {
-	url: uri,
-	exchanges: [
-		mapExchange({
-		onResult(result) {
-		  return result.operation.kind === 'query'
-			? { ...result, data: maskTypename(result.data, true) }
-			: result;
+	const opts: ClientOptions = {
+		url,
+		exchanges: [
+			mapExchange({
+			onResult(result) {
+			  return result.operation.kind === 'query'
+				? { ...result, data: maskTypename(result.data, true) }
+				: result;
+			},
+			}),
+			cacheExchange,
+			fetchExchange
+		],
+		fetchOptions: {
+			credentials: 'same-origin'
 		},
-		}),
-		cacheExchange,
-		fetchExchange
-	],
-	fetchOptions: {
-		credentials: 'same-origin'
-	},
-	// https://formidable.com/open-source/urql/docs/basics/document-caching/#request-policies
-	requestPolicy: 'cache-and-network'
-};
-
-if (process.env.ENABLE_API_AUTH == 'true') {
-	getIdToken(function (idToken: string) {
-		clientOpts.fetchOptions = {
-			...clientOpts.fetchOptions,
+		// https://formidable.com/open-source/urql/docs/basics/document-caching/#request-policies
+		requestPolicy: 'cache-and-network'
+	};
+	if (idToken) {
+		opts.fetchOptions = {
+			...opts.fetchOptions,
 			headers: {
 				Authorization: idToken
 			}
 		};
-	});
+	}
+	return opts;
+}
+
+function createClient(relativeUri: string, idToken: string | null): Client {
+	const opts = createOpts(relativeUri, idToken);
+	const client = createGqlClient(opts);
+	// uncomment to debug urql:
+	// client.subscribeToDebugTarget(event => {
+	// 	if (event.source === 'cacheExchange')
+	// 		return;
+	// 	console.log('event data:', event.data); // { type, message, operation, data, source, timestamp }
+	// });
+	return client;
 }
 
 // alternative to below in each request: const { __typename, ...rest } = res.data;
@@ -72,4 +81,4 @@ const maskTypename = (data: any, isRoot?: boolean): any => {
 	}
   };
 
-export default createClient(clientOpts)
+export {createClient};
