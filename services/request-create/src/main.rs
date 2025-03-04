@@ -102,9 +102,9 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
     Ok(response)
 }
 
-async fn create_request<'a>(
+async fn create_request(
     rule_tested: IntraTransaction,
-    svc: &Service<'a, DatabaseConnection>,
+    svc: &Service<'_, DatabaseConnection>,
 ) -> Result<Transaction, RequestCreateError> {
     let accounts = rule_tested.transaction.transaction_items.list_accounts();
 

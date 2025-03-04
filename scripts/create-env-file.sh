@@ -118,6 +118,13 @@ function set_default_value() {
 		fi
 		echo $SECRET=$ENV_VAR >>$ENV_FILE
 	fi
+
+	# add sveltekit PORT assignment for client vite build:
+	# https://svelte.dev/docs/kit/adapter-node#Environment-variables-PORT-HOST-and-SOCKET_PATH
+	if [[ "$SECRET" == 'CLIENT_PORT' ]] && [[ "$APP_NAME" == 'client' ]]; then
+		echo "PORT=$CLIENT_PORT" >>$ENV_FILE
+	fi
+
 	unset ENV_VAR
 	unset SECRET
 }

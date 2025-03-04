@@ -116,17 +116,12 @@ if [[ $(yq '.scripts.env_var.set.BUILD_DB.default' "../../../../../$PROJECT_CONF
 	exit 0
 fi
 
-pushd ../../../../../client
-
-printf "\n${YELLOW}*** deploying client to cache origin bucket, then purging cache${NOCOLOR}\n\n"
-make --no-print-directory deploy ENV=dev
-
-pushd ../migrations
+pushd ../../../../../migrations
 
 printf "\n${YELLOW}*** deploying migrations to rds in $ID_ENV${NOCOLOR}\n\n"
 make --no-print-directory uprds DB=test ENV=dev
 
-popd; popd; popd;
+popd; popd;
 
 printf "\n${YELLOW}*** testing integration with new infrastructure and app deployments${NOCOLOR}\n\n"
 set +e # avoid exiting on flaky tests

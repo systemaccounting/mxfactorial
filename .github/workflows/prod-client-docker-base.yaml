@@ -13,9 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME: mxfactorial/client-base:v1
-      CI: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: docker login
         run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u mxfactorial --password-stdin
       - name: docker build

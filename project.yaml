@@ -44,13 +44,23 @@ client:
         default: 10009
       GOOGLE_MAPS_API_KEY:
         ssm: null
-        # todo: precommit hook requiring null
+        # todo: precommit hook setting null
         default: null
+      # variables requiring a PUBLIC_* prefix
+      # https://svelte.dev/docs/kit/configuration#env
+      PUBLIC_PREFIX_VARS:
+        ssm: null
+        default:
+          - POOL_ID
+          - CLIENT_ID
+          - GRAPHQL_URI
+          - GOOGLE_MAPS_API_KEY
+          - GRAPHQL_SUBSCRIPTIONS_URI
     get:
+      - CLIENT_PORT
       - POOL_ID
       - CLIENT_ID
       - GRAPHQL_URI
-      - CLIENT_PORT
       - GOOGLE_MAPS_API_KEY
       - GRAPHQL_SUBSCRIPTIONS_URI
   params:
@@ -162,10 +172,10 @@ infra:
                 default: 5432
               CLIENT_ID:
                 ssm: auth/cognito/client_id
-                default: null
+                default: localhost
               POOL_ID:
                 ssm: auth/cognito/pool_id
-                default: null
+                default: localhost
               COGNITO_JWKS_URI:
                 ssm: auth/cognito/jwks/uri
                 default: null
@@ -267,9 +277,6 @@ infra:
               ARTIFACTS_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-artifacts
-              CLIENT_ORIGIN_BUCKET_PREFIX:
-                ssm: null
-                default: mxfactorial-client
               TFSTATE_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-tfstate

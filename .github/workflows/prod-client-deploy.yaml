@@ -1,0 +1,28 @@
+name: prod-client-deploy
+
+on:
+  push:
+    paths:
+    - 'client/**'
+    branches:
+    - 'master'
+
+jobs:
+  deploy_prod:
+    name: deploy client to prod cloud environment
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      APP_DIR: client
+    steps:
+      - uses: actions/checkout@v4
+      - name: mask values
+        run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
+      - name: deploy client to prod cloud environment
+        run: |
+          # tag pushed prod image with master merge commit sha
+          bash scripts/tag-merge-commit.sh --app-name $APP_DIR --env prod --env-id ${{ secrets.PROD_ENV_ID }};
+          # deploy newly tagged image to prod cloud
+          bash scripts/deploy-last-image.sh --app-name $APP_DIR --env prod --env-id ${{ secrets.PROD_ENV_ID }};
