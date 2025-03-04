@@ -2,7 +2,6 @@ resource "aws_apigatewayv2_api" "default" {
   name          = var.api_name
   protocol_type = "HTTP"
   description   = "${var.api_name} api in ${var.env}"
-  target        = var.lambda_invoke_arn
 
   cors_configuration {
     allow_origins = ["*"]
@@ -31,7 +30,7 @@ resource "aws_apigatewayv2_integration" "default" {
 resource "aws_apigatewayv2_route" "default" {
   count              = var.enable_api_auth ? 0 : 1
   api_id             = aws_apigatewayv2_api.default.id
-  route_key          = "ANY /{proxy+}"
+  route_key          = "$default"
   authorization_type = "NONE"
   target             = "integrations/${aws_apigatewayv2_integration.default.id}"
 }
@@ -39,7 +38,7 @@ resource "aws_apigatewayv2_route" "default" {
 resource "aws_apigatewayv2_route" "auth_enabled" {
   count              = var.enable_api_auth ? 1 : 0
   api_id             = aws_apigatewayv2_api.default.id
-  route_key          = "ANY /{proxy+}"
+  route_key          = "$default"
   authorization_type = "JWT"
   authorizer_id      = aws_apigatewayv2_authorizer.default[0].id
   target             = "integrations/${aws_apigatewayv2_integration.default.id}"
@@ -78,4 +77,33 @@ resource "aws_lambda_permission" "default" {
   function_name = trimsuffix(split(":", var.lambda_invoke_arn)[11], "/invocations")
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.default.execution_arn}/*/*"
+}
+
+resource "aws_apigatewayv2_stage" "default" {
+  api_id      = aws_apigatewayv2_api.default.id
+  name        = "$default"
+  auto_deploy = true
+  description = "${var.api_name} api stage"
+  default_route_settings {
+    # logging_level          = var.apigwv2_logging_level
+    throttling_burst_limit = var.apigwv2_burst_limit
+    throttling_rate_limit  = var.apigwv2_rate_limit
+  }
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.default.arn
+    // https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-logging-variables.html
+    format = jsonencode({
+      "requestId"       = "$context.requestId"
+      "ip"              = "$context.identity.sourceIp"
+      "requestTime"     = "$context.requestTime"
+      "httpMethod"      = "$context.httpMethod"
+      "routeKey"        = "$context.routeKey"
+      "status"          = "$context.status"
+      "protocol"        = "$context.protocol"
+      "responseLength"  = "$context.responseLength"
+      "apiError"        = "$context.error.message"
+      "authorizerError" = "$context.authorizer.error"
+      "cognitoUsername" = "$context.authorizer.claims.username"
+    })
+  }
 }
