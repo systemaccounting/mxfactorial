@@ -1,6 +1,6 @@
 import url from 'url'; // cadet todo: replace with whatwg-url and add tests
 
-export default function (uri: string): string {
+export default function (uri: string, enableTls: boolean): string {
 	// if protocol prefix missing
 	if (!uri.includes('://')) {
 		// if its a websocket uri
@@ -13,7 +13,9 @@ export default function (uri: string): string {
 		}
 	}
 	const parsed = url.parse(uri);
-	if (process.env.ENABLE_TLS && process.env.ENABLE_TLS === 'true') {
+	// tls remains enabled IF uri was passed with https:// or wss:// prefix
+	// but this will override if uri was passed with http:// or ws:// prefix
+	if (enableTls) {
 		if (parsed.protocol === 'http:') {
 			parsed.protocol = 'https:';
 		}
