@@ -10,6 +10,9 @@ module "graphql_apigwv2" {
   cognito_client_id        = aws_cognito_user_pool_client.client.id
   cognito_endpoint         = aws_cognito_user_pool.pool.endpoint
   authorization_header_key = var.apigw_authorization_header_key
+  # apigwv2_logging_level   = var.apigwv2_logging_level
+  apigwv2_burst_limit = var.apigwv2_burst_limit
+  apigwv2_rate_limit  = var.apigwv2_rate_limit
 }
 
 module "graphql_apigwv2_dns" {
