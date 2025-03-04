@@ -1,4 +1,3 @@
-// prod only
 locals {
   WWW_URI = "www.${local.CUSTOM_DOMAIN}"
 }
@@ -8,7 +7,7 @@ data "aws_route53_zone" "default" {
 }
 
 resource "aws_s3_bucket" "www_mxfactorial_client" {
-  bucket        = "www-${local.ORIGIN_PREFIX}-${local.ID_ENV}"
+  bucket        = "www-${local.APP}-${local.ID_ENV}"
   force_destroy = true
 }
 
