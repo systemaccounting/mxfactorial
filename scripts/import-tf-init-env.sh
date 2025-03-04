@@ -37,8 +37,3 @@ terraform import module.project_storage_$ENV.aws_s3_bucket.artifacts mxfactorial
 
 # docker image storage
 terraform import module.project_storage_$ENV.aws_ecr_repository.go_migrate go-migrate-$ID_ENV
-
-# client hosting
-terraform import module.project_storage_$ENV.aws_s3_bucket.client_origin mxfactorial-client-$ID_ENV
-terraform import module.project_storage_$ENV.aws_s3_bucket_website_configuration.client_origin mxfactorial-client-$ID_ENV
-terraform import module.project_storage_$ENV.aws_s3_bucket_public_access_block.client_origin mxfactorial-client-$ID_ENV
