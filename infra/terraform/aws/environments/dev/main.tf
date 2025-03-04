@@ -4,7 +4,6 @@ locals {
   APP_ENV          = "${local.APP}-${local.ENV}"
   PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
   STORAGE_ENV_VAR  = local.PROJECT_CONF.infra.terraform.aws.modules.project-storage.env_var.set
-  ORIGIN_PREFIX    = local.STORAGE_ENV_VAR.CLIENT_ORIGIN_BUCKET_PREFIX.default
   ARTIFACTS_PREFIX = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
   TFSTATE_PREFIX   = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
   INFRA_ENV_VAR    = local.PROJECT_CONF.infra.terraform.aws.modules.environment.env_var.set
@@ -65,6 +64,11 @@ module "dev" {
 
   // change graphql_deployment_version when switching
   enable_api_auth = local.INFRA_ENV_VAR.ENABLE_API_AUTH.default
+  # terraform keeps applying changes to apigwv2_logging_level
+  # even when it doesnt change so commenting out
+  # apigwv2_logging_level = "OFF" // OFF, INFO, ERROR
+  apigwv2_burst_limit = 5000
+  apigwv2_rate_limit  = 10000
 
   // change value to deploy api
   graphql_deployment_version     = 1
@@ -76,9 +80,5 @@ module "dev" {
   ############### k8s ###############
 
   microk8s_instance_type = "t2.medium"
-  enable_microk8s = false
-
-  ############### client ###############
-
-  client_origin_bucket_name = "${local.ORIGIN_PREFIX}-${local.ID_ENV}"
+  enable_microk8s        = false
 }
