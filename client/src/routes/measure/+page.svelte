@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { Loader } from '@googlemaps/js-api-loader';
+	import * as gmapsLoader from '@googlemaps/js-api-loader';
+	const { Loader } = gmapsLoader;
 	import { onMount } from 'svelte';
-	import b64 from 'base-64';
 	import { createClient as createWSClient } from 'graphql-ws';
 	import type { Client } from 'graphql-ws';
 	import uriBuilder from '../../utils/uriBuilder';
-	let searchQuery = $state('california gdp now');
+	import { env } from '$env/dynamic/public';
+	let searchQuery = $state('');
 	let price = $state('0.000');
 	let priceTag: HTMLDivElement = $state(document.createElement('div'));
 	let map: google.maps.Map;
@@ -25,11 +26,16 @@
 			await resetWebsocket();
 		}
 
-		const uri = uriBuilder(b64.decode(process.env.GRAPHQL_SUBSCRIPTIONS_URI as string));
+		if (!env.PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI) {
+			console.error('missing PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI');
+			return;
+		}
 
-		wsClient = createWSClient({
-			url: uri
-		});
+		// ENABLE_TLS required by uriBuilder() is NOT currently set in project.yaml or
+		// used here but TLS remains when relativeUri passed with https:// prefix
+		const url = uriBuilder(env.PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI, false);
+
+		wsClient = createWSClient({ url });
 
 		const variables: any = { date, country, region };
 		if (municipality) {
@@ -55,8 +61,12 @@
 		}
 	}
 
+	if (!env.PUBLIC_GOOGLE_MAPS_API_KEY) {
+		throw new Error('missing GOOGLE_MAPS_API_KEY');
+	}
+
 	const loader = new Loader({
-		apiKey: b64.decode(process.env.GOOGLE_MAPS_API_KEY as string),
+		apiKey: env.PUBLIC_GOOGLE_MAPS_API_KEY as string,
 		version: 'weekly',
 		libraries: ['maps', 'marker', 'places']
 	});
