@@ -32,10 +32,4 @@ HASH=$(git rev-parse --short=$SHORT_GIT_SHA_LENGTH HEAD)
 IMAGE_TAG="$APP_NAME:$HASH"
 DOCKERFILE_PATH=./docker/$APP_NAME.Dockerfile
 
-COUNT=$(docker image ls | grep --color=never -E "^$APP_NAME.*latest" | wc -l | xargs)
-
-if [[ $COUNT -gt 0 ]]; then
-	docker tag $APP_NAME:latest $IMAGE_TAG
-else
-	docker build -f $DOCKERFILE_PATH -t $IMAGE_TAG --provenance=false "$BUILD_CTX"
-fi
+docker build -f $DOCKERFILE_PATH -t $IMAGE_TAG --provenance=false "$BUILD_CTX"
