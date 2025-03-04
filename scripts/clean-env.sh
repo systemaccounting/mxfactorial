@@ -15,7 +15,7 @@ done
 
 PROJECT_CONF=project.yaml
 
-APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type all | grep --color=never "$APP_NAME$")
+APP_DIR_PATH=$(source scripts/list-dir-paths.sh --type all | grep --color=never "^$APP_NAME$")
 ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE="$APP_DIR_PATH/$ENV_FILE_NAME"
 
