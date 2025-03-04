@@ -24,24 +24,29 @@
 		addRecipient,
 		getRecipient
 	} from '../../stores/requestCreate';
-	import { account } from '../../stores/account';
+	import { page } from '$app/state';
+	const account = page.data.account;
 	import CREATE_REQUEST_MUTATION from '../../graphql/mutation/createRequest';
 	import { Pulse } from 'svelte-loading-spinners';
-	import type { Client } from '@urql/core';
-	import { getContext, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import c from '../../utils/constants';
 	import RULES_QUERY from '../../graphql/query/rules';
 	import initialJSON from '../../data/initial.json';
-	const initial: App.ITransactionItem[] = JSON.parse(JSON.stringify(initialJSON));
+	import { env } from '$env/dynamic/public';
+	import { createClient } from '../../graphql/client';
+	if (!env.PUBLIC_GRAPHQL_URI) throw new Error('PUBLIC_GRAPHQL_URI not set');
+	if (!env.PUBLIC_CLIENT_ID) throw new Error('PUBLIC_CLIENT_ID not set');
 
-	let client: Client = getContext(c.CLIENT_CTX_KEY);
+	// src/hooks.server.ts creates a global graphql client for server but
+	// another graphql client is created client-side to speed up rule queries
+	const client = createClient(env.PUBLIC_GRAPHQL_URI, page.data.idToken);
+
+	const initial: App.ITransactionItem[] = JSON.parse(JSON.stringify(initialJSON));
 
 	let trItemHeight = $state(0);
 	let prevReqItemsCount = 0;
 
-	// restore recipient saved in store if avail
-	let recipient = $state(getRecipient($account) ? getRecipient($account) : '');
+	let recipient = $state(getRecipient(account) ? getRecipient(account) : '');
 
 	let showLoading = $state(false);
 	let rulesEventCount = $state(0);
@@ -109,10 +114,10 @@
 		if (e.target instanceof HTMLInputElement) {
 			if (isCredit) {
 				if (e.target instanceof HTMLInputElement) {
-					addRecipient(e.target.value, $account);
+					addRecipient(e.target.value, account);
 				}
 			} else {
-				addRecipient($account, e.target.value);
+				addRecipient(account, e.target.value);
 			}
 		}
 	}
@@ -131,7 +136,7 @@
 		if (!disableButton(reqItems) && accountsAvailable(reqItems)) {
 			client
 				.mutation(CREATE_REQUEST_MUTATION, {
-					auth_account: $account,
+					auth_account: account,
 					transaction_items: reqItems
 				})
 				.toPromise()
