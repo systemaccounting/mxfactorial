@@ -39,7 +39,7 @@ redis.call('PUBLISH', KEYS[1], r)
 
 const GDP_TTL: i64 = 60 * 60 * 24 * 3; // secs * mins * hours * days = 3
 
-pub async fn redis_incrby_gdp<'a>(client: &RedisClient, gdp_map: Gdp<'a>) {
+pub async fn redis_incrby_gdp(client: &RedisClient, gdp_map: Gdp<'_>) {
     for (key, value) in gdp_map.0.iter() {
         let k = key.to_string();
         let v = trim_string_decimal(&value.parse::<String>().unwrap());
