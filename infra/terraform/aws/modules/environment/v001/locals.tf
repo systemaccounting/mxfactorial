@@ -13,6 +13,7 @@ locals {
   REQUESTS_BY_ACCOUNT_PORT     = local.SERVICES_CONF.requests-by-account.env_var.set.REQUESTS_BY_ACCOUNT_PORT.default
   REQUEST_APPROVE_PORT         = local.SERVICES_CONF.request-approve.env_var.set.REQUEST_APPROVE_PORT.default
   REQUEST_CREATE_PORT          = local.SERVICES_CONF.request-create.env_var.set.REQUEST_CREATE_PORT.default
+  CLIENT_PORT                  = local.PROJECT_CONF.client.env_var.set.CLIENT_PORT.default
   RETURN_RECORD_LIMIT          = local.SERVICES_CONF.env_var.set.RETURN_RECORD_LIMIT.default
   SQL_TYPE                     = local.PROJECT_CONF.migrations.env_var.set.SQL_TYPE.default
 }

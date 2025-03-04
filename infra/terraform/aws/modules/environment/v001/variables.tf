@@ -9,7 +9,6 @@ variable "apigw_authorization_header_key" {}
 variable "enable_api_auth" {}
 variable "graphql_deployment_version" {}
 variable "initial_account_balance" {}
-variable "client_origin_bucket_name" {}
 variable "enable_api_auto_deploy" {}
 variable "artifacts_bucket_name" {}
 variable "custom_domain_name" { default = "" }
@@ -22,3 +21,6 @@ variable "build_cache" { type = bool }
 variable "readiness_check_path" { default = "/healthz" } // todo: assign from root project.yaml
 variable "microk8s_instance_type" {}
 variable "enable_microk8s" { type = bool }
+# variable "apigwv2_logging_level" {}
+variable "apigwv2_burst_limit" {}
+variable "apigwv2_rate_limit" {}
