@@ -258,4 +258,14 @@ services:
       context: ../
       dockerfile: ./docker/client.Dockerfile
     ports:
-      - "10009:80"
+      - "10009:10009"
+    environment:
+      # WARNING: dupe config from client/.env
+      # PUBLIC variable name prefix normally added by
+      # make -C client prefix-env-vars but added here manually
+      PUBLIC_POOL_ID: localhost
+      PUBLIC_CLIENT_ID: localhost
+      PUBLIC_GRAPHQL_URI: http://graphql:10000
+      PUBLIC_GOOGLE_MAPS_API_KEY: null
+      PORT: 10009
+
