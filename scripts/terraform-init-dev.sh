@@ -45,6 +45,7 @@ pushd "$DIR"
 terraform init \
 	-backend-config="bucket=$TFSTATE_BUCKET" \
 	-backend-config="key=$KEY" \
-	-backend-config="region=$REGION"
+	-backend-config="region=$REGION" \
+	-reconfigure
 
 popd
