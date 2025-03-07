@@ -1,6 +1,6 @@
 import url from 'url'; // cadet todo: replace with whatwg-url and add tests
 
-export default function (uri: string, enableTls: boolean): string {
+export default function (uri: string, resource: string | undefined, enableTls: boolean): string {
 	// if protocol prefix missing
 	if (!uri.includes('://')) {
 		// if its a websocket uri
@@ -22,6 +22,13 @@ export default function (uri: string, enableTls: boolean): string {
 		if (parsed.protocol === 'ws:') {
 			parsed.protocol = 'wss:';
 		}
+	}
+	// add resource path if available
+	if (resource) {
+		// remove leading slashes and add one back
+		parsed.pathname = '/' + resource.replace(/^\/+/, '');
+		// remove trailing slashes
+		parsed.pathname = parsed.pathname.replace(/\/+$/, '');
 	}
 	return url.format(parsed);
 }

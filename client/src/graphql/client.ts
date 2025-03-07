@@ -1,12 +1,22 @@
 import { createClient as createGqlClient, cacheExchange, fetchExchange, mapExchange } from '@urql/core';
 import type { ClientOptions, Client } from '@urql/core';
 import buildUri from '../utils/uriBuilder';
-const queryResource = 'query'; // todo: read from env var
 
-function createOpts(relativeUri: string, idToken: string|null): ClientOptions {
+type MaybeString = string | undefined;
+
+// MaybeString just lets handling unset env vars in one place
+function createOpts(relativeUri: MaybeString, resource: MaybeString, idToken: string | null): ClientOptions {
+	if (!relativeUri) {
+		throw new Error('createOpts: missing relativeUri');
+	}
+	// need /query for graphql
+	if (!resource) {
+		throw new Error('createOpts: missing resource');
+	}
+
 	// ENABLE_TLS required by uriBuilder() is NOT currently set in project.yaml or
 	// used here but TLS remains when relativeUri passed with https:// prefix
-	const url = buildUri(relativeUri, false) + queryResource;
+	const url = buildUri(relativeUri, resource, false);
 
 	const opts: ClientOptions = {
 		url,
@@ -38,8 +48,8 @@ function createOpts(relativeUri: string, idToken: string|null): ClientOptions {
 	return opts;
 }
 
-function createClient(relativeUri: string, idToken: string | null): Client {
-	const opts = createOpts(relativeUri, idToken);
+function createClient(relativeUri: MaybeString, resource: MaybeString, idToken: string | null): Client {
+	const opts = createOpts(relativeUri, resource, idToken);
 	const client = createGqlClient(opts);
 	// uncomment to debug urql:
 	// client.subscribeToDebugTarget(event => {

@@ -26,14 +26,18 @@
 			await resetWebsocket();
 		}
 
-		if (!env.PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI) {
-			console.error('missing PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI');
+		if (!env.PUBLIC_GRAPHQL_WS_RESOURCE) {
+			console.error('missing PUBLIC_GRAPHQL_WS_RESOURCE');
 			return;
 		}
 
 		// ENABLE_TLS required by uriBuilder() is NOT currently set in project.yaml or
 		// used here but TLS remains when relativeUri passed with https:// prefix
-		const url = uriBuilder(env.PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI, false);
+		const url = uriBuilder(
+			env.PUBLIC_GRAPHQL_URI,
+			env.PUBLIC_GRAPHQL_WS_RESOURCE,
+			false
+		);
 
 		wsClient = createWSClient({ url });
 

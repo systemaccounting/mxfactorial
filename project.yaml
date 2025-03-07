@@ -55,14 +55,16 @@ client:
           - CLIENT_ID
           - GRAPHQL_URI
           - GOOGLE_MAPS_API_KEY
-          - GRAPHQL_SUBSCRIPTIONS_URI
+          - GRAPHQL_RESOURCE
+          - GRAPHQL_WS_RESOURCE
     get:
       - CLIENT_PORT
       - POOL_ID
       - CLIENT_ID
       - GRAPHQL_URI
       - GOOGLE_MAPS_API_KEY
-      - GRAPHQL_SUBSCRIPTIONS_URI
+      - GRAPHQL_RESOURCE
+      - GRAPHQL_WS_RESOURCE
   params:
     - ENABLE_API_AUTH
 crates:
@@ -197,9 +199,6 @@ infra:
               GRAPHQL_URI:
                 ssm: api/graphql/uri
                 default: null # scripts/create-env-file.sh sets as localhost:$PORT
-              GRAPHQL_SUBSCRIPTIONS_URI:
-                ssm: null
-                default: null
               REQUEST_CREATE_URL:
                 ssm: service/lambda/request_create/url
                 default: null
@@ -472,6 +471,12 @@ services:
         GRAPHQL_PORT:
           ssm: null
           default: 10000
+        GRAPHQL_RESOURCE:
+          ssm: null
+          default: query
+        GRAPHQL_WS_RESOURCE:
+          ssm: null
+          default: ws
       get:
         - RULE_URL
         - REQUEST_CREATE_URL
@@ -486,6 +491,8 @@ services:
         - MEASURE_URL
         - MEASURE_RESOURCE
         - RUST_LOG
+        - GRAPHQL_RESOURCE
+        - GRAPHQL_WS_RESOURCE
   request-create:
     runtime: rust1.x
     min_code_cov: null
@@ -804,6 +811,7 @@ tests:
       - TRANSACTION_BY_ID_URL
       - BALANCE_BY_ACCOUNT_URL
       - AWS_LAMBDA_FUNCTION_NAME # used when testing cloud envs
+      - GRAPHQL_RESOURCE
   params: []
 env_var:
   set:

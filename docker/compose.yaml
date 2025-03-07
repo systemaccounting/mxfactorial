@@ -267,5 +267,7 @@ services:
       PUBLIC_CLIENT_ID: localhost
       PUBLIC_GRAPHQL_URI: http://graphql:10000
       PUBLIC_GOOGLE_MAPS_API_KEY: null
+      PUBLIC_GRAPHQL_RESOURCE: query
+      PUBLIC_GRAPHQL_WS_RESOURCE: ws
       PORT: 10009
 

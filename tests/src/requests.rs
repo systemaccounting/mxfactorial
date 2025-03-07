@@ -10,8 +10,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use uribuilder::Uri;
 
-const GRAPHQL_RESOURCE: &str = "query";
-
 #[derive(Debug, Deserialize)]
 struct BalanceResponse {
     balance: String,
@@ -27,8 +25,9 @@ pub async fn get_balance_gql(
     account_name: String,
     auth_account: String,
 ) -> Result<String, Box<dyn std::error::Error>> {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let query = r#"query getBalance($account_name: String!, $auth_account: String!) {
         balance(account_name: $account_name, auth_account: $auth_account)
@@ -120,8 +119,9 @@ struct RuleVars {
 pub async fn get_rules_gql(
     transaction_items: Vec<TransactionItem>,
 ) -> Result<Transaction, Box<dyn std::error::Error>> {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let query = r#"query getRules($transaction_items: [TransactionItemInput!]) {
         rules(transaction_items: $transaction_items) {
@@ -183,8 +183,9 @@ pub async fn create_request_gql(
     auth_account: String,
     transaction_items: Vec<TransactionItem>,
 ) -> Transaction {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let query = r#"mutation createRequest($transaction_items: [TransactionItemInput!], $auth_account: String!) {
         createRequest(transaction_items: $transaction_items, auth_account: $auth_account) {
@@ -252,8 +253,9 @@ pub async fn approve_request_gql(
     account_role: String,
     auth_account: String,
 ) -> Transaction {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let mutation = r#"mutation approveRequest($id: String!, $account_name: String!, $account_role: String!, $auth_account: String!) {
         approveRequest(id: $id, account_name: $account_name, account_role: $account_role, auth_account: $auth_account) {
@@ -320,8 +322,9 @@ pub async fn get_transactions_by_account_gql(
     auth_account: String,
     account_name: String,
 ) -> Vec<Transaction> {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let query = r#"query getTransactionsByAccount($account_name: String!, $auth_account: String!) {
         transactionsByAccount(account_name: $account_name, auth_account: $auth_account) {
@@ -390,8 +393,9 @@ pub async fn get_transaction_by_id_gql(
     account_name: String,
     id: String,
 ) -> Transaction {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let query = r#"query getTransactionByID($id: String!, $account_name: String!, $auth_account: String!) {
         transactionByID(id: $id, account_name: $account_name, auth_account: $auth_account) {
@@ -456,8 +460,9 @@ pub async fn get_requests_by_account_gql(
     auth_account: String,
     account_name: String,
 ) -> Vec<Transaction> {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let query = r#"query getRequestsByAccount($account_name: String!, $auth_account: String!) {
         requestsByAccount(account_name: $account_name, auth_account: $auth_account) {
@@ -523,8 +528,9 @@ pub async fn get_request_by_id_gql(
     account_name: String,
     id: String,
 ) -> Transaction {
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
-        .with_path(GRAPHQL_RESOURCE)
+        .with_path(graphql_resource.as_str())
         .to_string();
     let query = r#"query getRequestByID($id: String!, $account_name: String!, $auth_account: String!) {
         requestByID(id: $id, account_name: $account_name, auth_account: $auth_account) {

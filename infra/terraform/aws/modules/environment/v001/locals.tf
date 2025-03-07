@@ -6,6 +6,8 @@ locals {
   SERVICES_CONF                = local.PROJECT_CONF.services
   RULE_PORT                    = local.SERVICES_CONF.rule.env_var.set.RULE_PORT.default
   GRAPHQL_PORT                 = local.SERVICES_CONF.graphql.env_var.set.GRAPHQL_PORT.default
+  GRAPHQL_RESOURCE             = local.SERVICES_CONF.graphql.env_var.set.GRAPHQL_RESOURCE.default
+  GRAPHQL_WS_RESOURCE          = local.SERVICES_CONF.graphql.env_var.set.GRAPHQL_WS_RESOURCE.default
   BALANCE_BY_ACCOUNT_PORT      = local.SERVICES_CONF.balance-by-account.env_var.set.BALANCE_BY_ACCOUNT_PORT.default
   TRANSACTION_BY_ID_PORT       = local.SERVICES_CONF.transaction-by-id.env_var.set.TRANSACTION_BY_ID_PORT.default
   TRANSACTIONS_BY_ACCOUNT_PORT = local.SERVICES_CONF.transactions-by-account.env_var.set.TRANSACTIONS_BY_ACCOUNT_PORT.default
