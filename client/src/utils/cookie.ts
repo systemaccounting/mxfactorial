@@ -9,7 +9,10 @@ class Cookies {
 	private keyPrefix: string;
 	private cookies: Map<string, string>;
 
-	constructor(clientId: string, cookieList: ICookies) {
+	constructor(clientId: string | undefined, cookieList: ICookies) {
+		if (!clientId) {
+			throw new Error('Cookies: clientId missing');
+		}
 		this.cookies = new Map<string, string>();
 		for (const cookie of cookieList) {
 			this.cookies.set(cookie.name, cookie.value);
