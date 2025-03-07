@@ -16,6 +16,8 @@ module "graphql" {
     TRANSACTIONS_BY_ACCOUNT_URL = module.transactions_by_account.lambda_function_url
     TRANSACTION_BY_ID_URL       = module.transaction_by_id.lambda_function_url
     BALANCE_BY_ACCOUNT_URL      = module.balance_by_account.lambda_function_url
+    GRAPHQL_RESOURCE            = local.GRAPHQL_RESOURCE
+    GRAPHQL_WS_RESOURCE         = local.GRAPHQL_WS_RESOURCE
   })
   aws_lwa_port          = local.GRAPHQL_PORT
   invoke_url_principals = []
