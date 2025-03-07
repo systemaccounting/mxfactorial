@@ -153,11 +153,12 @@ module "client" {
     PORT = local.CLIENT_PORT
     # variables requiring a PUBLIC_* prefix
     # https://svelte.dev/docs/kit/configuration#env
-    PUBLIC_POOL_ID                   = aws_cognito_user_pool.pool.id
-    PUBLIC_CLIENT_ID                 = aws_cognito_user_pool_client.client.id
-    PUBLIC_GRAPHQL_URI               = module.graphql_apigwv2.invoke_url
-    PUBLIC_GOOGLE_MAPS_API_KEY       = null
-    PUBLIC_GRAPHQL_SUBSCRIPTIONS_URI = null
+    PUBLIC_POOL_ID             = aws_cognito_user_pool.pool.id
+    PUBLIC_CLIENT_ID           = aws_cognito_user_pool_client.client.id
+    PUBLIC_GRAPHQL_URI         = module.graphql_apigwv2.invoke_url
+    PUBLIC_GOOGLE_MAPS_API_KEY = null
+    PUBLIC_GRAPHQL_RESOURCE    = local.GRAPHQL_RESOURCE
+    PUBLIC_GRAPHQL_WS_RESOURCE = local.GRAPHQL_WS_RESOURCE
   }
   aws_lwa_port          = local.CLIENT_PORT
   invoke_url_principals = [module.graphql.lambda_role_arn]
