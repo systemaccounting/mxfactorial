@@ -303,11 +303,11 @@ fn get_amzn_ctx_from_headers(headers: &HeaderMap) -> ApiGatewayV2httpRequestCont
 }
 
 async fn graphiql() -> impl IntoResponse {
-    let grapqhl_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let graphql_ws_resource = std::env::var("GRAPHQL_WS_RESOURCE").unwrap();
     response::Html(
         http::GraphiQLSource::build()
-            .endpoint(format!("/{}", grapqhl_resource).as_str())
+            .endpoint(format!("/{}", graphql_resource).as_str())
             .subscription_endpoint(format!("/{}", graphql_ws_resource).as_str())
             .finish(),
     )
@@ -353,12 +353,12 @@ async fn main() {
 
     let schema = Schema::build(Query, Mutation, Subscription).finish();
 
-    let grapqhl_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
+    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let graphql_ws_resource = std::env::var("GRAPHQL_WS_RESOURCE").unwrap();
 
     let app = Router::new()
         .route("/", get(graphiql))
-        .route(format!("/{}", grapqhl_resource).as_str(), post(graphql))
+        .route(format!("/{}", graphql_resource).as_str(), post(graphql))
         .route(
             readiness_check_path.as_str(), // absolute path so format not used
             get(|| async { StatusCode::OK }),
