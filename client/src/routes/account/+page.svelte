@@ -34,12 +34,10 @@
 	import initialJSON from '../../data/initial.json';
 	import { env } from '$env/dynamic/public';
 	import { createClient } from '../../graphql/client';
-	if (!env.PUBLIC_GRAPHQL_URI) throw new Error('PUBLIC_GRAPHQL_URI not set');
-	if (!env.PUBLIC_CLIENT_ID) throw new Error('PUBLIC_CLIENT_ID not set');
 
 	// src/hooks.server.ts creates a global graphql client for server but
 	// another graphql client is created client-side to speed up rule queries
-	const client = createClient(env.PUBLIC_GRAPHQL_URI, page.data.idToken);
+	const client = createClient(env.PUBLIC_GRAPHQL_URI, env.PUBLIC_GRAPHQL_RESOURCE, page.data.idToken);
 
 	const initial: App.ITransactionItem[] = JSON.parse(JSON.stringify(initialJSON));
 

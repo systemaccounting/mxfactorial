@@ -11,7 +11,7 @@ export const POST: RequestHandler = async (event) => {
 	const cookieList = event.cookies.getAll();
 	const cookies = new Cookies(env.PUBLIC_CLIENT_ID, cookieList);
 	const lastAuthUser = cookies.lastAuthUser();
-	const client = createClient(env.PUBLIC_GRAPHQL_URI, cookies.idToken());
+	const client = createClient(env.PUBLIC_GRAPHQL_URI, env.PUBLIC_GRAPHQL_RESOURCE, cookies.idToken());
 	const transactionRequestId = event.params.slug;
 	// todo: add reject bool to request and handle with reject mutation
 	const { transaction_items }: App.ITransaction = await event.request.json();

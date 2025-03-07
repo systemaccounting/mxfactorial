@@ -5,11 +5,10 @@ import { env } from '$env/dynamic/public';
 import { Cookies } from '../../utils/cookie';
 
 export const load: PageServerLoad = async (page: RequestEvent) => {
-	const clientId = env.PUBLIC_CLIENT_ID;
 	const cookieList = page.cookies.getAll(); // magic: read cookies on server
-	const cookies = new Cookies(clientId, cookieList);
+	const cookies = new Cookies(env.PUBLIC_CLIENT_ID, cookieList);
 	const lastAuthUser = cookies.lastAuthUser();
-	const client = createClient(env.PUBLIC_GRAPHQL_URI, cookies.idToken());
+	const client = createClient(env.PUBLIC_GRAPHQL_URI, env.PUBLIC_GRAPHQL_RESOURCE, cookies.idToken());
 
 	const variables = {
 		auth_account: lastAuthUser,
