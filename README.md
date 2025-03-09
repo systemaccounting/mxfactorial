@@ -156,6 +156,11 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 **q.** how does systemaccounting model an economy?  
 **a.** systemaccounting recognizes the public's right to continuity when searching for correlation so it models economic activity with conformal geometric algebra. in a cga economy, goods and services are referenced in transactions as 3d objects. this 3d physical space of goods and services provides the data model's base space. then motion of goods services between debitors and creditors is modeled by orthogonally extending the base space with 2 more debitor and creditor dimensions. adding a quadratic structure to the debitor and creditor dimensions and assigning each to -1 and +1 respectively enables measuring the alternating, signed recurrence of accounts across transactions. now referencing industry, occupation and other contextual values across *transactions as rotations* supports designing financial and economic queries with continuity-embedding multivectors. propagating economic value through light-like transactions achieves a much higher form of fidelity to how information travels in spacetime than through the transactions middled by government-chartered "banks"  
 
+**q.** how to explain *transactions as rotations* to a non engineer?  
+**a.** just say "value rotates between debitor and creditor accounts":
+
+![transactions as rotations](https://github.com/user-attachments/assets/1f4b165a-bfbf-462b-8baa-e00563524e0b)
+
 **q.** does replacing a banking with a cga economy require a democratic mandate?  
 **a.** no. but while sending someone down a hole with a spartan kick to the chest is tempting when you hear them claim the choice to stop stealing from you through a "money multiplier" is their *democratic right*, they're likely still under the spell that the counted opinion has more authority than the empirical one  
 
