@@ -346,3 +346,6 @@ installs project dependencies. only macos supported
 
 #### `delete-dev-images.sh`
 deletes all images of single app in dev ecr
+
+#### `test-availability.sh`
+tests availability of services locally or in cloud
