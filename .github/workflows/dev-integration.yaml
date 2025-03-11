@@ -54,6 +54,10 @@ jobs:
         run: make --no-print-directory -C ./migrations/dumps dump-rds-testseed
       - name: get secrets for dev integration tests
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./tests get-secrets ENV=dev
+      - name: install awscurl
+        run: pip install awscurl --break-system-packages
+      - name: warm up lambdas with availability script
+        run: bash scripts/test-availability.sh
       - name: run dev cloud integration tests
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} cargo test --manifest-path ./tests/Cargo.toml --features integration_tests -- --test-threads=1
       # todo: test client integration
