@@ -172,6 +172,9 @@ so they'll receive **courtesy** while the instrument used to finance this absurd
 **q.** will a government hosted payment app reduce my privacy?  
 **a.** you dont need to publish your account activity. publishing account data is a feature primarily intended for 1) businesses owners who wish to signal the demand for capital with an empirical rate of return and 2) government officials who wish to keep citizens informed of the performance of fiscal policies with empirical data  
 
+**q.** does this app require a fixed money supply?  
+**a.** no. decimal precision can be increased  
+
 **q.** doesn't decentralized finance offer the most security?  
 **a.** centralized finance is not a threat when it's transparent. and decentralizing finance unwittingly decentralizes a cost center. information symmetry supplies the highest form of security and a single source rapidly receiving the most advanced r&d empowers the public with the most scalable reduction in the cost of storing, transforming and transmitting information  
 
@@ -244,6 +247,9 @@ on the other hand, systemaccounting will eliminate a lot of archaic labor depend
   }
 ]
 ```
+
+**q.** how to learn more about the project?  
+**a.** open github copilot and ask it questions  
 
 **q.** can i invest?  
 **a.** contribute what you like. the dividend for believing in science is protection from other people's fiction  
