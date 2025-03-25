@@ -226,7 +226,7 @@ on the other hand, systemaccounting will eliminate a lot of archaic labor depend
 buysiding for the public is a service and not a privilege. while "fed governors" of a banking economy sit around in closed meetings before telling the public what prices they should pay, systemaccountants of a cga state space roll up their sleaves and openly help [hunt down](https://en.wikipedia.org/wiki/Combinatorial_optimization) those prices instead (policies for manifolds, suits for algorithms)  
 
 **q.** what research does mxfactorial apply?  
-**a.** the [geometric number](https://gist.github.com/mxfactorial/454e259f7b4cf7c719c4ff2fb5000d1b), but with strings as angle preserving coordinates  
+**a.** the [geometric number](https://gist.github.com/mxfactorial/c151619d22ef6603a557dbf370864085), but with strings as angle preserving coordinates  
 
 **q.** why is the code public if the license is private?  
 **a.** publicly used code is a public structure

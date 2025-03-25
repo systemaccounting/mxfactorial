@@ -3,6 +3,7 @@ name: dev-integration
 on:
   push:
     paths:
+    - 'crates/**'
     - 'services/graphql/**'
     - 'services/rule/**'
     - 'services/request-create/**'
