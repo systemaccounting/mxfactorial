@@ -1577,9 +1577,9 @@ dependencies = [
 name = "event"
 version = "0.1.0"
 dependencies = [
- "fred",
  "futures-channel",
  "futures-util",
+ "redisclient",
  "rust_decimal",
  "serde",
  "serde_json",
@@ -2753,10 +2753,10 @@ name = "measure"
 version = "0.1.0"
 dependencies = [
  "axum 0.7.5",
- "fred",
  "futures",
  "http 1.1.0",
  "pg",
+ "redisclient",
  "rust_decimal",
  "serde",
  "shutdown",
@@ -3586,6 +3586,16 @@ dependencies = [
  "crc16",
  "log",
  "nom",
+]
+
+[[package]]
+name = "redisclient"
+version = "0.1.0"
+dependencies = [
+ "fred",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
