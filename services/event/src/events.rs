@@ -1,5 +1,4 @@
-use crate::RedisClient;
-use fred::prelude::LuaInterface;
+use redisclient::RedisClient;
 use rust_decimal::prelude::*;
 use rust_decimal::Decimal;
 use std::collections::HashMap;
@@ -43,7 +42,7 @@ pub async fn redis_incrby_gdp(client: &RedisClient, gdp_map: Gdp<'_>) {
     for (key, value) in gdp_map.0.iter() {
         let k = key.to_string();
         let v = trim_string_decimal(&value.parse::<String>().unwrap());
-        let _: () = client
+        client
             .eval(
                 INCRBY_GDP,
                 vec![k],

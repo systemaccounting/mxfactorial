@@ -201,7 +201,7 @@ so they'll receive **courtesy** while the instrument used to finance this absurd
 ```  
 
 **q.** how does systemaccounting model a free market?  
-**a.** by splitting **everything** between debitors and creditors [right down the middle](https://en.wikipedia.org/wiki/Spacetime_algebra#Spacetime_split)  
+**a.** by splitting **everything** between debitors and creditors [right down the middle](https://en.wikipedia.org/wiki/Spacetime_algebra#Spacetime_split) and standing guard with a conservation law. chasing out "monetary" policy with physics protects everyone from fiscal policy socializing its deficits into the center  
 
 **q.** how does systemaccounting affect setting public policy?  
 **a.** solving problems one at a time depends on 1) researching facts, 2) designing a solution, 3) applying the solution, 4) measuring its input and output and 5) holding contributors accountable. empowering sincere fact finders and problem solvers with more convenient access to public data science reduces the risk of luring them into the idle game of assigning blame between fictional social groups  
@@ -219,6 +219,14 @@ on the other hand, systemaccounting will eliminate a lot of archaic labor depend
 
 **q.** how to explain this project to a physicist?  
 **a.** invite them to speak with an [ai](https://claude.ai/share/9ebc37e9-709d-4df3-a199-a5ec54543fda)  
+
+**q.** what does mxfactorial mean?  
+**a.** it counts the grade-2 paths value can flow as a multivector enabled combinatorial expansion  
+
+buysiding for the public is a service and not a privilege. while "fed governors" of a banking economy sit around in closed meetings before telling the public what prices they should pay, systemaccountants of a cga state space roll up their sleaves and openly help [hunt down](https://en.wikipedia.org/wiki/Combinatorial_optimization) those prices instead (policies for manifolds, suits for algorithms)  
+
+**q.** what research does mxfactorial apply?  
+**a.** the [geometric number](https://gist.github.com/mxfactorial/454e259f7b4cf7c719c4ff2fb5000d1b), but with strings as angle preserving coordinates  
 
 **q.** why is the code public if the license is private?  
 **a.** publicly used code is a public structure
@@ -385,7 +393,7 @@ public demonstration of the following use cases through a systemaccounting funct
 // autonomous market pricing bread = milk
 ```  
 * *contracts as code*: enabling transaction automation through publicly-contributed scripts, e.g. automating tax, debt & equity sales, dividend, interest, wage and bill payments  **(input)**
-* maintaining publicly-accessible static and streaming endpoints servicing third-party visualization and [optimization](https://en.wikipedia.org/wiki/Combinatorial_optimization) **(output)**
+* maintaining publicly-accessible static and streaming endpoints servicing third-party visualization and optimization **(output)**
 
 this project intends to exploit the software engineering community's familiarity with data science to rapidly develop their capacity to describe an economy using mathemtical physics. software engineers may be expediently converted to phd-level experts because they come equipped with the technology to test, adopt, and communicate the subject to others. adding to the project's **[list of features](https://github.com/systemaccounting/mxfactorial/issues?q=is%3Aissue+is%3Apublic+sort%3Acreated-asc)** is designed to foster enough interaction between engineers and the data model that a movement to eliminate nothing but [public ignorance](https://en.wikipedia.org/wiki/Pareto_efficiency) becomes generally accepted as possible *only* when it's precipitated by activism pursued—not in the streets where slogans, bottles, and rocks are blindly hurled at others who are equally frustrated with their economy, but on knowledge's frontier where science and technology are used as tools to empower mankinds revolution in the cloud
 

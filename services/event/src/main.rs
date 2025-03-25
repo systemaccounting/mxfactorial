@@ -1,6 +1,6 @@
-use fred::prelude::*;
 use futures_channel::mpsc;
 use futures_util::{stream, FutureExt, StreamExt, TryStreamExt};
+use redisclient::RedisClient;
 use serde::Deserialize;
 use std::env;
 use tokio_postgres::{AsyncMessage, NoTls};
@@ -23,22 +23,6 @@ fn pg_conn_uri() -> String {
     uri
 }
 
-fn redis_conn_uri() -> String {
-    let redis_db = std::env::var("REDIS_DB").unwrap();
-    let redis_host = std::env::var("REDIS_HOST").unwrap();
-    let redis_port = std::env::var("REDIS_PORT").unwrap();
-    let redis_username = std::env::var("REDIS_USERNAME").unwrap();
-    let redis_password = std::env::var("REDIS_PASSWORD").unwrap();
-    format!(
-        "redis://{redis_username}:{redis_password}@{redis_host}:{redis_port}/{redis_db}",
-        redis_db = redis_db,
-        redis_host = redis_host,
-        redis_port = redis_port,
-        redis_username = redis_username,
-        redis_password = redis_password
-    )
-}
-
 #[derive(Deserialize, Debug)]
 struct Event {
     name: String,
@@ -54,9 +38,7 @@ async fn main() {
     }
 
     let pg_uri = pg_conn_uri();
-    let redis_uri = redis_conn_uri();
-    let redis_config = RedisConfig::from_url(&redis_uri).unwrap();
-    let redis_client = Builder::from_config(redis_config).build().unwrap();
+    let redis_client = RedisClient::new().await;
 
     loop {
         match redis_client.init().await {

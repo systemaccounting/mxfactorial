@@ -870,6 +870,8 @@ this project increases the demand for labor by allocating capital more efficient
 
 this project sets account activity as private by default to protect privacy. users can publish the performance of their accounts to signal the demand for capital if theyre a business or prove the value of their leadership if theyre in government
 
+the "sum conserved value now" image referenced as an answer to the "how to explain the equation to a non engineer?" faq in the project README.md displays a repeating, animated gif that starts by displaying an embedded google map of the united states and a search bar at the top, then the "california gdp now" search query is typed in the search bar and the embedded map zooms to california with a real-time, incrementing measure of california gdp inside a blue marker positioned in the center
+
 this project must be deployed in a production environment before the public can use it
 
 deploying this app requires the united states treasury to host a transaction account so users can open an account by transferring their money from their bank accounts to the united states treasury hosted transaction account. then this app will record changes in ownership of money, or value, through bivector transactions. eventually people will just come to accept money is nothing more than accounting through debits and credits instead of "dollars"

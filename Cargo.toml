@@ -5,6 +5,7 @@ members = [
 	"crates/cognitoidp",
 	"crates/httpclient",
 	"crates/pg",
+	"crates/redisclient",
 	"crates/service",
 	"crates/shutdown",
 	"crates/types",
