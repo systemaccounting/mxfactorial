@@ -10,10 +10,10 @@ use axum::{
     routing::get,
     Router,
 };
-use fred::prelude::*;
 use futures::{sink::SinkExt, stream::StreamExt};
 use http::StatusCode;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
+use redisclient::RedisClient;
 use rust_decimal::prelude::*;
 use rust_decimal::Decimal;
 use serde::Deserialize;
@@ -21,22 +21,6 @@ use shutdown::shutdown_signal;
 use std::{env, net::SocketAddr};
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
-
-fn redis_conn_uri() -> String {
-    let redis_db = std::env::var("REDIS_DB").unwrap();
-    let redis_host = std::env::var("REDIS_HOST").unwrap();
-    let redis_port = std::env::var("REDIS_PORT").unwrap();
-    let redis_username = std::env::var("REDIS_USERNAME").unwrap();
-    let redis_password = std::env::var("REDIS_PASSWORD").unwrap();
-    format!(
-        "redis://{redis_username}:{redis_password}@{redis_host}:{redis_port}/{redis_db}",
-        redis_db = redis_db,
-        redis_host = redis_host,
-        redis_port = redis_port,
-        redis_username = redis_username,
-        redis_password = redis_password
-    )
-}
 
 #[derive(Debug, Deserialize)]
 struct Params {
@@ -127,13 +111,11 @@ async fn handle_socket(socket: WebSocket, _who: SocketAddr, pool: ConnectionPool
     let redis_gdp_key = abbreviations.redis_gdp_key();
 
     // connect to redis
-    let redis_uri = redis_conn_uri();
-    let redis_config = RedisConfig::from_url(&redis_uri).unwrap();
-    let redis_client = Builder::from_config(redis_config).build().unwrap();
+    let redis_client = RedisClient::new().await;
     redis_client.init().await.unwrap();
 
     // subscribe to redis channel named after redis key
-    redis_client.subscribe(redis_gdp_key).await.unwrap();
+    redis_client.subscribe(vec![redis_gdp_key]).await.unwrap();
 
     // proxy redis subscription to websocket
     proxy_redis_subscription(redis_client, socket).await
