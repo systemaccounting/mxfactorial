@@ -16,7 +16,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** is this a "blockchain"?  
 **a.** no, and please use the word *replication*  
 
-**q.** i dont find any words in here used by the media. what is this?  
+**q.** i dont find any words used by mass & social media in here. what is this?  
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law
 
 first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively:
@@ -31,7 +31,7 @@ first, currency is modeled as a lightweight, dual positive-negative structured t
   "debitor_approval_time": "2023-03-20T04:58:32.001Z"
 }
 ```
-once transactions are typed as [conserved](https://en.wikipedia.org/wiki/Conserved_quantity), applying encryption and replication is relevant  
+not until transactions are typed as [conserved](https://en.wikipedia.org/wiki/Conserved_quantity) is applying encryption and replication relevant  
 
 **q.** where will i bank?  
 **a.** you dont need a bank. you need accounting. if you still wish to lend your money after receiving the service of accounting, please judge the risk of the loan you intend to offer the recipient by first exploiting your access to their accounting, then assume no one except you will own that risk after you consume it  
@@ -153,13 +153,33 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 **q.** how does systemaccounting manage financial stability?  
 **a.** systemaccounting automates financial stability by typing transactions as conserved. [bounding](https://en.wikipedia.org/wiki/BIBO_stability) financial system inputs automatically protects it from blowing up  
 
+**q.** how does systemaccounting improve tax collection?  
+**a.** measuring tax liability and its collection are automated by the [rule](https://github.com/systemaccounting/mxfactorial/tree/develop/services/rule) service in systemaccounting. for example, a store owner adds a 9% sales tax rule to their business account. someone shopping in their store brings a bottle of water priced at 1.000 to the cashier. the cashier sends 1 x 1.000 x bottled water to the rule service. the rule service responds with a 1 x 0.090 x sales tax in addition to the original 1 x 1.000 x bottled water. when the cashier and shopper approve the transaction, the shopper's balance decreases by 1.090, the store account increases by 1.000, and the state account increases by 0.090. systemaccounting simultaneously settles transactions across multiple accounts in a single transaction. no need for quarterly estimations, paper work or expensive accountants  
+
+**q.** how are stock markets affected?  
+**a.** "stocks" and "bonds" and their markets arent necessary in systemaccounting. debt and equity are traded without complicated abstractions through the rule service. if youre a business owner, just sell a rule to an investor promising a threshold-triggered dividend or a regularly scheduled debt service payment. systemaccounting also empowers you to publish the real time performance of your business account, so investors may very well find you first and offer to purchase those rules from you (investor confidence is strengthened by empirical data and you wont have to pay overly priced bankers, lawyers, accountants, regulators, etc for an "IPO")  
+
+"secondary" markets are more resale speculation casinos than accessible sources of capital empowering production. money that doesnt bet on returns directly from physical production is *soft*  
+
+**q.** what is black-scholes?  
+**a.** a formula used to guess the value of uncertainty in a system that hides information. it prices the future when the present isn't measurable. black-scholes isn’t required in systemaccounting because risk is replaced by resolution. transaction frequency and conserved value flow provide a transparent measure of return—so value isn’t modeled, it’s seen  
+
+**q.** what is capm?  
+**a.** a model that estimates return by adding arbitrary noise to a fabricated baseline. capm is a workaround for an unobservable market. systemaccounting eliminates the need for capm by exposing the cost of capital empirically. when rates of return are measurable, pricing risk requires no betas, no portfolios, and no “expected returns”  
+
+**q.** what is modigliani & miller?  
+**a.** a theorem that proves a firm’s value doesn’t depend on whether it’s funded by debt or equity—as long as you don’t cheat. systemaccounting enforces that proof by removing the cheat codes. tax advantages, asymmetric information, and leverage schemes vanish when all transactions are conserved and value must be earned before it’s priced  
+
 **q.** how does systemaccounting model an economy?  
 **a.** systemaccounting recognizes the public's right to continuity when searching for correlation so it models economic activity with conformal geometric algebra. in a cga economy, goods and services are referenced in transactions as 3d objects. this 3d physical space of goods and services provides the data model's base space. then motion of goods services between debitors and creditors is modeled by orthogonally extending the base space with 2 more debitor and creditor dimensions. adding a quadratic structure to the debitor and creditor dimensions and assigning each to -1 and +1 respectively enables measuring the alternating, signed recurrence of accounts across transactions. now referencing industry, occupation and other contextual values across *transactions as rotations* supports designing financial and economic queries with continuity-embedding multivectors. propagating economic value through light-like transactions achieves a much higher form of fidelity to how information travels in spacetime than through the transactions middled by government-chartered "banks"  
 
 **q.** how to explain *transactions as rotations* to a non engineer?  
 **a.** just say "value rotates between debitor and creditor accounts":
 
-![transactions as rotations](https://github.com/user-attachments/assets/1f4b165a-bfbf-462b-8baa-e00563524e0b)
+<p align="center"><img width="600" alt="transactions as rotations" src="https://github.com/user-attachments/assets/1f4b165a-bfbf-462b-8baa-e00563524e0b"></p>
+
+**q.** how do bivector transactions project value through time?  
+**a.** like homogeneous coordinates: (debitor, creditor, price × quantity) or (debitor/(price × quantity), creditor/(price × quantity), 1)  
 
 **q.** does replacing a banking with a cga economy require a democratic mandate?  
 **a.** no. but while sending someone down a hole with a spartan kick to the chest is tempting when you hear them claim the choice to stop stealing from you through a "money multiplier" is their *democratic right*, they're likely still under the spell that the counted opinion has more authority than the empirical one  
@@ -170,7 +190,9 @@ so they'll receive **courtesy** while the instrument used to finance this absurd
 **a.** the government can already see your transactions. systemaccounting empowers you to see the transactions of your government. access to the realtime financial performance of your government helps protect you from electing individuals who exploit money printing, price manipulation and the absence of accountability to systematize the cost of their failures to everyone else  
 
 **q.** will a government hosted payment app reduce my privacy?  
-**a.** you dont need to publish your account activity. publishing account data is a feature primarily intended for 1) businesses owners who wish to signal the demand for capital with an empirical rate of return and 2) government officials who wish to keep citizens informed of the performance of fiscal policies with empirical data  
+**a.** the economy as a crystal ball not only defends against the surveillance state by empowering a surveilling public, it eliminates a far more subtle but destructive hack enabled by the absence of evidence. the option to publish account performance is offered to protect 1) investors from businesses owners who do NOT want to signal the demand for capital with an **empirical** rate of return, and 2) voters from government officials who do NOT want to keep citizens informed of the performance of fiscal policies with **empirical** data  
+
+so while you don't need to publish your account activity, earning capital or votes is less likely if trust in your leadership depends on accountability  
 
 **q.** does this app require a fixed money supply?  
 **a.** no. decimal precision can be increased  
@@ -218,12 +240,80 @@ on the other hand, systemaccounting will eliminate a lot of archaic labor depend
 **a.** invite them to speak with an [ai](https://youtu.be/ZealDFpricU)  
 
 **q.** how to explain this project to a physicist?  
-**a.** invite them to speak with an [ai](https://claude.ai/share/9ebc37e9-709d-4df3-a199-a5ec54543fda)  
+**a.** represent each account as a basis vector:
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $e_a$ = unit vector for account `a`    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $e_b$ = unit vector for account `b`  
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then a transaction between `a` (debitor) and `b` (creditor) with scalar value $v$ is expressed as
+
+$$T_{ab} = v \cdot (e_b \wedge e_a)$$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;since the exterior product is antisymmetric
+
+$$e_b \wedge e_a = -(e_a \wedge e_b)$$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the transaction is signed
+* $+v$ for the creditor (inflow)
+* $-v$ for the debitor (outflow)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to enforce conservation we define the full transaction operator as nilpotent
+
+$$T_{ab} + T_{ba} = 0$$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;so
+
+$$v \cdot (e_b \wedge e_a) + v \cdot (e_a \wedge e_b) = 0$$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;which holds since
+
+$$e_b \wedge e_a = -e_a \wedge e_b$$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;now each transaction is a zero-sum rotation between two dual accounts in value-time space
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to project through time we extend each vector with a temporal coordinate
+
+$$x_a = (e_a, t_a) \quad x_b = (e_b, t_b)$$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then define the temporal bivector
+
+$$T_{ab} = v \cdot \left[(e_b, t_b) \wedge (e_a, t_a)\right]$$
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this rotation spans a plane in spacetime with direction (credit → debit) and magnitude $v$
+
+<p align="center"><img width="500" alt="nilpotent" src="lightcones.svg"></p>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with the transaction json
+
+```json
+{ "price": "1.000", "quantity": "1", "creditor": "b", "debitor": "a" }
+```
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;algebraically modeling
+
+$$\text{value} = pq = 1.000 \quad T_{ab} = pq \cdot (e_b \wedge e_a)$$
+
+—or you can just invite them to speak with an [ai](https://claude.ai/share/9ebc37e9-709d-4df3-a199-a5ec54543fda)  
 
 **q.** what does mxfactorial mean?  
-**a.** it counts the grade-2 paths value can flow as a multivector enabled combinatorial expansion  
+**a.** it measures the value flowing through grade-2 paths in a multivector-enabled combinatorial expansion  
 
 buysiding for the public is a service and not a privilege. while "fed governors" of a banking economy sit around in closed meetings before telling the public what prices they should pay, systemaccountants of a cga state space roll up their sleaves and openly help [hunt down](https://en.wikipedia.org/wiki/Combinatorial_optimization) those prices instead (policies for manifolds, suits for algorithms)  
+
+**q.** how does mxfactorial define the future?  
+**a.** it encodes potential economic states in a structured multivector form with future transactions as paths between accounts:  
+
+$$Mx!\ future = \sum_{i=1}^{n} \sum_{j=1, j \neq i}^{n} v_{ij} \cdot (e_j \wedge e_i)$$
+
+where:
+* $i$ and $j$ iterate through all accounts
+* $v_{ij}$ represents the potential value of a transaction between accounts $i$ and $j$
+* $e_j \wedge e_i$ is the bivector representing the oriented path from account $i$ to account $j$
+
+the future is the number of transactions possible across all pairs of accounts benefiting from path independence and an optimization-enabled least action principle  
+
+**q.** how does systemaccounting create a light-cone of the economy?  
+**a.** systemaccounting defines a quadratic 5d geometric structure over real economic data by modeling each transaction as a nilpotent bivector. this enforces conservation and directionality, restricting economic evolution to physically legal paths. the result is a literal light-cone of constrained, measurable futures—not guessed, but geometrically derived  
 
 **q.** what research does mxfactorial apply?  
 **a.** the [geometric number](https://gist.github.com/mxfactorial/c151619d22ef6603a557dbf370864085), but with strings as angle preserving coordinates  
@@ -258,6 +348,13 @@ buysiding for the public is a service and not a privilege. while "fed governors"
 
 **q.** how to learn more about the project?  
 **a.** open github copilot and ask it questions  
+
+**q.** is systemaccounting administered by conservatives?  
+**a.** no. everyones pushed left by mathematizing the right  
+
+privilege often stealthily depends on state support just as poverty visibly depends on welfare  
+
+both are visible to the mathematical right  
 
 **q.** can i invest?  
 **a.** contribute what you like. the dividend for believing in science is protection from other people's fiction  
