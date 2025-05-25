@@ -16,7 +16,7 @@ systemaccounting optimizes the flow of capital by expediting the discovery of ec
 **q.** is this a "blockchain"?  
 **a.** no, and please use the word *replication*  
 
-**q.** i dont find any words used by mass & social media in here. what is this?  
+**q.** i dont find any words used by mass & social media here. what is this?  
 **a.** encryption solves access risk. replication solves single point of failure and inconsistency risk. neither of these solutions are relevant to modeling currency as an electric current. this payment application solves contemporary economic issues by replacing "monetary" policy with a natural physical law
 
 first, currency is modeled as a lightweight, dual positive-negative structured time-series between creditors and debitors respectively:
@@ -152,6 +152,9 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 
 **q.** how does systemaccounting manage financial stability?  
 **a.** systemaccounting automates financial stability by typing transactions as conserved. [bounding](https://en.wikipedia.org/wiki/BIBO_stability) financial system inputs automatically protects it from blowing up  
+
+**q.** how does systemaccounting simplify money mechanics?  
+**a.** by banishing the science fiction "monetary" economics adds to it. modeling the economy as a physical system is both practical and rational. a conservation of value creates a mirror between past and future: sell something to create a potential so you can kineticize it later. sticking with classical mechanics protects [public sanity](https://claude.ai/share/b3688c38-3af5-4908-891f-009404812d83)  
 
 **q.** how does systemaccounting improve tax collection?  
 **a.** measuring tax liability and its collection are automated by the [rule](https://github.com/systemaccounting/mxfactorial/tree/develop/services/rule) service in systemaccounting. for example, a store owner adds a 9% sales tax rule to their business account. someone shopping in their store brings a bottle of water priced at 1.000 to the cashier. the cashier sends 1 x 1.000 x bottled water to the rule service. the rule service responds with a 1 x 0.090 x sales tax in addition to the original 1 x 1.000 x bottled water. when the cashier and shopper approve the transaction, the shopper's balance decreases by 1.090, the store account increases by 1.000, and the state account increases by 0.090. systemaccounting simultaneously settles transactions across multiple accounts in a single transaction. no need for quarterly estimations, paper work or expensive accountants  
