@@ -23,7 +23,7 @@ pub fn restore_testseed() {
         // cargo test -- --show-output
         if !restore_output.clone().stderr.is_empty() {
             let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
-            println!("{}", restore_output_str);
+            println!("{restore_output_str}");
         }
         if !restore_output.stdout.is_empty() {
             let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
@@ -42,7 +42,7 @@ pub fn restore_testseed() {
         // cargo test -- --show-output
         if !restore_output.clone().stderr.is_empty() {
             let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
-            println!("{}", restore_output_str);
+            println!("{restore_output_str}");
         }
         if !restore_output.stdout.is_empty() {
             let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");

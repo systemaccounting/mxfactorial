@@ -58,7 +58,7 @@ impl From<String> for AccountRole {
         match s.as_str() {
             "debitor" => AccountRole::Debitor,
             "creditor" => AccountRole::Creditor,
-            _ => panic!("{} is not an account role", s),
+            _ => panic!("{s} is not an account role"),
         }
     }
 }

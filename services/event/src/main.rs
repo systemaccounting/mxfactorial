@@ -12,14 +12,7 @@ fn pg_conn_uri() -> String {
     let pghost = std::env::var("PGHOST").unwrap();
     let pgport = std::env::var("PGPORT").unwrap();
     let pgdatabase = std::env::var("PGDATABASE").unwrap();
-    let uri = format!(
-        "postgresql://{pguser}:{pgpassword}@{pghost}:{pgport}/{pgdatabase}",
-        pguser = pguser,
-        pgpassword = pgpassword,
-        pghost = pghost,
-        pgport = pgport,
-        pgdatabase = pgdatabase
-    );
+    let uri = format!("postgresql://{pguser}:{pgpassword}@{pghost}:{pgport}/{pgdatabase}");
     uri
 }
 

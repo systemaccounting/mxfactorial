@@ -58,13 +58,13 @@ impl WsUri {
         uri.push_str(&format!("measure={}", self.measure));
         uri.push_str(&format!("&date={}", self.date));
         if let Some(country) = &self.country {
-            uri.push_str(&format!("&country={}", country));
+            uri.push_str(&format!("&country={country}"));
         }
         if let Some(region) = &self.region {
-            uri.push_str(&format!("&region={}", region));
+            uri.push_str(&format!("&region={region}"));
         }
         if let Some(municipality) = &self.municipality {
-            uri.push_str(&format!("&municipality={}", municipality));
+            uri.push_str(&format!("&municipality={municipality}"));
         }
         uri.replace(" ", "%20")
     }

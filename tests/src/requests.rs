@@ -634,7 +634,7 @@ pub async fn get_account_balance_http(account_name: String, auth_account: String
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     let balance_float: f32 = serde_json::from_str(&response_string).unwrap();
-    format!("{:.3}", balance_float)
+    format!("{balance_float:.3}")
 }
 
 pub async fn get_transaction_by_id_http(

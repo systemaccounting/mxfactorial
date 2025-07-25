@@ -104,14 +104,13 @@ impl ApprovalTable {
             for (i, c) in columns.clone().enumerate() {
                 let mut value = match c.clone().name() {
                     "transaction_id" => {
-                        format!("({} {} {} {})", SELECT, tr_aux_column, FROM, tr_aux_table)
+                        format!("({SELECT} {tr_aux_column} {FROM} {tr_aux_table})")
                     }
-                    "transaction_item_id" => format!(
-                        "({} {} {} {})",
-                        SELECT, tr_item_aux_column, FROM, tr_item_aux_table
-                    ),
+                    "transaction_item_id" => {
+                        format!("({SELECT} {tr_item_aux_column} {FROM} {tr_item_aux_table})")
+                    }
                     _ => {
-                        let value = format!("${}", positional_parameter);
+                        let value = format!("${positional_parameter}");
                         *positional_parameter += 1;
                         value
                     }

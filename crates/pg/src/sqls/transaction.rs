@@ -113,14 +113,14 @@ impl TransactionTable {
         positional_parameter: &mut i32,
     ) -> String {
         let mut array = String::new();
-        array.push_str(&format!("{} [", ARRAY));
+        array.push_str(&format!("{ARRAY} ["));
         for i in 0..row_count {
             array.push_str(&self.pg_row(columns.clone(), None, positional_parameter));
             if i < row_count - 1 {
                 array.push_str(", ");
             }
         }
-        array.push_str(&format!("]::{}[]", row_type));
+        array.push_str(&format!("]::{row_type}[]"));
         array
     }
 
@@ -131,11 +131,13 @@ impl TransactionTable {
         positional_parameter: &mut i32,
     ) -> String {
         let mut row = String::new();
-        row.push_str(&format!("{}(", ROW));
+        row.push_str(&format!("{ROW}("));
         for (j, c) in columns.clone().enumerate() {
-            row.push_str(&format!("${}", *positional_parameter));
+            let param = *positional_parameter;
+            row.push_str(&format!("${param}"));
             if c.cast_value_as.is_some() {
-                row.push_str(&format!("::{}", c.cast_value_as.unwrap()));
+                let cast_type = c.cast_value_as.unwrap();
+                row.push_str(&format!("::{cast_type}"));
             }
             *positional_parameter += 1;
             if j < columns.len() - 1 {
@@ -144,7 +146,7 @@ impl TransactionTable {
         }
         row.push(')');
         if let Some(t) = row_type {
-            row.push_str(&format!("::{}", t));
+            row.push_str(&format!("::{t}"));
         }
         row
     }
@@ -179,7 +181,7 @@ impl TransactionTable {
     ) -> String {
         let tr_item_row = self.transaction_item_row(positional_parameter);
         let appr_array = self.approval_array(approval_count, positional_parameter);
-        format!("{}({}, {})", ROW, tr_item_row, appr_array)
+        format!("{ROW}({tr_item_row}, {appr_array})")
     }
 
     fn entire_transaction_item_array(
@@ -188,7 +190,7 @@ impl TransactionTable {
         positional_parameter: &mut i32,
     ) -> String {
         let mut entire_transaction_item_array = String::new();
-        entire_transaction_item_array.push_str(&format!("{} [", ARRAY));
+        entire_transaction_item_array.push_str(&format!("{ARRAY} ["));
         for (i, length) in lengths_of_approvals.iter().enumerate() {
             entire_transaction_item_array
                 .push_str(&self.entire_transaction_item_row(*length, positional_parameter));
@@ -196,7 +198,7 @@ impl TransactionTable {
                 entire_transaction_item_array.push_str(", ");
             }
         }
-        entire_transaction_item_array.push_str(&format!("]::{}[]", ENTIRE_TRANSACTION_ITEM_TYPE));
+        entire_transaction_item_array.push_str(&format!("]::{ENTIRE_TRANSACTION_ITEM_TYPE}[]"));
         entire_transaction_item_array
     }
 
@@ -208,10 +210,7 @@ impl TransactionTable {
         let tr_row = self.transaction_row(positional_parameter);
         let tr_item_array =
             self.entire_transaction_item_array(lengths_of_approvals, positional_parameter);
-        format!(
-            "{}({}, {})::{}",
-            ROW, tr_row, tr_item_array, ENTIRE_TRANSACTION_TYPE
-        )
+        format!("{ROW}({tr_row}, {tr_item_array})::{ENTIRE_TRANSACTION_TYPE}")
     }
 
     /* example fn_select_insert_transaction_sql output:
@@ -289,7 +288,7 @@ impl TransactionTable {
     // creates a parameterized select statement for calling the insert_transaction postgres function
     pub fn fn_select_insert_transaction_sql(&self, list_of_approval_lengths: Vec<usize>) -> String {
         let mut select_insert_sql = String::new();
-        select_insert_sql.push_str(&format!("{} {}", SELECT, INSERT_TRANSACTION_FN));
+        select_insert_sql.push_str(&format!("{SELECT} {INSERT_TRANSACTION_FN}"));
         select_insert_sql.push('(');
         let mut positional_parameter = 1;
         let sql = self.entire_transaction_row(list_of_approval_lengths, &mut positional_parameter);
@@ -365,14 +364,13 @@ impl TransactionTable {
                 ORDER BY transaction_id
                 DESC
             )
-            SELECT {} FROM transaction
+            SELECT {columns} FROM transaction
             WHERE id IN (
                 SELECT transaction_id
                 FROM transactions
-                WHERE all_approved IS {}
+                WHERE all_approved IS {is_transaction}
                 LIMIT $2
-            );"#,
-            columns, is_transaction
+            );"#
         )
     }
 }

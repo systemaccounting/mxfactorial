@@ -198,27 +198,7 @@ impl AccountProfileTable {
         let owned_account_column = "owned_account";
         let owned_subaccount_column = "owned_subaccount";
         format!(
-            "{} {} {}({}, '') {} {}({}, '') {} {} {} {} {} {} {}.{} {} $1 {} {}.{} {} $1",
-            SELECT,
-            DISTINCT,
-            COALESCE,
-            owner_account_column,
-            CONCAT,
-            COALESCE,
-            owner_subaccount_column,
-            AS,
-            column_alias,
-            FROM,
-            table,
-            table_alias,
-            WHERE,
-            table_alias,
-            owned_account_column,
-            EQUAL,
-            OR,
-            table_alias,
-            owned_subaccount_column,
-            EQUAL
+            "{SELECT} {DISTINCT} {COALESCE}({owner_account_column}, '') {CONCAT} {COALESCE}({owner_subaccount_column}, '') {AS} {column_alias} {FROM} {table} {table_alias} {WHERE} {table_alias}.{owned_account_column} {EQUAL} $1 {OR} {table_alias}.{owned_subaccount_column} {EQUAL} $1"
         )
     }
 }

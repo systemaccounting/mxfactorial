@@ -322,12 +322,12 @@ impl TransactionItems {
         for ti in self.0.iter_mut() {
             if ti.debitor_profile_id.is_none() {
                 let debitor_profile_id = profile_ids.get_id(ti.debitor.clone()).unwrap();
-                ti.debitor_profile_id = Some(format!("{}", debitor_profile_id));
+                ti.debitor_profile_id = Some(format!("{debitor_profile_id}"));
             }
 
             if ti.creditor_profile_id.is_none() {
                 let creditor_profile_id = profile_ids.get_id(ti.creditor.clone()).unwrap();
-                ti.creditor_profile_id = Some(format!("{}", creditor_profile_id));
+                ti.creditor_profile_id = Some(format!("{creditor_profile_id}"));
             }
         }
     }
@@ -575,7 +575,7 @@ impl TransactionItems {
         }
 
         if !missing_items.is_empty() {
-            println!("missing items: {:#?}", missing_items);
+            println!("missing items: {missing_items:#?}");
             return Err(TransactionItemError::MissingTransactionItems(missing_items));
         }
 

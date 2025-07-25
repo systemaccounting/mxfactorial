@@ -87,7 +87,7 @@ pub fn create_value_params(
 pub fn create_params(count: usize, positional_parameter: &mut i32) -> String {
     let mut values = String::new();
     for i in 0..count {
-        values.push_str(&format!("${}", positional_parameter));
+        values.push_str(&format!("${positional_parameter}"));
         *positional_parameter += 1;
         if i < count - 1 {
             values.push_str(", ");
