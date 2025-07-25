@@ -284,7 +284,7 @@ $$T_{ab} = v \cdot \left[(e_b, t_b) \wedge (e_a, t_a)\right]$$
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;this rotation spans a plane in spacetime with direction (credit → debit) and magnitude $v$
 
-<p align="center"><img width="500" alt="nilpotent" src="lightcones.svg"></p>
+<p align="center"><img width="500" alt="nilpotent" src="lightcones.png"></p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with the transaction json
 
@@ -358,6 +358,22 @@ the future is the number of transactions possible across all pairs of accounts b
 privilege often stealthily depends on state support just as poverty visibly depends on welfare  
 
 both are visible to the mathematical right  
+
+**q.** how is systemaccounting different from other payment apps?  
+**a.** storing and moving money are a horse and carriage abstraction for the accounting of the non movement and movement of value between owners  
+
+dont even say "money"  
+
+these are government services  
+
+of course these are not non government services  
+
+and the government that protects path independence betweeen accounts will supply them in such a way that they will never allow you to externalize your costs to others or allow others to externalize their costs to you  
+
+free speech does not entitle anyone to equate their promises to other peoples work, or palm off *money-tary* for **conserved** value  
+
+**q.** why not pitch this to investors?  
+**a.** startups pitch. a conservation law summons  
 
 **q.** can i invest?  
 **a.** contribute what you like. the dividend for believing in science is protection from other people's fiction  
