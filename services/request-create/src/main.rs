@@ -137,7 +137,7 @@ async fn handle_event(
     let rule_tested = test_values(request)
         .await
         .map_err(|_e| {
-            println!("error: {:?}", _e);
+            println!("error: {_e:?}");
             StatusCode::INTERNAL_SERVER_ERROR
         })
         .unwrap();

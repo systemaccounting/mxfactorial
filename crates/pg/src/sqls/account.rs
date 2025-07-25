@@ -21,18 +21,12 @@ pub fn insert_account_sql() -> String {
 
 pub fn delete_owner_account_sql() -> String {
     let column = "owner_account";
-    format!(
-        "{} {} {} {} {} $1",
-        DELETE_FROM, ACCOUNT_OWNER_TABLE, WHERE, column, EQUAL
-    )
+    format!("{DELETE_FROM} {ACCOUNT_OWNER_TABLE} {WHERE} {column} {EQUAL} $1")
 }
 
 pub fn delete_account_sql() -> String {
     let column = "name";
-    format!(
-        "{} {} {} {} {} $1",
-        DELETE_FROM, ACCOUNT_TABLE, WHERE, column, EQUAL
-    )
+    format!("{DELETE_FROM} {ACCOUNT_TABLE} {WHERE} {column} {EQUAL} $1")
 }
 
 pub struct AccountOwnerTable {

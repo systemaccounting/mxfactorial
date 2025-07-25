@@ -42,7 +42,7 @@ fn create_fake_profile(account_name: &str) -> AccountProfile {
     let floor_number = random_number(1, 30);
     let unit_number = random_number(100, 999);
     let city_name = address::city();
-    let county_name = format!("{} County", city_name);
+    let county_name = format!("{city_name} County");
     let region = None;
     let state_name = "California".to_string();
     let postal_code = address::zip();

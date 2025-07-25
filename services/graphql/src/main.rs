@@ -307,8 +307,8 @@ async fn graphiql() -> impl IntoResponse {
     let graphql_ws_resource = std::env::var("GRAPHQL_WS_RESOURCE").unwrap();
     response::Html(
         http::GraphiQLSource::build()
-            .endpoint(format!("/{}", graphql_resource).as_str())
-            .subscription_endpoint(format!("/{}", graphql_ws_resource).as_str())
+            .endpoint(format!("/{graphql_resource}").as_str())
+            .subscription_endpoint(format!("/{graphql_ws_resource}").as_str())
             .finish(),
     )
 }
@@ -358,13 +358,13 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(graphiql))
-        .route(format!("/{}", graphql_resource).as_str(), post(graphql))
+        .route(format!("/{graphql_resource}").as_str(), post(graphql))
         .route(
             readiness_check_path.as_str(), // absolute path so format not used
             get(|| async { StatusCode::OK }),
         )
         .route(
-            format!("/{}", graphql_ws_resource).as_str(),
+            format!("/{graphql_ws_resource}").as_str(),
             get(graphql_subscription),
         )
         .layer(CorsLayer::permissive())

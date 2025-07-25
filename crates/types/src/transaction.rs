@@ -91,7 +91,7 @@ impl Transaction {
         {
             Ok(()) => Ok(()),
             Err(e) => {
-                println!("error: {:?}", e);
+                println!("error: {e:?}");
                 Err(e)
             }
         }

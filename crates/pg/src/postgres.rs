@@ -41,6 +41,23 @@ pub struct DatabaseConnection(pub PooledConnection<'static, PostgresConnectionMa
 
 pub type ToSqlVec = Vec<Box<(dyn ToSql + Sync + Send)>>;
 
+#[macro_export]
+macro_rules! to_sql_vec {
+    ($($val:expr),* $(,)?) => {
+        vec![$(Box::new($val) as Box<dyn ToSql + Sync + Send>),*]
+    };
+}
+
+pub trait ToSqlVecExt {
+    fn push_param<T: ToSql + Sync + Send + 'static>(&mut self, value: T);
+}
+
+impl ToSqlVecExt for ToSqlVec {
+    fn push_param<T: ToSql + Sync + Send + 'static>(&mut self, value: T) {
+        self.push(Box::new(value));
+    }
+}
+
 // tokio_postgres deps here
 impl DatabaseConnection {
     pub async fn query(

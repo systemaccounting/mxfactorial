@@ -127,9 +127,9 @@ impl TransactionItemTable {
 
         for (i, c) in columns.clone().enumerate() {
             let mut value = if c.clone().name() == "transaction_id" {
-                format!("({} {} {} {})", SELECT, tr_aux_column, FROM, tr_aux_table)
+                format!("({SELECT} {tr_aux_column} {FROM} {tr_aux_table})")
             } else {
-                let value = format!("${}", positional_parameter);
+                let value = format!("${positional_parameter}");
 
                 *positional_parameter += 1;
 

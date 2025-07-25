@@ -112,24 +112,25 @@ impl AccountBalanceTable {
         let mut positional_parameter = 1;
         let mut values = String::new();
         for i in 0..row_count {
-            values.push_str(&format!("{}(", ROW));
+            values.push_str(&format!("{ROW}("));
             for c in 0..3 {
-                values.push_str(&format!("${}", positional_parameter));
+                values.push_str(&format!("${positional_parameter}"));
                 if c == 1 {
-                    values.push_str(format!("::{}", TEXT).as_str());
+                    values.push_str(format!("::{TEXT}").as_str());
                 }
                 positional_parameter += 1;
                 if c < 2 {
                     values.push_str(", ");
                 }
             }
-            values.push_str(format!(", {}, {}", NULL, NULL).as_str()); // add nulls for the last two columns (created_at, updated_at
-            values.push_str(format!(")::{}", self.name()).as_str());
+            values.push_str(format!(", {NULL}, {NULL}").as_str()); // add nulls for the last two columns (created_at, updated_at
+            let self_name = self.name();
+            values.push_str(format!(")::{self_name}").as_str());
             if i < row_count - 1 {
                 values.push_str(", ");
             }
         }
-        format!("{} {}({})", SELECT, CHANGE_BALANCES, values)
+        format!("{SELECT} {CHANGE_BALANCES}({values})")
     }
 }
 

@@ -1,11 +1,13 @@
 #![allow(async_fn_in_trait)]
-use crate::postgres::{DatabaseConnection, ToSqlVec};
+use crate::postgres::{DatabaseConnection, ToSqlVec, ToSqlVecExt};
 use crate::sqls::common::TableTrait;
+use crate::to_sql_vec;
 use chrono::{DateTime, Utc};
 use geo_types::Point;
 use mockall::automock;
 use rust_decimal::Decimal;
 use std::{error::Error, vec};
+use tokio_postgres::types::ToSql;
 use types::{
     account::{AccountProfile, AccountProfiles},
     account_role::AccountRole,
@@ -123,7 +125,7 @@ pub trait ModelTrait {
 impl ModelTrait for DatabaseConnection {
     async fn insert_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
         let sql = crate::sqls::account::insert_account_sql();
-        let values: ToSqlVec = vec![Box::new(account)];
+        let values = to_sql_vec![account];
         let result = self.execute(sql, values).await;
         match result {
             Err(e) => Err(Box::new(e)),
@@ -133,7 +135,7 @@ impl ModelTrait for DatabaseConnection {
 
     async fn delete_owner_account_query(&self, account: String) -> Result<(), Box<dyn Error>> {
         let sql = crate::sqls::account::delete_owner_account_sql();
-        let values: ToSqlVec = vec![Box::new(account)];
+        let values = to_sql_vec![account];
         let result = self.execute(sql, values).await;
         match result {
             Err(e) => Err(Box::new(e)),
@@ -147,13 +149,13 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<String, Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.select_current_account_balance_by_account_name_sql();
-        let values: ToSqlVec = vec![Box::new(account)];
+        let values = to_sql_vec![account];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
             Ok(rows) => {
                 let balance: Decimal = rows[0].get(0);
-                Ok(format!("{:.FIXED_DECIMAL_PLACES$}", balance))
+                Ok(format!("{balance:.FIXED_DECIMAL_PLACES$}"))
             }
         }
     }
@@ -166,7 +168,7 @@ impl ModelTrait for DatabaseConnection {
         let sql = table.select_account_balances_sql(accounts.len());
         let mut values: ToSqlVec = Vec::new();
         for a in accounts.into_iter() {
-            values.push(Box::new(a))
+            values.push_param(a)
         }
         let rows = self.query(sql.to_string(), values).await;
         match rows {
@@ -186,22 +188,18 @@ impl ModelTrait for DatabaseConnection {
         let mut values: ToSqlVec = Vec::new();
         for tr_item in transaction_items.clone().into_iter() {
             // add creditor account as first param
-            values.push(Box::new(tr_item.clone().creditor));
+            values.push_param(tr_item.clone().creditor);
             // add creditor revenue string as second param
-            values.push(Box::new(tr_item.clone().revenue_string()));
+            values.push_param(tr_item.clone().revenue_string());
             // add transaction item id as third param
-            values.push(Box::new(
-                tr_item.id.clone().unwrap().parse::<i32>().unwrap(),
-            ));
+            values.push_param(tr_item.id.clone().unwrap().parse::<i32>().unwrap());
 
             // add debitor account as fourth param
-            values.push(Box::new(tr_item.clone().debitor));
+            values.push_param(tr_item.clone().debitor);
             // add debitor expense string as fifth param
-            values.push(Box::new(tr_item.clone().expense_string()));
+            values.push_param(tr_item.clone().expense_string());
             // add transaction item id as sixth param
-            values.push(Box::new(
-                tr_item.clone().id.unwrap().parse::<i32>().unwrap(),
-            ));
+            values.push_param(tr_item.clone().id.unwrap().parse::<i32>().unwrap());
         }
 
         let table = crate::sqls::balance::AccountBalanceTable::new();
@@ -221,11 +219,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::balance::AccountBalanceTable::new();
         let sql = table.insert_account_balance_sql();
-        let values: ToSqlVec = vec![
-            Box::new(account),
-            Box::new(balance),
-            Box::new(curr_tr_item_id),
-        ];
+        let values = to_sql_vec![account, balance, curr_tr_item_id,];
         let result = self.execute(sql.to_string(), values).await;
         match result {
             Err(e) => Err(Box::new(e)),
@@ -239,7 +233,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<Approvals, Box<dyn Error>> {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.select_approvals_by_transaction_id_sql();
-        let values: ToSqlVec = vec![Box::new(transaction_id)];
+        let values = to_sql_vec![transaction_id];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(rows) => Err(Box::new(rows)),
@@ -253,7 +247,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<Approvals, Box<dyn Error>> {
         let mut values: ToSqlVec = Vec::new();
         for t in transaction_ids.clone().into_iter() {
-            values.push(Box::new(t))
+            values.push_param(t)
         }
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.select_approvals_by_transaction_ids_sql(transaction_ids.len());
@@ -273,7 +267,7 @@ impl ModelTrait for DatabaseConnection {
         let table = crate::sqls::approval::ApprovalTable::new();
         let sql = table.update_approvals_by_account_and_role_sql();
         // sql values: tr_id int, acct_name text, acct_role text
-        let values: ToSqlVec = vec![Box::new(transaction_id), Box::new(account), Box::new(role)];
+        let values = to_sql_vec![transaction_id, account, role];
         let result = self.query(sql.to_string(), values).await;
         match result {
             Err(e) => Err(Box::new(e)),
@@ -290,53 +284,45 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<String, Box<dyn Error>> {
         let table = crate::sqls::profile::AccountProfileTable::new();
         let sql = table.insert_account_profile_sql();
-        let values: ToSqlVec = vec![
-            Box::new(account_profile.account_name),
-            Box::new(account_profile.description),
-            Box::new(account_profile.first_name),
-            Box::new(account_profile.middle_name),
-            Box::new(account_profile.last_name),
-            Box::new(account_profile.country_name),
-            Box::new(account_profile.street_number),
-            Box::new(account_profile.street_name),
-            Box::new(account_profile.floor_number),
-            Box::new(account_profile.unit_number),
-            Box::new(account_profile.city_name),
-            Box::new(account_profile.county_name),
-            Box::new(account_profile.region_name),
-            Box::new(account_profile.state_name),
-            Box::new(account_profile.postal_code),
-            Box::new(parse_pg_point(account_profile.latlng).unwrap()),
-            Box::new(account_profile.email_address),
-            Box::new(
-                account_profile
-                    .telephone_country_code
-                    .unwrap()
-                    .parse::<i32>()
-                    .unwrap(),
-            ),
-            Box::new(
-                account_profile
-                    .telephone_area_code
-                    .unwrap()
-                    .parse::<i32>()
-                    .unwrap(),
-            ),
-            Box::new(
-                account_profile
-                    .telephone_number
-                    .unwrap()
-                    .parse::<i32>()
-                    .unwrap(),
-            ),
-            Box::new(
-                account_profile
-                    .occupation_id
-                    .unwrap()
-                    .parse::<i32>()
-                    .unwrap(),
-            ),
-            Box::new(account_profile.industry_id.unwrap().parse::<i32>().unwrap()),
+        let values = to_sql_vec![
+            account_profile.account_name,
+            account_profile.description,
+            account_profile.first_name,
+            account_profile.middle_name,
+            account_profile.last_name,
+            account_profile.country_name,
+            account_profile.street_number,
+            account_profile.street_name,
+            account_profile.floor_number,
+            account_profile.unit_number,
+            account_profile.city_name,
+            account_profile.county_name,
+            account_profile.region_name,
+            account_profile.state_name,
+            account_profile.postal_code,
+            parse_pg_point(account_profile.latlng).unwrap(),
+            account_profile.email_address,
+            account_profile
+                .telephone_country_code
+                .unwrap()
+                .parse::<i32>()
+                .unwrap(),
+            account_profile
+                .telephone_area_code
+                .unwrap()
+                .parse::<i32>()
+                .unwrap(),
+            account_profile
+                .telephone_number
+                .unwrap()
+                .parse::<i32>()
+                .unwrap(),
+            account_profile
+                .occupation_id
+                .unwrap()
+                .parse::<i32>()
+                .unwrap(),
+            account_profile.industry_id.unwrap().parse::<i32>().unwrap(),
         ];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
@@ -357,7 +343,7 @@ impl ModelTrait for DatabaseConnection {
         let sql = table.select_profile_ids_by_account_names_sql(accounts.len());
         let mut values: ToSqlVec = Vec::new();
         for a in accounts.into_iter() {
-            values.push(Box::new(a))
+            values.push_param(a)
         }
         let rows = self.query(sql.to_string(), values).await;
         match rows {
@@ -383,7 +369,7 @@ impl ModelTrait for DatabaseConnection {
         let sql = table.select_profiles_by_account_names_sql(deduped.len());
         let mut values: ToSqlVec = Vec::new();
         for a in deduped.into_iter() {
-            values.push(Box::new(a))
+            values.push_param(a)
         }
         let rows = self.query(sql.to_string(), values).await;
         match rows {
@@ -398,7 +384,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<TransactionItems, Box<dyn Error>> {
         let table = crate::sqls::transaction_item::TransactionItemTable::new();
         let sql = table.select_transaction_items_by_transaction_id_sql();
-        let values: ToSqlVec = vec![Box::new(transaction_id)];
+        let values = to_sql_vec![transaction_id];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -412,7 +398,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<TransactionItems, Box<dyn Error>> {
         let mut values: ToSqlVec = Vec::new();
         for t in transaction_ids.clone().into_iter() {
-            values.push(Box::new(t))
+            values.push_param(t)
         }
         let table = crate::sqls::transaction_item::TransactionItemTable::new();
         let sql = table.select_transaction_items_by_transaction_ids_sql(transaction_ids.len());
@@ -429,7 +415,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<Transaction, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_transaction_by_id_sql();
-        let values: ToSqlVec = vec![Box::new(transaction_id)];
+        let values = to_sql_vec![transaction_id];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -458,102 +444,102 @@ impl ModelTrait for DatabaseConnection {
         let transaction_sum_value = parse_pg_numeric(Some(transaction.sum_value)).unwrap();
         let transaction_created_at = parse_pg_timestamp(None::<TZTime>).unwrap();
 
-        let mut values: ToSqlVec = vec![
-            Box::new(None::<i32>),                      // id
-            Box::new(transaction_rule_instance_id),     // rule_instance_id
-            Box::new(transaction.author),               // author
-            Box::new(transaction.author_device_id),     // author_device_id
-            Box::new(transaction_author_device_latlng), // author_device_latlng
-            Box::new(transaction.author_role),          // author_role
-            Box::new(transaction_equilibrium_time),     // equilibrium_time
-            Box::new(transaction_sum_value),            // sum_value
-            Box::new(transaction_created_at),           // created_at
+        let mut values = to_sql_vec![
+            None::<i32>,                      // id
+            transaction_rule_instance_id,     // rule_instance_id
+            transaction.author,               // author
+            transaction.author_device_id,     // author_device_id
+            transaction_author_device_latlng, // author_device_latlng
+            transaction.author_role,          // author_role
+            transaction_equilibrium_time,     // equilibrium_time
+            transaction_sum_value,            // sum_value
+            transaction_created_at,           // created_at
         ];
 
         for tr_item in transaction.transaction_items.into_iter() {
             // add values expected by postgres row constructor
 
-            values.push(Box::new(None::<i32>)); // id
+            values.push_param(None::<i32>); // id
 
-            values.push(Box::new(None::<i32>)); // transaction_id
+            values.push_param(None::<i32>); // transaction_id
 
-            values.push(Box::new(tr_item.item_id)); // item_id
+            values.push_param(tr_item.item_id); // item_id
 
             let tr_item_price = parse_pg_numeric(Some(tr_item.price)).unwrap();
-            values.push(Box::new(tr_item_price)); // price
+            values.push_param(tr_item_price); // price
 
             let tr_item_quantity = parse_pg_numeric(Some(tr_item.quantity)).unwrap();
-            values.push(Box::new(tr_item_quantity)); // quantity
+            values.push_param(tr_item_quantity); // quantity
 
-            values.push(Box::new(tr_item.debitor_first)); // debitor_first
+            values.push_param(tr_item.debitor_first); // debitor_first
 
             let tr_item_rule_instance_id = parse_pg_int4(tr_item.rule_instance_id).unwrap();
-            values.push(Box::new(tr_item_rule_instance_id)); // rule_instance_id
+            values.push_param(tr_item_rule_instance_id); // rule_instance_id
 
-            values.push(Box::new(tr_item.rule_exec_ids)); // rule_exec_ids
+            values.push_param(tr_item.rule_exec_ids); // rule_exec_ids
 
-            values.push(Box::new(tr_item.unit_of_measurement)); // unit_of_measurement
+            values.push_param(tr_item.unit_of_measurement); // unit_of_measurement
 
             let tr_item_units_measured = parse_pg_numeric(tr_item.units_measured).unwrap();
-            values.push(Box::new(tr_item_units_measured)); // units_measured
+            values.push_param(tr_item_units_measured); // units_measured
 
-            values.push(Box::new(tr_item.debitor)); // debitor
-            values.push(Box::new(tr_item.creditor)); // creditor
+            values.push_param(tr_item.debitor); // debitor
+            values.push_param(tr_item.creditor); // creditor
 
             let debitor_profile_id = parse_pg_int4(tr_item.debitor_profile_id).unwrap();
-            values.push(Box::new(debitor_profile_id)); // debitor_profile_id
+            values.push_param(debitor_profile_id); // debitor_profile_id
 
             let creditor_profile_id = parse_pg_int4(tr_item.creditor_profile_id).unwrap();
-            values.push(Box::new(creditor_profile_id)); // creditor_profile_id
+            values.push_param(creditor_profile_id); // creditor_profile_id
 
             let tr_item_debitor_approval_time =
                 parse_pg_timestamp(tr_item.debitor_approval_time).unwrap();
-            values.push(Box::new(tr_item_debitor_approval_time)); // debitor_approval_time
+            values.push_param(tr_item_debitor_approval_time); // debitor_approval_time
 
             let tr_item_creditor_approval_time =
                 parse_pg_timestamp(tr_item.creditor_approval_time).unwrap();
-            values.push(Box::new(tr_item_creditor_approval_time)); // creditor_approval_time
+            values.push_param(tr_item_creditor_approval_time); // creditor_approval_time
 
             let tr_item_debitor_expiration_time =
                 parse_pg_timestamp(tr_item.debitor_expiration_time).unwrap();
-            values.push(Box::new(tr_item_debitor_expiration_time)); // debitor_expiration_time
+            values.push_param(tr_item_debitor_expiration_time); // debitor_expiration_time
 
             let tr_item_creditor_expiration_time =
                 parse_pg_timestamp(tr_item.creditor_expiration_time).unwrap();
-            values.push(Box::new(tr_item_creditor_expiration_time)); // creditor_expiration_time
+            values.push_param(tr_item_creditor_expiration_time); // creditor_expiration_time
 
             let tr_item_creditor_rejection_time =
                 parse_pg_timestamp(tr_item.creditor_rejection_time).unwrap();
-            values.push(Box::new(tr_item_creditor_rejection_time)); // creditor_rejection_time
+            values.push_param(tr_item_creditor_rejection_time); // creditor_rejection_time
 
             let tr_item_debitor_rejection_time =
                 parse_pg_timestamp(tr_item.debitor_rejection_time).unwrap();
-            values.push(Box::new(tr_item_debitor_rejection_time)); // debitor_rejection_time
+            values.push_param(tr_item_debitor_rejection_time); // debitor_rejection_time
 
             for approval in tr_item.approvals.unwrap().into_iter() {
-                values.push(Box::new(None::<i32>)); // id
+                values.push_param(None::<i32>); // id
 
                 let approval_rule_instance_id = parse_pg_int4(approval.rule_instance_id).unwrap();
-                values.push(Box::new(approval_rule_instance_id)); // rule_instance_id
+                values.push_param(approval_rule_instance_id); // rule_instance_id
 
-                values.push(Box::new(None::<i32>)); // transaction_id
-                values.push(Box::new(None::<i32>)); // transaction_item.id
-                values.push(Box::new(approval.account_name)); // account_name
-                values.push(Box::new(approval.account_role)); // account_role
-                values.push(Box::new(approval.device_id)); // device_id
+                values.push_param(None::<i32>); // transaction_id
+                values.push_param(None::<i32>); // transaction_item.id
+                values.push_param(approval.account_name); // account_name
+                values.push_param(approval.account_role); // account_role
+                values.push_param(approval.device_id); // device_id
 
                 let approval_device_latlng = parse_pg_point(approval.device_latlng).unwrap();
-                values.push(Box::new(approval_device_latlng)); // device_latlng
+                values.push_param(approval_device_latlng); // device_latlng
 
                 let approval_approval_time = parse_pg_timestamp(approval.approval_time).unwrap();
-                values.push(Box::new(approval_approval_time)); // approval_time
+                values.push_param(approval_approval_time); // approval_time
 
                 let approval_rejection_time = parse_pg_timestamp(approval.rejection_time).unwrap();
-                values.push(Box::new(approval_rejection_time)); // rejection_time
+                values.push_param(approval_rejection_time); // rejection_time
 
                 let approval_expiration_time =
                     parse_pg_timestamp(approval.expiration_time).unwrap();
-                values.push(Box::new(approval_expiration_time)); // expiration_time
+                values.push_param(approval_expiration_time); // expiration_time
             }
         }
         let rows = self.query(sql.to_string(), values).await;
@@ -575,7 +561,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_last_n_reqs_or_trans_by_account_sql(true);
-        let values: ToSqlVec = vec![Box::new(account), Box::new(n)];
+        let values = to_sql_vec![account, n];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -593,7 +579,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<Transactions, Box<dyn Error>> {
         let table = crate::sqls::transaction::TransactionTable::new();
         let sql = table.select_last_n_reqs_or_trans_by_account_sql(false);
-        let values: ToSqlVec = vec![Box::new(account), Box::new(n)];
+        let values = to_sql_vec![account, n];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -612,7 +598,7 @@ impl ModelTrait for DatabaseConnection {
         let sql = table.select_transactions_by_ids_sql(transaction_ids.len());
         let mut values: ToSqlVec = Vec::new();
         for t in transaction_ids.into_iter() {
-            values.push(Box::new(t))
+            values.push_param(t)
         }
         let rows = self.query(sql.to_string(), values).await;
         match rows {
@@ -631,17 +617,17 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<bool, Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.select_rule_instance_exists_sql();
-        let values: ToSqlVec = vec![
-            Box::new("approval".to_string()),                  // rule_type
-            Box::new("approveAnyCreditItem".to_string()),      // rule_name
-            Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
-            Box::new(AccountRole::Creditor),                   // account_role
-            Box::new(account_name.clone()),                    // account_name
-            Box::new(vec![
+        let values = to_sql_vec![
+            "approval".to_string(),                  // rule_type
+            "approveAnyCreditItem".to_string(),      // rule_name
+            "ApprovalAllCreditRequests".to_string(), // rule_instance_name
+            AccountRole::Creditor,                   // account_role
+            account_name.clone(),                    // account_name
+            vec![
                 account_name.clone(),
                 AccountRole::Creditor.to_string(),
                 account_name,
-            ]), // variable_values
+            ], // variable_values
         ];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
@@ -659,17 +645,17 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.insert_rule_instance_sql();
-        let values: ToSqlVec = vec![
-            Box::new("approval".to_string()),                  // rule_type
-            Box::new("approveAnyCreditItem".to_string()),      // rule_name
-            Box::new("ApprovalAllCreditRequests".to_string()), // rule_instance_name
-            Box::new(AccountRole::Creditor),                   // account_role
-            Box::new(account_name.clone()),                    // account_name
-            Box::new(vec![
+        let values = to_sql_vec![
+            "approval".to_string(),                  // rule_type
+            "approveAnyCreditItem".to_string(),      // rule_name
+            "ApprovalAllCreditRequests".to_string(), // rule_instance_name
+            AccountRole::Creditor,                   // account_role
+            account_name.clone(),                    // account_name
+            vec![
                 account_name.clone(),
                 AccountRole::Creditor.to_string(),
                 account_name,
-            ]), // variable_values
+            ], // variable_values
         ];
         let result = self.execute(sql.to_string(), values).await;
         match result {
@@ -681,7 +667,7 @@ impl ModelTrait for DatabaseConnection {
     async fn select_approvers_query(&self, account: String) -> Result<Vec<String>, Box<dyn Error>> {
         let table = crate::sqls::account::AccountOwnerTable::new();
         let sql = table.select_approvers_sql();
-        let values: ToSqlVec = vec![Box::new(account)];
+        let values = to_sql_vec![account];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -700,11 +686,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<RuleInstances, Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.select_rule_instance_by_type_role_state_sql();
-        let values: ToSqlVec = vec![
-            Box::new(rule_type),
-            Box::new(account_role),
-            Box::new(state_name),
-        ];
+        let values = to_sql_vec![rule_type, account_role, state_name,];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -723,11 +705,7 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<RuleInstances, Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.select_rule_instance_by_type_role_account_sql();
-        let values: ToSqlVec = vec![
-            Box::new(rule_type),
-            Box::new(account_role),
-            Box::new(account_name),
-        ];
+        let values = to_sql_vec![rule_type, account_role, account_name,];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
@@ -751,13 +729,13 @@ impl DatabaseConnection {
     ) -> Result<bool, Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.select_rule_instance_exists_sql();
-        let values: ToSqlVec = vec![
-            Box::new(rule_type),
-            Box::new(rule_name),
-            Box::new(rule_instance_name),
-            Box::new(account_role),
-            Box::new(account_name),
-            Box::new(variable_values),
+        let values = to_sql_vec![
+            rule_type,
+            rule_name,
+            rule_instance_name,
+            account_role,
+            account_name,
+            variable_values,
         ];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
@@ -780,13 +758,13 @@ impl DatabaseConnection {
     ) -> Result<(), Box<dyn Error>> {
         let table = crate::sqls::rule_instance::RuleInstanceTable::new();
         let sql = table.insert_rule_instance_sql();
-        let values: ToSqlVec = vec![
-            Box::new(rule_type),
-            Box::new(rule_name),
-            Box::new(rule_instance_name),
-            Box::new(account_role),
-            Box::new(account_name),
-            Box::new(variable_values),
+        let values = to_sql_vec![
+            rule_type,
+            rule_name,
+            rule_instance_name,
+            account_role,
+            account_name,
+            variable_values,
         ];
         let result = self.execute(sql.to_string(), values).await;
         match result {
