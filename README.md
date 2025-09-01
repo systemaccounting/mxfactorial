@@ -350,7 +350,7 @@ the future is the number of transactions possible across all pairs of accounts b
 ```
 
 **q.** how to learn more about the project?  
-**a.** open github copilot and ask it questions  
+**a.** upload this readme to an ai and ask it questions  
 
 **q.** is systemaccounting administered by conservatives?  
 **a.** no. everyones pushed left by mathematizing the right  
@@ -358,6 +358,46 @@ the future is the number of transactions possible across all pairs of accounts b
 privilege often stealthily depends on state support just as poverty visibly depends on welfare  
 
 both are visible to the mathematical right  
+
+**q.** how does systemaccounting affect socialism?  
+**a.** people whose livelihoods depend on the law that defines goods & services as mass & energy can be exploited by those who attempt to vote their independence from it. so protecting producers with a conservation law is necessary. enforcing empiricism guards against those who dont measurably contribute to an economy from exploiting a consensus fallacy to fund their entitlement:  
+
+corporate consensus  
+public consensus  
+any social consensus  
+
+the work vs vote funded allocation is a problem only when votes are cast by those who do not also contribute the work or accept full liability for its promise ("*socializing their liability*"). all redistribution becomes voluntary charity or explicit taxation with transparent accounting enforcing a conservation law  
+
+**q.** how does systemaccounting affect communism?  
+**a.** whats termed "communism" is only the least sophisticated form of "socialism"—funding public entitlement by averaging all property ownership despite varying individual contribution. but at least the overly simple math is explicit: 
+
+**Communism (Explicit Averaging)** 
+
+$$\text{communism} = \frac{\sum \text{assets}}{\text{people}}$$
+
+change the unit of government redistributed wealth from all property to **money-multiplier averaged liability**:  
+
+**Modern Monetary System (Hidden Averaging)** 
+
+$$\text{modern monetary system} = \frac{\sum \text{money-multiplier generated liability}}{\text{currency holders}}$$
+
+and youll notice why a new government appears at the top of the most averaged property list—and at a scale dwarfing all explicitly redistributing governments combined: thesis committees fund their entitlement by putting science to a vote, then theyre cited by vote collectors who see how well averaged liability scales (seizing and managing finite physical property vs swiftly placing every currency holder into involuntary redistribution of compounding, unlimited claims against future production)
+
+once counting opinions is mistaken for measuring physical events, and no ones measuring whos producing what, the slippery slope begins and its "social" all the way down:
+
+"those are *our* opinions"
+
+"those are *our* assets"
+
+"those are *our* liabilities"
+
+best just to let the universe [express its opinion](https://gist.github.com/mxfactorial/ca7516cf77cf333f799398267c37d1ce) and call it a day  
+
+**q.** does systemaccounting support capitalism?  
+**a.** systemaccounting protects the storage and movement of all property, private and public, by balancing revenues with expenses, and helps lower the risk of converting expense into revenue with measurability and transparency  
+
+**q.** how does systemaccounting support credit creation?  
+**a.** you dont *create* credit. you earn it. and you dont violate the causal structure between production and consumption to scale an economy. you scale by enabling coordination and optimization through science and technology  
 
 **q.** how is systemaccounting different from other payment apps?  
 **a.** storing and moving money are a horse and carriage abstraction for the accounting of the non movement and movement of value between owners  
