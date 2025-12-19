@@ -39,10 +39,10 @@ function flush() {
 
 	# test for compose or k8s
 	if [[ "$PGPORT" == "5432" ]]; then
-		docker exec -it $CONTAINER_NAME redis-cli --no-auth-warning -u $REDIS_URI FLUSHDB
+		docker exec $CONTAINER_NAME redis-cli --no-auth-warning -u $REDIS_URI FLUSHDB
 	else
 		POD=$(kubectl get pods -l app=redis -o jsonpath='{.items[0].metadata.name}')
-		kubectl --stdin --tty exec $POD -- redis-cli --no-auth-warning -u $REDIS_URI FLUSHDB
+		kubectl exec $POD -- redis-cli --no-auth-warning -u $REDIS_URI FLUSHDB
 	fi
 }
 

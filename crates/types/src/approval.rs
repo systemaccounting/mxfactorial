@@ -191,9 +191,9 @@ impl Approvals {
             Ok(())
         } else if previously_approved == account_role_approvals.len() {
             let previously_approved_time = account_role_approvals.0[0].approval_time.unwrap();
-            return Err(ApprovalError::PreviouslyApproved(previously_approved_time));
+            Err(ApprovalError::PreviouslyApproved(previously_approved_time))
         } else {
-            return Err(ApprovalError::IncompletePreviousApproval);
+            Err(ApprovalError::IncompletePreviousApproval)
         }
     }
 

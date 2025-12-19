@@ -495,7 +495,7 @@ mod tests {
             )),
         }]);
         // create iterator
-        let test_rule_instances = std::iter::repeat(want.0[0].clone()).take(1);
+        let test_rule_instances = std::iter::repeat_n(want.0[0].clone(), 1);
         // test method
         let got = RuleInstances::from_iter(test_rule_instances);
         // assert

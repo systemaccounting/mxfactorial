@@ -351,7 +351,16 @@ the future is the number of transactions possible across all pairs of accounts b
 **a.** systemaccounting defines a quadratic 5d geometric structure over real economic data by modeling each transaction as a nilpotent bivector. this enforces conservation and directionality, restricting economic evolution to physically legal paths. the result is a literal light-cone of constrained, measurable futures—not guessed, but geometrically derived
 
 **q.** what research does mxfactorial apply?  
-**a.** the [geometric number](https://gist.github.com/mxfactorial/c151619d22ef6603a557dbf370864085), but with strings as angle preserving coordinates
+**a.** the [geometric number](https://gist.github.com/mxfactorial/c151619d22ef6603a557dbf370864085), but with strings as angle preserving coordinates:
+```json5
+{
+  "debitor": "john",
+  "creditor": "mary",
+  "price": "1.00",
+  "quantity": "1"
+  // "john" ∧ "mary" = 1.00
+}
+```
 
 **q.** why is the code public if the license is private?  
 **a.** publicly used code is a public structure
