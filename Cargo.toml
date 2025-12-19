@@ -28,3 +28,6 @@ members = [
 
 [workspace.package]
 rust-version = "1.75"
+
+[workspace.dependencies]
+http-body-util = "0.1.3"
