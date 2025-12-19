@@ -20,6 +20,8 @@ REDIS_USERNAME=$(shell yq '.services.event.env_var.set.REDIS_USERNAME.default' $
 REDIS_PASSWORD=$(shell yq '.services.event.env_var.set.REDIS_PASSWORD.default' $(PROJECT_CONF))
 REDIS_PORT=$(shell yq '.services.event.env_var.set.REDIS_PORT.default' $(PROJECT_CONF))
 REDIS_HOST=$(shell yq '.services.event.env_var.set.REDIS_HOST.default' $(PROJECT_CONF))
+include make/cloud-env.mk
+include make/docker.mk
 
 # approx 10 minutes
 all:
@@ -93,41 +95,6 @@ install:
 	cargo install cargo-watch
 	cargo install cargo-llvm-cov
 
-env-id:
-	@bash scripts/create-env-id.sh
-
-delete-env-id:
-	@bash scripts/delete-env-id.sh
-
-print-env-id:
-	@bash scripts/print-env-id.sh
-
-build-dev:
-	bash scripts/build-dev-env.sh
-
-delete-dev:
-	bash scripts/delete-dev-env.sh
-
-delete-dev-state:
-	(cd infra/terraform/aws/environments/dev; rm -rf .terraform* .tfplan*)
-
-init-dev:
-	bash scripts/terraform-init-dev.sh \
-		--key $(TFSTATE_ENV_FILE) \
-		--dir infra/terraform/aws/environments/dev
-
-set-env-id:
-	$(MAKE) resume-dev
-
-resume-dev:
-	$(MAKE) -C infra/terraform/aws/environments/dev resume
-
-new-iam:
-	bash scripts/manage-gitpod-iam.sh --new
-
-delete-iam:
-	bash scripts/manage-gitpod-iam.sh --delete
-
 help:
 	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'
 
@@ -157,63 +124,6 @@ clean:
 
 redis-uri:
 	@echo "redis://$(REDIS_USERNAME):$(REDIS_PASSWORD)@$(REDIS_HOST):$(REDIS_PORT)/$(REDIS_DB)"
-
-###################### docker ######################
-
-test-up:
-	@$(MAKE) test && $(MAKE) compose-up
-
-compose-build:
-	bash scripts/compose.sh --build
-
-compose-up:
-	bash scripts/compose.sh --up
-
-compose-up-build:
-	bash scripts/compose.sh --up --build
-
-compose-down:
-	bash scripts/compose.sh --down
-
-rebuild-db:
-	@$(MAKE) -C migrations rebuild
-	@$(MAKE) -C migrations run
-
-reset-db:
-	@$(MAKE) -C migrations reset
-
-rebuild-rule:
-	@bash scripts/rebuild-service.sh --name rule
-
-rebuild-request-create:
-	@bash scripts/rebuild-service.sh --name request-create
-
-rebuild-request-approve:
-	@bash scripts/rebuild-service.sh --name request-approve
-
-rebuild-balance-by-account:
-	@bash scripts/rebuild-service.sh --name balance-by-account
-
-rebuild-request-by-id:
-	@bash scripts/rebuild-service.sh --name request-by-id
-
-rebuild-requests-by-account:
-	@bash scripts/rebuild-service.sh --name requests-by-account
-
-rebuild-transaction-by-id:
-	@bash scripts/rebuild-service.sh --name transaction-by-id
-
-rebuild-transactions-by-account:
-	@bash scripts/rebuild-service.sh --name transactions-by-account
-
-rebuild-event:
-	@bash scripts/rebuild-service.sh --name event
-
-rebuild-graphql:
-	@bash scripts/rebuild-service.sh --name graphql
-
-rebuild-client:
-	@bash scripts/rebuild-service.sh --name client
 
 ###################### demo ######################
 
