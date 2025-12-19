@@ -39,7 +39,7 @@ impl ConnectionPool {
 
 pub struct DatabaseConnection(pub PooledConnection<'static, PostgresConnectionManager<NoTls>>);
 
-pub type ToSqlVec = Vec<Box<(dyn ToSql + Sync + Send)>>;
+pub type ToSqlVec = Vec<Box<dyn ToSql + Sync + Send>>;
 
 #[macro_export]
 macro_rules! to_sql_vec {
@@ -78,7 +78,7 @@ impl DatabaseConnection {
         self.0.execute(sql_stmt.as_str(), &unboxed_values).await
     }
 
-    fn unbox_values(values: &[Box<(dyn ToSql + Sync + Send)>]) -> Vec<&(dyn ToSql + Sync)> {
+    fn unbox_values(values: &[Box<dyn ToSql + Sync + Send>]) -> Vec<&(dyn ToSql + Sync)> {
         values
             .iter()
             // https://github.com/sfackler/rust-postgres/issues/712#issuecomment-743456104

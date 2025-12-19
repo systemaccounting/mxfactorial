@@ -358,7 +358,7 @@ mod tests {
             removal_time: None,
         }]);
         // create iterator
-        let test_account_profiles = std::iter::repeat(want.0[0].clone()).take(1);
+        let test_account_profiles = std::iter::repeat_n(want.0[0].clone(), 1);
         // test method
         let got = AccountProfiles::from_iter(test_account_profiles);
         // assert
