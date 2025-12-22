@@ -2,9 +2,7 @@
 **/*.zip
 **/*.terraform
 **/.env
-**/bootstrap
 client/build
-migrations/dumps/testseed.sql
 target
 nohup.out
 **/DS_Store

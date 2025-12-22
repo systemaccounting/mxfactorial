@@ -156,12 +156,6 @@ transactions-by-account:
 
 ###################### postgres ######################
 
-dump-testseed:
-	@$(MAKE) -C ./migrations/dumps dump-testseed
-
-restore-testseed:
-	@$(MAKE) -C ./migrations/dumps restore-testseed
-
 insert:
 	@$(MAKE) -C ./migrations insert
 
