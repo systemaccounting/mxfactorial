@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -z $ENV ]]; then
-	echo "set ENV variable in environment before continuing, e.g. export ENV=dev"
+	echo "set ENV variable in environment before continuing, e.g. export ENV=dev" >&2
 	exit 1
 fi
 
@@ -15,7 +15,7 @@ elif [[ -z $ENV_ID ]]; then # get ENV_ID from .env file if not set in env
 	if [[ -f $ENV_FILE ]] && grep -q "ENV_ID=" $ENV_FILE; then
 		ENV_ID=$(grep "ENV_ID=" $ENV_FILE | cut -d'=' -f2)
 	else
-		echo "ENV_ID not found in $ENV_FILE"
+		echo "ENV_ID not found in $ENV_FILE" >&2
 		exit 1
 	fi
 fi
