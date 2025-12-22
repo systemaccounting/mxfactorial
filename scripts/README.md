@@ -61,10 +61,6 @@ builds, zips and deploys each app from a loop through directories listed in root
 
 prints `services["request-create"]` when passed `services/request-create` for use in `yq`
 
-##### `download-go-mod.sh`
-
-downloads module dependencies
-
 ##### `invoke-function.sh`
 
 invokes app lambdas locally from app directories with [aws lambda invoke](https://docs.aws.amazon.com/cli/latest/reference/lambda/invoke.html)
@@ -95,14 +91,6 @@ adds a mix of requests and transactions in docker postgres (requires `cd migrati
 1. drops and up migrates postgres in docker
 1. inserts requests from `tests/testdata/requests.json` using `services/request-create`
 1. converts every other request into a transaction using `services/request-approve`
-
-##### `dump-db.sh`
-
-dumps postgres db to path passed as parameter, e.g. `bash scripts/dump-db.sh --path migrations/dumps/testseed.sql`
-
-##### `restore-db.sh`
-
-restores postgres db from path passed as parameter
 
 ##### `shared-error.sh`
 
@@ -223,6 +211,10 @@ print list of pids and apps
 ##### `print-value.sh`
 
 print the value of an `env-var` in `project.yaml`
+
+##### `go-migrate-rds.sh`
+
+invokes go-migrate lambda to run migrations on rds
 
 ##### `post-go-migrate.sh`
 
