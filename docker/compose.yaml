@@ -270,4 +270,20 @@ services:
       PUBLIC_GRAPHQL_RESOURCE: query
       PUBLIC_GRAPHQL_WS_RESOURCE: ws
       PORT: 10009
+  go-migrate:
+    profiles: ["tools"]
+    build:
+      context: ../
+      dockerfile: ./docker/go-migrate.Dockerfile
+    entrypoint: ["bash", "migrate.sh", "--dir", "/var/task/migrations"]
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      SQL_TYPE: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
 
