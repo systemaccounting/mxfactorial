@@ -1,15 +1,13 @@
 #!/bin/bash
 
 PROJECT_CONF=project.yaml
-ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
-MIGRATIONS_DIR_PATH=./migrations
-ENV_FILE="$MIGRATIONS_DIR_PATH/$ENV_FILE_NAME"
-
-make -C $MIGRATIONS_DIR_PATH env ENV=local
-
-source $ENV_FILE
+ENV_PATH='.infra.terraform.aws.modules.environment.env_var.set'
+PGHOST=$(yq "$ENV_PATH.PGHOST.default" $PROJECT_CONF)
+PGUSER=$(yq "$ENV_PATH.PGUSER.default" $PROJECT_CONF)
+PGPASSWORD=$(yq "$ENV_PATH.PGPASSWORD.default" $PROJECT_CONF)
+PGDATABASE=$(yq "$ENV_PATH.PGDATABASE.default" $PROJECT_CONF)
 
 until pg_isready -h $PGHOST -U $PGUSER -d $PGDATABASE; do sleep 1; done
 
-psql -U $PGUSER -d $PGDATABASE -h $PGHOST -c "ALTER SYSTEM SET log_min_messages TO NOTICE;"
-psql -U $PGUSER -d $PGDATABASE -h $PGHOST -c "SELECT pg_reload_conf();"
+PGPASSWORD=$PGPASSWORD psql -U $PGUSER -d $PGDATABASE -h $PGHOST -c "ALTER SYSTEM SET log_min_messages TO NOTICE;"
+PGPASSWORD=$PGPASSWORD psql -U $PGUSER -d $PGDATABASE -h $PGHOST -c "SELECT pg_reload_conf();"
