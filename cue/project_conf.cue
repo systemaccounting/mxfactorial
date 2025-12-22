@@ -113,9 +113,6 @@ k8s: {
 migrations: {
     #Dir
     type!: #AppType
-    dumps: {
-        env_var!: #EnvVars
-    }
     "go-migrate": #App
     testseed: {
         env_var!: #EnvVars

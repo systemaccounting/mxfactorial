@@ -9,7 +9,6 @@ test-local:
 	@$(MAKE) get-secrets ENV=local
 	@$(MAKE) -S -C ../migrations reset
 	@until pg_isready -h localhost; do sleep 1; done
-	@$(MAKE) -S -C ../migrations/dumps dump-testseed
 	cargo test --features integration_tests -- --test-threads=1
 
 test-docker:
@@ -19,7 +18,6 @@ test-docker:
 test-cloud:
 	@$(MAKE) -s test-env-arg
 	@$(MAKE) --no-print-directory -C ../migrations resetrds ENV=$(ENV) DB=test
-	@$(MAKE) --no-print-directory -C ../migrations/dumps dump-rds-testseed
 	@$(MAKE) --no-print-directory -S get-secrets ENV=$(ENV)
 	cargo test --features integration_tests -- --test-threads=1
 
@@ -28,7 +26,6 @@ test-k8s:
 	@$(MAKE) get-secrets ENV=local
 	@until pg_isready -h localhost -p 32345; do sleep 1; done
 	@$(MAKE) -S -C ../migrations resetdocker
-	@$(MAKE) -S -C ../migrations/dumps dump-testseed
 	cargo test --features integration_tests -- --test-threads=1
 	(cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/set-k8s-ports.sh --reset)
 

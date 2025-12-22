@@ -229,6 +229,9 @@ infra:
               READINESS_CHECK_PATH:
                 ssm: service/lambda/readiness_check_path
                 default: /healthz
+              GO_MIGRATE_URL:
+                ssm: service/lambda/go_migrate/url
+                default: null
             get: []
         microk8s:
           env_var:
@@ -349,13 +352,6 @@ migrations:
       - PGUSER
       - PGPASSWORD
       - PGDATABASE
-  dumps:
-    env_var:
-      set:
-        TESTSEED_DUMP_PATH:
-          ssm: null
-          default: ./migrations/dumps/testseed.sql
-      get: []
   go-migrate:
     runtime: bash
     min_code_cov: null
@@ -376,6 +372,7 @@ migrations:
         - PGUSER
         - PGPASSWORD
         - PGDATABASE
+        - GO_MIGRATE_URL
   testseed:
     env_var:
       set:

@@ -30,17 +30,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: mask values
         run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
-      - name: install latest psql client
-        run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends postgresql-client
-      - name: install golang-migrate
-        run: |
-          curl -LO https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.deb
-          sudo dpkg -i migrate.linux-amd64.deb
-          rm migrate.linux-amd64.deb
       - name: deploy to dev cloud environment
         run: |
           for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
@@ -49,10 +38,6 @@ jobs:
             # deploy newly tagged images to dev cloud
             bash scripts/deploy-last-image.sh --app-name $app --env dev --env-id ${{ secrets.DEV_ENV_ID }};
           done
-      - name: reset rds database for integration tests
-        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./migrations resetrds ENV=dev DB=test
-      - name: dump rds database locally for restore between integration tests
-        run: make --no-print-directory -C ./migrations/dumps dump-rds-testseed
       - name: get secrets for dev integration tests
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./tests get-secrets ENV=dev
       - name: install awscurl

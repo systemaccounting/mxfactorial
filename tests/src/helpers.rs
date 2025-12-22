@@ -11,31 +11,38 @@ use uribuilder::Uri;
 pub fn restore_testseed() {
     // cloud dev env
     if env::var("AWS_LAMBDA_FUNCTION_NAME").ok().is_some() {
-        let restore_output = Command::new("make")
-            .arg("--no-print-directory")
-            .arg("-C")
-            .arg("../migrations/dumps")
-            .arg("restore-rds-testseed")
-            .arg("ENV=dev") // cadet todo: assigned ENV from env var
+        let restore_output = Command::new("bash")
+            .arg("scripts/go-migrate-rds.sh")
+            .arg("--env")
+            .arg("dev")
+            .arg("--cmd")
+            .arg("reset")
+            .current_dir("..")
             .output()
             .expect("failed to execute process");
 
-        // cargo test -- --show-output
         if !restore_output.clone().stderr.is_empty() {
             let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
             println!("{restore_output_str}");
         }
         if !restore_output.stdout.is_empty() {
-            let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-            // println!("{}", _restore_output_str);
+            let restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
+            println!("{restore_output_str}");
         }
     } else {
         // local env
-        let restore_output = Command::new("make")
-            .arg("--no-print-directory")
-            .arg("-C")
-            .arg("../migrations/dumps")
-            .arg("restore-testseed")
+        let restore_output = Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg("docker/compose.yaml")
+            .arg("run")
+            .arg("--rm")
+            .arg("go-migrate")
+            .arg("--db_type")
+            .arg("test")
+            .arg("--cmd")
+            .arg("reset")
+            .current_dir("..")
             .output()
             .expect("failed to execute process");
 
