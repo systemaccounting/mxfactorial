@@ -19,6 +19,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: start services
         run: make start
       - name: test service integration

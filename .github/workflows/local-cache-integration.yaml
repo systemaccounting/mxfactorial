@@ -23,6 +23,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: cache integration tests
         run: make -C ./crates/redisclient test-cache
       - name: clean up

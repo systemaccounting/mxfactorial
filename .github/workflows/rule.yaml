@@ -21,6 +21,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: linting
         run: |
           cargo fmt -- --check
@@ -34,6 +35,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: unit test
         run: cargo test
       - uses: taiki-e/install-action@cargo-llvm-cov
@@ -49,6 +51,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: test database
         run: make -C crates/pg test-db
   integration_test:
@@ -60,6 +63,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: start services
         run: make start
       - name: test service integration
