@@ -3,20 +3,21 @@ locals {
 }
 
 module "warm_cache" {
-  source         = "../../provided-lambda/v001"
-  service_name   = "warm-cache"
-  env            = var.env
-  ssm_prefix     = var.ssm_prefix
-  env_id         = var.env_id
-  lambda_timeout = 300
+  source             = "../../provided-lambda/v001"
+  service_name       = "warm-cache"
+  env                = var.env
+  ssm_prefix         = var.ssm_prefix
+  env_id             = var.env_id
+  lambda_timeout     = 300
+  lambda_memory_size = 1024
   env_vars = merge(local.POSTGRES_VARS, {
-    WARM_CACHE_PASSPHRASE  = random_password.warm_cache.result
-    TRANSACTION_DDB_TABLE  = aws_dynamodb_table.cache.name
-    CACHE_KEY_RULES_STATE  = local.WARM_CACHE_CONF.CACHE_KEY_RULES_STATE.default
+    WARM_CACHE_PASSPHRASE   = random_password.warm_cache.result
+    TRANSACTION_DDB_TABLE   = aws_dynamodb_table.cache.name
+    CACHE_KEY_RULES_STATE   = local.WARM_CACHE_CONF.CACHE_KEY_RULES_STATE.default
     CACHE_KEY_RULES_ACCOUNT = local.WARM_CACHE_CONF.CACHE_KEY_RULES_ACCOUNT.default
-    CACHE_KEY_PROFILE      = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE.default
-    CACHE_KEY_PROFILE_ID   = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE_ID.default
-    CACHE_KEY_APPROVERS    = local.WARM_CACHE_CONF.CACHE_KEY_APPROVERS.default
+    CACHE_KEY_PROFILE       = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE.default
+    CACHE_KEY_PROFILE_ID    = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE_ID.default
+    CACHE_KEY_APPROVERS     = local.WARM_CACHE_CONF.CACHE_KEY_APPROVERS.default
   })
   create_secret                 = true
   attached_policy_arns          = [aws_iam_policy.warm_cache_dynamodb.arn]

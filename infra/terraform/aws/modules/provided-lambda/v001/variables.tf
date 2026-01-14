@@ -25,6 +25,7 @@ variable "create_secret" {
 variable "ssm_prefix" {}
 variable "env_id" {}
 variable "lambda_timeout" { default = 30 }
+variable "lambda_memory_size" { default = 128 }
 variable "lambda_url_authorization_type" { default = "AWS_IAM" }
 variable "aws_lwa_port" { default = null }
 variable "lambda_layer_arns" {
