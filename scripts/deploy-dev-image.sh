@@ -30,7 +30,7 @@ REPO_URI=$(aws ecr describe-repositories \
 	--output text \
 	--region $REGION)
 
-LATEST_ECR_IMAGE_TAG_VERSIONS=($(aws ecr describe-images --repository-name $REPO_NAME --output text --query 'sort_by(imageDetails,& imagePushedAt)[-1].imageTags' | xargs))
+LATEST_ECR_IMAGE_TAG_VERSIONS=($(aws ecr describe-images --repository-name $REPO_NAME --output text --query 'sort_by(imageDetails[?imageTags],& imagePushedAt)[-1].imageTags' | xargs))
 LATEST_ECR_IMAGE_TAG_VERSION="${LATEST_ECR_IMAGE_TAG_VERSIONS[0]}"
 
 IMAGE_TAG=$REPO_URI:$LATEST_ECR_IMAGE_TAG_VERSION
