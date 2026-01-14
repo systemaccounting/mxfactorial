@@ -8,7 +8,7 @@ ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
 test-local:
 	@$(MAKE) get-secrets ENV=local
 	@$(MAKE) -S -C ../migrations reset
-	@until pg_isready -h localhost; do sleep 1; done
+	@until docker exec mxf-postgres-1 pg_isready -U postgres; do sleep 1; done
 	cargo test --features integration_tests -- --test-threads=1
 
 test-docker:
