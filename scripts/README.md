@@ -200,10 +200,6 @@ stops services started by start-local.sh
 
 sourced in other scripts. declares functions to publish and disable ports in cloud development environments (codespace, gitpod)
 
-##### `restart-local.sh`
-
-restarts services locally if not all services started
-
 ##### `list-pids.sh`
 
 print list of pids and apps
@@ -341,3 +337,6 @@ deletes all images of single app in dev ecr
 
 #### `test-availability.sh`
 tests availability of services locally or in cloud
+
+#### `invoke-warm-cache.sh`
+invokes warm-cache lambda to populate ddb cache from rds
