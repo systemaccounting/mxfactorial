@@ -1,11 +1,16 @@
 name: prod-client-base-image
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - client/package.json
     - client/package-lock.json
     - docker/prod/client-base.Dockerfile
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   deploy:

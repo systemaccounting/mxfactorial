@@ -8,11 +8,16 @@ name: dev-client-merge
 # to reduce time and debugging latency issues in tests with lambda hosted ssr
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'client/**'
     branches:
     - 'develop'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   tag_push_deploy_dev:
@@ -31,6 +36,7 @@ jobs:
       # deploy newly tagged dev image to dev cloud
         run: bash scripts/deploy-last-image.sh --app-name $APP_DIR --env dev --env-id ${{ secrets.DEV_ENV_ID }}
   push_prod:
+    needs: tag_push_deploy_dev
     name: push develop client to prod ecr
     runs-on: ubuntu-latest
     env:

@@ -35,7 +35,8 @@ COMPOSE_DIR=./docker
 
 INIT_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
 docker compose \\
-  -f $COMPOSE_DIR/compose.yaml"
+  -f $COMPOSE_DIR/storage.yaml \\
+  -f $COMPOSE_DIR/services.yaml"
 
 if [[ $UP ]]; then
 

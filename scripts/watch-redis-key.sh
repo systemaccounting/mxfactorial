@@ -43,7 +43,7 @@ REDIS_PASSWORD=$(yq '.services.event.env_var.set.REDIS_PASSWORD.default' $PROJEC
 REDIS_PORT=$(yq '.services.event.env_var.set.REDIS_PORT.default' $PROJECT_CONF)
 REDIS_HOST=$(yq '.services.event.env_var.set.REDIS_HOST.default' $PROJECT_CONF)
 REDIS_URI="redis://$REDIS_USERNAME:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/$REDIS_DB"
-COMPOSE_PROJECT_NAME=$(yq '.name' ./docker/compose.yaml)
+COMPOSE_PROJECT_NAME=$(yq '.name' ./docker/storage.yaml)
 CONTAINER_NAME="$COMPOSE_PROJECT_NAME-redis-1"
 PGPORT=$(yq '.infra.terraform.aws.modules.environment.env_var.set.PGPORT.default' $PROJECT_CONF)
 

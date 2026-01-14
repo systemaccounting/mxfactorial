@@ -30,6 +30,7 @@ resource "aws_lambda_function" "default" {
   image_uri     = "${data.aws_ecr_repository.default.repository_url}:${data.aws_ecr_image.default.image_tags[0]}"
   package_type  = "Image"
   timeout       = var.lambda_timeout
+  memory_size   = var.lambda_memory_size
   role          = aws_iam_role.default.arn
 
   environment {

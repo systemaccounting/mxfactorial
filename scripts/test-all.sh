@@ -12,6 +12,8 @@ cargo clippy --all-targets --all-features -- -D warnings
 cargo test
 # test db
 make --no-print-directory -C crates/pg test-db
+# test cache
+make --no-print-directory -C crates/redisclient test-cache
 # test integration
 make --no-print-directory -C tests test-local
 # test client

@@ -8,6 +8,10 @@ on:
     - 'master'
     - 'develop'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: test client

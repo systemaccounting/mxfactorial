@@ -1,6 +1,7 @@
 name: migrations
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'migrations/schema/**'
@@ -8,6 +9,10 @@ on:
     - 'migrations/testseed/**'
     branches-ignore:
     - 'master'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   migrations:

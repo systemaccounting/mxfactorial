@@ -20,6 +20,9 @@ rebuild-db:
 reset-db:
 	@$(MAKE) -C migrations reset
 
+warm-cache:
+	@$(MAKE) -C migrations warm-cache
+
 rebuild-rule:
 	@bash scripts/rebuild-service.sh --name rule
 

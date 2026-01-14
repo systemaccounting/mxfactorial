@@ -2,7 +2,9 @@
 resolver = "2"
 
 members = [
+	"crates/cache",
 	"crates/cognitoidp",
+	"crates/ddbclient",
 	"crates/httpclient",
 	"crates/pg",
 	"crates/redisclient",

@@ -1,7 +1,7 @@
 use crate::time::TZTime;
 use async_graphql::SimpleObject;
 use async_trait::async_trait;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error};
 use tokio_postgres::{
     types::{FromSql, ToSql},
@@ -17,7 +17,7 @@ pub trait AccountTrait {
     async fn get_approvers_for_account(&self, account: String) -> Vec<String>;
 }
 
-#[derive(Eq, PartialEq, Debug, Deserialize, ToSql, FromSql, Clone, SimpleObject)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, ToSql, FromSql, Clone, SimpleObject)]
 #[graphql(rename_fields = "snake_case")]
 pub struct AccountProfile {
     pub id: Option<String>,

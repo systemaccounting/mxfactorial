@@ -65,6 +65,7 @@ crates: {
     #Dir
     httpclient: #Lib
     pg: #Lib
+    redisclient: #Lib
     types: #Lib
     uribuilder: #Lib
     wsclient: #Lib
@@ -114,6 +115,7 @@ migrations: {
     #Dir
     type!: #AppType
     "go-migrate": #App
+    "warm-cache": #App
     testseed: {
         env_var!: #EnvVars
     }

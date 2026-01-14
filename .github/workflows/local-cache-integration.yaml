@@ -1,0 +1,34 @@
+name: local-cache-integration
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+    - 'crates/cache/**'
+    - 'crates/redisclient/**'
+    - 'crates/ddbclient/**'
+    - 'services/rule/**'
+    - 'services/request-create/**'
+    - 'migrations/**'
+    branches-ignore:
+    - 'master'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: cache integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: cache integration tests
+        run: make -C ./crates/redisclient test-cache
+      - name: clean up
+        run: make -C ./crates/redisclient stop

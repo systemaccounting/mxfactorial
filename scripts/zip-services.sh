@@ -26,6 +26,10 @@ zip -r $SERVICES_ZIP \
 	crates \
 	tests \
 	migrations/go-migrate \
+	migrations/warm-cache \
+	migrations/schema \
+	migrations/seed \
+	migrations/testseed \
 	--exclude='*/.env' \
 	--exclude='*/README.md' \
 	--exclude='tests/testdata/*' \

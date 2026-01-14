@@ -10,6 +10,7 @@ rust_decimal = { version = "1.34.3", default-features = false }
 httpclient = { path = "../httpclient" }
 pg = { path = "../pg" }
 cognitoidp = { path = "../cognitoidp" }
+cache = { path = "../cache" }
 
 [dev-dependencies]
 mockall = "0.12.1"

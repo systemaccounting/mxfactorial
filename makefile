@@ -99,7 +99,7 @@ help:
 	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'
 
 start:
-	bash scripts/restart-local.sh
+	bash scripts/start-local.sh
 
 stop:
 	bash scripts/stop-local.sh
@@ -107,6 +107,9 @@ stop:
 restart:
 	$(MAKE) stop
 	$(MAKE) start
+
+logs:
+	tail -F $(NOHUP_LOG)
 
 list-pids:
 	@bash scripts/list-pids.sh

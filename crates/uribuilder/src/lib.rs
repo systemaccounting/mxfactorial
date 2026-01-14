@@ -32,7 +32,7 @@ impl Uri {
 
         let mut url = Url::parse(&uri).unwrap();
 
-        if std::env::var("ENABLE_TLS").is_ok() && std::env::var("ENABLE_TLS").unwrap() == "true" {
+        if std::env::var("ENABLE_TLS").is_ok_and(|v| v == "true") {
             url.set_scheme(Protocol::Https.to_string().as_str())
                 .unwrap();
         }

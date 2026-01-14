@@ -1,6 +1,7 @@
 name: transactions-by-account
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/transactions-by-account/**'
@@ -9,6 +10,10 @@ on:
     branches-ignore:
     - 'master'
     - 'develop'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint_test:
@@ -20,11 +25,13 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: linting
         run: |
           cargo fmt -- --check
           cargo clippy -- -Dwarnings
   unit_test:
+    needs: lint_test
     name: unit test
     runs-on: ubuntu-latest
     steps:
@@ -33,9 +40,11 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: unit test
         run: cargo test
   database_test:
+    needs: unit_test
     name: database test in local docker
     runs-on: ubuntu-latest
     steps:
@@ -44,9 +53,11 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: test database
         run: make -C crates/pg test-db
   integration_test:
+    needs: database_test
     name: integration test in local docker
     runs-on: ubuntu-latest
     steps:
@@ -55,17 +66,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
-      - name: install latest psql client
-        run: |
-          sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends postgresql-client
-      - name: install golang-migrate
-        run: |
-          curl -LO https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.deb
-          sudo dpkg -i migrate.linux-amd64.deb
-          rm migrate.linux-amd64.deb
+      - uses: Swatinem/rust-cache@v2
       - name: start services
         run: make start
       - name: test service integration
@@ -73,6 +74,7 @@ jobs:
       - name: clean up
         run: make stop
   client_test:
+    needs: integration_test
     name: client test in local docker
     runs-on: ubuntu-latest
     steps:
@@ -91,7 +93,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       APP_DIR: services/transactions-by-account
-    needs: [lint_test, unit_test, database_test, integration_test, client_test]
+    needs: client_test
     steps:
       - uses: actions/checkout@v4
       - name: mask values

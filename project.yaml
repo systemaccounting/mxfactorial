@@ -117,6 +117,29 @@ crates:
       set: {}
       get: []
     params: []
+  redisclient:
+    runtime: rust1.x
+    min_code_cov: 0
+    type: lib
+    env_var:
+      set:
+        REDIS_DB:
+          ssm: null
+          default: 0
+        REDIS_HOST:
+          ssm: null
+          default: localhost
+        REDIS_PORT:
+          ssm: null
+          default: 6379
+        REDIS_USERNAME:
+          ssm: null
+          default: default
+        REDIS_PASSWORD:
+          ssm: null
+          default: test
+      get: []
+    params: []
 docker:
   env_var:
     set:
@@ -232,6 +255,21 @@ infra:
               GO_MIGRATE_URL:
                 ssm: service/lambda/go_migrate/url
                 default: null
+              WARM_CACHE_URL:
+                ssm: service/lambda/warm_cache/url
+                default: null
+              WARM_CACHE_PASSPHRASE:
+                ssm: service/lambda/warm_cache/passphrase
+                default: null
+              TRANSACTION_DDB_TABLE:
+                ssm: database/nosql/dynamodb/transaction_table
+                default: transact
+              CACHE_TABLE_HASH_KEY:
+                ssm: null
+                default: pk
+              CACHE_TABLE_RANGE_KEY:
+                ssm: null
+                default: sk
             get: []
         microk8s:
           env_var:
@@ -261,21 +299,6 @@ infra:
         project-storage:
           env_var:
             set:
-              DDB_TABLE_NAME_PREFIX:
-                ssm: null
-                default: github-workflows
-              DDB_TABLE_HASH_KEY:
-                ssm: null
-                default: GithubSha
-              DDB_TABLE_TTL_ATTR:
-                ssm: null
-                default: ttl
-              DYNAMODB_TTL_DAYS:
-                ssm: null
-                default: 1
-              DDB_TABLE_PENDING_TESTS_ATTR:
-                ssm: null
-                default: PendingTests
               ARTIFACTS_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-artifacts
@@ -373,6 +396,28 @@ migrations:
         - PGPASSWORD
         - PGDATABASE
         - GO_MIGRATE_URL
+  warm-cache:
+    runtime: bash
+    min_code_cov: null
+    type: app
+    local_dev: false
+    params:
+      - AWS_REGION
+    deploy: true
+    build_src_path: null
+    dependents: []
+    rust_log: off
+    env_var:
+      set: {}
+      get:
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - TRANSACTION_DDB_TABLE
+        - WARM_CACHE_URL
+        - WARM_CACHE_PASSPHRASE
   testseed:
     env_var:
       set:
@@ -401,18 +446,6 @@ scripts:
       TEST_ACCOUNTS_MIGRATION_FILE:
         ssm: null
         default: ./migrations/testseed/000001_accounts.up.sql
-      REQUIRED_PID_COUNT:
-        ssm: null
-        default: 11
-      LOCAL_RESTART_LIMIT:
-        ssm: null
-        default: 3
-      RESTART_SLEEP_SECONDS:
-        ssm: null
-        default: 5
-      CUSTOM_IFS:
-        ssm: null
-        default: '|'
       SERVICE_PROCESSES:
         ssm: null
         default:
@@ -516,6 +549,15 @@ services:
         - PGUSER
         - PGPASSWORD
         - PGDATABASE
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
+        - TRANSACTION_DDB_TABLE
+        - CACHE_TABLE_HASH_KEY
+        - CACHE_TABLE_RANGE_KEY
+        - CACHE_KEY_PROFILE_ID
   request-approve:
     runtime: rust1.x
     min_code_cov: null
@@ -568,6 +610,21 @@ services:
         RUST_BACKTRACE:
           ssm: null
           default: 1
+        CACHE_KEY_RULES_STATE:
+          ssm: null
+          default: "rules:state"
+        CACHE_KEY_RULES_ACCOUNT:
+          ssm: null
+          default: "rules:account"
+        CACHE_KEY_PROFILE:
+          ssm: null
+          default: "profile"
+        CACHE_KEY_PROFILE_ID:
+          ssm: null
+          default: "profile_id"
+        CACHE_KEY_APPROVERS:
+          ssm: null
+          default: "approvers"
       get:
         - PGDATABASE
         - PGUSER
@@ -582,6 +639,19 @@ services:
         - HOSTNAME_OR_IP
         - RUST_LOG
         - RUST_BACKTRACE
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
+        - CACHE_KEY_RULES_STATE
+        - CACHE_KEY_RULES_ACCOUNT
+        - CACHE_KEY_PROFILE
+        - CACHE_KEY_PROFILE_ID
+        - CACHE_KEY_APPROVERS
+        - TRANSACTION_DDB_TABLE
+        - CACHE_TABLE_HASH_KEY
+        - CACHE_TABLE_RANGE_KEY
   request-by-id:
     runtime: rust1.x
     min_code_cov: null
@@ -710,22 +780,6 @@ services:
     dependents: []
     rust_log: off
     env_var:
-      set:
-        REDIS_DB:
-          ssm: null
-          default: 0
-        REDIS_HOST:
-          ssm: null
-          default: localhost
-        REDIS_PORT:
-          ssm: null
-          default: 6379
-        REDIS_USERNAME:
-          ssm: null
-          default: default
-        REDIS_PASSWORD:
-          ssm: null
-          default: test
       get:
         - PGHOST
         - PGPORT
@@ -738,6 +792,7 @@ services:
         - REDIS_USERNAME
         - REDIS_PASSWORD
         - RUST_LOG
+      set: {}
   measure:
     runtime: rust1.x
     min_code_cov: null
@@ -809,6 +864,12 @@ tests:
       - BALANCE_BY_ACCOUNT_URL
       - AWS_LAMBDA_FUNCTION_NAME # used when testing cloud envs
       - GRAPHQL_RESOURCE
+      - REDIS_DB
+      - REDIS_HOST
+      - REDIS_PORT
+      - REDIS_USERNAME
+      - REDIS_PASSWORD
+      - TRANSACTION_DDB_TABLE
   params: []
 env_var:
   set:

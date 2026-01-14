@@ -9,6 +9,10 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: us-east-1
   
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   rule:
     name: rule
@@ -105,6 +109,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SERVICE_NAME: go-migrate
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  warm_cache:
+    name: warm-cache
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: warm-cache
     steps:
       - uses: actions/checkout@v4
       - name: build and deploy image

@@ -3,13 +3,12 @@ locals {
   PROJECT_CONF_FILE_NAME = "project.yaml"
   PROJECT_CONF           = yamldecode(file("../../../../../${local.PROJECT_CONF_FILE_NAME}"))
   STORAGE_ENV_VAR        = local.PROJECT_CONF.infra.terraform.aws.modules.project-storage.env_var.set
-  DDB_TABLE_NAME_PREFIX  = local.STORAGE_ENV_VAR.DDB_TABLE_NAME_PREFIX.default
-  DDB_TABLE_HASH_KEY     = local.STORAGE_ENV_VAR.DDB_TABLE_HASH_KEY.default
   ID_ENV_PREFIX          = "${var.env_id}/${var.env}"
 
   // add a terraform_data precondition to fail
   // if a service is not found in project.yaml
   GO_MIGRATE              = "go-migrate"
+  WARM_CACHE              = "warm-cache"
   AUTO_CONFIRM            = "auto-confirm"
   BALANCE_BY_ACCOUNT      = "balance-by-account"
   GRAPHQL                 = "graphql"
@@ -25,6 +24,7 @@ locals {
   // used in ecr.tf
   ECR_REPOS = toset([
     local.GO_MIGRATE,
+    local.WARM_CACHE,
     local.AUTO_CONFIRM,
     local.BALANCE_BY_ACCOUNT,
     local.GRAPHQL,
@@ -48,6 +48,10 @@ resource "terraform_data" "locals_test" {
     precondition {
       condition     = lookup(local.PROJECT_CONF.migrations, local.GO_MIGRATE, null) != null
       error_message = "${local.GO_MIGRATE} not found in ${local.PROJECT_CONF_FILE_NAME}"
+    }
+    precondition {
+      condition     = lookup(local.PROJECT_CONF.migrations, local.WARM_CACHE, null) != null
+      error_message = "${local.WARM_CACHE} not found in ${local.PROJECT_CONF_FILE_NAME}"
     }
     precondition {
       condition     = lookup(local.PROJECT_CONF.services, local.AUTO_CONFIRM, null) != null

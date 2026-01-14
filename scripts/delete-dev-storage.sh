@@ -7,12 +7,10 @@ ENV_ID=$(source ./scripts/print-env-id.sh)
 ID_ENV="$ENV_ID-$ENV"
 ARTIFACTS_BUCKET_PREFIX=$(yq '.infra.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default' $PROJECT_CONF)
 TFSTATE_BUCKET_PREFIX=$(yq '.infra.terraform.aws.modules["project-storage"].env_var.set.TFSTATE_BUCKET_PREFIX.default' $PROJECT_CONF)
-DDB_TABLE_NAME_PREFIX=$(yq '.infra.terraform.aws.modules["project-storage"].env_var.set.DDB_TABLE_NAME_PREFIX.default' $PROJECT_CONF)
 LOCAL_TFSTATE_FILE=terraform.tfstate
 
 ARTIFACTS_BUCKET="$ARTIFACTS_BUCKET_PREFIX-$ID_ENV"
 TFSTATE_BUCKET="$TFSTATE_BUCKET_PREFIX-$ID_ENV"
-DDB_TABLE="$DDB_TABLE_NAME_PREFIX-$ID_ENV"
 
 INIT_DEV_DIR=infra/terraform/aws/environments/init-dev
 
@@ -31,16 +29,9 @@ function delete_dev_storage() {
 	delete_bucket "$ARTIFACTS_BUCKET"
 	delete_bucket "$TFSTATE_BUCKET"
 
-	# delete ddb table
-	DEL_RESP=$(aws dynamodb delete-table --table-name "$DDB_TABLE" --query 'TableDescription.{ TableName: TableName, TableStatus: TableStatus }')
-	TABLE_NAME=$(echo $DEL_RESP | yq '.TableName')
-	TABLE_STATUS=$(echo $DEL_RESP | yq '.TableStatus')
-
 	popd
 	source ./scripts/delete-ecr-repos.sh
 	pushd $INIT_DEV_DIR
-
-	printf '%s %s dynamodb table\n' "$TABLE_STATUS" "$TABLE_NAME"
 }
 
 pushd $INIT_DEV_DIR

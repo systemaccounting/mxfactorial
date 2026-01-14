@@ -256,6 +256,9 @@ so while you don't need to publish your account activity, earning capital or vot
   }
 ]
 ```
+or just "a zero change in value with respect to ownership" if you want to say it in an orientation omitting language like calculus:
+
+$$\frac{\partial V}{\partial \text{ownership}} = 0$$
 
 **q.** how does systemaccounting model a free market?  
 **a.** by splitting **everything** between debitors and creditors [right down the middle](https://en.wikipedia.org/wiki/Spacetime_algebra#Spacetime_split) and standing guard with a conservation law. chasing out "monetary" policy with physics protects everyone from fiscal policy socializing its deficits into the center
@@ -358,7 +361,7 @@ the future is the number of transactions possible across all pairs of accounts b
   "creditor": "mary",
   "price": "1.00",
   "quantity": "1"
-  // "john" ∧ "mary" = 1.00
+  // 1.00 (john ∧ mary) = -1.00 (mary ∧ john)
 }
 ```
 

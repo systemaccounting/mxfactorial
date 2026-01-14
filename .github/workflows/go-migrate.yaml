@@ -1,6 +1,7 @@
 name: go-migrate
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: [migrations]
     types: [completed]
@@ -11,6 +12,10 @@ on:
     branches-ignore:
     - 'master'
     - 'develop'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   push_image:

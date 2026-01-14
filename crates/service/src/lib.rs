@@ -1,7 +1,8 @@
+use cache::Cache;
 use cognitoidp::CognitoJwkSet;
 use pg::model::ModelTrait;
 use rust_decimal::Decimal;
-use std::{env, error::Error};
+use std::{env, error::Error, sync::Arc};
 use types::{
     account::{AccountProfile, AccountProfiles, ProfileIds},
     account_role::AccountRole,
@@ -16,11 +17,12 @@ use types::{
 
 pub struct Service<'a, T: ModelTrait> {
     conn: &'a T,
+    cache: Option<Arc<dyn Cache>>,
 }
 
 impl<'a, T: ModelTrait> Service<'a, T> {
-    pub fn new(conn: &'a T) -> Self {
-        Self { conn }
+    pub fn new(conn: &'a T, cache: Option<Arc<dyn Cache>>) -> Self {
+        Self { conn, cache }
     }
 
     pub async fn create_account(&self, account: String) -> Result<(), Box<dyn Error>> {
@@ -55,6 +57,51 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         &self,
         account_names: Vec<String>,
     ) -> Result<ProfileIds, Box<dyn Error>> {
+        // try cache first for each account
+        if let Some(cache) = &self.cache {
+            let mut profile_ids = ProfileIds::new();
+            let mut cache_misses = Vec::new();
+
+            for account in &account_names {
+                match cache.get_profile_id(account).await {
+                    Ok(id_str) => {
+                        if let Ok(id) = id_str.parse::<i32>() {
+                            profile_ids.insert(account.clone(), id);
+                        } else {
+                            cache_misses.push(account.clone());
+                        }
+                    }
+                    Err(_) => {
+                        cache_misses.push(account.clone());
+                    }
+                }
+            }
+
+            // if all found in cache, return
+            if cache_misses.is_empty() {
+                return Ok(profile_ids);
+            }
+
+            // fetch missing from db
+            if !cache_misses.is_empty() {
+                let db_results = self
+                    .conn
+                    .select_profile_ids_by_account_names_query(cache_misses)
+                    .await?;
+
+                // write through to cache and merge results
+                for (id_str, account) in &db_results {
+                    cache.set_profile_id(account, id_str).await.ok();
+                    if let Ok(id) = id_str.parse::<i32>() {
+                        profile_ids.insert(account.clone(), id);
+                    }
+                }
+            }
+
+            return Ok(profile_ids);
+        }
+
+        // no cache, go direct to db
         match self
             .conn
             .select_profile_ids_by_account_names_query(account_names)
@@ -446,7 +493,22 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         &self,
         account: String,
     ) -> Result<Vec<String>, Box<dyn Error>> {
-        self.conn.select_approvers_query(account).await
+        // try cache first
+        if let Some(cache) = &self.cache {
+            if let Ok(approvers) = cache.get_account_approvers(&account).await {
+                return Ok(approvers);
+            }
+        }
+
+        // cache miss, fetch from db
+        let approvers = self.conn.select_approvers_query(account.clone()).await?;
+
+        // write through to cache
+        if let Some(cache) = &self.cache {
+            cache.set_account_approvers(&account, &approvers).await.ok();
+        }
+
+        Ok(approvers)
     }
 
     pub async fn get_tr_item_rule_instances_by_role_account(
@@ -454,19 +516,80 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         account_role: AccountRole,
         account_name: String,
     ) -> Result<RuleInstances, Box<dyn Error>> {
-        self.conn
+        // try cache first
+        if let Some(cache) = &self.cache {
+            if let Ok(rules) = cache.get_account_rules(account_role, &account_name).await {
+                return Ok(rules);
+            }
+        }
+
+        // cache miss, fetch from db
+        let rules = self
+            .conn
             .select_rule_instance_by_type_role_account_query(
                 "transaction_item".to_string(),
                 account_role,
-                account_name,
+                account_name.clone(),
             )
-            .await
+            .await?;
+
+        // write through to cache
+        if let Some(cache) = &self.cache {
+            cache
+                .set_account_rules(account_role, &account_name, &rules)
+                .await
+                .ok();
+        }
+
+        Ok(rules)
     }
 
     pub async fn get_account_profiles(
         &self,
         account_names: Vec<String>,
     ) -> Result<AccountProfiles, Box<dyn Error>> {
+        // try cache first for each account
+        if let Some(cache) = &self.cache {
+            let mut profiles = Vec::new();
+            let mut cache_misses = Vec::new();
+
+            for account in &account_names {
+                match cache.get_account_profile(account).await {
+                    Ok(profile) => {
+                        profiles.push(profile);
+                    }
+                    Err(_) => {
+                        cache_misses.push(account.clone());
+                    }
+                }
+            }
+
+            // if all found in cache, return
+            if cache_misses.is_empty() {
+                return Ok(AccountProfiles(profiles));
+            }
+
+            // fetch missing from db
+            if !cache_misses.is_empty() {
+                let db_profiles = self
+                    .conn
+                    .select_account_profiles_by_account_names_query(cache_misses)
+                    .await?;
+
+                // write through to cache and merge results
+                for profile in db_profiles.0 {
+                    cache
+                        .set_account_profile(&profile.account_name, &profile)
+                        .await
+                        .ok();
+                    profiles.push(profile);
+                }
+            }
+
+            return Ok(AccountProfiles(profiles));
+        }
+
+        // no cache, go direct to db
         self.conn
             .select_account_profiles_by_account_names_query(account_names)
             .await
@@ -477,13 +600,35 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         account_role: AccountRole,
         state_name: String,
     ) -> Result<RuleInstances, Box<dyn Error>> {
-        self.conn
+        // try cache first
+        if let Some(cache) = &self.cache {
+            if let Ok(rules) = cache
+                .get_transaction_item_rules(account_role, &state_name)
+                .await
+            {
+                return Ok(rules);
+            }
+        }
+
+        // cache miss, fetch from db
+        let rules = self
+            .conn
             .select_rule_instance_by_type_role_state_query(
                 "transaction_item".to_string(),
                 account_role,
-                state_name,
+                state_name.clone(),
             )
-            .await
+            .await?;
+
+        // write through to cache
+        if let Some(cache) = &self.cache {
+            cache
+                .set_transaction_item_rules(account_role, &state_name, &rules)
+                .await
+                .ok();
+        }
+
+        Ok(rules)
     }
 
     pub async fn get_approval_rule_instances(
@@ -491,13 +636,35 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         account_role: AccountRole,
         approver_account: String,
     ) -> Result<RuleInstances, Box<dyn Error>> {
-        self.conn
+        // try cache first
+        if let Some(cache) = &self.cache {
+            if let Ok(rules) = cache
+                .get_approval_rules(account_role, &approver_account)
+                .await
+            {
+                return Ok(rules);
+            }
+        }
+
+        // cache miss, fetch from db
+        let rules = self
+            .conn
             .select_rule_instance_by_type_role_account_query(
                 "approval".to_string(),
                 account_role,
-                approver_account,
+                approver_account.clone(),
             )
-            .await
+            .await?;
+
+        // write through to cache
+        if let Some(cache) = &self.cache {
+            cache
+                .set_approval_rules(account_role, &approver_account, &rules)
+                .await
+                .ok();
+        }
+
+        Ok(rules)
     }
 }
 
@@ -529,7 +696,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.create_account(account).await;
     }
@@ -544,7 +711,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.delete_owner_account(account).await;
     }
@@ -559,7 +726,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok("test_account".to_string()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.create_account_profile(test_account_profile).await;
     }
@@ -574,7 +741,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(vec![]));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_profile_ids_by_account_names(account_names)
@@ -597,7 +764,7 @@ mod tests {
             .times(1)
             .returning(|_, _, _| Ok(()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .create_account_balance(account, balance, curr_tr_item_id)
@@ -614,7 +781,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok("100".to_string()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_account_balance(account).await;
     }
@@ -629,7 +796,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(AccountBalances::new()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_account_balances(accounts).await;
     }
@@ -643,7 +810,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(AccountBalances::new()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_debitor_account_balances(test_transaction_items)
@@ -660,7 +827,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .change_account_balances(test_transaction_items)
@@ -684,7 +851,7 @@ mod tests {
                 Ok(test_account_balances)
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .test_sufficient_debitor_funds(test_transaction_items)
@@ -708,7 +875,7 @@ mod tests {
                 Ok(test_account_balances)
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let result = service
             .test_sufficient_debitor_funds(test_transaction_items)
@@ -733,7 +900,7 @@ mod tests {
             .times(1)
             .returning(|_, _, _| Ok(None));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .add_approval_times_by_account_and_role(transaction_id, account, role)
@@ -767,7 +934,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_transaction_with_transaction_items_and_approvals_by_id(transaction_id)
@@ -814,7 +981,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_transactions_with_transaction_items_and_approvals_by_ids(transaction_ids)
@@ -890,7 +1057,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .approve(test_auth_account, test_approver_role, test_request)
@@ -913,7 +1080,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .add_approve_all_credit_rule_instance_if_not_exists(account_name)
@@ -956,7 +1123,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(false));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .create_account_from_cognito_trigger(
@@ -977,7 +1144,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(create_test_transaction()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_transaction_by_id(transaction_id).await;
     }
@@ -1008,7 +1175,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_full_transaction_by_id(transaction_id).await;
     }
@@ -1023,7 +1190,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok("1".to_string()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.create_transaction(test_transaction).await;
     }
@@ -1059,7 +1226,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_last_n_requests(account, n).await;
     }
@@ -1095,7 +1262,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_last_n_transactions(account, n).await;
     }
@@ -1121,7 +1288,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_transaction_items_and_approvals_by_transaction_ids(transaction_ids)
@@ -1138,7 +1305,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(create_test_transaction_items()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_transaction_items_by_transaction_id(transaction_id)
@@ -1155,7 +1322,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(create_test_transaction_items()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_transaction_items_by_transaction_ids(transaction_ids)
@@ -1178,7 +1345,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_approvals_by_transaction_id(transaction_id)
@@ -1201,7 +1368,7 @@ mod tests {
                     .clone())
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_approvals_by_transaction_ids(transaction_ids)
@@ -1218,7 +1385,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(vec![]));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_account_approvers(account).await;
     }
@@ -1281,7 +1448,7 @@ mod tests {
                 }]))
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_tr_item_rule_instances_by_role_account(account_role, account_name)
@@ -1298,7 +1465,7 @@ mod tests {
             .times(1)
             .returning(|_| Ok(create_test_account_profiles()));
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service.get_account_profiles(account_names).await;
     }
@@ -1361,7 +1528,7 @@ mod tests {
                 }]))
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_state_tr_item_rule_instances(account_role, state_name)
@@ -1421,7 +1588,7 @@ mod tests {
                 }]))
             });
 
-        let service = super::Service::new(&conn);
+        let service = super::Service::new(&conn, None);
 
         let _ = service
             .get_approval_rule_instances(account_role, approver_account)

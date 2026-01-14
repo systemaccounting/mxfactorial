@@ -1,11 +1,16 @@
 name: auto-confirm
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/auto-confirm/**'
     branches-ignore:
     - 'master'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint_test:
@@ -17,6 +22,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: linting
         run: |
           cargo fmt -- --check
@@ -30,6 +36,7 @@ jobs:
         with:
           toolchain: stable
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
       - name: unit test
         run: cargo test
   push_image:

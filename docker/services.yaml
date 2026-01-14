@@ -1,29 +1,5 @@
 name: mxf
 services:
-  postgres:
-    build:
-      context: ../
-      dockerfile: ./docker/bitnami-postgres.Dockerfile
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-  redis:
-    image: bitnami/redis:latest
-    ports:
-      - "6379:6379"
-    healthcheck:
-      test: redis-cli --no-auth-warning -a test PING | grep PONG
-      interval: 1s
-      timeout: 5s
-      retries: 5
-    environment:
-      REDIS_PORT_NUMBER: 6379
-      REDIS_PASSWORD: test
   graphql:
     image: graphql:latest
     build:
@@ -120,11 +96,24 @@ services:
       PG_MAX_CONNECTIONS: 20
       PG_IDLE_TIMEOUT: 10000
       PG_CONN_TIMEOUT: 500
+      REDIS_DB: 0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USERNAME: default
+      REDIS_PASSWORD: test
+      CACHE_KEY_RULES_STATE: "rules:state"
+      CACHE_KEY_RULES_ACCOUNT: "rules:account"
+      CACHE_KEY_PROFILE: "profile"
+      CACHE_KEY_PROFILE_ID: "profile_id"
+      CACHE_KEY_APPROVERS: "approvers"
       READINESS_CHECK_PATH: /healthz
       RUST_LOG: info
       RULE_PORT: 10001
     depends_on:
-      - postgres
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
   request-by-id:
     image: request-by-id:latest
     build:
@@ -270,20 +259,3 @@ services:
       PUBLIC_GRAPHQL_RESOURCE: query
       PUBLIC_GRAPHQL_WS_RESOURCE: ws
       PORT: 10009
-  go-migrate:
-    profiles: ["tools"]
-    build:
-      context: ../
-      dockerfile: ./docker/go-migrate.Dockerfile
-    entrypoint: ["bash", "migrate.sh", "--dir", "/var/task/migrations"]
-    environment:
-      PGDATABASE: mxfactorial
-      PGUSER: test
-      PGPASSWORD: test
-      PGHOST: postgres
-      PGPORT: 5432
-      SQL_TYPE: postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
-

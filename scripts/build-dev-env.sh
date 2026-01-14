@@ -123,6 +123,9 @@ make --no-print-directory uprds DB=test ENV=dev
 
 popd; popd;
 
+printf "\n${YELLOW}*** warming cache in $ID_ENV${NOCOLOR}\n\n"
+bash scripts/invoke-warm-cache.sh --env dev
+
 printf "\n${YELLOW}*** testing integration with new infrastructure and app deployments${NOCOLOR}\n\n"
 set +e # avoid exiting on flaky tests
 make --no-print-directory test-cloud ENV=dev
