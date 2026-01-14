@@ -35,7 +35,7 @@ impl HttpClient {
     }
 
     async fn sign(http_request: &mut http::Request<String>) {
-        let config = aws_config::load_defaults(aws_config::BehaviorVersion::v2023_11_09()).await;
+        let config = aws_config::load_defaults(aws_config::BehaviorVersion::v2024_03_28()).await;
         let region = config.region().unwrap().as_ref();
         let provider = config.credentials_provider().unwrap();
         let credentials = provider.provide_credentials().await.unwrap();
