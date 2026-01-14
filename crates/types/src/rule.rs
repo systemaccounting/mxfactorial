@@ -64,6 +64,7 @@ pub struct RuleInstance {
     pub industry_id: Option<String>,
     pub disabled_time: Option<TZTime>,
     pub removed_time: Option<TZTime>,
+    #[serde(skip_serializing)]
     pub created_at: Option<TZTime>,
 }
 
