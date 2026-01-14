@@ -31,13 +31,22 @@ module "rule" {
   env          = var.env
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
-  env_vars     = merge(local.POSTGRES_VARS, {})
+  env_vars = merge(local.POSTGRES_VARS, {
+    TRANSACTION_DDB_TABLE   = aws_dynamodb_table.cache.name
+    CACHE_TABLE_HASH_KEY    = local.CACHE_TABLE_HASH_KEY
+    CACHE_TABLE_RANGE_KEY   = local.CACHE_TABLE_RANGE_KEY
+    CACHE_KEY_RULES_STATE   = local.WARM_CACHE_CONF.CACHE_KEY_RULES_STATE.default
+    CACHE_KEY_RULES_ACCOUNT = local.WARM_CACHE_CONF.CACHE_KEY_RULES_ACCOUNT.default
+    CACHE_KEY_PROFILE       = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE.default
+    CACHE_KEY_PROFILE_ID    = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE_ID.default
+    CACHE_KEY_APPROVERS     = local.WARM_CACHE_CONF.CACHE_KEY_APPROVERS.default
+  })
   aws_lwa_port = local.RULE_PORT
   invoke_url_principals = [
     module.graphql.lambda_role_arn,
     module.request_create.lambda_role_arn,
   ]
-  attached_policy_arns = []
+  attached_policy_arns = [aws_iam_policy.rule_dynamodb_read.arn]
   create_secret        = true
 }
 
@@ -48,11 +57,15 @@ module "request_create" {
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
-    RULE_URL = module.rule.lambda_function_url
+    RULE_URL              = module.rule.lambda_function_url
+    TRANSACTION_DDB_TABLE = aws_dynamodb_table.cache.name
+    CACHE_TABLE_HASH_KEY  = local.CACHE_TABLE_HASH_KEY
+    CACHE_TABLE_RANGE_KEY = local.CACHE_TABLE_RANGE_KEY
+    CACHE_KEY_PROFILE_ID  = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE_ID.default
   })
   aws_lwa_port          = local.REQUEST_CREATE_PORT
   invoke_url_principals = [module.graphql.lambda_role_arn]
-  attached_policy_arns  = []
+  attached_policy_arns  = [aws_iam_policy.rule_dynamodb_read.arn]
   create_secret         = true
 }
 
