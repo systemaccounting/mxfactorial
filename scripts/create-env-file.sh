@@ -58,6 +58,8 @@ if [[ $ENV != 'local' ]]; then
 		echo 'set ENV_ID variable in project root .env or make build-dev to build a cloud dev environment'
 		exit 1
 	fi
+	# export so print-env-id.sh sees it in subshell
+	export ENV_ID
 	ENV_ID=$(source scripts/print-env-id.sh)
 fi
 
