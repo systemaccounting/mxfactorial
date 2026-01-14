@@ -37,7 +37,7 @@ test db = `./schema` + `./seed` + `./testseed`
 ### compose task
 reset local postgres with compose task:
 ```
-docker compose -f docker/compose.yaml run --rm go-migrate --db_type test --cmd reset
+docker compose -f docker/storage.yaml run --rm go-migrate --db_type test --cmd reset
 ```
 
 ### rds migrations
