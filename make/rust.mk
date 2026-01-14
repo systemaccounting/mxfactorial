@@ -3,7 +3,7 @@ MIGRATIONS_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/migrations
 
 start:
 	@$(MAKE) get-secrets ENV=local
-	nohup cargo watch --env-file $(ENV_FILE) -w src -w $(RELATIVE_PROJECT_ROOT_PATH)/crates -x run >> $(NOHUP_LOG) &
+	@nohup cargo watch --env-file $(ENV_FILE) -w src -w $(RELATIVE_PROJECT_ROOT_PATH)/crates -x run >> $(NOHUP_LOG) &
 
 stop:
 	$(MAKE) -C $(RELATIVE_PROJECT_ROOT_PATH) stop
