@@ -26,9 +26,6 @@ cd infra/terraform/aws/environments/init-$ENV
 
 terraform init
 
-# workflow data storage
-terraform import module.project_storage_$ENV.aws_dynamodb_table.github_workflows github-workflows-$ID_ENV
-
 # tf state storage
 terraform import module.project_storage_$ENV.aws_s3_bucket.tfstate mxfactorial-tfstate-$ID_ENV
 
