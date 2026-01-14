@@ -11,7 +11,7 @@ run:
 start:
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose \
-			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
+			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml \
 			up \
 			-d \
 			postgres \
@@ -23,9 +23,12 @@ start:
 reset:
 	@$(MAKE) resetdocker
 
+warm-cache:
+	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml up warm-cache
+
 rebuild:
 	@docker compose \
-		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
+		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml \
 		build \
 		postgres \
 		--no-cache
@@ -35,7 +38,7 @@ up:
 
 down:
 	@docker compose \
-		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml \
+		-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml \
 		down
 
 stop:
@@ -61,23 +64,23 @@ create:
 ###################### local/docker migrate commands ######################
 
 resetdocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml run --rm go-migrate --db_type test --cmd reset
+	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd reset
 
 rl:
 	$(MAKE) resetdocker
 
 downdocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml run --rm go-migrate --db_type test --cmd down
+	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd down
 
 testdocker:
 	$(MAKE) resetdocker
 	$(MAKE) downdocker
 
 updocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml run --rm go-migrate --db_type test --cmd up
+	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd up
 
 dropdocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/compose.yaml run --rm go-migrate --db_type test --cmd drop
+	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd drop
 
 insert:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
