@@ -42,7 +42,7 @@ postgres is run in docker. the image is built from docker/bitnami-postgres.Docke
 
 query postgres with `PGPASSWORD=test psql -h localhost -U test -d mxfactorial -c 'SELECT * FROM table_name'`
 
-redis runs in docker. the image is built from the redis services block in docker/compose.yaml. use standard compose commands to manage it
+redis runs in docker. the image is built from the redis services block in docker/storage.yaml. use standard compose commands to manage it
 
 to demo live streaming gdp, run `make continue-insert` in background to continuously create and approve transactions. poll the gdp key with `bash scripts/watch-redis-key.sh --key gdp:usa:cal:sac --cmd watch` or query directly: `docker exec mxf-redis-1 redis-cli -a test --no-auth-warning GET "$(date -u '+%Y-%m-%d'):gdp:usa:cal:sac"`. kill with `pkill -f insert-transactions`
 
@@ -91,3 +91,15 @@ theory meets implementation: services/rule plans the bivector (adds required ite
 transaction.svg visualizes transactions as rotations
 
 project ports start at 10000. print currently assigned ports with `make list-used-ports`. set ports in project.yaml and assign them from project.yaml in bash, make and terraform
+
+use yq -i ... to replace env var get and set blocks in project.yaml for temporary, convenient scripting, eg .github/workflows/warm-cache.yaml temporarily sets dynamodb table env var dependencies to locally test caching
+
+graphql tests can fail while http tests pass when backend lambdas are cold since graphql proxies to them. run `bash scripts/test-availability.sh` first
+
+lambda function URLs need IAM signing. use `scripts/invoke-function-url.sh` or `awscurl` instead of curl
+
+check cloudwatch logs: `aws logs tail /aws/lambda/SERVICE-ENVID-ENV --since 5m --format short`
+
+image tags use `SHORT_GIT_SHA_LENGTH` from project.yaml (default: 7) for git hash length
+
+use yq instead of jq for local json/yaml scripting
