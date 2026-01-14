@@ -8,5 +8,6 @@ services/request-approve
 services/graphql
 services/balance-by-account
 services/auto-confirm
+migrations/warm-cache
 migrations/go-migrate
 client
