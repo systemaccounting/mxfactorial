@@ -1,5 +1,3 @@
-import url from 'url'; // cadet todo: replace with whatwg-url and add tests
-
 export default function (uri: string, resource: string | undefined, enableTls: boolean): string {
 	// if protocol prefix missing
 	if (!uri.includes('://')) {
@@ -12,7 +10,7 @@ export default function (uri: string, resource: string | undefined, enableTls: b
 			uri = 'http://' + uri;
 		}
 	}
-	const parsed = url.parse(uri);
+	const parsed = new URL(uri);
 	// tls remains enabled IF uri was passed with https:// or wss:// prefix
 	// but this will override if uri was passed with http:// or ws:// prefix
 	if (enableTls) {
@@ -30,5 +28,5 @@ export default function (uri: string, resource: string | undefined, enableTls: b
 		// remove trailing slashes
 		parsed.pathname = parsed.pathname.replace(/\/+$/, '');
 	}
-	return url.format(parsed);
+	return parsed.toString();
 }
