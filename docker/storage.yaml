@@ -28,6 +28,7 @@ services:
       postgres:
         condition: service_healthy
   warm-cache:
+    profiles: ["init"]
     build:
       context: ../
       dockerfile: ./docker/warm-cache.Dockerfile

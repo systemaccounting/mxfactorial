@@ -22,8 +22,11 @@ fi
 
 set -e # exit when docker login not configured
 
-echo -e -n "\n${GREEN}*** starting storage (postgres -> redis -> warm-cache)${RESET}\n"
+echo -e -n "\n${GREEN}*** starting storage (postgres -> redis)${RESET}\n"
 docker compose -f docker/storage.yaml up -d --build --wait
+
+echo -e -n "\n${GREEN}*** warming cache${RESET}\n"
+docker compose -f docker/storage.yaml --profile init up --build warm-cache
 
 set +e
 
