@@ -85,16 +85,8 @@ impl Transaction {
         auth_account: &str,
         account_role: AccountRole,
     ) -> Result<(), ApprovalError> {
-        match self
-            .transaction_items
+        self.transaction_items
             .test_pending_role_approval(auth_account, account_role)
-        {
-            Ok(()) => Ok(()),
-            Err(e) => {
-                println!("error: {e:?}");
-                Err(e)
-            }
-        }
     }
 
     pub fn add_transaction_items(
