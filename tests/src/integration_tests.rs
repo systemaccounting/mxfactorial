@@ -629,4 +629,37 @@ mod tests {
             ));
         }
     }
+
+    #[tokio::test]
+    #[cfg_attr(not(feature = "integration_tests"), ignore)]
+    async fn it_reads_rules_from_cache() {
+        _before_each();
+
+        // get and modify cached rule: 0.09 → 0.50
+        let original = h::get_cached_state_rule("California").await;
+        let modified = original.replace("0.09", "0.50");
+        h::set_cached_state_rule("California", &original, &modified).await;
+
+        // call rule service (reuse existing testdata - bread $3 x 2)
+        let file = File::open("../tests/testdata/nullFirstTrItemsNoAppr.json").unwrap();
+        let reader = BufReader::new(file);
+        let test_items: Vec<TransactionItem> = serde_json::from_reader(reader).unwrap();
+        let got = r::get_rules_http(test_items).await;
+
+        // restore original
+        h::set_cached_state_rule("California", &modified, &original).await;
+
+        // find tax item and assert 50% (cache) not 9% (db)
+        // bread $3 = 50% tax = $1.50
+        let tax_item = got
+            .transaction
+            .transaction_items
+            .0
+            .iter()
+            .find(|i| i.item_id.contains("tax") && i.price.starts_with("1.5"))
+            .expect("tax item for bread not found");
+
+        // 50% of $3 = $1.50 (not 9% = $0.27)
+        assert_eq!(tax_item.price, "1.500");
+    }
 }

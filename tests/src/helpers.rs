@@ -34,7 +34,7 @@ pub fn restore_testseed() {
         let restore_output = Command::new("docker")
             .arg("compose")
             .arg("-f")
-            .arg("docker/compose.yaml")
+            .arg("docker/storage.yaml")
             .arg("run")
             .arg("--rm")
             .arg("go-migrate")
@@ -93,4 +93,67 @@ pub async fn create_transaction() -> Transaction {
     let approve_request: IntraTransaction =
         serde_json::from_str(&approve_request_response_body).unwrap();
     approve_request.transaction
+}
+
+use aws_sdk_dynamodb::{types::AttributeValue, Client as DdbClient};
+
+pub async fn get_cached_state_rule(state: &str) -> String {
+    let key = format!("rules:state:creditor:{}", state);
+    if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
+        ddb_query(&key).await.remove(0)
+    } else {
+        let client = redisclient::RedisClient::new().await;
+        client.init().await.unwrap();
+        client.smembers(&key).await.unwrap().remove(0)
+    }
+}
+
+pub async fn set_cached_state_rule(state: &str, old: &str, new: &str) {
+    let key = format!("rules:state:creditor:{}", state);
+    if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
+        let old_json: serde_json::Value = serde_json::from_str(old).unwrap();
+        let sk = old_json["id"].as_str().unwrap();
+        ddb_put(&key, sk, new).await;
+    } else {
+        let client = redisclient::RedisClient::new().await;
+        client.init().await.unwrap();
+        client.srem(&key, old).await.unwrap();
+        client.sadd(&key, new).await.unwrap();
+    }
+}
+
+async fn ddb_query(pk: &str) -> Vec<String> {
+    let config = aws_config::load_defaults(aws_config::BehaviorVersion::latest()).await;
+    let client = DdbClient::new(&config);
+    let table = env::var("TRANSACTION_DDB_TABLE").unwrap();
+    let result = client
+        .query()
+        .table_name(&table)
+        .key_condition_expression("#pk = :pk")
+        .expression_attribute_names("#pk", "pk")
+        .expression_attribute_values(":pk", AttributeValue::S(pk.to_string()))
+        .send()
+        .await
+        .unwrap();
+    result
+        .items
+        .unwrap_or_default()
+        .iter()
+        .filter_map(|item| item.get("data").and_then(|v| v.as_s().ok()).cloned())
+        .collect()
+}
+
+async fn ddb_put(pk: &str, sk: &str, data: &str) {
+    let config = aws_config::load_defaults(aws_config::BehaviorVersion::latest()).await;
+    let client = DdbClient::new(&config);
+    let table = env::var("TRANSACTION_DDB_TABLE").unwrap();
+    client
+        .put_item()
+        .table_name(&table)
+        .item("pk", AttributeValue::S(pk.to_string()))
+        .item("sk", AttributeValue::S(sk.to_string()))
+        .item("data", AttributeValue::S(data.to_string()))
+        .send()
+        .await
+        .unwrap();
 }
