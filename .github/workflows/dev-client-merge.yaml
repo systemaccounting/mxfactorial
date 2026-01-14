@@ -15,6 +15,10 @@ on:
     branches:
     - 'develop'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tag_push_deploy_dev:
     name: tag develop client

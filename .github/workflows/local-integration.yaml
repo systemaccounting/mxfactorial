@@ -9,6 +9,10 @@ on:
     - 'master'
     - 'develop'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   integration_test:
     name: integration test in local docker
