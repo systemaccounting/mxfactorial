@@ -94,6 +94,13 @@ resource "aws_ssm_parameter" "go_migrate_passphrase" {
   value       = random_password.go_migrate.result
 }
 
+resource "aws_ssm_parameter" "warm_cache_passphrase" {
+  name        = "/${var.ssm_prefix}/service/lambda/warm_cache/passphrase"
+  description = "warm cache passphrase in ${local.SPACED_ID_ENV}"
+  type        = "SecureString"
+  value       = random_password.warm_cache.result
+}
+
 resource "aws_ssm_parameter" "lambda_readiness_check_path" {
   name = "/${var.ssm_prefix}/service/lambda/readiness_check_path"
   // https://github.com/awslabs/aws-lambda-web-adapter#readiness-check
