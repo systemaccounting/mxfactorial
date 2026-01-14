@@ -270,7 +270,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: build image
-        run: bash scripts/build-image-job.sh --service-name $SERVICE_NAME --build-ctx ./migrations/go-migrate # non root build context
+        run: bash scripts/build-image-job.sh --service-name $SERVICE_NAME --build-ctx ./migrations/go-migrate
+      - name: tag image with current short sha and latest
+        run: |
+          docker tag $SERVICE_NAME:latest ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/$SERVICE_NAME:${GITHUB_SHA:0:7}
+          docker tag $SERVICE_NAME:latest ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/$SERVICE_NAME:latest
+      - name: log into container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GITHUB_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: push images
+        run: docker push --all-tags ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/$SERVICE_NAME
+  warm_cache:
+    name: warm-cache
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: warm-cache
+    steps:
+      - uses: actions/checkout@v4
+      - name: build image
+        run: bash scripts/build-image-job.sh --service-name $SERVICE_NAME --build-ctx .
       - name: tag image with current short sha and latest
         run: |
           docker tag $SERVICE_NAME:latest ${{ env.GITHUB_REGISTRY }}/${{ github.repository }}/$SERVICE_NAME:${GITHUB_SHA:0:7}

@@ -109,3 +109,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: build and deploy image
         run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
+  warm_cache:
+    name: warm-cache
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_NAME: warm-cache
+    steps:
+      - uses: actions/checkout@v4
+      - name: build and deploy image
+        run: bash scripts/deploy-image-job.sh --service-name $SERVICE_NAME
