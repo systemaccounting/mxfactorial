@@ -1,0 +1,15 @@
+[package]
+name = "ddbclient"
+version = "0.1.0"
+edition = "2021"
+rust-version.workspace = true
+
+[dependencies]
+tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread"] }
+aws-config = { version = "1.1.1", features = ["behavior-version-latest"] }
+aws-sdk-dynamodb = "1.9.0"
+async-trait = "0.1.73"
+serde_json = "1.0.93"
+tracing = "0.1.40"
+cache = { path = "../cache" }
+types = { path = "../types" }
