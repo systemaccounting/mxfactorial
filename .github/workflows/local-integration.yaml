@@ -1,6 +1,7 @@
 name: local-integration
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'tests/**'

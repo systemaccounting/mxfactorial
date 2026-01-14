@@ -1,6 +1,7 @@
 name: requests-by-account
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/requests-by-account/**'

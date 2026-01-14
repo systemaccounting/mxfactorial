@@ -1,6 +1,7 @@
 name: auto-confirm
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/auto-confirm/**'

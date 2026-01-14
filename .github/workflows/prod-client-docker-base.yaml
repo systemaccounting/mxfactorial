@@ -1,6 +1,7 @@
 name: prod-client-base-image
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - client/package.json

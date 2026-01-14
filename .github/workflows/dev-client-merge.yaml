@@ -8,6 +8,7 @@ name: dev-client-merge
 # to reduce time and debugging latency issues in tests with lambda hosted ssr
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'client/**'

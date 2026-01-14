@@ -1,6 +1,7 @@
 name: migrations
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'migrations/schema/**'

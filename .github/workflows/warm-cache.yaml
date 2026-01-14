@@ -1,6 +1,7 @@
 name: warm-cache
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: [migrations]
     types: [completed]

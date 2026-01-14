@@ -1,6 +1,7 @@
 name: crates-postgres
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'crates/pg/**'

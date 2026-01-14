@@ -1,6 +1,7 @@
 name: request-approve
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/request-approve/**'

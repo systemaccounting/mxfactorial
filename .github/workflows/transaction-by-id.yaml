@@ -1,6 +1,7 @@
 name: transaction-by-id
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/transaction-by-id/**'

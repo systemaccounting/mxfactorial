@@ -1,6 +1,7 @@
 name: local-cache-integration
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'crates/cache/**'

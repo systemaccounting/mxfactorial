@@ -1,6 +1,7 @@
 name: graphql
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/graphql/**'

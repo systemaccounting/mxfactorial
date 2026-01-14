@@ -1,6 +1,7 @@
 name: rule
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/rule/**'

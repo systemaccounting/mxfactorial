@@ -1,6 +1,7 @@
 name: request-by-id
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/request-by-id/**'

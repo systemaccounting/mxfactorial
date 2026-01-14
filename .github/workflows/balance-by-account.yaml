@@ -1,6 +1,7 @@
 name: balance-by-account
 
 on:
+  workflow_dispatch:
   push:
     paths:
     - 'services/balance-by-account/**'
