@@ -19,7 +19,7 @@ dev:
 
 start:
 	@$(MAKE) install
-	nohup npm run dev >> $(NOHUP_LOG) &
+	@nohup npm run dev >> $(NOHUP_LOG) &
 
 run:
 	@$(MAKE) install
@@ -92,10 +92,10 @@ clean:
 ###################### secrets ######################
 
 up:
-	docker compose -f ../docker/compose.yaml up -d client --renew-anon-volumes --force-recreate --build
+	docker compose -f ../docker/services.yaml up -d client --renew-anon-volumes --force-recreate --build
 
 down:
-	docker compose -f ../docker/compose.yaml down
+	docker compose -f ../docker/services.yaml down
 
 ###################### k8s ######################
 
