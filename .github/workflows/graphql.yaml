@@ -30,6 +30,7 @@ jobs:
           cargo fmt -- --check
           cargo clippy -- -Dwarnings
   unit_test:
+    needs: lint_test
     name: unit test
     runs-on: ubuntu-latest
     steps:
@@ -42,6 +43,7 @@ jobs:
       - name: unit test
         run: cargo test
   integration_test:
+    needs: unit_test
     name: integration test in local docker
     runs-on: ubuntu-latest
     steps:
@@ -58,6 +60,7 @@ jobs:
       - name: clean up
         run: make stop
   client_test:
+    needs: integration_test
     name: client test in local docker
     runs-on: ubuntu-latest
     steps:
@@ -76,7 +79,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
       APP_DIR: services/graphql
-    needs: [lint_test, unit_test, integration_test, client_test]
+    needs: client_test
     steps:
       - uses: actions/checkout@v4
       - name: mask values
