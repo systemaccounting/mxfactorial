@@ -66,7 +66,7 @@ module "prod" {
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres13"
-  rds_engine_version              = "13.15"
+  rds_engine_version              = "13.20"
   rds_instance_name               = "${local.RDS_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
 
