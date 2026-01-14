@@ -80,8 +80,7 @@ done
 echo ""
 
 if [[ $CONCLUSION != 'success' ]]; then
-  echo "build failed"
-  exit 1
+  echo "build failed, pulling latest from ghcr anyway"
 fi
 
 source scripts/pull-all-images.sh
