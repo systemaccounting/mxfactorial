@@ -4,11 +4,14 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use cache::Cache;
+use ddbclient::DdbClient;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
+use redisclient::RedisClient;
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use service::Service;
 use shutdown::shutdown_signal;
-use std::{env, net::ToSocketAddrs};
+use std::{env, net::ToSocketAddrs, sync::Arc};
 use types::approval::{Approval, Approvals};
 use types::{
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
@@ -17,6 +20,12 @@ use types::{
     transaction_item::TransactionItems,
 };
 mod rules;
+
+#[derive(Clone)]
+struct Store {
+    pool: ConnectionPool,
+    cache: Option<Arc<dyn Cache>>,
+}
 
 // used by lambda to test for service availability
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
@@ -179,7 +188,7 @@ async fn apply_approval_rules<'a>(
 }
 
 async fn apply_rules(
-    State(pool): State<ConnectionPool>,
+    State(state): State<Store>,
     transaction_items: Json<TransactionItems>,
 ) -> Result<axum::Json<IntraTransaction>, StatusCode> {
     if !expected_values(&transaction_items) {
@@ -203,10 +212,10 @@ async fn apply_rules(
     }
 
     // get connection from pool
-    let conn = pool.get_conn().await;
+    let conn = state.pool.get_conn().await;
 
-    // create service with conn
-    let svc = Service::new(&conn);
+    // create service with conn and cache
+    let svc = Service::new(&conn, state.cache.clone());
 
     let mut rule_applied_tr_items =
         apply_transaction_item_rules(&svc, role_sequence, &transaction_items).await;
@@ -242,13 +251,41 @@ async fn main() {
 
     let pool = DB::new_pool(&conn_uri).await;
 
+    // init cache: dynamodb in lambda, redis locally
+    let cache: Option<Arc<dyn Cache>> = if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
+        match DdbClient::new().await {
+            Ok(ddb_client) => {
+                tracing::info!("dynamodb cache initialized");
+                Some(Arc::new(ddb_client))
+            }
+            Err(e) => {
+                tracing::warn!("dynamodb init failed, continuing without cache: {}", e);
+                None
+            }
+        }
+    } else if env::var("REDIS_HOST").is_ok() {
+        let redis_client = RedisClient::new().await;
+        if let Err(e) = redis_client.init().await {
+            tracing::warn!("redis init failed, continuing without cache: {}", e);
+            None
+        } else {
+            tracing::info!("redis cache initialized");
+            Some(Arc::new(redis_client))
+        }
+    } else {
+        tracing::info!("no cache backend configured");
+        None
+    };
+
+    let store = Store { pool, cache };
+
     let app = Router::new()
         .route("/", post(apply_rules))
         .route(
             readiness_check_path.as_str(),
             get(|| async { StatusCode::OK }),
         )
-        .with_state(pool);
+        .with_state(store);
 
     let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
 

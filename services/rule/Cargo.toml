@@ -19,6 +19,9 @@ chrono = "0.4.23"
 nanoid = "0.4.0"
 service = { path = "../../crates/service" }
 shutdown = { path = "../../crates/shutdown" }
+cache = { path = "../../crates/cache" }
+redisclient = { path = "../../crates/redisclient" }
+ddbclient = { path = "../../crates/ddbclient" }
 
 [dev-dependencies]
 regex = "1.0.0"

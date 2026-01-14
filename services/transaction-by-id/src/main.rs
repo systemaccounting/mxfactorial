@@ -22,7 +22,7 @@ async fn handle_event(
 
     let conn = pool.get_conn().await;
 
-    let svc = Service::new(&conn);
+    let svc = Service::new(&conn, None);
 
     let transaction_id = client_request.id.parse::<i32>().unwrap();
 

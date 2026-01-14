@@ -16,6 +16,9 @@ service = { path = "../../crates/service" }
 types = { path = "../../crates/types" }
 httpclient = { path = "../../crates/httpclient" }
 uribuilder = { path = "../../crates/uribuilder" }
+cache = { path = "../../crates/cache" }
+ddbclient = { path = "../../crates/ddbclient" }
+redisclient = { path = "../../crates/redisclient" }
 
 [target.x86_64-unknown-linux-musl.dependencies]
 openssl = { version = "0.10", features = ["vendored"] }
