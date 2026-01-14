@@ -27,7 +27,7 @@ source ./scripts/set-uri-vars.sh
 COMPOSE_IGNORE_ORPHANS=true \
 GRAPHQL_URI=$B64_GRAPHQL_URI \
 	docker compose \
-		-f ./docker/compose.yaml \
+		-f ./docker/services.yaml \
 		up \
 		-d \
 		--force-recreate \

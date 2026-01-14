@@ -22,8 +22,8 @@ fi
 
 set -e # exit when docker login not configured
 
-make --no-print-directory -C migrations start
-source scripts/manage-redis.sh --start
+echo -e -n "\n${GREEN}*** starting storage (postgres -> redis -> warm-cache)${RESET}\n"
+docker compose -f docker/storage.yaml up -d --build --wait
 
 set +e
 
@@ -74,3 +74,7 @@ for d in "${APP_DIRS[@]}"; do
 		publish_client_cde_port
 	fi
 done
+
+if [[ -z "$CI" ]]; then
+	echo -e "\n${YELLOW}*** tail logs with: make logs${RESET}\n"
+fi
