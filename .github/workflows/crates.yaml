@@ -14,8 +14,12 @@ concurrency:
 
 jobs:
   test:
-    name: crates
+    name: ${{ matrix.crate }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        crate: [pg, types, httpclient, uribuilder, redisclient, wsclient, ddbclient, service]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -23,22 +27,15 @@ jobs:
           toolchain: stable
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@nextest
-      - name: crates lint
+      - name: lint
         run: |
-          cargo fmt -p pg -p types -p httpclient -p uribuilder -p redisclient -- --check
-          cargo clippy -p pg -p types -p httpclient -p uribuilder -p redisclient -- -Dwarnings
+          cargo fmt -p ${{ matrix.crate }} -- --check
+          cargo clippy -p ${{ matrix.crate }} -- -Dwarnings
+      - name: test
+        run: cargo test -p ${{ matrix.crate }}
       - name: install cargo-llvm-cov
+        if: matrix.crate == 'types' || matrix.crate == 'pg' || matrix.crate == 'httpclient'
         uses: taiki-e/install-action@cargo-llvm-cov
-      - name: crates unit tests
-        run: cargo test -p pg -p types -p httpclient -p uribuilder -p redisclient
-        # todo: increase partial list below to include remaining crates
-      - name: crates/types coverage report
-        run: |
-          make rust-coverage RUST_PKG=types
-      - name: crates/pg coverage report
-        run: |
-          make rust-coverage RUST_PKG=pg
-      - name: crates/httpclient coverage report
-        run: |
-          make rust-coverage RUST_PKG=httpclient
+      - name: coverage report
+        if: matrix.crate == 'types' || matrix.crate == 'pg' || matrix.crate == 'httpclient'
+        run: make rust-coverage RUST_PKG=${{ matrix.crate }}

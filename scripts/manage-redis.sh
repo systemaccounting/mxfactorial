@@ -27,11 +27,11 @@ function stop() {
 
 function flush() {
 	PROJECT_CONF=project.yaml
-	REDIS_DB=$(yq '.services.event.env_var.set.REDIS_DB.default' $PROJECT_CONF)
-	REDIS_USERNAME=$(yq '.services.event.env_var.set.REDIS_USERNAME.default' $PROJECT_CONF)
-	REDIS_PASSWORD=$(yq '.services.event.env_var.set.REDIS_PASSWORD.default' $PROJECT_CONF)
-	REDIS_PORT=$(yq '.services.event.env_var.set.REDIS_PORT.default' $PROJECT_CONF)
-	REDIS_HOST=$(yq '.services.event.env_var.set.REDIS_HOST.default' $PROJECT_CONF)
+	REDIS_DB=$(yq '.crates.redisclient.env_var.set.REDIS_DB.default' $PROJECT_CONF)
+	REDIS_USERNAME=$(yq '.crates.redisclient.env_var.set.REDIS_USERNAME.default' $PROJECT_CONF)
+	REDIS_PASSWORD=$(yq '.crates.redisclient.env_var.set.REDIS_PASSWORD.default' $PROJECT_CONF)
+	REDIS_PORT=$(yq '.crates.redisclient.env_var.set.REDIS_PORT.default' $PROJECT_CONF)
+	REDIS_HOST=$(yq '.crates.redisclient.env_var.set.REDIS_HOST.default' $PROJECT_CONF)
 	REDIS_URI="redis://$REDIS_USERNAME:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/$REDIS_DB"
 	COMPOSE_PROJECT_NAME=$(yq '.name' ./docker/storage.yaml)
 	CONTAINER_NAME="$COMPOSE_PROJECT_NAME-redis-1"

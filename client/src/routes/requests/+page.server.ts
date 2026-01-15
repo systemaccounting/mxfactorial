@@ -30,14 +30,14 @@ export const load: PageServerLoad = async (page: RequestEvent) => {
 		account_name: lastAuthUser,
 	};
 
-	const balance = await client.query(BALANCE_QUERY, variables);
+	const balance = await client.query(BALANCE_QUERY, variables).toPromise();
 	if (!balance.error) {
 		response.balance = balance.data.balance;
 	} else {
 		console.error(balance.error);
 	}
 
-	const transactionRequests = await client.query(REQUESTS_BY_ACCOUNT_QUERY, variables);
+	const transactionRequests = await client.query(REQUESTS_BY_ACCOUNT_QUERY, variables).toPromise();
 
 	if (!transactionRequests.error) {
 	// duplicate transaction requests where account appears as debitor and

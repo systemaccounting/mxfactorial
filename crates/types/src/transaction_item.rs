@@ -575,7 +575,6 @@ impl TransactionItems {
         }
 
         if !missing_items.is_empty() {
-            println!("missing items: {missing_items:#?}");
             return Err(TransactionItemError::MissingTransactionItems(missing_items));
         }
 

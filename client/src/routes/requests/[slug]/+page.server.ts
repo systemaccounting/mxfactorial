@@ -32,7 +32,7 @@ export const load: PageServerLoad = async (page: RequestEvent) => {
 		account_name: lastAuthUser,
 	};
 
-	const balance = await client.query(BALANCE_QUERY, balanceVariables);
+	const balance = await client.query(BALANCE_QUERY, balanceVariables).toPromise();
 
 	if (!balance.error) {
 		response.balance = balance.data.balance;
@@ -45,7 +45,7 @@ export const load: PageServerLoad = async (page: RequestEvent) => {
 		id: requestId,
 	};
 
-	const request = await client.query(REQUEST_BY_ID_QUERY, requestVariables);
+	const request = await client.query(REQUEST_BY_ID_QUERY, requestVariables).toPromise();
 
 	if (!request.error) {
 		if (!request.data.requestByID) {

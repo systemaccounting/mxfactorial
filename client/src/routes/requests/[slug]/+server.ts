@@ -22,7 +22,7 @@ export const POST: RequestHandler = async (event) => {
 		account_name: lastAuthUser,
 		account_role: accountRole,
 	};
-	const resp = await client.mutation(APPROVE_REQUEST_MUTATION, variables);
+	const resp = await client.mutation(APPROVE_REQUEST_MUTATION, variables).toPromise();
 	if (resp.error) {
 		console.error(resp.error);
 		throw json({ error: 'approve request failed' }, {

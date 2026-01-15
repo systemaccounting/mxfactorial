@@ -30,7 +30,7 @@ export const load: PageServerLoad = async (page: RequestEvent) => {
 		account_name: lastAuthUser,
 	};
 
-	const balance = await client.query(BALANCE_QUERY, balanceVariables);
+	const balance = await client.query(BALANCE_QUERY, balanceVariables).toPromise();
 
 	if (balance.error) {
 		console.error(balance.error);
@@ -41,7 +41,7 @@ export const load: PageServerLoad = async (page: RequestEvent) => {
 		id: transactionId,
 	};
 
-	const transaction = await client.query(TRANSACTION_BY_ID_QUERY, transactionVariables);
+	const transaction = await client.query(TRANSACTION_BY_ID_QUERY, transactionVariables).toPromise();
 
 	if (transaction.error) {
 		console.error(transaction.error);

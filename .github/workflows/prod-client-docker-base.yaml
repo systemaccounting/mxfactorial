@@ -6,7 +6,9 @@ on:
     paths:
     - client/package.json
     - client/package-lock.json
-    - docker/prod/client-base.Dockerfile
+    - docker/client-base.Dockerfile
+    branches:
+    - 'develop'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

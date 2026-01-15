@@ -29,13 +29,13 @@ export const load: PageServerLoad = async (page: RequestEvent) => {
 		account_name: lastAuthUser,
 	};
 
-	const balance = await client.query(BALANCE_QUERY, variables);
+	const balance = await client.query(BALANCE_QUERY, variables).toPromise();
 
 	if (balance.error) {
 		console.error(balance.error);
 	}
 
-	const history = await client.query(TRANSACTIONS_BY_ACCOUNT_QUERY, variables);
+	const history = await client.query(TRANSACTIONS_BY_ACCOUNT_QUERY, variables).toPromise();
 
 	if (!history.data.transactionsByAccount || history.data.transactionsByAccount.length == 0) {
 		console.error('zero transactions found');

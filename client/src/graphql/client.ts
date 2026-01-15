@@ -35,7 +35,9 @@ function createOpts(relativeUri: MaybeString, resource: MaybeString, idToken: st
 			credentials: 'same-origin'
 		},
 		// https://formidable.com/open-source/urql/docs/basics/document-caching/#request-policies
-		requestPolicy: 'cache-and-network'
+		requestPolicy: 'cache-and-network',
+		// graphql server doesnt support GET, use POST for all queries
+		preferGetMethod: false
 	};
 	if (idToken) {
 		opts.fetchOptions = {

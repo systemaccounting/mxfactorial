@@ -15,7 +15,7 @@ export const load: PageServerLoad = async (page: RequestEvent) => {
 		account_name: lastAuthUser
 	};
 
-	const res = await client.query(BALANCE_QUERY, variables);
+	const res = await client.query(BALANCE_QUERY, variables).toPromise();
 
 	if (res.error) {
 		console.error(res.error);

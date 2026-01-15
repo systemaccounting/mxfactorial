@@ -1,6 +1,5 @@
 <script lang="ts">
-	import * as gmapsLoader from '@googlemaps/js-api-loader';
-	const { Loader } = gmapsLoader;
+	import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
 	import { onMount } from 'svelte';
 	import { createClient as createWSClient } from 'graphql-ws';
 	import type { Client } from 'graphql-ws';
@@ -69,9 +68,9 @@
 		throw new Error('missing GOOGLE_MAPS_API_KEY');
 	}
 
-	const loader = new Loader({
-		apiKey: env.PUBLIC_GOOGLE_MAPS_API_KEY as string,
-		version: 'weekly',
+	setOptions({
+		key: env.PUBLIC_GOOGLE_MAPS_API_KEY as string,
+		v: 'weekly',
 		libraries: ['maps', 'marker', 'places']
 	});
 
@@ -138,14 +137,12 @@
 		return { time, country, region, municipality };
 	}
 
-	function initMap() {
-		loader.load().then((google) => {
-			const { Map } = google.maps;
-			map = new Map(document.getElementById('map') as HTMLElement, {
-				center: defaultCoordinates, // usa coordinates
-				zoom: 4,
-				mapId: '4504f8b37365c3d0'
-			});
+	async function initMap() {
+		const { Map } = await importLibrary('maps');
+		map = new Map(document.getElementById('map') as HTMLElement, {
+			center: defaultCoordinates, // usa coordinates
+			zoom: 4,
+			mapId: '4504f8b37365c3d0'
 		});
 	}
 
@@ -170,13 +167,15 @@
 		}
 	}
 
-	function changeMapCenter(location: string) {
+	async function changeMapCenter(location: string) {
 		if (map) {
 			// clear existing markers
 			markers.forEach((marker) => marker.setMap(null));
 			markers = [];
 
-			const geocoder = new google.maps.Geocoder();
+			const { Geocoder } = await importLibrary('geocoding');
+			const { AdvancedMarkerElement } = await importLibrary('marker');
+			const geocoder = new Geocoder();
 			geocoder.geocode({ address: location }, (results, status) => {
 				if (status === 'OK' && results && results.length > 0) {
 					let location = results[0].geometry.location;
@@ -194,8 +193,6 @@
 					}
 
 					map.setZoom(zoomLevel);
-
-					const { AdvancedMarkerElement } = google.maps.marker;
 
 					priceTag = document.createElement('div');
 					priceTag.textContent = `$${price}k`;
