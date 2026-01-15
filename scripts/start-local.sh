@@ -44,8 +44,8 @@ for d in "${APP_DIRS[@]}"; do
 	RUNTIME=$(yq "$CONF_PATH.runtime" $PROJECT_CONF)
 	BUILD_SRC_PATH=$(yq "$CONF_PATH.build_src_path" $PROJECT_CONF)
 
-	# compile rust before starting
-	if [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
+	# compile rust before starting (skip in CI - uses pre-built binaries)
+	if [[ -z "$CI" ]] && [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
 		echo -e -n "\n${GREEN}*** compiling $d${RESET}\n"
 		make --no-print-directory -C "$d" compile
 	fi
@@ -61,7 +61,10 @@ for d in "${APP_DIRS[@]}"; do
 		make --no-print-directory -C "$d" get-secrets ENV=local > /dev/null
 		# &; \ disown fails in make so backgrounding kept in bash
 		if [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
-			(cd "$d"; eval $(cat $ENV_FILE_NAME) cargo run > /dev/null 2>&1 & disown $!)
+			# run pre-built binary from CI matrix compile job
+			# skips cargo fingerprint check which would recompile
+			BINARY_PATH="$(pwd)/target/debug/$(basename "$d")"
+			(cd "$d"; eval $(cat $ENV_FILE_NAME) $BINARY_PATH > /dev/null 2>&1 & disown $!)
 		fi
 	else
 		make --no-print-directory -C "$d" start
