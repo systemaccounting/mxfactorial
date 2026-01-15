@@ -138,7 +138,7 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
                     Ok(message) => {
                         let message = message.value.as_string().unwrap();
                         let gdp = trim_string_decimal(message.as_str());
-                        let msg = Message::Text(gdp.clone());
+                        let msg = Message::Text(gdp.clone().into());
                         match ws_tx.send(msg).await {
                             Ok(_) => {
                                 tracing::info!("message sent to graphql: {}", gdp);

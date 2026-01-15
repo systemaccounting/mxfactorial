@@ -10,8 +10,8 @@ use types::account::AccountProfile;
 use unicode_segmentation::UnicodeSegmentation;
 
 fn random_number(min: i32, max: i32) -> i32 {
-    let mut rng = rand::thread_rng();
-    rng.gen_range(min..max)
+    let mut rng = rand::rng();
+    rng.random_range(min..max)
 }
 
 pub fn guess_first_and_last_names(account: &str) -> (String, String) {

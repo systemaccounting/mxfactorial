@@ -8,11 +8,11 @@ rust-version.workspace = true
 cache_tests = []
 
 [dependencies]
-tokio = { version = "1.35.1", features = ["macros", "rt-multi-thread"] }
-fred = { version = "9.0.3", features = ["i-scripts", "i-pubsub"] }
-tracing = "0.1.40"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
-async-trait = "0.1.73"
-serde_json = "1.0.93"
+tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
+fred = { version = "10.1", features = ["i-scripts", "i-pubsub"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+async-trait = "0.1"
+serde_json = "1.0"
 cache = { path = "../cache" }
 types = { path = "../types" }

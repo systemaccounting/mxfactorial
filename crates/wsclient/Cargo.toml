@@ -5,5 +5,5 @@ edition = "2021"
 rust-version.workspace = true
 
 [dependencies]
-async-tungstenite = { version = "0.28.0", features = ["async-std-runtime"] }
-async-std = "1.13.0"
+async-tungstenite = { version = "0.32", features = ["async-std-runtime"] }
+async-std = "1.13"
