@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   push_image:
-    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     name: push image to dev ecr
     runs-on: ubuntu-latest
     env:
