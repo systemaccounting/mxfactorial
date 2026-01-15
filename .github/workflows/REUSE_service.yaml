@@ -104,7 +104,7 @@ jobs:
         with:
           path: target/debug/
           merge-multiple: true
-      - name: set binary timestamps
+      - name: set permissions
         run: chmod +x target/debug/*
       - name: start services
         run: make start
@@ -124,7 +124,7 @@ jobs:
         with:
           path: target/debug/
           merge-multiple: true
-      - name: set binary timestamps
+      - name: set permissions
         run: chmod +x target/debug/*
       - name: start services
         run: make start
