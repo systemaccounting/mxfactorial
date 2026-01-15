@@ -104,6 +104,8 @@ jobs:
         with:
           path: target/debug/
           merge-multiple: true
+      - name: set binary timestamps
+        run: chmod +x target/debug/* && touch target/debug/*
       - name: start services
         run: make start
       - name: test service integration
@@ -122,6 +124,8 @@ jobs:
         with:
           path: target/debug/
           merge-multiple: true
+      - name: set binary timestamps
+        run: chmod +x target/debug/* && touch target/debug/*
       - name: start services
         run: make start
       - name: e2e test client
