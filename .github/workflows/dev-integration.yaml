@@ -51,7 +51,7 @@ jobs:
       - name: reset dev rds
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./migrations resetrds ENV=dev DB=test
       - name: warm cache
-        run: bash scripts/invoke-warm-cache.sh --env dev
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} bash scripts/invoke-warm-cache.sh --env dev
       - name: run dev cloud integration tests
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} cargo test --manifest-path ./tests/Cargo.toml --features integration_tests -- --test-threads=1
       # todo: test client integration
