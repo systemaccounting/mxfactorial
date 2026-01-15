@@ -3,6 +3,7 @@ name = "ddbclient"
 version = "0.1.0"
 edition = "2021"
 rust-version.workspace = true
+description = "implements cache trait for dynamodb"
 
 [dependencies]
 tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
