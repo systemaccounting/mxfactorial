@@ -72,6 +72,7 @@ test:
 
 test-ci:
 	if ! [ -d node_modules ]; then npm install; fi
+	@$(MAKE) -s install-sys-deps
 	@$(MAKE) -s install-browsers
 	@$(MAKE) -s get-secrets ENV=local
 	npm run test-ci
