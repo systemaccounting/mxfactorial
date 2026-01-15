@@ -43,13 +43,13 @@ fn get_cache_key_approvers() -> &'static str {
 }
 
 pub struct RedisClient {
-    inner: fred::clients::RedisClient,
+    inner: Client,
 }
 
 impl RedisClient {
     pub async fn new() -> Self {
         let redis_uri = Self::redis_uri_from_env();
-        let redis_config = RedisConfig::from_url(&redis_uri).unwrap();
+        let redis_config = Config::from_url(&redis_uri).unwrap();
         let redis_client = Builder::from_config(redis_config).build().unwrap();
         Self {
             inner: redis_client,
@@ -71,7 +71,7 @@ impl RedisClient {
         )
     }
 
-    pub async fn init(&self) -> Result<(), RedisError> {
+    pub async fn init(&self) -> Result<(), Error> {
         match self.inner.init().await {
             Ok(_) => {
                 tracing::info!("redis client initialized");
@@ -89,11 +89,11 @@ impl RedisClient {
         script: &str,
         keys: Vec<String>,
         args: Vec<String>,
-    ) -> Result<RedisValue, RedisError> {
+    ) -> Result<Value, Error> {
         self.inner.eval(script, keys, args).await
     }
 
-    pub async fn subscribe(&self, channels: Vec<String>) -> Result<(), RedisError> {
+    pub async fn subscribe(&self, channels: Vec<String>) -> Result<(), Error> {
         self.inner.subscribe(channels).await
     }
 
@@ -101,23 +101,23 @@ impl RedisClient {
         self.inner.message_rx()
     }
 
-    pub async fn get(&self, key: &str) -> Result<Option<String>, RedisError> {
+    pub async fn get(&self, key: &str) -> Result<Option<String>, Error> {
         self.inner.get(key).await
     }
 
-    pub async fn set(&self, key: &str, value: &str) -> Result<(), RedisError> {
+    pub async fn set(&self, key: &str, value: &str) -> Result<(), Error> {
         self.inner.set(key, value, None, None, false).await
     }
 
-    pub async fn sadd(&self, key: &str, value: &str) -> Result<i64, RedisError> {
+    pub async fn sadd(&self, key: &str, value: &str) -> Result<i64, Error> {
         self.inner.sadd(key, value).await
     }
 
-    pub async fn smembers(&self, key: &str) -> Result<Vec<String>, RedisError> {
+    pub async fn smembers(&self, key: &str) -> Result<Vec<String>, Error> {
         self.inner.smembers(key).await
     }
 
-    pub async fn srem(&self, key: &str, value: &str) -> Result<i64, RedisError> {
+    pub async fn srem(&self, key: &str, value: &str) -> Result<i64, Error> {
         self.inner.srem(key, value).await
     }
 }

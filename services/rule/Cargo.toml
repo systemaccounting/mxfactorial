@@ -6,16 +6,17 @@ publish = false
 rust-version.workspace = true
 
 [dependencies]
-axum = "0.6.2"
-tokio = { version = "1.33.0", default-features = false, features = [
+axum = "0.8"
+tokio = { version = "1.49", default-features = false, features = [
 	"rt-multi-thread",
 	"macros",
+	"net",
 ] }
-tracing = "0.1.37"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 types = { path = "../../crates/types" }
 pg = { path = "../../crates/pg" }
-chrono = "0.4.23"
+chrono = "0.4"
 nanoid = "0.4.0"
 service = { path = "../../crates/service" }
 shutdown = { path = "../../crates/shutdown" }
@@ -24,7 +25,7 @@ redisclient = { path = "../../crates/redisclient" }
 ddbclient = { path = "../../crates/ddbclient" }
 
 [dev-dependencies]
-regex = "1.0.0"
+regex = "1.12"
 
 [target.x86_64-unknown-linux-musl.dependencies]
 openssl = { version = "0.10", features = ["vendored"] }

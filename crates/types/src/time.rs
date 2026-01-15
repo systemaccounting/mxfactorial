@@ -101,9 +101,9 @@ mod tests {
         let test_serializer = serde_assert::Serializer::builder().build();
 
         let got = test_tz_time.serialize(&test_serializer).unwrap();
-        let want = serde_assert::Tokens(vec![serde_assert::Token::Str(String::from(
+        let want = [serde_assert::Token::Str(String::from(
             "2023-10-30T04:56:56.000Z",
-        ))]);
+        ))];
 
         assert_eq!(got, want, "got {:?}, want {:?}", got, want)
     }

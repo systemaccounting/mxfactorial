@@ -5,14 +5,14 @@ edition = "2021"
 rust-version.workspace = true
 
 [dependencies]
-aws-config = "1.1.1"
-aws-credential-types = "1.1.1"
-aws-sigv4 = "1.1.1"
-aws-smithy-runtime-api = "1.1.1"
-http = "0.2.0"
-reqwest = { version = "0.11.23", features = ["json"] }
+aws-config = "1.8"
+aws-credential-types = "1.2"
+aws-sigv4 = "1.3"
+aws-smithy-runtime-api = "1.10"
+http = "1.4"
+reqwest = { version = "0.13", features = ["json"] }
 
 [dev-dependencies]
-httpmock = "0.7.0"
-serde = { version = "1.0.195", features = ["derive"] }
-tokio = { version = "1.35.1", features = ["macros"] }
+httpmock = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.49", features = ["macros"] }
