@@ -1,12 +1,6 @@
 .github:
   env_var:
-    set:
-      GITHUB_ORG:
-        ssm: null
-        default: systemaccounting
-      GITHUB_REPO_NAME:
-        ssm: null
-        default: mxfactorial
+    set: {}
     get: []
   params: []
   codecov:
@@ -16,16 +10,7 @@
       - ui
   workflows:
     env_var:
-      set:
-        GITHUB_REGISTRY:
-          ssm: null
-          default: ghcr.io
-        IMAGE_BUILDER_WORKFLOW:
-          ssm: null
-          default: build-all-images.yaml
-        DEPLOY_IMAGE_WORKFLOW:
-          ssm: null
-          default: deploy-all-images.yaml
+      set: {}
       get: []
     params: []
 client:
@@ -146,9 +131,6 @@ docker:
       DOCKER_USER:
         ssm: null
         default: mxfactorial
-      LOCAL_TAG_VERSION:
-        ssm: null
-        default: latest
     get: []
 infra:
   terraform:
@@ -177,6 +159,13 @@ infra:
               ssm: null
               default: provided.al2023
           get: []
+        codepipeline:
+          env_var:
+            set:
+              BUILD_OBJECT_KEY_PATH:
+                ssm: null
+                default: build
+            get: []
         environment:
           env_var:
             set:
@@ -213,7 +202,7 @@ infra:
               REGION:
                 ssm: null
                 default: us-east-1
-              RDS_PREFIX:
+              NAME_PREFIX:
                 ssm: null
                 default: mxfactorial
               SSM_VERSION:
@@ -246,9 +235,6 @@ infra:
               BALANCE_BY_ACCOUNT_URL:
                 ssm: service/lambda/balance_by_account/url
                 default: null
-              RDS_INSTANCE_NAME_PREFIX:
-                ssm: null
-                default: mxfactorial
               READINESS_CHECK_PATH:
                 ssm: service/lambda/readiness_check_path
                 default: /healthz
@@ -305,6 +291,9 @@ infra:
               TFSTATE_BUCKET_PREFIX:
                 ssm: null
                 default: mxfactorial-tfstate
+              INTEG_TEST_OBJECT_KEY_PATH:
+                ssm: null
+                default: integ
             get: []
 k8s:
   local:
