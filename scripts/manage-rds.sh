@@ -19,8 +19,8 @@ PROJECT_CONF=project.yaml
 REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
 
 ENV_ID=$(source scripts/print-env-id.sh)
-RDS_INSTANCE_NAME_PREFIX=$(yq '.infra.terraform.aws.modules.environment.env_var.set.RDS_INSTANCE_NAME_PREFIX.default' $PROJECT_CONF)
-RDS_INSTANCE_NAME="$RDS_INSTANCE_NAME_PREFIX-$ENV_ID-$ENV"
+NAME_PREFIX=$(yq '.infra.terraform.aws.modules.environment.env_var.set.NAME_PREFIX.default' $PROJECT_CONF)
+RDS_INSTANCE_NAME="$NAME_PREFIX-$ENV_ID-$ENV"
 
 if [[ "$START" -eq 1 ]]; then
 	aws rds start-db-instance \
