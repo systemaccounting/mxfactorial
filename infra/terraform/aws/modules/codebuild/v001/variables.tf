@@ -1,0 +1,11 @@
+variable "project_name" {}
+variable "service_name" {}
+variable "env" {}
+variable "env_id" {}
+variable "aws_region" {}
+variable "aws_account_id" {}
+variable "compute_type" {}
+variable "buildspec" {}
+variable "artifacts_bucket_arn" {}
+variable "ecr_repository_arn" {}
+variable "lambda_function_arn" {}
