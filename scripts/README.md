@@ -144,10 +144,6 @@ inits terraform state for dev envs
 
 creates then sets custom env id to enable access to dev env from multiple workspaces
 
-##### `delete-dev-storage.sh`
-
-deletes storage for cloud dev environment with aws cli instead of terraform when state file not found, e.g. cloud dev env storage was created on different machine
-
 ##### `list-lambdas.sh`
 
 lists lambdas created by terraform
@@ -216,6 +212,10 @@ invokes go-migrate lambda to run migrations on rds
 
 send a http request to the internal `migrations/go-migrate` tool
 
+##### `ecr-images.sh`
+
+triggers codebuild to build, test and push images to ecr. `--build` builds+tests, `--push` pushes to ecr, `--deploy` updates lambdas, `--no-test` skips tests, `--integ` runs integration tests, `--pull` pulls from ecr, `--service <name>` targets single service
+
 ##### `auth-ecr.sh`
 
 authenticate with ecr
@@ -248,10 +248,6 @@ prints uri of ecr repo
 
 prints service image tag with ecr repo uri and current git sha added as tag version
 
-##### `delete-ecr-repos.sh`
-
-convenience script to delete all dev ecr repos
-
 ##### `push-dev-image.sh`
 
 pushes local docker image to dev ecr repo (assumes local image already tagged)
@@ -282,22 +278,9 @@ used in integration test workflow after cloud integration tests pass
 1. adds prod tag if current dev image tagged with merge commit, then pushes to prod ecr
 1. exits if current dev image NOT tagged with merge commit (prod image not tagged and pushed)
 
-##### `build-image-job.sh`
-
-used in `.github/workflows/build-all-images.yaml` to copy zipped code from s3, then build, tag and push service images to github container registry
-
 ##### `zip-services.sh`
 
-adds services to zip file. used by `scripts/build-all-images.sh` before triggering `.github/workflows/build-all-images.yaml`
-
-##### `build-all-images.sh`
-zips and pushes current service code to s3, then triggers `.github/workflows/build-all-images.yaml` to avoid building almost a dozen rust images locally
-
-##### `pull-all-images.sh`
-pulls images built and pushed by `.github/workflows/build-all-images.yaml`
-
-##### `deploy-all-images.sh`
-zips and pushes current service code to s3, then triggers `.github/workflows/deploy-all-images.yaml` to build and deploy services to lambda
+adds services to zip file for s3 upload
 
 ##### `create-env-id.sh`
 adds a [$RANDOM](https://tldp.org/LDP/abs/html/randomvar.html) `ENV_ID` variable the `.env` file in project root. the `ENV_ID` variable is used by terraform to provision cloud development environments matched to a developers local machine
@@ -331,9 +314,6 @@ gets ssh key from ssm and writes it to disk
 
 #### `install.sh`
 installs project dependencies. only macos supported
-
-#### `delete-dev-images.sh`
-deletes all images of single app in dev ecr
 
 #### `test-availability.sh`
 tests availability of services locally or in cloud
