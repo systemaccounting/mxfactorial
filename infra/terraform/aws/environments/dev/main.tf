@@ -7,7 +7,7 @@ locals {
   ARTIFACTS_PREFIX = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
   TFSTATE_PREFIX   = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
   INFRA_ENV_VAR    = local.PROJECT_CONF.infra.terraform.aws.modules.environment.env_var.set
-  RDS_PREFIX       = local.INFRA_ENV_VAR.RDS_PREFIX.default
+  NAME_PREFIX       = local.INFRA_ENV_VAR.NAME_PREFIX.default
   REGION           = local.INFRA_ENV_VAR.REGION.default
   ENV_ID           = module.env_id.ENV_ID
   ID_ENV           = "${local.ENV_ID}-${local.ENV}"
@@ -57,7 +57,7 @@ module "dev" {
   rds_instance_class              = "db.t3.micro"
   rds_parameter_group             = "default.postgres14"
   rds_engine_version              = "14.17"
-  rds_instance_name               = "${local.RDS_PREFIX}-${local.ID_ENV}"
+  rds_instance_name               = "${local.NAME_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
 
   ############### api gateway ###############

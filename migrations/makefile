@@ -64,45 +64,28 @@ create:
 ###################### local/docker migrate commands ######################
 
 resetdocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd reset
-
-rl:
-	$(MAKE) resetdocker
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd reset 2>&1 | grep -v "No services to build"
 
 downdocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd down
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd down 2>&1 | grep -v "No services to build"
 
 testdocker:
 	$(MAKE) resetdocker
 	$(MAKE) downdocker
 
 updocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd up
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd up 2>&1 | grep -v "No services to build"
 
 dropdocker:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd drop
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd drop 2>&1 | grep -v "No services to build"
 
 insert:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/insert-transactions.sh
-
-###################### rds migrate commands ######################
-
-resetrds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd reset
-
-downrds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd down
-
-testrds:
-	@$(MAKE) resetrds
-	@$(MAKE) downrds
-
-uprds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd up
-
-droprds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd drop
 
 ###################### arg tests ######################
 

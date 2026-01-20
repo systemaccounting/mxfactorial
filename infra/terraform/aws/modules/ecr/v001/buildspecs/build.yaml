@@ -1,0 +1,32 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+      - export SHORT_SHA=$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION:-$CODEBUILD_BUILD_ID} | sed 's/.*://' | cut -c1-7)
+      - export ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ENV_ID/$ENV/$SERVICE_NAME
+  build:
+    commands:
+      - echo "building $SERVICE_NAME (RUN_TESTS=$RUN_TESTS, PUSH_IMAGE=$PUSH_IMAGE)..."
+      - docker build --build-arg RUN_TESTS=$RUN_TESTS -t $SERVICE_NAME:$SHORT_SHA -f docker/$SERVICE_NAME.Dockerfile .
+      - docker tag $SERVICE_NAME:$SHORT_SHA $ECR_URI:$SHORT_SHA
+      - docker tag $SERVICE_NAME:$SHORT_SHA $ECR_URI:latest
+  post_build:
+    commands:
+      - |
+        if [ "$PUSH_IMAGE" = "true" ]; then
+          echo "pushing $SERVICE_NAME..."
+          docker push $ECR_URI:$SHORT_SHA
+          docker push $ECR_URI:latest
+        else
+          echo "skipping push (PUSH_IMAGE=$PUSH_IMAGE)"
+        fi
+      - |
+        if [ "$DEPLOY" = "true" ]; then
+          echo "deploying $SERVICE_NAME to lambda..."
+          aws lambda update-function-code \
+            --function-name $SERVICE_NAME-$ENV_ID-$ENV \
+            --image-uri $ECR_URI:latest \
+            --region $REGION
+        fi

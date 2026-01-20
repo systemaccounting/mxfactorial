@@ -1,9 +1,12 @@
 locals {
-  ID_ENV                 = "${var.env_id}-${var.env}"
-  PROJECT_CONF_FILE_NAME = "project.yaml"
-  PROJECT_CONF           = yamldecode(file("../../../../../${local.PROJECT_CONF_FILE_NAME}"))
-  STORAGE_ENV_VAR        = local.PROJECT_CONF.infra.terraform.aws.modules.project-storage.env_var.set
-  ID_ENV_PREFIX          = "${var.env_id}/${var.env}"
+  ID_ENV                     = "${var.env_id}-${var.env}"
+  PROJECT_CONF_FILE_NAME     = "project.yaml"
+  PROJECT_CONF               = yamldecode(file("../../../../../${local.PROJECT_CONF_FILE_NAME}"))
+  STORAGE_ENV_VAR            = local.PROJECT_CONF.infra.terraform.aws.modules.project-storage.env_var.set
+  ID_ENV_PREFIX              = "${var.env_id}/${var.env}"
+  SERVICES_ZIP               = local.PROJECT_CONF.scripts.env_var.set.SERVICES_ZIP.default
+  INTEG_TEST_OBJECT_KEY_PATH = local.STORAGE_ENV_VAR.INTEG_TEST_OBJECT_KEY_PATH.default
+  INTEG_SOURCE_LOCATION      = "${local.INTEG_TEST_OBJECT_KEY_PATH}/${local.SERVICES_ZIP}"
 
   // add a terraform_data precondition to fail
   // if a service is not found in project.yaml

@@ -13,6 +13,10 @@ compose-up-build:
 compose-down:
 	bash scripts/compose.sh --down
 
+compose-add-measure:
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose -f docker/storage.yaml -f docker/measure.yaml up -d
+
 rebuild-db:
 	@$(MAKE) -C migrations rebuild
 	@$(MAKE) -C migrations run

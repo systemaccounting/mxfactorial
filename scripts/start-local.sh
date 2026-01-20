@@ -44,24 +44,24 @@ for d in "${APP_DIRS[@]}"; do
 	RUNTIME=$(yq "$CONF_PATH.runtime" $PROJECT_CONF)
 	BUILD_SRC_PATH=$(yq "$CONF_PATH.build_src_path" $PROJECT_CONF)
 
-	# compile rust before starting (skip in CI - uses pre-built binaries)
-	if [[ -z "$CI" ]] && [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
+	# compile rust before starting (skip when using pre-built binaries from services workflow artifacts)
+	if [[ -z "$SERVICES_WORKFLOW" ]] && [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
 		echo -e -n "\n${GREEN}*** compiling $d${RESET}\n"
 		make --no-print-directory -C "$d" compile
 	fi
 
-	# skip starting client in workflows
-	if [[ "$CI" ]] && [[ "$d" == 'client' ]]; then
+	# skip starting client in services workflows
+	if [[ "$SERVICES_WORKFLOW" ]] && [[ "$d" == 'client' ]]; then
 		continue
 	fi
 
 	echo -e -n "\n${GREEN}*** starting $d${RESET}\n"
 
-	if [[ "$CI" ]]; then
+	if [[ "$SERVICES_WORKFLOW" ]]; then
 		make --no-print-directory -C "$d" get-secrets ENV=local > /dev/null
 		# &; \ disown fails in make so backgrounding kept in bash
 		if [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
-			# run pre-built binary from CI matrix compile job
+			# run pre-built binary from services workflow compile job artifacts
 			# skips cargo fingerprint check which would recompile
 			BINARY_PATH="$(pwd)/target/debug/$(basename "$d")"
 			(cd "$d"; eval $(cat $ENV_FILE_NAME) $BINARY_PATH > /dev/null 2>&1 & disown $!)

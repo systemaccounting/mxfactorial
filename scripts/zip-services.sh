@@ -25,14 +25,9 @@ zip -r $SERVICES_ZIP \
 	services \
 	crates \
 	tests \
-	migrations/go-migrate \
-	migrations/warm-cache \
-	migrations/schema \
-	migrations/seed \
-	migrations/testseed \
+	migrations \
 	--exclude='*/.env' \
 	--exclude='*/README.md' \
-	--exclude='tests/testdata/*' \
 	--exclude='tests/thunder-tests/*' \
 	--exclude='services/graphql/postman/*' \
 	--exclude='client/node_modules/*' \

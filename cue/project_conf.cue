@@ -86,6 +86,9 @@ infra: {
             }
             modules: {
                 env_var!: #EnvVars
+                codepipeline: {
+                    env_var!: #EnvVars
+                }
                 environment: {
                     env_var!: #EnvVars
                 }

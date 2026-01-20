@@ -1,0 +1,245 @@
+name: services
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+    - 'services/graphql/**'
+    - 'services/request-create/**'
+    - 'services/request-approve/**'
+    - 'services/rule/**'
+    - 'services/request-by-id/**'
+    - 'services/requests-by-account/**'
+    - 'services/transaction-by-id/**'
+    - 'services/transactions-by-account/**'
+    - 'services/balance-by-account/**'
+    - 'crates/**'
+    - 'migrations/schema/*'
+    branches-ignore:
+    - 'master'
+    - 'develop'
+
+concurrency:
+  group: services-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cache_images:
+    name: cache base images
+    runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    steps:
+      - name: login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: restore image cache
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/image-cache
+          key: base-images-v1
+      - name: pull and retag images
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/image-cache
+          docker pull ghcr.io/systemaccounting/rust:latest
+          docker tag ghcr.io/systemaccounting/rust:latest public.ecr.aws/docker/library/rust:latest
+          docker pull ghcr.io/systemaccounting/lambda-provided:al2023
+          docker tag ghcr.io/systemaccounting/lambda-provided:al2023 public.ecr.aws/lambda/provided:al2023
+          docker pull ghcr.io/systemaccounting/postgresql:15
+          docker tag ghcr.io/systemaccounting/postgresql:15 public.ecr.aws/bitnami/postgresql:15
+          docker pull ghcr.io/systemaccounting/redis:latest
+          docker tag ghcr.io/systemaccounting/redis:latest public.ecr.aws/bitnami/redis:latest
+          docker pull ghcr.io/systemaccounting/alpine:latest
+          docker tag ghcr.io/systemaccounting/alpine:latest public.ecr.aws/docker/library/alpine:latest
+          docker pull ghcr.io/systemaccounting/node:lts-alpine
+          docker tag ghcr.io/systemaccounting/node:lts-alpine public.ecr.aws/docker/library/node:lts-alpine
+          docker save -o ~/image-cache/images.tar \
+            public.ecr.aws/docker/library/rust:latest \
+            public.ecr.aws/lambda/provided:al2023 \
+            public.ecr.aws/bitnami/postgresql:15 \
+            public.ecr.aws/bitnami/redis:latest \
+            public.ecr.aws/docker/library/alpine:latest \
+            public.ecr.aws/docker/library/node:lts-alpine
+
+  lint_test:
+    name: lint test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: linting
+        run: |
+          cargo fmt -- --check
+          cargo clippy -- -Dwarnings
+
+  unit_test:
+    name: unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: unit test
+        run: cargo test
+
+  database_test:
+    name: database test in local docker
+    needs: cache_images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: restore image cache
+        uses: actions/cache@v4
+        with:
+          path: ~/image-cache
+          key: base-images-v1
+      - name: load cached images
+        run: docker load -i ~/image-cache/images.tar
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: test database
+        run: make -C crates/pg test-db
+
+  compile:
+    name: compile ${{ matrix.service }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - graphql
+          - request-create
+          - request-approve
+          - rule
+          - request-by-id
+          - requests-by-account
+          - transaction-by-id
+          - transactions-by-account
+          - balance-by-account
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ${{ matrix.service }}
+      - name: compile
+        run: cargo build -p ${{ matrix.service }}
+      - name: upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}
+          path: target/debug/${{ matrix.service }}
+          retention-days: 1
+
+  integration_test:
+    name: integration test in local docker
+    needs: [cache_images, compile]
+    runs-on: ubuntu-latest
+    env:
+      SERVICES_WORKFLOW: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: restore image cache
+        uses: actions/cache@v4
+        with:
+          path: ~/image-cache
+          key: base-images-v1
+      - name: load cached images
+        run: docker load -i ~/image-cache/images.tar
+      - name: download all binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: target/debug/
+          merge-multiple: true
+      - name: set permissions
+        run: chmod +x target/debug/*
+      - name: start services
+        run: make start
+      - name: test service integration
+        run: make -C ./tests test-local
+      - name: clean up
+        run: make stop
+
+  client_test:
+    name: client test in local docker
+    needs: [cache_images, compile]
+    runs-on: ubuntu-latest
+    env:
+      SERVICES_WORKFLOW: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: restore image cache
+        uses: actions/cache@v4
+        with:
+          path: ~/image-cache
+          key: base-images-v1
+      - name: load cached images
+        run: docker load -i ~/image-cache/images.tar
+      - name: download all binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: target/debug/
+          merge-multiple: true
+      - name: set permissions
+        run: chmod +x target/debug/*
+      - name: start services
+        run: make start
+      - name: e2e test client
+        run: make -C ./client test-ci
+      - name: clean up
+        run: make stop
+
+  push_images:
+    name: push ${{ matrix.service }} image
+    runs-on: ubuntu-latest
+    needs: [cache_images, lint_test, unit_test, database_test, integration_test, client_test]
+    strategy:
+      matrix:
+        service:
+          - graphql
+          - request-create
+          - request-approve
+          - rule
+          - request-by-id
+          - requests-by-account
+          - transaction-by-id
+          - transactions-by-account
+          - balance-by-account
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      NO_TEST: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: restore image cache
+        uses: actions/cache@v4
+        with:
+          path: ~/image-cache
+          key: base-images-v1
+      - name: load cached images
+        run: docker load -i ~/image-cache/images.tar
+      - name: mask values
+        run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
+      - name: build image
+        run: make -C services/${{ matrix.service }} build-image
+      - name: tag image
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C services/${{ matrix.service }} tag-dev-image
+      - name: push image
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C services/${{ matrix.service }} push-dev-image

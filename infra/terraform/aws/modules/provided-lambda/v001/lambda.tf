@@ -85,7 +85,7 @@ resource "aws_iam_policy" "default" {
         Action = [
           "logs:CreateLogGroup"
         ],
-        Resource = "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+        Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:*"
       },
       {
         Sid    = "${local.SERVICE_NAME_TITLE}LogEventPolicy${local.TITLED_ID_ENV}"
@@ -95,7 +95,7 @@ resource "aws_iam_policy" "default" {
           "logs:PutLogEvents"
         ],
         Resource = [
-          "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:${local.LOG_GROUP_NAME}:*"
+          "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:${local.LOG_GROUP_NAME}:*"
         ]
     }],
   })

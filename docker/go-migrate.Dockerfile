@@ -1,4 +1,4 @@
-FROM alpine:latest AS builder
+FROM public.ecr.aws/docker/library/alpine:latest AS builder
 
 ARG VERSION=v4.17.0
 ARG ARCH=linux-amd64

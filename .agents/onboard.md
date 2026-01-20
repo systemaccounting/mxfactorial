@@ -14,7 +14,7 @@ read scripts/bootcamp.sh to learn how to test services
 
 `make start` to start services in docker. services use `cargo-watch` for hot-reloading during development
 
-test the bootcamp commands to learn services requests and responses
+test the bootcamp commands to learn services requests and responses. the primary transaction bootcamp commands are `make rule`, `make request-create`, `make request-approve` and `make balance-by-account`
 
 project.yaml is project config uniformly sourced in bash, make and terraform code to avoid scattering it across the project. its large so parse when possible. for example, `yq .services.rule.env_var.set project.yaml` to list environment variables set by services/rule and `yq .services.rule.env_var.get project.yaml` to list variables it requires
 
@@ -103,3 +103,15 @@ check cloudwatch logs: `aws logs tail /aws/lambda/SERVICE-ENVID-ENV --since 5m -
 image tags use `SHORT_GIT_SHA_LENGTH` from project.yaml (default: 7) for git hash length
 
 use yq instead of jq for local json/yaml scripting
+
+`bash scripts/ecr-images.sh --build` triggers codebuild to build+test images remotely. add `--push` to push to ECR, `--deploy` to update lambdas, `--no-test` to skip tests, `--service graphql` to target one service
+
+`bash scripts/ecr-images.sh --integ` runs integration tests in codebuild using pre-built ECR images (test-db, test-cache, test-local, client e2e). requires `--build --push` first
+
+`bash scripts/ecr-images.sh --pull` pulls images from ECR and retags locally
+
+codebuild projects are in infra/terraform/aws/modules/project-storage/v001. per-service builds in codepipeline.tf (sources codebuild module), integ tests in integ.tf (buildspec inlined)
+
+buildspecs use runtime config via env vars (RUN_TESTS, PUSH_IMAGE, DEPLOY) set by `--environment-variables-override` in ecr-images.sh
+
+s3 upload to artifacts bucket auto-triggers codepipeline via eventbridge when using `--build --push` without `--service`

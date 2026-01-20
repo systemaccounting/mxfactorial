@@ -47,7 +47,7 @@ jobs:
           echo "redis key count: $(wc -l < /tmp/redis_keys.txt)"
       - name: reset rds
         # reset dev rds to match local postgres seed data
-        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C migrations resetrds
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C migrations/go-migrate resetrds
       - name: warm ddb cache
         run: |
           # temporarily add env vars to warm-cache get array so make env fetches them
