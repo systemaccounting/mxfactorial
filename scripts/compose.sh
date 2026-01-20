@@ -36,14 +36,24 @@ COMPOSE_DIR=./docker
 INIT_CMD="GRAPHQL_URI=$B64_GRAPHQL_URI \\
 docker compose \\
   -f $COMPOSE_DIR/storage.yaml \\
-  -f $COMPOSE_DIR/services.yaml"
+  -f $COMPOSE_DIR/services.yaml \\
+  -f $COMPOSE_DIR/measure.yaml"
 
 if [[ $UP ]]; then
 
+  if [[ $BUILD ]]; then
+    # build storage first for reliable startup
+    STORAGE_BUILD_CMD="docker compose -f $COMPOSE_DIR/storage.yaml build"
+    echo "$STORAGE_BUILD_CMD"
+    echo ""
+    eval "$STORAGE_BUILD_CMD"
+  fi
+
   UP_CMD=$(printf '%s \\\n  up \\\n  -d \\\n  --renew-anon-volumes' "$INIT_CMD")
 
+  # use --no-build when build was already done above
   if [[ $BUILD ]]; then
-    UP_CMD=$(printf '%s \\\n  --build' "$UP_CMD")
+    UP_CMD=$(printf '%s \\\n  --no-build' "$UP_CMD")
   fi
 
 	echo "$UP_CMD"

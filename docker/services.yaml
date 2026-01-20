@@ -19,6 +19,8 @@ services:
       READINESS_CHECK_PATH: "/healthz"
       RUST_LOG: info
       GRAPHQL_PORT: 10000
+      GRAPHQL_RESOURCE: query
+      GRAPHQL_WS_RESOURCE: ws
   balance-by-account:
     image: balance-by-account:latest
     build:
@@ -196,53 +198,8 @@ services:
       TRANSACTIONS_BY_ACCOUNT_PORT: 10008
     depends_on:
       - postgres
-  event:
-    image: event:latest
-    build:
-      context: ../
-      dockerfile: ./docker/event.Dockerfile
-    environment:
-      PGDATABASE: mxfactorial
-      PGUSER: test
-      PGPASSWORD: test
-      PGHOST: postgres
-      PGPORT: 5432
-      REDIS_DB: 0
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_USERNAME: default
-      REDIS_PASSWORD: test
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-  measure:
-    image: measure:latest
-    build:
-      context: ../
-      dockerfile: ./docker/measure.Dockerfile
-    ports:
-      - "10010:10010"
-    environment:
-      PGDATABASE: mxfactorial
-      PGUSER: test
-      PGPASSWORD: test
-      PGHOST: postgres
-      PGPORT: 5432
-      REDIS_DB: 0
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_USERNAME: default
-      REDIS_PASSWORD: test
-      MEASURE_PORT: 10010
-      READINESS_CHECK_PATH: "/healthz"
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
   client:
+    image: client:latest
     build:
       context: ../
       dockerfile: ./docker/client.Dockerfile

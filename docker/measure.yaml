@@ -1,0 +1,48 @@
+name: mxf
+services:
+  event:
+    image: event:latest
+    build:
+      context: ../
+      dockerfile: ./docker/event.Dockerfile
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      REDIS_DB: 0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USERNAME: default
+      REDIS_PASSWORD: test
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+  measure:
+    image: measure:latest
+    build:
+      context: ../
+      dockerfile: ./docker/measure.Dockerfile
+    ports:
+      - "10010:10010"
+    environment:
+      PGDATABASE: mxfactorial
+      PGUSER: test
+      PGPASSWORD: test
+      PGHOST: postgres
+      PGPORT: 5432
+      REDIS_DB: 0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_USERNAME: default
+      REDIS_PASSWORD: test
+      MEASURE_PORT: 10010
+      READINESS_CHECK_PATH: "/healthz"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
