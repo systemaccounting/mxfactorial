@@ -1,6 +1,6 @@
 locals {
-  PROJECT_CONF     = yamldecode(file("../../../../../project.yaml"))
-  GITHUB_REPO_NAME = local.PROJECT_CONF[".github"].env_var.set.GITHUB_REPO_NAME.default
+  PROJECT_CONF         = yamldecode(file("../../../../../project.yaml"))
+  NAME_PREFIX = local.PROJECT_CONF.infra.terraform.aws.modules.environment.env_var.set.NAME_PREFIX.default
 }
 
 resource "aws_api_gateway_account" "apigw_logging" {
@@ -13,7 +13,7 @@ resource "aws_iam_role" "apigw_logging" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "${title(local.GITHUB_REPO_NAME)}APIGwTrustPolicy"
+        Sid    = "${title(local.NAME_PREFIX)}APIGwTrustPolicy"
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
@@ -25,13 +25,13 @@ resource "aws_iam_role" "apigw_logging" {
 }
 
 resource "aws_iam_policy" "apigw_logging" {
-  name        = "${local.GITHUB_REPO_NAME}-apigw-logging"
-  description = "${local.GITHUB_REPO_NAME} apigw logging permission"
+  name        = "${local.NAME_PREFIX}-apigw-logging"
+  description = "${local.NAME_PREFIX} apigw logging permission"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid = "${title(local.GITHUB_REPO_NAME)}LoggingPolicy"
+        Sid = "${title(local.NAME_PREFIX)}LoggingPolicy"
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
