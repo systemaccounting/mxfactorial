@@ -49,7 +49,7 @@ jobs:
       - name: warm up lambdas with availability script
         run: bash scripts/test-availability.sh
       - name: reset dev rds
-        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./migrations resetrds ENV=dev DB=test
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./migrations/go-migrate resetrds ENV=dev DB=test
       - name: warm cache
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} bash scripts/invoke-warm-cache.sh --env dev
       - name: run dev cloud integration tests
