@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | grep project.yaml | wc -l | xargs) -eq 0 ]; do REL_PATH="$$REL_PATH./.."; done; printf '%s' "$$REL_PATH")
 APP_NAME=$(shell basename $(CURDIR))
 PROJECT_CONF_FILE_NAME=project.yaml
