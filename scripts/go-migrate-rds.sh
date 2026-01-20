@@ -26,14 +26,26 @@ PROJECT_CONF=project.yaml
 ENV_ID=$(source scripts/print-env-id.sh)
 SSM_VERSION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
 REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+SSM_PREFIX="$ENV_ID/$SSM_VERSION/$ENV"
+
+echo "*** fetching go-migrate url and passphrase from ssm"
+
+GO_MIGRATE_URL=$(aws ssm get-parameter \
+	--name "/$SSM_PREFIX/service/lambda/go_migrate/url" \
+	--with-decryption \
+	--query 'Parameter.Value' \
+	--output text \
+	--region $REGION)
 
 PASSPHRASE=$(aws ssm get-parameter \
-	--name "/$ENV_ID/$SSM_VERSION/$ENV/tool/lambda/go_migrate/passphrase" \
-	--query 'Parameter.Value' \
-	--region $REGION \
+	--name "/$SSM_PREFIX/tool/lambda/go_migrate/passphrase" \
 	--with-decryption \
-	--output text)
+	--query 'Parameter.Value' \
+	--output text \
+	--region $REGION)
 
-PAYLOAD="{\"db_type\":\"test\",\"cmd\":\"$CMD\",\"passphrase\":\"$PASSPHRASE\"}"
+echo "*** invoking go-migrate lambda"
 
-bash scripts/invoke-function-url.sh --app-name go-migrate --payload "$PAYLOAD" --env $ENV
+curl -s -X POST "$GO_MIGRATE_URL" \
+	-H 'Content-Type: application/json' \
+	-d "{\"db_type\":\"test\",\"cmd\":\"$CMD\",\"passphrase\":\"$PASSPHRASE\"}" | yq -o=json
