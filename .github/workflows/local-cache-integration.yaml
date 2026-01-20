@@ -21,8 +21,32 @@ jobs:
   test:
     name: cache integration tests
     runs-on: ubuntu-latest
+    permissions:
+      packages: read
     steps:
       - uses: actions/checkout@v4
+      - name: login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: restore image cache
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/image-cache
+          key: base-images-v1
+      - name: pull and retag images
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/image-cache
+          docker pull ghcr.io/systemaccounting/redis:latest
+          docker tag ghcr.io/systemaccounting/redis:latest public.ecr.aws/bitnami/redis:latest
+          docker save -o ~/image-cache/images.tar public.ecr.aws/bitnami/redis:latest
+      - name: load cached images
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: docker load -i ~/image-cache/images.tar
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
