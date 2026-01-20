@@ -40,6 +40,9 @@ terraform init
 printf "\n${YELLOW}*** provisioning artifact, cache origin and terraform state storage${NOCOLOR}\n\n"
 terraform apply
 
+printf "\n${YELLOW}*** waiting for IAM roles to propagate${NOCOLOR}\n\n"
+sleep 20
+
 popd
 
 function apply_agigw_logging_perm() {
@@ -79,8 +82,8 @@ else
 	apply_agigw_logging_perm
 fi
 
-printf "\n${YELLOW}*** compiling app binaries and pushing to artifact bucket${NOCOLOR}\n\n"
-make --no-print-directory all CMD=initial-deploy ENV=dev
+printf "\n${YELLOW}*** building and pushing images to ECR${NOCOLOR}\n\n"
+bash scripts/ecr-images.sh --build --push
 
 source ./scripts/terraform-init-dev.sh \
 	--key "$TFSTATE_ENV" \
@@ -116,12 +119,10 @@ if [[ $(yq '.scripts.env_var.set.BUILD_DB.default' "../../../../../$PROJECT_CONF
 	exit 0
 fi
 
-pushd ../../../../../migrations
+popd
 
 printf "\n${YELLOW}*** deploying migrations to rds in $ID_ENV${NOCOLOR}\n\n"
-make --no-print-directory uprds DB=test ENV=dev
-
-popd; popd;
+make --no-print-directory -C migrations/go-migrate uprds DB=test ENV=dev
 
 printf "\n${YELLOW}*** warming cache in $ID_ENV${NOCOLOR}\n\n"
 bash scripts/invoke-warm-cache.sh --env dev
