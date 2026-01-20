@@ -2,7 +2,7 @@ BUILD_CTX?=.
 
 build-image:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/build-image.sh --app-name $(APP_NAME) --build-ctx $(BUILD_CTX)
+	bash scripts/build-image.sh --app-name $(APP_NAME) --build-ctx $(BUILD_CTX) $(if $(NO_TEST),--no-test)
 
 tag-dev-image:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \

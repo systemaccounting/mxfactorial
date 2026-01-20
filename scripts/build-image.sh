@@ -1,12 +1,15 @@
 #!/bin/bash
 
-if [[ "$#" -ne 4 ]]; then
+if [[ "$#" -lt 4 ]]; then
 	cat <<-'EOF'
 		use:
 		bash scripts/build-image.sh --app-name rule --build-ctx .
+		bash scripts/build-image.sh --app-name rule --build-ctx . --no-test
 	EOF
 	exit 1
 fi
+
+BUILD_ARGS=""
 
 while [[ "$#" -gt 0 ]]; do
 	case $1 in
@@ -17,6 +20,9 @@ while [[ "$#" -gt 0 ]]; do
 	--build-ctx)
 		BUILD_CTX="$2"
 		shift
+		;;
+	--no-test)
+		BUILD_ARGS="--build-arg RUN_TESTS=false"
 		;;
 	*)
 		echo "unknown parameter passed: $1"
@@ -32,4 +38,4 @@ HASH=$(git rev-parse --short=$SHORT_GIT_SHA_LENGTH HEAD)
 IMAGE_TAG="$APP_NAME:$HASH"
 DOCKERFILE_PATH=./docker/$APP_NAME.Dockerfile
 
-docker build -f $DOCKERFILE_PATH -t $IMAGE_TAG --provenance=false "$BUILD_CTX"
+docker build -f $DOCKERFILE_PATH -t $IMAGE_TAG --provenance=false $BUILD_ARGS "$BUILD_CTX"

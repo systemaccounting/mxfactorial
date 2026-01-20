@@ -2,6 +2,7 @@
 name = "pg"
 version = "0.1.0"
 edition = "2021"
+description = "postgresql db access"
 
 [dependencies]
 bb8 = "0.9"

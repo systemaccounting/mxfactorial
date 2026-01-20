@@ -1,0 +1,50 @@
+name: mirror-images
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0' # weekly
+
+jobs:
+  mirror:
+    name: mirror base images to ghcr
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - name: login to ghcr
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: mirror rust
+        run: |
+          docker pull public.ecr.aws/docker/library/rust:latest
+          docker tag public.ecr.aws/docker/library/rust:latest ghcr.io/${{ github.repository_owner }}/rust:latest
+          docker push ghcr.io/${{ github.repository_owner }}/rust:latest
+      - name: mirror lambda-provided
+        run: |
+          docker pull public.ecr.aws/lambda/provided:al2023
+          docker tag public.ecr.aws/lambda/provided:al2023 ghcr.io/${{ github.repository_owner }}/lambda-provided:al2023
+          docker push ghcr.io/${{ github.repository_owner }}/lambda-provided:al2023
+      - name: mirror postgresql
+        run: |
+          docker pull public.ecr.aws/bitnami/postgresql:15
+          docker tag public.ecr.aws/bitnami/postgresql:15 ghcr.io/${{ github.repository_owner }}/postgresql:15
+          docker push ghcr.io/${{ github.repository_owner }}/postgresql:15
+      - name: mirror redis
+        run: |
+          docker pull public.ecr.aws/bitnami/redis:latest
+          docker tag public.ecr.aws/bitnami/redis:latest ghcr.io/${{ github.repository_owner }}/redis:latest
+          docker push ghcr.io/${{ github.repository_owner }}/redis:latest
+      - name: mirror alpine
+        run: |
+          docker pull public.ecr.aws/docker/library/alpine:latest
+          docker tag public.ecr.aws/docker/library/alpine:latest ghcr.io/${{ github.repository_owner }}/alpine:latest
+          docker push ghcr.io/${{ github.repository_owner }}/alpine:latest
+      - name: mirror node
+        run: |
+          docker pull public.ecr.aws/docker/library/node:lts-alpine
+          docker tag public.ecr.aws/docker/library/node:lts-alpine ghcr.io/${{ github.repository_owner }}/node:lts-alpine
+          docker push ghcr.io/${{ github.repository_owner }}/node:lts-alpine
