@@ -1,4 +1,4 @@
-FROM bitnamilegacy/postgresql:15.3.0
+FROM public.ecr.aws/bitnami/postgresql:15
 
 USER root
 
