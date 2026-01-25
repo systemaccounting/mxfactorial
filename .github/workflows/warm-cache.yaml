@@ -48,12 +48,23 @@ jobs:
       - name: reset rds
         # reset dev rds to match local postgres seed data
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C migrations/go-migrate resetrds
-      - name: warm ddb cache
+      - name: clear ddb cache
         run: |
           # temporarily add env vars to warm-cache get array so make env fetches them
           yq -i '.migrations.warm-cache.env_var.get += ["AWS_LAMBDA_FUNCTION_NAME", "CACHE_KEY_RULES_STATE", "CACHE_KEY_RULES_ACCOUNT", "CACHE_KEY_PROFILE", "CACHE_KEY_PROFILE_ID", "CACHE_KEY_APPROVERS"]' project.yaml
           # generate .env from project.yaml defaults and ssm
           ENV_ID=${{ secrets.DEV_ENV_ID }} make -C migrations/warm-cache env ENV=dev
+          # export .env vars to current shell
+          set -a && source migrations/warm-cache/.env && set +a
+          # clear all items from ddb table
+          aws dynamodb scan --table-name "$TRANSACTION_DDB_TABLE" --projection-expression "pk, sk" --output json \
+            | jq -c '.Items[]' \
+            | while read -r item; do
+                aws dynamodb delete-item --table-name "$TRANSACTION_DDB_TABLE" --key "$item"
+              done
+          echo "ddb cache cleared"
+      - name: warm ddb cache
+        run: |
           # export .env vars to current shell
           set -a && source migrations/warm-cache/.env && set +a
           # run warm-cache.sh locally against dev rds, writes to dev ddb
