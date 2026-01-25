@@ -40,6 +40,8 @@ if the user built a cloud dev environment, make -C services/rule env ENV=dev set
 
 postgres is run in docker. the image is built from docker/bitnami-postgres.Dockerfile and uses the github.com/golang-migrate/migrate binary migrate the db's migrations/schema, migrations/seed data and migrations/testseed for test images requiring bootstrapped data. manage the postgres image with migrations/makefile commands, eg `make -C migrations reset` after testing services
 
+to test migration changes without rebuilding the postgres image, run migrations/go-migrate/migrate.sh directly: `SQL_TYPE=postgresql PGUSER=test PGPASSWORD=test PGHOST=localhost PGPORT=5432 PGDATABASE=mxfactorial bash migrations/go-migrate/migrate.sh --dir migrations --db_type test --cmd reset`
+
 query postgres with `PGPASSWORD=test psql -h localhost -U test -d mxfactorial -c 'SELECT * FROM table_name'`
 
 redis runs in docker. the image is built from the redis services block in docker/storage.yaml. use standard compose commands to manage it
