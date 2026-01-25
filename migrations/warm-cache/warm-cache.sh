@@ -100,9 +100,8 @@ echo "caching state transaction item rules..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A > "$TMPFILE" <<EOF
 SELECT id, account_role, state_name, row_to_json(r)
-FROM rule_instance r
-WHERE rule_type = 'transaction_item'
-  AND state_name IS NOT NULL;
+FROM transaction_item_rule_instance r
+WHERE state_name IS NOT NULL;
 EOF
 while IFS='|' read -r id account_role state_name json; do
   role_lower=$(echo "$account_role" | tr '[:upper:]' '[:lower:]')
@@ -118,8 +117,7 @@ echo "caching approval rules..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A > "$TMPFILE" <<EOF
 SELECT id, account_role, account_name, row_to_json(r)
-FROM rule_instance r
-WHERE rule_type = 'approval';
+FROM approval_rule_instance r;
 EOF
 while IFS='|' read -r id account_role account_name json; do
   role_lower=$(echo "$account_role" | tr '[:upper:]' '[:lower:]')
