@@ -35,7 +35,7 @@
 		},
 		{
 			"id": null,
-			"rule_instance_id": "8",
+			"rule_instance_id": "6",
 			"transaction_id": "",
 			"transaction_item_id": "",
 			"account_name": "IgorPetrov",
@@ -48,7 +48,7 @@
 		},
 		{
 			"id": null,
-			"rule_instance_id": "7",
+			"rule_instance_id": "5",
 			"transaction_id": "",
 			"transaction_item_id": "",
 			"account_name": "MiriamLevy",

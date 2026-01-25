@@ -29,7 +29,7 @@
 				"approvals": [
 					{
 						"id": "256",
-						"rule_instance_id": "8",
+						"rule_instance_id": "6",
 						"transaction_id": "12",
 						"transaction_item_id": "67",
 						"account_name": "IgorPetrov",
@@ -38,7 +38,7 @@
 					},
 					{
 						"id": "257",
-						"rule_instance_id": "7",
+						"rule_instance_id": "5",
 						"transaction_id": "12",
 						"transaction_item_id": "67",
 						"account_name": "MiriamLevy",
@@ -77,7 +77,7 @@
 				"approvals": [
 					{
 						"id": "259",
-						"rule_instance_id": "8",
+						"rule_instance_id": "6",
 						"transaction_id": "12",
 						"transaction_item_id": "68",
 						"account_name": "IgorPetrov",
@@ -86,7 +86,7 @@
 					},
 					{
 						"id": "260",
-						"rule_instance_id": "7",
+						"rule_instance_id": "5",
 						"transaction_id": "12",
 						"transaction_item_id": "68",
 						"account_name": "MiriamLevy",
@@ -125,7 +125,7 @@
 				"approvals": [
 					{
 						"id": "262",
-						"rule_instance_id": "8",
+						"rule_instance_id": "6",
 						"transaction_id": "12",
 						"transaction_item_id": "69",
 						"account_name": "IgorPetrov",
@@ -134,7 +134,7 @@
 					},
 					{
 						"id": "263",
-						"rule_instance_id": "7",
+						"rule_instance_id": "5",
 						"transaction_id": "12",
 						"transaction_item_id": "69",
 						"account_name": "MiriamLevy",
@@ -173,7 +173,7 @@
 				"approvals": [
 					{
 						"id": "265",
-						"rule_instance_id": "4",
+						"rule_instance_id": "2",
 						"transaction_id": "12",
 						"transaction_item_id": "70",
 						"account_name": "BenRoss",
@@ -182,7 +182,7 @@
 					},
 					{
 						"id": "266",
-						"rule_instance_id": "5",
+						"rule_instance_id": "3",
 						"transaction_id": "12",
 						"transaction_item_id": "70",
 						"account_name": "DanLee",
@@ -191,7 +191,7 @@
 					},
 					{
 						"id": "267",
-						"rule_instance_id": "7",
+						"rule_instance_id": "5",
 						"transaction_id": "12",
 						"transaction_item_id": "70",
 						"account_name": "MiriamLevy",
@@ -230,7 +230,7 @@
 				"approvals": [
 					{
 						"id": "269",
-						"rule_instance_id": "4",
+						"rule_instance_id": "2",
 						"transaction_id": "12",
 						"transaction_item_id": "71",
 						"account_name": "BenRoss",
@@ -239,7 +239,7 @@
 					},
 					{
 						"id": "270",
-						"rule_instance_id": "5",
+						"rule_instance_id": "3",
 						"transaction_id": "12",
 						"transaction_item_id": "71",
 						"account_name": "DanLee",
@@ -248,7 +248,7 @@
 					},
 					{
 						"id": "271",
-						"rule_instance_id": "7",
+						"rule_instance_id": "5",
 						"transaction_id": "12",
 						"transaction_item_id": "71",
 						"account_name": "MiriamLevy",
@@ -287,7 +287,7 @@
 				"approvals": [
 					{
 						"id": "273",
-						"rule_instance_id": "4",
+						"rule_instance_id": "2",
 						"transaction_id": "12",
 						"transaction_item_id": "72",
 						"account_name": "BenRoss",
@@ -296,7 +296,7 @@
 					},
 					{
 						"id": "274",
-						"rule_instance_id": "5",
+						"rule_instance_id": "3",
 						"transaction_id": "12",
 						"transaction_item_id": "72",
 						"account_name": "DanLee",
@@ -305,7 +305,7 @@
 					},
 					{
 						"id": "275",
-						"rule_instance_id": "7",
+						"rule_instance_id": "5",
 						"transaction_id": "12",
 						"transaction_item_id": "72",
 						"account_name": "MiriamLevy",
