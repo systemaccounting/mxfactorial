@@ -1,6 +1,10 @@
 use async_trait::async_trait;
 use thiserror::Error;
-use types::{account::AccountProfile, account_role::AccountRole, rule::RuleInstances};
+use types::{
+    account::AccountProfile,
+    account_role::AccountRole,
+    rule::{ApprovalRuleInstances, TransactionItemRuleInstances},
+};
 
 #[derive(Error, Debug)]
 pub enum CacheError {
@@ -21,13 +25,13 @@ pub trait Cache: Send + Sync {
         &self,
         role: AccountRole,
         state: &str,
-    ) -> Result<RuleInstances, CacheError>;
+    ) -> Result<TransactionItemRuleInstances, CacheError>;
 
     async fn set_transaction_item_rules(
         &self,
         role: AccountRole,
         state: &str,
-        rules: &RuleInstances,
+        rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError>;
 
     // approval rules by account
@@ -35,13 +39,13 @@ pub trait Cache: Send + Sync {
         &self,
         role: AccountRole,
         account: &str,
-    ) -> Result<RuleInstances, CacheError>;
+    ) -> Result<ApprovalRuleInstances, CacheError>;
 
     async fn set_approval_rules(
         &self,
         role: AccountRole,
         account: &str,
-        rules: &RuleInstances,
+        rules: &ApprovalRuleInstances,
     ) -> Result<(), CacheError>;
 
     // transaction item rules by account
@@ -49,13 +53,13 @@ pub trait Cache: Send + Sync {
         &self,
         role: AccountRole,
         account: &str,
-    ) -> Result<RuleInstances, CacheError>;
+    ) -> Result<TransactionItemRuleInstances, CacheError>;
 
     async fn set_account_rules(
         &self,
         role: AccountRole,
         account: &str,
-        rules: &RuleInstances,
+        rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError>;
 
     // account profiles

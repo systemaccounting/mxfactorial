@@ -2,7 +2,11 @@ use async_trait::async_trait;
 use aws_sdk_dynamodb::{types::AttributeValue, Client};
 use cache::{Cache, CacheError};
 use std::sync::OnceLock;
-use types::{account::AccountProfile, account_role::AccountRole, rule::RuleInstances};
+use types::{
+    account::AccountProfile,
+    account_role::AccountRole,
+    rule::{ApprovalRuleInstances, TransactionItemRuleInstances},
+};
 
 static CACHE_TABLE_HASH_KEY: OnceLock<String> = OnceLock::new();
 static CACHE_TABLE_RANGE_KEY: OnceLock<String> = OnceLock::new();
@@ -166,7 +170,7 @@ impl Cache for DdbClient {
         &self,
         role: AccountRole,
         state: &str,
-    ) -> Result<RuleInstances, CacheError> {
+    ) -> Result<TransactionItemRuleInstances, CacheError> {
         let pk = rules_state_key(role, state);
         let items = self.query_items(&pk).await?;
 
@@ -177,7 +181,7 @@ impl Cache for DdbClient {
         let rules: Result<Vec<_>, _> = items.iter().map(|s| serde_json::from_str(s)).collect();
 
         rules
-            .map(RuleInstances)
+            .map(TransactionItemRuleInstances)
             .map_err(|e| CacheError::DeserializationError(e.to_string()))
     }
 
@@ -185,7 +189,7 @@ impl Cache for DdbClient {
         &self,
         role: AccountRole,
         state: &str,
-        rules: &RuleInstances,
+        rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError> {
         let pk = rules_state_key(role, state);
         for rule in &rules.0 {
@@ -201,7 +205,7 @@ impl Cache for DdbClient {
         &self,
         role: AccountRole,
         account: &str,
-    ) -> Result<RuleInstances, CacheError> {
+    ) -> Result<ApprovalRuleInstances, CacheError> {
         let pk = rules_account_key(role, account);
         let items = self.query_items(&pk).await?;
 
@@ -212,7 +216,7 @@ impl Cache for DdbClient {
         let rules: Result<Vec<_>, _> = items.iter().map(|s| serde_json::from_str(s)).collect();
 
         rules
-            .map(RuleInstances)
+            .map(ApprovalRuleInstances)
             .map_err(|e| CacheError::DeserializationError(e.to_string()))
     }
 
@@ -220,7 +224,7 @@ impl Cache for DdbClient {
         &self,
         role: AccountRole,
         account: &str,
-        rules: &RuleInstances,
+        rules: &ApprovalRuleInstances,
     ) -> Result<(), CacheError> {
         let pk = rules_account_key(role, account);
         for rule in &rules.0 {
@@ -236,17 +240,35 @@ impl Cache for DdbClient {
         &self,
         role: AccountRole,
         account: &str,
-    ) -> Result<RuleInstances, CacheError> {
-        self.get_approval_rules(role, account).await
+    ) -> Result<TransactionItemRuleInstances, CacheError> {
+        let pk = rules_account_key(role, account);
+        let items = self.query_items(&pk).await?;
+
+        if items.is_empty() {
+            return Err(CacheError::CacheMiss);
+        }
+
+        let rules: Result<Vec<_>, _> = items.iter().map(|s| serde_json::from_str(s)).collect();
+
+        rules
+            .map(TransactionItemRuleInstances)
+            .map_err(|e| CacheError::DeserializationError(e.to_string()))
     }
 
     async fn set_account_rules(
         &self,
         role: AccountRole,
         account: &str,
-        rules: &RuleInstances,
+        rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError> {
-        self.set_approval_rules(role, account, rules).await
+        let pk = rules_account_key(role, account);
+        for rule in &rules.0 {
+            let sk = rule.id.clone().unwrap_or_else(|| "_".to_string());
+            let json = serde_json::to_string(rule)
+                .map_err(|e| CacheError::SerializationError(e.to_string()))?;
+            self.put_item(&pk, &sk, &json).await?;
+        }
+        Ok(())
     }
 
     async fn get_account_profile(&self, account: &str) -> Result<AccountProfile, CacheError> {
