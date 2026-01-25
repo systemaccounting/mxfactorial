@@ -13,7 +13,7 @@ use types::{
     account_role::AccountRole,
     approval::Approvals,
     balance::AccountBalances,
-    rule::RuleInstances,
+    rule::{ApprovalRuleInstances, TransactionItemRuleInstances},
     time::TZTime,
     transaction::{Transaction, Transactions},
     transaction_item::TransactionItems,
@@ -108,18 +108,37 @@ pub trait ModelTrait {
         account_name: String,
     ) -> Result<(), Box<dyn Error>>;
     async fn select_approvers_query(&self, account: String) -> Result<Vec<String>, Box<dyn Error>>;
-    async fn select_rule_instance_by_type_role_state_query(
+    async fn select_transaction_item_rule_instances_by_role_state_query(
         &self,
-        rule_type: String,
         account_role: AccountRole,
         state_name: String,
-    ) -> Result<RuleInstances, Box<dyn Error>>;
-    async fn select_rule_instance_by_type_role_account_query(
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>>;
+    async fn select_transaction_item_rule_instances_by_role_account_query(
         &self,
-        rule_type: String,
         account_role: AccountRole,
         account_name: String,
-    ) -> Result<RuleInstances, Box<dyn Error>>;
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>>;
+    async fn select_approval_rule_instances_by_role_account_query(
+        &self,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<ApprovalRuleInstances, Box<dyn Error>>;
+    async fn select_approval_rule_instance_exists_query(
+        &self,
+        rule_name: String,
+        rule_instance_name: String,
+        account_role: AccountRole,
+        account_name: String,
+        variable_values: Vec<String>,
+    ) -> Result<bool, Box<dyn Error>>;
+    async fn insert_approval_rule_instance_query(
+        &self,
+        rule_name: String,
+        rule_instance_name: String,
+        account_role: AccountRole,
+        account_name: String,
+        variable_values: Vec<String>,
+    ) -> Result<(), Box<dyn Error>>;
 }
 
 impl ModelTrait for DatabaseConnection {
@@ -615,10 +634,9 @@ impl ModelTrait for DatabaseConnection {
         &self,
         account_name: String,
     ) -> Result<bool, Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.select_rule_instance_exists_sql();
+        let table = crate::sqls::rule_instance::ApprovalRuleInstanceTable::new();
+        let sql = table.select_exists_sql();
         let values = to_sql_vec![
-            "approval".to_string(),                  // rule_type
             "approveAnyCreditItem".to_string(),      // rule_name
             "ApprovalAllCreditRequests".to_string(), // rule_instance_name
             AccountRole::Creditor,                   // account_role
@@ -643,10 +661,9 @@ impl ModelTrait for DatabaseConnection {
         &self,
         account_name: String,
     ) -> Result<(), Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.insert_rule_instance_sql();
+        let table = crate::sqls::rule_instance::ApprovalRuleInstanceTable::new();
+        let sql = table.insert_sql();
         let values = to_sql_vec![
-            "approval".to_string(),                  // rule_type
             "approveAnyCreditItem".to_string(),      // rule_name
             "ApprovalAllCreditRequests".to_string(), // rule_instance_name
             AccountRole::Creditor,                   // account_role
@@ -678,59 +695,71 @@ impl ModelTrait for DatabaseConnection {
         }
     }
 
-    async fn select_rule_instance_by_type_role_state_query(
+    async fn select_transaction_item_rule_instances_by_role_state_query(
         &self,
-        rule_type: String,
         account_role: AccountRole,
         state_name: String,
-    ) -> Result<RuleInstances, Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.select_rule_instance_by_type_role_state_sql();
-        let values = to_sql_vec![rule_type, account_role, state_name,];
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::TransactionItemRuleInstanceTable::new();
+        let sql = table.select_by_role_state_sql();
+        let values = to_sql_vec![account_role, state_name];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
             Ok(rows) => {
-                let rule_instances: RuleInstances = RuleInstances::from(rows);
+                let rule_instances = TransactionItemRuleInstances::from(rows);
                 Ok(rule_instances)
             }
         }
     }
 
-    async fn select_rule_instance_by_type_role_account_query(
+    async fn select_transaction_item_rule_instances_by_role_account_query(
         &self,
-        rule_type: String,
         account_role: AccountRole,
         account_name: String,
-    ) -> Result<RuleInstances, Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.select_rule_instance_by_type_role_account_sql();
-        let values = to_sql_vec![rule_type, account_role, account_name,];
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::TransactionItemRuleInstanceTable::new();
+        let sql = table.select_by_role_account_sql();
+        let values = to_sql_vec![account_role, account_name];
         let rows = self.query(sql.to_string(), values).await;
         match rows {
             Err(e) => Err(Box::new(e)),
             Ok(rows) => {
-                let rule_instances: RuleInstances = RuleInstances::from(rows);
+                let rule_instances = TransactionItemRuleInstances::from(rows);
                 Ok(rule_instances)
             }
         }
     }
-}
 
-impl DatabaseConnection {
-    pub async fn select_rule_instance_exists_query(
+    async fn select_approval_rule_instances_by_role_account_query(
         &self,
-        rule_type: String,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<ApprovalRuleInstances, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::ApprovalRuleInstanceTable::new();
+        let sql = table.select_by_role_account_sql();
+        let values = to_sql_vec![account_role, account_name];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let rule_instances = ApprovalRuleInstances::from(rows);
+                Ok(rule_instances)
+            }
+        }
+    }
+
+    async fn select_approval_rule_instance_exists_query(
+        &self,
         rule_name: String,
         rule_instance_name: String,
         account_role: AccountRole,
         account_name: String,
         variable_values: Vec<String>,
     ) -> Result<bool, Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.select_rule_instance_exists_sql();
+        let table = crate::sqls::rule_instance::ApprovalRuleInstanceTable::new();
+        let sql = table.select_exists_sql();
         let values = to_sql_vec![
-            rule_type,
             rule_name,
             rule_instance_name,
             account_role,
@@ -747,19 +776,17 @@ impl DatabaseConnection {
         }
     }
 
-    pub async fn insert_rule_instance_query(
+    async fn insert_approval_rule_instance_query(
         &self,
-        rule_type: String,
         rule_name: String,
         rule_instance_name: String,
         account_role: AccountRole,
         account_name: String,
         variable_values: Vec<String>,
     ) -> Result<(), Box<dyn Error>> {
-        let table = crate::sqls::rule_instance::RuleInstanceTable::new();
-        let sql = table.insert_rule_instance_sql();
+        let table = crate::sqls::rule_instance::ApprovalRuleInstanceTable::new();
+        let sql = table.insert_sql();
         let values = to_sql_vec![
-            rule_type,
             rule_name,
             rule_instance_name,
             account_role,
@@ -1437,13 +1464,12 @@ mod integration_tests {
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]
     #[tokio::test]
-    async fn it_creates_a_select_rule_instance_exists_query() {
+    async fn it_returns_false_when_approval_rule_instance_not_found() {
         _before_each();
 
         let test_conn = _get_conn().await;
         let api_conn = DatabaseConnection(test_conn);
 
-        let test_rule_type = "approval".to_string();
         let test_rule_name = "approveAnyCreditItem".to_string();
         let test_rule_instance_name = "ApproveAllGroceryCoCredit".to_string();
         let test_account_role = AccountRole::Creditor;
@@ -1455,8 +1481,7 @@ mod integration_tests {
         ];
 
         let exists = api_conn
-            .select_rule_instance_exists_query(
-                test_rule_type.clone(),
+            .select_approval_rule_instance_exists_query(
                 test_rule_name.clone(),
                 test_rule_instance_name.clone(),
                 test_account_role,
@@ -1467,48 +1492,6 @@ mod integration_tests {
             .unwrap();
 
         assert!(!exists);
-    }
-
-    #[cfg_attr(not(feature = "db_tests"), ignore)]
-    #[tokio::test]
-    async fn it_creates_an_insert_rule_instance_query() {
-        _before_each();
-
-        let test_conn = _get_conn().await;
-        let api_conn = DatabaseConnection(test_conn);
-
-        let test_rule_type = String::from("approval");
-        let test_rule_name = String::from("approveAnyCreditItem");
-        let test_rule_instance_name = String::from("ApproveAllSkywaysCredit");
-        let test_account_role = AccountRole::Creditor;
-        let test_account_name = String::from("JacobWebb");
-        let test_variable_values = vec![
-            "Skyways".to_string(),
-            "creditor".to_string(),
-            "JacobWebb".to_string(),
-        ];
-
-        api_conn
-            .insert_rule_instance_query(
-                test_rule_type.clone(),
-                test_rule_name.clone(),
-                test_rule_instance_name.clone(),
-                test_account_role,
-                test_account_name.clone(),
-                test_variable_values.clone(),
-            )
-            .await
-            .unwrap();
-
-        let got_sql = &format!(
-            "SELECT EXISTS(SELECT 1 FROM rule_instance WHERE rule_type = '{}' AND rule_name = '{}' AND rule_instance_name = '{}' AND account_role = '{}' AND account_name = '{}' AND variable_values = '{{\"Skyways\",\"creditor\",\"JacobWebb\"}}');",
-            test_rule_type,
-            test_rule_name,
-            test_rule_instance_name,
-            test_account_role,
-            test_account_name,
-        );
-        _row_exists(got_sql).await;
     }
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]
@@ -1526,7 +1509,7 @@ mod integration_tests {
             .await;
 
         let got_sql = &format!(
-            "SELECT EXISTS(SELECT 1 FROM rule_instance WHERE rule_type = 'approval' AND rule_name = 'approveAnyCreditItem' AND rule_instance_name = 'ApprovalAllCreditRequests' AND account_role = 'creditor' AND account_name = '{}' AND variable_values = '{{\"JacobWebb\",\"creditor\",\"JacobWebb\"}}');",
+            "SELECT EXISTS(SELECT 1 FROM approval_rule_instance WHERE rule_name = 'approveAnyCreditItem' AND rule_instance_name = 'ApprovalAllCreditRequests' AND account_role = 'creditor' AND account_name = '{}' AND variable_values = '{{\"JacobWebb\",\"creditor\",\"JacobWebb\"}}');",
             test_account_name,
         );
         _row_exists(got_sql).await;
@@ -1573,15 +1556,14 @@ mod integration_tests {
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]
     #[tokio::test]
-    async fn it_creates_a_select_rule_instance_by_type_role_state_query() {
+    async fn it_creates_a_select_transaction_item_rule_instances_by_role_state_query() {
         _before_each();
 
         let test_conn = _get_conn().await;
         let api_conn = DatabaseConnection(test_conn);
 
         let rows = api_conn
-            .select_rule_instance_by_type_role_state_query(
-                "transaction_item".to_string(),
+            .select_transaction_item_rule_instances_by_role_state_query(
                 AccountRole::Creditor,
                 "California".to_string(),
             )
@@ -1593,15 +1575,14 @@ mod integration_tests {
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]
     #[tokio::test]
-    async fn it_creates_a_select_rule_instance_by_type_role_account_query() {
+    async fn it_creates_a_select_approval_rule_instances_by_role_account_query() {
         _before_each();
 
         let test_conn = _get_conn().await;
         let api_conn = DatabaseConnection(test_conn);
 
         let rows = api_conn
-            .select_rule_instance_by_type_role_account_query(
-                "approval".to_string(),
+            .select_approval_rule_instances_by_role_account_query(
                 AccountRole::Creditor,
                 "MiriamLevy".to_string(),
             )
@@ -1609,5 +1590,58 @@ mod integration_tests {
             .unwrap();
 
         assert_eq!(rows.len(), 2);
+    }
+
+    #[cfg_attr(not(feature = "db_tests"), ignore)]
+    #[tokio::test]
+    async fn it_creates_a_select_approval_rule_instance_exists_query() {
+        _before_each();
+
+        let test_conn = _get_conn().await;
+        let api_conn = DatabaseConnection(test_conn);
+
+        let exists = api_conn
+            .select_approval_rule_instance_exists_query(
+                "approveAnyCreditItem".to_string(),
+                "ApproveAllGroceryCoCredit".to_string(),
+                AccountRole::Creditor,
+                "MiriamLevy".to_string(),
+                vec![
+                    "GroceryCo".to_string(),
+                    "creditor".to_string(),
+                    "MiriamLevy".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        assert!(exists);
+    }
+
+    #[cfg_attr(not(feature = "db_tests"), ignore)]
+    #[tokio::test]
+    async fn it_creates_an_insert_approval_rule_instance_query() {
+        _before_each();
+
+        let test_conn = _get_conn().await;
+        let api_conn = DatabaseConnection(test_conn);
+
+        api_conn
+            .insert_approval_rule_instance_query(
+                "approveAnyCreditItem".to_string(),
+                "ApproveAllSkywaysCredit".to_string(),
+                AccountRole::Creditor,
+                "JacobWebb".to_string(),
+                vec![
+                    "Skyways".to_string(),
+                    "creditor".to_string(),
+                    "JacobWebb".to_string(),
+                ],
+            )
+            .await
+            .unwrap();
+
+        let got_sql = "SELECT EXISTS(SELECT 1 FROM approval_rule_instance WHERE rule_name = 'approveAnyCreditItem' AND rule_instance_name = 'ApproveAllSkywaysCredit' AND account_role = 'creditor' AND account_name = 'JacobWebb');";
+        _row_exists(got_sql).await;
     }
 }

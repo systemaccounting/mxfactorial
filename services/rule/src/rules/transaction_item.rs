@@ -2,7 +2,7 @@ use std::{error::Error, vec};
 
 use types::{
     account_role::AccountRole,
-    rule::RuleInstance,
+    rule::TransactionItemRuleInstance,
     transaction_item::{TransactionItem, TransactionItems},
 };
 
@@ -10,7 +10,7 @@ use crate::rules::tokens;
 use crate::rules::utils;
 
 pub fn match_transaction_item_rule(
-    rule_instance: &RuleInstance,
+    rule_instance: &TransactionItemRuleInstance,
     transaction_item: &mut TransactionItem,
 ) -> Result<TransactionItems, Box<dyn Error>> {
     let account_role = rule_instance.account_role;
@@ -25,7 +25,7 @@ pub fn match_transaction_item_rule(
 }
 
 fn multiply_item_value(
-    rule_instance: &RuleInstance,
+    rule_instance: &TransactionItemRuleInstance,
     transaction_item: &mut TransactionItem,
 ) -> Result<TransactionItems, Box<dyn Error>> {
     let debitor = rule_instance.variable_values[0].clone();

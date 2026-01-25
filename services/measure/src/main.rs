@@ -35,14 +35,14 @@ struct Params {
 impl Params {
     fn redis_gdp_key(&self) -> String {
         let mut key = format!("{}:{}", self.date, self.measure,);
-        if self.country.is_some() {
-            key.push_str(&format!(":{}", self.country.as_ref().unwrap()));
+        if let Some(country) = &self.country {
+            key.push_str(&format!(":{}", country));
         }
-        if self.region.is_some() {
-            key.push_str(&format!(":{}", self.region.as_ref().unwrap()));
+        if let Some(region) = &self.region {
+            key.push_str(&format!(":{}", region));
         }
-        if self.municipality.is_some() {
-            key.push_str(&format!(":{}", self.municipality.as_ref().unwrap()));
+        if let Some(municipality) = &self.municipality {
+            key.push_str(&format!(":{}", municipality));
         }
         key
     }
@@ -176,18 +176,18 @@ async fn redis_names(pg_conn: &DatabaseConnection, ws_params: Params) -> Params 
         region: None,
         municipality: None,
     };
-    if ws_params.country.is_some() {
-        keys.country = Some(query_key(pg_conn, ws_params.country.unwrap()).await);
+    if let Some(country) = ws_params.country {
+        keys.country = Some(query_key(pg_conn, country).await);
     } else {
         return keys;
     }
-    if ws_params.region.is_some() {
-        keys.region = Some(query_key(pg_conn, ws_params.region.unwrap()).await);
+    if let Some(region) = ws_params.region {
+        keys.region = Some(query_key(pg_conn, region).await);
     } else {
         return keys;
     }
-    if ws_params.municipality.is_some() {
-        keys.municipality = Some(query_key(pg_conn, ws_params.municipality.unwrap()).await);
+    if let Some(municipality) = ws_params.municipality {
+        keys.municipality = Some(query_key(pg_conn, municipality).await);
     }
     keys
 }

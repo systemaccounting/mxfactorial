@@ -31,7 +31,7 @@ CREATE TABLE transaction_item (
   --     REFERENCES account_profile(id),
   CONSTRAINT fk_rule_instance_id
     FOREIGN KEY(rule_instance_id)
-      REFERENCES rule_instance(id)
+      REFERENCES transaction_item_rule_instance(id)
   -- CONSTRAINT fk_item_id -- todo
   --   FOREIGN KEY(item_id)
   --     REFERENCES item(id)

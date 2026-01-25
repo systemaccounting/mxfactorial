@@ -4,7 +4,11 @@ use fred::prelude::*;
 use fred::types::Message;
 use std::sync::OnceLock;
 use tokio::sync::broadcast::Receiver as BroadcastReceiver;
-use types::{account::AccountProfile, account_role::AccountRole, rule::RuleInstances};
+use types::{
+    account::AccountProfile,
+    account_role::AccountRole,
+    rule::{ApprovalRuleInstances, TransactionItemRuleInstances},
+};
 
 static CACHE_KEY_RULES_STATE: OnceLock<String> = OnceLock::new();
 static CACHE_KEY_RULES_ACCOUNT: OnceLock<String> = OnceLock::new();
@@ -168,7 +172,7 @@ impl Cache for RedisClient {
         &self,
         role: AccountRole,
         state: &str,
-    ) -> Result<RuleInstances, CacheError> {
+    ) -> Result<TransactionItemRuleInstances, CacheError> {
         let key = rules_state_key(role, state);
         let members: Vec<String> = self
             .smembers(&key)
@@ -182,7 +186,7 @@ impl Cache for RedisClient {
         let rules: Result<Vec<_>, _> = members.iter().map(|s| serde_json::from_str(s)).collect();
 
         rules
-            .map(RuleInstances)
+            .map(TransactionItemRuleInstances)
             .map_err(|e| CacheError::DeserializationError(e.to_string()))
     }
 
@@ -190,7 +194,7 @@ impl Cache for RedisClient {
         &self,
         role: AccountRole,
         state: &str,
-        rules: &RuleInstances,
+        rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError> {
         let key = rules_state_key(role, state);
         for rule in &rules.0 {
@@ -207,7 +211,7 @@ impl Cache for RedisClient {
         &self,
         role: AccountRole,
         account: &str,
-    ) -> Result<RuleInstances, CacheError> {
+    ) -> Result<ApprovalRuleInstances, CacheError> {
         let key = rules_account_key(role, account);
         let members: Vec<String> = self
             .smembers(&key)
@@ -221,7 +225,7 @@ impl Cache for RedisClient {
         let rules: Result<Vec<_>, _> = members.iter().map(|s| serde_json::from_str(s)).collect();
 
         rules
-            .map(RuleInstances)
+            .map(ApprovalRuleInstances)
             .map_err(|e| CacheError::DeserializationError(e.to_string()))
     }
 
@@ -229,7 +233,7 @@ impl Cache for RedisClient {
         &self,
         role: AccountRole,
         account: &str,
-        rules: &RuleInstances,
+        rules: &ApprovalRuleInstances,
     ) -> Result<(), CacheError> {
         let key = rules_account_key(role, account);
         for rule in &rules.0 {
@@ -246,18 +250,39 @@ impl Cache for RedisClient {
         &self,
         role: AccountRole,
         account: &str,
-    ) -> Result<RuleInstances, CacheError> {
-        // same key pattern as approval rules for account-based lookups
-        self.get_approval_rules(role, account).await
+    ) -> Result<TransactionItemRuleInstances, CacheError> {
+        let key = rules_account_key(role, account);
+        let members: Vec<String> = self
+            .smembers(&key)
+            .await
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))?;
+
+        if members.is_empty() {
+            return Err(CacheError::CacheMiss);
+        }
+
+        let rules: Result<Vec<_>, _> = members.iter().map(|s| serde_json::from_str(s)).collect();
+
+        rules
+            .map(TransactionItemRuleInstances)
+            .map_err(|e| CacheError::DeserializationError(e.to_string()))
     }
 
     async fn set_account_rules(
         &self,
         role: AccountRole,
         account: &str,
-        rules: &RuleInstances,
+        rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError> {
-        self.set_approval_rules(role, account, rules).await
+        let key = rules_account_key(role, account);
+        for rule in &rules.0 {
+            let json = serde_json::to_string(rule)
+                .map_err(|e| CacheError::SerializationError(e.to_string()))?;
+            self.sadd(&key, &json)
+                .await
+                .map_err(|e| CacheError::ConnectionError(e.to_string()))?;
+        }
+        Ok(())
     }
 
     async fn get_account_profile(&self, account: &str) -> Result<AccountProfile, CacheError> {
@@ -389,7 +414,7 @@ mod tests {
 mod integration_tests {
     use super::*;
     use cache::Cache;
-    use types::rule::RuleInstance;
+    use types::rule::{ApprovalRuleInstance, TransactionItemRuleInstance};
 
     async fn get_client() -> RedisClient {
         let client = RedisClient::new().await;
@@ -496,9 +521,8 @@ mod integration_tests {
         let key = &rules_state_key(AccountRole::Creditor, "California");
         delete_test_keys(&client, &[key]).await;
 
-        let rule = RuleInstance {
+        let rule = TransactionItemRuleInstance {
             id: Some("1".to_string()),
-            rule_type: "transaction_item".to_string(),
             rule_name: "multiplyItemValue".to_string(),
             rule_instance_name: "NinePercentSalesTax".to_string(),
             variable_values: vec![
@@ -508,37 +532,22 @@ mod integration_tests {
                 "0.09".to_string(),
             ],
             account_role: AccountRole::Creditor,
+            account_name: None,
             item_id: None,
             price: None,
             quantity: None,
-            unit_of_measurement: None,
-            units_measured: None,
-            account_name: None,
-            first_name: None,
-            middle_name: None,
-            last_name: None,
             country_name: None,
-            street_id: None,
-            street_name: None,
-            floor_number: None,
-            unit_id: None,
             city_name: None,
             county_name: None,
-            region_name: None,
             state_name: Some("California".to_string()),
-            postal_code: None,
             latlng: None,
-            email_address: None,
-            telephone_country_code: None,
-            telephone_area_code: None,
-            telephone_number: None,
             occupation_id: None,
             industry_id: None,
             disabled_time: None,
             removed_time: None,
             created_at: None,
         };
-        let rules = RuleInstances(vec![rule]);
+        let rules = TransactionItemRuleInstances(vec![rule]);
 
         client
             .set_transaction_item_rules(AccountRole::Creditor, "California", &rules)
@@ -559,44 +568,18 @@ mod integration_tests {
         let key = &rules_account_key(AccountRole::Creditor, "TestAccount");
         delete_test_keys(&client, &[key]).await;
 
-        let rule = RuleInstance {
+        let rule = ApprovalRuleInstance {
             id: Some("1".to_string()),
-            rule_type: "approval".to_string(),
             rule_name: "approveAnyCreditItem".to_string(),
             rule_instance_name: "ApproveAllCredits".to_string(),
             variable_values: vec![],
             account_role: AccountRole::Creditor,
-            item_id: None,
-            price: None,
-            quantity: None,
-            unit_of_measurement: None,
-            units_measured: None,
-            account_name: Some("TestAccount".to_string()),
-            first_name: None,
-            middle_name: None,
-            last_name: None,
-            country_name: None,
-            street_id: None,
-            street_name: None,
-            floor_number: None,
-            unit_id: None,
-            city_name: None,
-            county_name: None,
-            region_name: None,
-            state_name: None,
-            postal_code: None,
-            latlng: None,
-            email_address: None,
-            telephone_country_code: None,
-            telephone_area_code: None,
-            telephone_number: None,
-            occupation_id: None,
-            industry_id: None,
+            account_name: "TestAccount".to_string(),
             disabled_time: None,
             removed_time: None,
             created_at: None,
         };
-        let rules = RuleInstances(vec![rule]);
+        let rules = ApprovalRuleInstances(vec![rule]);
 
         client
             .set_approval_rules(AccountRole::Creditor, "TestAccount", &rules)

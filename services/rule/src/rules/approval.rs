@@ -1,12 +1,12 @@
 use std::error::Error;
 
 use types::{
-    account_role::AccountRole, approval::Approval, rule::RuleInstance, time::TZTime,
+    account_role::AccountRole, approval::Approval, rule::ApprovalRuleInstance, time::TZTime,
     transaction_item::TransactionItem,
 };
 
 pub fn match_approval_rule(
-    rule_instance: &RuleInstance,
+    rule_instance: &ApprovalRuleInstance,
     transaction_item: &TransactionItem,
     approval: &mut Approval,
     approval_time: &TZTime,
@@ -21,7 +21,7 @@ pub fn match_approval_rule(
 }
 
 fn approve_any_credit_item(
-    rule_instance: &RuleInstance,
+    rule_instance: &ApprovalRuleInstance,
     transaction_item: &TransactionItem,
     approval: &mut Approval,
     approval_time: &TZTime,

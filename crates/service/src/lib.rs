@@ -9,7 +9,7 @@ use types::{
     approval::{ApprovalError, Approvals},
     balance::AccountBalances,
     request_response::IntraTransaction,
-    rule::RuleInstances,
+    rule::{ApprovalRuleInstances, TransactionItemRuleInstances},
     time::TZTime,
     transaction::{Transaction, Transactions},
     transaction_item::TransactionItems,
@@ -515,7 +515,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         &self,
         account_role: AccountRole,
         account_name: String,
-    ) -> Result<RuleInstances, Box<dyn Error>> {
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>> {
         // try cache first
         if let Some(cache) = &self.cache {
             if let Ok(rules) = cache.get_account_rules(account_role, &account_name).await {
@@ -526,8 +526,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         // cache miss, fetch from db
         let rules = self
             .conn
-            .select_rule_instance_by_type_role_account_query(
-                "transaction_item".to_string(),
+            .select_transaction_item_rule_instances_by_role_account_query(
                 account_role,
                 account_name.clone(),
             )
@@ -599,7 +598,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         &self,
         account_role: AccountRole,
         state_name: String,
-    ) -> Result<RuleInstances, Box<dyn Error>> {
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>> {
         // try cache first
         if let Some(cache) = &self.cache {
             if let Ok(rules) = cache
@@ -613,8 +612,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         // cache miss, fetch from db
         let rules = self
             .conn
-            .select_rule_instance_by_type_role_state_query(
-                "transaction_item".to_string(),
+            .select_transaction_item_rule_instances_by_role_state_query(
                 account_role,
                 state_name.clone(),
             )
@@ -635,7 +633,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         &self,
         account_role: AccountRole,
         approver_account: String,
-    ) -> Result<RuleInstances, Box<dyn Error>> {
+    ) -> Result<ApprovalRuleInstances, Box<dyn Error>> {
         // try cache first
         if let Some(cache) = &self.cache {
             if let Ok(rules) = cache
@@ -649,8 +647,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
         // cache miss, fetch from db
         let rules = self
             .conn
-            .select_rule_instance_by_type_role_account_query(
-                "approval".to_string(),
+            .select_approval_rule_instances_by_role_account_query(
                 account_role,
                 approver_account.clone(),
             )
@@ -680,7 +677,10 @@ mod tests {
         account_role::AccountRole,
         approval::{Approval, Approvals},
         balance::{AccountBalance, AccountBalances},
-        rule::{RuleInstance, RuleInstances},
+        rule::{
+            ApprovalRuleInstance, ApprovalRuleInstances, TransactionItemRuleInstance,
+            TransactionItemRuleInstances,
+        },
         time::TZTime,
         transaction::{Transaction, Transactions},
         transaction_item::{TransactionItem, TransactionItems},
@@ -1396,56 +1396,41 @@ mod tests {
         let account_role = AccountRole::Debitor;
         let account_name = "JacobWebb".to_string();
 
-        conn.expect_select_rule_instance_by_type_role_account_query()
+        conn.expect_select_transaction_item_rule_instances_by_role_account_query()
             .with(
-                predicate::eq("transaction_item".to_string()),
                 predicate::eq(account_role),
                 predicate::eq(account_name.clone()),
             )
             .times(1)
-            .returning(|_, _, _| {
-                Ok(RuleInstances(vec![RuleInstance {
-                    id: Some(String::from("1")),
-                    rule_type: String::from("transaction_item"),
-                    rule_name: String::from("multiplyItemValue"),
-                    rule_instance_name: String::from("NinePercentSalesTax"),
-                    variable_values: vec![
-                        String::from("ANY"),
-                        String::from("StateOfCalifornia"),
-                        String::from("9% state sales tax"),
-                        String::from("0.09"),
-                    ],
-                    account_role: AccountRole::Creditor,
-                    item_id: None,
-                    price: None,
-                    quantity: None,
-                    unit_of_measurement: None,
-                    units_measured: None,
-                    account_name: None,
-                    first_name: None,
-                    middle_name: None,
-                    last_name: None,
-                    country_name: None,
-                    street_id: None,
-                    street_name: None,
-                    floor_number: None,
-                    unit_id: None,
-                    city_name: None,
-                    county_name: None,
-                    region_name: None,
-                    state_name: Some(String::from("California")),
-                    postal_code: None,
-                    latlng: None,
-                    email_address: None,
-                    telephone_country_code: None,
-                    telephone_area_code: None,
-                    telephone_number: None,
-                    occupation_id: None,
-                    industry_id: None,
-                    disabled_time: None,
-                    removed_time: None,
-                    created_at: Some(TZTime::now()),
-                }]))
+            .returning(|_, _| {
+                Ok(TransactionItemRuleInstances(vec![
+                    TransactionItemRuleInstance {
+                        id: Some(String::from("1")),
+                        rule_name: String::from("multiplyItemValue"),
+                        rule_instance_name: String::from("NinePercentSalesTax"),
+                        variable_values: vec![
+                            String::from("ANY"),
+                            String::from("StateOfCalifornia"),
+                            String::from("9% state sales tax"),
+                            String::from("0.09"),
+                        ],
+                        account_role: AccountRole::Creditor,
+                        account_name: None,
+                        item_id: None,
+                        price: None,
+                        quantity: None,
+                        country_name: None,
+                        city_name: None,
+                        county_name: None,
+                        state_name: Some(String::from("California")),
+                        latlng: None,
+                        occupation_id: None,
+                        industry_id: None,
+                        disabled_time: None,
+                        removed_time: None,
+                        created_at: Some(TZTime::now()),
+                    },
+                ]))
             });
 
         let service = super::Service::new(&conn, None);
@@ -1476,56 +1461,41 @@ mod tests {
         let account_role = AccountRole::Debitor;
         let state_name = "California".to_string();
 
-        conn.expect_select_rule_instance_by_type_role_state_query()
+        conn.expect_select_transaction_item_rule_instances_by_role_state_query()
             .with(
-                predicate::eq("transaction_item".to_string()),
                 predicate::eq(account_role),
                 predicate::eq(state_name.clone()),
             )
             .times(1)
-            .returning(|_, _, _| {
-                Ok(RuleInstances(vec![RuleInstance {
-                    id: Some(String::from("1")),
-                    rule_type: String::from("transaction_item"),
-                    rule_name: String::from("multiplyItemValue"),
-                    rule_instance_name: String::from("NinePercentSalesTax"),
-                    variable_values: vec![
-                        String::from("ANY"),
-                        String::from("StateOfCalifornia"),
-                        String::from("9% state sales tax"),
-                        String::from("0.09"),
-                    ],
-                    account_role: AccountRole::Creditor,
-                    item_id: None,
-                    price: None,
-                    quantity: None,
-                    unit_of_measurement: None,
-                    units_measured: None,
-                    account_name: None,
-                    first_name: None,
-                    middle_name: None,
-                    last_name: None,
-                    country_name: None,
-                    street_id: None,
-                    street_name: None,
-                    floor_number: None,
-                    unit_id: None,
-                    city_name: None,
-                    county_name: None,
-                    region_name: None,
-                    state_name: Some(String::from("California")),
-                    postal_code: None,
-                    latlng: None,
-                    email_address: None,
-                    telephone_country_code: None,
-                    telephone_area_code: None,
-                    telephone_number: None,
-                    occupation_id: None,
-                    industry_id: None,
-                    disabled_time: None,
-                    removed_time: None,
-                    created_at: Some(TZTime::now()),
-                }]))
+            .returning(|_, _| {
+                Ok(TransactionItemRuleInstances(vec![
+                    TransactionItemRuleInstance {
+                        id: Some(String::from("1")),
+                        rule_name: String::from("multiplyItemValue"),
+                        rule_instance_name: String::from("NinePercentSalesTax"),
+                        variable_values: vec![
+                            String::from("ANY"),
+                            String::from("StateOfCalifornia"),
+                            String::from("9% state sales tax"),
+                            String::from("0.09"),
+                        ],
+                        account_role: AccountRole::Creditor,
+                        account_name: None,
+                        item_id: None,
+                        price: None,
+                        quantity: None,
+                        country_name: None,
+                        city_name: None,
+                        county_name: None,
+                        state_name: Some(String::from("California")),
+                        latlng: None,
+                        occupation_id: None,
+                        industry_id: None,
+                        disabled_time: None,
+                        removed_time: None,
+                        created_at: Some(TZTime::now()),
+                    },
+                ]))
             });
 
         let service = super::Service::new(&conn, None);
@@ -1541,47 +1511,20 @@ mod tests {
         let account_role = AccountRole::Debitor;
         let approver_account = "JacobWebb".to_string();
 
-        conn.expect_select_rule_instance_by_type_role_account_query()
+        conn.expect_select_approval_rule_instances_by_role_account_query()
             .with(
-                predicate::eq("approval".to_string()),
                 predicate::eq(account_role),
                 predicate::eq(approver_account.clone()),
             )
             .times(1)
-            .returning(|_, _, _| {
-                Ok(RuleInstances(vec![RuleInstance {
+            .returning(|_, _| {
+                Ok(ApprovalRuleInstances(vec![ApprovalRuleInstance {
                     id: Some(String::from("1")),
-                    rule_type: String::from("approval"),
                     rule_name: String::from("approveAllCredit"),
                     rule_instance_name: String::from("ApproveAllCredit"),
                     variable_values: vec![],
                     account_role: AccountRole::Debitor,
-                    item_id: None,
-                    price: None,
-                    quantity: None,
-                    unit_of_measurement: None,
-                    units_measured: None,
-                    account_name: None,
-                    first_name: None,
-                    middle_name: None,
-                    last_name: None,
-                    country_name: None,
-                    street_id: None,
-                    street_name: None,
-                    floor_number: None,
-                    unit_id: None,
-                    city_name: None,
-                    county_name: None,
-                    region_name: None,
-                    state_name: None,
-                    postal_code: None,
-                    latlng: None,
-                    email_address: None,
-                    telephone_country_code: None,
-                    telephone_area_code: None,
-                    telephone_number: None,
-                    occupation_id: None,
-                    industry_id: None,
+                    account_name: String::from("JacobWebb"),
                     disabled_time: None,
                     removed_time: None,
                     created_at: Some(TZTime::now()),

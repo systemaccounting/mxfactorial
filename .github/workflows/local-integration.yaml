@@ -14,16 +14,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  integration_test:
-    name: integration test in local docker
+  compile:
+    name: compile ${{ matrix.service }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - graphql
+          - request-create
+          - request-approve
+          - rule
+          - request-by-id
+          - requests-by-account
+          - transaction-by-id
+          - transactions-by-account
+          - balance-by-account
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
-          components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ${{ matrix.service }}
+      - name: compile
+        run: cargo build -p ${{ matrix.service }}
+      - name: upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.service }}
+          path: target/debug/${{ matrix.service }}
+          retention-days: 1
+
+  integration_test:
+    name: integration test in local docker
+    needs: compile
+    runs-on: ubuntu-latest
+    env:
+      SERVICES_WORKFLOW: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: download all binaries
+        uses: actions/download-artifact@v4
+        with:
+          path: target/debug/
+          merge-multiple: true
+      - name: set permissions
+        run: chmod +x target/debug/*
       - name: start services
         run: make start
       - name: test service integration

@@ -53,11 +53,11 @@ pub fn label_approved_transaction_items(
             let mut approval_times: Vec<TZTime> = vec![];
 
             for approval in approvals_per_role.clone().0.into_iter() {
-                if approval.approval_time.is_some() {
+                if let Some(time) = approval.approval_time {
                     // count role approvals with timestamps
                     approval_count += 1;
                     // save role approval timestamp
-                    approval_times.push(approval.approval_time.unwrap())
+                    approval_times.push(time)
                 }
             }
 

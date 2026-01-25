@@ -68,8 +68,8 @@ pub fn create_value_params(
         values.push('(');
         for (j, c) in columns.clone().enumerate() {
             values.push_str(&format!("${}", *positional_parameter));
-            if c.cast_value_as.is_some() {
-                values.push_str(&format!("::{}", c.cast_value_as.unwrap()));
+            if let Some(cast_type) = &c.cast_value_as {
+                values.push_str(&format!("::{}", cast_type));
             }
             *positional_parameter += 1;
             if j < columns.len() - 1 {

@@ -202,6 +202,9 @@ removing financial appeasement guides the freedom of speech by recalibrating exp
 **q.** isn't modeling the economy as a cga state space overly complicated?  
 **a.** reducing an economy to spacetime may be disorienting at first, but describing the movement of goods & services between owners as continuous geometric transformations keeps economics out of reach from those who would add complexity
 
+**q.** how does systemaccounting improve economic literacy?  
+**a.** cga enables human economic vision the same way it enables computer vision. when selling is a rotation from debitor to creditor and buying rotates it back, the space that draws lines in every direction as angle-preserving transformations between production and consumption collapses spatial opacity and temporal uncertainty into vision-enabling geometry. economic literacy becomes geometric intuition about how value projects through time between accounts when the inner product expressing conservation between them is automated by a data structure
+
 **q.** how to explain *transactions as rotations* to a non engineer?  
 **a.** just say "value rotates between debitor and creditor accounts":
 
