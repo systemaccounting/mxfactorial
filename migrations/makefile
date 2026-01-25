@@ -3,6 +3,7 @@ RELATIVE_PROJECT_ROOT_PATH=..
 PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 MIGRATIONS_DIR=$(CURDIR)/$(DIR)
+APP_NAME=$(shell basename $(CURDIR))
 
 run:
 	@$(MAKE) start
@@ -87,7 +88,25 @@ insert:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
 	bash scripts/insert-transactions.sh
 
+###################### env ######################
+
+env:
+	@$(MAKE) get-secrets
+
+get-secrets:
+	@$(MAKE) -s test-env-arg
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/create-env-file.sh \
+		--app-name $(APP_NAME) \
+		--env $(ENV)
+
 ###################### arg tests ######################
+
+test-env-arg:
+ifndef ENV
+	$(info trailing ENV assignment missing, e.g. make env ENV=dev|stg|prod, defaulting to 'local')
+ENV=local
+endif
 
 test-dir-arg:
 ifndef DIR
