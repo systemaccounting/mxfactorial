@@ -135,8 +135,7 @@ impl TransactionTable {
         for (j, c) in columns.clone().enumerate() {
             let param = *positional_parameter;
             row.push_str(&format!("${param}"));
-            if c.cast_value_as.is_some() {
-                let cast_type = c.cast_value_as.unwrap();
+            if let Some(cast_type) = &c.cast_value_as {
                 row.push_str(&format!("::{cast_type}"));
             }
             *positional_parameter += 1;

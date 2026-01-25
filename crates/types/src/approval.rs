@@ -53,10 +53,8 @@ impl Approval {
     }
 
     pub fn previously_approved(&self) -> Result<(), ApprovalError> {
-        if self.approval_time.is_some() {
-            Err(ApprovalError::PreviouslyApproved(
-                self.approval_time.unwrap(),
-            ))
+        if let Some(time) = self.approval_time {
+            Err(ApprovalError::PreviouslyApproved(time))
         } else {
             Ok(())
         }

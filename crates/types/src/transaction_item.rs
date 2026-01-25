@@ -360,14 +360,12 @@ impl TransactionItems {
         let mut false_count = 0;
 
         for ti in self.0.iter() {
-            if ti.debitor_first.is_some() {
-                if ti.debitor_first.unwrap() {
+            if let Some(debitor_first) = ti.debitor_first {
+                if debitor_first {
                     true_count += 1;
-                };
-                // not using else for untyped json values
-                if !ti.debitor_first.unwrap() {
+                } else {
                     false_count += 1;
-                };
+                }
             } else {
                 false_count += 1;
             }

@@ -116,8 +116,8 @@ impl ApprovalTable {
                     }
                 };
 
-                if c.cast_value_as.is_some() {
-                    value.push_str(&format!("::{}", c.cast_value_as.unwrap()));
+                if let Some(cast_type) = &c.cast_value_as {
+                    value.push_str(&format!("::{}", cast_type));
                 }
 
                 values.push_str(value.as_str());
