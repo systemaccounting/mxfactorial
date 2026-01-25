@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   integration_test:
-    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
     name: test cache key consistency
     runs-on: ubuntu-latest
     env:
