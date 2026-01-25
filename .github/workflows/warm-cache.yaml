@@ -54,7 +54,7 @@ jobs:
       - name: clear ddb cache
         run: |
           # temporarily add env vars to warm-cache get array so make env fetches them
-          yq -i '.migrations.warm-cache.env_var.get += ["AWS_LAMBDA_FUNCTION_NAME", "CACHE_KEY_RULES_STATE", "CACHE_KEY_RULES_ACCOUNT", "CACHE_KEY_PROFILE", "CACHE_KEY_PROFILE_ID", "CACHE_KEY_APPROVERS"]' project.yaml
+          yq -i '.migrations.warm-cache.env_var.get += ["CACHE_KEY_RULES_STATE", "CACHE_KEY_RULES_ACCOUNT", "CACHE_KEY_PROFILE", "CACHE_KEY_PROFILE_ID", "CACHE_KEY_APPROVERS"]' project.yaml
           # generate .env from project.yaml defaults and ssm
           ENV_ID=${{ secrets.DEV_ENV_ID }} make -C migrations/warm-cache env ENV=dev
           # export .env vars to current shell
@@ -67,11 +67,7 @@ jobs:
               done
           echo "ddb cache cleared"
       - name: warm ddb cache
-        run: |
-          # export .env vars to current shell
-          set -a && source migrations/warm-cache/.env && set +a
-          # run warm-cache.sh locally against dev rds, writes to dev ddb
-          bash migrations/warm-cache/warm-cache.sh
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} make -C migrations/warm-cache warm-cache ENV=dev
       - name: fetch ddb keys
         # fetch keys written to dev ddb by warm-cache.sh
         run: |
