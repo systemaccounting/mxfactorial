@@ -26,7 +26,7 @@ CREATE TABLE approval (
   expiration_time timestamptz,
   CONSTRAINT fk_rule_instance_id
     FOREIGN KEY(rule_instance_id)
-      REFERENCES rule_instance(id),
+      REFERENCES approval_rule_instance(id),
   CONSTRAINT fk_transaction_id
     FOREIGN KEY(transaction_id)
       REFERENCES transaction(id),

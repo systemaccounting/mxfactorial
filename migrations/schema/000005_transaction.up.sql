@@ -16,7 +16,7 @@ CREATE TABLE transaction (
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_rule_instance_id
     FOREIGN KEY(rule_instance_id)
-      REFERENCES rule_instance(id),
+      REFERENCES transaction_rule_instance(id),
   CONSTRAINT fk_author
     FOREIGN KEY(author)
       REFERENCES account(name)
