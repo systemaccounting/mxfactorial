@@ -39,7 +39,7 @@ jobs:
           sudo apt-get install --yes --no-install-recommends postgresql-client
       - name: start storage
         # starts postgres, redis, warm-cache (populates redis from local postgres)
-        run: docker compose -f docker/storage.yaml up -d --build --wait
+        run: docker compose -f docker/storage.yaml --profile init up -d --build --wait
       - name: save redis keys
         # save redis keys populated by warm-cache in storage.yaml
         run: |
