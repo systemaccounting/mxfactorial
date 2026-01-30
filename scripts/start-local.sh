@@ -44,12 +44,6 @@ for d in "${APP_DIRS[@]}"; do
 	RUNTIME=$(yq "$CONF_PATH.runtime" $PROJECT_CONF)
 	BUILD_SRC_PATH=$(yq "$CONF_PATH.build_src_path" $PROJECT_CONF)
 
-	# compile rust before starting (skip when using pre-built binaries from services workflow artifacts)
-	if [[ -z "$SERVICES_WORKFLOW" ]] && [[ "$RUNTIME" == "$RUST_RUNTIME" ]]; then
-		echo -e -n "\n${GREEN}*** compiling $d${RESET}\n"
-		make --no-print-directory -C "$d" compile
-	fi
-
 	# skip starting client in services workflows
 	if [[ "$SERVICES_WORKFLOW" ]] && [[ "$d" == 'client' ]]; then
 		continue
