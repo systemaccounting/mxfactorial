@@ -636,11 +636,13 @@ client (typescript, svelte, cloudfront/s3: demo web client targeting graphql)
       ├── request-by-id (rust, lambda: returns a transaction request by id)
       │   └── postgres
       ├── request-create (rust, lambda: creates a transaction request between a buyer and seller)
-      │   └── postgres
+      │   ├── rule
+      │   ├── postgres
+      │   └── cache (dynamodb/redis)
       ├── requests-by-account (rust, lambda: returns transaction requests by account)
       │   └── postgres
       ├── rule (rust, lambda: returns transactions with user defined rules applied, e.g. taxes, dividends, etc.)
-      │   └── postgres
+      │   └── cache (dynamodb/redis)
       ├── transaction-by-id (rust, lambda: returns a transaction by id)
       │   └── postgres
       └── transactions-by-account (rust, lambda: returns transactions by account)
