@@ -3665,6 +3665,7 @@ dependencies = [
  "openssl",
  "pg",
  "redisclient",
+ "serde_json",
  "service",
  "shutdown",
  "thiserror 2.0.17",
