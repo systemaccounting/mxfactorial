@@ -1,8 +1,8 @@
 import { gql } from "@urql/core";
 
 const CREATE_REQUEST_MUTATION = gql`
-	mutation createRequest($transaction_items: [TransactionItemInput!], $auth_account: String!) {
-		createRequest(transaction_items: $transaction_items, auth_account: $auth_account) {
+	mutation createRequest($transaction: TransactionInput!, $auth_account: String!) {
+		createRequest(transaction: $transaction, auth_account: $auth_account) {
 			id
 		}
 	}

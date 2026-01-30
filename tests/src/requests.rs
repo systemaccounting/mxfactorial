@@ -1,4 +1,5 @@
 use ::types::{
+    account_role::AccountRole,
     request_response::{IntraTransaction, IntraTransactions},
     time::TZTime,
     transaction::Transaction,
@@ -57,7 +58,6 @@ pub struct TransactionItemInput {
     pub item_id: String,
     pub price: String,
     pub quantity: String,
-    pub debitor_first: Option<bool>,
     pub rule_instance_id: Option<String>,
     pub rule_exec_ids: Option<Vec<String>>,
     pub unit_of_measurement: Option<String>,
@@ -82,7 +82,6 @@ impl From<TransactionItem> for TransactionItemInput {
             item_id: item.item_id,
             price: item.price,
             quantity: item.quantity,
-            debitor_first: item.debitor_first,
             rule_instance_id: item.rule_instance_id,
             rule_exec_ids: item.rule_exec_ids,
             unit_of_measurement: item.unit_of_measurement,
@@ -112,19 +111,50 @@ fn convert_to_input_vec(transaction_items: Vec<TransactionItem>) -> Vec<Transact
 }
 
 #[derive(Debug, Serialize)]
+pub struct TransactionInput {
+    pub id: Option<String>,
+    pub rule_instance_id: Option<String>,
+    pub author: Option<String>,
+    pub author_device_id: Option<String>,
+    pub author_device_latlng: Option<String>,
+    pub author_role: Option<AccountRole>,
+    pub equilibrium_time: Option<TZTime>,
+    pub debitor_first: Option<bool>,
+    pub sum_value: String,
+    pub transaction_items: Vec<TransactionItemInput>,
+}
+
+impl From<Transaction> for TransactionInput {
+    fn from(t: Transaction) -> Self {
+        TransactionInput {
+            id: t.id,
+            rule_instance_id: t.rule_instance_id,
+            author: t.author,
+            author_device_id: t.author_device_id,
+            author_device_latlng: t.author_device_latlng,
+            author_role: t.author_role,
+            equilibrium_time: t.equilibrium_time,
+            debitor_first: t.debitor_first,
+            sum_value: t.sum_value,
+            transaction_items: convert_to_input_vec(t.transaction_items.0),
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
 struct RuleVars {
-    transaction_items: Vec<TransactionItemInput>,
+    transaction: TransactionInput,
 }
 
 pub async fn get_rules_gql(
-    transaction_items: Vec<TransactionItem>,
+    transaction: Transaction,
 ) -> Result<Transaction, Box<dyn std::error::Error>> {
     let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
         .with_path(graphql_resource.as_str())
         .to_string();
-    let query = r#"query getRules($transaction_items: [TransactionItemInput!]) {
-        rules(transaction_items: $transaction_items) {
+    let query = r#"query getRules($transaction: TransactionInput!) {
+        rules(transaction: $transaction) {
           id
           rule_instance_id
           author
@@ -132,13 +162,13 @@ pub async fn get_rules_gql(
           author_device_latlng
           author_role
           sum_value
+          debitor_first
           transaction_items {
               id
               transaction_id
               item_id
               price
               quantity
-              debitor_first
               rule_instance_id
               unit_of_measurement
               units_measured
@@ -156,7 +186,7 @@ pub async fn get_rules_gql(
         }
       }"#;
     let variables = RuleVars {
-        transaction_items: convert_to_input_vec(transaction_items),
+        transaction: TransactionInput::from(transaction),
     };
     let client = GqlClient::new(uri);
     let res = client
@@ -170,7 +200,7 @@ pub async fn get_rules_gql(
 #[derive(Debug, Serialize)]
 struct CreateRequestVars {
     auth_account: String,
-    transaction_items: Vec<TransactionItemInput>,
+    transaction: TransactionInput,
 }
 
 #[derive(Debug, Deserialize)]
@@ -179,16 +209,13 @@ struct CreateRequestResponse {
     create_request: Transaction,
 }
 
-pub async fn create_request_gql(
-    auth_account: String,
-    transaction_items: Vec<TransactionItem>,
-) -> Transaction {
+pub async fn create_request_gql(auth_account: String, transaction: Transaction) -> Transaction {
     let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
     let uri = Uri::new_from_env_var("GRAPHQL_URI")
         .with_path(graphql_resource.as_str())
         .to_string();
-    let query = r#"mutation createRequest($transaction_items: [TransactionItemInput!], $auth_account: String!) {
-        createRequest(transaction_items: $transaction_items, auth_account: $auth_account) {
+    let query = r#"mutation createRequest($transaction: TransactionInput!, $auth_account: String!) {
+        createRequest(transaction: $transaction, auth_account: $auth_account) {
           id
           rule_instance_id
           author
@@ -196,6 +223,7 @@ pub async fn create_request_gql(
           author_device_latlng
           author_role
           sum_value
+          debitor_first
           transaction_items {
               id
               transaction_id
@@ -203,7 +231,6 @@ pub async fn create_request_gql(
               price
               rule_exec_ids
               quantity
-              debitor_first
               rule_instance_id
               unit_of_measurement
               units_measured
@@ -222,7 +249,7 @@ pub async fn create_request_gql(
       }"#;
     let variables = CreateRequestVars {
         auth_account,
-        transaction_items: convert_to_input_vec(transaction_items),
+        transaction: TransactionInput::from(transaction),
     };
     let client = GqlClient::new(uri);
     let res = client
@@ -267,13 +294,13 @@ pub async fn approve_request_gql(
           author_role
           equilibrium_time
           sum_value
+          debitor_first
           transaction_items {
               id
               transaction_id
               item_id
               price
               quantity
-              debitor_first
               rule_instance_id
               unit_of_measurement
               units_measured
@@ -342,7 +369,6 @@ pub async fn get_transactions_by_account_gql(
               item_id
               price
               quantity
-              debitor_first
               rule_instance_id
               unit_of_measurement
               units_measured
@@ -407,13 +433,13 @@ pub async fn get_transaction_by_id_gql(
           author_device_latlng
           author_role
           sum_value
+          debitor_first
           transaction_items {
               id
               transaction_id
               item_id
               price
               quantity
-              debitor_first
               rule_instance_id
               unit_of_measurement
               units_measured
@@ -473,13 +499,13 @@ pub async fn get_requests_by_account_gql(
           author_device_latlng
           author_role
           sum_value
+          debitor_first
           transaction_items {
               id
               transaction_id
               item_id
               price
               quantity
-              debitor_first
               rule_instance_id
               unit_of_measurement
               units_measured
@@ -541,13 +567,13 @@ pub async fn get_request_by_id_gql(
           author_device_latlng
           author_role
           sum_value
+          debitor_first
           transaction_items {
               id
               transaction_id
               item_id
               price
               quantity
-              debitor_first
               rule_instance_id
               unit_of_measurement
               units_measured
@@ -578,10 +604,10 @@ pub async fn get_request_by_id_gql(
     res.request_by_id
 }
 
-pub async fn get_rules_http(transaction_items: Vec<TransactionItem>) -> IntraTransaction {
+pub async fn get_rules_http(transaction: Transaction) -> IntraTransaction {
     let client = Client::new();
     let uri = Uri::new_from_env_var("RULE_URL").to_string();
-    let body_json = json!(transaction_items).to_string();
+    let body_json = json!(transaction).to_string();
     let response = client.post(uri, body_json).await.unwrap();
     let response_string = response.text().await.unwrap();
     serde_json::from_str(&response_string).unwrap()

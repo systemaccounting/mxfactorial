@@ -2,7 +2,6 @@ use ::types::{
     account_role::AccountRole,
     request_response::{IntraTransaction, IntraTransactions, RequestApprove},
     transaction::Transaction,
-    transaction_item::{TransactionItem, TransactionItems},
 };
 use ::wsclient::WsClient;
 use async_graphql::*;
@@ -119,11 +118,11 @@ impl Query {
     #[graphql(name = "rules")]
     async fn rules(
         &self,
-        #[graphql(name = "transaction_items")] transaction_items: Vec<TransactionItem>,
+        #[graphql(name = "transaction")] transaction: Transaction,
     ) -> Transaction {
         let uri = Uri::new_from_env_var("RULE_URL").to_string();
         let client = Client::new();
-        let body = json!(transaction_items).to_string();
+        let body = json!(transaction).to_string();
         let response = client.post(uri, body).await.unwrap();
         let response_body = response.text().await.unwrap();
         let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
@@ -138,20 +137,13 @@ impl Mutation {
     async fn create_request(
         &self,
         ctx: &Context<'_>,
-        #[graphql(name = "transaction_items")] transaction_items: Vec<TransactionItem>,
+        #[graphql(name = "transaction")] transaction: Transaction,
         #[graphql(name = "auth_account")] auth_account: String,
     ) -> Transaction {
         let account_from_token = get_auth_account(ctx, auth_account).unwrap();
         let uri = Uri::new_from_env_var("REQUEST_CREATE_URL").to_string();
         let client = Client::new();
-        let request = IntraTransaction::new(
-            account_from_token.clone(),
-            Transaction::new(
-                account_from_token,
-                None,
-                TransactionItems::from(transaction_items),
-            ),
-        );
+        let request = IntraTransaction::new(account_from_token, transaction);
         let body = json!(request).to_string();
         let response = client.post(uri, body).await.unwrap();
         let response_body = response.text().await.unwrap();

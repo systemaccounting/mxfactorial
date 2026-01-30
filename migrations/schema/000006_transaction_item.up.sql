@@ -5,7 +5,6 @@ CREATE TABLE transaction_item (
   item_id character varying(255) NOT NULL, -- temporary until item inserts added in code
   price numeric NOT NULL CHECK (price > 0),
   quantity numeric NOT NULL CHECK (quantity > 0),
-  debitor_first boolean default true,
   rule_instance_id int,
   rule_exec_ids text[],
   unit_of_measurement character varying(255),

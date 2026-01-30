@@ -320,3 +320,6 @@ tests availability of services locally or in cloud
 
 #### `invoke-warm-cache.sh`
 invokes warm-cache lambda to populate ddb cache from rds
+
+#### `maps-key.sh`
+gets or sets the google maps api key in ssm. `bash scripts/maps-key.sh` to get, `bash scripts/maps-key.sh --set <api-key>` to set. always targets dev ssm. used by `create-env-file.sh` to silently populate `GOOGLE_MAPS_API_KEY` in client `.env`

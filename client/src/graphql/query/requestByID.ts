@@ -10,13 +10,13 @@ const REQUEST_BY_ID_QUERY = gql`
 			author_device_latlng
 			author_role
 			sum_value
+			debitor_first
 			transaction_items {
 				id
 				transaction_id
 				item_id
 				price
 				quantity
-				debitor_first
 				rule_exec_ids
 				rule_instance_id
 				unit_of_measurement

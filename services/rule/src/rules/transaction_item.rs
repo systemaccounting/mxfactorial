@@ -36,7 +36,6 @@ fn multiply_item_value(
     let price: f32 = transaction_item.price.clone().parse().unwrap();
     let quantity =
         utils::number_to_fixed_string(transaction_item.quantity.clone().parse::<f32>().unwrap());
-    let rule_apply_sequence = transaction_item.debitor_first;
     let rule_instance_id = rule_instance.id.clone().unwrap();
     let unit_of_measurement = transaction_item.unit_of_measurement.clone();
     let units_measured = transaction_item.units_measured.clone();
@@ -68,7 +67,6 @@ fn multiply_item_value(
         item_id: item_name,
         price: added_item_value,
         quantity,
-        debitor_first: rule_apply_sequence,
         rule_instance_id: Some(rule_instance_id),
         rule_exec_ids: Some(vec![rule_exec_id]),
         unit_of_measurement,

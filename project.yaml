@@ -28,7 +28,7 @@ client:
         ssm: null
         default: 10009
       GOOGLE_MAPS_API_KEY:
-        ssm: null
+        ssm: client/google_maps_api_key
         # todo: precommit hook setting null
         default: null
       # variables requiring a PUBLIC_* prefix

@@ -1548,6 +1548,7 @@ mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
                     TransactionItem {
@@ -1556,7 +1557,6 @@ mod tests {
                         item_id: String::from("bread"),
                         price: String::from("3.000"),
                         quantity: String::from("2"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,
@@ -1606,7 +1606,6 @@ mod tests {
                         item_id: String::from("milk"),
                         price: String::from("4.000"),
                         quantity: String::from("3"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,
@@ -1660,6 +1659,7 @@ mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
                     TransactionItem {
@@ -1668,7 +1668,6 @@ mod tests {
                         item_id: String::from("bread"),
                         price: String::from("3.000"),
                         quantity: String::from("2"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,
@@ -1718,7 +1717,6 @@ mod tests {
                         item_id: String::from("milk"),
                         price: String::from("4.000"),
                         quantity: String::from("3"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,
@@ -1833,6 +1831,7 @@ mod tests {
             author_device_latlng: None,
             author_role: Some(AccountRole::Creditor),
             equilibrium_time: None,
+            debitor_first: Some(false),
             sum_value: String::from("21.800"),
             transaction_items: TransactionItems(vec![
                 TransactionItem {
@@ -1841,7 +1840,6 @@ mod tests {
                     item_id: String::from("bread"),
                     price: String::from("3.000"),
                     quantity: String::from("2"),
-                    debitor_first: Some(false),
                     rule_instance_id: None,
                     rule_exec_ids: Some(vec![]),
                     unit_of_measurement: None,
@@ -1891,7 +1889,6 @@ mod tests {
                     item_id: String::from("milk"),
                     price: String::from("4.000"),
                     quantity: String::from("3"),
-                    debitor_first: Some(false),
                     rule_instance_id: None,
                     rule_exec_ids: Some(vec![]),
                     unit_of_measurement: None,
@@ -1947,7 +1944,6 @@ mod tests {
                 item_id: String::from("bread"),
                 price: String::from("3.000"),
                 quantity: String::from("2"),
-                debitor_first: Some(false),
                 rule_instance_id: None,
                 rule_exec_ids: Some(vec![]),
                 unit_of_measurement: None,
@@ -1997,7 +1993,6 @@ mod tests {
                 item_id: String::from("milk"),
                 price: String::from("4.000"),
                 quantity: String::from("3"),
-                debitor_first: Some(false),
                 rule_instance_id: None,
                 rule_exec_ids: Some(vec![]),
                 unit_of_measurement: None,

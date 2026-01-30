@@ -108,3 +108,15 @@ resource "aws_ssm_parameter" "lambda_readiness_check_path" {
   type        = "SecureString"
   value       = var.readiness_check_path
 }
+
+resource "aws_ssm_parameter" "google_maps_api_key" {
+  name        = "/${var.ssm_prefix}/client/google_maps_api_key"
+  description = "google maps api key in ${local.SPACED_ID_ENV}"
+  type        = "SecureString"
+  // set later when dev wants to use maps in client/src/routes/measure/+page.svelte
+  value = "null"
+
+  lifecycle {
+    ignore_changes = [value]
+  }
+}

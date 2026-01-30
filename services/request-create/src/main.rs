@@ -14,10 +14,7 @@ use shutdown::shutdown_signal;
 use std::{env, error::Error, net::ToSocketAddrs, sync::Arc};
 use thiserror::Error;
 use tokio::net::TcpListener;
-use types::{
-    request_response::IntraTransaction, transaction::Transaction,
-    transaction_item::TransactionItems,
-};
+use types::{request_response::IntraTransaction, transaction::Transaction};
 use uribuilder::Uri;
 
 #[derive(Clone)]
@@ -39,16 +36,14 @@ enum RequestCreateError {
     MissingAuthorRole,
     #[error("sum_value failure")]
     SumValueFailure,
-    #[error("missing debitor_first values in request")]
-    MissingDebitorFirstValues,
 }
 
 pub async fn get_rule_applied_transaction(
-    transaction_items: TransactionItems,
+    transaction: Transaction,
 ) -> Result<IntraTransaction, Box<dyn Error>> {
     let uri = Uri::new_from_env_var("RULE_URL").to_string();
     let client = Client::new();
-    let body = transaction_items.to_json_string();
+    let body = serde_json::to_string(&transaction)?;
     let response = client.post(uri, body).await?;
     let rule_tested = response.text().await.unwrap();
     let intra_transaction = IntraTransaction::from_json_string(rule_tested.as_str())?;
@@ -72,23 +67,27 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
         return Err(Box::new(RequestCreateError::SumValueFailure));
     }
 
-    if req
-        .clone()
-        .transaction
-        .transaction_items
-        .into_iter()
-        .any(|item| item.debitor_first.is_none())
-    {
-        return Err(Box::new(RequestCreateError::MissingDebitorFirstValues));
-    }
-
     let non_rule_client_tr_items = req
         .transaction
         .transaction_items
         .remove_unauthorized_values()
         .filter_user_added();
 
-    let rule_tested = get_rule_applied_transaction(non_rule_client_tr_items.clone())
+    // build transaction with author fields for rule service
+    let rule_input_transaction = Transaction {
+        id: None,
+        rule_instance_id: None,
+        author: req.transaction.author.clone(),
+        author_device_id: req.transaction.author_device_id.clone(),
+        author_device_latlng: req.transaction.author_device_latlng.clone(),
+        author_role: req.transaction.author_role,
+        equilibrium_time: None,
+        debitor_first: req.transaction.debitor_first,
+        sum_value: non_rule_client_tr_items.sum_value(),
+        transaction_items: non_rule_client_tr_items.clone(),
+    };
+
+    let rule_tested = get_rule_applied_transaction(rule_input_transaction)
         .await
         .unwrap();
 

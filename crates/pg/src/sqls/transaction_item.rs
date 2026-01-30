@@ -40,7 +40,6 @@ impl TransactionItemTable {
             self.get_column("item_id"),
             self.get_column("price").cast_value_as(Type::NUMERIC),
             self.get_column("quantity").cast_value_as(Type::NUMERIC),
-            self.get_column("debitor_first"),
             self.get_column("rule_instance_id"),
             self.get_column("rule_exec_ids"),
             self.get_column("unit_of_measurement"),
@@ -64,7 +63,6 @@ impl TransactionItemTable {
             self.get_column("item_id"),
             self.get_column("price").cast_value_as(Type::NUMERIC),
             self.get_column("quantity").cast_value_as(Type::NUMERIC),
-            self.get_column("debitor_first"),
             self.get_column("rule_instance_id"),
             self.get_column("rule_exec_ids"),
             self.get_column("unit_of_measurement"),
@@ -89,7 +87,6 @@ impl TransactionItemTable {
             self.get_column("item_id"),
             self.get_column("price").cast_column_as(Type::TEXT),
             self.get_column("quantity").cast_column_as(Type::TEXT),
-            self.get_column("debitor_first"),
             self.get_column("rule_instance_id")
                 .cast_column_as(Type::TEXT),
             self.get_column("rule_exec_ids"),
@@ -206,7 +203,7 @@ mod tests {
         );
         assert_eq!(
 			sql,
-			"INSERT INTO transaction_item (transaction_id, item_id, price, quantity, debitor_first, rule_instance_id, rule_exec_ids, unit_of_measurement, units_measured, debitor, creditor, debitor_profile_id, creditor_profile_id, debitor_approval_time, creditor_approval_time, debitor_expiration_time, creditor_expiration_time) VALUES ((SELECT id FROM insert_transaction), $1, $2::numeric, $3::numeric, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id"
+			"INSERT INTO transaction_item (transaction_id, item_id, price, quantity, rule_instance_id, rule_exec_ids, unit_of_measurement, units_measured, debitor, creditor, debitor_profile_id, creditor_profile_id, debitor_approval_time, creditor_approval_time, debitor_expiration_time, creditor_expiration_time) VALUES ((SELECT id FROM insert_transaction), $1, $2::numeric, $3::numeric, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING id"
 		);
     }
 
@@ -216,7 +213,7 @@ mod tests {
         let sql = transaction_item_table.select_transaction_items_by_transaction_id_sql();
         assert_eq!(
             sql,
-            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, debitor_first, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id = $1"
+            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id = $1"
         );
     }
 
@@ -226,7 +223,7 @@ mod tests {
         let sql = transaction_item_table.select_transaction_items_by_transaction_ids_sql(2);
         assert_eq!(
             sql,
-            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, debitor_first, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id IN ($1, $2)"
+            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id IN ($1, $2)"
         );
     }
 }

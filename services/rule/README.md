@@ -10,23 +10,30 @@
 ### request
 
 1. the `JacobWebb` customer brings a single `bottled water` item priced at `1.000` to the `GroceryStore` cashier
-1. the `GroceryStore` cashier sends the following `transaction_item` list to the rule service to apply rules required by a transaction between the `debitor` and `creditor` accounts:
+1. the `GroceryStore` cashier sends the following `transaction` to the rule service to apply rules required by a transaction between the `debitor` and `creditor` accounts:
 
 ```json5
 // graphql variable
-[
-  {
-    "item_id": "bottled water",
-    "price": "1.000",
-    "quantity": "1",
-    "debitor_first": false,
-    "debitor": "JacobWebb",
-    "creditor": "GroceryStore",
-    "debitor_approval_time": null,
-    "creditor_approval_time": null,
-    // ... other properties
-  }
-]
+{
+  "author": "GroceryStore",
+  "author_device_id": null,
+  "author_device_latlng": null,
+  "author_role": "creditor",
+  "debitor_first": null,
+  "sum_value": "1.000",
+  "transaction_items": [
+    {
+      "item_id": "bottled water",
+      "price": "1.000",
+      "quantity": "1",
+      "debitor": "JacobWebb",
+      "creditor": "GroceryStore",
+      "debitor_approval_time": null,
+      "creditor_approval_time": null,
+      // ... other properties
+    }
+  ]
+}
 ```
 
 ### response
@@ -41,12 +48,13 @@ the rule service returns a `transaction` object with `transaction_items` listing
   "transaction": {
     "id": null,
     "rule_instance_id": null,
-    "author": null,
+    "author": "GroceryStore",
     "author_device_id": null,
     "author_device_latlng": null,
-    "author_role": null,
+    "author_role": "creditor",
     "equilibrium_time": null,
-    "sum_value": "1.090", // 1.000 bottled water + 0.090 california sales tax 
+    "debitor_first": null,
+    "sum_value": "1.090", // 1.000 bottled water + 0.090 california sales tax
     "transaction_items": [
       {
         "id": null,
@@ -54,7 +62,6 @@ the rule service returns a `transaction` object with `transaction_items` listing
         "item_id": "bottled water", // initially sent by GroceryStore account
         "price": "1.000",
         "quantity": "1",
-        "debitor_first": null,
         "rule_instance_id": null, // created by user, NOT rule service
         "rule_exec_ids": [
           "j_SxScz6"
@@ -106,7 +113,6 @@ the rule service returns a `transaction` object with `transaction_items` listing
         "item_id": "9% state sales tax", // added by rule service
         "price": "0.090",
         "quantity": "1.000",
-        "debitor_first": null,
         "rule_instance_id": "1", // tax transaction_item was added by rule
         "rule_exec_ids": [
           "j_SxScz6"
@@ -209,10 +215,10 @@ the rule service returns a `transaction` object with `transaction_items` listing
 1. `make test-unit` for unit tests
 1. run integration tests from project root:
     * docker:
-        1. `make compose-up`  
-        1. `make test-docker`  
+        1. `make compose-up`
+        1. `make test-docker`
     - cloud:
-        1. `make test-cloud`  
+        1. `make test-cloud`
 
 ### run unit & integration tests FAST
 `make test ENV=dev`
@@ -220,4 +226,4 @@ the rule service returns a `transaction` object with `transaction_items` listing
 ### prepare for terraform
 `make initial-deploy ENV=dev` to zip and put source in s3 only
 
-terraform: https://github.com/systemaccounting/mxfactorial/blob/d45b5dcb214eddb531819d2206786fbdd5c9033a/infra/terraform/aws/modules/environment/v001/lambda-services.tf#L26-L40
+terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infra/terraform/aws/modules/environment/v001/lambda-services.tf#L28-L51

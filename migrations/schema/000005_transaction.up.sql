@@ -12,6 +12,7 @@ CREATE TABLE transaction (
   author_role text not null,
   -- https://en.wiktionary.org/wiki/equilibrium_price
   equilibrium_time timestamptz,
+  debitor_first boolean default false,
   sum_value numeric,
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_rule_instance_id

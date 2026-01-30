@@ -152,7 +152,7 @@ jobs:
     needs: [cache_images, compile]
     runs-on: ubuntu-latest
     env:
-      SERVICES_WORKFLOW: true
+      SKIP_CARGO_WATCH: true
     steps:
       - uses: actions/checkout@v4
       - name: restore image cache
@@ -181,7 +181,7 @@ jobs:
     needs: [cache_images, compile]
     runs-on: ubuntu-latest
     env:
-      SERVICES_WORKFLOW: true
+      SKIP_CARGO_WATCH: true
     steps:
       - uses: actions/checkout@v4
       - name: restore image cache

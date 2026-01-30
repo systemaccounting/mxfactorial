@@ -51,7 +51,7 @@ jobs:
     needs: compile
     runs-on: ubuntu-latest
     env:
-      SERVICES_WORKFLOW: true
+      SKIP_CARGO_WATCH: true
     steps:
       - uses: actions/checkout@v4
       - name: download all binaries

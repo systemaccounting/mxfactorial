@@ -5,6 +5,7 @@
 		"author": "GroceryCo",
 		"author_role": "creditor",
 		"equilibrium_time": "2022-06-24T03:09:32.772Z",
+		"debitor_first": false,
 		"sum_value": "22.89",
 		"transaction_items": [
 			{
@@ -13,7 +14,6 @@
 				"item_id": "ground coffee",
 				"price": "5",
 				"quantity": "1",
-				"debitor_first": false,
 				"rule_instance_id": null,
 				"rule_exec_ids": [
 					"RPY4ycoT"
@@ -61,7 +61,6 @@
 				"item_id": "pasta",
 				"price": "2.5",
 				"quantity": "4",
-				"debitor_first": false,
 				"rule_instance_id": null,
 				"rule_exec_ids": [
 					"hoPzSXuj"
@@ -109,7 +108,6 @@
 				"item_id": "paper towels",
 				"price": "3",
 				"quantity": "2",
-				"debitor_first": false,
 				"rule_instance_id": null,
 				"rule_exec_ids": [
 					"dhlp9OBs"
@@ -157,7 +155,6 @@
 				"item_id": "9% state sales tax",
 				"price": "0.45",
 				"quantity": "1",
-				"debitor_first": false,
 				"rule_instance_id": "1",
 				"rule_exec_ids": [
 					"RPY4ycoT"
@@ -214,7 +211,6 @@
 				"item_id": "9% state sales tax",
 				"price": "0.225",
 				"quantity": "4",
-				"debitor_first": false,
 				"rule_instance_id": "1",
 				"rule_exec_ids": [
 					"hoPzSXuj"
@@ -271,7 +267,6 @@
 				"item_id": "9% state sales tax",
 				"price": "0.27",
 				"quantity": "2",
-				"debitor_first": false,
 				"rule_instance_id": "1",
 				"rule_exec_ids": [
 					"dhlp9OBs"
