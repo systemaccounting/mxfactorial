@@ -100,6 +100,9 @@ function set_default_value() {
 		else
 			echo "$SECRET=$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
 		fi
+	elif [[ "$SECRET" == 'GOOGLE_MAPS_API_KEY' ]]; then
+		ENV_VAR=$(bash scripts/maps-key.sh 2>/dev/null || true)
+		echo "$SECRET=$ENV_VAR" >>$ENV_FILE
 	elif [[ "$SECRET" == 'RUST_LOG' ]]; then
 		RUST_LOG_VAL=$(yq "$APP_CONF_PATH.rust_log" $PROJECT_CONF)
 		echo "$SECRET=$RUST_LOG_VAL" >>$ENV_FILE
