@@ -12,21 +12,15 @@ mod tests {
     use super::*;
     use crate::requests as r;
     use regex::Regex;
-    use serde::Deserialize;
     use std::{fs::File, io::BufReader};
     use types::{
-        account_role::AccountRole, request_response::IntraTransaction,
+        account_role::AccountRole, request_response::IntraTransaction, transaction::Transaction,
         transaction_item::TransactionItem,
     };
 
     // https://stackoverflow.com/a/3143231
     const DATE_RE: &str =
         r"\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z)";
-
-    #[derive(Debug, Deserialize)]
-    pub struct TransactionItemsBody {
-        pub transaction_items: Vec<TransactionItem>,
-    }
 
     #[tokio::test]
     #[cfg_attr(not(feature = "integration_tests"), ignore)]
@@ -35,9 +29,9 @@ mod tests {
 
         let file = File::open("../tests/testdata/nullFirstTrItemsNoAppr.json").unwrap();
         let reader = BufReader::new(file);
-        let test_transaction_items: Vec<TransactionItem> = serde_json::from_reader(reader).unwrap();
+        let test_transaction: Transaction = serde_json::from_reader(reader).unwrap();
 
-        let got = r::get_rules_http(test_transaction_items.clone()).await;
+        let got = r::get_rules_http(test_transaction.clone()).await;
         let got_rule_added_transaction_items: Vec<TransactionItem> = got
             .transaction
             .transaction_items
@@ -368,16 +362,13 @@ mod tests {
 
         let file = File::open("../tests/testdata/intRules.json").unwrap();
         let reader = BufReader::new(file);
-        let test_transaction_items: TransactionItemsBody = serde_json::from_reader(reader).unwrap();
+        let test_transaction: Transaction = serde_json::from_reader(reader).unwrap();
 
-        let rule_tested_transaction =
-            r::get_rules_gql(test_transaction_items.transaction_items.clone())
-                .await
-                .unwrap();
+        let rule_tested_transaction = r::get_rules_gql(test_transaction.clone()).await.unwrap();
 
         let got = r::create_request_gql(
-            test_transaction_items.transaction_items[0].creditor.clone(),
-            rule_tested_transaction.transaction_items.0,
+            test_transaction.transaction_items.0[0].creditor.clone(),
+            rule_tested_transaction,
         )
         .await;
 
@@ -392,19 +383,16 @@ mod tests {
 
         let file = File::open("../tests/testdata/intRules.json").unwrap();
         let reader = BufReader::new(file);
-        let test_transaction_items: TransactionItemsBody = serde_json::from_reader(reader).unwrap();
+        let test_transaction: Transaction = serde_json::from_reader(reader).unwrap();
 
-        let rule_tested_transaction =
-            r::get_rules_gql(test_transaction_items.transaction_items.clone())
-                .await
-                .unwrap();
+        let rule_tested_transaction = r::get_rules_gql(test_transaction.clone()).await.unwrap();
 
-        let test_creditor = test_transaction_items.transaction_items[0].creditor.clone();
+        let test_creditor = test_transaction.transaction_items.0[0].creditor.clone();
 
         let transaction_request =
-            r::create_request_gql(test_creditor, rule_tested_transaction.transaction_items.0).await;
+            r::create_request_gql(test_creditor, rule_tested_transaction).await;
 
-        let test_debitor = test_transaction_items.transaction_items[0].debitor.clone();
+        let test_debitor = test_transaction.transaction_items.0[0].debitor.clone();
 
         let got = r::approve_request_gql(
             transaction_request.id.unwrap(),
@@ -643,8 +631,8 @@ mod tests {
         // call rule service (reuse existing testdata - bread $3 x 2)
         let file = File::open("../tests/testdata/nullFirstTrItemsNoAppr.json").unwrap();
         let reader = BufReader::new(file);
-        let test_items: Vec<TransactionItem> = serde_json::from_reader(reader).unwrap();
-        let got = r::get_rules_http(test_items).await;
+        let test_transaction: Transaction = serde_json::from_reader(reader).unwrap();
+        let got = r::get_rules_http(test_transaction).await;
 
         // restore original
         h::set_cached_state_rule("California", &modified, &original).await;

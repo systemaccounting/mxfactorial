@@ -4,7 +4,7 @@ use crate::{
     time::TZTime,
     transaction_item::{TransactionItem, TransactionItemError, TransactionItems},
 };
-use async_graphql::{ComplexObject, Object, SimpleObject};
+use async_graphql::{InputObject, Object};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use std::{error::Error, vec};
@@ -27,8 +27,8 @@ pub enum TransactionError {
     MissingAuthorRoleInTransaction,
 }
 
-#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, SimpleObject)]
-#[graphql(rename_fields = "snake_case", complex)]
+#[derive(Eq, PartialEq, Debug, Deserialize, Serialize, Clone, InputObject)]
+#[graphql(input_name = "TransactionInput", rename_fields = "snake_case")]
 pub struct Transaction {
     pub id: Option<String>,
     pub rule_instance_id: Option<String>,
@@ -37,14 +37,43 @@ pub struct Transaction {
     pub author_device_latlng: Option<String>,
     pub author_role: Option<AccountRole>,
     pub equilibrium_time: Option<TZTime>,
+    pub debitor_first: Option<bool>,
     pub sum_value: String,
-    #[graphql(skip)]
     pub transaction_items: TransactionItems,
 }
 
-#[ComplexObject]
+// Transaction is both a graphql input and output type
+// https://async-graphql.github.io/async-graphql/en/define_complex_object.html
+// Object must have a resolver defined for each field in its impl
+#[Object(rename_fields = "snake_case")]
 impl Transaction {
-    #[graphql(name = "transaction_items")]
+    async fn id(&self) -> Option<String> {
+        self.id.clone()
+    }
+    async fn rule_instance_id(&self) -> Option<String> {
+        self.rule_instance_id.clone()
+    }
+    async fn author(&self) -> Option<String> {
+        self.author.clone()
+    }
+    async fn author_device_id(&self) -> Option<String> {
+        self.author_device_id.clone()
+    }
+    async fn author_device_latlng(&self) -> Option<String> {
+        self.author_device_latlng.clone()
+    }
+    async fn author_role(&self) -> Option<AccountRole> {
+        self.author_role
+    }
+    async fn equilibrium_time(&self) -> Option<TZTime> {
+        self.equilibrium_time
+    }
+    async fn debitor_first(&self) -> Option<bool> {
+        self.debitor_first
+    }
+    async fn sum_value(&self) -> String {
+        self.sum_value.clone()
+    }
     async fn transaction_items(&self) -> Vec<TransactionItem> {
         self.transaction_items.clone().0
     }
@@ -64,6 +93,7 @@ impl Transaction {
             author_device_latlng: None,
             author_role: None,
             equilibrium_time,
+            debitor_first: Some(false),
             sum_value: transaction_items.sum_value(),
             transaction_items,
         };
@@ -165,7 +195,8 @@ impl From<Row> for Transaction {
             author_device_latlng: row.get(4),
             author_role: row.get(5),
             equilibrium_time: row.get(6),
-            sum_value: row.get(7),
+            debitor_first: row.get(7),
+            sum_value: row.get(8),
             transaction_items: TransactionItems(vec![]),
         }
     }
@@ -181,7 +212,8 @@ impl From<&Row> for Transaction {
             author_device_latlng: row.get(4),
             author_role: row.get(5),
             equilibrium_time: row.get(6),
-            sum_value: row.get(7),
+            debitor_first: row.get(7),
+            sum_value: row.get(8),
             transaction_items: TransactionItems(vec![]),
         }
     }
@@ -440,6 +472,7 @@ pub mod tests {
                 "author_device_latlng": null,
                 "author_role": "creditor",
                 "equilibrium_time": null,
+                "debitor_first": false,
                 "sum_value": "21.800",
                 "transaction_items": [
                     {
@@ -448,7 +481,6 @@ pub mod tests {
                         "item_id": "bread",
                         "price": "3.000",
                         "quantity": "2",
-                        "debitor_first": false,
                         "rule_instance_id": null,
                         "rule_exec_ids": [],
                         "unit_of_measurement": null,
@@ -498,7 +530,6 @@ pub mod tests {
                         "item_id": "milk",
                         "price": "4.000",
                         "quantity": "3",
-                        "debitor_first": false,
                         "rule_instance_id": null,
                         "rule_exec_ids": [],
                         "unit_of_measurement": null,
@@ -568,6 +599,7 @@ pub mod tests {
 			"author_device_latlng": null,
 			"author_role": "creditor",
 			"equilibrium_time": null,
+			"debitor_first": false,
 			"sum_value": "21.800",
 			"transaction_items": [
                 {
@@ -576,7 +608,6 @@ pub mod tests {
                     "item_id": "bread",
                     "price": "3.000",
                     "quantity": "2",
-                    "debitor_first": false,
                     "rule_instance_id": null,
                     "rule_exec_ids": [],
                     "unit_of_measurement": null,
@@ -626,7 +657,6 @@ pub mod tests {
                     "item_id": "milk",
                     "price": "4.000",
                     "quantity": "3",
-                    "debitor_first": false,
                     "rule_instance_id": null,
                     "rule_exec_ids": [],
                     "unit_of_measurement": null,
@@ -680,6 +710,7 @@ pub mod tests {
 			"author_device_latlng": null,
 			"author_role": "creditor",
 			"equilibrium_time": null,
+			"debitor_first": false,
 			"sum_value": "21.800",
 			"transaction_items": [
                 {
@@ -688,7 +719,6 @@ pub mod tests {
                     "item_id": "bread",
                     "price": "3.000",
                     "quantity": "2",
-                    "debitor_first": false,
                     "rule_instance_id": null,
                     "rule_exec_ids": [],
                     "unit_of_measurement": null,
@@ -738,7 +768,6 @@ pub mod tests {
                     "item_id": "milk",
                     "price": "4.000",
                     "quantity": "3",
-                    "debitor_first": false,
                     "rule_instance_id": null,
                     "rule_exec_ids": [],
                     "unit_of_measurement": null,
@@ -801,6 +830,7 @@ pub mod tests {
             author_device_latlng: None,
             author_role: Some(AccountRole::Creditor),
             equilibrium_time: None,
+            debitor_first: Some(false),
             sum_value: String::from("21.800"),
             transaction_items: TransactionItems(vec![
                 TransactionItem {
@@ -809,7 +839,6 @@ pub mod tests {
                     item_id: String::from("bread"),
                     price: String::from("3.000"),
                     quantity: String::from("2"),
-                    debitor_first: Some(false),
                     rule_instance_id: None,
                     rule_exec_ids: Some(vec![]),
                     unit_of_measurement: None,
@@ -859,7 +888,6 @@ pub mod tests {
                     item_id: String::from("milk"),
                     price: String::from("4.000"),
                     quantity: String::from("3"),
-                    debitor_first: Some(false),
                     rule_instance_id: None,
                     rule_exec_ids: Some(vec![]),
                     unit_of_measurement: None,
@@ -917,6 +945,7 @@ pub mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
                     TransactionItem {
@@ -925,7 +954,6 @@ pub mod tests {
                         item_id: String::from("bread"),
                         price: String::from("3.000"),
                         quantity: String::from("2"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,
@@ -975,7 +1003,6 @@ pub mod tests {
                         item_id: String::from("milk"),
                         price: String::from("4.000"),
                         quantity: String::from("3"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,
@@ -1029,6 +1056,7 @@ pub mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
                     TransactionItem {
@@ -1037,7 +1065,6 @@ pub mod tests {
                         item_id: String::from("bread"),
                         price: String::from("3.000"),
                         quantity: String::from("2"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,
@@ -1087,7 +1114,6 @@ pub mod tests {
                         item_id: String::from("milk"),
                         price: String::from("4.000"),
                         quantity: String::from("3"),
-                        debitor_first: Some(false),
                         rule_instance_id: None,
                         rule_exec_ids: Some(vec![]),
                         unit_of_measurement: None,

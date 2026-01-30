@@ -17,6 +17,7 @@ use types::{
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
     request_response::IntraTransaction,
     time::TZTime,
+    transaction::Transaction,
     transaction_item::TransactionItems,
 };
 mod rules;
@@ -189,27 +190,23 @@ async fn apply_approval_rules<'a>(
 
 async fn apply_rules(
     State(state): State<Store>,
-    transaction_items: Json<TransactionItems>,
+    transaction: Json<Transaction>,
 ) -> Result<axum::Json<IntraTransaction>, StatusCode> {
-    if !expected_values(&transaction_items) {
+    if !expected_values(&transaction) {
         return Err(StatusCode::BAD_REQUEST);
     };
 
-    let mut role_sequence = CREDITOR_FIRST;
+    let debitor_first = transaction.debitor_first.unwrap_or(false);
+    let role_sequence = if debitor_first {
+        DEBITOR_FIRST
+    } else {
+        CREDITOR_FIRST
+    };
 
-    let mut transaction_items = transaction_items.clone();
+    let mut transaction_items = transaction.transaction_items.clone();
 
     // set defaults for None values
-    transaction_items.set_debitor_first_default();
     transaction_items.set_empty_rule_exec_ids();
-
-    match transaction_items.is_debitor_first() {
-        Ok(true) => role_sequence = DEBITOR_FIRST,
-        Ok(false) => {}
-        Err(_e) => {
-            return Err(StatusCode::BAD_REQUEST);
-        }
-    }
 
     // get connection from pool
     let conn = state.pool.get_conn().await;
@@ -233,9 +230,9 @@ async fn apply_rules(
 
     let labeled_approved = label_approved_transaction_items(&role_sequence, rule_applied_tr_items);
 
-    let transaction = create_response(labeled_approved);
+    let response_transaction = create_response(labeled_approved, &transaction);
 
-    let response = axum::Json(transaction);
+    let response = axum::Json(response_transaction);
 
     Ok(response)
 }

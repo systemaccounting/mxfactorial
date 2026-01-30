@@ -82,7 +82,13 @@
 
 	async function getRuleItems(userAdded: App.ITransactionItem[]) {
 		previouslySubmitted = JSON.stringify(userAdded);
-		const res = await client.query(RULES_QUERY, { transaction_items: userAdded }).toPromise();
+		const transaction = {
+			author: account,
+			author_role: isCredit ? 'creditor' : 'debitor',
+			sum_value: sum(userAdded),
+			transaction_items: userAdded
+		};
+		const res = await client.query(RULES_QUERY, { transaction }).toPromise();
 		if (!res.data || !res.data.rules) {
 			addRuleItems([]);
 		} else {
@@ -135,7 +141,12 @@
 			client
 				.mutation(CREATE_REQUEST_MUTATION, {
 					auth_account: account,
-					transaction_items: reqItems
+					transaction: {
+						author: account,
+						author_role: isCredit ? 'creditor' : 'debitor',
+						sum_value: sumValue,
+						transaction_items: reqItems
+					}
 				})
 				.toPromise()
 				.then((result) => {

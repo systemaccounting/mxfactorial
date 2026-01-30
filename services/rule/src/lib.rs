@@ -6,25 +6,29 @@ use types::{
     transaction_item::TransactionItems,
 };
 
-pub fn expected_values(tr_items: &TransactionItems) -> bool {
-    // todo: test transaction item values in request
-    let _ = tr_items;
+pub fn expected_values(transaction: &Transaction) -> bool {
+    // todo: test transaction values in request
+    let _ = transaction;
     true
 }
 
-pub fn create_response(transtaction_items: TransactionItems) -> IntraTransaction {
+pub fn create_response(
+    transaction_items: TransactionItems,
+    source_transaction: &Transaction,
+) -> IntraTransaction {
     IntraTransaction {
         auth_account: None,
         transaction: Transaction {
             id: None,
             rule_instance_id: None,
-            author: None,
-            author_device_id: None,
-            author_device_latlng: None,
-            author_role: None,
+            author: source_transaction.author.clone(),
+            author_device_id: source_transaction.author_device_id.clone(),
+            author_device_latlng: source_transaction.author_device_latlng.clone(),
+            author_role: source_transaction.author_role,
             equilibrium_time: None,
-            sum_value: transtaction_items.sum_value(),
-            transaction_items: transtaction_items,
+            debitor_first: source_transaction.debitor_first,
+            sum_value: transaction_items.sum_value(),
+            transaction_items,
         },
     }
 }
@@ -111,7 +115,6 @@ mod tests {
             item_id: String::from("9% state sales taxk"),
             price: String::from("0.270"),
             quantity: String::from("2.000"),
-            debitor_first: Some(false),
             rule_instance_id: None,
             rule_exec_ids: Some(vec![]),
             unit_of_measurement: None,

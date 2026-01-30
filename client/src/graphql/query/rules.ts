@@ -1,8 +1,8 @@
 import { gql } from "@urql/core";
 
 const RULES_QUERY = gql`
-	query getRules($transaction_items: [TransactionItemInput!]) {
-		rules(transaction_items: $transaction_items) {
+	query getRules($transaction: TransactionInput!) {
+		rules(transaction: $transaction) {
 			id
 			rule_instance_id
 			author
@@ -10,13 +10,13 @@ const RULES_QUERY = gql`
 			author_device_latlng
 			author_role
 			sum_value
+			debitor_first
 			transaction_items {
 				id
 				transaction_id
 				item_id
 				price
 				quantity
-				debitor_first
 				rule_instance_id
 				unit_of_measurement
 				units_measured
