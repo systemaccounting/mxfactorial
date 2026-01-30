@@ -23,6 +23,7 @@ BEGIN
 		author_device_latlng,
 		author_role,
 		equilibrium_time,
+		debitor_first,
 		sum_value
 	) VALUES (
 		(entire_transaction).transaction.rule_instance_id,
@@ -31,6 +32,7 @@ BEGIN
 		(entire_transaction).transaction.author_device_latlng,
 		(entire_transaction).transaction.author_role,
 		(entire_transaction).transaction.equilibrium_time,
+		(entire_transaction).transaction.debitor_first,
 		(entire_transaction).transaction.sum_value
 	) RETURNING id INTO tr_id;
 	-- 2. loop through transaction_item array and insert
@@ -42,7 +44,6 @@ BEGIN
 				item_id,
 				price,
 				quantity,
-				debitor_first,
 				rule_instance_id,
 				rule_exec_ids,
 				unit_of_measurement,
@@ -62,7 +63,6 @@ BEGIN
 				(tr_item).transaction_item.item_id,
 				(tr_item).transaction_item.price,
 				(tr_item).transaction_item.quantity,
-				(tr_item).transaction_item.debitor_first,
 				(tr_item).transaction_item.rule_instance_id,
 				(tr_item).transaction_item.rule_exec_ids,
 				(tr_item).transaction_item.unit_of_measurement,

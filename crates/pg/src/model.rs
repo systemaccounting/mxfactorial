@@ -471,6 +471,7 @@ impl ModelTrait for DatabaseConnection {
             transaction_author_device_latlng, // author_device_latlng
             transaction.author_role,          // author_role
             transaction_equilibrium_time,     // equilibrium_time
+            transaction.debitor_first,        // debitor_first
             transaction_sum_value,            // sum_value
             transaction_created_at,           // created_at
         ];
@@ -489,8 +490,6 @@ impl ModelTrait for DatabaseConnection {
 
             let tr_item_quantity = parse_pg_numeric(Some(tr_item.quantity)).unwrap();
             values.push_param(tr_item_quantity); // quantity
-
-            values.push_param(tr_item.debitor_first); // debitor_first
 
             let tr_item_rule_instance_id = parse_pg_int4(tr_item.rule_instance_id).unwrap();
             values.push_param(tr_item_rule_instance_id); // rule_instance_id

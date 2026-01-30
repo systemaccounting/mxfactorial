@@ -14,7 +14,6 @@ declare global {
 			item_id: string;
 			price: string;
 			quantity: string;
-			debitor_first: boolean;
 			rule_instance_id: string;
 			rule_exec_ids: string[];
 			unit_of_measurement: string;
@@ -40,6 +39,7 @@ declare global {
 			author_role: string;
 			equilibrium_time: string;
 			sum_value: string;
+			debitor_first?: boolean;
 			transaction_items: ITransactionItem[];
 		}
 

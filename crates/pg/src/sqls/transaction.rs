@@ -54,6 +54,7 @@ impl TransactionTable {
                 .cast_value_as(Type::POINT),
             self.get_column("author_role"),
             self.get_column("equilibrium_time"),
+            self.get_column("debitor_first"),
             self.get_column("sum_value").cast_value_as(Type::NUMERIC),
         ])
     }
@@ -70,6 +71,7 @@ impl TransactionTable {
                 .cast_value_as(Type::POINT),
             self.get_column("author_role"),
             self.get_column("equilibrium_time"),
+            self.get_column("debitor_first"),
             self.get_column("sum_value").cast_value_as(Type::NUMERIC),
             self.get_column("created_at"),
         ])
@@ -86,6 +88,7 @@ impl TransactionTable {
                 .cast_column_as(Type::TEXT),
             self.get_column("author_role"),
             self.get_column("equilibrium_time"),
+            self.get_column("debitor_first"),
             self.get_column("sum_value").cast_column_as(Type::TEXT),
         ])
     }
@@ -223,6 +226,7 @@ impl TransactionTable {
                     NULL, -- author_device_latlng
                     'creditor', -- author_role
                     NULL, -- equilibrium_time
+                    false, -- debitor_first
                     1.000, -- sum_value
                     NULL -- created_at
                 ),
@@ -234,7 +238,6 @@ impl TransactionTable {
                             'bread', -- item_id
                             1.000, -- price
                             1, -- quantity
-                            true, -- debitor_first
                             NULL, -- rule_instance_id
                             NULL, -- rule_exec_ids
                             NULL, -- unit_of_measurement
@@ -390,7 +393,7 @@ mod tests {
         let test_row = test_table.pg_row(test_columns, None, &mut 1);
         assert_eq!(
             test_row,
-            "ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9)"
+            "ROW($1, $2, $3, $4, $5::point, $6, $7, $8, $9::numeric, $10)"
         )
     }
 
@@ -421,7 +424,7 @@ mod tests {
         let test_row = test_table.pg_row(test_columns, None, &mut 1);
         assert_eq!(
             test_row,
-            "ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9)"
+            "ROW($1, $2, $3, $4, $5::point, $6, $7, $8, $9::numeric, $10)"
         )
     }
 
@@ -432,7 +435,7 @@ mod tests {
         let test_array = test_table.pg_row_array(test_columns, 2, "test", &mut 1);
         assert_eq!(
             test_array,
-            "ARRAY [ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9), ROW($10, $11, $12, $13, $14::point, $15, $16, $17::numeric, $18)]::test[]"
+            "ARRAY [ROW($1, $2, $3, $4, $5::point, $6, $7, $8, $9::numeric, $10), ROW($11, $12, $13, $14, $15::point, $16, $17, $18, $19::numeric, $20)]::test[]"
         )
     }
 
@@ -442,7 +445,7 @@ mod tests {
         let test_row = test_table.entire_transaction_item_row(2, &mut 1);
         assert_eq!(
             test_row,
-            r#"ROW(ROW($1, $2, $3, $4::numeric, $5::numeric, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20), ARRAY [ROW($21, $22, $23, $24, $25, $26, $27, $28::point, $29, $30, $31), ROW($32, $33, $34, $35, $36, $37, $38, $39::point, $40, $41, $42)]::approval[])"#
+            r#"ROW(ROW($1, $2, $3, $4::numeric, $5::numeric, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19), ARRAY [ROW($20, $21, $22, $23, $24, $25, $26, $27::point, $28, $29, $30), ROW($31, $32, $33, $34, $35, $36, $37, $38::point, $39, $40, $41)]::approval[])"#
         )
     }
 
@@ -450,7 +453,7 @@ mod tests {
     fn it_creates_an_entire_transaction_item_array() {
         assert_eq!(
             TransactionTable::new().entire_transaction_item_array(vec![2, 2], &mut 1),
-            r#"ARRAY [ROW(ROW($1, $2, $3, $4::numeric, $5::numeric, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20), ARRAY [ROW($21, $22, $23, $24, $25, $26, $27, $28::point, $29, $30, $31), ROW($32, $33, $34, $35, $36, $37, $38, $39::point, $40, $41, $42)]::approval[]), ROW(ROW($43, $44, $45, $46::numeric, $47::numeric, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62), ARRAY [ROW($63, $64, $65, $66, $67, $68, $69, $70::point, $71, $72, $73), ROW($74, $75, $76, $77, $78, $79, $80, $81::point, $82, $83, $84)]::approval[])]::entire_transaction_item[]"#
+            r#"ARRAY [ROW(ROW($1, $2, $3, $4::numeric, $5::numeric, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19), ARRAY [ROW($20, $21, $22, $23, $24, $25, $26, $27::point, $28, $29, $30), ROW($31, $32, $33, $34, $35, $36, $37, $38::point, $39, $40, $41)]::approval[]), ROW(ROW($42, $43, $44, $45::numeric, $46::numeric, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60), ARRAY [ROW($61, $62, $63, $64, $65, $66, $67, $68::point, $69, $70, $71), ROW($72, $73, $74, $75, $76, $77, $78, $79::point, $80, $81, $82)]::approval[])]::entire_transaction_item[]"#
         )
     }
 
@@ -458,13 +461,13 @@ mod tests {
     fn it_creates_an_entire_transaction_row() {
         assert_eq!(
             TransactionTable::new().entire_transaction_row(vec![2, 2], &mut 1),
-            r#"ROW(ROW($1, $2, $3, $4, $5::point, $6, $7, $8::numeric, $9), ARRAY [ROW(ROW($10, $11, $12, $13::numeric, $14::numeric, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29), ARRAY [ROW($30, $31, $32, $33, $34, $35, $36, $37::point, $38, $39, $40), ROW($41, $42, $43, $44, $45, $46, $47, $48::point, $49, $50, $51)]::approval[]), ROW(ROW($52, $53, $54, $55::numeric, $56::numeric, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71), ARRAY [ROW($72, $73, $74, $75, $76, $77, $78, $79::point, $80, $81, $82), ROW($83, $84, $85, $86, $87, $88, $89, $90::point, $91, $92, $93)]::approval[])]::entire_transaction_item[])::entire_transaction"#
+            r#"ROW(ROW($1, $2, $3, $4, $5::point, $6, $7, $8, $9::numeric, $10), ARRAY [ROW(ROW($11, $12, $13, $14::numeric, $15::numeric, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29), ARRAY [ROW($30, $31, $32, $33, $34, $35, $36, $37::point, $38, $39, $40), ROW($41, $42, $43, $44, $45, $46, $47, $48::point, $49, $50, $51)]::approval[]), ROW(ROW($52, $53, $54, $55::numeric, $56::numeric, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70), ARRAY [ROW($71, $72, $73, $74, $75, $76, $77, $78::point, $79, $80, $81), ROW($82, $83, $84, $85, $86, $87, $88, $89::point, $90, $91, $92)]::approval[])]::entire_transaction_item[])::entire_transaction"#
         )
     }
 
     #[test]
     fn it_creates_a_select_transaction_by_id_sql() {
-        let expected = "SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, sum_value::text FROM transaction WHERE id = $1";
+        let expected = "SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, debitor_first, sum_value::text FROM transaction WHERE id = $1";
         assert_eq!(
             TransactionTable::new().select_transaction_by_id_sql(),
             expected
@@ -473,7 +476,7 @@ mod tests {
 
     #[test]
     fn it_creates_a_select_transactions_by_ids_sql() {
-        let expected = "SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, sum_value::text FROM transaction WHERE id IN ($1, $2, $3)";
+        let expected = "SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, debitor_first, sum_value::text FROM transaction WHERE id IN ($1, $2, $3)";
         assert_eq!(
             TransactionTable::new().select_transactions_by_ids_sql(3),
             expected
@@ -505,7 +508,7 @@ mod tests {
                 ORDER BY transaction_id
                 DESC
             )
-            SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, sum_value::text FROM transaction
+            SELECT id::text, rule_instance_id::text, author, author_device_id, author_device_latlng::text, author_role, equilibrium_time, debitor_first, sum_value::text FROM transaction
             WHERE id IN (
                 SELECT transaction_id
                 FROM transactions
