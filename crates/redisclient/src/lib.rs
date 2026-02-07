@@ -124,6 +124,10 @@ impl RedisClient {
     pub async fn srem(&self, key: &str, value: &str) -> Result<i64, Error> {
         self.inner.srem(key, value).await
     }
+
+    pub async fn del(&self, key: &str) -> Result<i64, Error> {
+        self.inner.del(key).await
+    }
 }
 
 fn redis_uri(
@@ -356,6 +360,31 @@ impl Cache for RedisClient {
         }
         Ok(())
     }
+
+    async fn smembers(&self, key: &str) -> Result<Vec<String>, CacheError> {
+        self.inner
+            .smembers(key)
+            .await
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))
+    }
+
+    async fn incr_float(&self, key: &str, amount: &str) -> Result<String, CacheError> {
+        let val: f64 = amount.parse().unwrap_or(0.0);
+        let result: f64 = self
+            .inner
+            .incr_by_float(key, val)
+            .await
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))?;
+        Ok(result.to_string())
+    }
+
+    async fn del(&self, key: &str) -> Result<(), CacheError> {
+        self.inner
+            .del::<i64, _>(key)
+            .await
+            .map(|_| ())
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))
+    }
 }
 
 #[cfg(test)]
@@ -546,6 +575,7 @@ mod integration_tests {
             disabled_time: None,
             removed_time: None,
             created_at: None,
+            transaction_rule_instance_id: None,
         };
         let rules = TransactionItemRuleInstances(vec![rule]);
 
