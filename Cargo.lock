@@ -1511,8 +1511,11 @@ dependencies = [
 name = "event"
 version = "0.1.0"
 dependencies = [
+ "cache",
+ "chrono",
  "futures-channel",
  "futures-util",
+ "pg",
  "redisclient",
  "rust_decimal",
  "serde",
