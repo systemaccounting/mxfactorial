@@ -46,7 +46,7 @@ query postgres with `PGPASSWORD=test psql -h localhost -U test -d mxfactorial -c
 
 redis runs in docker. the image is built from the redis services block in docker/storage.yaml. use standard compose commands to manage it
 
-to demo live streaming gdp, run `make continue-insert` in background to continuously create and approve transactions. poll the gdp key with `bash scripts/watch-redis-key.sh --key gdp:usa:cal:sac --cmd watch` or query directly: `docker exec mxf-redis-1 redis-cli -a test --no-auth-warning GET "$(date -u '+%Y-%m-%d'):gdp:usa:cal:sac"`. kill with `pkill -f insert-transactions`
+to demo live streaming gdp, run `make insert` in background to continuously create and approve transactions. poll the gdp key with `bash scripts/watch-redis-key.sh --key gdp:usa:cal:sac --cmd watch` or query directly: `docker exec mxf-redis-1 redis-cli -a test --no-auth-warning GET "$(date -u '+%Y-%m-%d'):gdp:usa:cal:sac"`. kill with `pkill -f insert-transactions`
 
 shared libs are in `ls -1 crates`
 
@@ -75,6 +75,8 @@ the conventional transaction flow: creditor drafts a `transaction` with a `trans
 creditors are NOT required to create transaction as explained in the conventional transaction flow (ask). debitors can create transactions (bid)
 
 `insert_equilibrium_trigger` calls `insert_equilibrium` in migrations/schema/000010_equilibrium.up.sql when transactions reach equilibrium from receiving approval timestamps from all transacting accounts. `insert_equilibrium` sends a gdp notification. services/event listens for gdp notifications and increments keys in redis. services/measure listens to a redis stream for key changes and publishes them to a websocket. graphql proxies the services/measure websocket for clients through a query_gdp subscription (see client/src/routes/measure/+page.svelte)
+
+services/event also handles threshold profit accumulation on equilibrium. test: `make -C migrations env ENV=local && make -C migrations insert-thresh`. verify accumulator increments: `docker exec mxf-redis-1 redis-cli -a test --no-auth-warning GET transaction_rule_instance:1:accumulator`. when accumulated >= threshold (1000), event posts to auto-transact, subtracts threshold, and keeps remainder for next cycle. teardown: `pkill -f insert-transactions && make -C migrations thresh-down`
 
 client is a sveltekit SSR app. services can be accessed without the client through graphql
 
