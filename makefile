@@ -162,9 +162,6 @@ transactions-by-account:
 insert:
 	@$(MAKE) -C ./migrations insert
 
-continue-insert:
-	bash scripts/insert-transactions.sh --continue
-
 ###################### secrets ######################
 
 clean-env:
