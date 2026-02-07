@@ -4,6 +4,8 @@ PROJECT_CONF_FILE_NAME=project.yaml
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/$(PROJECT_CONF_FILE_NAME)
 MIGRATIONS_DIR=$(CURDIR)/$(DIR)
 APP_NAME=$(shell basename $(CURDIR))
+ENV_FILE_NAME=$(shell yq '.env_var.set.ENV_FILE_NAME.default' $(PROJECT_CONF))
+ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
 
 run:
 	@$(MAKE) start
@@ -24,8 +26,9 @@ start:
 reset:
 	@$(MAKE) resetdocker
 
+.PHONY: warm-cache
 warm-cache:
-	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml up warm-cache
+	@docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm warm-cache
 
 rebuild:
 	@docker compose \
@@ -65,6 +68,7 @@ create:
 ###################### local/docker migrate commands ######################
 
 resetdocker:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/manage-redis.sh --flush
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd reset 2>&1 | grep -v "No services to build"
 
@@ -86,7 +90,24 @@ dropdocker:
 
 insert:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/insert-transactions.sh
+	make -C $(MIGRATIONS_DIR) resetdocker DB=test; \
+	bash scripts/insert-transactions.sh --continue
+
+insert-thresh:
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
+	bash scripts/manage-redis.sh --flush; \
+	make -C $(MIGRATIONS_DIR) resetdocker DB=test; \
+	make -C $(MIGRATIONS_DIR) thresh-up; \
+	make -C $(MIGRATIONS_DIR) warm-cache; \
+	bash scripts/insert-transactions.sh --continue
+
+thresh-up:
+	@source $(ENV_FILE) && migrate -verbose -path testseedthresh \
+		-database "postgresql://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_testseedthresh_version" up
+
+thresh-down:
+	@source $(ENV_FILE) && migrate -verbose -path testseedthresh \
+		-database "postgresql://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_testseedthresh_version" down --all
 
 ###################### env ######################
 
