@@ -55,14 +55,6 @@ export PGPASSWORD=$(yq ".${ENV_VAR_PATH}.PGPASSWORD.default" $PROJECT_CONF)
 export PGHOST=$(yq ".${ENV_VAR_PATH}.PGHOST.default" $PROJECT_CONF)
 export PGPORT=$(yq ".${ENV_VAR_PATH}.PGPORT.default" $PROJECT_CONF)
 
-# reset postgres in docker
-(
-	bash scripts/manage-redis.sh --flush
-	cd $MIGRATIONS_DIR
-	make resetdocker DB=test
-)
-echo "*** finished migrations"
-
 echo ""
 
 # reset ports if k8s
