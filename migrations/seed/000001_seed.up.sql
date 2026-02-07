@@ -51,10 +51,12 @@ insert into occupation (major_group, minor_group, broad_group, detailed_occupati
 
 -- rule
 insert into rule (name, variable_names) values ('approveCreditItems', '{ "CREDITOR" }');
-insert into rule (name, variable_names) values ('multiplyItemValue', '{ "DEBITOR", "CREDITOR", "ITEM_NAME", "FACTOR" }');
+insert into rule (name, variable_names) values ('multiplyItemValue', '{ "FACTOR" }');
+insert into rule (name, variable_names) values ('appendMultipliedItemValue', '{ "DEBITOR", "CREDITOR", "ITEM_NAME", "FACTOR" }');
 insert into rule (name, variable_names) values ('approveItem', '{ "ACCOUNT" }');
 insert into rule (name, variable_names) values ('approveItemOnAccount', '{ "DEBITOR", "CREDITOR", "APPROVER_ROLE", "APPROVER_NAME" }');
 insert into rule (name, variable_names) values ('approveAnyCreditItem', '{ "CREDITOR", "APPROVER_ROLE", "APPROVER_NAME" }');
+insert into rule (name, variable_names) values ('createTransaction', '{}');
 
 -- geocode data matching account_profile table addresses
 INSERT INTO geocode (latlng, label, street, municipality, region, sub_region, postal_code, country) VALUES ('(37.318830, -120.486230)', NULL, NULL, 'Merced', 'California', 'Merced County', '95348', 'United States of America');

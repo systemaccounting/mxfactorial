@@ -2,7 +2,7 @@
 insert into transaction_item_rule_instance
   (rule_name, rule_instance_name, account_role, state_name, variable_values)
 values
-  ('multiplyItemValue', 'NinePercentSalesTax', 'creditor', 'California', '{ "ANY", "StateOfCalifornia", "9% state sales tax", "0.09" }');
+  ('appendMultipliedItemValue', 'NinePercentSalesTax', 'creditor', 'California', '{ "ANY", "StateOfCalifornia", "9% state sales tax", "0.09" }');
 
 -- approval_rule_instance: GroceryCo ApproveDebitStateOfCalifornia
 insert into approval_rule_instance
