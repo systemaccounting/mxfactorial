@@ -34,6 +34,7 @@ CREATE TABLE transaction_rule_instance (
   author_role text,
   -- ***
   cron varchar(255),
+  threshold numeric,
   disabled_time timestamptz,
   removed_time timestamptz,
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -63,6 +64,7 @@ CREATE TABLE transaction_item_rule_instance (
   occupation_id int,
   industry_id int,
   -- ***
+  transaction_rule_instance_id int REFERENCES transaction_rule_instance(id),
   disabled_time timestamptz,
   removed_time timestamptz,
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP

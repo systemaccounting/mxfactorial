@@ -117,6 +117,8 @@ pub struct TransactionItemRuleInstance {
     pub removed_time: Option<TZTime>,
     #[serde(skip_serializing)]
     pub created_at: Option<TZTime>,
+    #[serde(default)]
+    pub transaction_rule_instance_id: Option<String>,
 }
 
 impl From<&Row> for TransactionItemRuleInstance {
@@ -141,6 +143,7 @@ impl From<&Row> for TransactionItemRuleInstance {
             disabled_time: row.get(16),
             removed_time: row.get(17),
             created_at: row.get(18),
+            transaction_rule_instance_id: row.get(19),
         }
     }
 }
@@ -337,6 +340,7 @@ mod tests {
                     .unwrap()
                     .with_timezone(&Utc),
             )),
+            transaction_rule_instance_id: None,
         };
 
         assert_eq!(got, want);
@@ -460,6 +464,7 @@ mod tests {
             disabled_time: None,
             removed_time: None,
             created_at: None,
+            transaction_rule_instance_id: None,
         };
         let want = TransactionItemRuleInstances(vec![instance.clone()]);
         let got = TransactionItemRuleInstances::from_iter(std::iter::once(instance));

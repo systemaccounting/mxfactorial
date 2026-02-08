@@ -523,13 +523,10 @@ impl<'a, T: ModelTrait> Service<'a, T> {
             }
         }
 
-        // cache miss, fetch from db
+        // cache miss, fetch from db excluding template items
         let rules = self
             .conn
-            .select_transaction_item_rule_instances_by_role_account_query(
-                account_role,
-                account_name.clone(),
-            )
+            .select_transaction_item_rules_by_role_account_query(account_role, account_name.clone())
             .await?;
 
         // write through to cache
@@ -609,13 +606,10 @@ impl<'a, T: ModelTrait> Service<'a, T> {
             }
         }
 
-        // cache miss, fetch from db
+        // cache miss, fetch from db excluding template items
         let rules = self
             .conn
-            .select_transaction_item_rule_instances_by_role_state_query(
-                account_role,
-                state_name.clone(),
-            )
+            .select_transaction_item_rules_by_role_state_query(account_role, state_name.clone())
             .await?;
 
         // write through to cache
@@ -1396,7 +1390,7 @@ mod tests {
         let account_role = AccountRole::Debitor;
         let account_name = "JacobWebb".to_string();
 
-        conn.expect_select_transaction_item_rule_instances_by_role_account_query()
+        conn.expect_select_transaction_item_rules_by_role_account_query()
             .with(
                 predicate::eq(account_role),
                 predicate::eq(account_name.clone()),
@@ -1429,6 +1423,7 @@ mod tests {
                         disabled_time: None,
                         removed_time: None,
                         created_at: Some(TZTime::now()),
+                        transaction_rule_instance_id: None,
                     },
                 ]))
             });
@@ -1461,7 +1456,7 @@ mod tests {
         let account_role = AccountRole::Debitor;
         let state_name = "California".to_string();
 
-        conn.expect_select_transaction_item_rule_instances_by_role_state_query()
+        conn.expect_select_transaction_item_rules_by_role_state_query()
             .with(
                 predicate::eq(account_role),
                 predicate::eq(state_name.clone()),
@@ -1494,6 +1489,7 @@ mod tests {
                         disabled_time: None,
                         removed_time: None,
                         created_at: Some(TZTime::now()),
+                        transaction_rule_instance_id: None,
                     },
                 ]))
             });

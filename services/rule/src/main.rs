@@ -69,13 +69,18 @@ async fn apply_transaction_item_rules<'a>(
 
             // apply state rules to transaction item
             for rule_instance in state_rules.clone().0.iter() {
-                let mut state_added_tr_items =
-                    rules::transaction_item::match_transaction_item_rule(
-                        rule_instance,
-                        &mut current_tr_item,
-                    )
-                    .unwrap();
-                rule_added.0.append(&mut state_added_tr_items.0);
+                let state_added_tr_items = rules::transaction_item::match_transaction_item_rule(
+                    rule_instance,
+                    current_tr_item.clone(),
+                )
+                .unwrap();
+                // first item is updated original, rest are computed
+                if !state_added_tr_items.0.is_empty() {
+                    current_tr_item = state_added_tr_items.0[0].clone();
+                    for item in state_added_tr_items.0.into_iter().skip(1) {
+                        rule_added.0.push(item);
+                    }
+                }
             }
 
             // get rules matching account and rule
@@ -86,13 +91,18 @@ async fn apply_transaction_item_rules<'a>(
 
             // apply account rules to transaction item
             for rule_instance in account_rules.clone().0.iter() {
-                let mut account_added_tr_item =
-                    rules::transaction_item::match_transaction_item_rule(
-                        rule_instance,
-                        &mut current_tr_item,
-                    )
-                    .unwrap();
-                rule_added.0.append(&mut account_added_tr_item.0);
+                let account_added_tr_items = rules::transaction_item::match_transaction_item_rule(
+                    rule_instance,
+                    current_tr_item.clone(),
+                )
+                .unwrap();
+                // first item is updated original, rest are computed
+                if !account_added_tr_items.0.is_empty() {
+                    current_tr_item = account_added_tr_items.0[0].clone();
+                    for item in account_added_tr_items.0.into_iter().skip(1) {
+                        rule_added.0.push(item);
+                    }
+                }
             }
         }
 

@@ -113,7 +113,17 @@ pub trait ModelTrait {
         account_role: AccountRole,
         state_name: String,
     ) -> Result<TransactionItemRuleInstances, Box<dyn Error>>;
+    async fn select_transaction_item_rules_by_role_state_query(
+        &self,
+        account_role: AccountRole,
+        state_name: String,
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>>;
     async fn select_transaction_item_rule_instances_by_role_account_query(
+        &self,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>>;
+    async fn select_transaction_item_rules_by_role_account_query(
         &self,
         account_role: AccountRole,
         account_name: String,
@@ -712,6 +722,24 @@ impl ModelTrait for DatabaseConnection {
         }
     }
 
+    async fn select_transaction_item_rules_by_role_state_query(
+        &self,
+        account_role: AccountRole,
+        state_name: String,
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::TransactionItemRuleInstanceTable::new();
+        let sql = table.select_rules_by_role_state_sql();
+        let values = to_sql_vec![account_role, state_name];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let rule_instances = TransactionItemRuleInstances::from(rows);
+                Ok(rule_instances)
+            }
+        }
+    }
+
     async fn select_transaction_item_rule_instances_by_role_account_query(
         &self,
         account_role: AccountRole,
@@ -719,6 +747,24 @@ impl ModelTrait for DatabaseConnection {
     ) -> Result<TransactionItemRuleInstances, Box<dyn Error>> {
         let table = crate::sqls::rule_instance::TransactionItemRuleInstanceTable::new();
         let sql = table.select_by_role_account_sql();
+        let values = to_sql_vec![account_role, account_name];
+        let rows = self.query(sql.to_string(), values).await;
+        match rows {
+            Err(e) => Err(Box::new(e)),
+            Ok(rows) => {
+                let rule_instances = TransactionItemRuleInstances::from(rows);
+                Ok(rule_instances)
+            }
+        }
+    }
+
+    async fn select_transaction_item_rules_by_role_account_query(
+        &self,
+        account_role: AccountRole,
+        account_name: String,
+    ) -> Result<TransactionItemRuleInstances, Box<dyn Error>> {
+        let table = crate::sqls::rule_instance::TransactionItemRuleInstanceTable::new();
+        let sql = table.select_rules_by_role_account_sql();
         let values = to_sql_vec![account_role, account_name];
         let rows = self.query(sql.to_string(), values).await;
         match rows {

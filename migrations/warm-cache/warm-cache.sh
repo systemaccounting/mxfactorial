@@ -28,6 +28,23 @@ fi
 
 echo "using cache backend: $CACHE_BACKEND" 1>&2
 
+# cache key separator: redis uses ":", dynamodb uses "#"
+SEP=":"
+if [[ -n "${AWS_LAMBDA_FUNCTION_NAME:-}" ]]; then
+  SEP="#"
+fi
+
+# cache key builders (mirrors CacheKey enum in crates/cache/src/lib.rs)
+function cache_key_transaction_rule_instance_threshold_profit() {
+  local account="$1"
+  echo "transaction_rule_instance${SEP}threshold${SEP}profit${SEP}${account}"
+}
+
+function cache_key_transaction_rule_instance_accumulator() {
+  local id="$1"
+  echo "transaction_rule_instance${SEP}${id}${SEP}accumulator"
+}
+
 DBCONN="host=$PGHOST port=$PGPORT user=$PGUSER password=$PGPASSWORD dbname=$PGDATABASE sslmode=disable"
 
 function redis_set() {
@@ -101,7 +118,8 @@ TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A > "$TMPFILE" <<EOF
 SELECT id, account_role, state_name, row_to_json(r)
 FROM transaction_item_rule_instance r
-WHERE state_name IS NOT NULL;
+WHERE state_name IS NOT NULL
+AND transaction_rule_instance_id IS NULL;
 EOF
 while IFS='|' read -r id account_role state_name json; do
   role_lower=$(echo "$account_role" | tr '[:upper:]' '[:lower:]')
@@ -164,6 +182,47 @@ EOF
 while IFS=$'\t' read -r owned_account owner_account; do
   key="${CACHE_KEY_APPROVERS}:${owned_account}"
   cache_sadd "$key" "$owner_account" "$owner_account"
+done < "$TMPFILE"
+rm -f "$TMPFILE"
+ddb_flush
+
+# 6. cache geocode by latlng
+echo "caching geocode..." 1>&2
+TMPFILE=$(mktemp)
+psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
+SELECT latlng::text, country, region, municipality FROM geocode;
+EOF
+while IFS=$'\t' read -r latlng country region municipality; do
+  key="geocode:${latlng}"
+  value="${country}|${region}|${municipality}"
+  cache_set "$key" "$value"
+done < "$TMPFILE"
+rm -f "$TMPFILE"
+ddb_flush
+
+# 7. cache redis_name abbreviations
+echo "caching redis_name..." 1>&2
+TMPFILE=$(mktemp)
+psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
+SELECT key, value FROM redis_name;
+EOF
+while IFS=$'\t' read -r key value; do
+  cache_key="redis_name:${key}"
+  cache_set "$cache_key" "$value"
+done < "$TMPFILE"
+rm -f "$TMPFILE"
+ddb_flush
+
+# 8. cache threshold rules by author
+echo "caching threshold rules..." 1>&2
+TMPFILE=$(mktemp)
+psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
+SELECT id, author, threshold FROM transaction_rule_instance WHERE threshold IS NOT NULL;
+EOF
+while IFS=$'\t' read -r id author threshold; do
+  key=$(cache_key_transaction_rule_instance_threshold_profit "$author")
+  value="${id}|${threshold}"
+  cache_sadd "$key" "$id" "$value"
 done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush

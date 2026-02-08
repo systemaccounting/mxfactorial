@@ -84,4 +84,35 @@ pub trait Cache: Send + Sync {
         account: &str,
         approvers: &[String],
     ) -> Result<(), CacheError>;
+
+    // primitives
+    async fn smembers(&self, key: &str) -> Result<Vec<String>, CacheError>;
+    async fn incr_float(&self, key: &str, amount: &str) -> Result<String, CacheError>;
+    async fn del(&self, key: &str) -> Result<(), CacheError>;
+}
+
+pub enum CacheKey<'a> {
+    TransactionRuleInstanceThresholdProfit { account: &'a str },
+    TransactionRuleInstanceAccumulator { id: &'a str },
+}
+
+impl<'a> std::fmt::Display for CacheKey<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let sep = if std::env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
+            "#"
+        } else {
+            ":"
+        };
+
+        let key = match self {
+            Self::TransactionRuleInstanceThresholdProfit { account } => {
+                ["transaction_rule_instance", "threshold", "profit", account].join(sep)
+            }
+            Self::TransactionRuleInstanceAccumulator { id } => {
+                ["transaction_rule_instance", id, "accumulator"].join(sep)
+            }
+        };
+
+        write!(f, "{}", key)
+    }
 }

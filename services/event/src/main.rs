@@ -1,7 +1,7 @@
 use futures_channel::mpsc;
 use futures_util::{stream, FutureExt, StreamExt, TryStreamExt};
+use pg::postgres::DB;
 use redisclient::RedisClient;
-use serde::Deserialize;
 use std::env;
 use tokio_postgres::{AsyncMessage, NoTls};
 mod events;
@@ -14,12 +14,6 @@ fn pg_conn_uri() -> String {
     let pgdatabase = std::env::var("PGDATABASE").unwrap();
     let uri = format!("postgresql://{pguser}:{pgpassword}@{pghost}:{pgport}/{pgdatabase}");
     uri
-}
-
-#[derive(Deserialize, Debug)]
-struct Event {
-    name: String,
-    value: String,
 }
 
 #[tokio::main]
@@ -46,6 +40,9 @@ async fn main() {
         }
     }
 
+    // connection pool for querying transaction data
+    let pool = DB::new_pool(&pg_uri).await;
+
     loop {
         let (client, mut connection) = match tokio_postgres::connect(pg_uri.as_str(), NoTls).await {
             Ok(conn) => conn,
@@ -63,7 +60,7 @@ async fn main() {
         let connection = stream.forward(tx).map(|r| r.unwrap());
         let handler = tokio::spawn(connection);
 
-        if let Err(e) = client.batch_execute("LISTEN event;").await {
+        if let Err(e) = client.batch_execute("LISTEN equilibrium;").await {
             tracing::info!("failed to execute LISTEN command: {}", e);
             handler.abort();
             continue;
@@ -80,20 +77,17 @@ async fn main() {
             };
 
             match message {
-                AsyncMessage::Notification(n) => match serde_json::from_str::<Event>(n.payload()) {
-                    Ok(event) => match event.name.as_str() {
-                        "gdp" => {
-                            let gdp_map = events::Gdp::new(event.value.as_str());
-                            events::redis_incrby_gdp(&redis_client, gdp_map).await;
-                        }
-                        _ => {
-                            tracing::info!("unknown event: {}", event.name);
-                        }
-                    },
-                    Err(e) => {
-                        tracing::info!("failed to parse event: {}", e);
+                AsyncMessage::Notification(n) => {
+                    let transaction_id = n.payload();
+                    if let Err(e) = events::handle_gdp(&pool, &redis_client, transaction_id).await {
+                        tracing::error!("gdp handler error: {}", e);
                     }
-                },
+                    if let Err(e) =
+                        events::handle_threshold_profit(&pool, &redis_client, transaction_id).await
+                    {
+                        tracing::error!("threshold handler error: {}", e);
+                    }
+                }
                 _ => {
                     tracing::info!("unhandled message: {:?}", message);
                     tokio::time::sleep(std::time::Duration::from_secs(1)).await;

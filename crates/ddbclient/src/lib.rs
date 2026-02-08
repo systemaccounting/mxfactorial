@@ -327,6 +327,36 @@ impl Cache for DdbClient {
         }
         Ok(())
     }
+
+    // primitives for threshold profit accumulator
+    async fn smembers(&self, key: &str) -> Result<Vec<String>, CacheError> {
+        self.query_items(key).await
+    }
+
+    async fn incr_float(&self, key: &str, amount: &str) -> Result<String, CacheError> {
+        let current = self
+            .get_item(key, "_")
+            .await?
+            .unwrap_or_else(|| "0".to_string());
+        let current_val: f64 = current.parse().unwrap_or(0.0);
+        let increment: f64 = amount.parse().unwrap_or(0.0);
+        let new_val = current_val + increment;
+        let new_str = new_val.to_string();
+        self.put_item(key, "_", &new_str).await?;
+        Ok(new_str)
+    }
+
+    async fn del(&self, key: &str) -> Result<(), CacheError> {
+        self.client
+            .delete_item()
+            .table_name(&self.table_name)
+            .key(get_hash_key(), AttributeValue::S(key.to_string()))
+            .key(get_range_key(), AttributeValue::S("_".to_string()))
+            .send()
+            .await
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
