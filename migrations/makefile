@@ -68,7 +68,6 @@ create:
 ###################### local/docker migrate commands ######################
 
 resetdocker:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/manage-redis.sh --flush
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd reset 2>&1 | grep -v "No services to build"
 
