@@ -10,6 +10,7 @@ jobs:
     name: mirror base images to ghcr
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       packages: write
     steps:
       - name: login to ghcr
