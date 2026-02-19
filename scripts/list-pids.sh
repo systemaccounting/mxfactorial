@@ -16,12 +16,14 @@ function list_pids() {
 if [[ $CI ]]; then
 	while IFS= read -r pattern; do
 		list_pids "$pattern"
-	done < <(yq -r '.scripts.env_var.set.CI_SERVICE_PROCESSES.default[]' $PROJECT_CONF)
+	done < <(yq -r '.scripts.env_var.set.CI_SERVICE_PROCESSES.default[]' $PROJECT_CONF) | sort -k2
 else
-	while IFS= read -r pattern; do
-		list_pids "$pattern"
-	done < <(yq -r '.scripts.env_var.set.SERVICE_PROCESSES.default[]' $PROJECT_CONF)
+	{
+		while IFS= read -r pattern; do
+			list_pids "$pattern"
+		done < <(yq -r '.scripts.env_var.set.SERVICE_PROCESSES.default[]' $PROJECT_CONF)
 
-	# client process
-	list_pids "$(yq -r '.scripts.env_var.set.CLIENT_PROCESS.default' $PROJECT_CONF)" "client"
+		# client process
+		list_pids "$(yq -r '.scripts.env_var.set.CLIENT_PROCESS.default' $PROJECT_CONF)" "client"
+	} | sort -k2
 fi
