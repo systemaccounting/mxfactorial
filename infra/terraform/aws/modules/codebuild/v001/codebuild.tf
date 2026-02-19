@@ -41,7 +41,11 @@ resource "aws_codebuild_project" "default" {
       value = "true"
     }
     environment_variable {
-      name  = "DEPLOY"
+      name  = "DEPLOY_LAMBDA"
+      value = "false"
+    }
+    environment_variable {
+      name  = "DEPLOY_ECS"
       value = "false"
     }
   }
@@ -119,6 +123,26 @@ resource "aws_iam_role_policy" "codebuild" {
           "lambda:UpdateFunctionCode"
         ]
         Resource = var.lambda_function_arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ecs:DescribeServices",
+          "ecs:DescribeTaskDefinition",
+          "ecs:RegisterTaskDefinition",
+          "ecs:UpdateService"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["iam:PassRole"]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
       }
     ]
   })
