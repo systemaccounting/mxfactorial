@@ -54,9 +54,10 @@ insert into rule (name, variable_names) values ('approveCreditItems', '{ "CREDIT
 insert into rule (name, variable_names) values ('multiplyItemValue', '{ "FACTOR" }');
 insert into rule (name, variable_names) values ('appendMultipliedItemValue', '{ "DEBITOR", "CREDITOR", "ITEM_NAME", "FACTOR" }');
 insert into rule (name, variable_names) values ('approveItem', '{ "ACCOUNT" }');
-insert into rule (name, variable_names) values ('approveItemOnAccount', '{ "DEBITOR", "CREDITOR", "APPROVER_ROLE", "APPROVER_NAME" }');
+insert into rule (name, variable_names) values ('approveItemBetweenAccounts', '{ "DEBITOR", "CREDITOR", "ITEM_ID", "APPROVER_ROLE", "APPROVER_NAME" }');
 insert into rule (name, variable_names) values ('approveAnyCreditItem', '{ "CREDITOR", "APPROVER_ROLE", "APPROVER_NAME" }');
 insert into rule (name, variable_names) values ('createTransaction', '{}');
+insert into rule (name, variable_names) values ('addTransactionItem', '{ "DEBITOR", "CREDITOR" }');
 
 -- geocode data matching account_profile table addresses
 INSERT INTO geocode (latlng, label, street, municipality, region, sub_region, postal_code, country) VALUES ('(37.318830, -120.486230)', NULL, NULL, 'Merced', 'California', 'Merced County', '95348', 'United States of America');
