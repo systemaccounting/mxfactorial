@@ -41,10 +41,6 @@ deletes `.env` files created in app directories
 
 deletes `invoke.log` files created in app directories by local [aws lambda invoke](https://docs.aws.amazon.com/cli/latest/reference/lambda/invoke.html)
 
-##### `compile-go-linux.sh`
-
-compiles linux binaries for lambda in app directories with `go build` command
-
 ##### `create-env-file.sh`
 
 loops through an apps `secrets` in `project.yaml`, gets each secret value with [aws secretsmanager get-secret-value](https://docs.aws.amazon.com/cli/latest/reference/secretsmanager/get-secret-value.html), and creates a `.env` file in the app directory
@@ -103,10 +99,6 @@ creates testseed migration accounts in cognito
 ##### `delete-accounts.sh`
 
 deletes testseed migration accounts from cognito
-
-##### `sum-value.sh`
-
-sums value in json `transaction_item` list
 
 ##### `print-id-token.sh`
 
@@ -236,10 +228,6 @@ imports resources into the `infra/terraform/aws/environments/init-$ENV`terraform
 
 prints rust crate test coverage
 
-##### `print-lambda-policy.sh`
-
-prints policy attached to lambda function
-
 ##### `print-ecr-repo-uri.sh`
 
 prints uri of ecr repo
@@ -309,9 +297,6 @@ run all tests before before creating a pull request
 ##### `set-k8s-ports.sh`
 changes ports set in `project.yaml` to 3xxxx for access through kubernetes [NodePort](https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport)
 
-#### `get-ssh-key.sh`
-gets ssh key from ssm and writes it to disk
-
 #### `install.sh`
 installs project dependencies. only macos supported
 
@@ -320,6 +305,24 @@ tests availability of services locally or in cloud
 
 #### `invoke-warm-cache.sh`
 invokes warm-cache lambda to populate ddb cache from rds
+
+#### `build-image.sh`
+builds a docker image for a service. `bash scripts/build-image.sh --app-name rule --build-ctx .` to build, add `--no-test` to skip tests
+
+#### `deploy-ecs-task.sh`
+deploys latest ecr image to an ecs fargate service. `bash scripts/deploy-ecs-task.sh --service event --env dev`
+
+#### `save-id-token.sh`
+authenticates with cognito and saves the id token to a services .env file
+
+#### `tag-dev-image.sh`
+tags a local docker image with the dev ecr repo uri and current git sha. `bash scripts/tag-dev-image.sh --app-name go-migrate`
+
+#### `test-image-name.sh`
+parses and validates a service name from an ecr image tag. `bash scripts/test-image-name.sh --curr-tag 123456789101.dkr.ecr.us-east-1.amazonaws.com/12345/dev/rule:93496996`
+
+#### `test-reset.sh`
+restores db to initial test state. `bash scripts/test-reset.sh --set` caches max IDs and initial balance, `bash scripts/test-reset.sh` resets db to that state. supports cloud with `--env dev`
 
 #### `maps-key.sh`
 gets or sets the google maps api key in ssm. `bash scripts/maps-key.sh` to get, `bash scripts/maps-key.sh --set <api-key>` to set. always targets dev ssm. used by `create-env-file.sh` to silently populate `GOOGLE_MAPS_API_KEY` in client `.env`
