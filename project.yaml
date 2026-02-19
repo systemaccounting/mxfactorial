@@ -17,7 +17,7 @@ client:
   runtime: v8
   min_code_cov: null
   type: app
-  deploy: true
+  deploy_target: lambda
   local_dev: true
   env_var:
     set:
@@ -102,7 +102,7 @@ crates:
       set: {}
       get: []
     params: []
-  redisclient:
+  cache:
     runtime: rust1.x
     min_code_cov: 0
     type: lib
@@ -123,7 +123,63 @@ crates:
         REDIS_PASSWORD:
           ssm: null
           default: test
+        CACHE_KEY_RULES:
+          ssm: null
+          default: "rules"
+        CACHE_KEY_STATE:
+          ssm: null
+          default: "state"
+        CACHE_KEY_ACCOUNT:
+          ssm: null
+          default: "account"
+        CACHE_KEY_APPROVAL:
+          ssm: null
+          default: "approval"
+        CACHE_KEY_PROFILE:
+          ssm: null
+          default: "profile"
+        CACHE_KEY_PROFILE_ID:
+          ssm: null
+          default: "profile_id"
+        CACHE_KEY_APPROVERS:
+          ssm: null
+          default: "approvers"
       get: []
+    params: []
+  queue:
+    runtime: rust1.x
+    min_code_cov: 0
+    type: lib
+    env_var:
+      set:
+        QUEUE_KEY:
+          ssm: null
+          default: auto-transact:queue
+        SQS_QUEUE_URL:
+          ssm: queue/sqs/auto-transact/url
+          default: null
+      get:
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
+    params: []
+  pubsub:
+    runtime: rust1.x
+    min_code_cov: 0
+    type: lib
+    env_var:
+      set:
+        SNS_TOPIC_ARN:
+          ssm: pubsub/sns/gdp/arn
+          default: null
+      get:
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
     params: []
 docker:
   env_var:
@@ -256,31 +312,12 @@ infra:
               CACHE_TABLE_RANGE_KEY:
                 ssm: null
                 default: sk
-            get: []
-        microk8s:
-          env_var:
-            set:
-              MICROK8S_SSH_PUB_KEY:
-                ssm: ops/ec2/microk8s/ssh/pub_key
+              SQS_QUEUE_URL:
+                ssm: queue/sqs/auto-transact/url
                 default: null
-              MICROK8S_SSH_PRIV_KEY:
-                ssm: ops/ec2/microk8s/ssh/priv_key
+              SNS_TOPIC_ARN:
+                ssm: pubsub/sns/gdp/arn
                 default: null
-              MICROK8S_SSH_USER:
-                ssm: null
-                default: ubuntu
-              MICROK8S_SSH_HOST:
-                ssm: ops/ec2/microk8s/ssh/host
-                default: null
-              MICROK8S_SSH_PORT:
-                ssm: null
-                default: 22
-              MICROK8S_SSH_KEY_NAME_PREFIX:
-                ssm: null
-                default: microk8s
-              MICROK8S_MANIFESTS_DIR:
-                ssm: null
-                default: k8s
             get: []
         project-storage:
           env_var:
@@ -371,7 +408,7 @@ migrations:
     local_dev: false
     params:
       - AWS_REGION
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -392,7 +429,7 @@ migrations:
     local_dev: false
     params:
       - AWS_REGION
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -481,7 +518,7 @@ services:
     local_dev: true
     params:
       - AWS_REGION
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -519,7 +556,7 @@ services:
     local_dev: true
     params:
       - AWS_REGION
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents:
       - request-approve
@@ -554,7 +591,7 @@ services:
     local_dev: true
     params:
       - AWS_REGION
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -578,7 +615,7 @@ services:
     local_dev: true
     params:
       - AWS_REGION
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents:
       - request-create
@@ -599,21 +636,6 @@ services:
         RUST_BACKTRACE:
           ssm: null
           default: 1
-        CACHE_KEY_RULES_STATE:
-          ssm: null
-          default: "rules:state"
-        CACHE_KEY_RULES_ACCOUNT:
-          ssm: null
-          default: "rules:account"
-        CACHE_KEY_PROFILE:
-          ssm: null
-          default: "profile"
-        CACHE_KEY_PROFILE_ID:
-          ssm: null
-          default: "profile_id"
-        CACHE_KEY_APPROVERS:
-          ssm: null
-          default: "approvers"
       get:
         - PGDATABASE
         - PGUSER
@@ -633,8 +655,10 @@ services:
         - REDIS_PORT
         - REDIS_USERNAME
         - REDIS_PASSWORD
-        - CACHE_KEY_RULES_STATE
-        - CACHE_KEY_RULES_ACCOUNT
+        - CACHE_KEY_RULES
+        - CACHE_KEY_STATE
+        - CACHE_KEY_ACCOUNT
+        - CACHE_KEY_APPROVAL
         - CACHE_KEY_PROFILE
         - CACHE_KEY_PROFILE_ID
         - CACHE_KEY_APPROVERS
@@ -647,7 +671,7 @@ services:
     type: app
     local_dev: true
     params: []
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -670,7 +694,7 @@ services:
     type: app
     local_dev: true
     params: []
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -694,7 +718,7 @@ services:
     type: app
     local_dev: true
     params: []
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -717,7 +741,7 @@ services:
     type: app
     local_dev: true
     params: []
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -741,7 +765,7 @@ services:
     type: app
     local_dev: true
     params: []
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -764,7 +788,7 @@ services:
     type: app
     local_dev: true
     params: []
-    deploy: false
+    deploy_target: ecs
     build_src_path: null
     dependents: []
     rust_log: off
@@ -788,7 +812,7 @@ services:
     type: app
     local_dev: true
     params: []
-    deploy: false
+    deploy_target: ecs
     build_src_path: null
     dependents: []
     rust_log: off
@@ -823,7 +847,7 @@ services:
     type: app
     local_dev: false
     params: []
-    deploy: true
+    deploy_target: lambda
     build_src_path: null
     dependents: []
     rust_log: off
@@ -832,10 +856,61 @@ services:
       get: # used by make targets
         - POOL_ID
         - CLIENT_ID
+  auto-transact:
+    runtime: rust1.x
+    min_code_cov: null
+    type: app
+    local_dev: true
+    params: []
+    deploy_target: lambda
+    build_src_path: null
+    dependents: []
+    rust_log: off
+    env_var:
+      set:
+        AUTO_TRANSACT_PORT:
+          ssm: null
+          default: 10011
+        AUTO_TRANSACT_URL:
+          ssm: null
+          default: null
+        AUTO_TRANSACT_MAX_RETRIES:
+          ssm: null
+          default: 3
+        AUTO_TRANSACT_RETRY_DELAY_MS:
+          ssm: null
+          default: 1000
+        AUTO_TRANSACT_QUEUE_KEY:
+          ssm: null
+          default: auto-transact:queue
+        AUTO_TRANSACT_PROCESSING_KEY:
+          ssm: null
+          default: auto-transact:processing
+      get:
+        - READINESS_CHECK_PATH
+        - AUTO_TRANSACT_PORT
+        - RULE_URL
+        - REQUEST_CREATE_URL
+        - PGHOST
+        - PGPORT
+        - PGUSER
+        - PGPASSWORD
+        - PGDATABASE
+        - RUST_LOG
+        - RUST_BACKTRACE
+        - AUTO_TRANSACT_MAX_RETRIES
+        - AUTO_TRANSACT_RETRY_DELAY_MS
+        - REDIS_DB
+        - REDIS_HOST
+        - REDIS_PORT
+        - REDIS_USERNAME
+        - REDIS_PASSWORD
+        - AUTO_TRANSACT_QUEUE_KEY
+        - AUTO_TRANSACT_PROCESSING_KEY
 tests:
   runtime: rust1.x
   type: tool
-  deploy: false
+  deploy_target: null
   env_var:
     set:
       AWS_LAMBDA_FUNCTION_NAME:
@@ -859,6 +934,7 @@ tests:
       - REDIS_USERNAME
       - REDIS_PASSWORD
       - TRANSACTION_DDB_TABLE
+      - AUTO_TRANSACT_URL
   params: []
 env_var:
   set:

@@ -38,7 +38,7 @@ package project_conf
     min_code_cov!: *null | int
     type!: #AppType
     local_dev!: *false | bool
-    deploy!: *true | bool
+    deploy_target!: *null | "lambda" | "ecs" // null skips deploying
     build_src_path!: *null | string
     dependents!: [...string]
     rust_log!: #RustLog
@@ -50,7 +50,7 @@ client!: {
     min_code_cov!: null
     type!: #AppType
     local_dev!: *false | bool
-    deploy!: *true | bool
+    deploy_target!: *null | "lambda" | "ecs"
 }
 
 #Lib: {
@@ -63,9 +63,11 @@ client!: {
 
 crates: {
     #Dir
+    cache: #Lib
     httpclient: #Lib
     pg: #Lib
-    redisclient: #Lib
+    pubsub: #Lib
+    queue: #Lib
     types: #Lib
     uribuilder: #Lib
     wsclient: #Lib
@@ -90,9 +92,6 @@ infra: {
                     env_var!: #EnvVars
                 }
                 environment: {
-                    env_var!: #EnvVars
-                }
-                microk8s: {
                     env_var!: #EnvVars
                 }
                 "project-storage": {
@@ -146,11 +145,12 @@ services: {
     event: #App
     measure: #App
     "auto-confirm": #App
+    "auto-transact": #App
 }
 
 tests: {
     #Dir
     runtime!: #Runtime
     type!: #AppType
-    deploy: false
+    deploy_target: *null | "lambda" | "ecs"
 }
