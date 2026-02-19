@@ -1,19 +1,52 @@
-use futures_channel::mpsc;
-use futures_util::{stream, FutureExt, StreamExt, TryStreamExt};
+use futures::channel::mpsc;
+use futures::{stream, FutureExt, StreamExt, TryStreamExt};
 use pg::postgres::DB;
-use redisclient::RedisClient;
-use std::env;
+use shutdown::shutdown_signal;
+use std::{env, sync::Arc};
 use tokio_postgres::{AsyncMessage, NoTls};
 mod events;
 
-fn pg_conn_uri() -> String {
-    let pguser = std::env::var("PGUSER").unwrap();
-    let pgpassword = std::env::var("PGPASSWORD").unwrap();
-    let pghost = std::env::var("PGHOST").unwrap();
-    let pgport = std::env::var("PGPORT").unwrap();
-    let pgdatabase = std::env::var("PGDATABASE").unwrap();
-    let uri = format!("postgresql://{pguser}:{pgpassword}@{pghost}:{pgport}/{pgdatabase}");
-    uri
+struct AppState {
+    pool: pg::postgres::ConnectionPool,
+    cache: Arc<dyn cache::Cache>,
+    pubsub: Arc<dyn pubsub::PubSub>,
+    queue: Option<Arc<dyn queue::Queue>>,
+}
+
+async fn process_pending(state: &AppState) {
+    let conn = state.pool.get_conn().await;
+    let rows = match conn
+        .0
+        .query(
+            "UPDATE transaction SET event_time = NOW() WHERE equilibrium_time IS NOT NULL AND event_time IS NULL RETURNING id",
+            &[],
+        )
+        .await
+    {
+        Ok(rows) => rows,
+        Err(e) => {
+            tracing::error!("failed to claim pending transactions: {}", e);
+            return;
+        }
+    };
+
+    for row in rows {
+        let transaction_id: i32 = row.get(0);
+        let tid = transaction_id.to_string();
+        tracing::info!("processing transaction_id: {}", tid);
+
+        if let Err(e) = events::handle_gdp(&state.pool, &state.cache, &state.pubsub, &tid).await {
+            tracing::error!("gdp handler error for {}: {}", tid, e);
+        }
+
+        if let Some(ref q) = state.queue {
+            if let Err(e) =
+                events::handle_threshold_profit(&state.pool, &state.cache, q, &tid).await
+            {
+                tracing::error!("threshold handler error for {}: {}", tid, e);
+            }
+        }
+    }
 }
 
 #[tokio::main]
@@ -24,30 +57,36 @@ async fn main() {
         tracing_subscriber::fmt().init();
     }
 
-    let pg_uri = pg_conn_uri();
-    let redis_client = RedisClient::new().await;
+    let conn_uri = DB::create_conn_uri_from_env_vars();
+    let pool = DB::new_pool(&conn_uri).await;
+
+    let cache = cache::new()
+        .await
+        .expect("cache required for event service");
+    let pubsub = pubsub::new()
+        .await
+        .expect("pubsub required for event service");
+    let queue = queue::new().await;
+
+    let state = AppState {
+        pool,
+        cache,
+        pubsub,
+        queue,
+    };
+
+    // drain any rows left from before startup (crash recovery)
+    process_pending(&state).await;
+
+    let shutdown = shutdown_signal();
+    tokio::pin!(shutdown);
 
     loop {
-        match redis_client.init().await {
-            Ok(_) => {
-                tracing::info!("event connected to redis");
-                break;
-            }
-            Err(_e) => {
-                tracing::info!("failed to connect to redis: {}", _e);
-                tokio::time::sleep(std::time::Duration::from_secs(5)).await;
-            }
-        }
-    }
-
-    // connection pool for querying transaction data
-    let pool = DB::new_pool(&pg_uri).await;
-
-    loop {
-        let (client, mut connection) = match tokio_postgres::connect(pg_uri.as_str(), NoTls).await {
+        let (client, mut connection) = match tokio_postgres::connect(conn_uri.as_str(), NoTls).await
+        {
             Ok(conn) => conn,
-            Err(_e) => {
-                tracing::info!("failed to connect to postgres: {}", _e);
+            Err(e) => {
+                tracing::info!("failed to connect to postgres: {}", e);
                 tokio::time::sleep(std::time::Duration::from_secs(5)).await;
                 continue;
             }
@@ -66,32 +105,34 @@ async fn main() {
             continue;
         }
 
+        tracing::info!("listening on equilibrium channel");
+
+        // drain rows accumulated during reconnection
+        process_pending(&state).await;
+
         loop {
-            let message = match rx.next().await {
-                Some(message) => message,
-                None => {
-                    tracing::info!("connection terminated. attempting to reconnect...");
+            let message = tokio::select! {
+                msg = rx.next() => msg,
+                _ = &mut shutdown => {
+                    tracing::info!("shutting down");
                     handler.abort();
-                    break;
+                    return;
                 }
             };
 
             match message {
-                AsyncMessage::Notification(n) => {
-                    let transaction_id = n.payload();
-                    if let Err(e) = events::handle_gdp(&pool, &redis_client, transaction_id).await {
-                        tracing::error!("gdp handler error: {}", e);
+                Some(message) => match message {
+                    AsyncMessage::Notification(_) => {
+                        process_pending(&state).await;
                     }
-                    if let Err(e) =
-                        events::handle_threshold_profit(&pool, &redis_client, transaction_id).await
-                    {
-                        tracing::error!("threshold handler error: {}", e);
+                    _ => {
+                        tracing::info!("unhandled message: {:?}", message);
                     }
-                }
-                _ => {
-                    tracing::info!("unhandled message: {:?}", message);
-                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-                    continue;
+                },
+                None => {
+                    tracing::info!("connection terminated, reconnecting");
+                    handler.abort();
+                    break;
                 }
             }
         }
