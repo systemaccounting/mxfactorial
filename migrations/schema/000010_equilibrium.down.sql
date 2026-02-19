@@ -1,11 +1,7 @@
-DROP TRIGGER insert_equilibrium_trigger ON transaction;
+DROP TRIGGER IF EXISTS notify_equilibrium_trigger ON transaction;
 
-DROP FUNCTION insert_equilibrium();
-
-DROP FUNCTION redis_gdp_keys(coordinates point);
+DROP FUNCTION IF EXISTS notify_equilibrium();
 
 DROP TABLE redis_name;
 
 DROP TABLE geocode;
-
-DROP TABLE equilibrium;
