@@ -5,8 +5,6 @@ on:
   push:
     paths:
     - 'crates/cache/**'
-    - 'crates/redisclient/**'
-    - 'crates/ddbclient/**'
     - 'services/rule/**'
     - 'services/request-create/**'
     - 'migrations/**'
@@ -53,6 +51,6 @@ jobs:
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
       - name: cache integration tests
-        run: make -C ./crates/redisclient test-cache
+        run: make -C ./crates/cache test-cache
       - name: clean up
-        run: make -C ./crates/redisclient stop
+        run: make -C ./crates/cache stop
