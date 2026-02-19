@@ -103,8 +103,10 @@ services:
       REDIS_PORT: 6379
       REDIS_USERNAME: default
       REDIS_PASSWORD: test
-      CACHE_KEY_RULES_STATE: "rules:state"
-      CACHE_KEY_RULES_ACCOUNT: "rules:account"
+      CACHE_KEY_RULES: "rules"
+      CACHE_KEY_STATE: "state"
+      CACHE_KEY_ACCOUNT: "account"
+      CACHE_KEY_APPROVAL: "approval"
       CACHE_KEY_PROFILE: "profile"
       CACHE_KEY_PROFILE_ID: "profile_id"
       CACHE_KEY_APPROVERS: "approvers"
