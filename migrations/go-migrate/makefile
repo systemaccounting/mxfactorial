@@ -5,17 +5,17 @@ include $(RELATIVE_PROJECT_ROOT_PATH)/make/ecr-lambda.mk
 ###################### rds migrate commands ######################
 
 resetrds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd reset
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --subdirs schema,seed,testseed --cmd reset
 
 downrds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd down
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --subdirs schema,seed,testseed --cmd down
 
 testrds:
 	@$(MAKE) resetrds
 	@$(MAKE) downrds
 
 uprds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd up
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --subdirs schema,seed,testseed --cmd up
 
 droprds:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --cmd drop
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/go-migrate-rds.sh --env dev --subdirs schema,seed,testseed --cmd drop
