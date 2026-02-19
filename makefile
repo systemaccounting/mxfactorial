@@ -99,14 +99,14 @@ help:
 	@grep -v '^\t' makefile | grep -v '^#' | grep '^[[:lower:]]' | grep -v '^if' | grep -v '^end' | sed 's/://g'
 
 start:
+	@if [ $$($(MAKE) list-pids 2>/dev/null | wc -l | tr -d ' ') -gt 0 ]; then \
+		$(MAKE) stop; \
+	fi
 	bash scripts/start-local.sh
 
 stop:
 	bash scripts/stop-local.sh
 
-restart:
-	$(MAKE) stop
-	$(MAKE) start
 
 logs:
 	tail -F $(NOHUP_LOG)
@@ -157,7 +157,7 @@ transaction-by-id:
 transactions-by-account:
 	@$(MAKE) -C ./services/transactions-by-account demo
 
-###################### postgres ######################
+################ insert transactions ###############
 
 insert:
 	@$(MAKE) -C ./migrations insert
