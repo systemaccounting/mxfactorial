@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        crate: [pg, types, httpclient, uribuilder, redisclient, wsclient, ddbclient, service]
+        crate: [pg, types, httpclient, uribuilder, cache, queue, pubsub, wsclient, service]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
