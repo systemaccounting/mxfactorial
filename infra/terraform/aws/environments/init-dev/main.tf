@@ -28,5 +28,14 @@ module "project_storage_dev" {
   artifacts_bucket_name_prefix     = local.STORAGE_ENV_VAR.ARTIFACTS_BUCKET_PREFIX.default
   tfstate_bucket_name_prefix       = local.STORAGE_ENV_VAR.TFSTATE_BUCKET_PREFIX.default
   max_image_storage_count          = 10
-  codebuild_compute_type           = "BUILD_GENERAL1_MEDIUM" # SMALL, MEDIUM, LARGE, 2XLARGE
+}
+
+module "ci_dev" {
+  source                = "../../modules/ci/v001"
+  env                   = local.ENV
+  env_id                = local.ENV_ID
+  service_names         = module.project_storage_dev.ecr_repo_names
+  artifacts_bucket_name = module.project_storage_dev.artifacts_bucket_name
+  artifacts_bucket_arn  = module.project_storage_dev.artifacts_bucket_arn
+  compute_type          = "BUILD_GENERAL1_MEDIUM" # SMALL, MEDIUM, LARGE, 2XLARGE
 }
