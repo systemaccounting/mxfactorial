@@ -120,3 +120,17 @@ resource "aws_ssm_parameter" "google_maps_api_key" {
     ignore_changes = [value]
   }
 }
+
+resource "aws_ssm_parameter" "sqs_queue_url" {
+  name        = "/${var.ssm_prefix}/${local.ENVIRONMENT_CONF.SQS_QUEUE_URL.ssm}"
+  description = "sqs queue url for auto-transact in ${local.SPACED_ID_ENV}"
+  type        = "SecureString"
+  value       = aws_sqs_queue.auto_transact.url
+}
+
+resource "aws_ssm_parameter" "sns_topic_arn" {
+  name        = "/${var.ssm_prefix}/${local.ENVIRONMENT_CONF.SNS_TOPIC_ARN.ssm}"
+  description = "sns topic arn for gdp broadcast in ${local.SPACED_ID_ENV}"
+  type        = "SecureString"
+  value       = aws_sns_topic.gdp.arn
+}
