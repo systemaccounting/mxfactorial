@@ -65,7 +65,7 @@ module "prod" {
 
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
-  rds_parameter_group             = "default.postgres13"
+  rds_parameter_group_family      = "postgres13"
   rds_engine_version              = "13.20"
   rds_instance_name               = "${local.NAME_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
@@ -90,13 +90,12 @@ module "prod" {
   apigwv2_burst_limit   = 5000
   apigwv2_rate_limit    = 10000
 
-  ############### k8s ###############
-
-  microk8s_instance_type = "t2.medium"
-  enable_microk8s        = false
-
   ############### cloudfront ###############
 
   // OPTIONAL, comment or delete client_cert_arn if custom_domain_name unused:
   client_cert_arn = module.acm_certs_prod.client_cert // acm-certs module requires client subdomain = var.env
+
+  ############### fargate ###############
+
+  # ecs_instance_size = "256/512"
 }
