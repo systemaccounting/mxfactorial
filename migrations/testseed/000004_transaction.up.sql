@@ -105,4 +105,5 @@ null, (select id from insert_transaction), (select id from grapes), 'JoeCarter',
 ),(
 null, (select id from insert_transaction), (select id from tea), 'JoeCarter', 'debitor', NOW()
 );
-update transaction set equilibrium_time = NOW() where id = 2;
+-- event_time set to avoid event service creating gdp keys on startup
+update transaction set equilibrium_time = NOW(), event_time = NOW() where id = 2;
