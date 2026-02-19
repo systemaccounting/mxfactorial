@@ -9,52 +9,22 @@ use std::{env, fs::File, io::BufReader, process::Command};
 use uribuilder::Uri;
 
 pub fn restore_testseed() {
-    // cloud dev env
-    if env::var("AWS_LAMBDA_FUNCTION_NAME").ok().is_some() {
-        let restore_output = Command::new("bash")
-            .arg("scripts/go-migrate-rds.sh")
-            .arg("--env")
-            .arg("dev")
-            .arg("--cmd")
-            .arg("reset")
-            .current_dir("..")
-            .output()
-            .expect("failed to execute process");
+    let mut cmd = Command::new("bash");
+    cmd.arg("scripts/test-reset.sh").current_dir("..");
 
-        if !restore_output.clone().stderr.is_empty() {
-            let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
-            println!("{restore_output_str}");
-        }
-        if !restore_output.stdout.is_empty() {
-            let restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-            println!("{restore_output_str}");
-        }
-    } else {
-        // local env
-        let restore_output = Command::new("docker")
-            .arg("compose")
-            .arg("-f")
-            .arg("docker/storage.yaml")
-            .arg("run")
-            .arg("--rm")
-            .arg("go-migrate")
-            .arg("--db_type")
-            .arg("test")
-            .arg("--cmd")
-            .arg("reset")
-            .current_dir("..")
-            .output()
-            .expect("failed to execute process");
+    if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
+        cmd.arg("--env").arg("dev");
+    }
 
-        // cargo test -- --show-output
-        if !restore_output.clone().stderr.is_empty() {
-            let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
-            println!("{restore_output_str}");
-        }
-        if !restore_output.stdout.is_empty() {
-            let _restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
-            // println!("{}", _restore_output_str); // comment in to print db restore output
-        }
+    let restore_output = cmd.output().expect("failed to execute process");
+
+    if !restore_output.stderr.is_empty() {
+        let restore_output_str = String::from_utf8(restore_output.stderr).expect("Not UTF8");
+        println!("{restore_output_str}");
+    }
+    if !restore_output.stdout.is_empty() {
+        let restore_output_str = String::from_utf8(restore_output.stdout).expect("Not UTF8");
+        println!("{restore_output_str}");
     }
 }
 
@@ -97,25 +67,25 @@ pub async fn create_transaction() -> Transaction {
 
 use aws_sdk_dynamodb::{types::AttributeValue, Client as DdbClient};
 
-pub async fn get_cached_state_rule(state: &str) -> String {
-    let key = format!("rules:state:creditor:{}", state);
+pub async fn get_cached_account_rule(account: &str) -> String {
+    let key = format!("rules:account:creditor:{}", account);
     if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
         ddb_query(&key).await.remove(0)
     } else {
-        let client = redisclient::RedisClient::new().await;
+        let client = cache::RedisClient::new().await;
         client.init().await.unwrap();
         client.smembers(&key).await.unwrap().remove(0)
     }
 }
 
-pub async fn set_cached_state_rule(state: &str, old: &str, new: &str) {
-    let key = format!("rules:state:creditor:{}", state);
+pub async fn set_cached_account_rule(account: &str, old: &str, new: &str) {
+    let key = format!("rules:account:creditor:{}", account);
     if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
         let old_json: serde_json::Value = serde_json::from_str(old).unwrap();
         let sk = old_json["id"].as_str().unwrap();
         ddb_put(&key, sk, new).await;
     } else {
-        let client = redisclient::RedisClient::new().await;
+        let client = cache::RedisClient::new().await;
         client.init().await.unwrap();
         client.srem(&key, old).await.unwrap();
         client.sadd(&key, new).await.unwrap();
