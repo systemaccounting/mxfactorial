@@ -41,7 +41,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/image-cache
-          key: base-images-v1
+          key: services-base-images-v1
       - name: pull and retag images
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
@@ -104,7 +104,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/image-cache
-          key: base-images-v1
+          key: services-base-images-v1
       - name: load cached images
         run: docker load -i ~/image-cache/images.tar
       - uses: dtolnay/rust-toolchain@master
@@ -159,7 +159,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/image-cache
-          key: base-images-v1
+          key: services-base-images-v1
       - name: load cached images
         run: docker load -i ~/image-cache/images.tar
       - name: download all binaries
@@ -188,7 +188,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/image-cache
-          key: base-images-v1
+          key: services-base-images-v1
       - name: load cached images
         run: docker load -i ~/image-cache/images.tar
       - name: download all binaries
@@ -232,7 +232,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/image-cache
-          key: base-images-v1
+          key: services-base-images-v1
       - name: load cached images
         run: docker load -i ~/image-cache/images.tar
       - name: mask values
