@@ -624,9 +624,9 @@ mod tests {
         _before_each();
 
         // get and modify cached rule: 0.09 → 0.50
-        let original = h::get_cached_state_rule("California").await;
+        let original = h::get_cached_account_rule("GroceryStore").await;
         let modified = original.replace("0.09", "0.50");
-        h::set_cached_state_rule("California", &original, &modified).await;
+        h::set_cached_account_rule("GroceryStore", &original, &modified).await;
 
         // call rule service (reuse existing testdata - bread $3 x 2)
         let file = File::open("../tests/testdata/nullFirstTrItemsNoAppr.json").unwrap();
@@ -635,7 +635,7 @@ mod tests {
         let got = r::get_rules_http(test_transaction).await;
 
         // restore original
-        h::set_cached_state_rule("California", &modified, &original).await;
+        h::set_cached_account_rule("GroceryStore", &modified, &original).await;
 
         // find tax item and assert 50% (cache) not 9% (db)
         // bread $3 = 50% tax = $1.50
