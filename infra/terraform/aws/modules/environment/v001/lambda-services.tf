@@ -32,19 +32,22 @@ module "rule" {
   ssm_prefix   = var.ssm_prefix
   env_id       = var.env_id
   env_vars = merge(local.POSTGRES_VARS, {
-    TRANSACTION_DDB_TABLE   = aws_dynamodb_table.cache.name
-    CACHE_TABLE_HASH_KEY    = local.CACHE_TABLE_HASH_KEY
-    CACHE_TABLE_RANGE_KEY   = local.CACHE_TABLE_RANGE_KEY
-    CACHE_KEY_RULES_STATE   = local.WARM_CACHE_CONF.CACHE_KEY_RULES_STATE.default
-    CACHE_KEY_RULES_ACCOUNT = local.WARM_CACHE_CONF.CACHE_KEY_RULES_ACCOUNT.default
-    CACHE_KEY_PROFILE       = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE.default
-    CACHE_KEY_PROFILE_ID    = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE_ID.default
-    CACHE_KEY_APPROVERS     = local.WARM_CACHE_CONF.CACHE_KEY_APPROVERS.default
+    TRANSACTION_DDB_TABLE = aws_dynamodb_table.cache.name
+    CACHE_TABLE_HASH_KEY  = local.CACHE_TABLE_HASH_KEY
+    CACHE_TABLE_RANGE_KEY = local.CACHE_TABLE_RANGE_KEY
+    CACHE_KEY_RULES       = local.CACHE_CONF.CACHE_KEY_RULES.default
+    CACHE_KEY_STATE       = local.CACHE_CONF.CACHE_KEY_STATE.default
+    CACHE_KEY_ACCOUNT     = local.CACHE_CONF.CACHE_KEY_ACCOUNT.default
+    CACHE_KEY_APPROVAL    = local.CACHE_CONF.CACHE_KEY_APPROVAL.default
+    CACHE_KEY_PROFILE     = local.CACHE_CONF.CACHE_KEY_PROFILE.default
+    CACHE_KEY_PROFILE_ID  = local.CACHE_CONF.CACHE_KEY_PROFILE_ID.default
+    CACHE_KEY_APPROVERS   = local.CACHE_CONF.CACHE_KEY_APPROVERS.default
   })
   aws_lwa_port = local.RULE_PORT
   invoke_url_principals = [
     module.graphql.lambda_role_arn,
     module.request_create.lambda_role_arn,
+    module.auto_transact.lambda_role_arn,
   ]
   attached_policy_arns = [aws_iam_policy.rule_dynamodb_read.arn]
   create_secret        = true
@@ -61,12 +64,15 @@ module "request_create" {
     TRANSACTION_DDB_TABLE = aws_dynamodb_table.cache.name
     CACHE_TABLE_HASH_KEY  = local.CACHE_TABLE_HASH_KEY
     CACHE_TABLE_RANGE_KEY = local.CACHE_TABLE_RANGE_KEY
-    CACHE_KEY_PROFILE_ID  = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE_ID.default
+    CACHE_KEY_PROFILE_ID  = local.CACHE_CONF.CACHE_KEY_PROFILE_ID.default
   })
   aws_lwa_port          = local.REQUEST_CREATE_PORT
-  invoke_url_principals = [module.graphql.lambda_role_arn]
-  attached_policy_arns  = [aws_iam_policy.rule_dynamodb_read.arn]
-  create_secret         = true
+  invoke_url_principals = [
+    module.graphql.lambda_role_arn,
+    module.auto_transact.lambda_role_arn,
+  ]
+  attached_policy_arns = [aws_iam_policy.rule_dynamodb_read.arn]
+  create_secret        = true
 }
 
 module "request_approve" {
@@ -156,6 +162,28 @@ module "auto_confirm" {
     INITIAL_ACCOUNT_BALANCE = var.initial_account_balance
   })
   invoke_arn_principals = ["cognito-idp.amazonaws.com"]
+}
+
+module "auto_transact" {
+  source       = "../../provided-lambda/v001"
+  service_name = "auto-transact"
+  env          = var.env
+  ssm_prefix   = var.ssm_prefix
+  env_id       = var.env_id
+  env_vars = merge(local.POSTGRES_VARS, {
+    RULE_URL           = module.rule.lambda_function_url
+    REQUEST_CREATE_URL = module.request_create.lambda_function_url
+    SQS_QUEUE_URL      = aws_sqs_queue.auto_transact.url
+  })
+  aws_lwa_port         = local.AUTO_TRANSACT_PORT
+  attached_policy_arns = [aws_iam_policy.auto_transact_sqs.arn]
+  create_secret        = true
+}
+
+resource "aws_lambda_event_source_mapping" "auto_transact_sqs" {
+  event_source_arn = aws_sqs_queue.auto_transact.arn
+  function_name    = module.auto_transact.lambda_arn
+  batch_size       = 1
 }
 
 module "client" {
