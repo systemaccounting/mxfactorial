@@ -2,12 +2,13 @@
 
 set -e
 
-if [[ "$#" -ne 4 ]]; then
+if [[ "$#" -lt 4 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash scripts/go-migrate-rds.sh --env dev --cmd reset
+	bash scripts/go-migrate-rds.sh --env dev --subdirs schema,seed,testseed --cmd reset
 
 	possible values:
+		subdirs: comma-separated migration subdirectories
 		cmd: up, down, drop, reset
 	EOF
 	exit 1
@@ -16,6 +17,7 @@ fi
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --env) ENV="$2"; shift ;;
+        --subdirs) SUBDIRS="$2"; shift ;;
         --cmd) CMD="$2"; shift ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -48,4 +50,4 @@ echo "*** invoking go-migrate lambda"
 
 curl -s -X POST "$GO_MIGRATE_URL" \
 	-H 'Content-Type: application/json' \
-	-d "{\"db_type\":\"test\",\"cmd\":\"$CMD\",\"passphrase\":\"$PASSPHRASE\"}" | yq -o=json
+	-d "{\"subdirs\":\"$SUBDIRS\",\"cmd\":\"$CMD\",\"passphrase\":\"$PASSPHRASE\"}" | yq -o=json
