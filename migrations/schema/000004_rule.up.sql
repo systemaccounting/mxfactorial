@@ -34,6 +34,7 @@ CREATE TABLE transaction_rule_instance (
   author_role text,
   -- ***
   cron varchar(255),
+  cron_job_id bigint,
   threshold numeric,
   disabled_time timestamptz,
   removed_time timestamptz,
