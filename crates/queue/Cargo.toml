@@ -9,8 +9,6 @@ description = "queue trait with redis and sqs implementations"
 async-trait = "0.1.73"
 thiserror = "2.0"
 tracing = "0.1"
-tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
-
 # redis
 fred = { version = "10.1", features = ["i-lists"] }
 

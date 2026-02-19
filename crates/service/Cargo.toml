@@ -8,7 +8,6 @@ description = "service"
 [dependencies]
 types = { path = "../types" }
 rust_decimal = { version = "1.40", default-features = false }
-httpclient = { path = "../httpclient" }
 pg = { path = "../pg" }
 cognitoidp = { path = "../cognitoidp" }
 cache = { path = "../cache" }
