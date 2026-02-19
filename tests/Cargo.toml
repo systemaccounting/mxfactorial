@@ -6,7 +6,6 @@ rust-version.workspace = true
 
 [dependencies]
 dotenvy = "0.15"
-graphql_client = "0.15"
 reqwest = { version = "0.13", features = ["json"] }
 serde = "1.0"
 tokio = { version = "1.49", features = ["macros"] }
@@ -16,7 +15,7 @@ serde_json = "1.0"
 gql_client = "1.0"
 regex = "1.12"
 uribuilder = { path = "../crates/uribuilder" }
-redisclient = { path = "../crates/redisclient" }
+cache = { path = "../crates/cache" }
 aws-config = "1.8"
 aws-sdk-dynamodb = "1.101"
 
