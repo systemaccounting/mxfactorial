@@ -14,6 +14,7 @@ CREATE TABLE transaction (
   equilibrium_time timestamptz,
   debitor_first boolean default false,
   sum_value numeric,
+  event_time timestamptz,
   created_at timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_rule_instance_id
     FOREIGN KEY(rule_instance_id)
@@ -22,3 +23,6 @@ CREATE TABLE transaction (
     FOREIGN KEY(author)
       REFERENCES account(name)
 );
+
+CREATE INDEX transaction_pending_event_idx ON transaction (id)
+WHERE equilibrium_time IS NOT NULL AND event_time IS NULL;
