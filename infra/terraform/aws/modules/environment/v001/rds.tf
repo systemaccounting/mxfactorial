@@ -1,3 +1,21 @@
+resource "aws_db_parameter_group" "postgres" {
+  count  = var.build_db ? 1 : 0
+  name   = "pg-${local.ID_ENV}"
+  family = var.rds_parameter_group_family
+
+  parameter {
+    name         = "shared_preload_libraries"
+    value        = "pg_cron"
+    apply_method = "pending-reboot"
+  }
+
+  parameter {
+    name         = "cron.database_name"
+    value        = "mxfactorial"
+    apply_method = "pending-reboot"
+  }
+}
+
 resource "aws_db_instance" "postgres" {
   count                               = var.build_db ? 1 : 0 // false during terraform development
   identifier                          = var.rds_instance_name
@@ -11,7 +29,7 @@ resource "aws_db_instance" "postgres" {
   username                            = "u${random_password.pguser.result}"
   password                            = random_password.pgpassword.result
   port                                = 5432
-  parameter_group_name                = var.rds_parameter_group
+  parameter_group_name                = aws_db_parameter_group.postgres[0].name
   backup_retention_period             = 0
   backup_window                       = "07:09-07:39"
   db_subnet_group_name                = aws_db_subnet_group.default.name
