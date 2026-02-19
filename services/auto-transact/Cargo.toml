@@ -1,0 +1,23 @@
+[package]
+name = "auto-transact"
+version = "0.1.0"
+edition = "2021"
+rust-version.workspace = true
+
+[dependencies]
+axum = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
+shutdown = { path = "../../crates/shutdown" }
+pg = { path = "../../crates/pg" }
+service = { path = "../../crates/service" }
+types = { path = "../../crates/types" }
+httpclient = { path = "../../crates/httpclient" }
+uribuilder = { path = "../../crates/uribuilder" }
+queue = { path = "../../crates/queue" }
+
+[target.x86_64-unknown-linux-musl.dependencies]
+openssl = { version = "0.10", features = ["vendored"] }
