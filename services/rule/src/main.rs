@@ -5,9 +5,7 @@ use axum::{
     Router,
 };
 use cache::Cache;
-use ddbclient::DdbClient;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
-use redisclient::RedisClient;
 use rule::{create_response, expected_values, label_approved_transaction_items};
 use service::Service;
 use shutdown::shutdown_signal;
@@ -18,7 +16,7 @@ use types::{
     request_response::IntraTransaction,
     time::TZTime,
     transaction::Transaction,
-    transaction_item::TransactionItems,
+    transaction_item::{TransactionItem, TransactionItems},
 };
 mod rules;
 
@@ -198,6 +196,63 @@ async fn apply_approval_rules<'a>(
     }
 }
 
+// build transaction items from transaction_item_rule_instance templates
+// when a transaction envelope has rule_instance_id set and empty items
+async fn build_items_from_rule_instance(
+    conn: &DatabaseConnection,
+    transaction_rule_instance_id: &str,
+) -> Result<TransactionItems, StatusCode> {
+    let tri_id: i32 = transaction_rule_instance_id
+        .parse()
+        .map_err(|_| StatusCode::BAD_REQUEST)?;
+    let rows = conn
+        .0
+        .query(
+            "SELECT id::text, item_id, price::text, quantity::text, variable_values \
+             FROM transaction_item_rule_instance \
+             WHERE transaction_rule_instance_id = $1",
+            &[&tri_id],
+        )
+        .await
+        .map_err(|e| {
+            tracing::error!("query transaction_item_rule_instance failed: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    let mut items = TransactionItems::default();
+    for row in rows {
+        let tiri_id: String = row.get(0);
+        let item_id: String = row.get(1);
+        let price: String = row.get(2);
+        let quantity: String = row.get(3);
+        let variable_values: Vec<String> = row.get(4);
+
+        items.0.push(TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id,
+            price,
+            quantity,
+            rule_instance_id: Some(tiri_id),
+            rule_exec_ids: None,
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: variable_values.first().cloned().unwrap_or_default(),
+            creditor: variable_values.get(1).cloned().unwrap_or_default(),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        });
+    }
+    Ok(items)
+}
+
 async fn apply_rules(
     State(state): State<Store>,
     transaction: Json<Transaction>,
@@ -213,13 +268,22 @@ async fn apply_rules(
         CREDITOR_FIRST
     };
 
-    let mut transaction_items = transaction.transaction_items.clone();
+    // get connection from pool
+    let conn = state.pool.get_conn().await;
+
+    // when rule_instance_id is set and items are empty, build items from templates
+    let mut transaction_items = if let Some(ref rule_instance_id) = transaction.rule_instance_id {
+        if transaction.transaction_items.0.is_empty() {
+            build_items_from_rule_instance(&conn, rule_instance_id).await?
+        } else {
+            transaction.transaction_items.clone()
+        }
+    } else {
+        transaction.transaction_items.clone()
+    };
 
     // set defaults for None values
     transaction_items.set_empty_rule_exec_ids();
-
-    // get connection from pool
-    let conn = state.pool.get_conn().await;
 
     // create service with conn and cache
     let svc = Service::new(&conn, state.cache.clone());
@@ -258,31 +322,7 @@ async fn main() {
 
     let pool = DB::new_pool(&conn_uri).await;
 
-    // init cache: dynamodb in lambda, redis locally
-    let cache: Option<Arc<dyn Cache>> = if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
-        match DdbClient::new().await {
-            Ok(ddb_client) => {
-                tracing::info!("dynamodb cache initialized");
-                Some(Arc::new(ddb_client))
-            }
-            Err(e) => {
-                tracing::warn!("dynamodb init failed, continuing without cache: {}", e);
-                None
-            }
-        }
-    } else if env::var("REDIS_HOST").is_ok() {
-        let redis_client = RedisClient::new().await;
-        if let Err(e) = redis_client.init().await {
-            tracing::warn!("redis init failed, continuing without cache: {}", e);
-            None
-        } else {
-            tracing::info!("redis cache initialized");
-            Some(Arc::new(redis_client))
-        }
-    } else {
-        tracing::info!("no cache backend configured");
-        None
-    };
+    let cache = cache::new().await;
 
     let store = Store { pool, cache };
 
