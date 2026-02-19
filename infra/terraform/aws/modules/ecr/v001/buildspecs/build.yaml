@@ -23,10 +23,47 @@ phases:
           echo "skipping push (PUSH_IMAGE=$PUSH_IMAGE)"
         fi
       - |
-        if [ "$DEPLOY" = "true" ]; then
+        if [ "$DEPLOY_LAMBDA" = "true" ]; then
           echo "deploying $SERVICE_NAME to lambda..."
           aws lambda update-function-code \
             --function-name $SERVICE_NAME-$ENV_ID-$ENV \
             --image-uri $ECR_URI:latest \
             --region $REGION
+        fi
+      - |
+        if [ "$DEPLOY_ECS" = "true" ]; then
+          echo "deploying $SERVICE_NAME to ecs..."
+          CLUSTER=$ENV_ID-$ENV
+          ECS_SERVICE=$SERVICE_NAME-$ENV_ID-$ENV
+          CURRENT_TASK_DEF_ARN=$(aws ecs describe-services \
+            --cluster $CLUSTER \
+            --services $ECS_SERVICE \
+            --query 'services[0].taskDefinition' \
+            --output text \
+            --region $REGION)
+          TASK_DEF=$(aws ecs describe-task-definition \
+            --task-definition $CURRENT_TASK_DEF_ARN \
+            --query 'taskDefinition.{family:family,taskRoleArn:taskRoleArn,executionRoleArn:executionRoleArn,cpu:cpu,memory:memory,containerDefinitions:containerDefinitions}' \
+            --output json \
+            --region $REGION)
+          NEW_CONTAINER_DEFS=$(echo "$TASK_DEF" | jq ".containerDefinitions[0].image = \"$ECR_URI:$SHORT_SHA\" | .containerDefinitions")
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition \
+            --family "$(echo "$TASK_DEF" | jq -r '.family')" \
+            --task-role-arn "$(echo "$TASK_DEF" | jq -r '.taskRoleArn')" \
+            --execution-role-arn "$(echo "$TASK_DEF" | jq -r '.executionRoleArn')" \
+            --network-mode awsvpc \
+            --requires-compatibilities FARGATE \
+            --cpu "$(echo "$TASK_DEF" | jq -r '.cpu')" \
+            --memory "$(echo "$TASK_DEF" | jq -r '.memory')" \
+            --container-definitions "$NEW_CONTAINER_DEFS" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text \
+            --region $REGION)
+          aws ecs update-service \
+            --cluster $CLUSTER \
+            --service $ECS_SERVICE \
+            --task-definition $NEW_TASK_DEF_ARN \
+            --force-new-deployment \
+            --region $REGION > /dev/null
+          echo "*** $ECS_SERVICE deployed with $ECR_URI:$SHORT_SHA"
         fi
