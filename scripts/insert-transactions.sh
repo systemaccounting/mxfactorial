@@ -2,8 +2,12 @@
 
 set -e
 
-if [[ "$#" -gt 2 ]]; then
-	echo "use: bash scripts/insert-transactions.sh --continue --mix"
+if [[ "$#" -gt 3 ]]; then
+	cat <<- 'EOF'
+	use:
+	bash scripts/insert-transactions.sh --continue --mix
+	bash scripts/insert-transactions.sh --env dev --continue
+	EOF
 	exit 1
 fi
 
@@ -11,6 +15,7 @@ while [[ "$#" -gt 0 ]]; do
 	case $1 in
 	--continue) CONT=1 ;;
 	--mix) MIX=1 ;;
+	--env) ENV="$2"; shift ;;
 	*)
 		echo "unknown parameter passed: $1"
 		exit 1
@@ -20,62 +25,76 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 PROJECT_CONF=project.yaml
+SCRIPTS_ENV_FILE=scripts/.env
+ENV_VAR_PATH='infra.terraform.aws.modules.environment.env_var.set'
 
-# temp set k8s ports if pods are running
-if [[ $(
-	kubectl >/dev/null 2>&1
-	echo "$?"
-) -eq 0 ]]; then # if kubectl available
-	if [[ $(
-		kubectl cluster-info >/dev/null 2>&1
-		echo "$?"
-	) -eq 0 ]]; then # if cluster available
-		if [[ $(kubectl get pods | wc -l | xargs) -gt 3 ]]; then
-			bash scripts/set-k8s-ports.sh # set ports
-		fi
-	fi
+if [[ -n "$ENV" ]]; then
+	# build scripts/.env with function URLs from SSM
+	ENV_ID=$(source scripts/print-env-id.sh)
+	SSM_VERSION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.SSM_VERSION.default' $PROJECT_CONF)
+	REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
+	SSM_PREFIX="$ENV_ID/$SSM_VERSION/$ENV"
+
+	REQUEST_CREATE_URL=$(aws ssm get-parameter \
+		--name "/$SSM_PREFIX/service/lambda/request_create/url" \
+		--query 'Parameter.Value' \
+		--region $REGION \
+		--with-decryption \
+		--output text)
+
+	REQUEST_APPROVE_URL=$(aws ssm get-parameter \
+		--name "/$SSM_PREFIX/service/lambda/request_approve/url" \
+		--query 'Parameter.Value' \
+		--region $REGION \
+		--with-decryption \
+		--output text)
+
+	rm -f $SCRIPTS_ENV_FILE
+	echo "REQUEST_CREATE_URL=$REQUEST_CREATE_URL" >> $SCRIPTS_ENV_FILE
+	echo "REQUEST_APPROVE_URL=$REQUEST_APPROVE_URL" >> $SCRIPTS_ENV_FILE
+
+	# fetch pg credentials from SSM using paths declared in project.yaml
+	for VAR in PGDATABASE PGUSER PGPASSWORD PGHOST PGPORT; do
+		SSM_SUFFIX=$(yq ".${ENV_VAR_PATH}.${VAR}.ssm" $PROJECT_CONF)
+		export $VAR=$(aws ssm get-parameter \
+			--name "/$SSM_PREFIX/$SSM_SUFFIX" \
+			--query 'Parameter.Value' \
+			--region $REGION \
+			--with-decryption \
+			--output text)
+	done
+
+	CURL_CMD="awscurl -X POST --service lambda"
+
+	echo "*** cloud mode: $ENV"
+else
+	LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)
+	HOST="http://$LOCAL_ADDRESS"
+	REQUEST_CREATE_PORT=$(yq ".services.request-create.env_var.set.REQUEST_CREATE_PORT.default" $PROJECT_CONF)
+	REQUEST_CREATE_URL=$HOST:$REQUEST_CREATE_PORT
+	REQUEST_APPROVE_PORT=$(yq ".services.request-approve.env_var.set.REQUEST_APPROVE_PORT.default" $PROJECT_CONF)
+	REQUEST_APPROVE_URL=$HOST:$REQUEST_APPROVE_PORT
+
+	export PGDATABASE=$(yq ".${ENV_VAR_PATH}.PGDATABASE.default" $PROJECT_CONF)
+	export PGUSER=$(yq ".${ENV_VAR_PATH}.PGUSER.default" $PROJECT_CONF)
+	export PGPASSWORD=$(yq ".${ENV_VAR_PATH}.PGPASSWORD.default" $PROJECT_CONF)
+	export PGHOST=$(yq ".${ENV_VAR_PATH}.PGHOST.default" $PROJECT_CONF)
+	export PGPORT=$(yq ".${ENV_VAR_PATH}.PGPORT.default" $PROJECT_CONF)
+
+	CURL_CMD="curl -s"
 fi
 
-LOCAL_ADDRESS=$(yq '.env_var.set.LOCAL_ADDRESS.default' $PROJECT_CONF)
-HOST="http://$LOCAL_ADDRESS"
-REQUEST_CREATE_PORT=$(yq ".services.request-create.env_var.set.REQUEST_CREATE_PORT.default" $PROJECT_CONF)
-REQUEST_CREATE_URL=$HOST:$REQUEST_CREATE_PORT
-REQUEST_APPROVE_PORT=$(yq ".services.request-approve.env_var.set.REQUEST_APPROVE_PORT.default" $PROJECT_CONF)
-REQUEST_APPROVE_URL=$HOST:$REQUEST_APPROVE_PORT
 TEST_DATA_DIR=./tests/testdata
 TEST_DATA_FILE_NAME=requests.json
 TEST_DATA_FILE=$TEST_DATA_DIR/$TEST_DATA_FILE_NAME
 TEST_DATA_FILE_LENGTH=$(yq -o=json 'length' $TEST_DATA_FILE)
-MIGRATIONS_DIR=./migrations
-TEST_ENV=dev
-ENV_VAR_PATH='infra.terraform.aws.modules.environment.env_var.set'
-export PGDATABASE=$(yq ".${ENV_VAR_PATH}.PGDATABASE.default" $PROJECT_CONF)
-export PGUSER=$(yq ".${ENV_VAR_PATH}.PGUSER.default" $PROJECT_CONF)
-export PGPASSWORD=$(yq ".${ENV_VAR_PATH}.PGPASSWORD.default" $PROJECT_CONF)
-export PGHOST=$(yq ".${ENV_VAR_PATH}.PGHOST.default" $PROJECT_CONF)
-export PGPORT=$(yq ".${ENV_VAR_PATH}.PGPORT.default" $PROJECT_CONF)
 
 echo ""
-
-# reset ports if k8s
-if [[ $(
-	kubectl >/dev/null 2>&1
-	echo "$?"
-) -eq 0 ]]; then # if kubectl available
-	if [[ $(
-		kubectl cluster-info >/dev/null 2>&1
-		echo "$?"
-	) -eq 0 ]]; then # if cluster available
-		if [[ $(kubectl get pods | wc -l | xargs) -gt 3 ]]; then
-			bash scripts/set-k8s-ports.sh --reset # reset ports
-		fi
-	fi
-fi
 
 function request() {
 	local request="$1"
 	# create transaction request
-	TRANSACTION_ID=$(curl -s -H 'Content-Type: application/json' -d "$request" $REQUEST_CREATE_URL | yq '.transaction.id')
+	TRANSACTION_ID=$($CURL_CMD -H 'Content-Type: application/json' -d "$request" "$REQUEST_CREATE_URL" | yq '.transaction.id')
 	# get debitor approver from user (NOT rule) added transaction item
 	DEBITOR_APPROVER=$(echo -n "$request" | yq -I0 '[.transaction.transaction_items[] | select(.rule_instance_id == null)][0] | .debitor')
 }
@@ -84,7 +103,7 @@ function approve() {
 	# mock lambda input event
 	APPROVAL="{\"auth_account\":\""$DEBITOR_APPROVER"\",\"id\":\""$TRANSACTION_ID"\",\"account_name\":\""$DEBITOR_APPROVER"\",\"account_role\":\"debitor\"}"
 	# approve transaction request
-	curl -s -H 'Content-Type: application/json' -d "$APPROVAL" $REQUEST_APPROVE_URL >/dev/null
+	$CURL_CMD -H 'Content-Type: application/json' -d "$APPROVAL" "$REQUEST_APPROVE_URL" >/dev/null
 	unset TRANSACTION_ID
 	unset DEBITOR_APPROVER
 }
