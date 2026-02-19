@@ -20,6 +20,8 @@ if [[ "$#" -lt 1 ]]; then
 	bash scripts/ecr-images.sh --build --service graphql
 	bash scripts/ecr-images.sh --build --push --deploy --service graphql
 	bash scripts/ecr-images.sh --pull --service graphql
+	bash scripts/ecr-images.sh --stop                        # stop all in-progress builds
+	bash scripts/ecr-images.sh --stop --service graphql      # stop in-progress build for service
 	EOF
 	exit 1
 fi
@@ -31,6 +33,7 @@ PUSH=false
 DEPLOY=false
 PULL=false
 INTEG=false
+STOP=false
 SERVICE=""
 
 while [[ "$#" -gt 0 ]]; do
@@ -42,6 +45,7 @@ while [[ "$#" -gt 0 ]]; do
         --deploy) DEPLOY=true; shift ;;
         --pull) PULL=true; shift ;;
         --integ) INTEG=true; shift ;;
+        --stop) STOP=true; shift ;;
         --service) SERVICE="$2"; shift; shift ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -84,7 +88,7 @@ function get_services() {
     if [[ -n "$SERVICE" ]]; then
         echo "$SERVICE"
     else
-        yq '.. | select(has("type") and has("deploy") and .type == "app" and .deploy == true) | path | .[-1]' $PROJECT_CONF
+        yq '.. | select(has("type") and has("deploy_target") and .type == "app" and .deploy_target != null) | path | .[-1]' $PROJECT_CONF
     fi
 }
 
@@ -100,27 +104,37 @@ function start_builds() {
 
     source scripts/zip-services.sh
 
-    echo '*** uploading archive to s3'
-    aws s3 cp $SERVICES_ZIP s3://$ARTIFACTS_BUCKET/$BUILD_OBJECT_KEY_PATH/ --region $REGION
-    rm $SERVICES_ZIP
-
-    echo "*** starting builds (RUN_TESTS=$RUN_TESTS, PUSH_IMAGE=$PUSH_IMAGE, DEPLOY=$DO_DEPLOY)"
-    echo ""
-
     BUILD_IDS=""
     for SVC in $(get_services); do
+        UPLOAD_KEY_PATH="$BUILD_OBJECT_KEY_PATH/$SVC"
+
+        echo "*** uploading archive to s3://$ARTIFACTS_BUCKET/$UPLOAD_KEY_PATH/"
+        aws s3 cp $SERVICES_ZIP s3://$ARTIFACTS_BUCKET/$UPLOAD_KEY_PATH/ --region $REGION
+
+        DEPLOY_TARGET=$(yq ".. | select(has(\"$SVC\")) | .$SVC.deploy_target // \"\"" $PROJECT_CONF | head -1)
+        DEPLOY_LAMBDA=false
+        DEPLOY_ECS=false
+        if [[ "$DO_DEPLOY" == "true" ]]; then
+            if [[ "$DEPLOY_TARGET" == "lambda" ]]; then
+                DEPLOY_LAMBDA=true
+            elif [[ "$DEPLOY_TARGET" == "ecs" ]]; then
+                DEPLOY_ECS=true
+            fi
+        fi
+
         PROJECT_NAME="mxfactorial-$SVC-$ID_ENV"
         echo -e "${YELLOW}starting $PROJECT_NAME...${RESET}"
         BUILD_ID=$(aws codebuild start-build \
             --project-name $PROJECT_NAME \
             --region $REGION \
             --source-type-override S3 \
-            --source-location-override "$ARTIFACTS_BUCKET/$BUILD_OBJECT_KEY_PATH/$SERVICES_ZIP" \
+            --source-location-override "$ARTIFACTS_BUCKET/$UPLOAD_KEY_PATH/$SERVICES_ZIP" \
             --artifacts-override type=NO_ARTIFACTS \
             --environment-variables-override \
                 name=RUN_TESTS,value=$RUN_TESTS \
                 name=PUSH_IMAGE,value=$PUSH_IMAGE \
-                name=DEPLOY,value=$DO_DEPLOY \
+                name=DEPLOY_LAMBDA,value=$DEPLOY_LAMBDA \
+                name=DEPLOY_ECS,value=$DEPLOY_ECS \
             --query 'build.id' \
             --output text)
         BUILD_IDS="$BUILD_IDS $BUILD_ID"
@@ -129,6 +143,8 @@ function start_builds() {
         printf 'https://%s.console.aws.amazon.com/codesuite/codebuild/%s/projects/%s/build/%s/?region=%s\n' "$REGION" "$AWS_ACCOUNT_ID" "$PROJECT_NAME" "$BUILD_ID_ENCODED" "$REGION"
         echo ""
     done
+
+    rm $SERVICES_ZIP
 
     echo "*** waiting for builds to complete"
     echo -e "${YELLOW}(ctrl+c to exit - builds will continue in background)${RESET}"
@@ -202,6 +218,30 @@ function trigger_pipeline() {
         exit 1
     fi
 }
+
+# handle stop
+if [[ $STOP == true ]]; then
+    echo "*** stopping in-progress builds"
+    for SVC in $(get_services); do
+        PROJECT_NAME="mxfactorial-$SVC-$ID_ENV"
+        BUILD_ID=$(aws codebuild list-builds-for-project \
+            --project-name $PROJECT_NAME \
+            --query 'ids[0]' \
+            --output text 2>/dev/null)
+        if [[ "$BUILD_ID" != "None" && -n "$BUILD_ID" ]]; then
+            BUILD_STATUS=$(aws codebuild batch-get-builds \
+                --ids $BUILD_ID \
+                --query 'builds[0].buildStatus' \
+                --output text 2>/dev/null)
+            if [[ "$BUILD_STATUS" == "IN_PROGRESS" ]]; then
+                echo -e "${YELLOW}stopping $PROJECT_NAME ($BUILD_ID)...${RESET}"
+                aws codebuild stop-build --id $BUILD_ID --region $REGION > /dev/null
+            fi
+        fi
+    done
+    echo "*** done"
+    exit 0
+fi
 
 # handle pull separately
 if [[ $PULL == true ]]; then
