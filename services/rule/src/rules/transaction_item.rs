@@ -22,7 +22,7 @@ pub fn match_transaction_item_rule(
             "appendMultipliedItemValue" => {
                 append_multiplied_item_value(rule_instance, transaction_item)
             }
-            _ => Err("transaction_item rule not found".into()),
+            _ => Err(format!("unknown rule: {}", rule_name).into()),
         },
     }
 }
