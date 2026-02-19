@@ -7,4 +7,3 @@ variable "force_destroy_storage" {
   default = false
 }
 variable "max_image_storage_count" {}
-variable "codebuild_compute_type" {}
