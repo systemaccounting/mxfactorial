@@ -189,6 +189,25 @@ jobs:
           key: services-base-images-v1
       - name: load cached images
         run: docker load -i ~/image-cache/images.tar
+      - name: restore postgres base stage
+        id: pg-base
+        uses: actions/cache@v4
+        with:
+          path: ~/pg-base-cache/postgres-base.tar
+          key: postgres-base-${{ hashFiles('docker/bitnami-postgres.Dockerfile') }}
+      - name: build postgres base stage
+        if: steps.pg-base.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/pg-base-cache
+          docker build \
+            --target base \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t mxf-postgres-base \
+            -f docker/bitnami-postgres.Dockerfile .
+          docker save -o ~/pg-base-cache/postgres-base.tar mxf-postgres-base
+      - name: load postgres base stage
+        if: steps.pg-base.outputs.cache-hit == 'true'
+        run: docker load -i ~/pg-base-cache/postgres-base.tar
       - name: download all binaries
         uses: actions/download-artifact@v4
         with:
@@ -196,6 +215,8 @@ jobs:
           merge-multiple: true
       - name: set permissions
         run: chmod +x target/debug/*
+      - name: stop runner postgres
+        run: sudo systemctl stop postgresql
       - name: start services
         run: make start
       - name: test service integration
@@ -218,6 +239,25 @@ jobs:
           key: services-base-images-v1
       - name: load cached images
         run: docker load -i ~/image-cache/images.tar
+      - name: restore postgres base stage
+        id: pg-base
+        uses: actions/cache@v4
+        with:
+          path: ~/pg-base-cache/postgres-base.tar
+          key: postgres-base-${{ hashFiles('docker/bitnami-postgres.Dockerfile') }}
+      - name: build postgres base stage
+        if: steps.pg-base.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/pg-base-cache
+          docker build \
+            --target base \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t mxf-postgres-base \
+            -f docker/bitnami-postgres.Dockerfile .
+          docker save -o ~/pg-base-cache/postgres-base.tar mxf-postgres-base
+      - name: load postgres base stage
+        if: steps.pg-base.outputs.cache-hit == 'true'
+        run: docker load -i ~/pg-base-cache/postgres-base.tar
       - name: download all binaries
         uses: actions/download-artifact@v4
         with:
@@ -225,6 +265,8 @@ jobs:
           merge-multiple: true
       - name: set permissions
         run: chmod +x target/debug/*
+      - name: stop runner postgres
+        run: sudo systemctl stop postgresql
       - name: start services
         run: make start
       - name: e2e test client
