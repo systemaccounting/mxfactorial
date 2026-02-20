@@ -17,6 +17,7 @@ start:
 			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml \
 			up \
 			-d \
+			--wait \
 			postgres \
 			--renew-anon-volumes \
 			--force-recreate \

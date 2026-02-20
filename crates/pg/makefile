@@ -24,10 +24,7 @@ watch-db:
 
 test-db:
 	@$(MAKE) get-secrets
-	@if ! [[ $$(pg_isready -h localhost) ]]; then \
-		$(MAKE) -C $(MIGRATIONS_DIR) start; \
-	fi
-	@until pg_isready -h localhost; do sleep 1; done
+	@$(MAKE) -C $(MIGRATIONS_DIR) start
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/test-reset.sh --set
 	cargo test $(TEST_NAME) --features db_tests -- --test-threads=1
 
