@@ -19,6 +19,7 @@ start:
 			-d \
 			--wait \
 			postgres \
+			redis \
 			--renew-anon-volumes \
 			--force-recreate \
 			--build
