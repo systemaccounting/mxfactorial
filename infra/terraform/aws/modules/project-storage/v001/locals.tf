@@ -1,20 +1,20 @@
 locals {
-  ID_ENV                     = "${var.env_id}-${var.env}"
-  PROJECT_CONF_FILE_NAME     = "project.yaml"
-  PROJECT_CONF               = yamldecode(file("../../../../../${local.PROJECT_CONF_FILE_NAME}"))
-  STORAGE_ENV_VAR            = local.PROJECT_CONF.infra.terraform.aws.modules.project-storage.env_var.set
-  ID_ENV_PREFIX              = "${var.env_id}/${var.env}"
-  SERVICES_ZIP               = local.PROJECT_CONF.scripts.env_var.set.SERVICES_ZIP.default
-  INTEG_TEST_OBJECT_KEY_PATH = local.STORAGE_ENV_VAR.INTEG_TEST_OBJECT_KEY_PATH.default
-  INTEG_SOURCE_LOCATION      = "${local.INTEG_TEST_OBJECT_KEY_PATH}/${local.SERVICES_ZIP}"
+  ID_ENV                 = "${var.env_id}-${var.env}"
+  PROJECT_CONF_FILE_NAME = "project.yaml"
+  PROJECT_CONF           = yamldecode(file("../../../../../${local.PROJECT_CONF_FILE_NAME}"))
+  STORAGE_ENV_VAR        = local.PROJECT_CONF.infra.terraform.aws.modules.project-storage.env_var.set
+  ID_ENV_PREFIX          = "${var.env_id}/${var.env}"
 
   // add a terraform_data precondition to fail
   // if a service is not found in project.yaml
   GO_MIGRATE              = "go-migrate"
   WARM_CACHE              = "warm-cache"
   AUTO_CONFIRM            = "auto-confirm"
+  AUTO_TRANSACT           = "auto-transact"
   BALANCE_BY_ACCOUNT      = "balance-by-account"
+  EVENT                   = "event"
   GRAPHQL                 = "graphql"
+  MEASURE                 = "measure"
   REQUEST_APPROVE         = "request-approve"
   REQUEST_BY_ID           = "request-by-id"
   REQUESTS_BY_ACCOUNT     = "requests-by-account"
@@ -29,8 +29,11 @@ locals {
     local.GO_MIGRATE,
     local.WARM_CACHE,
     local.AUTO_CONFIRM,
+    local.AUTO_TRANSACT,
     local.BALANCE_BY_ACCOUNT,
+    local.EVENT,
     local.GRAPHQL,
+    local.MEASURE,
     local.REQUEST_APPROVE,
     local.REQUEST_BY_ID,
     local.REQUESTS_BY_ACCOUNT,
@@ -60,15 +63,28 @@ resource "terraform_data" "locals_test" {
       condition     = lookup(local.PROJECT_CONF.services, local.AUTO_CONFIRM, null) != null
       error_message = "${local.AUTO_CONFIRM} not found in ${local.PROJECT_CONF_FILE_NAME}"
     }
+    precondition {
+      condition     = lookup(local.PROJECT_CONF.services, local.AUTO_TRANSACT, null) != null
+      error_message = "${local.AUTO_TRANSACT} not found in ${local.PROJECT_CONF_FILE_NAME}"
+    }
 
     precondition {
       condition     = lookup(local.PROJECT_CONF.services, local.BALANCE_BY_ACCOUNT, null) != null
       error_message = "${local.BALANCE_BY_ACCOUNT} not found in ${local.PROJECT_CONF_FILE_NAME}"
     }
+    precondition {
+      condition     = lookup(local.PROJECT_CONF.services, local.EVENT, null) != null
+      error_message = "${local.EVENT} not found in ${local.PROJECT_CONF_FILE_NAME}"
+    }
 
     precondition {
       condition     = lookup(local.PROJECT_CONF.services, local.GRAPHQL, null) != null
       error_message = "${local.GRAPHQL} not found in ${local.PROJECT_CONF_FILE_NAME}"
+    }
+
+    precondition {
+      condition     = lookup(local.PROJECT_CONF.services, local.MEASURE, null) != null
+      error_message = "${local.MEASURE} not found in ${local.PROJECT_CONF_FILE_NAME}"
     }
 
     precondition {

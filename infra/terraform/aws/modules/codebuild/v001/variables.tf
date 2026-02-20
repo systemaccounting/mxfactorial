@@ -9,3 +9,9 @@ variable "buildspec" {}
 variable "artifacts_bucket_arn" {}
 variable "ecr_repository_arn" {}
 variable "lambda_function_arn" {}
+variable "ecs_cluster_arn" {
+  default = ""
+}
+variable "ecs_service_arn" {
+  default = ""
+}

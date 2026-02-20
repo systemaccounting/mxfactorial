@@ -4,6 +4,7 @@ APP_NAME=$(shell basename $(CURDIR))
 PROJECT_CONF_FILE_NAME=project.yaml
 TEST_NAME?=model::integration_tests::
 MIGRATIONS_DIR=$(RELATIVE_PROJECT_ROOT_PATH)/migrations
+START_TARGET?=start
 
 test-unit:
 	cargo test
@@ -24,12 +25,8 @@ watch-db:
 
 test-db:
 	@$(MAKE) get-secrets
-	@if [[ $$(pg_isready -h localhost) ]]; then \
-		$(MAKE) -C $(MIGRATIONS_DIR) reset; \
-	else \
-		$(MAKE) -C $(MIGRATIONS_DIR) start; \
-	fi
-	@until pg_isready -h localhost; do sleep 1; done
+	@$(MAKE) -C $(MIGRATIONS_DIR) $(START_TARGET)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/test-reset.sh --set
 	cargo test $(TEST_NAME) --features db_tests -- --test-threads=1
 
 stop:

@@ -1,0 +1,17 @@
+[package]
+name = "queue"
+version = "0.1.0"
+edition = "2021"
+rust-version.workspace = true
+description = "queue trait with redis and sqs implementations"
+
+[dependencies]
+async-trait = "0.1.73"
+thiserror = "2.0"
+tracing = "0.1"
+# redis
+fred = { version = "10.1", features = ["i-lists"] }
+
+# sqs
+aws-config = { version = "1.8", features = ["behavior-version-latest"] }
+aws-sdk-sqs = "1.60"

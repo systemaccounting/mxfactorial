@@ -11,16 +11,34 @@ run:
 	@$(MAKE) start
 
 # postgres docker
+# build postgres image and start postgres + redis
 start:
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose \
 			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml \
 			up \
 			-d \
+			--wait \
 			postgres \
+			redis \
 			--renew-anon-volumes \
 			--force-recreate \
 			--build
+
+# start postgres + redis from pre-built image (CI uses this after
+# building postgres image with --target base cache, see
+# .github/workflows/crates-postgres.yaml)
+start-nobuild:
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose \
+			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml \
+			up \
+			-d \
+			--wait \
+			postgres \
+			redis \
+			--renew-anon-volumes \
+			--force-recreate
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash ./scripts/enable-pg-notice.sh > /dev/null
 
 reset:
@@ -69,11 +87,11 @@ create:
 
 resetdocker:
 	@COMPOSE_IGNORE_ORPHANS=true \
-		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd reset 2>&1 | grep -v "No services to build"
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --subdirs schema,seed,testseed --cmd reset 2>&1 | grep -v "No services to build"
 
 downdocker:
 	@COMPOSE_IGNORE_ORPHANS=true \
-		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd down 2>&1 | grep -v "No services to build"
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --subdirs schema,seed,testseed --cmd down 2>&1 | grep -v "No services to build"
 
 testdocker:
 	$(MAKE) resetdocker
@@ -81,32 +99,22 @@ testdocker:
 
 updocker:
 	@COMPOSE_IGNORE_ORPHANS=true \
-		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd up 2>&1 | grep -v "No services to build"
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --subdirs schema,seed,testseed --cmd up 2>&1 | grep -v "No services to build"
 
 dropdocker:
 	@COMPOSE_IGNORE_ORPHANS=true \
-		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --db_type test --cmd drop 2>&1 | grep -v "No services to build"
+		docker compose -f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml run --rm go-migrate --subdirs schema,seed,testseed --cmd drop 2>&1 | grep -v "No services to build"
 
 insert:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	make -C $(MIGRATIONS_DIR) resetdocker DB=test; \
-	bash scripts/insert-transactions.sh --continue
-
-insert-thresh:
-	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
-	bash scripts/manage-redis.sh --flush; \
-	make -C $(MIGRATIONS_DIR) resetdocker DB=test; \
-	make -C $(MIGRATIONS_DIR) thresh-up; \
-	make -C $(MIGRATIONS_DIR) warm-cache; \
 	bash scripts/insert-transactions.sh --continue
 
 thresh-up:
-	@source $(ENV_FILE) && migrate -verbose -path testseedthresh \
-		-database "postgresql://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_testseedthresh_version" up
+	@set -a && source $(ENV_FILE) && set +a && SQL_TYPE=postgresql bash $(RELATIVE_PROJECT_ROOT_PATH)/migrations/go-migrate/migrate.sh --dir $(RELATIVE_PROJECT_ROOT_PATH)/migrations --subdirs testseedthresh --cmd up
+	@$(MAKE) warm-cache
 
 thresh-down:
-	@source $(ENV_FILE) && migrate -verbose -path testseedthresh \
-		-database "postgresql://$$PGUSER:$$PGPASSWORD@$$PGHOST:$$PGPORT/$$PGDATABASE?sslmode=disable&x-migrations-table=migration_testseedthresh_version" down --all
+	@set -a && source $(ENV_FILE) && set +a && SQL_TYPE=postgresql bash $(RELATIVE_PROJECT_ROOT_PATH)/migrations/go-migrate/migrate.sh --dir $(RELATIVE_PROJECT_ROOT_PATH)/migrations --subdirs testseedthresh --cmd down
 
 ###################### env ######################
 

@@ -180,6 +180,20 @@ impl TransactionItemRuleInstanceTable {
         )
     }
 
+    pub fn select_by_transaction_rule_instance_id_sql(&self) -> String {
+        let columns = self.select_all_with_text_casting().join_with_casting();
+        format!(
+            "{} {} {} {} {} {} {} $1",
+            SELECT,
+            columns,
+            FROM,
+            self.name(),
+            WHERE,
+            self.get_column("transaction_rule_instance_id").name(),
+            EQUAL
+        )
+    }
+
     pub fn select_rules_by_role_state_sql(&self) -> String {
         let columns = self.select_all_with_text_casting().join_with_casting();
         format!(
@@ -343,6 +357,15 @@ mod tests {
         assert_eq!(
             test_table.select_by_role_state_sql(),
             "SELECT id::text, rule_name, rule_instance_name, variable_values, account_role, account_name, item_id, price::text, quantity::text, country_name, city_name, county_name, state_name, latlng::text, occupation_id::text, industry_id::text, disabled_time, removed_time, created_at, transaction_rule_instance_id::text FROM transaction_item_rule_instance WHERE account_role = $1 AND state_name = $2"
+        );
+    }
+
+    #[test]
+    fn it_creates_a_select_by_transaction_rule_instance_id_sql() {
+        let test_table = TransactionItemRuleInstanceTable::new();
+        assert_eq!(
+            test_table.select_by_transaction_rule_instance_id_sql(),
+            "SELECT id::text, rule_name, rule_instance_name, variable_values, account_role, account_name, item_id, price::text, quantity::text, country_name, city_name, county_name, state_name, latlng::text, occupation_id::text, industry_id::text, disabled_time, removed_time, created_at, transaction_rule_instance_id::text FROM transaction_item_rule_instance WHERE transaction_rule_instance_id = $1"
         );
     }
 

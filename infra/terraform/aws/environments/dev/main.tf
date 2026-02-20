@@ -55,7 +55,7 @@ module "dev" {
 
   rds_allow_major_version_upgrade = true
   rds_instance_class              = "db.t3.micro"
-  rds_parameter_group             = "default.postgres14"
+  rds_parameter_group_family      = "postgres14"
   rds_engine_version              = "14.17"
   rds_instance_name               = "${local.NAME_PREFIX}-${local.ID_ENV}"
   db_snapshot_id                  = null
@@ -77,8 +77,7 @@ module "dev" {
   // apigw v2
   enable_api_auto_deploy = true
 
-  ############### k8s ###############
+  ############### fargate ###############
 
-  microk8s_instance_type = "t2.medium"
-  enable_microk8s        = false
+  # ecs_instance_size = "256/512"
 }

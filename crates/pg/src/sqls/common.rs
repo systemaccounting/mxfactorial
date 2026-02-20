@@ -58,6 +58,8 @@ pub const EXISTS: &str = "EXISTS";
 
 pub const ARRAY: &str = "ARRAY";
 
+pub const ORDER_BY: &str = "ORDER BY";
+
 pub fn create_value_params(
     columns: Columns,
     row_count: usize,

@@ -34,12 +34,17 @@ jobs:
       - uses: actions/checkout@v4
       - name: mask values
         run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
-      - name: deploy to dev cloud environment
+      - name: deploy lambda services to dev
         run: |
-          for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
-            # tag newly pushed dev images with develop merge commit sha
+          for app_dir in $(bash scripts/list-deployments.sh | grep -v client); do
+            app=$(basename $app_dir)
+            CONF_PATH=$(bash scripts/dir-to-conf-path.sh "$app_dir")
+            DEPLOY_TARGET=$(yq "$CONF_PATH.deploy_target" project.yaml)
+            if [[ "$DEPLOY_TARGET" != "lambda" ]]; then
+              echo "*** skipping $app (deploy_target: $DEPLOY_TARGET)"
+              continue
+            fi
             bash scripts/tag-merge-commit.sh --app-name $app --env dev --env-id ${{ secrets.DEV_ENV_ID }};
-            # deploy newly tagged images to dev cloud
             bash scripts/deploy-last-image.sh --app-name $app --env dev --env-id ${{ secrets.DEV_ENV_ID }};
           done
       - name: get secrets for dev integration tests
@@ -52,12 +57,19 @@ jobs:
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} make --no-print-directory -C ./migrations/go-migrate resetrds ENV=dev DB=test
       - name: warm cache
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} bash scripts/invoke-warm-cache.sh --env dev
+      - name: set test fixtures
+        run: ENV_ID=${{ secrets.DEV_ENV_ID }} bash scripts/test-reset.sh --env dev --set
       - name: run dev cloud integration tests
         run: ENV_ID=${{ secrets.DEV_ENV_ID }} cargo test --manifest-path ./tests/Cargo.toml --features integration_tests -- --test-threads=1
       # todo: test client integration
-      - name: tag and push dev images to prod ecr
+      - name: tag and push lambda images to prod ecr
         run: |
-          for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
-            # tag newly tested dev images with prod and push to prod ecr
+          for app_dir in $(bash scripts/list-deployments.sh | grep -v client); do
+            app=$(basename $app_dir)
+            CONF_PATH=$(bash scripts/dir-to-conf-path.sh "$app_dir")
+            DEPLOY_TARGET=$(yq "$CONF_PATH.deploy_target" project.yaml)
+            if [[ "$DEPLOY_TARGET" != "lambda" ]]; then
+              continue
+            fi
             bash scripts/push-prod-image.sh --app-name $app --env dev --env-id ${{ secrets.DEV_ENV_ID }};
           done

@@ -2,11 +2,11 @@ RELATIVE_PROJECT_ROOT_PATH=$(shell REL_PATH="."; while [ $$(ls "$$REL_PATH" | gr
 PROJECT_CONF=$(RELATIVE_PROJECT_ROOT_PATH)/project.yaml
 TEST_NAME?=integration_tests::
 
-REDIS_DB=$(shell yq '.crates.redisclient.env_var.set.REDIS_DB.default' $(PROJECT_CONF))
-REDIS_HOST=$(shell yq '.crates.redisclient.env_var.set.REDIS_HOST.default' $(PROJECT_CONF))
-REDIS_PORT=$(shell yq '.crates.redisclient.env_var.set.REDIS_PORT.default' $(PROJECT_CONF))
-REDIS_USERNAME=$(shell yq '.crates.redisclient.env_var.set.REDIS_USERNAME.default' $(PROJECT_CONF))
-REDIS_PASSWORD=$(shell yq '.crates.redisclient.env_var.set.REDIS_PASSWORD.default' $(PROJECT_CONF))
+REDIS_DB=$(shell yq '.crates.cache.env_var.set.REDIS_DB.default' $(PROJECT_CONF))
+REDIS_HOST=$(shell yq '.crates.cache.env_var.set.REDIS_HOST.default' $(PROJECT_CONF))
+REDIS_PORT=$(shell yq '.crates.cache.env_var.set.REDIS_PORT.default' $(PROJECT_CONF))
+REDIS_USERNAME=$(shell yq '.crates.cache.env_var.set.REDIS_USERNAME.default' $(PROJECT_CONF))
+REDIS_PASSWORD=$(shell yq '.crates.cache.env_var.set.REDIS_PASSWORD.default' $(PROJECT_CONF))
 
 test:
 	cargo test

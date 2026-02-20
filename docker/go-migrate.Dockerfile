@@ -17,6 +17,7 @@ COPY migrations/go-migrate/migrate.sh task/
 COPY migrations/schema task/migrations/schema
 COPY migrations/seed task/migrations/seed
 COPY migrations/testseed task/migrations/testseed
+COPY migrations/testseedthresh task/migrations/testseedthresh
 
 FROM public.ecr.aws/lambda/provided:al2023
 

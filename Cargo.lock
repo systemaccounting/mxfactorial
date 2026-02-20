@@ -62,12 +62,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
 
 [[package]]
-name = "ascii"
-version = "0.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eab1c04a571841102f5345a8fc0f6bb3d31c315dec879b5c6e42e40ce7ffa34e"
-
-[[package]]
 name = "ascii_utils"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -156,7 +150,7 @@ dependencies = [
  "futures-util",
  "handlebars",
  "http 1.4.0",
- "indexmap 2.1.0",
+ "indexmap",
  "mime",
  "multer",
  "num-traits",
@@ -223,7 +217,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "527a4c6022fc4dac57b4f03f12395e9a391512e85ba98230b93315f8f45f27fc"
 dependencies = [
  "bytes",
- "indexmap 2.1.0",
+ "indexmap",
  "serde",
  "serde_json",
 ]
@@ -386,6 +380,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "auto-transact"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "httpclient",
+ "openssl",
+ "pg",
+ "queue",
+ "serde",
+ "serde_json",
+ "service",
+ "shutdown",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "types",
+ "uribuilder",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -485,6 +499,28 @@ name = "aws-sdk-dynamodb"
 version = "1.101.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6f98cd9e5f2fc790aff1f393bc3c8680deea31c05d3c6f23b625cdc50b1b6b4"
+dependencies = [
+ "aws-credential-types",
+ "aws-runtime",
+ "aws-smithy-async",
+ "aws-smithy-http",
+ "aws-smithy-json",
+ "aws-smithy-runtime",
+ "aws-smithy-runtime-api",
+ "aws-smithy-types",
+ "aws-types",
+ "bytes",
+ "fastrand",
+ "http 0.2.9",
+ "regex-lite",
+ "tracing",
+]
+
+[[package]]
+name = "aws-sdk-sqs"
+version = "1.91.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e007a58d1e4be0e611a664d6b1cba4523011f67589619048c1902becef3e891f"
 dependencies = [
  "aws-credential-types",
  "aws-runtime",
@@ -1039,7 +1075,13 @@ name = "cache"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "aws-config",
+ "aws-sdk-dynamodb",
+ "fred",
+ "serde_json",
  "thiserror 2.0.17",
+ "tokio",
+ "tracing",
  "types",
 ]
 
@@ -1121,19 +1163,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.17",
-]
-
-[[package]]
-name = "combine"
-version = "3.8.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da3da6baa321ec19e1cc41d31bf599f00c783d0517095cdaf0332e3fe8d20680"
-dependencies = [
- "ascii",
- "byteorder",
- "either",
- "memchr",
- "unreachable",
 ]
 
 [[package]]
@@ -1277,16 +1306,6 @@ dependencies = [
 
 [[package]]
 name = "darling"
-version = "0.21.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9cdf337090841a411e2a7f3deb9187445851f91b309c0c0a29e05f74a00a48c0"
-dependencies = [
- "darling_core 0.21.3",
- "darling_macro 0.21.3",
-]
-
-[[package]]
-name = "darling"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "25ae13da2f202d56bd7f91c25fba009e7717a1e4a1cc98a76d844b65ae912e9d"
@@ -1300,20 +1319,6 @@ name = "darling_core"
 version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "95133861a8032aaea082871032f5815eb9e98cef03fa916ab4500513994df9e5"
-dependencies = [
- "fnv",
- "ident_case",
- "proc-macro2",
- "quote",
- "strsim",
- "syn 2.0.108",
-]
-
-[[package]]
-name = "darling_core"
-version = "0.21.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1247195ecd7e3c85f83c8d2a366e4210d588e802133e1e355180a9870b517ea4"
 dependencies = [
  "fnv",
  "ident_case",
@@ -1349,17 +1354,6 @@ dependencies = [
 
 [[package]]
 name = "darling_macro"
-version = "0.21.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d38308df82d1080de0afee5d069fa14b0326a88c14f15c5ccda35b4a6c414c81"
-dependencies = [
- "darling_core 0.21.3",
- "quote",
- "syn 2.0.108",
-]
-
-[[package]]
-name = "darling_macro"
 version = "0.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac3984ec7bd6cfa798e62b4a642426a5be0e68f9401cfc2a01e3fa9ea2fcdb8d"
@@ -1376,27 +1370,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e962a19be5cfc3f3bf6dd8f61eb50107f356ad6270fbb3ed41476571db78be5"
 
 [[package]]
-name = "ddbclient"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "aws-config",
- "aws-sdk-dynamodb",
- "cache",
- "serde_json",
- "tokio",
- "tracing",
- "types",
-]
-
-[[package]]
 name = "deranged"
 version = "0.3.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0f32d04922c60427da6f9fef14d042d9edddef64cb9d4ce0d64d0685fbeb1fd3"
 dependencies = [
  "powerfmt",
- "serde",
 ]
 
 [[package]]
@@ -1471,12 +1450,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
-name = "dyn-clone"
-version = "1.0.20"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0881ea181b1df73ff77ffaaf9c7544ecc11e82fba9b5f27b262a3c73a332555"
-
-[[package]]
 name = "either"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1513,13 +1486,14 @@ version = "0.1.0"
 dependencies = [
  "cache",
  "chrono",
- "futures-channel",
- "futures-util",
+ "futures",
  "pg",
- "redisclient",
+ "pubsub",
+ "queue",
  "rust_decimal",
  "serde",
  "serde_json",
+ "shutdown",
  "tokio",
  "tokio-postgres",
  "tracing",
@@ -1900,64 +1874,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "graphql-introspection-query"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e063446242093b0acecc78a2313801e6c4faafa3501277b409a2b1972eff5d85"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "graphql-parser"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2ebc8013b4426d5b81a4364c419a95ed0b404af2b82e2457de52d9348f0e474"
-dependencies = [
- "combine 3.8.1",
- "thiserror 1.0.64",
-]
-
-[[package]]
-name = "graphql_client"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83ce10ae0a8ba29e295f9296a4a400a5222b1aa0e65a72d66c5e489ed17fa217"
-dependencies = [
- "graphql_query_derive",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "graphql_client_codegen"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61d9d9d96a7397130da7ce3664851f51ce850137e62b030ac78c8a529661151a"
-dependencies = [
- "graphql-introspection-query",
- "graphql-parser",
- "heck 0.5.0",
- "lazy_static",
- "proc-macro2",
- "quote",
- "serde",
- "serde_json",
- "syn 2.0.108",
-]
-
-[[package]]
-name = "graphql_query_derive"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b684c77d1b5f9c6006068852e0e0e80c6df3ef85c24fe81ef26fbadbd595af77"
-dependencies = [
- "graphql_client_codegen",
- "proc-macro2",
- "syn 2.0.108",
-]
-
-[[package]]
 name = "h2"
 version = "0.3.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1969,7 +1885,7 @@ dependencies = [
  "futures-sink",
  "futures-util",
  "http 0.2.9",
- "indexmap 2.1.0",
+ "indexmap",
  "slab",
  "tokio",
  "tokio-util",
@@ -1988,7 +1904,7 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "http 1.4.0",
- "indexmap 2.1.0",
+ "indexmap",
  "slab",
  "tokio",
  "tokio-util",
@@ -2501,17 +2417,6 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.9.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1885e79c1fc4b10f0e172c475f458b7f7b93061064d98c3293e98c5ba0c8b399"
-dependencies = [
- "autocfg",
- "hashbrown 0.12.3",
- "serde",
-]
-
-[[package]]
-name = "indexmap"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d530e1a18b1cb4c484e6e34556a0d948706958449fca0cab753d649f2bce3d1f"
@@ -2551,7 +2456,7 @@ checksum = "1a87aa2bb7d2af34197c04845522473242e1aa17c12f4935d5856491a7fb8c97"
 dependencies = [
  "cesu8",
  "cfg-if",
- "combine 4.6.7",
+ "combine",
  "jni-sys",
  "log",
  "thiserror 1.0.64",
@@ -2745,7 +2650,7 @@ dependencies = [
  "futures",
  "http 1.4.0",
  "pg",
- "redisclient",
+ "pubsub",
  "rust_decimal",
  "serde",
  "shutdown",
@@ -3365,6 +3270,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "pubsub"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "fred",
+ "thiserror 2.0.17",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
 name = "query_map"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3373,6 +3289,18 @@ dependencies = [
  "form_urlencoded",
  "serde",
  "serde_derive",
+]
+
+[[package]]
+name = "queue"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "aws-config",
+ "aws-sdk-sqs",
+ "fred",
+ "thiserror 2.0.17",
+ "tracing",
 ]
 
 [[package]]
@@ -3526,46 +3454,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "redisclient"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "cache",
- "fred",
- "serde_json",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "types",
-]
-
-[[package]]
 name = "redox_syscall"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fb5a58c1855b4b6819d59012155603f0b22ad30cad752600aadfcb695265519a"
 dependencies = [
  "bitflags 1.3.2",
-]
-
-[[package]]
-name = "ref-cast"
-version = "1.0.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f354300ae66f76f1c85c5f84693f0ce81d747e2c3f21a45fef496d89c960bf7d"
-dependencies = [
- "ref-cast-impl",
-]
-
-[[package]]
-name = "ref-cast-impl"
-version = "1.0.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b7186006dcb21920990093f30e3dea63b7d6e977bf1256be20c3563a5db070da"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.108",
 ]
 
 [[package]]
@@ -3663,11 +3557,9 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "cache",
- "ddbclient",
  "httpclient",
  "openssl",
  "pg",
- "redisclient",
  "serde_json",
  "service",
  "shutdown",
@@ -3823,11 +3715,9 @@ dependencies = [
  "axum",
  "cache",
  "chrono",
- "ddbclient",
  "nanoid",
  "openssl",
  "pg",
- "redisclient",
  "regex",
  "service",
  "shutdown",
@@ -4028,30 +3918,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "schemars"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cd191f9397d57d581cddd31014772520aa448f65ef991055d7f61582c65165f"
-dependencies = [
- "dyn-clone",
- "ref-cast",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "schemars"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54e910108742c57a770f492731f99be216a52fadd361b06c8fb59d74ccc267d2"
-dependencies = [
- "dyn-clone",
- "ref-cast",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4233,37 +4099,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serde_with"
-version = "3.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fa237f2807440d238e0364a218270b98f767a00d3dada77b1c53ae88940e2e7"
-dependencies = [
- "base64 0.22.1",
- "chrono",
- "hex",
- "indexmap 1.9.2",
- "indexmap 2.1.0",
- "schemars 0.9.0",
- "schemars 1.2.0",
- "serde_core",
- "serde_json",
- "serde_with_macros",
- "time",
-]
-
-[[package]]
-name = "serde_with_macros"
-version = "3.16.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "52a8e3ca0ca629121f70ab50f95249e5a6f925cc0f6ffe8256c45b728875706c"
-dependencies = [
- "darling 0.21.3",
- "proc-macro2",
- "quote",
- "syn 2.0.108",
-]
-
-[[package]]
 name = "serial_test"
 version = "3.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4295,7 +4130,6 @@ version = "0.1.0"
 dependencies = [
  "cache",
  "cognitoidp",
- "httpclient",
  "mockall",
  "pg",
  "rust_decimal",
@@ -4640,11 +4474,10 @@ version = "0.1.0"
 dependencies = [
  "aws-config",
  "aws-sdk-dynamodb",
+ "cache",
  "dotenvy",
  "gql_client",
- "graphql_client",
  "httpclient",
- "redisclient",
  "regex",
  "reqwest 0.13.1",
  "serde",
@@ -4891,7 +4724,7 @@ version = "0.21.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8534fd7f78b5405e860340ad6575217ce99f38d4d5c8f2442cb5ecb50090e1"
 dependencies = [
- "indexmap 2.1.0",
+ "indexmap",
  "toml_datetime",
  "winnow",
 ]
@@ -5090,7 +4923,6 @@ dependencies = [
  "serde",
  "serde_assert",
  "serde_json",
- "serde_with",
  "strum",
  "strum_macros",
  "thiserror 2.0.17",
@@ -5142,15 +4974,6 @@ name = "unicode-width"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4ac048d71ede7ee76d585517add45da530660ef4390e49b098733c6e897f254"
-
-[[package]]
-name = "unreachable"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "382810877fe448991dfc7f0dd6e3ae5d58088fd0ea5e35189655f84e6814fa56"
-dependencies = [
- "void",
-]
 
 [[package]]
 name = "untrusted"
@@ -5244,12 +5067,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "void"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a02e4885ed3bc0f2de90ea6dd45ebcbb66dacffe03547fadbb0eeae2770887d"
 
 [[package]]
 name = "vsimd"

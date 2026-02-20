@@ -1544,6 +1544,7 @@ mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                event_time: None,
                 debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
@@ -1655,6 +1656,7 @@ mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                event_time: None,
                 debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
@@ -1827,6 +1829,7 @@ mod tests {
             author_device_latlng: None,
             author_role: Some(AccountRole::Creditor),
             equilibrium_time: None,
+            event_time: None,
             debitor_first: Some(false),
             sum_value: String::from("21.800"),
             transaction_items: TransactionItems(vec![

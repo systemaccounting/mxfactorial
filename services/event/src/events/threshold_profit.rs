@@ -2,6 +2,7 @@ use cache::{Cache, CacheKey};
 use pg::postgres::ConnectionPool;
 use rust_decimal::Decimal;
 use std::collections::HashSet;
+use std::sync::Arc;
 
 // query accounts involved in a transaction (creditors and debitors)
 const ACCOUNTS_QUERY: &str = r#"
@@ -21,6 +22,11 @@ FROM transaction_item
 WHERE transaction_id = $1
 "#;
 
+// query transaction_rule_instance by id for author and author_role
+const RULE_INSTANCE_QUERY: &str = r#"
+SELECT id::text, author, author_role FROM transaction_rule_instance WHERE id = $1
+"#;
+
 // handle_threshold_profit checks if any account's accumulated profit has reached
 // a configured threshold, and fires a dividend transaction if so
 //
@@ -29,12 +35,13 @@ WHERE transaction_id = $1
 // 2. for each account, check cache for threshold rules
 // 3. only if rules exist: query that account's net contribution
 // 4. lua script: INCRBYFLOAT accumulator keyed by rule instance id, compare against threshold
-// 5. if met: POST to auto-transact, DEL accumulator key
+// 5. if met: build transaction from rule instance, send to auto-transact queue
 //
 // accounts without threshold rules are skipped entirely
-pub async fn handle_threshold_profit<C: Cache>(
+pub async fn handle_threshold_profit(
     pool: &ConnectionPool,
-    cache: &C,
+    cache: &Arc<dyn Cache>,
+    queue: &Arc<dyn queue::Queue>,
     transaction_id: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let conn = pool.get_conn().await;
@@ -57,20 +64,38 @@ pub async fn handle_threshold_profit<C: Cache>(
             continue;
         }
 
-        // increment accumulator for each rule, check threshold
+        // atomic increment + threshold check for each rule
         for (rule_instance_id, threshold) in rules {
-            let accumulated = incr_accumulator(cache, &rule_instance_id, contribution).await?;
-            if accumulated >= threshold {
-                // todo: POST to auto-transact
-                // subtract threshold, keeping remainder for next cycle
-                let remainder = incr_accumulator(cache, &rule_instance_id, -threshold).await?;
+            let key = CacheKey::accumulator(&rule_instance_id).to_string();
+            let (accumulated_str, threshold_met) = cache
+                .incr_and_check_threshold(&key, &contribution.to_string(), &threshold.to_string())
+                .await?;
+
+            if threshold_met {
                 tracing::info!(
-                    "threshold met for rule {}: {} >= {}, remainder={}",
+                    "threshold met for rule {}: {} >= {}",
                     rule_instance_id,
-                    accumulated,
-                    threshold,
-                    remainder
+                    accumulated_str,
+                    threshold
                 );
+
+                // send transaction envelope to queue — rule service adds items
+                let ri_id: i32 = rule_instance_id.parse()?;
+                let tri_rows = conn.0.query(RULE_INSTANCE_QUERY, &[&ri_id]).await?;
+                if let Some(tri) = tri_rows.first() {
+                    let author: Option<String> = tri.get(1);
+                    let author_role: Option<String> = tri.get(2);
+
+                    let payload = serde_json::json!({
+                        "rule_instance_id": rule_instance_id,
+                        "author": author,
+                        "author_role": author_role,
+                        "sum_value": "0",
+                        "transaction_items": [],
+                    });
+
+                    queue.send(&payload.to_string()).await?;
+                }
             }
         }
     }
@@ -80,8 +105,8 @@ pub async fn handle_threshold_profit<C: Cache>(
 
 // get_threshold_rules looks up threshold rules for an account from cache
 // returns vec of (rule_instance_id, threshold) tuples
-async fn get_threshold_rules<C: Cache>(cache: &C, account: &str) -> Vec<(String, Decimal)> {
-    let key = CacheKey::TransactionRuleInstanceThresholdProfit { account }.to_string();
+async fn get_threshold_rules(cache: &Arc<dyn Cache>, account: &str) -> Vec<(String, Decimal)> {
+    let key = CacheKey::threshold_profit(account).to_string();
     let members: Vec<String> = cache.smembers(&key).await.unwrap_or_default();
 
     members
@@ -113,21 +138,6 @@ async fn get_contribution(
         return Ok(Decimal::ZERO);
     }
     Ok(rows[0].get(0))
-}
-
-// incr_accumulator increments the accumulator for a rule instance
-// returns the new accumulated value
-async fn incr_accumulator<C: Cache>(
-    cache: &C,
-    rule_instance_id: &str,
-    contribution: Decimal,
-) -> Result<Decimal, Box<dyn std::error::Error + Send + Sync>> {
-    let key = CacheKey::TransactionRuleInstanceAccumulator {
-        id: rule_instance_id,
-    }
-    .to_string();
-    let result = cache.incr_float(&key, &contribution.to_string()).await?;
-    Ok(result.parse()?)
 }
 
 #[cfg(test)]

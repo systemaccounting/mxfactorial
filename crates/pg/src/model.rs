@@ -472,6 +472,7 @@ impl ModelTrait for DatabaseConnection {
             parse_pg_timestamp(transaction.equilibrium_time).unwrap();
         let transaction_sum_value = parse_pg_numeric(Some(transaction.sum_value)).unwrap();
         let transaction_created_at = parse_pg_timestamp(None::<TZTime>).unwrap();
+        let transaction_event_time = parse_pg_timestamp(None::<TZTime>).unwrap();
 
         let mut values = to_sql_vec![
             None::<i32>,                      // id
@@ -484,6 +485,7 @@ impl ModelTrait for DatabaseConnection {
             transaction.debitor_first,        // debitor_first
             transaction_sum_value,            // sum_value
             transaction_created_at,           // created_at
+            transaction_event_time,           // event_time
         ];
 
         for tr_item in transaction.transaction_items.into_iter() {
@@ -904,10 +906,9 @@ mod integration_tests {
     }
 
     fn _reset_db() {
-        let restore_output = Command::new("make")
-            .arg("-C")
-            .arg("../..")
-            .arg("reset-db")
+        let restore_output = Command::new("bash")
+            .arg("scripts/test-reset.sh")
+            .current_dir("../..")
             .output()
             .expect("failed to execute process");
 
@@ -1615,7 +1616,7 @@ mod integration_tests {
             .await
             .unwrap();
 
-        assert_eq!(rows.len(), 1);
+        assert_eq!(rows.len(), 0);
     }
 
     #[cfg_attr(not(feature = "db_tests"), ignore)]

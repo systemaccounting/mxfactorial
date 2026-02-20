@@ -5,10 +5,8 @@ use axum::{
     Router,
 };
 use cache::Cache;
-use ddbclient::DdbClient;
 use httpclient::HttpClient as Client;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
-use redisclient::RedisClient;
 use service::Service;
 use shutdown::shutdown_signal;
 use std::{env, error::Error, net::ToSocketAddrs, sync::Arc};
@@ -76,12 +74,13 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
     // build transaction with author fields for rule service
     let rule_input_transaction = Transaction {
         id: None,
-        rule_instance_id: None,
+        rule_instance_id: req.transaction.rule_instance_id.clone(),
         author: req.transaction.author.clone(),
         author_device_id: req.transaction.author_device_id.clone(),
         author_device_latlng: req.transaction.author_device_latlng.clone(),
         author_role: req.transaction.author_role,
         equilibrium_time: None,
+        event_time: None,
         debitor_first: req.transaction.debitor_first,
         sum_value: non_rule_client_tr_items.sum_value(),
         transaction_items: non_rule_client_tr_items.clone(),
@@ -185,31 +184,7 @@ async fn main() {
 
     let pool = DB::new_pool(&conn_uri).await;
 
-    // init cache: dynamodb in lambda, redis locally
-    let cache: Option<Arc<dyn Cache>> = if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
-        match DdbClient::new().await {
-            Ok(ddb_client) => {
-                tracing::info!("dynamodb cache initialized");
-                Some(Arc::new(ddb_client))
-            }
-            Err(e) => {
-                tracing::warn!("dynamodb init failed, continuing without cache: {}", e);
-                None
-            }
-        }
-    } else if env::var("REDIS_HOST").is_ok() {
-        let redis_client = RedisClient::new().await;
-        if let Err(e) = redis_client.init().await {
-            tracing::warn!("redis init failed, continuing without cache: {}", e);
-            None
-        } else {
-            tracing::info!("redis cache initialized");
-            Some(Arc::new(redis_client))
-        }
-    } else {
-        tracing::info!("no cache backend configured");
-        None
-    };
+    let cache = cache::new().await;
 
     let store = Store { pool, cache };
 

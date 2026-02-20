@@ -10,8 +10,10 @@ set -euo pipefail
 : "${PGDATABASE:?PGDATABASE required}"
 
 # required env vars for cache keys
-: "${CACHE_KEY_RULES_STATE:?CACHE_KEY_RULES_STATE required}"
-: "${CACHE_KEY_RULES_ACCOUNT:?CACHE_KEY_RULES_ACCOUNT required}"
+: "${CACHE_KEY_RULES:?CACHE_KEY_RULES required}"
+: "${CACHE_KEY_STATE:?CACHE_KEY_STATE required}"
+: "${CACHE_KEY_ACCOUNT:?CACHE_KEY_ACCOUNT required}"
+: "${CACHE_KEY_APPROVAL:?CACHE_KEY_APPROVAL required}"
 : "${CACHE_KEY_PROFILE:?CACHE_KEY_PROFILE required}"
 : "${CACHE_KEY_PROFILE_ID:?CACHE_KEY_PROFILE_ID required}"
 : "${CACHE_KEY_APPROVERS:?CACHE_KEY_APPROVERS required}"
@@ -27,23 +29,6 @@ else
 fi
 
 echo "using cache backend: $CACHE_BACKEND" 1>&2
-
-# cache key separator: redis uses ":", dynamodb uses "#"
-SEP=":"
-if [[ -n "${AWS_LAMBDA_FUNCTION_NAME:-}" ]]; then
-  SEP="#"
-fi
-
-# cache key builders (mirrors CacheKey enum in crates/cache/src/lib.rs)
-function cache_key_transaction_rule_instance_threshold_profit() {
-  local account="$1"
-  echo "transaction_rule_instance${SEP}threshold${SEP}profit${SEP}${account}"
-}
-
-function cache_key_transaction_rule_instance_accumulator() {
-  local id="$1"
-  echo "transaction_rule_instance${SEP}${id}${SEP}accumulator"
-}
 
 DBCONN="host=$PGHOST port=$PGPORT user=$PGUSER password=$PGPASSWORD dbname=$PGDATABASE sslmode=disable"
 
@@ -123,14 +108,32 @@ AND transaction_rule_instance_id IS NULL;
 EOF
 while IFS='|' read -r id account_role state_name json; do
   role_lower=$(echo "$account_role" | tr '[:upper:]' '[:lower:]')
-  key="${CACHE_KEY_RULES_STATE}:${role_lower}:${state_name}"
+  key="${CACHE_KEY_RULES}:${CACHE_KEY_STATE}:${role_lower}:${state_name}"
   json=$(echo "$json" | jq -c 'del(.created_at) | .id |= tostring')
   cache_sadd "$key" "$id" "$json"
 done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush
 
-# 2. cache approval rules by account
+# 2. cache account transaction item rules
+echo "caching account transaction item rules..." 1>&2
+TMPFILE=$(mktemp)
+psql -d "$DBCONN" -t -A > "$TMPFILE" <<EOF
+SELECT id, account_role, account_name, row_to_json(r)
+FROM transaction_item_rule_instance r
+WHERE account_name IS NOT NULL
+AND transaction_rule_instance_id IS NULL;
+EOF
+while IFS='|' read -r id account_role account_name json; do
+  role_lower=$(echo "$account_role" | tr '[:upper:]' '[:lower:]')
+  key="${CACHE_KEY_RULES}:${CACHE_KEY_ACCOUNT}:${role_lower}:${account_name}"
+  json=$(echo "$json" | jq -c 'del(.created_at) | .id |= tostring')
+  cache_sadd "$key" "$id" "$json"
+done < "$TMPFILE"
+rm -f "$TMPFILE"
+ddb_flush
+
+# 3. cache approval rules by account
 echo "caching approval rules..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A > "$TMPFILE" <<EOF
@@ -139,14 +142,14 @@ FROM approval_rule_instance r;
 EOF
 while IFS='|' read -r id account_role account_name json; do
   role_lower=$(echo "$account_role" | tr '[:upper:]' '[:lower:]')
-  key="${CACHE_KEY_RULES_ACCOUNT}:${role_lower}:${account_name}"
+  key="${CACHE_KEY_RULES}:${CACHE_KEY_APPROVAL}:${role_lower}:${account_name}"
   json=$(echo "$json" | jq -c 'del(.created_at) | .id |= tostring')
   cache_sadd "$key" "$id" "$json"
 done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush
 
-# 3. cache account profiles
+# 4. cache account profiles
 echo "caching account profiles..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A > "$TMPFILE" <<EOF
@@ -160,7 +163,7 @@ done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush
 
-# 4. cache profile ids
+# 5. cache profile ids
 echo "caching profile ids..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
@@ -173,7 +176,7 @@ done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush
 
-# 5. cache account approvers
+# 6. cache account approvers
 echo "caching account approvers..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
@@ -186,7 +189,7 @@ done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush
 
-# 6. cache geocode by latlng
+# 7. cache geocode by latlng
 echo "caching geocode..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
@@ -200,7 +203,7 @@ done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush
 
-# 7. cache redis_name abbreviations
+# 8. cache redis_name abbreviations
 echo "caching redis_name..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
@@ -213,16 +216,15 @@ done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush
 
-# 8. cache threshold rules by author
-echo "caching threshold rules..." 1>&2
+# 9. cache threshold profit rules
+echo "caching threshold profit rules..." 1>&2
 TMPFILE=$(mktemp)
 psql -d "$DBCONN" -t -A -F $'\t' > "$TMPFILE" <<EOF
-SELECT id, author, threshold FROM transaction_rule_instance WHERE threshold IS NOT NULL;
+SELECT author, id || '|' || threshold FROM transaction_rule_instance WHERE threshold IS NOT NULL;
 EOF
-while IFS=$'\t' read -r id author threshold; do
-  key=$(cache_key_transaction_rule_instance_threshold_profit "$author")
-  value="${id}|${threshold}"
-  cache_sadd "$key" "$id" "$value"
+while IFS=$'\t' read -r account member; do
+  key="transaction_rule_instance:threshold:profit:${account}"
+  cache_sadd "$key" "$member" "$member"
 done < "$TMPFILE"
 rm -f "$TMPFILE"
 ddb_flush

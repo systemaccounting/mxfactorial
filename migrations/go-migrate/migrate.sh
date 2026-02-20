@@ -3,10 +3,10 @@
 if [[ "$#" -ne 6 ]]; then
 	cat <<- 'EOF'
 	use:
-	bash migrate.sh --dir /tmp/mxfactorial/migrations --db_type test --cmd up
+	bash migrate.sh --dir /tmp/mxfactorial/migrations --subdirs schema,seed,testseed --cmd up
 
 	possible values:
-		db_type: test, prod # prod excludes testseed data
+		subdirs: comma-separated migration subdirectories in execution order
 		cmd: up, down, drop, reset
 	EOF
 	exit 1
@@ -15,7 +15,7 @@ fi
 while [[ "$#" -gt 0 ]]; do
     case $1 in
 		--dir) DIR="$2"; shift ;;
-		--db_type) DB_TYPE="$2"; shift ;;
+		--subdirs) SUBDIRS="$2"; shift ;;
 		--cmd) CMD="$2"; shift ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
@@ -28,15 +28,24 @@ if [[ -z "$DIR" ]]; then
 	exit 1
 fi
 
+if [[ -z "$SUBDIRS" ]]; then
+	echo "error: SUBDIRS not set"
+	exit 1
+fi
+
+ALLOWED_SUBDIRS=(schema seed testseed testseedthresh)
+IFS=',' read -ra SUBDIR_ARGS <<< "$SUBDIRS"
+for s in "${SUBDIR_ARGS[@]}"; do
+	if [[ ! " ${ALLOWED_SUBDIRS[*]} " =~ " ${s} " ]]; then
+		echo "error: unknown subdir '${s}'. allowed: ${ALLOWED_SUBDIRS[*]}"
+		exit 1
+	fi
+done
+
 if [[ -z "$CMD" ]]; then
 	echo "error: CMD not set"
 	exit 1
 fi
-
-case $DB_TYPE in
-	prod|test) ;;
-	*) echo "info: unknown db_type: \"$DB_TYPE\". testseed data will be excluded by defaulting to prod"; DB_TYPE='prod' ;;
-esac
 
 if [[ -z "$SQL_TYPE" ]]; then
 	echo "error: SQL_TYPE not set"
@@ -67,12 +76,14 @@ if [[ -z "$PGDATABASE" ]]; then
 	exit 1
 fi
 
-PROD_UP=(schema seed)
-PROD_DOWN=(seed schema)
-# append testseed to PROD_UP to include testseed data
-TEST_UP=("${PROD_UP[@]}" testseed)
-# prepend testseed to PROD_DOWN to remove testseed data
-TEST_DOWN=(testseed "${PROD_DOWN[@]}")
+# split comma-separated subdirs into array
+IFS=',' read -ra UP_DIRS <<< "$SUBDIRS"
+
+# reverse for down migrations
+DOWN_DIRS=()
+for (( i=${#UP_DIRS[@]}-1; i>=0; i-- )); do
+	DOWN_DIRS+=("${UP_DIRS[$i]}")
+done
 
 function create_conn() {
 	local MIGRATIONS_DIR="$1"
@@ -110,33 +121,15 @@ function drop () {
 }
 
 function up_migrate() {
-	if [[ "$DB_TYPE" == 'prod' ]]; then
-		for MIG_DIR in "${PROD_UP[@]}"; do
-			up "$MIG_DIR"
-		done
-	elif [[ "$DB_TYPE" == 'test' ]]; then
-		for MIG_DIR in "${TEST_UP[@]}"; do
-			up "$MIG_DIR"
-		done
-	else
-		echo "error: unknown db_type: $DB_TYPE"
-		exit 1
-	fi
+	for MIG_DIR in "${UP_DIRS[@]}"; do
+		up "$MIG_DIR"
+	done
 }
 
 function down_migrate() {
-	if [[ "$DB_TYPE" == 'prod' ]]; then
-		for MIG_DIR in "${PROD_DOWN[@]}"; do
-			down "$MIG_DIR"
-		done
-	elif [[ "$DB_TYPE" == 'test' ]]; then
-		for MIG_DIR in "${TEST_DOWN[@]}"; do
-			down "$MIG_DIR"
-		done
-	else
-		echo "error: unknown db_type: $DB_TYPE"
-		exit 1
-	fi
+	for MIG_DIR in "${DOWN_DIRS[@]}"; do
+		down "$MIG_DIR"
+	done
 }
 
 function reset() {

@@ -3,7 +3,7 @@ name: warm-cache
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: [migrations]
+    workflows: [go-migrate]
     types: [completed]
   push:
     paths:
@@ -54,7 +54,7 @@ jobs:
       - name: clear ddb cache
         run: |
           # temporarily add env vars to warm-cache get array so make env fetches them
-          yq -i '.migrations.warm-cache.env_var.get += ["CACHE_KEY_RULES_STATE", "CACHE_KEY_RULES_ACCOUNT", "CACHE_KEY_PROFILE", "CACHE_KEY_PROFILE_ID", "CACHE_KEY_APPROVERS"]' project.yaml
+          yq -i '.migrations.warm-cache.env_var.get += ["CACHE_KEY_RULES", "CACHE_KEY_STATE", "CACHE_KEY_ACCOUNT", "CACHE_KEY_APPROVAL", "CACHE_KEY_PROFILE", "CACHE_KEY_PROFILE_ID", "CACHE_KEY_APPROVERS"]' project.yaml
           # generate .env from project.yaml defaults and ssm
           ENV_ID=${{ secrets.DEV_ENV_ID }} make -C migrations/warm-cache env ENV=dev
           # export .env vars to current shell

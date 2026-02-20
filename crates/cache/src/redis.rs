@@ -1,8 +1,6 @@
 use async_trait::async_trait;
-use cache::{Cache, CacheError};
 use fred::prelude::*;
 use fred::types::Message;
-use std::sync::OnceLock;
 use tokio::sync::broadcast::Receiver as BroadcastReceiver;
 use types::{
     account::AccountProfile,
@@ -10,41 +8,7 @@ use types::{
     rule::{ApprovalRuleInstances, TransactionItemRuleInstances},
 };
 
-static CACHE_KEY_RULES_STATE: OnceLock<String> = OnceLock::new();
-static CACHE_KEY_RULES_ACCOUNT: OnceLock<String> = OnceLock::new();
-static CACHE_KEY_PROFILE: OnceLock<String> = OnceLock::new();
-static CACHE_KEY_PROFILE_ID: OnceLock<String> = OnceLock::new();
-static CACHE_KEY_APPROVERS: OnceLock<String> = OnceLock::new();
-
-fn get_cache_key_rules_state() -> &'static str {
-    CACHE_KEY_RULES_STATE.get_or_init(|| {
-        std::env::var("CACHE_KEY_RULES_STATE").unwrap_or_else(|_| "rules:state".to_string())
-    })
-}
-
-fn get_cache_key_rules_account() -> &'static str {
-    CACHE_KEY_RULES_ACCOUNT.get_or_init(|| {
-        std::env::var("CACHE_KEY_RULES_ACCOUNT").unwrap_or_else(|_| "rules:account".to_string())
-    })
-}
-
-fn get_cache_key_profile() -> &'static str {
-    CACHE_KEY_PROFILE.get_or_init(|| {
-        std::env::var("CACHE_KEY_PROFILE").unwrap_or_else(|_| "profile".to_string())
-    })
-}
-
-fn get_cache_key_profile_id() -> &'static str {
-    CACHE_KEY_PROFILE_ID.get_or_init(|| {
-        std::env::var("CACHE_KEY_PROFILE_ID").unwrap_or_else(|_| "profile_id".to_string())
-    })
-}
-
-fn get_cache_key_approvers() -> &'static str {
-    CACHE_KEY_APPROVERS.get_or_init(|| {
-        std::env::var("CACHE_KEY_APPROVERS").unwrap_or_else(|_| "approvers".to_string())
-    })
-}
+use crate::{Cache, CacheError, CacheKey};
 
 pub struct RedisClient {
     inner: Client,
@@ -128,6 +92,23 @@ impl RedisClient {
     pub async fn del(&self, key: &str) -> Result<i64, Error> {
         self.inner.del(key).await
     }
+
+    pub async fn lpush(&self, key: &str, value: &str) -> Result<i64, Error> {
+        self.inner.lpush(key, value).await
+    }
+
+    pub async fn brpoplpush(
+        &self,
+        source: &str,
+        dest: &str,
+        timeout_secs: f64,
+    ) -> Result<Option<String>, Error> {
+        self.inner.brpoplpush(source, dest, timeout_secs).await
+    }
+
+    pub async fn lrem(&self, key: &str, count: i64, value: &str) -> Result<i64, Error> {
+        self.inner.lrem(key, count, value).await
+    }
 }
 
 fn redis_uri(
@@ -140,36 +121,6 @@ fn redis_uri(
     format!("redis://{redis_username}:{redis_password}@{redis_host}:{redis_port}/{redis_db}")
 }
 
-fn rules_state_key(role: AccountRole, state: &str) -> String {
-    format!(
-        "{}:{}:{}",
-        get_cache_key_rules_state(),
-        role.to_string().to_lowercase(),
-        state
-    )
-}
-
-fn rules_account_key(role: AccountRole, account: &str) -> String {
-    format!(
-        "{}:{}:{}",
-        get_cache_key_rules_account(),
-        role.to_string().to_lowercase(),
-        account
-    )
-}
-
-fn profile_key(account: &str) -> String {
-    format!("{}:{}", get_cache_key_profile(), account)
-}
-
-fn profile_id_key(account: &str) -> String {
-    format!("{}:{}", get_cache_key_profile_id(), account)
-}
-
-fn approvers_key(account: &str) -> String {
-    format!("{}:{}", get_cache_key_approvers(), account)
-}
-
 #[async_trait]
 impl Cache for RedisClient {
     async fn get_transaction_item_rules(
@@ -177,7 +128,7 @@ impl Cache for RedisClient {
         role: AccountRole,
         state: &str,
     ) -> Result<TransactionItemRuleInstances, CacheError> {
-        let key = rules_state_key(role, state);
+        let key = CacheKey::rules_state(role, state).to_string();
         let members: Vec<String> = self
             .smembers(&key)
             .await
@@ -200,7 +151,7 @@ impl Cache for RedisClient {
         state: &str,
         rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError> {
-        let key = rules_state_key(role, state);
+        let key = CacheKey::rules_state(role, state).to_string();
         for rule in &rules.0 {
             let json = serde_json::to_string(rule)
                 .map_err(|e| CacheError::SerializationError(e.to_string()))?;
@@ -216,7 +167,7 @@ impl Cache for RedisClient {
         role: AccountRole,
         account: &str,
     ) -> Result<ApprovalRuleInstances, CacheError> {
-        let key = rules_account_key(role, account);
+        let key = CacheKey::rules_approval(role, account).to_string();
         let members: Vec<String> = self
             .smembers(&key)
             .await
@@ -239,7 +190,7 @@ impl Cache for RedisClient {
         account: &str,
         rules: &ApprovalRuleInstances,
     ) -> Result<(), CacheError> {
-        let key = rules_account_key(role, account);
+        let key = CacheKey::rules_approval(role, account).to_string();
         for rule in &rules.0 {
             let json = serde_json::to_string(rule)
                 .map_err(|e| CacheError::SerializationError(e.to_string()))?;
@@ -255,7 +206,7 @@ impl Cache for RedisClient {
         role: AccountRole,
         account: &str,
     ) -> Result<TransactionItemRuleInstances, CacheError> {
-        let key = rules_account_key(role, account);
+        let key = CacheKey::rules_account(role, account).to_string();
         let members: Vec<String> = self
             .smembers(&key)
             .await
@@ -278,7 +229,7 @@ impl Cache for RedisClient {
         account: &str,
         rules: &TransactionItemRuleInstances,
     ) -> Result<(), CacheError> {
-        let key = rules_account_key(role, account);
+        let key = CacheKey::rules_account(role, account).to_string();
         for rule in &rules.0 {
             let json = serde_json::to_string(rule)
                 .map_err(|e| CacheError::SerializationError(e.to_string()))?;
@@ -290,7 +241,7 @@ impl Cache for RedisClient {
     }
 
     async fn get_account_profile(&self, account: &str) -> Result<AccountProfile, CacheError> {
-        let key = profile_key(account);
+        let key = CacheKey::profile(account).to_string();
         let value: Option<String> = self
             .get(&key)
             .await
@@ -308,7 +259,7 @@ impl Cache for RedisClient {
         account: &str,
         profile: &AccountProfile,
     ) -> Result<(), CacheError> {
-        let key = profile_key(account);
+        let key = CacheKey::profile(account).to_string();
         let json = serde_json::to_string(profile)
             .map_err(|e| CacheError::SerializationError(e.to_string()))?;
         self.set(&key, &json)
@@ -317,7 +268,7 @@ impl Cache for RedisClient {
     }
 
     async fn get_profile_id(&self, account: &str) -> Result<String, CacheError> {
-        let key = profile_id_key(account);
+        let key = CacheKey::profile_id(account).to_string();
         let value: Option<String> = self
             .get(&key)
             .await
@@ -327,14 +278,14 @@ impl Cache for RedisClient {
     }
 
     async fn set_profile_id(&self, account: &str, id: &str) -> Result<(), CacheError> {
-        let key = profile_id_key(account);
+        let key = CacheKey::profile_id(account).to_string();
         self.set(&key, id)
             .await
             .map_err(|e| CacheError::ConnectionError(e.to_string()))
     }
 
     async fn get_account_approvers(&self, account: &str) -> Result<Vec<String>, CacheError> {
-        let key = approvers_key(account);
+        let key = CacheKey::approvers(account).to_string();
         let members: Vec<String> = self
             .smembers(&key)
             .await
@@ -352,13 +303,25 @@ impl Cache for RedisClient {
         account: &str,
         approvers: &[String],
     ) -> Result<(), CacheError> {
-        let key = approvers_key(account);
+        let key = CacheKey::approvers(account).to_string();
         for approver in approvers {
             self.sadd(&key, approver)
                 .await
                 .map_err(|e| CacheError::ConnectionError(e.to_string()))?;
         }
         Ok(())
+    }
+
+    async fn get(&self, key: &str) -> Result<Option<String>, CacheError> {
+        RedisClient::get(self, key)
+            .await
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))
+    }
+
+    async fn set(&self, key: &str, value: &str) -> Result<(), CacheError> {
+        RedisClient::set(self, key, value)
+            .await
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))
     }
 
     async fn smembers(&self, key: &str) -> Result<Vec<String>, CacheError> {
@@ -376,6 +339,39 @@ impl Cache for RedisClient {
             .await
             .map_err(|e| CacheError::ConnectionError(e.to_string()))?;
         Ok(result.to_string())
+    }
+
+    async fn incr_and_check_threshold(
+        &self,
+        key: &str,
+        amount: &str,
+        threshold: &str,
+    ) -> Result<(String, bool), CacheError> {
+        let script = r#"
+local new = redis.call('INCRBYFLOAT', KEYS[1], ARGV[1])
+local threshold = tonumber(ARGV[2])
+if tonumber(new) >= threshold then
+    redis.call('INCRBYFLOAT', KEYS[1], -threshold)
+    return new .. ':1'
+else
+    return new .. ':0'
+end
+"#;
+        let result: String = self
+            .inner
+            .eval(
+                script,
+                vec![key.to_string()],
+                vec![amount.to_string(), threshold.to_string()],
+            )
+            .await
+            .map_err(|e| CacheError::ConnectionError(e.to_string()))?;
+
+        // parse "value:0" or "value:1"
+        match result.rsplit_once(':') {
+            Some((value, flag)) => Ok((value.to_string(), flag == "1")),
+            None => Ok((result, false)),
+        }
     }
 
     async fn del(&self, key: &str) -> Result<(), CacheError> {
@@ -410,31 +406,37 @@ mod tests {
 
     #[test]
     fn it_creates_rules_state_key() {
-        let key = rules_state_key(AccountRole::Creditor, "California");
+        let key = CacheKey::rules_state(AccountRole::Creditor, "California").to_string();
         assert!(key.ends_with(":creditor:California"));
     }
 
     #[test]
     fn it_creates_rules_account_key() {
-        let key = rules_account_key(AccountRole::Debitor, "JacobWebb");
+        let key = CacheKey::rules_account(AccountRole::Debitor, "JacobWebb").to_string();
         assert!(key.ends_with(":debitor:JacobWebb"));
     }
 
     #[test]
+    fn it_creates_rules_approval_key() {
+        let key = CacheKey::rules_approval(AccountRole::Debitor, "IgorPetrov").to_string();
+        assert!(key.ends_with(":debitor:IgorPetrov"));
+    }
+
+    #[test]
     fn it_creates_profile_key() {
-        let key = profile_key("GroceryStore");
+        let key = CacheKey::profile("GroceryStore").to_string();
         assert!(key.ends_with(":GroceryStore"));
     }
 
     #[test]
     fn it_creates_profile_id_key() {
-        let key = profile_id_key("GroceryStore");
+        let key = CacheKey::profile_id("GroceryStore").to_string();
         assert!(key.ends_with(":GroceryStore"));
     }
 
     #[test]
     fn it_creates_approvers_key() {
-        let key = approvers_key("GroceryStore");
+        let key = CacheKey::approvers("GroceryStore").to_string();
         assert!(key.ends_with(":GroceryStore"));
     }
 }
@@ -442,7 +444,7 @@ mod tests {
 #[cfg(all(test, feature = "cache_tests"))]
 mod integration_tests {
     use super::*;
-    use cache::Cache;
+    use crate::Cache;
     use types::rule::{ApprovalRuleInstance, TransactionItemRuleInstance};
 
     async fn get_client() -> RedisClient {
@@ -457,25 +459,27 @@ mod integration_tests {
         }
     }
 
+    // use test-only names to avoid colliding with warm-cache keys
+    const TEST_ACCT: &str = "CacheTestAccount";
+    const TEST_STATE: &str = "CacheTestState";
+
     #[tokio::test]
     async fn it_sets_and_gets_profile_id() {
         let client = get_client().await;
-        let key = &profile_id_key("TestAccount");
+        let key = &CacheKey::profile_id(TEST_ACCT).to_string();
         delete_test_keys(&client, &[key]).await;
 
-        let account = "TestAccount";
-        let id = "123";
+        client.set_profile_id(TEST_ACCT, "123").await.unwrap();
+        let result = client.get_profile_id(TEST_ACCT).await.unwrap();
 
-        client.set_profile_id(account, id).await.unwrap();
-        let result = client.get_profile_id(account).await.unwrap();
-
-        assert_eq!(result, id);
+        assert_eq!(result, "123");
+        delete_test_keys(&client, &[key]).await;
     }
 
     #[tokio::test]
     async fn it_returns_cache_miss_for_missing_profile_id() {
         let client = get_client().await;
-        let key = &profile_id_key("NonExistent");
+        let key = &CacheKey::profile_id("NonExistent").to_string();
         delete_test_keys(&client, &[key]).await;
 
         let result = client.get_profile_id("NonExistent").await;
@@ -485,12 +489,12 @@ mod integration_tests {
     #[tokio::test]
     async fn it_sets_and_gets_account_profile() {
         let client = get_client().await;
-        let key = &profile_key("TestAccount");
+        let key = &CacheKey::profile(TEST_ACCT).to_string();
         delete_test_keys(&client, &[key]).await;
 
         let profile = AccountProfile {
             id: Some("1".to_string()),
-            account_name: "TestAccount".to_string(),
+            account_name: TEST_ACCT.to_string(),
             description: Some("Test description".to_string()),
             first_name: Some("Test".to_string()),
             middle_name: None,
@@ -516,38 +520,40 @@ mod integration_tests {
         };
 
         client
-            .set_account_profile("TestAccount", &profile)
+            .set_account_profile(TEST_ACCT, &profile)
             .await
             .unwrap();
-        let result = client.get_account_profile("TestAccount").await.unwrap();
+        let result = client.get_account_profile(TEST_ACCT).await.unwrap();
 
-        assert_eq!(result.account_name, "TestAccount");
+        assert_eq!(result.account_name, TEST_ACCT);
         assert_eq!(result.state_name, "California");
+        delete_test_keys(&client, &[key]).await;
     }
 
     #[tokio::test]
     async fn it_sets_and_gets_account_approvers() {
         let client = get_client().await;
-        let key = &approvers_key("TestAccount");
+        let key = &CacheKey::approvers(TEST_ACCT).to_string();
         delete_test_keys(&client, &[key]).await;
 
         let approvers = vec!["Approver1".to_string(), "Approver2".to_string()];
 
         client
-            .set_account_approvers("TestAccount", &approvers)
+            .set_account_approvers(TEST_ACCT, &approvers)
             .await
             .unwrap();
-        let result = client.get_account_approvers("TestAccount").await.unwrap();
+        let result = client.get_account_approvers(TEST_ACCT).await.unwrap();
 
         assert_eq!(result.len(), 2);
         assert!(result.contains(&"Approver1".to_string()));
         assert!(result.contains(&"Approver2".to_string()));
+        delete_test_keys(&client, &[key]).await;
     }
 
     #[tokio::test]
     async fn it_sets_and_gets_transaction_item_rules() {
         let client = get_client().await;
-        let key = &rules_state_key(AccountRole::Creditor, "California");
+        let key = &CacheKey::rules_state(AccountRole::Creditor, TEST_STATE).to_string();
         delete_test_keys(&client, &[key]).await;
 
         let rule = TransactionItemRuleInstance {
@@ -568,7 +574,7 @@ mod integration_tests {
             country_name: None,
             city_name: None,
             county_name: None,
-            state_name: Some("California".to_string()),
+            state_name: Some(TEST_STATE.to_string()),
             latlng: None,
             occupation_id: None,
             industry_id: None,
@@ -580,22 +586,23 @@ mod integration_tests {
         let rules = TransactionItemRuleInstances(vec![rule]);
 
         client
-            .set_transaction_item_rules(AccountRole::Creditor, "California", &rules)
+            .set_transaction_item_rules(AccountRole::Creditor, TEST_STATE, &rules)
             .await
             .unwrap();
         let result = client
-            .get_transaction_item_rules(AccountRole::Creditor, "California")
+            .get_transaction_item_rules(AccountRole::Creditor, TEST_STATE)
             .await
             .unwrap();
 
         assert_eq!(result.0.len(), 1);
         assert_eq!(result.0[0].rule_name, "multiplyItemValue");
+        delete_test_keys(&client, &[key]).await;
     }
 
     #[tokio::test]
     async fn it_sets_and_gets_approval_rules() {
         let client = get_client().await;
-        let key = &rules_account_key(AccountRole::Creditor, "TestAccount");
+        let key = &CacheKey::rules_approval(AccountRole::Creditor, TEST_ACCT).to_string();
         delete_test_keys(&client, &[key]).await;
 
         let rule = ApprovalRuleInstance {
@@ -604,7 +611,7 @@ mod integration_tests {
             rule_instance_name: "ApproveAllCredits".to_string(),
             variable_values: vec![],
             account_role: AccountRole::Creditor,
-            account_name: "TestAccount".to_string(),
+            account_name: TEST_ACCT.to_string(),
             disabled_time: None,
             removed_time: None,
             created_at: None,
@@ -612,15 +619,16 @@ mod integration_tests {
         let rules = ApprovalRuleInstances(vec![rule]);
 
         client
-            .set_approval_rules(AccountRole::Creditor, "TestAccount", &rules)
+            .set_approval_rules(AccountRole::Creditor, TEST_ACCT, &rules)
             .await
             .unwrap();
         let result = client
-            .get_approval_rules(AccountRole::Creditor, "TestAccount")
+            .get_approval_rules(AccountRole::Creditor, TEST_ACCT)
             .await
             .unwrap();
 
         assert_eq!(result.0.len(), 1);
         assert_eq!(result.0[0].rule_name, "approveAnyCreditItem");
+        delete_test_keys(&client, &[key]).await;
     }
 }

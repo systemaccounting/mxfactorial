@@ -35,7 +35,7 @@ resource "aws_codebuild_project" "integ" {
 
   source {
     type      = "S3"
-    location  = "${aws_s3_bucket.artifacts.bucket}/${local.INTEG_SOURCE_LOCATION}"
+    location  = "${var.artifacts_bucket_name}/${local.INTEG_SOURCE_LOCATION}"
     buildspec = <<-EOF
       version: 0.2
       phases:
@@ -57,7 +57,7 @@ resource "aws_codebuild_project" "integ" {
             - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
             - export ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ENV_ID/$ENV
             - |
-              for SVC in ${join(" ", local.ECR_REPOS)}; do
+              for SVC in ${join(" ", var.service_names)}; do
                 echo "pulling $SVC..."
                 TAG=$(aws ecr describe-images --repository-name $ENV_ID/$ENV/$SVC --region $REGION --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' --output text 2>/dev/null || echo "")
                 if [ -n "$TAG" ] && [ "$TAG" != "None" ]; then
@@ -124,12 +124,12 @@ resource "aws_iam_role_policy" "integ" {
           "s3:GetObject",
           "s3:GetObjectVersion"
         ]
-        Resource = "${aws_s3_bucket.artifacts.arn}/*"
+        Resource = "${var.artifacts_bucket_arn}/*"
       },
       {
         Effect   = "Allow"
         Action   = ["s3:ListBucket"]
-        Resource = aws_s3_bucket.artifacts.arn
+        Resource = var.artifacts_bucket_arn
       },
       {
         Effect = "Allow"

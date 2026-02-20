@@ -13,12 +13,12 @@ use axum::{
 use futures::{sink::SinkExt, stream::StreamExt};
 use http::StatusCode;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
-use redisclient::RedisClient;
+use pubsub::PubSub;
 use rust_decimal::prelude::*;
 use rust_decimal::Decimal;
 use serde::Deserialize;
 use shutdown::shutdown_signal;
-use std::{env, net::SocketAddr};
+use std::{env, net::SocketAddr, sync::Arc};
 
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
@@ -105,25 +105,33 @@ async fn ws_handler(
 async fn handle_socket(socket: WebSocket, _who: SocketAddr, pool: ConnectionPool, params: Params) {
     // get abbreviated location names from postgres
     let conn = pool.get_conn().await;
-    let abbreviations = redis_names(&conn, params).await;
+    let abbreviations = abbrev_names(&conn, params).await;
 
-    // concat abbreviated location names to colon separated redis key: 2024-08-20:gdp:usa:cal:sac
-    let redis_gdp_key = abbreviations.redis_gdp_key();
+    // concat abbreviated location names to colon separated key: 2024-08-20:gdp:usa:cal:sac
+    let gdp_key = abbreviations.redis_gdp_key();
 
-    // connect to redis
-    let redis_client = RedisClient::new().await;
-    redis_client.init().await.unwrap();
+    // create pubsub client for this connection
+    let pubsub = match pubsub::new().await {
+        Some(p) => p,
+        None => {
+            tracing::error!("pubsub not available");
+            return;
+        }
+    };
 
-    // subscribe to redis channel named after redis key
-    redis_client.subscribe(vec![redis_gdp_key]).await.unwrap();
+    // subscribe to channel named after gdp key
+    if let Err(e) = pubsub.subscribe(vec![gdp_key.clone()]).await {
+        tracing::error!("subscribe failed: {}", e);
+        return;
+    }
 
-    // proxy redis subscription to websocket
-    proxy_redis_subscription(redis_client, socket).await
+    // proxy subscription to websocket
+    proxy_subscription(pubsub, gdp_key, socket).await
 }
 
-async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) {
+async fn proxy_subscription(pubsub: Arc<dyn PubSub>, channel: String, socket: WebSocket) {
     let (mut ws_tx, mut ws_rx) = socket.split();
-    let mut redis_stream = redis_client.message_rx();
+    let mut rx = pubsub.message_rx();
 
     loop {
         tokio::select! {
@@ -133,11 +141,14 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
                     break;
                 }
             },
-            redis_msg = redis_stream.recv() => {
-                match redis_msg {
+            msg = rx.recv() => {
+                match msg {
                     Ok(message) => {
-                        let message = message.value.as_string().unwrap();
-                        let gdp = trim_string_decimal(message.as_str());
+                        // filter messages to only our subscribed channel
+                        if message.channel != channel {
+                            continue;
+                        }
+                        let gdp = trim_string_decimal(&message.payload);
                         let msg = Message::Text(gdp.clone().into());
                         match ws_tx.send(msg).await {
                             Ok(_) => {
@@ -150,7 +161,7 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
                         }
                     }
                     Err(e) => {
-                        tracing::error!("error receiving message from graphql: {}", e);
+                        tracing::error!("error receiving pubsub message: {}", e);
                         break;
                     }
                 }
@@ -168,7 +179,7 @@ async fn proxy_redis_subscription(redis_client: RedisClient, socket: WebSocket) 
     }
 }
 
-async fn redis_names(pg_conn: &DatabaseConnection, ws_params: Params) -> Params {
+async fn abbrev_names(pg_conn: &DatabaseConnection, ws_params: Params) -> Params {
     let mut keys: Params = Params {
         measure: ws_params.measure,
         date: ws_params.date,

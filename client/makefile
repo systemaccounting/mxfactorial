@@ -67,7 +67,7 @@ install-browsers:
 test:
 	if ! [ -d node_modules ]; then npm install; fi
 	@$(MAKE) install-browsers
-	@$(MAKE) -C .. reset-db
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/test-reset.sh --set
 	npm run test
 
 test-ci:

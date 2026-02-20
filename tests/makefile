@@ -7,8 +7,7 @@ ENV_FILE=$(CURDIR)/$(ENV_FILE_NAME)
 
 test-local:
 	@$(MAKE) get-secrets ENV=local
-	@$(MAKE) -S -C ../migrations reset
-	@until docker exec mxf-postgres-1 pg_isready -U postgres; do sleep 1; done
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/test-reset.sh --set
 	cargo test --features integration_tests -- --test-threads=1
 
 test-docker:
@@ -19,6 +18,7 @@ test-cloud:
 	@$(MAKE) -s test-env-arg
 	@$(MAKE) --no-print-directory -C ../migrations/go-migrate resetrds ENV=$(ENV) DB=test
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/invoke-warm-cache.sh --env $(ENV)
+	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/test-reset.sh --env $(ENV) --set
 	@$(MAKE) --no-print-directory -S get-secrets ENV=$(ENV)
 	cargo test --features integration_tests -- --test-threads=1
 

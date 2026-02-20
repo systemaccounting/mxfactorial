@@ -6,10 +6,12 @@ locals {
 }
 
 resource "aws_dynamodb_table" "cache" {
-  name         = "${local.CACHE_TABLE_NAME}-${local.ID_ENV}"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = local.CACHE_TABLE_HASH_KEY
-  range_key    = local.CACHE_TABLE_RANGE_KEY
+  name             = "${local.CACHE_TABLE_NAME}-${local.ID_ENV}"
+  billing_mode     = "PAY_PER_REQUEST"
+  hash_key         = local.CACHE_TABLE_HASH_KEY
+  range_key        = local.CACHE_TABLE_RANGE_KEY
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
 
   attribute {
     name = local.CACHE_TABLE_HASH_KEY
@@ -19,6 +21,65 @@ resource "aws_dynamodb_table" "cache" {
   attribute {
     name = local.CACHE_TABLE_RANGE_KEY
     type = "S"
+  }
+}
+
+resource "aws_iam_role" "pipes_gdp" {
+  name = "pipes-gdp-${local.ID_ENV}"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Principal = {
+        Service = "pipes.amazonaws.com"
+      }
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "pipes_gdp_source" {
+  name = "pipes-gdp-source-${local.ID_ENV}"
+  role = aws_iam_role.pipes_gdp.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "dynamodb:DescribeStream",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:ListStreams"
+      ]
+      Resource = aws_dynamodb_table.cache.stream_arn
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "pipes_gdp_target" {
+  name = "pipes-gdp-target-${local.ID_ENV}"
+  role = aws_iam_role.pipes_gdp.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = "sns:Publish"
+      Resource = aws_sns_topic.gdp.arn
+    }]
+  })
+}
+
+resource "aws_pipes_pipe" "gdp_broadcast" {
+  name     = "gdp-broadcast-${local.ID_ENV}"
+  role_arn = aws_iam_role.pipes_gdp.arn
+  source   = aws_dynamodb_table.cache.stream_arn
+  target   = aws_sns_topic.gdp.arn
+
+  source_parameters {
+    dynamodb_stream_parameters {
+      starting_position = "LATEST"
+      batch_size        = 1
+    }
   }
 }
 

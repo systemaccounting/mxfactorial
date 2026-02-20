@@ -37,6 +37,7 @@ pub struct Transaction {
     pub author_device_latlng: Option<String>,
     pub author_role: Option<AccountRole>,
     pub equilibrium_time: Option<TZTime>,
+    pub event_time: Option<TZTime>,
     pub debitor_first: Option<bool>,
     pub sum_value: String,
     pub transaction_items: TransactionItems,
@@ -68,6 +69,9 @@ impl Transaction {
     async fn equilibrium_time(&self) -> Option<TZTime> {
         self.equilibrium_time
     }
+    async fn event_time(&self) -> Option<TZTime> {
+        self.event_time
+    }
     async fn debitor_first(&self) -> Option<bool> {
         self.debitor_first
     }
@@ -93,6 +97,7 @@ impl Transaction {
             author_device_latlng: None,
             author_role: None,
             equilibrium_time,
+            event_time: None,
             debitor_first: Some(false),
             sum_value: transaction_items.sum_value(),
             transaction_items,
@@ -195,8 +200,9 @@ impl From<Row> for Transaction {
             author_device_latlng: row.get(4),
             author_role: row.get(5),
             equilibrium_time: row.get(6),
-            debitor_first: row.get(7),
-            sum_value: row.get(8),
+            event_time: row.get(7),
+            debitor_first: row.get(8),
+            sum_value: row.get(9),
             transaction_items: TransactionItems(vec![]),
         }
     }
@@ -212,8 +218,9 @@ impl From<&Row> for Transaction {
             author_device_latlng: row.get(4),
             author_role: row.get(5),
             equilibrium_time: row.get(6),
-            debitor_first: row.get(7),
-            sum_value: row.get(8),
+            event_time: row.get(7),
+            debitor_first: row.get(8),
+            sum_value: row.get(9),
             transaction_items: TransactionItems(vec![]),
         }
     }
@@ -830,6 +837,7 @@ pub mod tests {
             author_device_latlng: None,
             author_role: Some(AccountRole::Creditor),
             equilibrium_time: None,
+            event_time: None,
             debitor_first: Some(false),
             sum_value: String::from("21.800"),
             transaction_items: TransactionItems(vec![
@@ -945,6 +953,7 @@ pub mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                event_time: None,
                 debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![
@@ -1056,6 +1065,7 @@ pub mod tests {
                 author_device_latlng: None,
                 author_role: Some(AccountRole::Creditor),
                 equilibrium_time: None,
+                event_time: None,
                 debitor_first: Some(false),
                 sum_value: String::from("21.800"),
                 transaction_items: TransactionItems(vec![

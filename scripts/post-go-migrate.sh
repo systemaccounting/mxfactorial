@@ -5,7 +5,7 @@ if [[ "$#" -ne 6 ]]; then
 	use:
 	bash scripts/migrate.sh \
 	        --branch develop \
-			--db_type test \ # or leave empty to exclude testseed data
+			--subdirs schema,seed,testseed \
 	        --command up # or down # or drop # or reset
 	EOF
 	exit 1
@@ -15,7 +15,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --branch) BRANCH="$2"; shift ;;
         --command) COMMAND="$2"; shift ;;
-        --db_type) DB_TYPE="$2"; shift ;;
+        --subdirs) SUBDIRS="$2"; shift ;;
         *) echo "unknown parameter passed: $1"; exit 1 ;;
     esac
 	shift
@@ -35,7 +35,7 @@ read -r -d '' BODY <<-EOF
 	"count": null,
 	"version": null,
 	"directory": null,
-	"db_type": "${DB_TYPE}"
+	"subdirs": "${SUBDIRS}"
 }
 EOF
 

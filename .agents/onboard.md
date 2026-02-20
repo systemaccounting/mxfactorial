@@ -12,7 +12,7 @@ read scripts/bootcamp.sh to learn how to test services
 
 `cargo build` to compile all rust apps and libs which consumes approximately 5 minutes
 
-`make start` to start services in docker. services use `cargo-watch` for hot-reloading during development
+`make start` to start services in docker. it stops any running services first. always run in background unless instructed otherwise since it exits when finished and will cause a timeout. services use `cargo-watch` for hot-reloading during development
 
 test the bootcamp commands to learn services requests and responses. the primary transaction bootcamp commands are `make rule`, `make request-create`, `make request-approve` and `make balance-by-account`
 
@@ -34,13 +34,15 @@ shared makefiles are stored in ./make
 
 set project root as cwd for all scripting
 
+`bash scripts/create-all-env-files.sh --env local` regenerates all service .env files from project.yaml defaults. run this after changing env var configuration in project.yaml
+
 make -C services/rule env ENV=local builds a rule/services/.env file project.yaml env_var default assignments from sourced make/shared.mk `env:` and `get-secrets:` targets. `get-secrets:` execs scripts/create-env-file.sh
 
 if the user built a cloud dev environment, make -C services/rule env ENV=dev sets values returned from aws sms
 
 postgres is run in docker. the image is built from docker/bitnami-postgres.Dockerfile and uses the github.com/golang-migrate/migrate binary migrate the db's migrations/schema, migrations/seed data and migrations/testseed for test images requiring bootstrapped data. manage the postgres image with migrations/makefile commands, eg `make -C migrations reset` after testing services
 
-to test migration changes without rebuilding the postgres image, run migrations/go-migrate/migrate.sh directly: `SQL_TYPE=postgresql PGUSER=test PGPASSWORD=test PGHOST=localhost PGPORT=5432 PGDATABASE=mxfactorial bash migrations/go-migrate/migrate.sh --dir migrations --db_type test --cmd reset`
+to test migration changes without rebuilding the postgres image, run migrations/go-migrate/migrate.sh directly: `SQL_TYPE=postgresql PGUSER=test PGPASSWORD=test PGHOST=localhost PGPORT=5432 PGDATABASE=mxfactorial bash migrations/go-migrate/migrate.sh --dir migrations --subdirs schema,seed,testseed --cmd reset`
 
 query postgres with `PGPASSWORD=test psql -h localhost -U test -d mxfactorial -c 'SELECT * FROM table_name'`
 
@@ -51,6 +53,8 @@ to demo live streaming gdp, run `make insert` in background to continuously crea
 shared libs are in `ls -1 crates`
 
 make stop stops the stack. `make list-pids` shows running services and their PIDs
+
+rust services use `tracing` for logging. log level is controlled by `RUST_LOG` env var sourced from the `rust_log` field in project.yaml per service (eg `yq '.services.auto-transact.rust_log' project.yaml`). most services default to `off`. set to `info` to enable logging then regenerate the .env with `make -C services/auto-transact env ENV=local` and restart the cargo-watch process. all service logs write to nohup.out at project root via make/rust.mk. read nohup.out with `grep` to check service output instead of tailing a terminal
 
 project dependencies are listed in project roots `install:` makefile recipe
 
@@ -74,13 +78,25 @@ the conventional transaction flow: creditor drafts a `transaction` with a `trans
 
 creditors are NOT required to create transaction as explained in the conventional transaction flow (ask). debitors can create transactions (bid)
 
-`insert_equilibrium_trigger` calls `insert_equilibrium` in migrations/schema/000010_equilibrium.up.sql when transactions reach equilibrium from receiving approval timestamps from all transacting accounts. `insert_equilibrium` sends a gdp notification. services/event listens for gdp notifications and increments keys in redis. services/measure listens to a redis stream for key changes and publishes them to a websocket. graphql proxies the services/measure websocket for clients through a query_gdp subscription (see client/src/routes/measure/+page.svelte)
+`notify_equilibrium_trigger` calls `notify_equilibrium` in migrations/schema/000010_equilibrium.up.sql when transactions reach equilibrium from receiving approval timestamps from all transacting accounts. `notify_equilibrium` sends a pg_notify on the equilibrium channel. services/event listens for equilibrium notifications, claims pending transactions by setting `event_time` on rows where `equilibrium_time IS NOT NULL AND event_time IS NULL`, and increments gdp keys in redis, and accumulates threshold profit for auto-transact dividends. services/measure listens to a redis stream for key changes and publishes them to a websocket. graphql proxies the services/measure websocket for clients through a query_gdp subscription (see client/src/routes/measure/+page.svelte)
 
-services/event also handles threshold profit accumulation on equilibrium. test: `make -C migrations env ENV=local && make -C migrations insert-thresh`. verify accumulator increments: `docker exec mxf-redis-1 redis-cli -a test --no-auth-warning GET transaction_rule_instance:1:accumulator`. when accumulated >= threshold (1000), event posts to auto-transact, subtracts threshold, and keeps remainder for next cycle. teardown: `pkill -f insert-transactions && make -C migrations thresh-down`
+services/event also handles threshold profit accumulation on equilibrium. when a transaction reaches equilibrium, handle_threshold_profit in services/event/src/events/threshold_profit.rs checks if any accounts accumulated profit has reached a configured threshold. flow: postgres equilibrium notification → event service queries accounts in the transaction → checks cache for threshold rules (redis SET key `transaction_rule_instance:threshold:profit:{account}` with members `{rule_instance_id}|{threshold}`) → computes net contribution per account → increments accumulator (redis key `transaction_rule_instance:{id}:accumulator`) → when accumulated >= threshold, builds a transaction payload from transaction_rule_instance and transaction_item_rule_instance tables and sends to auto-transact queue → auto-transact dequeues, forwards to rule service then request-create → dividend transaction reaches equilibrium with all approvals automated by approval_rule_instances
+
+threshold rule instances are seeded by migrations/testseedthresh/000001_dividend.up.sql (GroceryCo, threshold=1000, pays "1% dividend" to JoeCarter). `make -C migrations thresh-up` migrates the seed data then runs warm-cache to SADD the threshold cache key. `make -C migrations thresh-down` migrates down
+
+local threshold test: `make start` in background for fresh services, then `make -C migrations env ENV=local && make -C migrations thresh-up && make -C migrations insert`. verify accumulator increments: `docker exec mxf-redis-1 redis-cli -a test --no-auth-warning GET transaction_rule_instance:1:accumulator`. verify exactly 1 dividend transaction in postgres after accumulator exceeds 1000: `PGPASSWORD=test psql -h localhost -U test -d mxfactorial -c "SELECT t.id, t.author, ti.item_id, ti.price, ti.debitor, ti.creditor, t.equilibrium_time FROM transaction t JOIN transaction_item ti ON ti.transaction_id = t.id WHERE ti.item_id = '1% dividend'"`. teardown: `pkill -f insert-transactions && make -C migrations thresh-down`
+
+cloud threshold test: requires the ecs-hosted event stack. uncomment `ecs_instance_size` in infra/terraform/aws/environments/dev/main.tf and `terraform apply` from that directory to create the fargate cluster with event and measure services. then: 1) `ENV=dev bash scripts/go-migrate-rds.sh --subdirs schema,seed,testseed,testseedthresh --cmd reset` to reset rds with threshold seed data. 2) invoke warm-cache lambda to populate ddb cache including threshold rules. 3) `bash scripts/insert-transactions.sh --env dev --continue` to insert transactions. 4) poll ddb accumulator: `aws dynamodb get-item --table-name transact-ENVID-dev --key '{"pk":{"S":"transaction_rule_instance:1:accumulator"},"sk":{"S":"_"}}' --region us-east-1 --query 'Item.acc.N' --output text`. 5) after accumulator resets (threshold fired), verify exactly 1 dividend: query rds for `item_id = '1% dividend'`. teardown: `pkill -f insert-transactions`
+
+key files: services/event/src/events/threshold_profit.rs (accumulator + queue.send), services/auto-transact/src/main.rs (queue_worker dequeues and processes), crates/queue/ (redis BRPOP locally, SQS in lambda), crates/cache/src/lib.rs (CacheKey::TransactionRuleInstanceThresholdProfit and TransactionRuleInstanceAccumulator)
 
 client is a sveltekit SSR app. services can be accessed without the client through graphql
 
 maintain and use scripts/test-all.sh for test coverage
+
+`bash scripts/test-reset.sh --set` caches max IDs and initial balance in redis as the test initial db state. `bash scripts/test-reset.sh` restores the db to that initial db state. each make test target calls `--set` before running. if tests fail with wrong IDs, the initial db state was set on a dirty db. fix: `make start` then retest
+
+dont send requests to services while tests are running. services cache postgres prepared statements on pooled connections. `resetdocker` drops and recreates the schema which assigns new OIDs to tables. stale prepared statements on previously used connections then cause services to return incomplete http responses. if services received any requests before a test-triggered DB reset, integration tests will fail with `IncompleteMessage`. fix: `make start` before rerunning tests
 
 cloud infrastructure code is stored in ./infra. only terraform is currently used. devs configure their aws cli with their own aws credentials and build environments in their own accounts. the root makefile includes the make/cloud-env.mk file storing cloud infra commands—read it to learn about them
 
@@ -108,14 +124,16 @@ image tags use `SHORT_GIT_SHA_LENGTH` from project.yaml (default: 7) for git has
 
 use yq instead of jq for local json/yaml scripting
 
-`bash scripts/ecr-images.sh --build` triggers codebuild to build+test images remotely. add `--push` to push to ECR, `--deploy` to update lambdas, `--no-test` to skip tests, `--service graphql` to target one service
+`bash scripts/ecr-images.sh --build` triggers codebuild to build+test images remotely. add `--push` to push to ECR, `--deploy` to update lambdas or ecs services (based on `deploy_target` in project.yaml), `--no-test` to skip tests, `--service graphql` to target one service
 
 `bash scripts/ecr-images.sh --integ` runs integration tests in codebuild using pre-built ECR images (test-db, test-cache, test-local, client e2e). requires `--build --push` first
 
 `bash scripts/ecr-images.sh --pull` pulls images from ECR and retags locally
 
-codebuild projects are in infra/terraform/aws/modules/project-storage/v001. per-service builds in codepipeline.tf (sources codebuild module), integ tests in integ.tf (buildspec inlined)
+codebuild projects are in infra/terraform/aws/modules/ci/v001. per-service builds in main.tf (sources codebuild module), integ tests in integ.tf (buildspec inlined). ci module is only used by init-dev
 
-buildspecs use runtime config via env vars (RUN_TESTS, PUSH_IMAGE, DEPLOY) set by `--environment-variables-override` in ecr-images.sh
+buildspecs use runtime config via env vars (RUN_TESTS, PUSH_IMAGE, DEPLOY_LAMBDA, DEPLOY_ECS) set by `--environment-variables-override` in ecr-images.sh
 
 s3 upload to artifacts bucket auto-triggers codepipeline via eventbridge when using `--build --push` without `--service`
+
+say "design" instead of "approach"

@@ -1,5 +1,5 @@
 locals {
-  WARM_CACHE_CONF = local.PROJECT_CONF.services.rule.env_var.set
+  CACHE_CONF = local.PROJECT_CONF.crates.cache.env_var.set
 }
 
 module "warm_cache" {
@@ -11,13 +11,15 @@ module "warm_cache" {
   lambda_timeout     = 300
   lambda_memory_size = 1024
   env_vars = merge(local.POSTGRES_VARS, {
-    WARM_CACHE_PASSPHRASE   = random_password.warm_cache.result
-    TRANSACTION_DDB_TABLE   = aws_dynamodb_table.cache.name
-    CACHE_KEY_RULES_STATE   = local.WARM_CACHE_CONF.CACHE_KEY_RULES_STATE.default
-    CACHE_KEY_RULES_ACCOUNT = local.WARM_CACHE_CONF.CACHE_KEY_RULES_ACCOUNT.default
-    CACHE_KEY_PROFILE       = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE.default
-    CACHE_KEY_PROFILE_ID    = local.WARM_CACHE_CONF.CACHE_KEY_PROFILE_ID.default
-    CACHE_KEY_APPROVERS     = local.WARM_CACHE_CONF.CACHE_KEY_APPROVERS.default
+    WARM_CACHE_PASSPHRASE = random_password.warm_cache.result
+    TRANSACTION_DDB_TABLE = aws_dynamodb_table.cache.name
+    CACHE_KEY_RULES       = local.CACHE_CONF.CACHE_KEY_RULES.default
+    CACHE_KEY_STATE       = local.CACHE_CONF.CACHE_KEY_STATE.default
+    CACHE_KEY_ACCOUNT     = local.CACHE_CONF.CACHE_KEY_ACCOUNT.default
+    CACHE_KEY_APPROVAL    = local.CACHE_CONF.CACHE_KEY_APPROVAL.default
+    CACHE_KEY_PROFILE     = local.CACHE_CONF.CACHE_KEY_PROFILE.default
+    CACHE_KEY_PROFILE_ID  = local.CACHE_CONF.CACHE_KEY_PROFILE_ID.default
+    CACHE_KEY_APPROVERS   = local.CACHE_CONF.CACHE_KEY_APPROVERS.default
   })
   create_secret                 = true
   attached_policy_arns          = [aws_iam_policy.warm_cache_dynamodb.arn]
@@ -43,7 +45,7 @@ resource "aws_iam_policy" "warm_cache_dynamodb" {
     Version = "2012-10-17"
     Statement = [{
       Effect   = "Allow"
-      Action   = ["dynamodb:PutItem", "dynamodb:BatchWriteItem"]
+      Action   = ["dynamodb:GetItem", "dynamodb:Query", "dynamodb:PutItem", "dynamodb:BatchWriteItem", "dynamodb:UpdateItem"]
       Resource = aws_dynamodb_table.cache.arn
     }]
   })

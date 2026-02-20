@@ -3,9 +3,22 @@ name = "cache"
 version = "0.1.0"
 edition = "2021"
 rust-version.workspace = true
-description = "trait for cache tools"
+description = "cache trait with redis and dynamodb implementations"
+
+[features]
+cache_tests = []
 
 [dependencies]
 async-trait = "0.1.73"
 thiserror = "2.0"
+serde_json = "1.0"
+tracing = "0.1"
+tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
 types = { path = "../types" }
+
+# redis
+fred = { version = "10.1", features = ["i-scripts", "i-pubsub"] }
+
+# dynamodb
+aws-config = { version = "1.8", features = ["behavior-version-latest"] }
+aws-sdk-dynamodb = "1.101"

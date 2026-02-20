@@ -162,13 +162,15 @@ impl TransactionItemTable {
     pub fn select_transaction_items_by_transaction_id_sql(&self) -> String {
         let columns = self.select_all_with_casting().join_with_casting();
         format!(
-            "{} {} {} {} {} {} = $1",
+            "{} {} {} {} {} {} = $1 {} {}",
             SELECT,
             columns,
             FROM,
             self.name(),
             WHERE,
-            self.get_column("transaction_id").name()
+            self.get_column("transaction_id").name(),
+            ORDER_BY,
+            self.get_column("id").name()
         )
     }
 
@@ -176,7 +178,7 @@ impl TransactionItemTable {
         let values = create_params(row_count, &mut 1);
         let columns = self.select_all_with_casting().join_with_casting();
         format!(
-            "{} {} {} {} {} {} {} ({})",
+            "{} {} {} {} {} {} {} ({}) {} {}",
             SELECT,
             columns,
             FROM,
@@ -184,7 +186,9 @@ impl TransactionItemTable {
             WHERE,
             self.get_column("transaction_id").name(),
             IN,
-            values
+            values,
+            ORDER_BY,
+            self.get_column("id").name()
         )
     }
 }
@@ -213,7 +217,7 @@ mod tests {
         let sql = transaction_item_table.select_transaction_items_by_transaction_id_sql();
         assert_eq!(
             sql,
-            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id = $1"
+            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id = $1 ORDER BY id"
         );
     }
 
@@ -223,7 +227,7 @@ mod tests {
         let sql = transaction_item_table.select_transaction_items_by_transaction_ids_sql(2);
         assert_eq!(
             sql,
-            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id IN ($1, $2)"
+            "SELECT id::text, transaction_id::text, item_id, price::text, quantity::text, rule_instance_id::text, rule_exec_ids, unit_of_measurement, units_measured::text, debitor, creditor, debitor_profile_id::text, creditor_profile_id::text, debitor_approval_time, creditor_approval_time, debitor_rejection_time, creditor_rejection_time, debitor_expiration_time, creditor_expiration_time FROM transaction_item WHERE transaction_id IN ($1, $2) ORDER BY id"
         );
     }
 }

@@ -7,11 +7,11 @@ function handler () {
   # otherwise assign variables from object root (lambda invoke)
   if [[ $(echo $EVENT_DATA | jq -r '.body') != "null" ]]; then
     BODY=$(echo $EVENT_DATA | jq -r '.body')
-    DATABASE_TYPE=$(echo $BODY | jq -r '.db_type')
+    SUBDIRS=$(echo $BODY | jq -r '.subdirs')
     MIGRATE_CMD=$(echo $BODY | jq -r '.cmd')
     PASSPHRASE=$(echo $BODY | jq -r '.passphrase')
   else
-    DATABASE_TYPE=$(echo $EVENT_DATA | jq -r '.db_type')
+    SUBDIRS=$(echo $EVENT_DATA | jq -r '.subdirs')
     MIGRATE_CMD=$(echo $EVENT_DATA | jq -r '.cmd')
     PASSPHRASE=$(echo $EVENT_DATA | jq -r '.passphrase')
   fi
@@ -25,7 +25,7 @@ function handler () {
   fi
 
   # migrate using baked-in migrations
-  source ./migrate.sh --dir "$MIGRATE_DIR" --db_type "$DATABASE_TYPE" --cmd "$MIGRATE_CMD"
+  source ./migrate.sh --dir "$MIGRATE_DIR" --subdirs "$SUBDIRS" --cmd "$MIGRATE_CMD"
 
-  echo "{\"db_type\":\"$DATABASE_TYPE\",\"cmd\":\"$MIGRATE_CMD\"}"
+  echo "{\"subdirs\":\"$SUBDIRS\",\"cmd\":\"$MIGRATE_CMD\"}"
 }

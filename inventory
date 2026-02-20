@@ -5,8 +5,11 @@ services/requests-by-account
 services/request-create
 services/request-by-id
 services/request-approve
+services/measure
 services/graphql
+services/event
 services/balance-by-account
+services/auto-transact
 services/auto-confirm
 migrations/warm-cache
 migrations/go-migrate
