@@ -935,6 +935,11 @@ tests:
       - REDIS_PASSWORD
       - TRANSACTION_DDB_TABLE
       - AUTO_TRANSACT_URL
+      - PGDATABASE
+      - PGUSER
+      - PGPASSWORD
+      - PGHOST
+      - PGPORT
   params: []
 env_var:
   set:
