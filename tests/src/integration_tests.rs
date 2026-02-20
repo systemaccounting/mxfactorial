@@ -2,8 +2,8 @@ use crate::helpers as h;
 use dotenvy::dotenv;
 
 fn _before_each() {
-    h::restore_testseed();
     dotenv().expect(".env file not found");
+    h::restore_testseed();
 }
 
 // cadet todo: assert all response values
