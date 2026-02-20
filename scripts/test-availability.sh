@@ -14,7 +14,7 @@ REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default
 READINESS_CHECK_PATH=$(yq '.infra.terraform.aws.modules.environment.env_var.set.READINESS_CHECK_PATH.default' $PROJECT_CONF)
 
 # list services in integration tests
-SERVICES=($(bash scripts/list-deployments.sh | grep --color=never -e transact -e request -e rule -e graphql | xargs basename -a))
+SERVICES=($(bash scripts/list-deployments.sh | grep --color=never -e transaction -e request -e rule -e graphql | xargs basename -a))
 
 # test for availability of each *_URL variable assignment in tests/.env
 for SERVICE in "${SERVICES[@]}"; do
