@@ -4,6 +4,8 @@ services:
     build:
       context: ../
       dockerfile: ./docker/bitnami-postgres.Dockerfile
+      cache_from:
+        - mxf-postgres-base
     ports:
       - "5432:5432"
     healthcheck:
