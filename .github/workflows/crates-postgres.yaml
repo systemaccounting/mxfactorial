@@ -26,26 +26,47 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: restore image cache
-        id: cache
+      - name: restore base images
+        id: base-images
         uses: actions/cache@v4
         with:
-          path: ~/image-cache
-          key: crates-postgres-base-images-v1
-      - name: pull and retag images
-        if: steps.cache.outputs.cache-hit != 'true'
+          path: ~/image-cache/base-images.tar
+          key: base-images-redis-v1
+      - name: pull and cache base images
+        if: steps.base-images.outputs.cache-hit != 'true'
         run: |
           mkdir -p ~/image-cache
-          docker pull ghcr.io/systemaccounting/postgresql:15
-          docker tag ghcr.io/systemaccounting/postgresql:15 public.ecr.aws/bitnami/postgresql:15
           docker pull ghcr.io/systemaccounting/redis:latest
           docker tag ghcr.io/systemaccounting/redis:latest public.ecr.aws/bitnami/redis:latest
-          docker save -o ~/image-cache/images.tar \
-            public.ecr.aws/bitnami/postgresql:15 \
-            public.ecr.aws/bitnami/redis:latest
-      - name: load cached images
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: docker load -i ~/image-cache/images.tar
+          docker save -o ~/image-cache/base-images.tar public.ecr.aws/bitnami/redis:latest
+      - name: load base images
+        if: steps.base-images.outputs.cache-hit == 'true'
+        run: docker load -i ~/image-cache/base-images.tar
+      - name: restore postgres base stage
+        id: pg-base
+        uses: actions/cache@v4
+        with:
+          path: ~/image-cache/postgres-base.tar
+          key: postgres-base-${{ hashFiles('docker/bitnami-postgres.Dockerfile') }}
+      - name: build postgres base stage
+        if: steps.pg-base.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/image-cache
+          docker build \
+            --target base \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            -t mxf-postgres-base \
+            -f docker/bitnami-postgres.Dockerfile .
+          docker save -o ~/image-cache/postgres-base.tar mxf-postgres-base
+      - name: load postgres base stage
+        if: steps.pg-base.outputs.cache-hit == 'true'
+        run: docker load -i ~/image-cache/postgres-base.tar
+      - name: build postgres image
+        run: |
+          docker build \
+            --cache-from mxf-postgres-base \
+            -t mxf-postgres \
+            -f docker/bitnami-postgres.Dockerfile .
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
@@ -58,6 +79,6 @@ jobs:
       - name: crates/pg unit tests
         run: make -C ./crates/pg test-unit
       - name: crates/pg db_tests
-        run: make -C ./crates/pg test-db
+        run: make -C ./crates/pg test-db START_TARGET=start-nobuild
       - name: crates/pg clean up
         run: make -C ./crates/pg stop

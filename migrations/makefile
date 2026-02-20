@@ -11,6 +11,7 @@ run:
 	@$(MAKE) start
 
 # postgres docker
+# build postgres image and start postgres + redis
 start:
 	@COMPOSE_IGNORE_ORPHANS=true \
 		docker compose \
@@ -23,6 +24,21 @@ start:
 			--renew-anon-volumes \
 			--force-recreate \
 			--build
+
+# start postgres + redis from pre-built image (CI uses this after
+# building postgres image with --target base cache, see
+# .github/workflows/crates-postgres.yaml)
+start-nobuild:
+	@COMPOSE_IGNORE_ORPHANS=true \
+		docker compose \
+			-f $(RELATIVE_PROJECT_ROOT_PATH)/docker/storage.yaml \
+			up \
+			-d \
+			--wait \
+			postgres \
+			redis \
+			--renew-anon-volumes \
+			--force-recreate
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash ./scripts/enable-pg-notice.sh > /dev/null
 
 reset:
