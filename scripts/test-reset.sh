@@ -31,28 +31,41 @@ PROJECT_CONF=project.yaml
 ENV_VAR_PATH='infra.terraform.aws.modules.environment.env_var.set'
 
 if [[ -n "${ENV:-}" ]]; then
-	ENV_ID=$(source scripts/print-env-id.sh)
-	SSM_VERSION=$(yq ".${ENV_VAR_PATH}.SSM_VERSION.default" $PROJECT_CONF)
 	REGION=$(yq ".${ENV_VAR_PATH}.REGION.default" $PROJECT_CONF)
-	SSM_PREFIX="$ENV_ID/$SSM_VERSION/$ENV"
 
-	for VAR in PGDATABASE PGUSER PGPASSWORD PGHOST PGPORT; do
-		SSM_SUFFIX=$(yq ".${ENV_VAR_PATH}.${VAR}.ssm" $PROJECT_CONF)
-		export $VAR=$(aws ssm get-parameter \
-			--name "/$SSM_PREFIX/$SSM_SUFFIX" \
+	# skip SSM lookups when PG vars inherited from parent process
+	if [[ -z "${PGHOST:-}" ]]; then
+		ENV_ID=$(source scripts/print-env-id.sh)
+		SSM_VERSION=$(yq ".${ENV_VAR_PATH}.SSM_VERSION.default" $PROJECT_CONF)
+		SSM_PREFIX="$ENV_ID/$SSM_VERSION/$ENV"
+
+		for VAR in PGDATABASE PGUSER PGPASSWORD PGHOST PGPORT; do
+			SSM_SUFFIX=$(yq ".${ENV_VAR_PATH}.${VAR}.ssm" $PROJECT_CONF)
+			export $VAR=$(aws ssm get-parameter \
+				--name "/$SSM_PREFIX/$SSM_SUFFIX" \
+				--query 'Parameter.Value' \
+				--region $REGION \
+				--with-decryption \
+				--output text)
+		done
+	fi
+
+	if [[ -n "${TRANSACTION_DDB_TABLE:-}" ]]; then
+		DDB_TABLE="$TRANSACTION_DDB_TABLE"
+	else
+		if [[ -z "${SSM_PREFIX:-}" ]]; then
+			ENV_ID=$(source scripts/print-env-id.sh)
+			SSM_VERSION=$(yq ".${ENV_VAR_PATH}.SSM_VERSION.default" $PROJECT_CONF)
+			SSM_PREFIX="$ENV_ID/$SSM_VERSION/$ENV"
+		fi
+		DDB_TABLE_SSM_SUFFIX=$(yq ".${ENV_VAR_PATH}.TRANSACTION_DDB_TABLE.ssm" $PROJECT_CONF)
+		DDB_TABLE=$(aws ssm get-parameter \
+			--name "/$SSM_PREFIX/$DDB_TABLE_SSM_SUFFIX" \
 			--query 'Parameter.Value' \
 			--region $REGION \
 			--with-decryption \
 			--output text)
-	done
-
-	DDB_TABLE_SSM_SUFFIX=$(yq ".${ENV_VAR_PATH}.TRANSACTION_DDB_TABLE.ssm" $PROJECT_CONF)
-	DDB_TABLE=$(aws ssm get-parameter \
-		--name "/$SSM_PREFIX/$DDB_TABLE_SSM_SUFFIX" \
-		--query 'Parameter.Value' \
-		--region $REGION \
-		--with-decryption \
-		--output text)
+	fi
 
 	echo "*** cloud mode: $ENV"
 else
