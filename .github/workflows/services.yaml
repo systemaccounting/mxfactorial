@@ -112,6 +112,8 @@ jobs:
           toolchain: stable
           components: clippy, rustfmt
       - uses: Swatinem/rust-cache@v2
+      - name: stop runner postgres
+        run: sudo systemctl stop postgresql
       - name: test database
         run: make -C crates/pg test-db
 
