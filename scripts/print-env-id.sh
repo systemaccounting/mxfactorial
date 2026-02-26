@@ -11,7 +11,7 @@ ENV_FILE=$ENV_FILE_NAME # assumes project root
 
 if [[ $ENV == 'prod' ]]; then # use configured prod env id
 	ENV_ID=$(yq '.env_var.set.PROD_ENV_ID.default' $PROJECT_CONF)
-elif [[ -z $ENV_ID ]]; then # get ENV_ID from .env file if not set in env
+elif [[ -z ${ENV_ID:-} ]]; then # get ENV_ID from .env file if not set in env
 	if [[ -f $ENV_FILE ]] && grep -q "ENV_ID=" $ENV_FILE; then
 		ENV_ID=$(grep "ENV_ID=" $ENV_FILE | cut -d'=' -f2)
 	else
