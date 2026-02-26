@@ -27,9 +27,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: mask values
         run: echo "::add-mask::${{ secrets.AWS_ACCOUNT_ID }}"
-      - name: deploy services to prod cloud environment
+      - name: deploy lambda services to prod cloud environment
         run: |
-          for app in $(bash scripts/list-deployments.sh | grep -v client | xargs basename -a); do
+          for app_dir in $(bash scripts/list-deployments.sh | grep -v client); do
+            app=$(basename $app_dir)
+            CONF_PATH=$(bash scripts/dir-to-conf-path.sh "$app_dir")
+            DEPLOY_TARGET=$(yq "$CONF_PATH.deploy_target" project.yaml)
+            if [[ "$DEPLOY_TARGET" != "lambda" ]]; then
+              echo "*** skipping $app (deploy_target: $DEPLOY_TARGET)"
+              continue
+            fi
             # tag newly pushed prod images with master merge commit sha
             bash scripts/tag-merge-commit.sh --app-name $app --env prod --env-id ${{ secrets.PROD_ENV_ID }};
             # deploy newly tagged images to prod cloud
