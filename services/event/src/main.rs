@@ -1,10 +1,24 @@
 use futures::channel::mpsc;
 use futures::{stream, FutureExt, StreamExt, TryStreamExt};
 use pg::postgres::DB;
+use serde::Deserialize;
 use shutdown::shutdown_signal;
 use std::{env, sync::Arc};
 use tokio_postgres::{AsyncMessage, NoTls};
 mod events;
+
+#[derive(Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum EventType {
+    Equilibrium,
+    Cron,
+}
+
+#[derive(Deserialize)]
+struct EventPayload {
+    event: EventType,
+    id: String,
+}
 
 struct AppState {
     pool: pg::postgres::ConnectionPool,
@@ -99,13 +113,13 @@ async fn main() {
         let connection = stream.forward(tx).map(|r| r.unwrap());
         let handler = tokio::spawn(connection);
 
-        if let Err(e) = client.batch_execute("LISTEN equilibrium;").await {
+        if let Err(e) = client.batch_execute("LISTEN event;").await {
             tracing::info!("failed to execute LISTEN command: {}", e);
             handler.abort();
             continue;
         }
 
-        tracing::info!("listening on equilibrium channel");
+        tracing::info!("listening on event channel");
 
         // drain rows accumulated during reconnection
         process_pending(&state).await;
@@ -122,8 +136,32 @@ async fn main() {
 
             match message {
                 Some(message) => match message {
-                    AsyncMessage::Notification(_) => {
-                        process_pending(&state).await;
+                    AsyncMessage::Notification(n) => {
+                        match serde_json::from_str::<EventPayload>(n.payload()) {
+                            Ok(payload) => match payload.event {
+                                EventType::Equilibrium => process_pending(&state).await,
+                                EventType::Cron => {
+                                    if let Some(ref q) = state.queue {
+                                        if let Err(e) =
+                                            events::handle_cron(&state.pool, q, &payload.id).await
+                                        {
+                                            tracing::error!(
+                                                "cron handler error for {}: {}",
+                                                payload.id,
+                                                e
+                                            );
+                                        }
+                                    } else {
+                                        tracing::error!(
+                                            "cron event received but no queue configured"
+                                        );
+                                    }
+                                }
+                            },
+                            Err(e) => {
+                                tracing::error!("failed to parse event payload: {}", e);
+                            }
+                        }
                     }
                     _ => {
                         tracing::info!("unhandled message: {:?}", message);

@@ -3,6 +3,8 @@ use pg::postgres::ConnectionPool;
 use rust_decimal::Decimal;
 use std::collections::HashSet;
 use std::sync::Arc;
+use types::account_role::AccountRole;
+use types::transaction::Transaction;
 
 // query accounts involved in a transaction (creditors and debitors)
 const ACCOUNTS_QUERY: &str = r#"
@@ -86,15 +88,13 @@ pub async fn handle_threshold_profit(
                     let author: Option<String> = tri.get(1);
                     let author_role: Option<String> = tri.get(2);
 
-                    let payload = serde_json::json!({
-                        "rule_instance_id": rule_instance_id,
-                        "author": author,
-                        "author_role": author_role,
-                        "sum_value": "0",
-                        "transaction_items": [],
-                    });
+                    let transaction = Transaction::from_rule_instance(
+                        rule_instance_id.clone(),
+                        author,
+                        author_role.map(AccountRole::from),
+                    );
 
-                    queue.send(&payload.to_string()).await?;
+                    queue.send(&serde_json::to_string(&transaction)?).await?;
                 }
             }
         }

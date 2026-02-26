@@ -2,10 +2,34 @@
   <a href="https://www.systemaccounting.org/" target="_blank"><img width="475" alt="systemaccounting" src="https://user-images.githubusercontent.com/12200465/37568924-06f05d08-2a99-11e8-8891-60f373b33421.png"></a>
 </p>
 
-1. invoked by `graphql` after request sent by client, or by `request-create` service to test if all current and expected items are included in client request
-1. queries for rules applicable to items and accounts
-1. applies transaction_item and approval rules
-1. returns current and expected items
+axum service that applies transaction item and approval rules to a transaction
+
+### how it works
+
+1. receives a `transaction` from `graphql` (client request) or `request-create` (testing current vs expected items)
+1. when `rule_instance_id` is set and `transaction_items` is empty, builds items from `transaction_item_rule_instance` templates in the database (used by auto-transact services like cron and threshold)
+1. queries for `transaction_item_rule_instance` rules matching the state and account of each debitor and creditor
+1. applies transaction item rules per user-defined role sequence (`debitor_first` or creditor first)
+1. queries for `approval_rule_instance` rules matching each account owner (approver)
+1. applies approval rules, automating `approval_time` when a rule matches
+1. labels each `transaction_item` with `debitor_approval_time` or `creditor_approval_time` when all approvals for that role have timestamps
+1. returns the transaction with rule-added items, approvals, and updated `sum_value`
+
+### transaction item rules
+
+defined in `src/rules/transaction_item.rs`:
+
+- **multiplyItemValue**: computes `price * factor` and returns only the computed item (e.g. a dividend). `variable_values = [DEBITOR, CREDITOR, ITEM_NAME, FACTOR]`
+- **appendMultipliedItemValue**: computes `price * factor` and returns both the original item (with `rule_exec_id` added) and the computed item (e.g. a sales tax). same variable_values
+
+the `ANY` token in debitor or creditor position matches the corresponding account from the original transaction item
+
+### approval rules
+
+defined in `src/rules/approval.rs`:
+
+- **approveAnyCreditItem**: automates approval for a creditor approver on any credit item. `variable_values = [CREDITOR, APPROVER_ROLE, APPROVER_NAME]`
+- **approveItemBetweenAccounts**: automates approval for a specific debitor/creditor/item_id match. `variable_values = [DEBITOR, CREDITOR, ITEM_ID, APPROVER_ROLE, APPROVER_NAME]`
 
 ### request
 
@@ -192,38 +216,16 @@ the rule service returns a `transaction` object with `transaction_items` listing
 ### dev
 1. install [rust](https://doc.rust-lang.org/book/ch01-01-installation.html#installing-rustup-on-linux-or-macos), [cargo-watch](https://crates.io/crates/cargo-watch) and [docker](https://docs.docker.com/get-docker/)
 1. start docker
-1. `make dev` to start:
-    1. the rule service
-    1. postgres in docker
-1. cntrl + c && `make -C migrations clean` OR `make stop-dev` in a separate shell to stop dev process
-
-### deploy to lambda
-1. `make compile` to build for lambda
-1. `make zip-only` to zip lambda binary
-1. `make put-object ENV=dev` to put zip in s3
-1. `make update-function ENV=dev` to deploy zip to lambda from s3
-
-### deploy to lambda FAST
-1. `make deploy ENV=dev`
-
-### invoke lambda
-1. set desired values in `TEST_EVENT` makefile variable
-1. `make invoke-function ENV=dev`
+1. `make dev` to start the rule service and postgres in docker
+1. cntrl + c to stop, then `make -C migrations clean` to clean up
 
 ### testing
 1. `make test-lint` for [clippy](https://github.com/rust-lang/rust-clippy)
 1. `make test-unit` for unit tests
+1. `make water` to curl a bottled water request to a running local rule service
 1. run integration tests from project root:
-    * docker:
-        1. `make compose-up`
-        1. `make test-docker`
-    - cloud:
-        1. `make test-cloud`
+    * docker: `make compose-up && make test-docker`
+    * cloud: `make -C tests test-cloud ENV=dev`
 
-### run unit & integration tests FAST
-`make test ENV=dev`
-
-### prepare for terraform
-`make initial-deploy ENV=dev` to zip and put source in s3 only
-
-terraform: https://github.com/systemaccounting/mxfactorial/blob/develop/infra/terraform/aws/modules/environment/v001/lambda-services.tf#L28-L51
+### deploy
+`make deploy ENV=dev` to build, push to ecr, and deploy lambda

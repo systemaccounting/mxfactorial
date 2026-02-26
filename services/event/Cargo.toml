@@ -17,5 +17,6 @@ cache = { path = "../../crates/cache" }
 pubsub = { path = "../../crates/pubsub" }
 queue = { path = "../../crates/queue" }
 pg = { path = "../../crates/pg" }
+types = { path = "../../crates/types" }
 shutdown = { path = "../../crates/shutdown" }
 chrono = "0.4"

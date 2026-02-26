@@ -33,7 +33,7 @@ CREATE INDEX redis_name_key_idx ON redis_name(key);
 
 CREATE OR REPLACE FUNCTION notify_equilibrium() RETURNS TRIGGER AS $$
 BEGIN
-  PERFORM pg_notify('equilibrium', NEW.id::text);
+  PERFORM notify_event('equilibrium', NEW.id::text);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

@@ -116,6 +116,34 @@ thresh-up:
 thresh-down:
 	@set -a && source $(ENV_FILE) && set +a && SQL_TYPE=postgresql bash $(RELATIVE_PROJECT_ROOT_PATH)/migrations/go-migrate/migrate.sh --dir $(RELATIVE_PROJECT_ROOT_PATH)/migrations --subdirs testseedthresh --cmd down
 
+cron-up:
+	@set -a && source $(ENV_FILE) && set +a && SQL_TYPE=postgresql bash $(RELATIVE_PROJECT_ROOT_PATH)/migrations/go-migrate/migrate.sh --dir $(RELATIVE_PROJECT_ROOT_PATH)/migrations --subdirs testseedcron --cmd up
+	@$(MAKE) warm-cache
+
+cron-down:
+	@set -a && source $(ENV_FILE) && set +a && SQL_TYPE=postgresql bash $(RELATIVE_PROJECT_ROOT_PATH)/migrations/go-migrate/migrate.sh --dir $(RELATIVE_PROJECT_ROOT_PATH)/migrations --subdirs testseedcron --cmd down
+
+# poll for cron transactions (waits 15 seconds for pg_cron to fire)
+wait-cron:
+	@for i in $$(seq 1 15); do printf '#'; sleep 1; done; echo
+
+# poll redis accumulator until threshold fires (value resets)
+wait-thresh:
+	@key=$$(docker exec mxf-redis-1 redis-cli -a test --no-auth-warning KEYS '*accumulator' 2>/dev/null | head -1); \
+	while [ -z "$$key" ]; do \
+		sleep 2; \
+		key=$$(docker exec mxf-redis-1 redis-cli -a test --no-auth-warning KEYS '*accumulator' 2>/dev/null | head -1); \
+	done; \
+	prev=0; \
+	while true; do \
+		val=$$(docker exec mxf-redis-1 redis-cli -a test --no-auth-warning GET "$$key" 2>/dev/null | tr -d '"'); \
+		if [ -z "$$val" ] || [ "$$val" = "(nil)" ]; then sleep 2; continue; fi; \
+		echo "accumulator: $$val"; \
+		if [ "$$(echo "$$val < $$prev" | bc -l)" = "1" ]; then echo "threshold fired"; break; fi; \
+		prev=$$val; \
+		sleep 2; \
+	done
+
 ###################### env ######################
 
 env:
