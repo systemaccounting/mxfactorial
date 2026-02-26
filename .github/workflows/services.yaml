@@ -139,6 +139,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: stop runner postgres
         run: sudo systemctl stop postgresql
+      - name: start postgres
+        run: make -C migrations start-nobuild
       - name: test database
         run: make -C crates/pg test-db
 
