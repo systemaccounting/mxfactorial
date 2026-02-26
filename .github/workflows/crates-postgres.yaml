@@ -79,6 +79,6 @@ jobs:
       - name: crates/pg unit tests
         run: make -C ./crates/pg test-unit
       - name: crates/pg db_tests
-        run: make -C ./crates/pg test-db START_TARGET=start-nobuild
+        run: make -C ./crates/pg test-db
       - name: crates/pg clean up
         run: make -C ./crates/pg stop

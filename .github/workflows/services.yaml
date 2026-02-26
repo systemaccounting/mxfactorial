@@ -140,7 +140,7 @@ jobs:
       - name: stop runner postgres
         run: sudo systemctl stop postgresql
       - name: test database
-        run: make -C crates/pg test-db START_TARGET=start-nobuild
+        run: make -C crates/pg test-db
 
   compile:
     name: compile ${{ matrix.service }}
