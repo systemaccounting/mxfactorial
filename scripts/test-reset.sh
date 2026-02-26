@@ -84,6 +84,7 @@ if [[ "$SET_MODE" == true ]]; then
 	# query initial max IDs and initial balance from postgres
 	IFS='|' read -r APPROVAL_MAX TRANSACTION_ITEM_MAX TRANSACTION_MAX \
 		ACCOUNT_PROFILE_MAX APPROVAL_RULE_INSTANCE_MAX ACCOUNT_OWNER_MAX \
+		TRANSACTION_RULE_INSTANCE_MAX TRANSACTION_ITEM_RULE_INSTANCE_MAX \
 		INITIAL_BALANCE <<< "$(psql -d "$DBCONN" -t -A <<'SQL'
 SELECT
   (SELECT COALESCE(MAX(id), 0) FROM approval),
@@ -92,6 +93,8 @@ SELECT
   (SELECT COALESCE(MAX(id), 0) FROM account_profile),
   (SELECT COALESCE(MAX(id), 0) FROM approval_rule_instance),
   (SELECT COALESCE(MAX(id), 0) FROM account_owner),
+  (SELECT COALESCE(MAX(id), 0) FROM transaction_rule_instance),
+  (SELECT COALESCE(MAX(id), 0) FROM transaction_item_rule_instance),
   (SELECT current_balance FROM account_balance LIMIT 1)
 SQL
 )"
@@ -105,6 +108,8 @@ SQL
 			"account_profile|$ACCOUNT_PROFILE_MAX" \
 			"approval_rule_instance|$APPROVAL_RULE_INSTANCE_MAX" \
 			"account_owner|$ACCOUNT_OWNER_MAX" \
+			"transaction_rule_instance|$TRANSACTION_RULE_INSTANCE_MAX" \
+			"transaction_item_rule_instance|$TRANSACTION_ITEM_RULE_INSTANCE_MAX" \
 			"initial_balance|$INITIAL_BALANCE"; do
 			KEY="${pair%%|*}"
 			VAL="${pair##*|}"
@@ -121,6 +126,8 @@ SQL
 			test_fixture:account_profile "$ACCOUNT_PROFILE_MAX" \
 			test_fixture:approval_rule_instance "$APPROVAL_RULE_INSTANCE_MAX" \
 			test_fixture:account_owner "$ACCOUNT_OWNER_MAX" \
+			test_fixture:transaction_rule_instance "$TRANSACTION_RULE_INSTANCE_MAX" \
+			test_fixture:transaction_item_rule_instance "$TRANSACTION_ITEM_RULE_INSTANCE_MAX" \
 			test_fixture:initial_balance "$INITIAL_BALANCE" \
 			> /dev/null
 	fi
@@ -137,6 +144,8 @@ if [[ -n "${ENV:-}" ]]; then
 	ACCOUNT_PROFILE_MAX=$(aws dynamodb get-item --table-name "$DDB_TABLE" --key '{"pk":{"S":"test_fixture:account_profile"},"sk":{"S":"_"}}' --query 'Item.val.N' --region "$REGION" --output text)
 	APPROVAL_RULE_INSTANCE_MAX=$(aws dynamodb get-item --table-name "$DDB_TABLE" --key '{"pk":{"S":"test_fixture:approval_rule_instance"},"sk":{"S":"_"}}' --query 'Item.val.N' --region "$REGION" --output text)
 	ACCOUNT_OWNER_MAX=$(aws dynamodb get-item --table-name "$DDB_TABLE" --key '{"pk":{"S":"test_fixture:account_owner"},"sk":{"S":"_"}}' --query 'Item.val.N' --region "$REGION" --output text)
+	TRANSACTION_RULE_INSTANCE_MAX=$(aws dynamodb get-item --table-name "$DDB_TABLE" --key '{"pk":{"S":"test_fixture:transaction_rule_instance"},"sk":{"S":"_"}}' --query 'Item.val.N' --region "$REGION" --output text)
+	TRANSACTION_ITEM_RULE_INSTANCE_MAX=$(aws dynamodb get-item --table-name "$DDB_TABLE" --key '{"pk":{"S":"test_fixture:transaction_item_rule_instance"},"sk":{"S":"_"}}' --query 'Item.val.N' --region "$REGION" --output text)
 	INITIAL_BALANCE=$(aws dynamodb get-item --table-name "$DDB_TABLE" --key '{"pk":{"S":"test_fixture:initial_balance"},"sk":{"S":"_"}}' --query 'Item.val.N' --region "$REGION" --output text)
 else
 	APPROVAL_MAX=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET test_fixture:approval 2>/dev/null)
@@ -145,12 +154,15 @@ else
 	ACCOUNT_PROFILE_MAX=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET test_fixture:account_profile 2>/dev/null)
 	APPROVAL_RULE_INSTANCE_MAX=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET test_fixture:approval_rule_instance 2>/dev/null)
 	ACCOUNT_OWNER_MAX=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET test_fixture:account_owner 2>/dev/null)
+	TRANSACTION_RULE_INSTANCE_MAX=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET test_fixture:transaction_rule_instance 2>/dev/null)
+	TRANSACTION_ITEM_RULE_INSTANCE_MAX=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET test_fixture:transaction_item_rule_instance 2>/dev/null)
 	INITIAL_BALANCE=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning GET test_fixture:initial_balance 2>/dev/null)
 fi
 
 # validate initial values exist
 for VAL in "$APPROVAL_MAX" "$TRANSACTION_ITEM_MAX" "$TRANSACTION_MAX" \
 	"$ACCOUNT_PROFILE_MAX" "$APPROVAL_RULE_INSTANCE_MAX" "$ACCOUNT_OWNER_MAX" \
+	"$TRANSACTION_RULE_INSTANCE_MAX" "$TRANSACTION_ITEM_RULE_INSTANCE_MAX" \
 	"$INITIAL_BALANCE"; do
 	if [[ -z "$VAL" || "$VAL" == "(nil)" || "$VAL" == "None" ]]; then
 		echo "*** error: fixture not set. run: bash scripts/test-reset.sh --set"
@@ -169,6 +181,8 @@ UPDATE account_balance SET current_balance = $INITIAL_BALANCE, current_transacti
 SET session_replication_role = 'origin';
 DELETE FROM account_profile WHERE id > $ACCOUNT_PROFILE_MAX;
 DELETE FROM approval_rule_instance WHERE id > $APPROVAL_RULE_INSTANCE_MAX;
+DELETE FROM transaction_item_rule_instance WHERE id > $TRANSACTION_ITEM_RULE_INSTANCE_MAX;
+DELETE FROM transaction_rule_instance WHERE id > $TRANSACTION_RULE_INSTANCE_MAX;
 DELETE FROM account_owner WHERE owner_account = 'test_account';
 DELETE FROM account WHERE name = 'test_account';
 
@@ -180,6 +194,8 @@ SELECT setval('transaction_id_seq', $TRANSACTION_MAX);
 SELECT setval('transaction_item_id_seq', $TRANSACTION_ITEM_MAX);
 SELECT setval('approval_id_seq', $APPROVAL_MAX);
 SELECT setval('approval_rule_instance_id_seq', $APPROVAL_RULE_INSTANCE_MAX);
+SELECT setval('transaction_rule_instance_id_seq', GREATEST($TRANSACTION_RULE_INSTANCE_MAX, 1), $TRANSACTION_RULE_INSTANCE_MAX > 0);
+SELECT setval('transaction_item_rule_instance_id_seq', GREATEST($TRANSACTION_ITEM_RULE_INSTANCE_MAX, 1), $TRANSACTION_ITEM_RULE_INSTANCE_MAX > 0);
 SELECT setval('account_profile_id_seq', $ACCOUNT_PROFILE_MAX);
 SELECT setval('account_owner_id_seq', $ACCOUNT_OWNER_MAX);
 SQL
@@ -189,8 +205,8 @@ if [[ -n "${ENV:-}" ]]; then
 	# scan for gdp and accumulator keys then batch delete
 	ITEMS=$(aws dynamodb scan \
 		--table-name "$DDB_TABLE" \
-		--filter-expression "contains(pk, :gdp) OR begins_with(pk, :acc)" \
-		--expression-attribute-values '{":gdp":{"S":":gdp:"},":acc":{"S":"transaction_rule_instance:"}}' \
+		--filter-expression "contains(pk, :gdp) OR begins_with(pk, :acc) OR begins_with(pk, :appr)" \
+		--expression-attribute-values '{":gdp":{"S":":gdp:"},":acc":{"S":"transaction_rule_instance:"},":appr":{"S":"rules:approval:"}}' \
 		--projection-expression "pk, sk" \
 		--region "$REGION" \
 		--output json)
@@ -203,6 +219,10 @@ if [[ -n "${ENV:-}" ]]; then
 			--region "$REGION" > /dev/null
 	fi
 else
+	approval_rule_keys=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning KEYS 'rules:approval:*' 2>/dev/null | tr '\n' ' ')
+	if [[ -n "$approval_rule_keys" ]]; then
+		docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning DEL $approval_rule_keys > /dev/null
+	fi
 	gdp_keys=$(docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning KEYS '*:gdp:*' 2>/dev/null | tr '\n' ' ')
 	if [[ -n "$gdp_keys" ]]; then
 		docker exec mxf-redis-1 redis-cli -a "$REDIS_PASSWORD" --no-auth-warning DEL $gdp_keys > /dev/null
