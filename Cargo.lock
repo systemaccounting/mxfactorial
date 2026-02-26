@@ -1498,6 +1498,7 @@ dependencies = [
  "tokio-postgres",
  "tracing",
  "tracing-subscriber",
+ "types",
 ]
 
 [[package]]
