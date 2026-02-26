@@ -17,19 +17,19 @@ values
 insert into approval_rule_instance
   (rule_name, rule_instance_name, account_role, account_name, variable_values)
 values
-  ('approveItemBetweenAccounts', 'ApproveDividendGroceryCo', 'debitor', 'IgorPetrov',
+  ('approveItemBetweenAccounts', 'ApproveGroceryDividendGroceryCo', 'debitor', 'IgorPetrov',
    '{ "GroceryCo", "JoeCarter", "1% dividend", "debitor", "IgorPetrov" }');
 
 -- approval_rule_instance: MiriamLevy approves GroceryCo → JoeCarter debits
 insert into approval_rule_instance
   (rule_name, rule_instance_name, account_role, account_name, variable_values)
 values
-  ('approveItemBetweenAccounts', 'ApproveDividendGroceryCo', 'debitor', 'MiriamLevy',
+  ('approveItemBetweenAccounts', 'ApproveGroceryDividendGroceryCo', 'debitor', 'MiriamLevy',
    '{ "GroceryCo", "JoeCarter", "1% dividend", "debitor", "MiriamLevy" }');
 
 -- approval_rule_instance: JoeCarter approves GroceryCo → JoeCarter credits
 insert into approval_rule_instance
   (rule_name, rule_instance_name, account_role, account_name, variable_values)
 values
-  ('approveItemBetweenAccounts', 'ApproveDividendJoeCarter', 'creditor', 'JoeCarter',
+  ('approveItemBetweenAccounts', 'ApproveGroceryDividendJoeCarter', 'creditor', 'JoeCarter',
    '{ "GroceryCo", "JoeCarter", "1% dividend", "creditor", "JoeCarter" }');
