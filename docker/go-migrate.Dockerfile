@@ -18,6 +18,7 @@ COPY migrations/schema task/migrations/schema
 COPY migrations/seed task/migrations/seed
 COPY migrations/testseed task/migrations/testseed
 COPY migrations/testseedthresh task/migrations/testseedthresh
+COPY migrations/testseedcron task/migrations/testseedcron
 
 FROM public.ecr.aws/lambda/provided:al2023
 

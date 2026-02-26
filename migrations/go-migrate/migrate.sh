@@ -33,7 +33,7 @@ if [[ -z "$SUBDIRS" ]]; then
 	exit 1
 fi
 
-ALLOWED_SUBDIRS=(schema seed testseed testseedthresh)
+ALLOWED_SUBDIRS=(schema seed testseed testseedthresh testseedcron)
 IFS=',' read -ra SUBDIR_ARGS <<< "$SUBDIRS"
 for s in "${SUBDIR_ARGS[@]}"; do
 	if [[ ! " ${ALLOWED_SUBDIRS[*]} " =~ " ${s} " ]]; then
