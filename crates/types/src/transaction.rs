@@ -84,6 +84,26 @@ impl Transaction {
 }
 
 impl Transaction {
+    pub fn from_rule_instance(
+        rule_instance_id: String,
+        author: Option<String>,
+        author_role: Option<AccountRole>,
+    ) -> Self {
+        Transaction {
+            id: None,
+            rule_instance_id: Some(rule_instance_id),
+            author,
+            author_device_id: None,
+            author_device_latlng: None,
+            author_role,
+            equilibrium_time: None,
+            event_time: None,
+            debitor_first: None,
+            sum_value: "0".to_string(),
+            transaction_items: TransactionItems(vec![]),
+        }
+    }
+
     pub fn new(
         author: String,
         equilibrium_time: Option<TZTime>,
@@ -457,6 +477,46 @@ pub mod tests {
         for transaction in test_transactions.0 {
             assert_eq!(transaction.transaction_items.len(), 2);
         }
+    }
+
+    #[test]
+    fn it_creates_transaction_from_rule_instance_with_author() {
+        let got = Transaction::from_rule_instance(
+            "42".to_string(),
+            Some("StateOfCalifornia".to_string()),
+            Some(AccountRole::Creditor),
+        );
+        assert_eq!(got.rule_instance_id, Some("42".to_string()));
+        assert_eq!(got.author, Some("StateOfCalifornia".to_string()));
+        assert_eq!(got.author_role, Some(AccountRole::Creditor));
+        assert_eq!(got.id, None);
+        assert_eq!(got.author_device_id, None);
+        assert_eq!(got.author_device_latlng, None);
+        assert_eq!(got.equilibrium_time, None);
+        assert_eq!(got.event_time, None);
+        assert_eq!(got.debitor_first, None);
+        assert_eq!(got.sum_value, "0");
+        assert!(got.transaction_items.0.is_empty());
+    }
+
+    #[test]
+    fn it_creates_transaction_from_rule_instance_without_author() {
+        let got = Transaction::from_rule_instance("7".to_string(), None, None);
+        assert_eq!(got.rule_instance_id, Some("7".to_string()));
+        assert_eq!(got.author, None);
+        assert_eq!(got.author_role, None);
+    }
+
+    #[test]
+    fn it_serializes_transaction_from_rule_instance() {
+        let transaction = Transaction::from_rule_instance(
+            "42".to_string(),
+            Some("StateOfCalifornia".to_string()),
+            Some(AccountRole::Creditor),
+        );
+        let json = serde_json::to_string(&transaction).unwrap();
+        let deserialized: Transaction = serde_json::from_str(&json).unwrap();
+        assert_eq!(transaction, deserialized);
     }
 
     // cadet todo: test remaining branches of get_author_role
