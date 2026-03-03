@@ -1,17 +1,16 @@
 use bb8::{Pool, PooledConnection};
 use bb8_postgres::PostgresConnectionManager;
-use std::env;
 use tokio_postgres::{types::ToSql, NoTls, Row};
 
 pub struct DB;
 
 impl DB {
     pub fn create_conn_uri_from_env_vars() -> String {
-        let pguser = DB::get_env_var("PGUSER");
-        let pgpassword = DB::get_env_var("PGPASSWORD");
-        let pghost = DB::get_env_var("PGHOST");
-        let pgport = DB::get_env_var("PGPORT");
-        let pgdatabase = DB::get_env_var("PGDATABASE");
+        let pguser = envvar::required("PGUSER").unwrap();
+        let pgpassword = envvar::required("PGPASSWORD").unwrap();
+        let pghost = envvar::required("PGHOST").unwrap();
+        let pgport = envvar::required("PGPORT").unwrap();
+        let pgdatabase = envvar::required("PGDATABASE").unwrap();
         format!("postgresql://{pguser}:{pgpassword}@{pghost}:{pgport}/{pgdatabase}")
     }
 
@@ -20,10 +19,6 @@ impl DB {
         let pool = Pool::builder().build(manager).await.unwrap();
         ConnectionPool(pool)
     }
-
-    pub fn get_env_var(var_name: &str) -> String {
-        env::var(var_name).unwrap_or_else(|_| panic!("{var_name} not set"))
-    }
 }
 
 // https://github.com/tokio-rs/axum/blob/5793e75aacfeae16f02fea144ecc2ee7dcb12f55/examples/tokio-postgres/src/main.rs
@@ -31,9 +26,14 @@ impl DB {
 pub struct ConnectionPool(pub Pool<PostgresConnectionManager<NoTls>>);
 
 impl ConnectionPool {
-    pub async fn get_conn(&self) -> DatabaseConnection {
-        let conn = self.0.get_owned().await.unwrap(); // todo: handle error
-        DatabaseConnection(conn)
+    pub async fn get_conn(
+        &self,
+    ) -> Result<DatabaseConnection, Box<dyn std::error::Error + Send + Sync>> {
+        let conn = self.0.get_owned().await.map_err(|e| {
+            tracing::error!("failed to get db connection: {}", e);
+            e
+        })?;
+        Ok(DatabaseConnection(conn))
     }
 }
 
