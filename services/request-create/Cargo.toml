@@ -13,6 +13,7 @@ tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
 thiserror = "2.0"
 shutdown = { path = "../../crates/shutdown" }
 pg = { path = "../../crates/pg" }
+envvar = { path = "../../crates/envvar" }
 service = { path = "../../crates/service" }
 types = { path = "../../crates/types" }
 httpclient = { path = "../../crates/httpclient" }

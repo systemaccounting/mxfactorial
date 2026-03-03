@@ -12,7 +12,7 @@ pub async fn handle_cron(
     queue: &Arc<dyn queue::Queue>,
     rule_instance_id: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let conn = pool.get_conn().await;
+    let conn = pool.get_conn().await?;
     let ri_id: i32 = rule_instance_id.parse()?;
 
     let rows = conn.0.query(RULE_INSTANCE_QUERY, &[&ri_id]).await?;

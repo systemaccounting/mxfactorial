@@ -31,7 +31,7 @@ pub async fn handle_gdp(
     pubsub: &Arc<dyn PubSub>,
     transaction_id: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let conn = pool.get_conn().await;
+    let conn = pool.get_conn().await?;
     let tx_id: i32 = transaction_id.parse()?;
 
     let rows = conn.0.query(GDP_QUERY, &[&tx_id]).await?;

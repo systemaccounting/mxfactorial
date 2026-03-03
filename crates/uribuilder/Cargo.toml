@@ -5,4 +5,5 @@ edition = "2021"
 rust-version.workspace = true
 
 [dependencies]
+envvar = { path = "../envvar" }
 url = "2.5"

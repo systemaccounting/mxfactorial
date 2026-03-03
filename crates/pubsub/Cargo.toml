@@ -7,6 +7,7 @@ description = "pubsub trait with redis and sns implementations"
 
 [dependencies]
 async-trait = "0.1.73"
+envvar = { path = "../envvar" }
 thiserror = "2.0"
 tracing = "0.1"
 tokio = { version = "1.49", features = ["macros", "rt-multi-thread", "sync"] }

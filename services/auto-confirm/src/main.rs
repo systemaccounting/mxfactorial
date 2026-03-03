@@ -99,7 +99,7 @@ async fn func(event: LambdaEvent<CognitoEventUserPoolsPreSignup>) -> Result<Valu
 
     let fake_profile = create_fake_profile(&cognito_user);
 
-    let initial_account_balance = std::env::var("INITIAL_ACCOUNT_BALANCE").unwrap();
+    let initial_account_balance = envvar::required("INITIAL_ACCOUNT_BALANCE").unwrap();
 
     let decimal_balance: Decimal = initial_account_balance.parse().unwrap();
 
@@ -107,7 +107,7 @@ async fn func(event: LambdaEvent<CognitoEventUserPoolsPreSignup>) -> Result<Valu
 
     let pool = DB::new_pool(&conn_uri).await;
 
-    let conn = pool.get_conn().await;
+    let conn = pool.get_conn().await.expect("failed to get db connection");
 
     conn.0
         .execute(
