@@ -20,10 +20,6 @@ resource "aws_codebuild_project" "integ" {
       value = var.env_id
     }
     environment_variable {
-      name  = "ENV"
-      value = var.env
-    }
-    environment_variable {
       name  = "AWS_ACCOUNT_ID"
       value = data.aws_caller_identity.current.account_id
     }
@@ -55,11 +51,11 @@ resource "aws_codebuild_project" "integ" {
             - npx playwright install-deps
             # pull pre-built service images from ecr and tag as latest for docker compose
             - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
-            - export ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ENV_ID/$ENV
+            - export ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ENV_ID/${var.env}
             - |
               for SVC in ${join(" ", var.service_names)}; do
                 echo "pulling $SVC..."
-                TAG=$(aws ecr describe-images --repository-name $ENV_ID/$ENV/$SVC --region $REGION --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' --output text 2>/dev/null || echo "")
+                TAG=$(aws ecr describe-images --repository-name $ENV_ID/${var.env}/$SVC --region $REGION --query 'sort_by(imageDetails,&imagePushedAt)[-1].imageTags[0]' --output text 2>/dev/null || echo "")
                 if [ -n "$TAG" ] && [ "$TAG" != "None" ]; then
                   docker pull $ECR_URI/$SVC:$TAG
                   docker tag $ECR_URI/$SVC:$TAG $SVC:latest
@@ -69,13 +65,14 @@ resource "aws_codebuild_project" "integ" {
               done
         build:
           commands:
-            # build storage (postgres), then start all services with pre-built images
+            # build postgres base stage for cache_from, then build full image
+            - docker build --target base -t mxf-postgres-base -f docker/bitnami-postgres.Dockerfile .
             - docker compose -f docker/storage.yaml build
             - docker compose -f docker/storage.yaml -f docker/services.yaml up -d --no-build
             - until docker exec mxf-postgres-1 pg_isready -U postgres; do sleep 1; done
-            # run tests
+            # run tests (ENV must be unset so test-reset.sh uses local defaults)
             - make --no-print-directory -C crates/pg test-db
-            - make --no-print-directory -C crates/redisclient test-cache
+            - make --no-print-directory -C crates/cache test-cache
             - make --no-print-directory -C tests test-local
             - make --no-print-directory -C client test
         post_build:
