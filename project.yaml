@@ -57,6 +57,14 @@ crates:
     set: {}
     get: []
   params: []
+  envvar:
+    runtime: rust1.x
+    min_code_cov: 0
+    type: lib
+    env_var:
+      set: {}
+      get: []
+    params: []
   httpclient:
     runtime: rust1.x
     min_code_cov: 55

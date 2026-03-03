@@ -64,6 +64,7 @@ client!: {
 crates: {
     #Dir
     cache: #Lib
+    envvar: #Lib
     httpclient: #Lib
     pg: #Lib
     pubsub: #Lib
