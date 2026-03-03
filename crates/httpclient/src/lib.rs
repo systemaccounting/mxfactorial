@@ -2,8 +2,28 @@ use aws_credential_types::provider::ProvideCredentials;
 use aws_sigv4::http_request::{sign, SignableBody, SignableRequest, SigningSettings};
 use aws_sigv4::sign::v4;
 use aws_smithy_runtime_api::client::identity::Identity;
-use reqwest::{Client, Error, Response};
+use reqwest::Client;
 use std::{env, time::SystemTime};
+
+#[derive(Debug, thiserror::Error)]
+pub enum ClientError {
+    #[error("request error: {0}")]
+    Request(#[from] reqwest::Error),
+    #[error("signing error: {0}")]
+    Signing(String),
+    #[error("aws config error: {0}")]
+    AwsConfig(String),
+    #[error("request build error: {0}")]
+    Build(String),
+    #[error("{message}")]
+    Downstream { status: u16, message: String },
+}
+
+impl From<String> for ClientError {
+    fn from(s: String) -> Self {
+        ClientError::Build(s)
+    }
+}
 
 #[derive(Default)]
 pub struct HttpClient(Client);
@@ -13,32 +33,51 @@ impl HttpClient {
         Self::default()
     }
 
-    pub async fn post(&self, url: String, body: String) -> Result<Response, Error> {
+    pub async fn post(&self, url: String, body: String) -> Result<String, ClientError> {
         let mut http_request = http::Request::builder()
             .method("POST")
             .uri(url)
-            .header(
-                "Content-Type",
-                http::HeaderValue::from_str("application/json").unwrap(),
-            )
+            .header("Content-Type", "application/json")
             .body(body)
-            .unwrap();
+            .map_err(|e| ClientError::Build(e.to_string()))?;
 
         // sign request when testing lambda
         if env::var("AWS_LAMBDA_FUNCTION_NAME").ok().is_some() {
-            HttpClient::sign(&mut http_request).await;
+            HttpClient::sign(&mut http_request).await?;
         }
 
-        let req = reqwest::Request::try_from(http_request).unwrap();
+        let req = reqwest::Request::try_from(http_request)
+            .map_err(|e| ClientError::Build(e.to_string()))?;
 
-        self.0.execute(req).await
+        let response = self.0.execute(req).await?;
+        let status = response.status();
+        let text = response.text().await?;
+        if !status.is_success() {
+            let msg = serde_json::from_str::<serde_json::Value>(&text)
+                .ok()
+                .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(String::from))
+                .unwrap_or(text);
+            return Err(ClientError::Downstream {
+                status: status.as_u16(),
+                message: msg,
+            });
+        }
+        Ok(text)
     }
 
-    async fn sign(http_request: &mut http::Request<String>) {
+    async fn sign(http_request: &mut http::Request<String>) -> Result<(), ClientError> {
         let config = aws_config::load_defaults(aws_config::BehaviorVersion::latest()).await;
-        let region = config.region().unwrap().as_ref();
-        let provider = config.credentials_provider().unwrap();
-        let credentials = provider.provide_credentials().await.unwrap();
+        let region = config
+            .region()
+            .ok_or_else(|| ClientError::AwsConfig("missing aws region".into()))?
+            .as_ref();
+        let provider = config
+            .credentials_provider()
+            .ok_or_else(|| ClientError::AwsConfig("missing credentials provider".into()))?;
+        let credentials = provider
+            .provide_credentials()
+            .await
+            .map_err(|e| ClientError::AwsConfig(e.to_string()))?;
         // https://github.com/awslabs/aws-sdk-rust/discussions/868
         let identity = Identity::new(credentials, None);
         let signing_settings = SigningSettings::default();
@@ -50,7 +89,7 @@ impl HttpClient {
             .time(SystemTime::now())
             .settings(signing_settings)
             .build()
-            .unwrap()
+            .map_err(|e| ClientError::Signing(e.to_string()))?
             .into();
 
         let signable_request = SignableRequest::new(
@@ -59,15 +98,17 @@ impl HttpClient {
             http_request
                 .headers()
                 .iter()
-                .map(|(k, v)| (k.as_str(), v.to_str().unwrap())),
+                .map(|(k, v)| (k.as_str(), v.to_str().unwrap_or_default())),
             SignableBody::Bytes(http_request.body().as_bytes()),
         )
-        .unwrap();
+        .map_err(|e| ClientError::Signing(e.to_string()))?;
 
         let (signing_instructions, _signature) = sign(signable_request, &signing_params)
-            .unwrap()
+            .map_err(|e| ClientError::Signing(e.to_string()))?
             .into_parts();
         signing_instructions.apply_to_request_http1x(http_request);
+
+        Ok(())
     }
 }
 
@@ -81,6 +122,19 @@ mod tests {
     #[derive(PartialEq, Debug, Serialize, Deserialize)]
     struct TestMessage {
         message: String,
+    }
+
+    #[tokio::test]
+    async fn it_returns_client_error_on_connection_refused() {
+        let client = HttpClient::new();
+        let result = client
+            .post("http://localhost:1".to_string(), String::new())
+            .await;
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            crate::ClientError::Request(_)
+        ));
     }
 
     #[tokio::test]
@@ -100,10 +154,10 @@ mod tests {
 
         let url = server.base_url() + "/";
         let test_client = HttpClient::new();
-        let response = test_client.post(url, String::from("")).await.unwrap();
-        let response_body: TestMessage = response.json().await.unwrap();
+        let response_body = test_client.post(url, String::from("")).await.unwrap();
+        let parsed: TestMessage = serde_json::from_str(&response_body).unwrap();
 
-        let got = response_body.message;
+        let got = parsed.message;
         let want = "test".to_string();
 
         assert_eq!(got, want);
