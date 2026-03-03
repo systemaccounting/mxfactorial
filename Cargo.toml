@@ -4,6 +4,7 @@ resolver = "2"
 members = [
 	"crates/cache",
 	"crates/cognitoidp",
+	"crates/envvar",
 	"crates/httpclient",
 	"crates/pg",
 	"crates/pubsub",
