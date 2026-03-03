@@ -604,12 +604,41 @@ pub async fn get_request_by_id_gql(
     res.request_by_id
 }
 
+pub async fn create_request_http_raw(
+    auth_account: String,
+    transaction_items: TransactionItems,
+) -> Result<String, httpclient::ClientError> {
+    let transaction = Transaction::new(auth_account.clone(), None, transaction_items);
+    let body = IntraTransaction::new(auth_account.clone(), transaction);
+    let body_json = json!(body).to_string();
+    let client = Client::new();
+    let uri = Uri::new_from_env_var("REQUEST_CREATE_URL").to_string();
+    client.post(uri, body_json).await
+}
+
+pub async fn approve_request_http_raw(
+    id: String,
+    account_name: String,
+    account_role: String,
+    auth_account: String,
+) -> Result<String, httpclient::ClientError> {
+    let body_json = json!({
+        "id": id,
+        "account_name": account_name,
+        "account_role": account_role,
+        "auth_account": auth_account
+    })
+    .to_string();
+    let client = Client::new();
+    let uri = Uri::new_from_env_var("REQUEST_APPROVE_URL").to_string();
+    client.post(uri, body_json).await
+}
+
 pub async fn get_rules_http(transaction: Transaction) -> IntraTransaction {
     let client = Client::new();
     let uri = Uri::new_from_env_var("RULE_URL").to_string();
     let body_json = json!(transaction).to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     serde_json::from_str(&response_string).unwrap()
 }
 
@@ -622,8 +651,7 @@ pub async fn create_request_http(
     let body_json = json!(body).to_string();
     let client = Client::new();
     let uri = Uri::new_from_env_var("REQUEST_CREATE_URL").to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     let transaction_request: IntraTransaction = serde_json::from_str(&response_string).unwrap();
     transaction_request.transaction
 }
@@ -643,8 +671,7 @@ pub async fn approve_request_http(
     .to_string();
     let client = Client::new();
     let uri = Uri::new_from_env_var("REQUEST_APPROVE_URL").to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     let approved: IntraTransaction = serde_json::from_str(&response_string).unwrap();
     approved.transaction
 }
@@ -657,8 +684,7 @@ pub async fn get_account_balance_http(account_name: String, auth_account: String
     .to_string();
     let client = Client::new();
     let uri = Uri::new_from_env_var("BALANCE_BY_ACCOUNT_URL").to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     let balance_float: f32 = serde_json::from_str(&response_string).unwrap();
     format!("{balance_float:.3}")
 }
@@ -676,8 +702,7 @@ pub async fn get_transaction_by_id_http(
     .to_string();
     let client = Client::new();
     let uri = Uri::new_from_env_var("TRANSACTION_BY_ID_URL").to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     let intra_transaction: IntraTransaction = serde_json::from_str(&response_string).unwrap();
     intra_transaction
 }
@@ -693,8 +718,7 @@ pub async fn get_transactions_by_account_http(
     .to_string();
     let client = Client::new();
     let uri = Uri::new_from_env_var("TRANSACTIONS_BY_ACCOUNT_URL").to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     let intra_transactions: IntraTransactions = serde_json::from_str(&response_string).unwrap();
     intra_transactions
 }
@@ -712,8 +736,7 @@ pub async fn get_request_by_id_http(
     .to_string();
     let client = Client::new();
     let uri = Uri::new_from_env_var("REQUEST_BY_ID_URL").to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     let intra_transaction: IntraTransaction = serde_json::from_str(&response_string).unwrap();
     intra_transaction
 }
@@ -729,8 +752,7 @@ pub async fn get_requests_by_account_http(
     .to_string();
     let client = Client::new();
     let uri = Uri::new_from_env_var("REQUESTS_BY_ACCOUNT_URL").to_string();
-    let response = client.post(uri, body_json).await.unwrap();
-    let response_string = response.text().await.unwrap();
+    let response_string = client.post(uri, body_json).await.unwrap();
     let intra_transactions: IntraTransactions = serde_json::from_str(&response_string).unwrap();
     intra_transactions
 }
