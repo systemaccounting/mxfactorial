@@ -37,21 +37,20 @@ pub fn create_response(
 pub fn label_approved_transaction_items(
     role_sequence: &RoleSequence,
     transaction_items: TransactionItems,
-) -> TransactionItems {
+) -> Result<TransactionItems, String> {
     let mut labeled = transaction_items;
 
     for tr_item in labeled.0.iter_mut() {
         for role in role_sequence {
             // get list of approvals per role (debitor or creditor)
-            let approvals_per_role = tr_item
+            let approvals = tr_item
                 .approvals
                 .clone()
-                .unwrap()
-                .get_approvals_per_role(*role);
+                .ok_or("missing approvals in transaction item")?;
+            let approvals_per_role = approvals.get_approvals_per_role(*role);
 
-            // todo: error on 0 approvals_per_role
             if approvals_per_role.0.is_empty() {
-                panic!("0 approvals per role");
+                return Err("0 approvals per role".into());
             }
 
             let mut approval_count = 0;
@@ -94,7 +93,7 @@ pub fn label_approved_transaction_items(
             }
         }
     }
-    labeled
+    Ok(labeled)
 }
 
 #[cfg(test)]
@@ -190,7 +189,8 @@ mod tests {
         }]);
 
         // test function
-        let got = label_approved_transaction_items(&DEBITOR_FIRST, tr_items);
+        let got = label_approved_transaction_items(&DEBITOR_FIRST, tr_items)
+            .expect("label_approved_transaction_items returned an error");
 
         // assert #1
         // save creditor_approval_time

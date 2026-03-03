@@ -7,7 +7,7 @@ use axum::{
 use pg::postgres::{ConnectionPool, DB};
 use service::Service;
 use shutdown::shutdown_signal;
-use std::{env, net::ToSocketAddrs};
+use std::net::ToSocketAddrs;
 use tokio::net::TcpListener;
 use types::request_response::{IntraTransactions, QueryByAccount};
 
@@ -20,14 +20,17 @@ async fn handle_event(
 ) -> Result<axum::Json<IntraTransactions>, StatusCode> {
     let client_request = event.0;
 
-    let conn = pool.get_conn().await;
+    let conn = pool
+        .get_conn()
+        .await
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
     let svc = Service::new(&conn, None);
 
     let account = client_request.account_name;
 
-    let record_limit = env::var("RETURN_RECORD_LIMIT")
-        .unwrap_or_else(|_| panic!("RETURN_RECORD_LIMIT variable assignment"))
+    let record_limit = envvar::required("RETURN_RECORD_LIMIT")
+        .unwrap()
         .parse::<i64>()
         .unwrap();
 
@@ -52,8 +55,7 @@ async fn handle_event(
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let readiness_check_path = env::var(READINESS_CHECK_PATH)
-        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+    let readiness_check_path = envvar::required(READINESS_CHECK_PATH).unwrap();
 
     let conn_uri = DB::create_conn_uri_from_env_vars();
 
@@ -67,9 +69,9 @@ async fn main() {
         )
         .with_state(pool);
 
-    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
+    let hostname_or_ip = envvar::optional("HOSTNAME_OR_IP", "0.0.0.0");
 
-    let port = env::var("REQUESTS_BY_ACCOUNT_PORT").unwrap();
+    let port = envvar::required("REQUESTS_BY_ACCOUNT_PORT").unwrap();
 
     let serve_addr = format!("{hostname_or_ip}:{port}");
 

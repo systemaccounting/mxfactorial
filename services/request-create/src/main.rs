@@ -7,9 +7,9 @@ use axum::{
 use cache::Cache;
 use httpclient::HttpClient as Client;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
-use service::Service;
+use service::{Service, ServiceError};
 use shutdown::shutdown_signal;
-use std::{env, error::Error, net::ToSocketAddrs, sync::Arc};
+use std::{error::Error, net::ToSocketAddrs, sync::Arc};
 use thiserror::Error;
 use tokio::net::TcpListener;
 use types::{request_response::IntraTransaction, transaction::Transaction};
@@ -42,8 +42,7 @@ pub async fn get_rule_applied_transaction(
     let uri = Uri::new_from_env_var("RULE_URL").to_string();
     let client = Client::new();
     let body = serde_json::to_string(&transaction)?;
-    let response = client.post(uri, body).await?;
-    let rule_tested = response.text().await.unwrap();
+    let rule_tested = client.post(uri, body).await?;
     let intra_transaction = IntraTransaction::from_json_string(rule_tested.as_str())?;
     Ok(intra_transaction)
 }
@@ -86,22 +85,12 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
         transaction_items: non_rule_client_tr_items.clone(),
     };
 
-    let rule_tested = get_rule_applied_transaction(rule_input_transaction)
-        .await
-        .unwrap();
+    let rule_tested = get_rule_applied_transaction(rule_input_transaction).await?;
 
-    match rule_tested
+    rule_tested
         .transaction
         .transaction_items
-        .test_equality(req.clone().transaction.transaction_items)
-    {
-        Ok(_) => {
-            // println!("client request equal to rule response")
-        }
-        Err(e) => {
-            return Err(Box::new(e));
-        }
-    }
+        .test_equality(req.clone().transaction.transaction_items)?;
 
     let mut response = req.clone();
     response.add_rule_tested_values(rule_tested);
@@ -112,13 +101,10 @@ async fn test_values(req: IntraTransaction) -> Result<IntraTransaction, Box<dyn 
 async fn create_request(
     rule_tested: IntraTransaction,
     svc: &Service<'_, DatabaseConnection>,
-) -> Result<Transaction, RequestCreateError> {
+) -> Result<Transaction, Box<dyn Error>> {
     let accounts = rule_tested.transaction.transaction_items.list_accounts();
 
-    let profile_ids = svc
-        .get_profile_ids_by_account_names(accounts)
-        .await
-        .unwrap();
+    let profile_ids = svc.get_profile_ids_by_account_names(accounts).await?;
 
     let mut transaction_request = rule_tested.transaction.clone();
 
@@ -126,11 +112,13 @@ async fn create_request(
         .transaction_items
         .add_profile_ids(profile_ids);
 
-    let transaction_id = svc.create_transaction(transaction_request).await.unwrap();
+    let transaction_id = svc.create_transaction(transaction_request).await?;
 
-    let id = transaction_id.parse::<i32>().unwrap();
+    let id = transaction_id
+        .parse::<i32>()
+        .map_err(|e| format!("invalid transaction id: {e}"))?;
 
-    let inserted_transaction_request = svc.get_full_transaction_by_id(id).await.unwrap();
+    let inserted_transaction_request = svc.get_full_transaction_by_id(id).await?;
 
     Ok(inserted_transaction_request)
 }
@@ -138,37 +126,47 @@ async fn create_request(
 async fn handle_event(
     State(store): State<Store>,
     intra_transaction: Json<IntraTransaction>,
-) -> Result<axum::Json<IntraTransaction>, StatusCode> {
+) -> Result<axum::Json<IntraTransaction>, ServiceError> {
     let request = intra_transaction.0;
 
     let rule_tested = test_values(request)
         .await
-        .map_err(|_e| {
-            println!("error: {_e:?}");
-            StatusCode::INTERNAL_SERVER_ERROR
-        })
-        .unwrap();
+        .map_err(|e| ServiceError::bad_request(&e.to_string()))?;
 
-    let conn = store.pool.get_conn().await;
+    let conn = store
+        .pool
+        .get_conn()
+        .await
+        .map_err(|_| ServiceError::internal("failed to get db connection"))?;
 
     let svc = Service::new(&conn, store.cache.clone());
 
     let inserted_transaction_request = create_request(rule_tested.clone(), &svc)
         .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
     // auth_account and approver_role are different on request-approve
-    let auth_account = rule_tested.clone().auth_account.unwrap();
-    let approver_role = rule_tested.transaction.author_role.unwrap();
+    let auth_account = rule_tested
+        .clone()
+        .auth_account
+        .ok_or_else(|| ServiceError::bad_request("missing auth account"))?;
+    let approver_role = rule_tested
+        .transaction
+        .author_role
+        .ok_or_else(|| ServiceError::bad_request("missing author role"))?;
 
-    let conn = store.pool.get_conn().await;
+    let conn = store
+        .pool
+        .get_conn()
+        .await
+        .map_err(|_| ServiceError::internal("failed to get db connection"))?;
 
     let svc = Service::new(&conn, store.cache.clone());
 
     let approved_transaction_request = svc
         .approve(auth_account, approver_role, inserted_transaction_request)
         .await
-        .unwrap(); // todo: handle error
+        .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
     Ok(axum::Json(approved_transaction_request))
 }
@@ -177,8 +175,7 @@ async fn handle_event(
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let readiness_check_path = env::var(READINESS_CHECK_PATH)
-        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+    let readiness_check_path = envvar::required(READINESS_CHECK_PATH).unwrap();
 
     let conn_uri = DB::create_conn_uri_from_env_vars();
 
@@ -196,9 +193,9 @@ async fn main() {
         )
         .with_state(store);
 
-    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
+    let hostname_or_ip = envvar::optional("HOSTNAME_OR_IP", "0.0.0.0");
 
-    let port = env::var("REQUEST_CREATE_PORT").unwrap();
+    let port = envvar::required("REQUEST_CREATE_PORT").unwrap();
 
     let serve_addr = format!("{hostname_or_ip}:{port}");
 

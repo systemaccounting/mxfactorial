@@ -7,9 +7,9 @@ use axum::{
 use cache::Cache;
 use pg::postgres::{ConnectionPool, DatabaseConnection, DB};
 use rule::{create_response, expected_values, label_approved_transaction_items};
-use service::Service;
+use service::{Service, ServiceError};
 use shutdown::shutdown_signal;
-use std::{env, net::ToSocketAddrs, sync::Arc};
+use std::{net::ToSocketAddrs, sync::Arc};
 use types::approval::{Approval, Approvals};
 use types::{
     account_role::{RoleSequence, CREDITOR_FIRST, DEBITOR_FIRST},
@@ -33,10 +33,13 @@ async fn apply_transaction_item_rules<'a>(
     svc: &'a Service<'a, DatabaseConnection>,
     role_sequence: RoleSequence,
     transaction_items: &TransactionItems,
-) -> TransactionItems {
+) -> Result<TransactionItems, ServiceError> {
     let accounts = transaction_items.list_accounts();
 
-    let initial_account_profiles = svc.get_account_profiles(accounts).await.unwrap();
+    let initial_account_profiles = svc
+        .get_account_profiles(accounts)
+        .await
+        .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
     let mut response: TransactionItems = TransactionItems::default();
 
@@ -54,16 +57,21 @@ async fn apply_transaction_item_rules<'a>(
             // get account profile
             let account_profile = initial_account_profiles
                 .match_profile_by_account(account.clone())
-                .unwrap();
+                .ok_or_else(|| {
+                    ServiceError::internal(&format!("profile not found for {account}"))
+                })?;
 
             // add profile id to transaction item
-            current_tr_item.set_profile_id(role, account_profile.clone().id.unwrap()); // todo: handle missing id error
+            let profile_id = account_profile.clone().id.ok_or_else(|| {
+                ServiceError::internal(&format!("missing profile id for {account}"))
+            })?;
+            current_tr_item.set_profile_id(role, profile_id);
 
             // get rules matching state in account profile
             let state_rules = svc
                 .get_state_tr_item_rule_instances(role, account_profile.state_name.to_string())
                 .await
-                .unwrap();
+                .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
             // apply state rules to transaction item
             for rule_instance in state_rules.clone().0.iter() {
@@ -71,7 +79,7 @@ async fn apply_transaction_item_rules<'a>(
                     rule_instance,
                     current_tr_item.clone(),
                 )
-                .unwrap();
+                .map_err(|e| ServiceError::internal(&e.to_string()))?;
                 // first item is updated original, rest are computed
                 if !state_added_tr_items.0.is_empty() {
                     current_tr_item = state_added_tr_items.0[0].clone();
@@ -85,7 +93,7 @@ async fn apply_transaction_item_rules<'a>(
             let account_rules = svc
                 .get_tr_item_rule_instances_by_role_account(role, account.clone())
                 .await
-                .unwrap();
+                .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
             // apply account rules to transaction item
             for rule_instance in account_rules.clone().0.iter() {
@@ -93,7 +101,7 @@ async fn apply_transaction_item_rules<'a>(
                     rule_instance,
                     current_tr_item.clone(),
                 )
-                .unwrap();
+                .map_err(|e| ServiceError::internal(&e.to_string()))?;
                 // first item is updated original, rest are computed
                 if !account_added_tr_items.0.is_empty() {
                     current_tr_item = account_added_tr_items.0[0].clone();
@@ -112,7 +120,7 @@ async fn apply_transaction_item_rules<'a>(
             let added_profile_ids = svc
                 .get_profile_ids_by_account_names(added_accounts)
                 .await
-                .unwrap();
+                .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
             // add account profile ids to rule added transaction items
             // todo: some profiles may be previously fetched when
@@ -127,7 +135,7 @@ async fn apply_transaction_item_rules<'a>(
         response.0.append(&mut rule_added.0);
     }
 
-    response
+    Ok(response)
 }
 
 async fn apply_approval_rules<'a>(
@@ -135,7 +143,7 @@ async fn apply_approval_rules<'a>(
     role_sequence: RoleSequence,
     transaction_items: &mut TransactionItems,
     approval_time: &TZTime,
-) {
+) -> Result<(), ServiceError> {
     // loop through transaction_item(s)
     for tr_item in transaction_items.0.iter_mut() {
         // create empty list of approvals which will increase as
@@ -149,7 +157,10 @@ async fn apply_approval_rules<'a>(
             let account = tr_item.get_account_by_role(role);
 
             // query account owners (approvers) of debitor or credit account
-            let approvers = svc.get_account_approvers(account).await.unwrap();
+            let approvers = svc
+                .get_account_approvers(account)
+                .await
+                .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
             // loop through list of approvers
             for approver in approvers {
@@ -172,7 +183,7 @@ async fn apply_approval_rules<'a>(
                 let approval_rules = svc
                     .get_approval_rule_instances(role, approver.clone())
                     .await
-                    .unwrap();
+                    .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
                 // loop through each approval rule and apply
                 for rule_instance in approval_rules.0.iter() {
@@ -183,7 +194,7 @@ async fn apply_approval_rules<'a>(
                         &mut approval,
                         approval_time,
                     )
-                    .unwrap(); // todo: handle error
+                    .map_err(|e| ServiceError::internal(&e.to_string()))?;
                 }
 
                 // add post rule approval to approvals list
@@ -194,6 +205,8 @@ async fn apply_approval_rules<'a>(
         // attach post rule approvals to each transaction_item
         tr_item.approvals = Some(approvals);
     }
+
+    Ok(())
 }
 
 // build transaction items from transaction_item_rule_instance templates
@@ -201,10 +214,10 @@ async fn apply_approval_rules<'a>(
 async fn build_items_from_rule_instance(
     conn: &DatabaseConnection,
     transaction_rule_instance_id: &str,
-) -> Result<TransactionItems, StatusCode> {
+) -> Result<TransactionItems, ServiceError> {
     let tri_id: i32 = transaction_rule_instance_id
         .parse()
-        .map_err(|_| StatusCode::BAD_REQUEST)?;
+        .map_err(|_| ServiceError::bad_request("invalid rule_instance_id"))?;
     let rows = conn
         .0
         .query(
@@ -216,7 +229,7 @@ async fn build_items_from_rule_instance(
         .await
         .map_err(|e| {
             tracing::error!("query transaction_item_rule_instance failed: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
+            ServiceError::internal("query transaction_item_rule_instance failed")
         })?;
 
     let mut items = TransactionItems::default();
@@ -256,9 +269,11 @@ async fn build_items_from_rule_instance(
 async fn apply_rules(
     State(state): State<Store>,
     transaction: Json<Transaction>,
-) -> Result<axum::Json<IntraTransaction>, StatusCode> {
+) -> Result<axum::Json<IntraTransaction>, ServiceError> {
     if !expected_values(&transaction) {
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(ServiceError::bad_request(
+            "missing expected transaction values",
+        ));
     };
 
     let debitor_first = transaction.debitor_first.unwrap_or(false);
@@ -269,7 +284,11 @@ async fn apply_rules(
     };
 
     // get connection from pool
-    let conn = state.pool.get_conn().await;
+    let conn = state
+        .pool
+        .get_conn()
+        .await
+        .map_err(|_| ServiceError::internal("failed to get db connection"))?;
 
     // when rule_instance_id is set and items are empty, build items from templates
     let mut transaction_items = if let Some(ref rule_instance_id) = transaction.rule_instance_id {
@@ -289,7 +308,7 @@ async fn apply_rules(
     let svc = Service::new(&conn, state.cache.clone());
 
     let mut rule_applied_tr_items =
-        apply_transaction_item_rules(&svc, role_sequence, &transaction_items).await;
+        apply_transaction_item_rules(&svc, role_sequence, &transaction_items).await?;
 
     // create an approval time to be used for all automated approvals
     let approval_time = TZTime::now();
@@ -300,9 +319,10 @@ async fn apply_rules(
         &mut rule_applied_tr_items,
         &approval_time,
     )
-    .await;
+    .await?;
 
-    let labeled_approved = label_approved_transaction_items(&role_sequence, rule_applied_tr_items);
+    let labeled_approved = label_approved_transaction_items(&role_sequence, rule_applied_tr_items)
+        .map_err(|e| ServiceError::internal(&e))?;
 
     let response_transaction = create_response(labeled_approved, &transaction);
 
@@ -315,8 +335,7 @@ async fn apply_rules(
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let readiness_check_path = env::var(READINESS_CHECK_PATH)
-        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+    let readiness_check_path = envvar::required(READINESS_CHECK_PATH).unwrap();
 
     let conn_uri = DB::create_conn_uri_from_env_vars();
 
@@ -334,9 +353,9 @@ async fn main() {
         )
         .with_state(store);
 
-    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
+    let hostname_or_ip = envvar::optional("HOSTNAME_OR_IP", "0.0.0.0");
 
-    let port = env::var("RULE_PORT").unwrap();
+    let port = envvar::required("RULE_PORT").unwrap();
 
     let serve_addr = format!("{hostname_or_ip}:{port}");
 

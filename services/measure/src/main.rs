@@ -59,8 +59,7 @@ async fn main() {
         tracing_subscriber::fmt().init();
     }
 
-    let readiness_check_path = env::var(READINESS_CHECK_PATH)
-        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+    let readiness_check_path = envvar::required(READINESS_CHECK_PATH).unwrap();
 
     let conn_uri = DB::create_conn_uri_from_env_vars();
     let pool = DB::new_pool(&conn_uri).await;
@@ -73,8 +72,8 @@ async fn main() {
         )
         .with_state(pool);
 
-    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
-    let port = env::var("MEASURE_PORT").unwrap();
+    let hostname_or_ip = envvar::optional("HOSTNAME_OR_IP", "0.0.0.0");
+    let port = envvar::required("MEASURE_PORT").unwrap();
     let serve_addr = format!("{hostname_or_ip}:{port}");
 
     let listener = tokio::net::TcpListener::bind(serve_addr.clone())
@@ -104,7 +103,7 @@ async fn ws_handler(
 /// spawn websocket per connection
 async fn handle_socket(socket: WebSocket, _who: SocketAddr, pool: ConnectionPool, params: Params) {
     // get abbreviated location names from postgres
-    let conn = pool.get_conn().await;
+    let conn = pool.get_conn().await.expect("failed to get db connection");
     let abbreviations = abbrev_names(&conn, params).await;
 
     // concat abbreviated location names to colon separated key: 2024-08-20:gdp:usa:cal:sac

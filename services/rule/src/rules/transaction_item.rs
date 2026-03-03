@@ -47,12 +47,24 @@ fn append_multiplied_item_value(
     let debitor = rule_instance.variable_values[0].clone();
     let creditor = rule_instance.variable_values[1].clone();
     let item_name = rule_instance.variable_values[2].clone();
-    let factor: f32 = rule_instance.variable_values[3].clone().parse().unwrap();
+    let factor: f32 = rule_instance.variable_values[3]
+        .clone()
+        .parse()
+        .map_err(|e| format!("unsupported factor: {e}"))?;
 
-    let price: f32 = transaction_item.price.clone().parse().unwrap();
-    let quantity =
-        utils::number_to_fixed_string(transaction_item.quantity.clone().parse::<f32>().unwrap());
-    let rule_instance_id = rule_instance.id.clone().unwrap();
+    let price: f32 = transaction_item
+        .price
+        .clone()
+        .parse()
+        .map_err(|e| format!("unsupported price: {e}"))?;
+    let quantity = utils::number_to_fixed_string(
+        transaction_item
+            .quantity
+            .clone()
+            .parse::<f32>()
+            .map_err(|e| format!("unsupported quantity: {e}"))?,
+    );
+    let rule_instance_id = rule_instance.id.clone().ok_or("missing rule_instance id")?;
     let rule_exec_id = utils::create_rule_exec_id();
 
     // clone original and add rule_exec_id
@@ -60,7 +72,7 @@ fn append_multiplied_item_value(
     original_with_exec_id
         .rule_exec_ids
         .as_mut()
-        .unwrap()
+        .ok_or("missing rule_exec_ids")?
         .push(rule_exec_id.clone());
 
     let post_token_debitor: String = match debitor.as_str() {
@@ -227,5 +239,56 @@ mod tests {
         let result = match_transaction_item_rule(&rule_instance, item);
 
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn it_errors_on_non_numeric_factor() {
+        let rule_instance = test_rule_instance(
+            "appendMultipliedItemValue",
+            vec!["ANY", "StateOfCalifornia", "tax", "not_a_number"],
+        );
+        let item = test_transaction_item("10.000", "1");
+
+        let result = append_multiplied_item_value(&rule_instance, item);
+
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("unsupported factor"));
+    }
+
+    #[test]
+    fn it_errors_on_non_numeric_price() {
+        let rule_instance = test_rule_instance(
+            "appendMultipliedItemValue",
+            vec!["ANY", "StateOfCalifornia", "tax", "0.09"],
+        );
+        let item = test_transaction_item("not_a_number", "1");
+
+        let result = append_multiplied_item_value(&rule_instance, item);
+
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("unsupported price"));
+    }
+
+    #[test]
+    fn it_errors_on_non_numeric_quantity() {
+        let rule_instance = test_rule_instance(
+            "appendMultipliedItemValue",
+            vec!["ANY", "StateOfCalifornia", "tax", "0.09"],
+        );
+        let item = test_transaction_item("10.000", "not_a_number");
+
+        let result = append_multiplied_item_value(&rule_instance, item);
+
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("unsupported quantity"));
     }
 }

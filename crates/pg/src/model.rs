@@ -221,14 +221,19 @@ impl ModelTrait for DatabaseConnection {
             // add creditor revenue string as second param
             values.push_param(tr_item.clone().revenue_string());
             // add transaction item id as third param
-            values.push_param(tr_item.id.clone().unwrap().parse::<i32>().unwrap());
+            let tr_item_id: i32 = tr_item
+                .id
+                .clone()
+                .ok_or("missing id in transaction item")?
+                .parse()?;
+            values.push_param(tr_item_id);
 
             // add debitor account as fourth param
             values.push_param(tr_item.clone().debitor);
             // add debitor expense string as fifth param
             values.push_param(tr_item.clone().expense_string());
             // add transaction item id as sixth param
-            values.push_param(tr_item.clone().id.unwrap().parse::<i32>().unwrap());
+            values.push_param(tr_item_id);
         }
 
         let table = crate::sqls::balance::AccountBalanceTable::new();
@@ -465,14 +470,12 @@ impl ModelTrait for DatabaseConnection {
         let sql = table.fn_select_insert_transaction_sql(approval_lengths);
 
         // convert rust transaction values to postgres values
-        let transaction_rule_instance_id = parse_pg_int4(transaction.rule_instance_id).unwrap();
-        let transaction_author_device_latlng =
-            parse_pg_point(transaction.author_device_latlng).unwrap();
-        let transaction_equilibrium_time =
-            parse_pg_timestamp(transaction.equilibrium_time).unwrap();
-        let transaction_sum_value = parse_pg_numeric(Some(transaction.sum_value)).unwrap();
-        let transaction_created_at = parse_pg_timestamp(None::<TZTime>).unwrap();
-        let transaction_event_time = parse_pg_timestamp(None::<TZTime>).unwrap();
+        let transaction_rule_instance_id = parse_pg_int4(transaction.rule_instance_id)?;
+        let transaction_author_device_latlng = parse_pg_point(transaction.author_device_latlng)?;
+        let transaction_equilibrium_time = parse_pg_timestamp(transaction.equilibrium_time)?;
+        let transaction_sum_value = parse_pg_numeric(Some(transaction.sum_value))?;
+        let transaction_created_at = parse_pg_timestamp(None::<TZTime>)?;
+        let transaction_event_time = parse_pg_timestamp(None::<TZTime>)?;
 
         let mut values = to_sql_vec![
             None::<i32>,                      // id
@@ -497,59 +500,61 @@ impl ModelTrait for DatabaseConnection {
 
             values.push_param(tr_item.item_id); // item_id
 
-            let tr_item_price = parse_pg_numeric(Some(tr_item.price)).unwrap();
+            let tr_item_price = parse_pg_numeric(Some(tr_item.price))?;
             values.push_param(tr_item_price); // price
 
-            let tr_item_quantity = parse_pg_numeric(Some(tr_item.quantity)).unwrap();
+            let tr_item_quantity = parse_pg_numeric(Some(tr_item.quantity))?;
             values.push_param(tr_item_quantity); // quantity
 
-            let tr_item_rule_instance_id = parse_pg_int4(tr_item.rule_instance_id).unwrap();
+            let tr_item_rule_instance_id = parse_pg_int4(tr_item.rule_instance_id)?;
             values.push_param(tr_item_rule_instance_id); // rule_instance_id
 
             values.push_param(tr_item.rule_exec_ids); // rule_exec_ids
 
             values.push_param(tr_item.unit_of_measurement); // unit_of_measurement
 
-            let tr_item_units_measured = parse_pg_numeric(tr_item.units_measured).unwrap();
+            let tr_item_units_measured = parse_pg_numeric(tr_item.units_measured)?;
             values.push_param(tr_item_units_measured); // units_measured
 
             values.push_param(tr_item.debitor); // debitor
             values.push_param(tr_item.creditor); // creditor
 
-            let debitor_profile_id = parse_pg_int4(tr_item.debitor_profile_id).unwrap();
+            let debitor_profile_id = parse_pg_int4(tr_item.debitor_profile_id)?;
             values.push_param(debitor_profile_id); // debitor_profile_id
 
-            let creditor_profile_id = parse_pg_int4(tr_item.creditor_profile_id).unwrap();
+            let creditor_profile_id = parse_pg_int4(tr_item.creditor_profile_id)?;
             values.push_param(creditor_profile_id); // creditor_profile_id
 
-            let tr_item_debitor_approval_time =
-                parse_pg_timestamp(tr_item.debitor_approval_time).unwrap();
+            let tr_item_debitor_approval_time = parse_pg_timestamp(tr_item.debitor_approval_time)?;
             values.push_param(tr_item_debitor_approval_time); // debitor_approval_time
 
             let tr_item_creditor_approval_time =
-                parse_pg_timestamp(tr_item.creditor_approval_time).unwrap();
+                parse_pg_timestamp(tr_item.creditor_approval_time)?;
             values.push_param(tr_item_creditor_approval_time); // creditor_approval_time
 
             let tr_item_debitor_expiration_time =
-                parse_pg_timestamp(tr_item.debitor_expiration_time).unwrap();
+                parse_pg_timestamp(tr_item.debitor_expiration_time)?;
             values.push_param(tr_item_debitor_expiration_time); // debitor_expiration_time
 
             let tr_item_creditor_expiration_time =
-                parse_pg_timestamp(tr_item.creditor_expiration_time).unwrap();
+                parse_pg_timestamp(tr_item.creditor_expiration_time)?;
             values.push_param(tr_item_creditor_expiration_time); // creditor_expiration_time
 
             let tr_item_creditor_rejection_time =
-                parse_pg_timestamp(tr_item.creditor_rejection_time).unwrap();
+                parse_pg_timestamp(tr_item.creditor_rejection_time)?;
             values.push_param(tr_item_creditor_rejection_time); // creditor_rejection_time
 
             let tr_item_debitor_rejection_time =
-                parse_pg_timestamp(tr_item.debitor_rejection_time).unwrap();
+                parse_pg_timestamp(tr_item.debitor_rejection_time)?;
             values.push_param(tr_item_debitor_rejection_time); // debitor_rejection_time
 
-            for approval in tr_item.approvals.unwrap().into_iter() {
+            let approvals = tr_item
+                .approvals
+                .ok_or("missing approvals in transaction item")?;
+            for approval in approvals.into_iter() {
                 values.push_param(None::<i32>); // id
 
-                let approval_rule_instance_id = parse_pg_int4(approval.rule_instance_id).unwrap();
+                let approval_rule_instance_id = parse_pg_int4(approval.rule_instance_id)?;
                 values.push_param(approval_rule_instance_id); // rule_instance_id
 
                 values.push_param(None::<i32>); // transaction_id
@@ -558,17 +563,16 @@ impl ModelTrait for DatabaseConnection {
                 values.push_param(approval.account_role); // account_role
                 values.push_param(approval.device_id); // device_id
 
-                let approval_device_latlng = parse_pg_point(approval.device_latlng).unwrap();
+                let approval_device_latlng = parse_pg_point(approval.device_latlng)?;
                 values.push_param(approval_device_latlng); // device_latlng
 
-                let approval_approval_time = parse_pg_timestamp(approval.approval_time).unwrap();
+                let approval_approval_time = parse_pg_timestamp(approval.approval_time)?;
                 values.push_param(approval_approval_time); // approval_time
 
-                let approval_rejection_time = parse_pg_timestamp(approval.rejection_time).unwrap();
+                let approval_rejection_time = parse_pg_timestamp(approval.rejection_time)?;
                 values.push_param(approval_rejection_time); // rejection_time
 
-                let approval_expiration_time =
-                    parse_pg_timestamp(approval.expiration_time).unwrap();
+                let approval_expiration_time = parse_pg_timestamp(approval.expiration_time)?;
                 values.push_param(approval_expiration_time); // expiration_time
             }
         }
@@ -849,43 +853,45 @@ impl ModelTrait for DatabaseConnection {
 }
 
 fn parse_pg_int4(s: Option<String>) -> Result<Option<i32>, Box<dyn Error>> {
-    if s.clone().is_none() || s.clone().unwrap() == *"" {
-        return Ok(None);
+    match s {
+        None => Ok(None),
+        Some(ref v) if v.is_empty() => Ok(None),
+        Some(v) => Ok(Some(v.parse::<i32>()?)),
     }
-    // test for non-numeric string
-    if s.clone().unwrap().parse::<i32>().is_err() {
-        return Err("non-numeric string".into());
-    }
-    Ok(Some(s.unwrap().parse::<i32>().unwrap()))
 }
 
 fn parse_pg_point(s: Option<String>) -> Result<Option<Point<f64>>, Box<dyn Error>> {
-    if s.clone().is_none() || s.clone().unwrap() == *"" {
-        return Ok(None);
+    match s {
+        None => Ok(None),
+        Some(ref v) if v.is_empty() => Ok(None),
+        Some(v) => {
+            // create point from "(39.534552,-119.737825)"
+            let stripped_parens = v.replace(['(', ')'], "");
+            let coords: Vec<&str> = stripped_parens.split(',').collect();
+            let lat = coords[0].trim().parse::<f64>()?;
+            let lng = coords[1].trim().parse::<f64>()?;
+            Ok(Some(Point::new(lat, lng)))
+        }
     }
-    // create point from "(39.534552,-119.737825)"
-    let stripped_parens = s.unwrap().replace(['(', ')'], "");
-    let coords: Vec<&str> = stripped_parens.split(',').collect();
-    let lat = coords[0].trim().parse::<f64>().unwrap();
-    let lng = coords[1].trim().parse::<f64>().unwrap();
-    let point = Point::new(lat, lng);
-    Ok(Some(point))
 }
 
 fn parse_pg_timestamp(time: Option<TZTime>) -> Result<Option<DateTime<Utc>>, Box<dyn Error>> {
-    if time.clone().is_none() {
-        return Ok(None::<DateTime<Utc>>);
+    match time {
+        None => Ok(None),
+        Some(t) => Ok(Some(t.0)),
     }
-    Ok(Some(time.unwrap().0))
 }
 
 fn parse_pg_numeric(s: Option<String>) -> Result<Option<Decimal>, Box<dyn Error>> {
-    if s.clone().is_none() || s.clone().unwrap() == *"" {
-        return Ok(None);
+    match s {
+        None => Ok(None),
+        Some(ref v) if v.is_empty() => Ok(None),
+        Some(v) => {
+            let mut decimal = Decimal::from_str_exact(v.as_str())?;
+            decimal.rescale(FIXED_DECIMAL_PLACES as u32);
+            Ok(Some(decimal))
+        }
     }
-    let mut decimal = Decimal::from_str_exact(s.unwrap().as_str())?;
-    decimal.rescale(FIXED_DECIMAL_PLACES as u32);
-    Ok(Some(decimal))
 }
 
 #[cfg(test)]

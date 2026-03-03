@@ -28,7 +28,11 @@ struct AppState {
 }
 
 async fn process_pending(state: &AppState) {
-    let conn = state.pool.get_conn().await;
+    let conn = state
+        .pool
+        .get_conn()
+        .await
+        .expect("failed to get db connection");
     let rows = match conn
         .0
         .query(
