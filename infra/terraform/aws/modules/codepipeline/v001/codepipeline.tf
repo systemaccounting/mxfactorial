@@ -18,6 +18,21 @@ resource "aws_codepipeline" "build" {
     type     = "S3"
   }
 
+  variable {
+    name          = "RUN_TESTS"
+    default_value = "true"
+  }
+
+  variable {
+    name          = "PUSH_IMAGE"
+    default_value = "true"
+  }
+
+  variable {
+    name          = "DEPLOY"
+    default_value = "false"
+  }
+
   stage {
     name = "Source"
     action {
@@ -50,29 +65,27 @@ resource "aws_codepipeline" "build" {
         run_order       = 1
         configuration = {
           ProjectName = action.value
+          EnvironmentVariables = jsonencode([
+            {
+              name  = "RUN_TESTS"
+              value = "#{variables.RUN_TESTS}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "PUSH_IMAGE"
+              value = "#{variables.PUSH_IMAGE}"
+              type  = "PLAINTEXT"
+            },
+            {
+              name  = "DEPLOY"
+              value = "#{variables.DEPLOY}"
+              type  = "PLAINTEXT"
+            }
+          ])
         }
       }
     }
   }
-}
-
-resource "aws_cloudwatch_event_rule" "s3_trigger" {
-  name = "mxfactorial-build-trigger-${local.ID_ENV}"
-
-  event_pattern = jsonencode({
-    source      = ["aws.s3"]
-    detail-type = ["Object Created"]
-    detail = {
-      bucket = { name = [var.artifacts_bucket_name] }
-      object = { key = [{ prefix = local.BUILD_SOURCE_LOCATION }] }
-    }
-  })
-}
-
-resource "aws_cloudwatch_event_target" "codepipeline" {
-  rule     = aws_cloudwatch_event_rule.s3_trigger.name
-  arn      = aws_codepipeline.build.arn
-  role_arn = aws_iam_role.eventbridge_pipeline.arn
 }
 
 resource "aws_iam_role" "codepipeline" {
@@ -119,39 +132,6 @@ resource "aws_iam_role_policy" "codepipeline" {
           "codebuild:StartBuild"
         ]
         Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role" "eventbridge_pipeline" {
-  name = "eventbridge-pipeline-${local.ID_ENV}"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "events.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "eventbridge_pipeline" {
-  name = "eventbridge-pipeline-${local.ID_ENV}"
-  role = aws_iam_role.eventbridge_pipeline.id
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect   = "Allow"
-        Action   = "codepipeline:StartPipelineExecution"
-        Resource = aws_codepipeline.build.arn
       }
     ]
   })

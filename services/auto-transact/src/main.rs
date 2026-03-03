@@ -16,12 +16,10 @@ use uribuilder::Uri;
 const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 
 fn retry_config(service_name: &str) -> RetryConfig {
-    let max_retries: u32 = env::var("AUTO_TRANSACT_MAX_RETRIES")
-        .unwrap_or("3".to_string())
+    let max_retries: u32 = envvar::optional("AUTO_TRANSACT_MAX_RETRIES", "3")
         .parse()
         .unwrap_or(3);
-    let delay_ms: u64 = env::var("AUTO_TRANSACT_RETRY_DELAY_MS")
-        .unwrap_or("1000".to_string())
+    let delay_ms: u64 = envvar::optional("AUTO_TRANSACT_RETRY_DELAY_MS", "1000")
         .parse()
         .unwrap_or(1000);
     RetryConfig {
@@ -39,15 +37,10 @@ async fn process_transaction(transaction: Transaction) -> Result<(), String> {
     let rule_body = serde_json::to_string(&transaction)
         .map_err(|e| format!("serialize for rule failed: {}", e))?;
 
-    let rule_response = client
+    let rule_text = client
         .post(rule_uri, rule_body)
         .await
         .map_err(|e| format!("rule request failed: {:?}", e))?;
-
-    let rule_text = rule_response
-        .text()
-        .await
-        .map_err(|e| format!("rule response read failed: {}", e))?;
 
     let rule_applied: IntraTransaction = serde_json::from_str(&rule_text)
         .map_err(|e| format!("rule response parse failed: {}", e))?;
@@ -69,12 +62,8 @@ async fn process_transaction(transaction: Transaction) -> Result<(), String> {
         let uri = create_uri.clone();
         let body = create_body.clone();
         async move {
-            let response = client
+            client
                 .post(uri, body)
-                .await
-                .map_err(|e| -> Box<dyn std::error::Error + Send + Sync> { Box::new(e) })?;
-            response
-                .text()
                 .await
                 .map_err(|e| -> Box<dyn std::error::Error + Send + Sync> { Box::new(e) })
         }
@@ -180,8 +169,7 @@ async fn queue_worker(queue: Arc<dyn Queue>) {
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let readiness_check_path = env::var(READINESS_CHECK_PATH)
-        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+    let readiness_check_path = envvar::required(READINESS_CHECK_PATH).unwrap();
 
     let conn_uri = DB::create_conn_uri_from_env_vars();
     let pool = DB::new_pool(&conn_uri).await;
@@ -205,8 +193,8 @@ async fn main() {
         )
         .with_state(pool);
 
-    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
-    let port = env::var("AUTO_TRANSACT_PORT").unwrap();
+    let hostname_or_ip = envvar::optional("HOSTNAME_OR_IP", "0.0.0.0");
+    let port = envvar::required("AUTO_TRANSACT_PORT").unwrap();
     let serve_addr = format!("{hostname_or_ip}:{port}");
 
     let mut addrs_iter = serve_addr.to_socket_addrs().unwrap_or(

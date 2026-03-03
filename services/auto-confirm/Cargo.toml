@@ -16,6 +16,7 @@ tokio = { version = "1.49", default-features = false, features = [
 	"macros",
 ] }
 unicode-segmentation = "1.12"
+envvar = { path = "../../crates/envvar" }
 types = { path = "../../crates/types" }
 pg = { path = "../../crates/pg" }
 service = { path = "../../crates/service" }

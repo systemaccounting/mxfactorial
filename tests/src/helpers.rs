@@ -55,11 +55,10 @@ pub async fn create_transaction() -> Transaction {
     );
     let approve_request_body_json = json!(approve_request_body).to_string();
     let client = Client::new();
-    let approve_request_response = client
+    let approve_request_response_body = client
         .post(approve_request_uri, approve_request_body_json)
         .await
         .unwrap();
-    let approve_request_response_body = approve_request_response.text().await.unwrap();
     let approve_request: IntraTransaction =
         serde_json::from_str(&approve_request_response_body).unwrap();
     approve_request.transaction
@@ -72,7 +71,7 @@ pub async fn get_cached_account_rule(account: &str) -> String {
     if env::var("AWS_LAMBDA_FUNCTION_NAME").is_ok() {
         ddb_query(&key).await.remove(0)
     } else {
-        let client = cache::RedisClient::new().await;
+        let client = cache::RedisClient::new().await.unwrap();
         client.init().await.unwrap();
         client.smembers(&key).await.unwrap().remove(0)
     }
@@ -85,7 +84,7 @@ pub async fn set_cached_account_rule(account: &str, old: &str, new: &str) {
         let sk = old_json["id"].as_str().unwrap();
         ddb_put(&key, sk, new).await;
     } else {
-        let client = cache::RedisClient::new().await;
+        let client = cache::RedisClient::new().await.unwrap();
         client.init().await.unwrap();
         client.srem(&key, old).await.unwrap();
         client.sadd(&key, new).await.unwrap();

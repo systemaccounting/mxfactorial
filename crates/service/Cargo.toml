@@ -8,10 +8,14 @@ description = "service"
 [dependencies]
 types = { path = "../types" }
 rust_decimal = { version = "1.40", default-features = false }
+envvar = { path = "../envvar" }
 pg = { path = "../pg" }
 cognitoidp = { path = "../cognitoidp" }
 cache = { path = "../cache" }
+axum = "0.8"
+serde_json = "1"
 
 [dev-dependencies]
 mockall = "0.14"
 tokio = { version = "1.49", default-features = false, features = ["macros"] }
+http-body-util = "0.1"

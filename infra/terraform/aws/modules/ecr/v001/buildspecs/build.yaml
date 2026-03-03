@@ -6,6 +6,11 @@ phases:
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
       - export SHORT_SHA=$(echo ${CODEBUILD_RESOLVED_SOURCE_VERSION:-$CODEBUILD_BUILD_ID} | sed 's/.*://' | cut -c1-7)
       - export ECR_URI=$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ENV_ID/$ENV/$SERVICE_NAME
+      - |
+        if [ "${DEPLOY:-false}" = "true" ]; then
+          if [ "$DEPLOY_TARGET" = "lambda" ]; then export DEPLOY_LAMBDA=true; fi
+          if [ "$DEPLOY_TARGET" = "ecs" ]; then export DEPLOY_ECS=true; fi
+        fi
   build:
     commands:
       - echo "building $SERVICE_NAME (RUN_TESTS=$RUN_TESTS, PUSH_IMAGE=$PUSH_IMAGE)..."

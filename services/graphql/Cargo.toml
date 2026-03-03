@@ -19,6 +19,7 @@ aws_lambda_events = { version = "1.0", default-features = false, features = [
 ] }
 tower-http = { version = "0.6", features = ["cors"] }
 http = "1.4"
+envvar = { path = "../../crates/envvar" }
 shutdown = { path = "../../crates/shutdown" }
 futures-util = "0.3"
 wsclient = { path = "../../crates/wsclient" }

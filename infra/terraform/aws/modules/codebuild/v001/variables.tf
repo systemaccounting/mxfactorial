@@ -9,6 +9,9 @@ variable "buildspec" {}
 variable "artifacts_bucket_arn" {}
 variable "ecr_repository_arn" {}
 variable "lambda_function_arn" {}
+variable "deploy_target" {
+  default = "none"
+}
 variable "ecs_cluster_arn" {
   default = ""
 }

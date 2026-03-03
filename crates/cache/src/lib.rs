@@ -25,6 +25,12 @@ pub enum CacheError {
     DeserializationError(String),
 }
 
+impl From<String> for CacheError {
+    fn from(s: String) -> Self {
+        CacheError::ConnectionError(s)
+    }
+}
+
 #[async_trait]
 pub trait Cache: Send + Sync {
     // transaction item rules by state
@@ -123,7 +129,13 @@ pub async fn new() -> Option<Arc<dyn Cache>> {
             }
         }
     } else if env::var("REDIS_HOST").is_ok() {
-        let client = RedisClient::new().await;
+        let client = match RedisClient::new().await {
+            Ok(c) => c,
+            Err(e) => {
+                tracing::warn!("redis client creation failed: {}", e);
+                return None;
+            }
+        };
         if let Err(e) = client.init().await {
             tracing::warn!("redis init failed: {}", e);
             None

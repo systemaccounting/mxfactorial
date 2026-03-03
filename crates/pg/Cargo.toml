@@ -12,11 +12,13 @@ tokio-postgres = { version = "0.7", features = [
 	"with-chrono-0_4",
 	"with-geo-types-0_7",
 ] }
+envvar = { path = "../envvar" }
 types = { path = "../types" }
 serde = { version = "1.0", features = ["derive"] }
 serde-aux = { version = "4.7", default-features = false }
 rust_decimal = { version = "1.40", features = ["db-tokio-postgres"] }
 geo-types = "0.7"
+tracing = "0.1"
 chrono = "0.4"
 mockall = "0.14"
 

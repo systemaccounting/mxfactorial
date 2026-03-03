@@ -5,9 +5,9 @@ use axum::{
     Router,
 };
 use pg::postgres::{ConnectionPool, DB};
-use service::Service;
+use service::{Service, ServiceError};
 use shutdown::shutdown_signal;
-use std::{env, net::ToSocketAddrs};
+use std::net::ToSocketAddrs;
 use tokio::net::TcpListener;
 use types::request_response::{IntraTransaction, RequestApprove};
 
@@ -17,26 +17,28 @@ const READINESS_CHECK_PATH: &str = "READINESS_CHECK_PATH";
 async fn handle_event(
     State(pool): State<ConnectionPool>,
     event: Json<RequestApprove>,
-) -> Result<axum::Json<IntraTransaction>, StatusCode> {
+) -> Result<axum::Json<IntraTransaction>, ServiceError> {
     let client_request = event.0;
 
-    let conn = pool.get_conn().await;
+    let conn = pool
+        .get_conn()
+        .await
+        .map_err(|_| ServiceError::internal("failed to get db connection"))?;
 
     let svc = Service::new(&conn, None);
 
-    let request_id = client_request.id.parse::<i32>().unwrap();
+    let request_id = client_request
+        .id
+        .parse::<i32>()
+        .map_err(|e| ServiceError::bad_request(&format!("invalid request id: {e}")))?;
 
     let transaction_request = svc
         .get_full_transaction_by_id(request_id)
         .await
-        .map_err(|e| {
-            tracing::error!("error: {}", e);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+        .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
     if transaction_request.equilibrium_time.is_some() {
-        println!("transaction previously approved");
-        return Err(StatusCode::BAD_REQUEST);
+        return Err(ServiceError::bad_request("transaction previously approved"));
     }
 
     let auth_account = client_request.auth_account;
@@ -45,7 +47,7 @@ async fn handle_event(
     let approved_transaction_request = svc
         .approve(auth_account, approver_role, transaction_request)
         .await
-        .unwrap(); // todo: handle error
+        .map_err(|e| ServiceError::internal(&e.to_string()))?;
 
     Ok(axum::Json(approved_transaction_request))
 }
@@ -54,8 +56,7 @@ async fn handle_event(
 async fn main() {
     tracing_subscriber::fmt::init();
 
-    let readiness_check_path = env::var(READINESS_CHECK_PATH)
-        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+    let readiness_check_path = envvar::required(READINESS_CHECK_PATH).unwrap();
 
     let conn_uri = DB::create_conn_uri_from_env_vars();
 
@@ -69,9 +70,9 @@ async fn main() {
         )
         .with_state(pool);
 
-    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
+    let hostname_or_ip = envvar::optional("HOSTNAME_OR_IP", "0.0.0.0");
 
-    let port = env::var("REQUEST_APPROVE_PORT").unwrap();
+    let port = envvar::required("REQUEST_APPROVE_PORT").unwrap();
 
     let serve_addr = format!("{hostname_or_ip}:{port}");
 

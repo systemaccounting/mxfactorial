@@ -7,6 +7,13 @@ locals {
   SERVICES_ZIP               = local.PROJECT_CONF.scripts.env_var.set.SERVICES_ZIP.default
   INTEG_TEST_OBJECT_KEY_PATH = local.STORAGE_ENV_VAR.INTEG_TEST_OBJECT_KEY_PATH.default
   INTEG_SOURCE_LOCATION      = "${local.INTEG_TEST_OBJECT_KEY_PATH}/${local.SERVICES_ZIP}"
+
+  # map service name -> deploy_target from project.yaml
+  service_deploy_targets = merge(
+    { for k, v in try(local.PROJECT_CONF.services, {}) : k => v.deploy_target if try(v.type, "") == "app" },
+    { for k, v in try(local.PROJECT_CONF.migrations, {}) : k => v.deploy_target if try(v.type, "") == "app" },
+    try(local.PROJECT_CONF.client.type, "") == "app" ? { "client" = local.PROJECT_CONF.client.deploy_target } : {}
+  )
 }
 
 data "aws_caller_identity" "current" {}
@@ -27,6 +34,7 @@ module "codebuild_projects" {
   artifacts_bucket_arn = var.artifacts_bucket_arn
   ecr_repository_arn   = "arn:aws:ecr:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:repository/${local.ID_ENV_PREFIX}/${each.value}"
   lambda_function_arn  = "arn:aws:lambda:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:function:${each.value}-${local.ID_ENV}"
+  deploy_target        = try(local.service_deploy_targets[each.value], "none")
 }
 
 module "codepipeline" {

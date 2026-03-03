@@ -34,7 +34,10 @@ fn approve_item_between_accounts(
     let debitor = rule_instance.variable_values[0].clone();
     let creditor = rule_instance.variable_values[1].clone();
     let item_id = rule_instance.variable_values[2].clone();
-    let approver_role: AccountRole = rule_instance.variable_values[3].clone().parse().unwrap();
+    let approver_role: AccountRole = rule_instance.variable_values[3]
+        .clone()
+        .parse()
+        .map_err(|e| format!("unsupported approver role: {e}"))?;
     let approver_account = rule_instance.variable_values[4].clone();
 
     // match debitor/creditor/item_id on transaction_item and approver on approval
@@ -52,6 +55,8 @@ fn approve_item_between_accounts(
     Ok(())
 }
 
+// approveAnyCreditItem: auto-approves creditor items
+// variable_values = [CREDITOR, APPROVER_ROLE, APPROVER_NAME]
 fn approve_any_credit_item(
     rule_instance: &ApprovalRuleInstance,
     transaction_item: &TransactionItem,
@@ -59,7 +64,10 @@ fn approve_any_credit_item(
     approval_time: &TZTime,
 ) -> Result<(), Box<dyn Error>> {
     let _creditor = rule_instance.variable_values[0].clone();
-    let approver_role: AccountRole = rule_instance.variable_values[1].clone().parse().unwrap();
+    let approver_role: AccountRole = rule_instance.variable_values[1]
+        .clone()
+        .parse()
+        .map_err(|e| format!("unsupported approver role: {e}"))?;
     let approver_account = rule_instance.variable_values[2].clone();
     let rule_instance_id = rule_instance.id.clone();
     let transaction_id = transaction_item.transaction_id.clone();
@@ -75,5 +83,112 @@ fn approve_any_credit_item(
         Ok(())
     } else {
         Err("unmatched approver rule instance from db".into())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_approval_rule_instance(
+        rule_name: &str,
+        variable_values: Vec<&str>,
+    ) -> ApprovalRuleInstance {
+        ApprovalRuleInstance {
+            id: Some("1".to_string()),
+            rule_name: rule_name.to_string(),
+            rule_instance_name: "TestRule".to_string(),
+            variable_values: variable_values.iter().map(|s| s.to_string()).collect(),
+            account_role: AccountRole::Creditor,
+            account_name: "GroceryStore".to_string(),
+            disabled_time: None,
+            removed_time: None,
+            created_at: None,
+        }
+    }
+
+    fn test_transaction_item() -> TransactionItem {
+        TransactionItem {
+            id: None,
+            transaction_id: None,
+            item_id: "bread".to_string(),
+            price: "3.000".to_string(),
+            quantity: "2.000".to_string(),
+            rule_instance_id: None,
+            rule_exec_ids: Some(vec![]),
+            unit_of_measurement: None,
+            units_measured: None,
+            debitor: "JacobWebb".to_string(),
+            creditor: "GroceryStore".to_string(),
+            debitor_profile_id: None,
+            creditor_profile_id: None,
+            debitor_approval_time: None,
+            creditor_approval_time: None,
+            debitor_rejection_time: None,
+            creditor_rejection_time: None,
+            debitor_expiration_time: None,
+            creditor_expiration_time: None,
+            approvals: None,
+        }
+    }
+
+    fn test_approval() -> Approval {
+        Approval {
+            id: None,
+            rule_instance_id: None,
+            transaction_id: None,
+            transaction_item_id: None,
+            account_name: "GroceryStore".to_string(),
+            account_role: AccountRole::Creditor,
+            device_id: None,
+            device_latlng: None,
+            approval_time: None,
+            rejection_time: None,
+            expiration_time: None,
+        }
+    }
+
+    #[test]
+    fn it_errors_on_unsupported_role_in_approve_any_credit_item() {
+        let rule_instance = test_approval_rule_instance(
+            "approveAnyCreditItem",
+            vec!["GroceryStore", "not_a_role", "GroceryStore"],
+        );
+        let tr_item = test_transaction_item();
+        let mut approval = test_approval();
+        let approval_time = TZTime::now();
+
+        let result = match_approval_rule(&rule_instance, &tr_item, &mut approval, &approval_time);
+
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("unsupported approver role"));
+    }
+
+    #[test]
+    fn it_errors_on_unsupported_role_in_approve_item_between_accounts() {
+        let rule_instance = test_approval_rule_instance(
+            "approveItemBetweenAccounts",
+            vec![
+                "JacobWebb",
+                "GroceryStore",
+                "bread",
+                "not_a_role",
+                "GroceryStore",
+            ],
+        );
+        let tr_item = test_transaction_item();
+        let mut approval = test_approval();
+        let approval_time = TZTime::now();
+
+        let result = match_approval_rule(&rule_instance, &tr_item, &mut approval, &approval_time);
+
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("unsupported approver role"));
     }
 }

@@ -365,6 +365,7 @@ name = "auto-confirm"
 version = "0.1.0"
 dependencies = [
  "aws_lambda_events",
+ "envvar",
  "fakeit",
  "lambda_runtime",
  "openssl",
@@ -384,6 +385,7 @@ name = "auto-transact"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "httpclient",
  "openssl",
  "pg",
@@ -883,6 +885,7 @@ name = "balance-by-account"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "openssl",
  "pg",
  "service",
@@ -1077,6 +1080,7 @@ dependencies = [
  "async-trait",
  "aws-config",
  "aws-sdk-dynamodb",
+ "envvar",
  "fred",
  "serde_json",
  "thiserror 2.0.17",
@@ -1463,6 +1467,10 @@ checksum = "7268b386296a025e474d5140678f75d6de9493ae55a5d709eeb9dd08149945e1"
 dependencies = [
  "cfg-if",
 ]
+
+[[package]]
+name = "envvar"
+version = "0.1.0"
 
 [[package]]
 name = "equivalent"
@@ -1858,6 +1866,7 @@ dependencies = [
  "async-stream",
  "aws_lambda_events",
  "axum",
+ "envvar",
  "futures-util",
  "http 1.4.0",
  "httpclient",
@@ -2083,6 +2092,8 @@ dependencies = [
  "httpmock",
  "reqwest 0.13.1",
  "serde",
+ "serde_json",
+ "thiserror 2.0.17",
  "tokio",
 ]
 
@@ -2648,6 +2659,7 @@ name = "measure"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "futures",
  "http 1.4.0",
  "pg",
@@ -3026,6 +3038,7 @@ dependencies = [
  "bb8-postgres",
  "chrono",
  "dotenvy",
+ "envvar",
  "geo-types",
  "mockall",
  "regex",
@@ -3036,6 +3049,7 @@ dependencies = [
  "serial_test",
  "tokio",
  "tokio-postgres",
+ "tracing",
  "types",
 ]
 
@@ -3275,6 +3289,7 @@ name = "pubsub"
 version = "0.1.0"
 dependencies = [
  "async-trait",
+ "envvar",
  "fred",
  "thiserror 2.0.17",
  "tokio",
@@ -3299,6 +3314,7 @@ dependencies = [
  "async-trait",
  "aws-config",
  "aws-sdk-sqs",
+ "envvar",
  "fred",
  "thiserror 2.0.17",
  "tracing",
@@ -3527,6 +3543,7 @@ name = "request-approve"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "openssl",
  "pg",
  "service",
@@ -3542,6 +3559,7 @@ name = "request-by-id"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "openssl",
  "pg",
  "service",
@@ -3558,6 +3576,7 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "cache",
+ "envvar",
  "httpclient",
  "openssl",
  "pg",
@@ -3577,6 +3596,7 @@ name = "requests-by-account"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "openssl",
  "pg",
  "service",
@@ -3716,6 +3736,7 @@ dependencies = [
  "axum",
  "cache",
  "chrono",
+ "envvar",
  "nanoid",
  "openssl",
  "pg",
@@ -4129,11 +4150,15 @@ dependencies = [
 name = "service"
 version = "0.1.0"
 dependencies = [
+ "axum",
  "cache",
  "cognitoidp",
+ "envvar",
+ "http-body-util",
  "mockall",
  "pg",
  "rust_decimal",
+ "serde_json",
  "tokio",
  "types",
 ]
@@ -4856,6 +4881,7 @@ name = "transaction-by-id"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "openssl",
  "pg",
  "service",
@@ -4871,6 +4897,7 @@ name = "transactions-by-account"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "envvar",
  "openssl",
  "pg",
  "service",
@@ -4992,6 +5019,7 @@ checksum = "8ecb6da28b8a351d773b68d5825ac39017e680750f980f3a1a85cd8dd28a47c1"
 name = "uribuilder"
 version = "0.1.0"
 dependencies = [
+ "envvar",
  "url",
 ]
 

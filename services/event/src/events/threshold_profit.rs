@@ -46,7 +46,7 @@ pub async fn handle_threshold_profit(
     queue: &Arc<dyn queue::Queue>,
     transaction_id: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let conn = pool.get_conn().await;
+    let conn = pool.get_conn().await?;
     let tx_id: i32 = transaction_id.parse()?;
 
     // get all accounts involved in this transaction

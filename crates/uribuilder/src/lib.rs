@@ -41,7 +41,7 @@ impl Uri {
     }
 
     pub fn new_from_env_var(env_var: &str) -> Self {
-        let uri = std::env::var(env_var).unwrap();
+        let uri = envvar::required(env_var).unwrap();
         Self::new(&uri)
     }
 

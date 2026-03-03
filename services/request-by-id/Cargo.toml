@@ -9,6 +9,7 @@ axum = "0.8"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tokio = { version = "1.49", features = ["macros", "rt-multi-thread"] }
+envvar = { path = "../../crates/envvar" }
 shutdown = { path = "../../crates/shutdown" }
 pg = { path = "../../crates/pg" }
 service = { path = "../../crates/service" }

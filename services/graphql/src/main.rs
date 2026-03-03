@@ -19,7 +19,7 @@ use futures_util::{stream::Stream, StreamExt};
 use httpclient::HttpClient as Client;
 use serde_json::json;
 use shutdown::shutdown_signal;
-use std::{env, net::ToSocketAddrs, result::Result};
+use std::{env, net::ToSocketAddrs};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tungstenite::error::Error as WsError;
@@ -36,13 +36,16 @@ impl Query {
         ctx: &Context<'_>,
         #[graphql(name = "account_name")] account_name: String,
         #[graphql(name = "auth_account")] auth_account: String,
-    ) -> String {
-        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+    ) -> Result<String, Error> {
+        let account_from_token = get_auth_account(ctx, auth_account)?;
         let uri = Uri::new_from_env_var("BALANCE_BY_ACCOUNT_URL").to_string();
         let body = account_auth(account_name, account_from_token);
         let client = Client::new();
-        let response = client.post(uri, body).await.unwrap();
-        response.text().await.unwrap()
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        Ok(response_body)
     }
 
     #[graphql(name = "transactionsByAccount")]
@@ -51,15 +54,18 @@ impl Query {
         ctx: &Context<'_>,
         #[graphql(name = "account_name")] account_name: String,
         #[graphql(name = "auth_account")] auth_account: String,
-    ) -> Vec<Transaction> {
-        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+    ) -> Result<Vec<Transaction>, Error> {
+        let account_from_token = get_auth_account(ctx, auth_account)?;
         let uri = Uri::new_from_env_var("TRANSACTIONS_BY_ACCOUNT_URL").to_string();
         let body = account_auth(account_name, account_from_token);
         let client = Client::new();
-        let response = client.post(uri, body).await.unwrap();
-        let response_body = response.text().await.unwrap();
-        let response_body: IntraTransactions = serde_json::from_str(&response_body).unwrap();
-        response_body.transactions.0
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        let parsed: IntraTransactions = serde_json::from_str(&response_body)
+            .map_err(|e| Error::new(format!("failed to parse response: {e}")))?;
+        Ok(parsed.transactions.0)
     }
 
     #[graphql(name = "transactionByID")]
@@ -69,15 +75,18 @@ impl Query {
         #[graphql(name = "id")] id: String,
         #[graphql(name = "account_name")] account_name: String,
         #[graphql(name = "auth_account")] auth_account: String,
-    ) -> Transaction {
-        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+    ) -> Result<Transaction, Error> {
+        let account_from_token = get_auth_account(ctx, auth_account)?;
         let uri = Uri::new_from_env_var("TRANSACTION_BY_ID_URL").to_string();
         let body = id_account_auth(id, account_name, account_from_token);
         let client = Client::new();
-        let response = client.post(uri, body).await.unwrap();
-        let response_body = response.text().await.unwrap();
-        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
-        intra_transaction.transaction
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body)
+            .map_err(|e| Error::new(format!("failed to parse response: {e}")))?;
+        Ok(intra_transaction.transaction)
     }
 
     #[graphql(name = "requestsByAccount")]
@@ -86,15 +95,18 @@ impl Query {
         ctx: &Context<'_>,
         #[graphql(name = "account_name")] account_name: String,
         #[graphql(name = "auth_account")] auth_account: String,
-    ) -> Vec<Transaction> {
-        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+    ) -> Result<Vec<Transaction>, Error> {
+        let account_from_token = get_auth_account(ctx, auth_account)?;
         let uri = Uri::new_from_env_var("REQUESTS_BY_ACCOUNT_URL").to_string();
-        let client = Client::new();
         let body = account_auth(account_name, account_from_token);
-        let response = client.post(uri, body).await.unwrap();
-        let response_body = response.text().await.unwrap();
-        let response_body: IntraTransactions = serde_json::from_str(&response_body).unwrap();
-        response_body.transactions.0
+        let client = Client::new();
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        let parsed: IntraTransactions = serde_json::from_str(&response_body)
+            .map_err(|e| Error::new(format!("failed to parse response: {e}")))?;
+        Ok(parsed.transactions.0)
     }
 
     #[graphql(name = "requestByID")]
@@ -104,29 +116,35 @@ impl Query {
         #[graphql(name = "id")] id: String,
         #[graphql(name = "account_name")] account_name: String,
         #[graphql(name = "auth_account")] auth_account: String,
-    ) -> Transaction {
-        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+    ) -> Result<Transaction, Error> {
+        let account_from_token = get_auth_account(ctx, auth_account)?;
         let uri = Uri::new_from_env_var("REQUEST_BY_ID_URL").to_string();
         let body = id_account_auth(id, account_name, account_from_token);
         let client = Client::new();
-        let response = client.post(uri, body).await.unwrap();
-        let response_body = response.text().await.unwrap();
-        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
-        intra_transaction.transaction
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body)
+            .map_err(|e| Error::new(format!("failed to parse response: {e}")))?;
+        Ok(intra_transaction.transaction)
     }
 
     #[graphql(name = "rules")]
     async fn rules(
         &self,
         #[graphql(name = "transaction")] transaction: Transaction,
-    ) -> Transaction {
+    ) -> Result<Transaction, Error> {
         let uri = Uri::new_from_env_var("RULE_URL").to_string();
-        let client = Client::new();
         let body = json!(transaction).to_string();
-        let response = client.post(uri, body).await.unwrap();
-        let response_body = response.text().await.unwrap();
-        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
-        intra_transaction.transaction
+        let client = Client::new();
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body)
+            .map_err(|e| Error::new(format!("failed to parse response: {e}")))?;
+        Ok(intra_transaction.transaction)
     }
 }
 
@@ -139,16 +157,19 @@ impl Mutation {
         ctx: &Context<'_>,
         #[graphql(name = "transaction")] transaction: Transaction,
         #[graphql(name = "auth_account")] auth_account: String,
-    ) -> Transaction {
-        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+    ) -> Result<Transaction, Error> {
+        let account_from_token = get_auth_account(ctx, auth_account)?;
         let uri = Uri::new_from_env_var("REQUEST_CREATE_URL").to_string();
-        let client = Client::new();
         let request = IntraTransaction::new(account_from_token, transaction);
         let body = json!(request).to_string();
-        let response = client.post(uri, body).await.unwrap();
-        let response_body = response.text().await.unwrap();
-        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
-        intra_transaction.transaction
+        let client = Client::new();
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body)
+            .map_err(|e| Error::new(format!("failed to parse response: {e}")))?;
+        Ok(intra_transaction.transaction)
     }
 
     async fn approve_request(
@@ -158,10 +179,9 @@ impl Mutation {
         #[graphql(name = "account_name")] account_name: String,
         #[graphql(name = "account_role")] account_role: AccountRole,
         #[graphql(name = "auth_account")] auth_account: String,
-    ) -> Transaction {
-        let account_from_token = get_auth_account(ctx, auth_account).unwrap();
+    ) -> Result<Transaction, Error> {
+        let account_from_token = get_auth_account(ctx, auth_account)?;
         let uri = Uri::new_from_env_var("REQUEST_APPROVE_URL").to_string();
-        let client = Client::new();
         let request = RequestApprove::new(
             account_from_token,
             transaction_id,
@@ -169,10 +189,14 @@ impl Mutation {
             account_role,
         );
         let body = json!(request).to_string();
-        let response = client.post(uri, body).await.unwrap();
-        let response_body = response.text().await.unwrap();
-        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body).unwrap();
-        intra_transaction.transaction
+        let client = Client::new();
+        let response_body = client
+            .post(uri, body)
+            .await
+            .map_err(|e| Error::new(e.to_string()))?;
+        let intra_transaction: IntraTransaction = serde_json::from_str(&response_body)
+            .map_err(|e| Error::new(format!("failed to parse response: {e}")))?;
+        Ok(intra_transaction.transaction)
     }
 }
 
@@ -188,13 +212,20 @@ impl Subscription {
         #[graphql(name = "region")] region: Option<String>,
         #[graphql(name = "municipality")] municipality: Option<String>,
     ) -> impl Stream<Item = f64> {
-        let resource = env::var("MEASURE_RESOURCE").unwrap();
-        let uri = Uri::new_from_env_var("MEASURE_URL")
-            .with_path(resource.as_str())
-            .with_ws()
-            .to_string();
-        let ws_client = WsClient::new(uri, "gdp".to_string(), date, country, region, municipality);
         stream! {
+            let resource = match envvar::required("MEASURE_RESOURCE") {
+                Ok(r) => r,
+                Err(e) => {
+                    tracing::error!("{}", e);
+                    return;
+                }
+            };
+            let uri = Uri::new_from_env_var("MEASURE_URL")
+                .with_path(resource.as_str())
+                .with_ws()
+                .to_string();
+            let ws_client = WsClient::new(uri, "gdp".to_string(), date, country, region, municipality);
+
             let measure_socket = match ws_client.connect().await {
                 Ok(ws) => {
                     tracing::info!("graphql websocket connection created with measure");
@@ -218,9 +249,15 @@ impl Subscription {
                     Some(Ok(msg)) => {
                         match msg {
                             tungstenite::Message::Text(text) => {
-                                let gdp: f64 = serde_json::from_str(&text).unwrap();
-                                tracing::info!("sending gdp from measure: {}", gdp);
-                                yield gdp;
+                                match serde_json::from_str::<f64>(&text) {
+                                    Ok(gdp) => {
+                                        tracing::info!("sending gdp from measure: {}", gdp);
+                                        yield gdp;
+                                    }
+                                    Err(e) => {
+                                        tracing::error!("failed to parse gdp value from measure: {}", e);
+                                    }
+                                }
                             }
                             _ => {
                                 tracing::info!("received non-text message from measure: {:?}", msg);
@@ -267,36 +304,38 @@ fn id_account_auth(id: String, account_name: String, auth_account: String) -> St
 
 fn get_auth_account(ctx: &Context<'_>, account_from_request: String) -> Result<String, Error> {
     if env::var("ENABLE_API_AUTH") == Ok("true".to_string()) {
-        let headers = ctx.data::<HeaderMap>().unwrap();
-        let amzn_ctx = get_amzn_ctx_from_headers(headers);
-        match amzn_ctx.authorizer {
-            Some(authorizer) => Ok(authorizer
-                .jwt
-                .unwrap()
-                .claims
-                .get("cognito:username")
-                .unwrap()
-                .to_string()),
-            None => {
-                tracing::error!("error: missing authorizer");
-                Err("error: missing authorizer".into())
-            }
-        }
+        let headers = ctx.data::<HeaderMap>()?;
+        let amzn_ctx = get_amzn_ctx_from_headers(headers)?;
+        let authorizer = amzn_ctx
+            .authorizer
+            .ok_or_else(|| Error::new("missing authorizer"))?;
+        let jwt = authorizer
+            .jwt
+            .ok_or_else(|| Error::new("missing jwt in authorizer"))?;
+        let username = jwt
+            .claims
+            .get("cognito:username")
+            .ok_or_else(|| Error::new("missing cognito:username claim"))?;
+        Ok(username.to_string())
     } else {
         Ok(account_from_request)
     }
 }
 
-fn get_amzn_ctx_from_headers(headers: &HeaderMap) -> ApiGatewayV2httpRequestContext {
-    headers
+fn get_amzn_ctx_from_headers(headers: &HeaderMap) -> Result<ApiGatewayV2httpRequestContext, Error> {
+    let value = headers
         .get("x-amzn-request-context")
-        .and_then(|value| serde_json::from_str(value.to_str().unwrap()).ok())
-        .unwrap()
+        .ok_or_else(|| Error::new("missing x-amzn-request-context header"))?;
+    let value_str = value
+        .to_str()
+        .map_err(|e| Error::new(format!("invalid x-amzn-request-context header: {e}")))?;
+    serde_json::from_str(value_str)
+        .map_err(|e| Error::new(format!("failed to parse x-amzn-request-context: {e}")))
 }
 
 async fn graphiql() -> impl IntoResponse {
-    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
-    let graphql_ws_resource = std::env::var("GRAPHQL_WS_RESOURCE").unwrap();
+    let graphql_resource = envvar::required("GRAPHQL_RESOURCE").unwrap();
+    let graphql_ws_resource = envvar::required("GRAPHQL_WS_RESOURCE").unwrap();
     response::Html(
         http::GraphiQLSource::build()
             .endpoint(format!("/{graphql_resource}").as_str())
@@ -340,13 +379,12 @@ async fn main() {
         tracing_subscriber::fmt().init();
     }
 
-    let readiness_check_path = env::var(READINESS_CHECK_PATH)
-        .unwrap_or_else(|_| panic!("{READINESS_CHECK_PATH} variable assignment"));
+    let readiness_check_path = envvar::required(READINESS_CHECK_PATH).unwrap();
 
     let schema = Schema::build(Query, Mutation, Subscription).finish();
 
-    let graphql_resource = std::env::var("GRAPHQL_RESOURCE").unwrap();
-    let graphql_ws_resource = std::env::var("GRAPHQL_WS_RESOURCE").unwrap();
+    let graphql_resource = envvar::required("GRAPHQL_RESOURCE").unwrap();
+    let graphql_ws_resource = envvar::required("GRAPHQL_WS_RESOURCE").unwrap();
 
     let app = Router::new()
         .route("/", get(graphiql))
@@ -362,9 +400,9 @@ async fn main() {
         .layer(CorsLayer::permissive())
         .with_state(schema);
 
-    let hostname_or_ip = env::var("HOSTNAME_OR_IP").unwrap_or("0.0.0.0".to_string());
+    let hostname_or_ip = envvar::optional("HOSTNAME_OR_IP", "0.0.0.0");
 
-    let port = env::var("GRAPHQL_PORT").unwrap();
+    let port = envvar::required("GRAPHQL_PORT").unwrap();
 
     let serve_addr = format!("{hostname_or_ip}:{port}");
 

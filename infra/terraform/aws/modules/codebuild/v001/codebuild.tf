@@ -41,12 +41,12 @@ resource "aws_codebuild_project" "default" {
       value = "true"
     }
     environment_variable {
-      name  = "DEPLOY_LAMBDA"
+      name  = "DEPLOY"
       value = "false"
     }
     environment_variable {
-      name  = "DEPLOY_ECS"
-      value = "false"
+      name  = "DEPLOY_TARGET"
+      value = var.deploy_target
     }
   }
 

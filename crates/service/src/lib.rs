@@ -1,3 +1,5 @@
+use axum::http::StatusCode;
+use axum::response::{IntoResponse, Response};
 use cache::Cache;
 use cognitoidp::CognitoJwkSet;
 use pg::model::ModelTrait;
@@ -14,6 +16,47 @@ use types::{
     transaction::{Transaction, Transactions},
     transaction_item::TransactionItems,
 };
+
+pub struct ServiceError {
+    status: StatusCode,
+    message: String,
+}
+
+impl ServiceError {
+    pub fn bad_request(message: &str) -> Self {
+        Self {
+            status: StatusCode::BAD_REQUEST,
+            message: message.to_string(),
+        }
+    }
+
+    pub fn not_found(message: &str) -> Self {
+        Self {
+            status: StatusCode::NOT_FOUND,
+            message: message.to_string(),
+        }
+    }
+
+    pub fn internal(message: &str) -> Self {
+        Self {
+            status: StatusCode::INTERNAL_SERVER_ERROR,
+            message: message.to_string(),
+        }
+    }
+}
+
+impl From<String> for ServiceError {
+    fn from(s: String) -> Self {
+        ServiceError::internal(&s)
+    }
+}
+
+impl IntoResponse for ServiceError {
+    fn into_response(self) -> Response {
+        let body = serde_json::json!({ "error": self.message });
+        (self.status, axum::Json(body)).into_response()
+    }
+}
 
 pub struct Service<'a, T: ModelTrait> {
     conn: &'a T,
@@ -177,7 +220,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
 
             let debitor_account_balance = debitor_funds_available
                 .get_account_balance(&debitor)
-                .unwrap();
+                .ok_or_else(|| format!("account balance not found for {debitor}"))?;
 
             if !debitor_account_balance.sufficient_balance(funds_required) {
                 let err_msg = &*format!(
@@ -279,7 +322,12 @@ impl<'a, T: ModelTrait> Service<'a, T> {
             },
         }
 
-        let transaction_id = request.clone().id.unwrap().parse::<i32>().unwrap();
+        let transaction_id = request
+            .clone()
+            .id
+            .ok_or("missing transaction id")?
+            .parse::<i32>()
+            .map_err(|e| format!("invalid transaction id: {e}"))?;
 
         // add approval time to transaction if not previously approved
         if approval_time.is_none() {
@@ -464,7 +512,7 @@ impl<'a, T: ModelTrait> Service<'a, T> {
 
     pub async fn get_json_web_key_set(&self) -> Result<Option<CognitoJwkSet>, Box<dyn Error>> {
         if env::var("ENABLE_API_AUTH") == Ok("true".to_string()) {
-            let uri = env::var("COGNITO_JWKS_URI").expect("msg: COGNITO_JWKS_URI not set");
+            let uri = envvar::required("COGNITO_JWKS_URI").unwrap();
             let jwks = CognitoJwkSet::new(uri.as_str()).await;
             match jwks {
                 Ok(jwks) => Ok(Some(jwks)),
@@ -663,6 +711,8 @@ impl<'a, T: ModelTrait> Service<'a, T> {
 mod tests {
     use std::{str::FromStr, vec};
 
+    use axum::response::IntoResponse;
+    use http_body_util::BodyExt;
     use mockall::predicate;
     use pg::model::MockModelTrait;
     use rust_decimal::Decimal;
@@ -679,6 +729,39 @@ mod tests {
         transaction::{Transaction, Transactions},
         transaction_item::{TransactionItem, TransactionItems},
     };
+
+    #[tokio::test]
+    async fn it_returns_400_with_json_error_for_bad_request() {
+        let err = super::ServiceError::bad_request("test error");
+        let response = err.into_response();
+        assert_eq!(response.status(), axum::http::StatusCode::BAD_REQUEST);
+        let body = response.into_body().collect().await.unwrap().to_bytes();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        assert_eq!(json["error"], "test error");
+    }
+
+    #[tokio::test]
+    async fn it_returns_404_with_json_error_for_not_found() {
+        let err = super::ServiceError::not_found("missing resource");
+        let response = err.into_response();
+        assert_eq!(response.status(), axum::http::StatusCode::NOT_FOUND);
+        let body = response.into_body().collect().await.unwrap().to_bytes();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        assert_eq!(json["error"], "missing resource");
+    }
+
+    #[tokio::test]
+    async fn it_returns_500_with_json_error_for_internal() {
+        let err = super::ServiceError::internal("server failure");
+        let response = err.into_response();
+        assert_eq!(
+            response.status(),
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR
+        );
+        let body = response.into_body().collect().await.unwrap().to_bytes();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        assert_eq!(json["error"], "server failure");
+    }
 
     #[tokio::test]
     async fn create_account_queries_by_account() {

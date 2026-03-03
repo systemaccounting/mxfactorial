@@ -138,8 +138,8 @@ use yq instead of jq for local json/yaml scripting
 
 codebuild projects are in infra/terraform/aws/modules/ci/v001. per-service builds in main.tf (sources codebuild module), integ tests in integ.tf (buildspec inlined). ci module is only used by init-dev
 
-buildspecs use runtime config via env vars (RUN_TESTS, PUSH_IMAGE, DEPLOY_LAMBDA, DEPLOY_ECS) set by `--environment-variables-override` in ecr-images.sh
+buildspecs use runtime config via env vars (RUN_TESTS, PUSH_IMAGE, DEPLOY, DEPLOY_TARGET). DEPLOY_TARGET is set per codebuild project in terraform. DEPLOY_LAMBDA/DEPLOY_ECS are derived in the buildspec from DEPLOY + DEPLOY_TARGET
 
-s3 upload to artifacts bucket auto-triggers codepipeline via eventbridge when using `--build --push` without `--service`
+`--build` without `--service` triggers codepipeline via `start-pipeline-execution` with pipeline variables. `--build --service <name>` starts a direct codebuild job with `--environment-variables-override`
 
 say "design" instead of "approach"

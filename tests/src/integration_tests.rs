@@ -620,6 +620,97 @@ mod tests {
 
     #[tokio::test]
     #[cfg_attr(not(feature = "integration_tests"), ignore)]
+    async fn it_returns_400_from_request_create_on_missing_author() {
+        _before_each();
+
+        let empty_items = types::transaction_item::TransactionItems(vec![
+            types::transaction_item::TransactionItem {
+                id: None,
+                transaction_id: None,
+                item_id: "bread".to_string(),
+                price: "3.000".to_string(),
+                quantity: "2.000".to_string(),
+                rule_instance_id: None,
+                rule_exec_ids: None,
+                unit_of_measurement: None,
+                units_measured: None,
+                debitor: "JacobWebb".to_string(),
+                creditor: "GroceryStore".to_string(),
+                debitor_profile_id: None,
+                creditor_profile_id: None,
+                debitor_approval_time: None,
+                creditor_approval_time: None,
+                debitor_rejection_time: None,
+                creditor_rejection_time: None,
+                debitor_expiration_time: None,
+                creditor_expiration_time: None,
+                approvals: None,
+            },
+        ]);
+
+        let err = r::create_request_http_raw("GroceryStore".to_string(), empty_items)
+            .await
+            .unwrap_err();
+
+        match err {
+            httpclient::ClientError::Downstream { status, .. } => assert_eq!(status, 400),
+            _ => panic!("expected downstream error"),
+        }
+    }
+
+    #[tokio::test]
+    #[cfg_attr(not(feature = "integration_tests"), ignore)]
+    async fn it_returns_400_from_request_approve_on_invalid_id() {
+        _before_each();
+
+        let err = r::approve_request_http_raw(
+            "not_a_number".to_string(),
+            "JacobWebb".to_string(),
+            "debitor".to_string(),
+            "JacobWebb".to_string(),
+        )
+        .await
+        .unwrap_err();
+
+        match err {
+            httpclient::ClientError::Downstream { status, message } => {
+                assert_eq!(status, 400);
+                assert!(message.contains("invalid request id"));
+            }
+            _ => panic!("expected downstream error"),
+        }
+    }
+
+    #[tokio::test]
+    #[cfg_attr(not(feature = "integration_tests"), ignore)]
+    async fn it_returns_400_from_request_approve_on_previously_approved() {
+        _before_each();
+
+        let transaction = h::create_transaction().await;
+        let transaction_id = transaction.id.unwrap();
+
+        let debitor = transaction.transaction_items.0[0].debitor.clone();
+
+        let err = r::approve_request_http_raw(
+            transaction_id,
+            debitor.clone(),
+            "debitor".to_string(),
+            debitor,
+        )
+        .await
+        .unwrap_err();
+
+        match err {
+            httpclient::ClientError::Downstream { status, message } => {
+                assert_eq!(status, 400);
+                assert!(message.contains("previously approved"));
+            }
+            _ => panic!("expected downstream error"),
+        }
+    }
+
+    #[tokio::test]
+    #[cfg_attr(not(feature = "integration_tests"), ignore)]
     async fn it_reads_rules_from_cache() {
         _before_each();
 

@@ -46,12 +46,7 @@ impl RedisPubSub {
 }
 
 fn redis_uri_from_env() -> String {
-    let redis_db = std::env::var("REDIS_DB").unwrap_or_else(|_| "0".to_string());
-    let redis_host = std::env::var("REDIS_HOST").unwrap();
-    let redis_port = std::env::var("REDIS_PORT").unwrap_or_else(|_| "6379".to_string());
-    let redis_username = std::env::var("REDIS_USERNAME").unwrap_or_else(|_| "default".to_string());
-    let redis_password = std::env::var("REDIS_PASSWORD").unwrap_or_default();
-    format!("redis://{redis_username}:{redis_password}@{redis_host}:{redis_port}/{redis_db}")
+    envvar::redis_uri().unwrap()
 }
 
 #[async_trait]
