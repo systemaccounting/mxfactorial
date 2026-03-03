@@ -104,37 +104,24 @@ function start_builds() {
 
     source scripts/zip-services.sh
 
+    echo "*** uploading archive to s3://$ARTIFACTS_BUCKET/$BUILD_OBJECT_KEY_PATH/"
+    aws s3 cp $SERVICES_ZIP s3://$ARTIFACTS_BUCKET/$BUILD_OBJECT_KEY_PATH/ --region $REGION
+    rm $SERVICES_ZIP
+
     BUILD_IDS=""
     for SVC in $(get_services); do
-        UPLOAD_KEY_PATH="$BUILD_OBJECT_KEY_PATH/$SVC"
-
-        echo "*** uploading archive to s3://$ARTIFACTS_BUCKET/$UPLOAD_KEY_PATH/"
-        aws s3 cp $SERVICES_ZIP s3://$ARTIFACTS_BUCKET/$UPLOAD_KEY_PATH/ --region $REGION
-
-        DEPLOY_TARGET=$(yq ".. | select(has(\"$SVC\")) | .$SVC.deploy_target // \"\"" $PROJECT_CONF | head -1)
-        DEPLOY_LAMBDA=false
-        DEPLOY_ECS=false
-        if [[ "$DO_DEPLOY" == "true" ]]; then
-            if [[ "$DEPLOY_TARGET" == "lambda" ]]; then
-                DEPLOY_LAMBDA=true
-            elif [[ "$DEPLOY_TARGET" == "ecs" ]]; then
-                DEPLOY_ECS=true
-            fi
-        fi
-
         PROJECT_NAME="mxfactorial-$SVC-$ID_ENV"
         echo -e "${YELLOW}starting $PROJECT_NAME...${RESET}"
         BUILD_ID=$(aws codebuild start-build \
             --project-name $PROJECT_NAME \
             --region $REGION \
             --source-type-override S3 \
-            --source-location-override "$ARTIFACTS_BUCKET/$UPLOAD_KEY_PATH/$SERVICES_ZIP" \
+            --source-location-override "$ARTIFACTS_BUCKET/$BUILD_OBJECT_KEY_PATH/$SERVICES_ZIP" \
             --artifacts-override type=NO_ARTIFACTS \
             --environment-variables-override \
                 name=RUN_TESTS,value=$RUN_TESTS \
                 name=PUSH_IMAGE,value=$PUSH_IMAGE \
-                name=DEPLOY_LAMBDA,value=$DEPLOY_LAMBDA \
-                name=DEPLOY_ECS,value=$DEPLOY_ECS \
+                name=DEPLOY,value=$DO_DEPLOY \
             --query 'build.id' \
             --output text)
         BUILD_IDS="$BUILD_IDS $BUILD_ID"
@@ -143,8 +130,6 @@ function start_builds() {
         printf 'https://%s.console.aws.amazon.com/codesuite/codebuild/%s/projects/%s/build/%s/?region=%s\n' "$REGION" "$AWS_ACCOUNT_ID" "$PROJECT_NAME" "$BUILD_ID_ENCODED" "$REGION"
         echo ""
     done
-
-    rm $SERVICES_ZIP
 
     echo "*** waiting for builds to complete"
     echo -e "${YELLOW}(ctrl+c to exit - builds will continue in background)${RESET}"
@@ -167,7 +152,11 @@ function start_builds() {
     done
 }
 
-function trigger_pipeline() {
+function start_pipeline() {
+    local RUN_TESTS=$1
+    local PUSH_IMAGE=$2
+    local DO_DEPLOY=$3
+
     ARTIFACTS_BUCKET_PREFIX=$(yq '.infra.terraform.aws.modules["project-storage"].env_var.set.ARTIFACTS_BUCKET_PREFIX.default' $PROJECT_CONF)
     ARTIFACTS_BUCKET="$ARTIFACTS_BUCKET_PREFIX-$ID_ENV"
     SERVICES_ZIP=$(yq '.scripts.env_var.set.SERVICES_ZIP.default' $PROJECT_CONF)
@@ -179,7 +168,16 @@ function trigger_pipeline() {
     aws s3 cp $SERVICES_ZIP s3://$ARTIFACTS_BUCKET/build/ --region $REGION
     rm $SERVICES_ZIP
 
-    echo "*** codepipeline $PIPELINE_NAME triggered via eventbridge"
+    echo "*** starting codepipeline $PIPELINE_NAME"
+    aws codepipeline start-pipeline-execution \
+        --name $PIPELINE_NAME \
+        --region $REGION \
+        --variables \
+            name=RUN_TESTS,value=$RUN_TESTS \
+            name=PUSH_IMAGE,value=$PUSH_IMAGE \
+            name=DEPLOY,value=$DO_DEPLOY \
+        --output text > /dev/null
+
     echo "https://$REGION.console.aws.amazon.com/codesuite/codepipeline/pipelines/$PIPELINE_NAME/view/?region=$REGION"
 
     sleep 5
@@ -327,9 +325,9 @@ if [[ $BUILD == true ]]; then
         echo ""
     fi
 
-    # use pipeline for full builds (all services + push + no deploy), otherwise direct codebuild
-    if [[ -z "$SERVICE" && $PUSH == true && $TEST == true && $DEPLOY == false ]]; then
-        trigger_pipeline
+    # use pipeline for all-service builds, direct codebuild for single service
+    if [[ -z "$SERVICE" ]]; then
+        start_pipeline "$RUN_TESTS" "$PUSH_IMAGE" "$DO_DEPLOY"
     else
         start_builds "$RUN_TESTS" "$PUSH_IMAGE" "$DO_DEPLOY"
     fi
