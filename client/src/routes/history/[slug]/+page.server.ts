@@ -1,64 +1,30 @@
 import type { PageServerLoad, RequestEvent } from './$types';
-import BALANCE_QUERY from '../../../graphql/query/balance';
+import { loadPageContext } from '../../../server/pageContext';
 import TRANSACTION_BY_ID_QUERY from '../../../graphql/query/transactionByID';
-import { createClient } from '../../../graphql/client';
-import { env } from '$env/dynamic/public';
-import { Cookies } from '../../../utils/cookie';
 import { sortTrItems } from '../../../utils/transactions';
 
-interface ITransactionResponse {
-	account: string;
-	transaction: App.ITransaction | null;
-	balance: string;
-}
-
 export const load: PageServerLoad = async (page: RequestEvent) => {
-	const cookieList = page.cookies.getAll();
-	const cookies = new Cookies(env.PUBLIC_CLIENT_ID, cookieList);
-	const lastAuthUser = cookies.lastAuthUser();
-	const transactionId = page.params.slug;
-	const client = createClient(env.PUBLIC_GRAPHQL_URI, env.PUBLIC_GRAPHQL_RESOURCE, cookies.idToken());
+	const { account, balance, client } = await loadPageContext(page.cookies.getAll());
 
-	let response: ITransactionResponse = {
-		account: lastAuthUser,
-		transaction: null,
-		balance: '0.000',
+	const variables = {
+		auth_account: account,
+		account_name: account,
+		id: page.params.slug
 	};
 
-	const balanceVariables = {
-		auth_account: lastAuthUser,
-		account_name: lastAuthUser,
-	};
-
-	const balance = await client.query(BALANCE_QUERY, balanceVariables).toPromise();
-
-	if (balance.error) {
-		console.error(balance.error);
-	}
-
-	const transactionVariables = {
-		...balanceVariables,
-		id: transactionId,
-	};
-
-	const transaction = await client.query(TRANSACTION_BY_ID_QUERY, transactionVariables).toPromise();
+	const transaction = await client.query(TRANSACTION_BY_ID_QUERY, variables).toPromise();
 
 	if (transaction.error) {
 		console.error(transaction.error);
 	}
 
-	if (!transaction.data.transactionByID) {
-		console.error('transaction not found');
+	if (transaction.data?.transactionByID) {
+		sortTrItems(transaction.data.transactionByID.transaction_items);
 	}
 
-	sortTrItems(transaction.data.transactionByID.transaction_items);
-
-	response = {
-		...response,
-		account: lastAuthUser,
-		transaction: transaction.data.transactionByID,
-		balance: balance.data.balance,
+	return {
+		account,
+		transaction: transaction.data?.transactionByID ?? null,
+		balance
 	};
-
-	return response;
 };
