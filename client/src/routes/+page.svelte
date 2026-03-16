@@ -1,5 +1,5 @@
 <script>
-	import Landing from '../containers/Landing.svelte';
+	import Landing from '../components/Landing.svelte';
 </script>
 
 <svelte:head>

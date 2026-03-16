@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { signUp, signIn } from '../auth/cognito';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 
 	let hasError: boolean = false;
@@ -22,7 +23,7 @@
 		} catch (err) {
 			alert(err);
 		}
-		goto('/account');
+		goto(resolve('/account'));
 	}
 
 	async function handleSignUp() {
@@ -37,7 +38,7 @@
 		} catch (err) {
 			alert(err);
 		}
-		goto('/account');
+		goto(resolve('/account'));
 	}
 </script>
 
@@ -64,7 +65,7 @@
 			data-id="signInButton"
 			class:disabled
 			class:inactive
-			type="submit">Sign In</button
+			type="submit">sign in</button
 		>
 		<button
 			class="base-button create-account"
@@ -72,24 +73,26 @@
 			class:inactive
 			data-id="createAccountButton"
 			type="submit"
-			onclick={handleSignUp}>Create</button
+			onclick={handleSignUp}>create</button
 		>
 	</form>
 </div>
 
 <style>
 	p {
-		color: white;
+		color: rgba(255, 255, 255, 0.8);
 		font-weight: 400;
+		text-shadow: var(--text-raised);
 	}
 
 	a {
-		color: white;
+		color: rgba(255, 255, 255, 0.8);
 		text-decoration: underline;
+		text-shadow: var(--text-raised);
 	}
 
 	a:visited {
-		color: white;
+		color: rgba(255, 255, 255, 0.8);
 	}
 
 	img {
@@ -98,45 +101,26 @@
 
 	input {
 		width: 70%;
-		text-align: center;
-		border-radius: 3px;
-		margin-bottom: 0.75rem;
-		height: 2.5rem;
-		outline: none;
-		border: none;
 		font-size: 1.5rem;
-		box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
-		background-color: white;
+		margin-bottom: 0.75rem;
 		cursor: text;
-	}
-
-	input:focus {
-		color: rgb(131, 131, 131);
+		color: rgba(255, 255, 255, 0.8);
+		text-shadow: var(--text-raised);
 	}
 
 	input.hasError {
-		color: red;
-	}
-
-	input:focus::-webkit-input-placeholder {
-		color: transparent;
+		color: var(--color-error);
 	}
 
 	.base-button {
 		width: 70%;
 		text-align: center;
-		padding: 0;
-		border-radius: 3px;
 		margin-bottom: 0.75rem;
 		height: 2.9rem;
-		outline: none;
-		border: none;
 		font-size: 1.5rem;
-		cursor: pointer;
-		transition: 0.2s;
-		align-items: center;
-		justify-content: center;
-		box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
+		background-color: rgba(255, 255, 255, 0.15);
+		color: rgba(255, 255, 255, 0.8);
+		text-shadow: var(--text-raised);
 	}
 
 	.base-button.disabled {
@@ -145,17 +129,15 @@
 	}
 
 	.base-button.inactive {
-		background-color: rgb(202, 201, 201) !important;
-		color: rgb(238, 235, 235);
+		background-color: var(--color-inactive) !important;
+		color: var(--color-inactive-text);
 	}
 
 	.primary {
-		background-color: #005396;
-		color: white;
+		background-color: rgba(40, 90, 150, 0.75);
 	}
 
 	.create-account {
-		background-color: rgb(0, 153, 230);
-		color: white;
+		background-color: rgba(60, 130, 180, 0.65);
 	}
 </style>
