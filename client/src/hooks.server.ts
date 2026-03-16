@@ -12,7 +12,7 @@ function testRequiredEnvVars() {
 		'PUBLIC_GRAPHQL_URI',
 		// 'PUBLIC_GOOGLE_MAPS_API_KEY',
 		'PUBLIC_GRAPHQL_RESOURCE',
-		'PUBLIC_GRAPHQL_WS_RESOURCE',
+		'PUBLIC_GRAPHQL_WS_RESOURCE'
 	] as const;
 	const unsetEnvVars = requiredEnvVars.filter((envVar) => !env[envVar]);
 	if (unsetEnvVars.length > 0) {

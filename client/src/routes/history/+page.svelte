@@ -3,27 +3,26 @@
 	import Balance from '../../components/Balance.svelte';
 	import HistoryCard from '../../components/HistoryCard.svelte';
 	import { isCreditor, requestTime, getTransContraAccount } from '../../utils/transactions';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 </script>
 
 <Nav>
-	{#snippet children()}
-		<Balance />
-		<div class="container">
-			{#each page.data.transactions as tr, i}
-				<a href={'/history/' + tr['id']}>
-					<div class="history" data-id-index={i} data-id-tr={tr.id}>
-						<HistoryCard
-							contraAccount={getTransContraAccount(page.data.account, tr)}
-							isCurrentAccountCreditor={isCreditor(page.data.account, tr.transaction_items)}
-							equilibriumTime={requestTime(tr.transaction_items)}
-							sumValue={tr.sum_value}
-						/>
-					</div>
-				</a>
-			{/each}
-		</div>
-	{/snippet}
+	<Balance />
+	<div class="container">
+		{#each page.data.transactions as tr, i (tr['id'])}
+			<a href={resolve(`/history/${tr['id']}`)}>
+				<div class="history" data-id-index={i} data-id-tr={tr.id}>
+					<HistoryCard
+						contraAccount={getTransContraAccount(page.data.account, tr)}
+						isCurrentAccountCreditor={isCreditor(page.data.account, tr.transaction_items)}
+						equilibriumTime={requestTime(tr.transaction_items)}
+						sumValue={tr.sum_value}
+					/>
+				</div>
+			</a>
+		{/each}
+	</div>
 </Nav>
 
 <style>

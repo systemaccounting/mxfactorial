@@ -4,24 +4,29 @@ import {
 	CognitoUser,
 	CookieStorage
 } from 'amazon-cognito-identity-js';
-import type { ICognitoUserPoolData, ICognitoUserData, ICookieStorageData } from 'amazon-cognito-identity-js';
+import type {
+	ICognitoUserPoolData,
+	ICognitoUserData,
+	ICookieStorageData
+} from 'amazon-cognito-identity-js';
 import JsCookies from 'js-cookie';
 
 // cookie key prefix defined in getSession method:
 // client/node_modules/amazon-cognito-identity-js/src/CognitoUser.js
 // local dev only:
-const LastAuthUserKey = (clientId: string): string => `CognitoIdentityServiceProvider.${clientId}.LastAuthUser`;
+const LastAuthUserKey = (clientId: string): string =>
+	`CognitoIdentityServiceProvider.${clientId}.LastAuthUser`;
 const IdToken = (clientId: string, account: string): string => {
-	return `CognitoIdentityServiceProvider.${clientId}.${account}.idToken`
+	return `CognitoIdentityServiceProvider.${clientId}.${account}.idToken`;
 };
 
 function cookieConf(domain: string): ICookieStorageData {
 	return {
 		domain,
-		secure: (domain === 'localhost') ? false : true,
+		secure: domain === 'localhost' ? false : true,
 		expires: 1,
 		path: '/',
-		sameSite: 'lax',
+		sameSite: 'lax'
 	};
 }
 
@@ -30,7 +35,7 @@ function configureUserPool(poolId: string, clientId: string, domain: string): Co
 	const poolData: ICognitoUserPoolData = {
 		UserPoolId: poolId,
 		ClientId: clientId,
-		Storage: new CookieStorage(cookieOpts),
+		Storage: new CookieStorage(cookieOpts)
 	};
 	return new CognitoUserPool(poolData);
 }
@@ -38,7 +43,7 @@ function configureUserPool(poolId: string, clientId: string, domain: string): Co
 function createAuthDetails(username: string, password: string): AuthenticationDetails {
 	return new AuthenticationDetails({
 		Username: username,
-		Password: password,
+		Password: password
 	});
 }
 
@@ -51,12 +56,13 @@ function signIn(
 	clientId: string,
 	domain: string,
 	account: string,
-	password: string): Promise<CognitoUser | void> {
+	password: string
+): Promise<CognitoUser | void> {
 	// local env
 	if (clientId == 'localhost') {
 		JsCookies.set(LastAuthUserKey(clientId), account, cookieConf(domain));
 		JsCookies.set(IdToken(clientId, account), 'localhost', cookieConf(domain));
-		return Promise.resolve()
+		return Promise.resolve();
 	}
 	// cloud env
 	return new Promise((resolve, reject) => {
@@ -64,7 +70,7 @@ function signIn(
 		const cognitoUser = createCognitoUser({
 			Username: account,
 			Pool: configureUserPool(poolId, clientId, domain),
-			Storage: new CookieStorage(cookieOpts),
+			Storage: new CookieStorage(cookieOpts)
 		});
 		const authDetails = createAuthDetails(account, password);
 		cognitoUser.authenticateUser(authDetails, {
@@ -79,12 +85,13 @@ function signUp(
 	clientId: string,
 	domain: string,
 	account: string,
-	password: string): Promise<CognitoUser | void> {
+	password: string
+): Promise<CognitoUser | void> {
 	// local env
 	if (clientId == 'localhost') {
 		JsCookies.set(LastAuthUserKey(clientId), account, cookieConf(domain));
 		JsCookies.set(IdToken(clientId, account), 'localhost', cookieConf(domain));
-		return Promise.resolve()
+		return Promise.resolve();
 	}
 	// cloud env
 	const userPool = configureUserPool(poolId, clientId, domain);
@@ -101,13 +108,9 @@ function signUp(
 			}
 		});
 	});
-};
+}
 
-function signOut(
-	poolId: string,
-	clientId: string,
-	domain: string,
-): Promise<void> {
+function signOut(poolId: string, clientId: string, domain: string): Promise<void> {
 	// get session from cookie storage
 	const lastAuthUser = JsCookies.get(LastAuthUserKey(clientId));
 	if (!lastAuthUser) {
@@ -118,14 +121,14 @@ function signOut(
 	if (clientId === 'localhost') {
 		JsCookies.remove(LastAuthUserKey(clientId), cookieConf(domain));
 		JsCookies.remove(IdToken(clientId, lastAuthUser), cookieConf(domain));
-		return Promise.resolve()
+		return Promise.resolve();
 	}
 	// cloud env
 	const cognitoUser = new CognitoUser({
 		Username: lastAuthUser,
 		Pool: configureUserPool(poolId, clientId, domain),
-		Storage: new CookieStorage(cookieConf(domain)),
-	})
+		Storage: new CookieStorage(cookieConf(domain))
+	});
 	return new Promise((resolve) => {
 		cognitoUser.signOut();
 		resolve();

@@ -1,4 +1,4 @@
-import { gql } from "@urql/core";
+import { gql } from '@urql/core';
 
 const RULES_QUERY = gql`
 	query getRules($transaction: TransactionInput!) {
