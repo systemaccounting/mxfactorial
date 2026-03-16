@@ -23,23 +23,22 @@
 		margin: 0 0 0.5rem 0;
 		border: 0;
 		padding: 0;
-		border-radius: 3px;
-		box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
-		color: white;
+		border-radius: var(--radius);
+		box-shadow: var(--shadow);
+		color: rgba(255, 255, 255, 0.8);
+		text-shadow: var(--text-raised);
 		transition: all 0.2s ease;
 		cursor: pointer;
 	}
 
 	button:hover:not([disabled]) {
-		filter: brightness(1.15);
-		transform: scale(1.02);
-		box-shadow: 10px 10px 10px 2px rgba(92, 92, 95, 0.25);
+		filter: brightness(1.1);
+		box-shadow: var(--shadow-hover);
 	}
 
 	button:active:not([disabled]) {
-		filter: brightness(0.9);
-		transform: scale(0.98);
-		box-shadow: 6px 6px 6px 0px rgba(92, 92, 95, 0.15);
+		filter: brightness(0.95);
+		box-shadow: var(--shadow-active);
 	}
 
 	button[disabled] {

@@ -5,11 +5,7 @@
 		middle: Snippet;
 		right: Snippet;
 	}
-	let {
-		left,
-		middle,
-		right
-	}: Props = $props();
+	let { left, middle, right }: Props = $props();
 </script>
 
 <div>
@@ -30,7 +26,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		color: #efefef;
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: var(--text-raised);
 		margin: 0 0 1rem 0;
 	}
 

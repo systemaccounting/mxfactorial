@@ -1,18 +1,12 @@
 <script lang="ts">
 	import Card from './Card.svelte';
-	import Info from './Info.svelte';
 	import { page } from '$app/state';
 </script>
 
 <div data-id="balance">
-	<Info label="account" value={page.data.account} />
 	<Card minHeight="2rem">
-		{#snippet children()}
-			<small>
-				<span> Balance </span>
-			</small>
-			<p data-id="accountBalance">{page.data.balance}</p>
-		{/snippet}
+		<span class="header">{page.data.account} balance</span>
+		<div class="value" data-id="accountBalance">{page.data.balance}</div>
 	</Card>
 </div>
 
@@ -20,22 +14,21 @@
 	div {
 		margin: 0;
 		border: 0;
-		padding: 0;
-		color: rgb(161, 160, 160);
+		padding: 0.5rem 0 0;
 	}
-	small {
-		text-align: left;
-		font-size: 1rem;
-		margin-left: 0.3rem;
+	.header {
+		display: block;
 		font-weight: 600;
-		color: rgb(156, 158, 164);
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: var(--text-raised);
+		margin-bottom: 0.4rem;
+		text-align: left;
 	}
-	p {
-		margin: 0;
-		text-align: right;
+	.value {
 		font-size: 1.25rem;
 		font-weight: 600;
-		font-family: sans-serif;
-		color: rgb(156, 158, 164);
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: var(--text-raised);
+		text-align: right;
 	}
 </style>

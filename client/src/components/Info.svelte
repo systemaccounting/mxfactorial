@@ -24,11 +24,12 @@
 	.label {
 		float: left;
 		font-style: italic;
-		color: rgba(255, 255, 255, 0.6);
+		color: rgba(255, 255, 255, 0.5);
+		text-shadow: var(--text-raised);
 	}
 	.value {
 		float: right;
-		color: rgb(255, 246, 113);
-		text-shadow: 0.7px 0.7px rgba(92, 92, 95, 0.2);
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: var(--text-raised);
 	}
 </style>

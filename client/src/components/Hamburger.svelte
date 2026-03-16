@@ -1,19 +1,22 @@
 <script lang="ts">
-	import { activeNav, switchActiveNav } from '../stores/activeNav';
+	interface Props {
+		isOpen: boolean;
+		toggle: () => void;
+		theme?: 'surface' | 'flat';
+	}
+	let { isOpen, toggle, theme = 'surface' }: Props = $props();
+
 	function handleClick(e: MouseEvent): void {
 		e.preventDefault();
-		switchActiveNav();
+		e.stopPropagation();
+		toggle();
 	}
-	let isNavActive: boolean;
-	activeNav.subscribe((value) => {
-		isNavActive = value;
-	});
 </script>
-<!-- svelte-ignore a11y_consider_explicit_label -->
-<button onclick={handleClick}>
-	<span class="first {isNavActive ? 'first-active' : ''}"></span>
-	<span class="second {isNavActive ? 'second-active' : ''}"></span>
-	<span class="third {isNavActive ? 'third-active' : ''}"></span>
+
+<button onclick={handleClick} aria-label="menu" class={theme}>
+	<span class="first {isOpen ? 'first-active' : ''}"></span>
+	<span class="second {isOpen ? 'second-active' : ''}"></span>
+	<span class="third {isOpen ? 'third-active' : ''}"></span>
 </button>
 
 <style>
@@ -27,8 +30,15 @@
 		z-index: 1000;
 		right: 1.5rem;
 		bottom: 1rem;
-		background-color: #005396;
+		background-color: var(--color-primary);
 		border-color: transparent;
+	}
+	button.flat {
+		background-color: white;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+	}
+	button.flat span {
+		background-color: #333;
 	}
 	button:focus {
 		outline: none;
@@ -39,7 +49,7 @@
 		height: 4px;
 		left: 10px;
 		border-radius: 2px;
-		background-color: white;
+		background-color: var(--color-white);
 		opacity: 1;
 		transition: 0.2s;
 	}

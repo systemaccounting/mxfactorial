@@ -1,114 +1,26 @@
 <script lang="ts">
-	import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
 	import { onMount } from 'svelte';
-	import { createClient as createWSClient } from 'graphql-ws';
-	import type { Client } from 'graphql-ws';
-	import uriBuilder from '../../utils/uriBuilder';
 	import { env } from '$env/dynamic/public';
+	import { createGdpSubscription } from '../../services/gdpSubscription';
+	import { createMapService, createPriceTag } from '../../services/mapService';
+	import Hamburger from '../../components/Hamburger.svelte';
+	import NavMenu from '../../components/NavMenu.svelte';
+
 	let searchQuery = $state('');
 	let price = $state('0.000');
 	let priceTag: HTMLDivElement = $state(document.createElement('div'));
-	let map: google.maps.Map;
-	let markers = [] as any[]; // todo: google.maps.marker.AdvancedMarkerElement does not expect setMap method
 	let messageCount = $state(0);
-	let wsClient: Client;
-	let stop = false;
-	let defaultCoordinates = { lat: 39.8283, lng: -98.5795 }; // usa
-
-	async function subscribeGdp(
-		date: string,
-		country: string,
-		region: string,
-		municipality: string | null
-	) {
-		if (messageCount) {
-			await resetWebsocket();
-		}
-
-		if (!env.PUBLIC_GRAPHQL_WS_RESOURCE) {
-			console.error('missing PUBLIC_GRAPHQL_WS_RESOURCE');
-			return;
-		}
-
-		// ENABLE_TLS required by uriBuilder() is NOT currently set in project.yaml or
-		// used here but TLS remains when relativeUri passed with https:// prefix
-		const url = uriBuilder(
-			env.PUBLIC_GRAPHQL_URI,
-			env.PUBLIC_GRAPHQL_WS_RESOURCE,
-			false
-		);
-
-		wsClient = createWSClient({ url });
-
-		const variables: any = { date, country, region };
-		if (municipality) {
-			variables.municipality = municipality;
-		}
-
-		const subscription = wsClient.iterate({
-			query: `subscription QueryGdp($date: String!, $country: String, $region: String, $municipality: String) {
-				queryGdp(date: $date, country: $country, region: $region, municipality: $municipality)
-				}`,
-			variables
-		});
-
-		for await (const { data } of subscription) {
-			if (stop) {
-				stop = false;
-				break;
-			}
-			if (data && typeof data.queryGdp === 'number') {
-				price = data.queryGdp.toFixed(3);
-				messageCount++;
-			}
-		}
+	let isOpen = $state(false);
+	function toggle() {
+		isOpen = !isOpen;
+	}
+	function handleWindowClick() {
+		if (isOpen) isOpen = false;
 	}
 
-	if (!env.PUBLIC_GOOGLE_MAPS_API_KEY) {
-		throw new Error('missing GOOGLE_MAPS_API_KEY');
-	}
-
-	setOptions({
-		key: env.PUBLIC_GOOGLE_MAPS_API_KEY as string,
-		v: 'weekly',
-		libraries: ['maps', 'marker', 'places']
-	});
-
-	async function handleSearch(event: Event) {
-		event.preventDefault();
-
-		if (searchQuery.trim() === '') {
-			await resetMap();
-			return;
-		}
-
-		// parse location from search query
-		let location;
-		if (searchQuery.includes('gdp')) {
-			location = searchQuery.split('gdp')[0].trim();
-		} else {
-			location = searchQuery.split('revenue')[0].trim();
-		}
-
-		// temp hack to handle 'StateOfCalifornia revenue now'
-		// if location contains 'StateOfCalifornia', replace with 'sacramento california'
-		if (location.includes('StateOfCalifornia')) {
-			location = 'sacramento california';
-		}
-
-		changeMapCenter(location);
-		const queryVars = parseQuery(location);
-		await subscribeGdp(queryVars.time, queryVars.country, queryVars.region, queryVars.municipality);
-	}
-
-	async function resetWebsocket() {
-		stop = true;
-		// wait for subscription loop to break
-		while (stop) {
-			await new Promise((resolve) => setTimeout(resolve, 100));
-		}
-		messageCount = 0;
-	}
+	const hasMapKey = !!env.PUBLIC_GOOGLE_MAPS_API_KEY;
+	const mapService = hasMapKey ? createMapService(env.PUBLIC_GOOGLE_MAPS_API_KEY as string) : null;
+	const gdp = createGdpSubscription(env.PUBLIC_GRAPHQL_URI, env.PUBLIC_GRAPHQL_WS_RESOURCE);
 
 	function toTitleCase(str: string) {
 		return str.replace(/\w\S*/g, function (txt) {
@@ -121,133 +33,62 @@
 	// 'StateOfCalifornia revenue now'
 	// 'california gdp now'
 	function parseQuery(location: string) {
-		// poc hardcoding
-		const time = new Date().toISOString().split('T')[0]; // 2021-09-01
+		const time = new Date().toISOString().split('T')[0];
 		let country = 'United States of America';
 		let region = 'California';
-
-		// poc location args can be length 1 or 2
 		let locations = location.split(' ');
-		// if length 1, municipality is null
 		let municipality = null;
-		// if length 2, parse municipality
 		if (locations.length === 2) {
 			municipality = toTitleCase(locations[0]);
 		}
 		return { time, country, region, municipality };
 	}
 
-	async function initMap() {
-		const { Map } = await importLibrary('maps');
-		map = new Map(document.getElementById('map') as HTMLElement, {
-			center: defaultCoordinates, // usa coordinates
-			zoom: 4,
-			mapId: '4504f8b37365c3d0'
-		});
-	}
+	async function handleSearch(event: Event) {
+		event.preventDefault();
 
-	function waitForMessages() {
-		const interval = setInterval(() => {
-			if (messageCount > 0) {
-				clearInterval(interval);
-				setTimeout(() => {
-					priceTag.style.opacity = '1';
-				}, 250); // fade in after 0.25 seconds
-			}
-		}, 100); // check every 100 milliseconds
-	}
-
-	async function resetMap() {
-		if (map) {
-			await resetWebsocket();
-			markers.forEach((marker) => marker.setMap(null));
-			markers = [];
-			map.setCenter(defaultCoordinates);
-			map.setZoom(4);
+		if (searchQuery.trim() === '') {
+			await gdp.reset();
+			await mapService?.reset();
+			return;
 		}
-	}
 
-	async function changeMapCenter(location: string) {
-		if (map) {
-			// clear existing markers
-			markers.forEach((marker) => marker.setMap(null));
-			markers = [];
+		let location;
+		if (searchQuery.includes('gdp')) {
+			location = searchQuery.split('gdp')[0].trim();
+		} else {
+			location = searchQuery.split('revenue')[0].trim();
+		}
 
-			const { Geocoder } = await importLibrary('geocoding');
-			const { AdvancedMarkerElement } = await importLibrary('marker');
-			const geocoder = new Geocoder();
-			geocoder.geocode({ address: location }, (results, status) => {
-				if (status === 'OK' && results && results.length > 0) {
-					let location = results[0].geometry.location;
-					map.setCenter(location);
-					let zoomLevel;
-					const types = results[0].types;
-					if (types.includes('country')) {
-						zoomLevel = 4; // Country level zoom
-					} else if (types.includes('administrative_area_level_1')) {
-						zoomLevel = 5; // State level zoom
-					} else if (types.includes('locality')) {
-						zoomLevel = 10; // City level zoom
-					} else {
-						zoomLevel = 12; // Default zoom for specific addresses
-					}
+		// temp hack to handle 'StateOfCalifornia revenue now'
+		if (location.includes('StateOfCalifornia')) {
+			location = 'sacramento california';
+		}
 
-					map.setZoom(zoomLevel);
+		messageCount = 0;
+		priceTag = createPriceTag();
+		mapService?.centerOnLocation(location, priceTag);
 
-					priceTag = document.createElement('div');
-					priceTag.textContent = `$${price}k`;
-
-					const priceTagstyles = {
-						backgroundColor: '#4285f4',
-						borderRadius: '8px',
-						color: '#ffffff',
-						fontSize: '14px',
-						padding: '10px 15px',
-						position: 'relative',
-						top: '-15px',
-						opacity: '0',
-						transition: 'opacity 0.5s ease-in'
-					};
-
-					Object.assign(priceTag.style, priceTagstyles);
-
-					const pseudoElement = document.createElement('div');
-
-					const pseudoElementStyles = {
-						content: '""',
-						position: 'absolute',
-						left: '50%',
-						top: '100%',
-						transform: 'translate(-50%, 0)',
-						width: '0',
-						height: '0',
-						borderLeft: '8px solid transparent',
-						borderRight: '8px solid transparent',
-						borderTop: '8px solid #4285F4'
-					};
-
-					Object.assign(pseudoElement.style, pseudoElementStyles);
-
-					priceTag.appendChild(pseudoElement);
-
-					const marker = new AdvancedMarkerElement({
-						map,
-						position: location,
-						content: priceTag
-					});
-
-					markers.push(marker);
-
-					waitForMessages();
-				} else {
-					console.error('geocode not successful:', status);
+		const queryVars = parseQuery(location);
+		await gdp.subscribe(
+			queryVars.time,
+			queryVars.country,
+			queryVars.region,
+			queryVars.municipality,
+			(value) => {
+				price = value;
+				messageCount++;
+				if (messageCount === 1) {
+					setTimeout(() => {
+						priceTag.style.opacity = '1';
+					}, 250);
 				}
-			});
-		}
+			}
+		);
 	}
 
 	onMount(() => {
-		initMap();
+		mapService?.init();
 	});
 
 	$effect(() => {
@@ -256,6 +97,8 @@
 		}
 	});
 </script>
+
+<svelte:window onclick={handleWindowClick} />
 
 <div class="search-bar-container">
 	<form class="search-bar" onsubmit={handleSearch}>
@@ -272,18 +115,12 @@
 	<div id="map"></div>
 </div>
 
-<style>
-	:global(html),
-	:global(body) {
-		background: white;
-		margin: 0;
-		padding: 0;
-		width: 100%;
-		height: 100%;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu,
-			Cantarell, 'Helvetica Neue', sans-serif;
-	}
+{#if isOpen}
+	<NavMenu {toggle} theme="flat" showTopNav topNavAlign="right" />
+{/if}
+<Hamburger {isOpen} {toggle} theme="flat" />
 
+<style>
 	.search-bar-container {
 		position: absolute;
 		top: 5px; /* Adjust as needed */
@@ -300,12 +137,19 @@
 	}
 
 	.search-input {
-		width: calc(100% - 22px); /* Reduce width by 5px */
+		width: calc(100% - 22px);
 		padding: 10px;
-		margin: 15px 0; /* Increase margin around the search input */
+		margin: 15px 0;
 		font-size: 16px;
 		border: 1px solid #ccc;
 		border-radius: 6px;
+		box-shadow: none;
+		background-color: white;
+		color: inherit;
+		text-shadow: none;
+		text-align: left;
+		height: auto;
+		caret-color: auto;
 	}
 
 	.map-container {

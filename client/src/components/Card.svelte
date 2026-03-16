@@ -14,14 +14,15 @@
 
 <style>
 	div {
-		border-radius: 4px;
+		border-radius: var(--radius);
 		padding: 8px;
 		margin: 0;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
-		font-family: Sans-Serif;
-		background-color: rgb(255, 255, 255);
+		box-shadow:
+			1px 2px 4px var(--bevel-shadow),
+			-1px -1px 2px var(--bevel-light);
+		background-color: rgba(255, 255, 255, 0.12);
 	}
 </style>
