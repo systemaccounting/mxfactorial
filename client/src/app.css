@@ -1,7 +1,45 @@
+:root {
+	--color-primary: rgba(40, 90, 150, 0.6);
+	--color-primary-75: rgba(40, 90, 150, 0.45);
+	--color-secondary: rgba(60, 130, 180, 0.55);
+	--color-gradient-teal: rgb(148, 209, 219);
+	--color-gradient-blue: rgb(67, 120, 219);
+	--color-request: rgba(80, 140, 120, 0.5);
+	--color-pay: rgba(100, 80, 130, 0.5);
+	--color-reject: rgba(70, 60, 110, 0.5);
+	--color-inactive: rgba(150, 170, 190, 0.4);
+	--color-disabled: rgba(130, 150, 170, 0.35);
+	--color-error: red;
+	--color-text: rgb(131, 131, 131);
+	--color-text-muted: rgb(129, 125, 125);
+	--color-text-subtle: rgb(156, 158, 164);
+	--color-text-nav: rgb(115, 162, 194);
+	--color-text-light: #efefef;
+	--color-text-label: rgba(255, 255, 255, 0.6);
+	--color-text-value: rgb(255, 246, 113);
+	--color-white: #fff;
+	--color-inactive-text: rgba(255, 255, 255, 0.7);
+	--color-border: rgb(236, 236, 240);
+	--color-mask: rgba(0, 0, 0, 0.3);
+	--radius: 6px;
+	--bevel-light: rgba(255, 255, 255, 0.35);
+	--bevel-shadow: rgba(30, 60, 120, 0.35);
+	--shadow: 2px 3px 6px var(--bevel-shadow), -1px -1px 3px var(--bevel-light);
+	--shadow-inset: inset 2px 2px 4px var(--bevel-shadow), inset -1px -1px 3px var(--bevel-light);
+	--shadow-left: -3px 3px 6px var(--bevel-shadow), 1px -1px 3px var(--bevel-light);
+	--shadow-hover: 3px 4px 8px var(--bevel-shadow), -1px -2px 4px var(--bevel-light);
+	--shadow-active: inset 1px 2px 4px var(--bevel-shadow), inset -1px -1px 2px var(--bevel-light);
+	--text-raised: 0 -1px 0 var(--bevel-light), 0 1px 1px var(--bevel-shadow);
+	--text-inset: 0 -1px 0 var(--bevel-shadow), 0 1px 1px var(--bevel-light);
+	--bg: radial-gradient(
+		at left 50% top 20%,
+		var(--color-gradient-teal),
+		var(--color-gradient-blue)
+	);
+}
+
 html {
-	background-image: radial-gradient(at left 50% top 20%,
-			rgb(148, 209, 219),
-			rgb(67, 120, 219));
+	background-image: var(--bg);
 	background-repeat: no-repeat;
 	background-size: 100vw 100vh;
 	background-attachment: fixed;
@@ -12,13 +50,16 @@ body {
 	position: relative;
 	width: 100%;
 	height: 100%;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+	font-family:
+		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+		'Helvetica Neue', sans-serif;
 }
 
 body {
 	margin: 0;
 	border: 0;
 	padding: 0;
+	text-shadow: var(--text-inset);
 }
 
 *:focus {
@@ -27,4 +68,64 @@ body {
 
 a {
 	text-decoration: none;
+}
+
+input {
+	height: 2.5rem;
+	text-align: center;
+	border-radius: var(--radius);
+	font-size: 1.25rem;
+	box-shadow: var(--shadow-inset);
+	background-color: rgba(255, 255, 255, 0.22);
+	border: 0;
+	padding: 0;
+	margin: 0 0 0.5rem 0;
+	color: rgba(255, 255, 255, 0.85);
+	text-shadow: var(--text-raised);
+	caret-color: rgb(160, 165, 175);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+	-webkit-box-shadow:
+		var(--shadow-inset),
+		0 0 0px 1000px rgba(255, 255, 255, 0.22) inset;
+	-webkit-text-fill-color: rgba(255, 255, 255, 0.85);
+	transition: background-color 5000s ease-in-out 0s;
+}
+
+input::-webkit-input-placeholder {
+	color: transparent;
+	text-shadow: var(--text-inset);
+}
+
+input:focus::-webkit-input-placeholder {
+	text-shadow: none;
+}
+
+button {
+	border-radius: var(--radius);
+	box-shadow: var(--shadow);
+	color: var(--color-white);
+	border: 0;
+	padding: 0;
+	margin: 0;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+button:hover:not([disabled]) {
+	filter: brightness(1.1);
+	box-shadow: var(--shadow-hover);
+}
+
+button:active:not([disabled]) {
+	filter: brightness(0.95);
+	box-shadow: var(--shadow-active);
+}
+
+button[disabled] {
+	cursor: not-allowed;
+	opacity: 0.8;
 }
