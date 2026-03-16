@@ -21,14 +21,14 @@ jobs:
       packages: read
     steps:
       - name: login to ghcr
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: restore image cache
         id: cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/image-cache
           key: local-integ-base-images-v1
@@ -88,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: restore image cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/image-cache
           key: local-integ-base-images-v1
@@ -96,7 +96,7 @@ jobs:
         run: docker load -i ~/image-cache/images.tar
       - name: restore postgres base stage
         id: pg-base
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/pg-base-cache/postgres-base.tar
           key: postgres-base-${{ hashFiles('docker/bitnami-postgres.Dockerfile') }}

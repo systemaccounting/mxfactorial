@@ -39,30 +39,10 @@
 	}
 
 	.field {
-		height: 2.5rem;
 		width: 100%;
-		text-align: center;
-		border-radius: 3px;
-		margin-bottom: 1rem;
-		font-size: 1.25rem;
-		box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
-		background-color: rgb(255, 255, 255);
-		cursor: cursor;
-		margin: 0 0 0.5rem 0;
-		padding: 0;
-		border: 0;
-	}
-
-	.field::-webkit-input-placeholder {
-		color: rgb(131, 131, 131);
-	}
-
-	.field:focus::-webkit-input-placeholder {
-		color: transparent;
-		outline: none;
 	}
 
 	.error {
-		color: red;
+		color: var(--color-error);
 	}
 </style>

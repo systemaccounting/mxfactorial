@@ -1,4 +1,4 @@
-import { gql } from "@urql/core";
+import { gql } from '@urql/core';
 
 const TRANSACTION_BY_ID_QUERY = gql`
 	query getTransactionByID($id: String!, $account_name: String!, $auth_account: String!) {

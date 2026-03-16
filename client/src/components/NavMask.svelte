@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { switchActiveNav } from '../stores/activeNav';
+	interface Props {
+		toggle: () => void;
+	}
+	let { toggle }: Props = $props();
 
 	function handleEvent(e: Event): void {
 		e.preventDefault();
-		switchActiveNav();
+		toggle();
 	}
 </script>
-<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div class="nav-mask" onclick={handleEvent}></div>
+
+<div class="nav-mask" onclick={handleEvent} role="presentation"></div>
 
 <svelte:window onkeypress={handleEvent} />
 
@@ -16,7 +19,7 @@
 		position: fixed;
 		width: 100vw;
 		height: 100vh;
-		background-color: rgba(0, 0, 0, 0.3);
+		background-color: var(--color-mask);
 		transition: 0.2s;
 		transition-delay: 0.2s;
 		margin: 0 auto;

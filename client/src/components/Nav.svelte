@@ -2,25 +2,34 @@
 	import TopNav from './TopNav.svelte';
 	import Hamburger from './Hamburger.svelte';
 	import NavMenu from './NavMenu.svelte';
-	import NavMask from './NavMask.svelte';
 	import type { Snippet } from 'svelte';
-	let { children }: { children: Snippet } = $props();
-	import { activeNav } from '../stores/activeNav';
-	import { get } from 'svelte/store';
-	let isNavActive = $state(get(activeNav));
-	activeNav.subscribe((value) => {
-		isNavActive = value;
-	});
+	interface Props {
+		children: Snippet;
+		onreset?: () => void;
+	}
+	let { children, onreset }: Props = $props();
+
+	let isOpen = $state(false);
+	function toggle() {
+		isOpen = !isOpen;
+	}
+
+	function handleWindowClick() {
+		if (isOpen) {
+			isOpen = false;
+		}
+	}
 </script>
 
+<svelte:window onclick={handleWindowClick} />
+
 <div class="private">
-	<TopNav />
+	<TopNav {onreset} />
 	{@render children()}
-	{#if isNavActive}
-		<NavMask />
-		<NavMenu />
+	{#if isOpen}
+		<NavMenu {toggle} />
 	{/if}
-	<Hamburger />
+	<Hamburger {isOpen} {toggle} />
 </div>
 
 <style>

@@ -5,18 +5,18 @@
 		dataId: string;
 		left: Snippet;
 		right: Snippet;
+		onswitch?: () => void;
 	}
-	let { switchButtons = $bindable(), dataId, left, right }: Props = $props();
-	import { switchRecipient } from '../stores/requestCreate';
+	let { switchButtons = $bindable(), dataId, left, right, onswitch }: Props = $props();
 
 	function handleLeftButtonClick(): void {
 		switchButtons = false;
-		switchRecipient();
+		onswitch?.();
 	}
 
 	function handleRightButtonClick(): void {
 		switchButtons = true;
-		switchRecipient();
+		onswitch?.();
 	}
 </script>
 
@@ -35,7 +35,7 @@
 		border: 0;
 		padding: 0;
 		height: 2.25rem;
-		box-shadow: 9px 9px 9px 1px rgba(92, 92, 95, 0.2);
+		box-shadow: var(--shadow);
 	}
 
 	button {
@@ -46,22 +46,24 @@
 		padding: 0;
 		float: left;
 		width: 50%;
-		color: white;
+		color: rgba(255, 255, 255, 0.8);
+		text-shadow: var(--text-raised);
 	}
 
 	button:first-child {
-		border-radius: 4px 0 0 4px;
+		border-radius: var(--radius) 0 0 var(--radius);
 	}
 
 	button:last-child {
-		border-radius: 0 4px 4px 0;
+		border-radius: 0 var(--radius) var(--radius) 0;
 	}
 
 	.active {
-		background-color: #005396;
+		background-color: rgba(40, 90, 150, 0.6);
 	}
 
 	.inactive {
-		background-color: rgb(202, 201, 201);
+		background-color: rgba(150, 170, 190, 0.2);
+		color: rgba(255, 255, 255, 0.5);
 	}
 </style>

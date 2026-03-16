@@ -1,4 +1,4 @@
-import { gql } from "@urql/core";
+import { gql } from '@urql/core';
 
 const CREATE_REQUEST_MUTATION = gql`
 	mutation createRequest($transaction: TransactionInput!, $auth_account: String!) {

@@ -1,11 +1,20 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { switchActiveNav } from '../stores/activeNav';
+	import { resolve } from '$app/paths';
 	import { signOut } from '../auth/cognito';
 	import { page } from '$app/state';
+	import TopNav from './TopNav.svelte';
+
+	interface Props {
+		toggle: () => void;
+		theme?: 'surface' | 'flat';
+		showTopNav?: boolean;
+		topNavAlign?: 'left' | 'right';
+	}
+	let { toggle, theme = 'surface', showTopNav = false, topNavAlign = 'left' }: Props = $props();
 
 	function handleDisplayClick() {
-		switchActiveNav();
+		toggle();
 	}
 
 	function handleSignOutClick(e: Event) {
@@ -15,24 +24,27 @@
 		} catch (err) {
 			alert(err);
 		}
-		goto('/');
+		goto(resolve('/'));
 	}
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-<div onclick={handleDisplayClick}>
-	<ul data-id="nav-menu">
-		<a href="/requests">
-			<li data-id="nav-menu-item">Requests</li>
+<div onclick={handleDisplayClick} role="presentation">
+	<ul data-id="nav-menu" class={theme}>
+		{#if showTopNav}
+			<TopNav {theme} align={topNavAlign} />
+		{/if}
+		<a href={resolve('/requests')}>
+			<li data-id="nav-menu-item">requests</li>
 		</a>
-		<a href="/history">
-			<li data-id="nav-menu-item">History</li>
+		<a href={resolve('/history')}>
+			<li data-id="nav-menu-item">history</li>
 		</a>
-		<li data-id="nav-menu-item">Rules</li>
-		<li data-id="nav-menu-item">Query</li>
-		<li data-id="nav-menu-item">Support</li>
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<li data-name="sign-out" data-id="nav-menu-item" onclick={handleSignOutClick}>Sign Out</li>
+		<li data-id="nav-menu-item">rules</li>
+		<a href={resolve('/measure')} data-sveltekit-reload>
+			<li data-id="nav-menu-item">measure</li>
+		</a>
+		<li data-id="nav-menu-item">support</li>
+		<li data-id="nav-menu-item" data-name="sign-out" onclick={handleSignOutClick}>sign out</li>
 	</ul>
 </div>
 
@@ -58,17 +70,32 @@
 	}
 
 	li {
-		padding: 0.5rem;
+		padding: 0.5rem 0.8rem;
 		margin: 0.3rem 0 0 0;
 		font-size: 1.2rem;
-		color: rgb(115, 162, 194);
-		background-color: white;
-		border-style: solid;
-		border-width: 0.5px;
-		border-radius: 3px;
-		border-color: rgb(236, 236, 240);
+		border: none;
+		border-radius: 0.5rem;
 		text-align: right;
-		box-shadow: -7px 7px 9px 1px rgba(92, 92, 95, 0.3);
 		cursor: pointer;
+	}
+
+	.surface li {
+		color: rgba(255, 255, 255, 0.8);
+		text-shadow: var(--text-raised);
+		background-color: rgba(255, 255, 255, 0.08);
+		box-shadow:
+			inset -2px -2px 4px var(--bevel-shadow),
+			inset 1px 1px 3px var(--bevel-light);
+	}
+
+	.flat {
+		right: 0.5rem;
+	}
+
+	.flat li {
+		color: #333;
+		text-shadow: none;
+		background-color: white;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 	}
 </style>

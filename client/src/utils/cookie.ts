@@ -1,7 +1,7 @@
 type ICookies = Array<{
-    name: string;
-    value: string;
-}>
+	name: string;
+	value: string;
+}>;
 
 // cadet todo: add unit tests
 class Cookies {

@@ -9,65 +9,58 @@
 		requestTime,
 		getTransContraAccount
 	} from '../../utils/transactions';
+	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	let isActive: boolean = true;
 </script>
 
 <Nav>
-	{#snippet children()}
-		<Balance />
-		<div class="switch">
-			<SwitchButtons bind:switchButtons={isActive} dataId="activeRejectedBtns">
-				{#snippet left()}
-					Rejected
-				{/snippet}
-				{#snippet right()}
-					Active
-				{/snippet}
-			</SwitchButtons>
-		</div>
-		<div class="requests">
-			<div class="container">
-				{#each page.data.transactions as req, i}
-					{#if isActive}
-						{#if !isRejected(req['transaction_items'])}
-							<a href={'/requests/' + req['id']}>
-								<div class="container" data-id-index={i} data-id-req={req['id']}>
-									<RequestCard
-										contraAccount={getTransContraAccount(page.data.account, req)}
-										isCurrentAccountAuthor={req['author'] == page.data.account}
-										isCurrentAccountCreditor={isCreditor(
-											page.data.account,
-											req['transaction_items']
-										)}
-										requestTime={requestTime(req['transaction_items'])}
-										sumValue={req['sum_value']}
-									/>
-								</div>
-							</a>
-						{/if}
-					{:else if isRejected(req['transaction_items'])}
-						<a href={'/requests/' + req['id']}>
+	<Balance />
+	<div class="switch">
+		<SwitchButtons bind:switchButtons={isActive} dataId="activeRejectedBtns">
+			{#snippet left()}
+				rejected
+			{/snippet}
+			{#snippet right()}
+				active
+			{/snippet}
+		</SwitchButtons>
+	</div>
+	<div class="requests">
+		<div class="container">
+			{#each page.data.transactions as req, i (req['id'])}
+				{#if isActive}
+					{#if !isRejected(req['transaction_items'])}
+						<a href={resolve(`/requests/${req['id']}`)}>
 							<div class="container" data-id-index={i} data-id-req={req['id']}>
 								<RequestCard
-									contraAccount={page.data.account == req['author']
-										? page.data.account
-										: req['author']}
+									contraAccount={getTransContraAccount(page.data.account, req)}
 									isCurrentAccountAuthor={req['author'] == page.data.account}
-									isCurrentAccountCreditor={isCreditor(
-										page.data.account,
-										req['transaction_items']
-									)}
+									isCurrentAccountCreditor={isCreditor(page.data.account, req['transaction_items'])}
 									requestTime={requestTime(req['transaction_items'])}
 									sumValue={req['sum_value']}
 								/>
 							</div>
 						</a>
 					{/if}
-				{/each}
-			</div>
+				{:else if isRejected(req['transaction_items'])}
+					<a href={resolve(`/requests/${req['id']}`)}>
+						<div class="container" data-id-index={i} data-id-req={req['id']}>
+							<RequestCard
+								contraAccount={page.data.account == req['author']
+									? page.data.account
+									: req['author']}
+								isCurrentAccountAuthor={req['author'] == page.data.account}
+								isCurrentAccountCreditor={isCreditor(page.data.account, req['transaction_items'])}
+								requestTime={requestTime(req['transaction_items'])}
+								sumValue={req['sum_value']}
+							/>
+						</div>
+					</a>
+				{/if}
+			{/each}
 		</div>
-	{/snippet}
+	</div>
 </Nav>
 
 <style>

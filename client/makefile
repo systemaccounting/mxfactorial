@@ -64,14 +64,20 @@ install-sys-deps:
 install-browsers:
 	npx playwright install
 
+test-unit:
+	if ! [ -d node_modules ]; then npm install; fi
+	npm run test:unit -- --run
+
 test:
 	if ! [ -d node_modules ]; then npm install; fi
+	@$(MAKE) test-unit
 	@$(MAKE) install-browsers
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); bash scripts/test-reset.sh --set
-	npm run test
+	npm run test:e2e
 
 test-ci:
 	if ! [ -d node_modules ]; then npm install; fi
+	@$(MAKE) -s test-unit
 	@$(MAKE) -s install-sys-deps
 	@$(MAKE) -s install-browsers
 	@$(MAKE) -s get-secrets ENV=local

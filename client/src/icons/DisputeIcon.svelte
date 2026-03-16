@@ -15,11 +15,7 @@
 	viewBox="0 0 70 70"
 	preserveAspectRatio="xMidYMid meet"
 >
-	<g
-		transform="translate(0.000000, 70) scale(0.01,-0.01)"
-		fill="currentColor"
-		stroke="none"
-	>
+	<g transform="translate(0.000000, 70) scale(0.01,-0.01)" fill="currentColor" stroke="none">
 		<path
 			d="M3420 6333 c-138 -24 -263 -128 -305 -253 -18 -55 -27 -64 -75 -78
 -19 -6 -66 -23 -105 -37 -38 -14 -88 -32 -110 -40 -22 -7 -65 -23 -95 -35 -30
@@ -61,7 +57,7 @@ l-95 -6 -45 46 c-53 54 -129 93 -208 106 -59 9 -69 9 -112 2z m2384 -605 c2
 		background-color: transparent;
 		border: none;
 		outline: rgba(0, 0, 0, 0);
-		color: #fff;
+		color: var(--color-white);
 		opacity: 1; /** temp disable hover */
 		cursor: pointer;
 	}

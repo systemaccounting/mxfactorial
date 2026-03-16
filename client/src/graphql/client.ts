@@ -1,11 +1,20 @@
-import { createClient as createGqlClient, cacheExchange, fetchExchange, mapExchange } from '@urql/core';
+import {
+	createClient as createGqlClient,
+	cacheExchange,
+	fetchExchange,
+	mapExchange
+} from '@urql/core';
 import type { ClientOptions, Client } from '@urql/core';
 import buildUri from '../utils/uriBuilder';
 
 type MaybeString = string | undefined;
 
 // MaybeString just lets handling unset env vars in one place
-function createOpts(relativeUri: MaybeString, resource: MaybeString, idToken: string | null): ClientOptions {
+function createOpts(
+	relativeUri: MaybeString,
+	resource: MaybeString,
+	idToken: string | null
+): ClientOptions {
 	if (!relativeUri) {
 		throw new Error('createOpts: missing relativeUri');
 	}
@@ -22,11 +31,11 @@ function createOpts(relativeUri: MaybeString, resource: MaybeString, idToken: st
 		url,
 		exchanges: [
 			mapExchange({
-			onResult(result) {
-			  return result.operation.kind === 'query'
-				? { ...result, data: maskTypename(result.data, true) }
-				: result;
-			},
+				onResult(result) {
+					return result.operation.kind === 'query'
+						? { ...result, data: maskTypename(result.data, true) }
+						: result;
+				}
 			}),
 			cacheExchange,
 			fetchExchange
@@ -50,7 +59,11 @@ function createOpts(relativeUri: MaybeString, resource: MaybeString, idToken: st
 	return opts;
 }
 
-function createClient(relativeUri: MaybeString, resource: MaybeString, idToken: string | null): Client {
+function createClient(
+	relativeUri: MaybeString,
+	resource: MaybeString,
+	idToken: string | null
+): Client {
 	const opts = createOpts(relativeUri, resource, idToken);
 	const client = createGqlClient(opts);
 	// uncomment to debug urql:
@@ -67,30 +80,26 @@ function createClient(relativeUri: MaybeString, resource: MaybeString, idToken: 
 // eslint-disable-next-line  @typescript-eslint/no-explicit-any
 const maskTypename = (data: any, isRoot?: boolean): any => {
 	if (!data || typeof data !== 'object') {
-	  return data;
+		return data;
 	} else if (Array.isArray(data)) {
-	  return data.map(d => maskTypename(d));
-	} else if (
-	  data &&
-	  typeof data === 'object' &&
-	  (isRoot || '__typename' in data)
-	) {
+		return data.map((d) => maskTypename(d));
+	} else if (data && typeof data === 'object' && (isRoot || '__typename' in data)) {
 		// eslint-disable-next-line  @typescript-eslint/no-explicit-any
-	  const acc: { [key: string]: any } = {};
-	  for (const key in data) {
-		if (key === '__typename') {
-		  Object.defineProperty(acc, '__typename', {
-			enumerable: false,
-			value: data.__typename,
-		  });
-		} else {
-		  acc[key] = maskTypename(data[key]);
+		const acc: { [key: string]: any } = {};
+		for (const key in data) {
+			if (key === '__typename') {
+				Object.defineProperty(acc, '__typename', {
+					enumerable: false,
+					value: data.__typename
+				});
+			} else {
+				acc[key] = maskTypename(data[key]);
+			}
 		}
-	  }
-	  return acc;
+		return acc;
 	} else {
-	  return data;
+		return data;
 	}
-  };
+};
 
-export {createClient};
+export { createClient };

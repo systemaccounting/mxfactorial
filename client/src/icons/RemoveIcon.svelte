@@ -13,15 +13,18 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <svg
 	onclick={handleRemove}
+	onkeydown={(e) => e.key === 'Enter' && handleRemove(e)}
 	{style}
 	width={size}
 	height={size}
 	data-id="removeIcon"
 	data-id-index={index}
 	viewBox="0 0 1024 1024"
+	role="button"
+	tabindex="0"
+	aria-label="remove item"
 >
 	<path
 		fill="currentColor"
@@ -34,7 +37,7 @@
 		background-color: transparent;
 		border: none;
 		outline: rgba(0, 0, 0, 0);
-		color: #fff;
+		color: var(--color-white);
 		opacity: 0.7;
 		cursor: pointer;
 		margin: 0 -5px 10px 0;

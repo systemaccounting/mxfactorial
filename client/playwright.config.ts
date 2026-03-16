@@ -8,5 +8,5 @@ export default defineConfig({
 
 	testDir: 'e2e',
 	workers: 1,
-	timeout: 20000,
+	timeout: 20000
 });

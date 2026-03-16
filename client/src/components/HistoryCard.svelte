@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Card from "./Card.svelte";
-	import { fromNow } from "../utils/date";
+	import Card from './Card.svelte';
+	import { fromNow } from '../utils/date';
 	interface Props {
 		contraAccount: string | null;
 		isCurrentAccountCreditor: boolean;
@@ -17,7 +17,7 @@
 	</p>
 	<p class="content">
 		<strong>
-			{isCurrentAccountCreditor ? "" : "-"}{sumValue}
+			{isCurrentAccountCreditor ? '' : '-'}{sumValue}
 		</strong>
 	</p>
 </Card>
@@ -28,14 +28,15 @@
 		padding: 0;
 		border: 0;
 		text-align: right;
-		font-weight: medium;
-		color: rgb(129, 125, 125);
+		font-weight: 600;
+		color: rgba(255, 255, 255, 0.85);
+		text-shadow: var(--text-raised);
 	}
 	.title {
-		font-family: sans-serif;
 		margin: 0 0 0.3rem 0.3rem;
 		text-align: left;
 		font-size: 0.85rem;
+		color: rgba(255, 255, 255, 0.6);
 	}
 	.content {
 		text-align: right;
