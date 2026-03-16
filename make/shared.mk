@@ -37,6 +37,7 @@ get-secrets:
 	bash scripts/create-env-file.sh \
 		--app-name $(APP_NAME) \
 		--env $(ENV)
+	@if [ "$(APP_NAME)" = "client" ]; then $(MAKE) -s prefix-env-vars; fi
 
 clean-env:
 	@cd $(RELATIVE_PROJECT_ROOT_PATH); \
