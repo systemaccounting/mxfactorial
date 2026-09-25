@@ -86,7 +86,7 @@ function set_default_value() {
 		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URI//')
 		PORT_ENV_VAR="$SVC_NAME"_PORT
 		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+		if [[ $CODESPACES ]]; then
 			echo "$SECRET=$GRAPHQL_URI" >>$ENV_FILE
 		else
 			echo "$SECRET=$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE
@@ -95,7 +95,7 @@ function set_default_value() {
 		SVC_NAME=$(printf '%s' "$SECRET" | sed 's/_URI//')
 		PORT_ENV_VAR="$SVC_NAME"_PORT
 		PORT_VAL=$(yq "... | select(has(\"$PORT_ENV_VAR\")).$PORT_ENV_VAR.default" $PROJECT_CONF)
-		if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+		if [[ $CODESPACES ]]; then
 			echo "$SECRET=$CLIENT_URI" >>$ENV_FILE
 		else
 			echo "$SECRET=$LOCAL_ADDRESS:$PORT_VAL" >>$ENV_FILE

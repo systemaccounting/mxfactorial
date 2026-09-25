@@ -11,17 +11,11 @@ function publish_graphql_cde_port() {
 	if [[ $CODESPACES ]]; then
 		gh codespace ports visibility $GRAPHQL_PORT:public -c "$CODESPACE_NAME"
 	fi
-	if [[ $GITPOD_WORKSPACE_URL ]]; then
-		gp ports visibility $GRAPHQL_PORT:public
-	fi
 }
 
 function disable_graphql_cde_port() {
 	if [[ $CODESPACES ]]; then
 		gh codespace ports visibility $GRAPHQL_PORT:private -c "$CODESPACE_NAME"
-	fi
-	if [[ $GITPOD_WORKSPACE_URL ]]; then
-		gp ports visibility $GRAPHQL_PORT:private
 	fi
 }
 
@@ -29,17 +23,11 @@ function publish_client_cde_port() {
 	if [[ $CODESPACES ]]; then
 		gh codespace ports visibility $CLIENT_PORT:publish -c "$CODESPACE_NAME"
 	fi
-	if [[ $GITPOD_WORKSPACE_URL ]]; then
-		gp ports visibility $CLIENT_PORT:publish
-	fi
 }
 
 function disable_client_cde_port() {
 	if [[ $CODESPACES ]]; then
 		gh codespace ports visibility $CLIENT_PORT:private -c "$CODESPACE_NAME"
-	fi
-	if [[ $GITPOD_WORKSPACE_URL ]]; then
-		gp ports visibility $CLIENT_PORT:private
 	fi
 }
 

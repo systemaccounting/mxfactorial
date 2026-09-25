@@ -462,12 +462,6 @@ migrations:
 scripts:
   env_var:
     set:
-      IAM_USER:
-        ssm: null
-        default: mxgitpod
-      USER_POLICY_ARN:
-        ssm: null
-        default: arn:aws:iam::aws:policy/AdministratorAccess
       COMPOSE_DIR:
         ssm: null
         default: ./docker

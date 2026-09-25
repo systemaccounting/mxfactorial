@@ -124,10 +124,6 @@ deletes dev environment in aws
 
 configures machine with aws credentials, then builds a dev environment in aws
 
-##### `manage-gitpod-iam.sh`
-
-creates and deletes an aws iam user for gitpod
-
 ##### `terraform-init-dev.sh`
 
 inits terraform state for dev envs
@@ -162,7 +158,7 @@ sets `CLIENT_URI`, `GRAPHQL_URI` and `B64_GRAPHQL_URI` vars when sourced in othe
 
 ##### `rebuild-client-image.sh`
 
-rebuilds client image when the `B64_GRAPHQL_URI` var requires setting by a new devcontainer (gitpod, codespaces)
+rebuilds client image when the `B64_GRAPHQL_URI` var requires setting by a new devcontainer (codespaces)
 
 ##### `post-create-cmd.sh`
 
@@ -186,7 +182,7 @@ stops services started by start-local.sh
 
 ##### `manage-cde-ports.sh`
 
-sourced in other scripts. declares functions to publish and disable ports in cloud development environments (codespace, gitpod)
+sourced in other scripts. declares functions to publish and disable ports in cloud development environments (codespace)
 
 ##### `list-pids.sh`
 

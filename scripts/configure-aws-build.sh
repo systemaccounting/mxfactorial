@@ -13,7 +13,6 @@ ENV_FILE_NAME=$(yq '.env_var.set.ENV_FILE_NAME.default' $PROJECT_CONF)
 ENV_FILE=$ENV_FILE_NAME
 
 REGION=$(yq '.infra.terraform.aws.modules.environment.env_var.set.REGION.default' $PROJECT_CONF)
-IAM_USER=$(yq '.scripts.env_var.set.IAM_USER.default' $PROJECT_CONF)
 
 TFSTATE_INIT_DEV=infra/terraform/aws/environments/init-dev/terraform.tfstate
 DEV_ENV_DIR=infra/terraform/aws/environments/dev
@@ -55,17 +54,7 @@ fi
 
 printf "\n${CYAN}*** deploying the systemaccounting infrastructure and application code to your own aws account minimizes security administration and billing risk ***
 
-on your own machine where admin aws account credentials are configured, run:
-
-    bash scripts/manage-gitpod-iam.sh --new # OR --delete
-
-to create:
-
-1. a ${IAM_USER} user,
-2. an \"AWS Access Key ID\", and
-3. an \"AWS Secret Access Key\"
-
-then enter the gitpod user \"AWS Access Key ID\" and \"AWS Secret Access Key\" below to view the terraform plans, and deploy the infrastructure and application code${NOCOLOR}\n\n"
+enter an \"AWS Access Key ID\" and \"AWS Secret Access Key\" from your own aws account below to view the terraform plans, and deploy the infrastructure and application code${NOCOLOR}\n\n"
 
 aws configure
 

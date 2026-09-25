@@ -35,11 +35,3 @@ set-env-id:
 # resume using dev environment infrastructure in aws
 resume-dev:
 	$(MAKE) -C infra/terraform/aws/environments/dev resume
-
-# create new iam user and policies for gitpod access to dev environment
-new-iam:
-	bash scripts/manage-gitpod-iam.sh --new
-
-# delete iam user and policies for gitpod access to dev environment
-delete-iam:
-	bash scripts/manage-gitpod-iam.sh --delete

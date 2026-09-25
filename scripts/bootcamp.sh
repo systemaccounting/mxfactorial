@@ -133,7 +133,7 @@ eval_with_no_print_directory "$CMD"
 
 echo ""
 
-if [[ $GITPOD_WORKSPACE_URL ]] || [[ $CODESPACES ]]; then
+if [[ $CODESPACES ]]; then
 	echo -e -n "${GREEN}open the vscode command palette (Shift+Command+P on Mac, Ctrl+Shift+P on Windows/Linux) and run \"View: Toggle Ports\" to view ports opened by running services. press any key to continue${RESET}\n\n>"
 	read -n 1
 
